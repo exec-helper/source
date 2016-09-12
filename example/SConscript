@@ -1,0 +1,14 @@
+Import('env')
+
+includes = [
+]
+
+libs = [
+]
+
+libs_path = [
+]
+
+sources = ['example.cpp']
+target = env.Program(source = sources)
+env.Alias('main', target)
