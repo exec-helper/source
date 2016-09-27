@@ -1,7 +1,7 @@
 from exec_utils.util.util import *
 
 class Options:
-    def __init__(self):
+    def __init__(self, relative_path_reference = getCurrentDir()):
         self.commands = []
         self.modes = 'release'
         self.targets= ['all']
@@ -14,6 +14,8 @@ class Options:
         self.profileMethods = ['perf']
         self.toolchainPath = ['']
         self.currentDir = getCurrentDir()
+        self.profileMap = 'exec-helper_profiles???'
+        self.relative_path_reference = relative_path_reference
         pass 
 
     def parse(self, args):
@@ -29,6 +31,10 @@ class Options:
         self.toolchainPath = args.toolchain_path[0]
         self.profileMethods = args.profile_method 
         self.showStuff = args.show_stuff
+        if args.profile_map:
+            relative_path = os.path.relpath(args.profile_map[0], self.relative_path_reference)
+            filename,unused_ = os.path.splitext(relative_path)
+            self.profileMap = filename.replace("/", ".")
 
     @staticmethod
     def replaceWith(hayStack, needle, replacementNeedle):
@@ -48,11 +54,19 @@ class Options:
         return self.modes
 
     def getTargets(self):
-        self.replaceWith(self.targets, 'all', getTargets(self.currentDir, False)) 
+        realTargets = getTargets(self.currentDir, False)
+        if realTargets:
+            self.replaceWith(self.targets, 'all', realTargets) 
         return self.targets
 
     def getRunTargets(self):
-        self.replaceWith(self.runTargets, 'all', getRunTargets(False)) 
+        allTarget = 'all'
+        realRunTargets = getRunTargets(self.getProfileMap(), False)
+        if realRunTargets:
+            self.replaceWith(self.runTargets, allTarget, realRunTargets) 
+        else:
+            while(self.runTargets.count(allTarget) > 0):
+                self.runTargets.remove(allTarget)
         return self.runTargets
 
     def getCompilers(self):
@@ -79,3 +93,6 @@ class Options:
 
     def getCurrentDir(self):
         return self.currentDir
+
+    def getProfileMap(self):
+        return self.profileMap

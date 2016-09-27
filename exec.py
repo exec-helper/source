@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import argparse
+import inspect
 
 from exec_utils.util.util import *
 from exec_utils.cmd.cmd import *
@@ -43,12 +44,11 @@ def execute(options):
 
 
 def main():
-    args = Options()        # Until Options.parse() is called, the getters will return the default values
+    real_path_to_this_file = os.path.dirname(os.path.realpath(__file__))        # The real path is the dirname of the completely resolved path (no symlinks)
+    args = Options(real_path_to_this_file)        # Until Options.parse() is called, the getters will return the default values
 
     commandOptions = ['init', 'build', 'clean', 'distclean', 'rebuild', 'run', 'analyze', 'profile']
     buildModeOptions = ['debug', 'release']
-    targetOptions = getTargets(getCurrentDir())
-    runTargetOptions = getRunTargets()
     compilerOptions = ['gcc', 'clang']
     analyzeOptions = getAnalyzeMethods()
     profileOptions = ['perf', 'callgrind']
@@ -58,9 +58,9 @@ def main():
 		   help="Commands to execute. Possible values: {0}.".format(commandOptions))
     parser.add_argument('-m', '--mode', choices=buildModeOptions, default=args.getModes(),
 		   help="Build mode to use.")
-    parser.add_argument('-t', '--target', nargs='+', choices=targetOptions, default=args.getTargets(),
+    parser.add_argument('-t', '--target', nargs='+', default=args.getTargets(),
 		   help="Target to build.")
-    parser.add_argument('-r', '--run', nargs='+', choices=runTargetOptions, default=args.getRunTargets(),
+    parser.add_argument('-r', '--run', nargs='+', default=args.runTargets,
 		   help="Modes of the target to run.")
     parser.add_argument('-c', '--compiler', nargs='+', choices=compilerOptions, default=args.getCompilers(),
 		   help="Compiler to use.")
@@ -73,8 +73,11 @@ def main():
 		   help="Select performance tool.")
     parser.add_argument('-p', '--toolchain-path', nargs=1, default=args.getToolchainPath(),
 		   help="Path to the compiler")
+    parser.add_argument('-i', '--profile-map', nargs=1, default=args.getProfileMap(),
+                    help="Path to profile map")
 
     args.parse(parser.parse_args())
+    print('Profile map file = ' + args.getProfileMap())
     print('Commands = {0}'.format(listToString(args.getCommands(), ' - ')))
     print('Build mode = {0}'.format(args.getModes()))
     print('Target = {0}'.format(listToString(args.getTargets(), ' - ')))

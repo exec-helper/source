@@ -18,4 +18,4 @@ def profileSystem(target, mode, runTarget, compiler, profileMethod, showStuff, o
         print('Error: unknown method to analyze project: ' + method)
         return False
 
-    return runner(target, mode, runTarget, compiler, showStuff, filterchain)
+    return runner(target, mode, runTarget, compiler, showStuff, options, filterchain)

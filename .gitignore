@@ -90,3 +90,6 @@ ENV/
 
 # Scons temporary files
 .sconsign.dblite
+
+# Vim temporary files
+*.swp

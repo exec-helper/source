@@ -39,7 +39,7 @@ rootDir = Dir('.').abspath
 rootBuildDir = Dir('build/{toolchain}/{mode}'.format(toolchain=env['compiler'], mode=env['mode'])).abspath
 
 buildDir = Dir('{rootBuildDir}'.format(rootBuildDir = rootBuildDir)).abspath
-sourceDir = Dir('example').abspath
+sourceDir = Dir('.').abspath
 VariantDir('{buildDir}'.format(buildDir=buildDir), sourceDir)
 
 env['ROOT_DIR'] = Dir('.').abspath

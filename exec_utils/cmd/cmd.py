@@ -37,7 +37,7 @@ def run(options):
     for target in options.getTargets():
         for runTarget in options.getRunTargets():
             for compiler in options.getCompilers():
-                if not runner(target, options.getModes(), runTarget, compiler, options.getShowStuff()):
+                if not runner(target, options.getModes(), runTarget, compiler, options.getShowStuff(), options):
                     return False
     return True
 

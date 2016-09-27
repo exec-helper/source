@@ -108,7 +108,7 @@ def analyzeBuildSystem(method, mode, target, verbose, showStuff, options):
             for runTarget in options.getRunTargets():
                 filterchain = FilterChain()
                 filterchain.addFilter(ValgrindMemcheck())
-                if not runner(target, mode, runTarget, compiler, showStuff, filterchain):
+                if not runner(target, mode, runTarget, compiler, showStuff, options, filterchain):
                     return False
         return True
     else:

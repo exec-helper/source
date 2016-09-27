@@ -4,6 +4,7 @@ import os
 import subprocess
 import glob
 import fnmatch
+import importlib
 
 BUILD_DIR = 'build'
 BIN_DIR = 'bin'
@@ -45,7 +46,7 @@ def getAllTargets(dir):
     return targets
 
 def getTargets(dir, returnAll = True):
-    targets = ['main']
+    targets = ['example']
     if returnAll:
         targets.append('all')
     return targets
@@ -55,11 +56,37 @@ def getSrcDir(target = None):
         return SRC_DIR
     return SRC_DIR + '/' + target
 
-def getRunTargets(returnAll = True):
-    runTargets = ['bin']
+def getRunTargets(profileMapFile = None, returnAll = True):
+    runTargets = getProfileMap(profileMapFile).keys()
     if returnAll:
         runTargets.append('all')
     return runTargets
+
+def getRunTargetSuffix(profileMapFile, runTarget):
+    return getProfileMapParameter(profileMapFile, runTarget, 0)
+
+def getRunTargetRunDir(profileMapFile, runTarget):
+    return getProfileMapParameter(profileMapFile, runTarget, 1)
+
+def getProfileMapParameter(profileMapFile, runTarget, index):
+    profileMap = getProfileMap(profileMapFile)
+    if runTarget in profileMap:
+        if len(profileMap) > index:
+            return getProfileMap(profileMapFile)[runTarget][index]
+        else:
+            raise IndexError
+    else:
+        raise KeyError
+
+def getProfileMap(profileMapFile):
+    try:
+        profiles = importlib.import_module(profileMapFile)
+        return profiles.profileMap
+    except ImportError:
+        pass
+    except TypeError:
+        pass
+    return {}
 
 def getAnalyzeMethods(returnAll = True):
     analyzeMethods = ['clang', 'cppcheck', 'cpd', 'valgrind']
