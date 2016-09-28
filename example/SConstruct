@@ -51,7 +51,7 @@ print("Building in {buildDir}".format(buildDir=buildDir))
 
 ################################# Call Sconscript file tree ##########################
 SConscript_files = [
-	'{buildDir}/SConscript'.format(buildDir=buildDir)
+	'{buildDir}/src/SConscript'.format(buildDir=buildDir)
 ]
 
 SConscript(SConscript_files)

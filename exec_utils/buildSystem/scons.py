@@ -16,7 +16,7 @@ class Scons:
     def init(self, workingDir, mode):
         return True
 
-    def build(self, target, mode, runMode, compiler, toolchainPath, verbose, singleThreaded, prependCommand = None):
+    def build(self, target, mode, runTarget, compiler, toolchainPath, verbose, singleThreaded, options, prependCommand = None):
         if prependCommand is None:
             build_command = self.getBuildCommand()
         else:
@@ -36,6 +36,7 @@ class Scons:
         if(not target or target == 'default'):
             print("Building default targets in {0} mode".format(mode))
         else:
+            target = target + getRunTargetSuffix(options.getProfileMap(), runTarget)
             print("Building target {0} in {1} mode".format(target, mode))
             build_command.append(target)
 

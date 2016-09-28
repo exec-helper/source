@@ -13,9 +13,9 @@ def init(workingDir, options):
 
 def build(options):
     for target in options.getTargets():
-        for runMode in options.getRunTargets():
+        for runTarget in options.getRunTargets():
             for compiler in options.getCompilers():
-                if not buildBuildSystem(target, options.getModes(), runMode, compiler, options.getToolchainPath(), options.getVerbosity(), options.getBuildSingleThreaded()):
+                if not buildBuildSystem(target, options.getModes(), runTarget, compiler, options.getToolchainPath(), options.getVerbosity(), options.getBuildSingleThreaded(), options):
                     return False
     return True
 
@@ -43,9 +43,10 @@ def run(options):
 
 def analyze(options):
     for analyzeMethod in options.getAnalyzeMethods():
-        for target in options.getTargets():
-            if not analyzeBuildSystem(analyzeMethod, options.getModes(), target, options.getVerbosity(), options.getShowStuff(), options):
-                return False
+        for runTarget in options.getRunTargets():
+            for target in options.getTargets():
+                if not analyzeBuildSystem(analyzeMethod, options.getModes(), target, runTarget, options.getVerbosity(), options.getShowStuff(), options):
+                    return False
     return True
 
 def profile(options):

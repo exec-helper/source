@@ -52,9 +52,7 @@ def getTargets(dir, returnAll = True):
     return targets
 
 def getSrcDir(target = None):
-    if target is None or target == 'all':
-        return SRC_DIR
-    return SRC_DIR + '/' + target
+    return SRC_DIR
 
 def getRunTargets(profileMapFile = None, returnAll = True):
     runTargets = getProfileMap(profileMapFile).keys()
