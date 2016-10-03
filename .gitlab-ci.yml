@@ -4,6 +4,10 @@ before_script:
 stages:
     - test
 
+test-buildTarget:
+    script: "python3 test/buildTargetTest.py"
+    stage: test
+
 python2-compatibility:
     script:
         - apt-get install --yes -qq valgrind cppcheck

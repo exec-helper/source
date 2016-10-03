@@ -68,6 +68,7 @@ def getRunTargetRunDir(profileMapFile, runTarget):
 
 def getProfileMapParameter(profileMapFile, runTarget, index):
     profileMap = getProfileMap(profileMapFile)
+    print(str(profileMap))
     if runTarget in profileMap:
         if len(profileMap) > index:
             return getProfileMap(profileMapFile)[runTarget][index]
@@ -81,7 +82,15 @@ def getProfileMap(profileMapFile):
         profiles = importlib.import_module(profileMapFile)
         return profiles.profileMap
     except ImportError:
-        pass
+        # Means it may be python 2
+        try:
+            module,filename = os.path.splitext(profileMapFile)
+            profiles = importlib.import_module(filename, module)
+            return profiles.profileMap
+        except ImportError:
+            pass
+        except TypeError:
+            pass
     except TypeError:
         pass
     return {}
@@ -104,6 +113,14 @@ def getShellOutput(cmd, working_directory = '.'):
     process = subprocess.Popen(cmd, stdout=subprocess.PIPE, cwd = working_directory)
     out, err = process.communicate()
     return out,err
+
+def getShellOutputAndReturnCode(cmd, working_directory = '.', verbose = True):
+    if verbose:
+        print("\nExecuting '{0}' in '{1}'".format(listToString(cmd, ' '), working_directory))
+    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, cwd = working_directory)
+    out, err = process.communicate()
+    retCode = process.returncode
+    return retCode,out,err
 
 def isInstalled(binary):
     cmd = ['which', binary]

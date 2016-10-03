@@ -93,3 +93,4 @@ ENV/
 
 # Vim temporary files
 *.swp
+output/*

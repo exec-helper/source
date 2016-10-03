@@ -14,7 +14,7 @@ class Options:
         self.profileMethods = ['perf']
         self.toolchainPath = ['']
         self.currentDir = getCurrentDir()
-        self.profileMap = 'exec-helper_profiles???'
+        self.profileMap = 'exec-helper_profiles'
         self.relative_path_reference = relative_path_reference
         pass 
 
