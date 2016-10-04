@@ -11,7 +11,7 @@ def testBuildingAllExamples(compiler, pythonVersion, testObject):
         errorFile = 'output/' + testObject.id() + '.error'
         cmd = [pythonVersion, 'exec']
         cmd.extend(getBuildCommand())
-        cmd.extend(compiler.getBuildCommand())
+        cmd.extend(compiler.getCommandLineSpecification())
         testObject.assertTrue(execute(cmd, outputFile, errorFile), "Failed executing '" + str(cmd) + ". Check " + outputFile + " and " + errorFile)
 
         # Check that files exist

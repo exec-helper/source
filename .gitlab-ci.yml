@@ -4,6 +4,10 @@ before_script:
 stages:
     - test
 
+test-distcleanTarget:
+    script: "python3 test/distcleanTargetTest.py"
+    stage: test
+
 test-buildTarget:
     script: "python3 test/buildTargetTest.py"
     stage: test

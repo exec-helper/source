@@ -24,19 +24,30 @@ def writeFile(filename, content, writeMode='w'):
             try:
                 f.write(content)
             except:
-                pass
-            # f.write(content.decode('ascii'))
+                f.write(content.decode('ascii'))
         else:
             f.write("")
 
+def getProfileMap(profileMap = 'exec-helper_profiles'):
+    if profileMap is None:
+        return []
+    else:
+        return ['--profile-map', profileMap]
+
+def getDistcleanCommand(profileMap = 'exec-helper_profiles'):
+    cmd = ['distclean']
+    cmd.extend(getProfileMap())
+    return cmd
+
+def getCleanCommand(profileMap = 'exec-helper_profiles'):
+    cmd = ['clean']
+    cmd.extend(getProfileMap())
+    return cmd
+
 def getBuildCommand(profileMap = 'exec-helper_profiles'):
     cmd = ['build']
-
-    if profileMap is None:
-        return cmd
-    else:
-        cmd.extend(['--profile-map', profileMap])
-        return cmd
+    cmd.extend(getProfileMap())
+    return cmd
 
 def execute(cmd, outputFile = None, errorFile = None):
     retCode,output,error = getShellOutputAndReturnCode(cmd, getTestRootDir(), False)
@@ -51,12 +62,15 @@ def checkThatFileIsExists(path):
     fileExists = os.path.isfile(path)
     return fileExists
 
+def checkThatDirExists(path):
+    return os.path.isdir(path)
+
 class Compiler:
     def __init__(self, mode, name):
         self.mode = mode
         self.name = name
 
-    def getBuildCommand(self):
+    def getCommandLineSpecification(self):
         cmd = []
         cmd.extend(['--compiler', self.name])
         cmd.extend(['--mode', self.mode])
