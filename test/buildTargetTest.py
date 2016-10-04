@@ -7,14 +7,17 @@ from cm.cm import *
 
 def testBuildingAllExamples(compiler, pythonVersion, testObject):
         # Build
+        outputFile = 'output/' + testObject.id() + '.output'
+        errorFile = 'output/' + testObject.id() + '.error'
         cmd = [pythonVersion, 'exec']
         cmd.extend(getBuildCommand())
         cmd.extend(compiler.getBuildCommand())
-        testObject.assertTrue(execute(cmd, 'output/' + testObject.id() + '.output', 'output/' + testObject.id() + '.error'))
+        testObject.assertTrue(execute(cmd, outputFile, errorFile), "Failed executing '" + str(cmd) + ". Check " + outputFile + " and " + errorFile)
 
         # Check that files exist
         for target in getAllTargets():
-            testObject.assertTrue(checkThatFileIsExists(getTestRootDir() + '/' + compiler.getOutputDirectory() + '/' + target))
+            targetFile = getTestRootDir() + '/' + compiler.getOutputDirectory() + '/' + target
+            testObject.assertTrue(checkThatFileIsExists(targetFile), "'" + targetFile + "' does not exist.")
 
 class TestBuildTargets(unittest.TestCase):
     @classmethod

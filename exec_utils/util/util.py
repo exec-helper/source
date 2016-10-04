@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import os
+import sys
 import subprocess
 import glob
 import fnmatch
@@ -85,7 +86,10 @@ def getProfileMap(profileMapFile):
         # Means it may be python 2
         try:
             module,filename = os.path.splitext(profileMapFile)
-            profiles = importlib.import_module(filename, module)
+            sys.path.append(module)
+            filename = filename.lstrip('.')
+            profiles = importlib.import_module(filename)
+            print(profiles)
             return profiles.profileMap
         except ImportError:
             pass

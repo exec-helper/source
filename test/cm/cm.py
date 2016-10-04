@@ -1,5 +1,7 @@
 from exec_utils.util.util import *
 
+import os
+
 SHELL_RETURN_CODE = 0
 
 PYTHON2 = 'python2'
@@ -13,9 +15,17 @@ def getTestRootDir():
     return 'example'
 
 def writeFile(filename, content, writeMode='w'):
+    directory = os.path.dirname(filename)
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
     with open(filename, writeMode) as f:
         if content:
-            f.write(content.decode('ascii'))
+            try:
+                f.write(content)
+            except:
+                pass
+            # f.write(content.decode('ascii'))
         else:
             f.write("")
 
@@ -39,8 +49,6 @@ def execute(cmd, outputFile = None, errorFile = None):
 
 def checkThatFileIsExists(path):
     fileExists = os.path.isfile(path)
-    if not fileExists:
-        print(str(path) + ' does not exist')
     return fileExists
 
 class Compiler:
