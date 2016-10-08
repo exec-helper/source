@@ -3,7 +3,7 @@ from exec_utils.util.util import *
 class Options:
     def __init__(self, relative_path_reference = getCurrentDir()):
         self.commands = []
-        self.modes = 'release'
+        self.modes = ['release']
         self.targets= ['all']
         self.runTargets= ['all']
         self.compilers = ['gcc']
@@ -45,6 +45,7 @@ class Options:
             for replacement in replacementNeedle:
                 hayStack.insert(insertIndex, replacement) 
                 insertIndex = insertIndex + 1
+        return hayStack
 
     def getCommands(self):
         self.replaceWith(self.commands, 'rebuild', ['distclean', 'build'])

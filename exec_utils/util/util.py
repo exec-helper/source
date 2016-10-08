@@ -86,7 +86,9 @@ def getProfileMap(profileMapFile):
         # Means it may be python 2
         try:
             module,filename = os.path.splitext(profileMapFile)
-            sys.path.append(module)
+            print("module = " + module)
+            print(os.getcwd())
+            sys.path.append(os.getcwd())
             filename = filename.lstrip('.')
             profiles = importlib.import_module(filename)
             print(profiles)

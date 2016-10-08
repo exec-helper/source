@@ -7,7 +7,7 @@ from cm.cm import *
 
 def testCleaningAllTargets(compiler, pythonVersion, testObject):
     # Touch files so we can check they have been removed
-    for target in getAllTargets():
+    for target in getAllBinaryTargets():
         writeFile(getTestRootDir() + '/' + compiler.getOutputDirectory() + '/' + target, "Hello!")
 
     # Clean targets
@@ -20,9 +20,9 @@ def testCleaningAllTargets(compiler, pythonVersion, testObject):
     testObject.assertTrue(execute(cmd, outputFile, errorFile), "Failed executing '" + str(cmd) + ". Check " + outputFile + " and " + errorFile)
 
     # Check that files exist
-    for target in getAllTargets():
+    for target in getAllBinaryTargets():
         targetFile = getTestRootDir() + '/' + compiler.getOutputDirectory() + '/' + target
-        testObject.assertFalse(checkThatFileIsExists(targetFile), "'" + targetFile + "' is not cleaned.")
+        testObject.assertFalse(checkThatFileExists(targetFile), "'" + targetFile + "' is not cleaned.")
 
 class TestCleanTargets(unittest.TestCase):
     def test_buildAllGccPython2(self):

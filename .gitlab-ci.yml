@@ -4,12 +4,20 @@ before_script:
 stages:
     - test
 
-test-distcleanTarget:
-    script: "python3 test/distcleanTargetTest.py"
+test-distcleanTarget-python2:
+    script: "python3 test/distcleanTargetTest.py --compiler gcc clang --python-version python2"
     stage: test
 
-test-buildTarget:
-    script: "python3 test/buildTargetTest.py"
+test-distcleanTarget-python3:
+    script: "python3 test/distcleanTargetTest.py --compiler gcc clang --python-version python3"
+    stage: test
+
+test-buildTarget-python2:
+    script: "python3 test/buildTargetTest.py --compiler gcc clang --python-version python2"
+    stage: test
+
+test-buildTarget-python3:
+    script: "python3 test/buildTargetTest.py --compiler gcc clang --python-version python3"
     stage: test
 
 python2-compatibility:

@@ -1,38 +1,44 @@
 import unittest
+import options
 
 from os import sys, path
 sys.path.append(path.dirname(path.dirname(path.abspath(__file__ + '/../exec_utils'))))
 
 from cm.cm import *
 
-def testDistcleaningAllTargets(compiler, pythonVersion, testObject):
+def testDistCleaning(target, pythonVersion, testObject):
     # Touch files so we can check they have been removed
-    compilerOutputDirectory = getTestRootDir() + '/' + compiler.getOutputDirectory()
-    for target in getAllTargets():
-        writeFile(getTestRootDir() + '/' + compiler.getOutputDirectory() + '/' + target, "Hello!")
-        testObject.assertTrue(checkThatDirExists(compilerOutputDirectory), "'" + compilerOutputDirectory + "' is not dist cleaned'")
+    for compiler in target.getCompilers():
+        for binary in target.getAllBinaries():
+            fileToDistClean = getTestRootDir() + '/' + compiler.getOutputDirectory() + '/' + binary
+            writeFile(fileToDistClean, "Hello!")
+            testObject.assertTrue(checkThatFileExists(fileToDistClean), "'" + fileToDistClean + "' was not created. Failing test.'")
 
-    # Clean targets
     outputFile = 'output/' + testObject.id() + '.output'
     errorFile = 'output/' + testObject.id() + '.error'
 
-    cmd = [pythonVersion, 'exec']
-    cmd.extend(getDistcleanCommand())
-    cmd.extend(compiler.getCommandLineSpecification())
-    testObject.assertTrue(execute(cmd, outputFile, errorFile), "Failed executing '" + str(cmd) + ". Check " + outputFile + " and " + errorFile)
+    testObject.assertTrue(executeTarget([DISTCLEAN_COMMAND], target, pythonVersion, outputFile, errorFile))
 
-    # Check that files exist
-    testObject.assertFalse(checkThatDirExists(compilerOutputDirectory), "'" + compilerOutputDirectory + "' is not dist cleaned'")
+    # Check that the files were cleaned
+    for compiler in target.getCompilers():
+        for binary in target.getAllBinaries():
+            targetFile = getTestRootDir() + '/' + compiler.getOutputDirectory() + '/' + binary
+            testObject.assertFalse(checkThatFileExists(targetFile), "'" + targetFile + "' was not cleaned.")
 
 class TestDistcleanTargets(unittest.TestCase):
-    def test_buildAllGccPython2(self):
-        compiler = Gcc('release')
-        testDistcleaningAllTargets(compiler, PYTHON2, self)
+    @classmethod
+    def setUp(self):
+        self.compilers = UnittestOptions.getCompilers()
+        self.pythonVersion = UnittestOptions.getPythonVersion()
 
-    def test_buildAllGccPython3(self):
-        compiler = Gcc('release')
-        testDistcleaningAllTargets(compiler, PYTHON3, self)
+    def test_distcleanAll(self):
+        target = Target(['all'], ['all'], self.compilers)
+        testDistCleaning(target, self.pythonVersion, self)
 
-if __name__ == '__main__':
+def main():
+    options.parseArgs()
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDistcleanTargets)
     unittest.TextTestRunner(verbosity=2).run(suite)
+
+if __name__ == '__main__':
+    main()

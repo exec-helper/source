@@ -1,15 +1,41 @@
+import os
+
 from exec_utils.util.util import *
 
-import os
+from cm.target import *
 
 SHELL_RETURN_CODE = 0
 
 PYTHON2 = 'python2'
 PYTHON3 = 'python3'
 
-def getAllTargets():
-    return ['src/example', 'bin/example',
-            'src/example-unittest', 'bin/test/unittest/example-unittest']
+GCC = 'gcc'
+CLANG = 'clang'
+
+BUILD_COMMAND = 'build'
+CLEAN_COMMAND = 'clean'
+DISTCLEAN_COMMAND = 'distclean'
+
+class UnittestOptions:
+    compilers = []
+    pythonVersion = None
+
+    @staticmethod
+    def addCompiler(compiler):
+        UnittestOptions.compilers.append(compiler)
+
+    @staticmethod
+    def getCompilers():
+        return UnittestOptions.compilers
+
+    @staticmethod
+    def setPythonVersion(newPythonVersion):
+        UnittestOptions.pythonVersion = newPythonVersion
+
+    @staticmethod
+    def getPythonVersion():
+        return UnittestOptions.pythonVersion
+
 
 def getTestRootDir():
     return 'example'
@@ -28,27 +54,6 @@ def writeFile(filename, content, writeMode='w'):
         else:
             f.write("")
 
-def getProfileMap(profileMap = 'exec-helper_profiles'):
-    if profileMap is None:
-        return []
-    else:
-        return ['--profile-map', profileMap]
-
-def getDistcleanCommand(profileMap = 'exec-helper_profiles'):
-    cmd = ['distclean']
-    cmd.extend(getProfileMap())
-    return cmd
-
-def getCleanCommand(profileMap = 'exec-helper_profiles'):
-    cmd = ['clean']
-    cmd.extend(getProfileMap())
-    return cmd
-
-def getBuildCommand(profileMap = 'exec-helper_profiles'):
-    cmd = ['build']
-    cmd.extend(getProfileMap())
-    return cmd
-
 def execute(cmd, outputFile = None, errorFile = None):
     retCode,output,error = getShellOutputAndReturnCode(cmd, getTestRootDir(), False)
     if outputFile:
@@ -58,26 +63,50 @@ def execute(cmd, outputFile = None, errorFile = None):
         writeFile(errorFile, error)
     return retCode == SHELL_RETURN_CODE
 
-def checkThatFileIsExists(path):
+def executeTarget(commandList, target, pythonVersion = PYTHON3, outputFile = None, errorFile = None, execCommand = 'exec'):
+    cmd = []
+    cmd.append(pythonVersion)
+    cmd.append(execCommand)
+    cmd.extend(commandList)
+    cmd.extend(target.getProfileMapOptions())
+    cmd.extend(target.getCompilerOptions())
+    cmd.extend(target.getTargetOptions())
+    cmd.extend(target.getRunTargetOptions())
+    cmd.extend(target.getModeOptions())
+    return execute(cmd, outputFile, errorFile)
+
+def checkThatFileExists(path):
     fileExists = os.path.isfile(path)
     return fileExists
 
 def checkThatDirExists(path):
     return os.path.isdir(path)
 
+COMPILER_DEBUG_MODE = 'debug'
+COMPILER_RELEASE_MODE = 'release'
+
 class Compiler:
     def __init__(self, mode, name):
         self.mode = mode
         self.name = name
 
-    def getCommandLineSpecification(self):
-        cmd = []
-        cmd.extend(['--compiler', self.name])
-        cmd.extend(['--mode', self.mode])
-        return cmd
-    
+    def getName(self):
+        return self.name
+
+    def getMode(self):
+        return self.mode
+
     def getOutputDirectory(self):
         return 'build/' + self.name + '/' + self.mode
+
+    @staticmethod
+    def getAllCompilers():
+        return  [
+                    Gcc(COMPILER_RELEASE_MODE), 
+                    Gcc(COMPILER_DEBUG_MODE),
+                    Clang(COMPILER_RELEASE_MODE),
+                    Clang(COMPILER_DEBUG_MODE)
+                ]
 
 class Gcc(Compiler):
     def __init__(self, mode = 'release'):

@@ -56,7 +56,7 @@ def main():
     parser = argparse.ArgumentParser(description='Convenience script for executing commands')
     parser.add_argument('commands', metavar='commands', nargs='+', choices=commandOptions,
 		   help="Commands to execute. Possible values: {0}.".format(commandOptions))
-    parser.add_argument('-m', '--mode', choices=buildModeOptions, default=args.getModes(),
+    parser.add_argument('-m', '--mode', nargs='+', choices=buildModeOptions, default=args.getModes(),
 		   help="Build mode to use.")
     parser.add_argument('-t', '--target', nargs='+', default=args.getTargets(),
 		   help="Target to build.")
