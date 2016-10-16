@@ -6,7 +6,7 @@
 
 void writeToFile(const std::string& file, const std::string& content) {
     std::ofstream outputFile;
-    outputFile.open(file);
+    outputFile.open(file.c_str());
     outputFile << content << std::endl;
     outputFile.close();
 }
