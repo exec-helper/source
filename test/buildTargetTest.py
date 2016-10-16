@@ -54,7 +54,10 @@ class TestBuildTargets(unittest.TestCase):
 def main():
     options.parseArgs()
     suite = unittest.TestLoader().loadTestsFromTestCase(TestBuildTargets)
-    unittest.TextTestRunner(verbosity=2).run(suite)
+    testResult = unittest.TextTestRunner(verbosity=2).run(suite)
+    if not testResult.wasSuccessful():
+        sys.exit(1)
+    sys.exit(0)
 
 if __name__ == '__main__':
     main()
