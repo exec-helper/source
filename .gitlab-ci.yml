@@ -39,11 +39,11 @@ python2-perf:
         - apt-get install --yes -qq unzip default-jre unzip flex bison
         - wget https://github.com/torvalds/linux/archive/master.zip && unzip master.zip && pushd linux-master/tools/perf && make && export PATH=$PATH:$(pwd); popd
         - cd example
-        - "python2 exec distclean clean init build run rebuild analyze profile -m release -t all -r all -c gcc clang -l perf -i exec-helper_profiles.py"
+        - "python2 exec distclean clean init build profile -m release -t all -r all -c gcc clang -l perf -i exec-helper_profiles.py"
 
 python3-perf:
     script:
         - apt-get install --yes -qq unzip default-jre unzip flex bison
         - wget https://github.com/torvalds/linux/archive/master.zip && unzip master.zip && pushd linux-master/tools/perf && make && export PATH=$PATH:$(pwd); popd
         - cd example
-        - "python3 exec distclean clean init build run rebuild analyze profile -m release -t all -r all -c gcc clang -l perf -i exec-helper_profiles.py"
+        - "python3 exec distclean clean init build profile -m release -t all -r all -c gcc clang -l perf -i exec-helper_profiles.py"
