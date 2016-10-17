@@ -1,4 +1,5 @@
 from exec_utils.util.util import *
+from exec_utils.profileMap.parse import *
 
 class Options:
     def __init__(self, relative_path_reference = getCurrentDir()):
@@ -14,7 +15,8 @@ class Options:
         self.profileMethods = ['perf']
         self.toolchainPath = ['']
         self.currentDir = getCurrentDir()
-        self.profileMap = 'exec-helper_profiles'
+        self.profileMap = '.exec-helper_profiles.py'
+        self.profiles = parseProfileMap(self.profileMap)
         self.relative_path_reference = relative_path_reference
         pass 
 
@@ -31,10 +33,7 @@ class Options:
         self.toolchainPath = args.toolchain_path[0]
         self.profileMethods = args.profile_method 
         self.showStuff = args.show_stuff
-        if args.profile_map:
-            relative_path = os.path.relpath(args.profile_map[0], self.relative_path_reference)
-            filename,unused_ = os.path.splitext(relative_path)
-            self.profileMap = filename.replace("/", ".")
+        self.profileMap = args.profile_map[0]
 
     @staticmethod
     def replaceWith(hayStack, needle, replacementNeedle):
@@ -62,7 +61,7 @@ class Options:
 
     def getRunTargets(self):
         allTarget = 'all'
-        realRunTargets = getRunTargets(self.getProfileMap(), False)
+        realRunTargets = getRunTargets(self.profiles, False)
         if realRunTargets:
             self.replaceWith(self.runTargets, allTarget, realRunTargets) 
         else:
@@ -97,3 +96,13 @@ class Options:
 
     def getProfileMap(self):
         return self.profileMap
+
+    def getProfiles(self, runModes):
+        allProfiles = self.getAllProfiles()
+        profiles = []
+        for runMode in runModes:
+            profiles.append(allProfiles[runMode])
+        return profiles
+
+    def getAllProfiles(self):
+        return self.profiles

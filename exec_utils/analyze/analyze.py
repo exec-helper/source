@@ -6,8 +6,8 @@ from ..runner.runner import runner
 from ..filter.filterchain import FilterChain
 from ..filter.valgrindMemcheck import ValgrindMemcheck
 
-def analyzeClang(mode, target, runTarget, verbose, options):
-    return buildBuildSystem(target, mode, runTarget, 'CC', '', options.getVerbosity(), False, options, prependCommand = ['scan-build', '-o', 'build/clang-static-analyze'])
+def analyzeClang(mode, target, profile, verbose, options):
+    return buildBuildSystem(target, mode, profile, 'CC', '', options.getVerbosity(), False, options, prependCommand = ['scan-build', '-o', 'build/clang-static-analyze'])
 
 def analyzeCppcheck(target, verbose):
     binary_name = 'cppcheck'
@@ -92,9 +92,9 @@ def analyzeCpd(target, verbose):
     cmd.append(' '.join(includes))
     return isSuccess(executeInShell(cmd))
 
-def analyzeBuildSystem(method, mode, target, runTarget, verbose, showStuff, options):
+def analyzeBuildSystem(method, mode, target, profile, verbose, showStuff, options):
     if method == 'clang':
-        return analyzeClang(mode, target, runTarget, verbose, options)
+        return analyzeClang(mode, target, profile, verbose, options)
     elif method == 'cppcheck':
         return analyzeCppcheck(target, verbose)
     elif method == 'cpplint':
@@ -105,10 +105,10 @@ def analyzeBuildSystem(method, mode, target, runTarget, verbose, showStuff, opti
         return analyzeCpd(target, verbose)
     elif method == 'valgrind':
         for compiler in options.getCompilers():
-            for runTarget in options.getRunTargets():
+            for profile in options.getProfiles(options.getRunTargets()):
                 filterchain = FilterChain()
                 filterchain.addFilter(ValgrindMemcheck())
-                if not runner(target, mode, runTarget, compiler, showStuff, options, filterchain):
+                if not runner(target, mode, profile, compiler, showStuff, options, filterchain):
                     return False
         return True
     else:

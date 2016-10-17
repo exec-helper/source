@@ -55,51 +55,11 @@ def getTargets(dir, returnAll = True):
 def getSrcDir(target = None):
     return SRC_DIR
 
-def getRunTargets(profileMapFile = None, returnAll = True):
-    runTargets = getProfileMap(profileMapFile).keys()
+def getRunTargets(profiles, returnAll = True):
+    runTargets = profiles.keys()
     if returnAll:
         runTargets.append('all')
     return runTargets
-
-def getRunTargetSuffix(profileMapFile, runTarget):
-    return getProfileMapParameter(profileMapFile, runTarget, 0)
-
-def getRunTargetRunDir(profileMapFile, runTarget):
-    return getProfileMapParameter(profileMapFile, runTarget, 1)
-
-def getProfileMapParameter(profileMapFile, runTarget, index):
-    profileMap = getProfileMap(profileMapFile)
-    print(str(profileMap))
-    if runTarget in profileMap:
-        if len(profileMap) > index:
-            return getProfileMap(profileMapFile)[runTarget][index]
-        else:
-            raise IndexError
-    else:
-        raise KeyError
-
-def getProfileMap(profileMapFile):
-    try:
-        profiles = importlib.import_module(profileMapFile)
-        return profiles.profileMap
-    except ImportError:
-        # Means it may be python 2
-        try:
-            module,filename = os.path.splitext(profileMapFile)
-            print("module = " + module)
-            print(os.getcwd())
-            sys.path.append(os.getcwd())
-            filename = filename.lstrip('.')
-            profiles = importlib.import_module(filename)
-            print(profiles)
-            return profiles.profileMap
-        except ImportError:
-            pass
-        except TypeError:
-            pass
-    except TypeError:
-        pass
-    return {}
 
 def getAnalyzeMethods(returnAll = True):
     analyzeMethods = ['clang', 'cppcheck', 'cpd', 'valgrind']

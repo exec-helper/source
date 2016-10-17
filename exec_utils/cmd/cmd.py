@@ -14,9 +14,9 @@ def init(workingDir, options):
 def build(options):
     for mode in options.getModes():
         for target in options.getTargets():
-            for runTarget in options.getRunTargets():
+            for profile in options.getProfiles(options.getRunTargets()):
                 for compiler in options.getCompilers():
-                    if not buildBuildSystem(target, mode, runTarget, compiler, options.getToolchainPath(), options.getVerbosity(), options.getBuildSingleThreaded(), options):
+                    if not buildBuildSystem(target, mode, profile, compiler, options.getToolchainPath(), options.getVerbosity(), options.getBuildSingleThreaded(), options):
                         return False
     return True
 
@@ -39,18 +39,18 @@ def distclean(options):
 def run(options):
     for mode in options.getModes():
         for target in options.getTargets():
-            for runTarget in options.getRunTargets():
+            for profile in options.getProfiles(options.getRunTargets()):
                 for compiler in options.getCompilers():
-                    if not runner(target, mode, runTarget, compiler, options.getShowStuff(), options):
+                    if not runner(target, mode, profile, compiler, options.getShowStuff(), options):
                         return False
     return True
 
 def analyze(options):
     for mode in options.getModes():
         for analyzeMethod in options.getAnalyzeMethods():
-            for runTarget in options.getRunTargets():
+            for profile in options.getProfiles(options.getRunTargets()):
                 for target in options.getTargets():
-                    if not analyzeBuildSystem(analyzeMethod, mode, target, runTarget, options.getVerbosity(), options.getShowStuff(), options):
+                    if not analyzeBuildSystem(analyzeMethod, mode, target, profile, options.getVerbosity(), options.getShowStuff(), options):
                         return False
     return True
 
@@ -58,9 +58,9 @@ def profile(options):
     for mode in options.getModes():
         for profileMethod in options.getProfileMethods():
             for target in options.getTargets():
-                for runTarget in options.getRunTargets():
+                for profile in options.getProfiles(options.getRunTargets()):
                     for compiler in options.getCompilers():
-                        if not profileSystem(target, mode, runTarget, compiler, profileMethod, options.getShowStuff(), options):
+                        if not profileSystem(target, mode, profile, compiler, profileMethod, options.getShowStuff(), options):
                             return False
     return True
 
