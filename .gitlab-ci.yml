@@ -20,6 +20,14 @@ test-buildTarget-python3:
     script: "python3 test/buildTargetTest.py --compiler gcc clang --python-version python3"
     stage: test
 
+test-runTarget-python2:
+    script: "python3 test/runTargetTest.py --compiler gcc clang --python-version python2"
+    stage: test
+
+test-runTarget-python3:
+    script: "python3 test/runTargetTest.py --compiler gcc clang --python-version python3"
+    stage: test
+
 python2-compatibility:
     script:
         - apt-get install --yes -qq valgrind cppcheck

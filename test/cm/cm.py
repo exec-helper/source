@@ -12,9 +12,10 @@ PYTHON3 = 'python3'
 GCC = 'gcc'
 CLANG = 'clang'
 
-BUILD_COMMAND = 'build'
-CLEAN_COMMAND = 'clean'
 DISTCLEAN_COMMAND = 'distclean'
+CLEAN_COMMAND = 'clean'
+BUILD_COMMAND = 'build'
+RUN_COMMAND = 'run'
 
 class UnittestOptions:
     compilers = []

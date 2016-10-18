@@ -20,9 +20,9 @@ class Target:
         for target in self.targets:
             for runTarget in self.runTargets:
                 if runTarget == 'bin':
-                    binaryTargets.extend(['src/' + target, 'bin/' + target])
+                    binaryTargets.extend(['bin/' + target])
                 elif runTarget == 'unittest':
-                    binaryTargets.extend(['src/' + target + '-' + runTarget, 'bin/test/' + runTarget + '/' + target + '-' + runTarget])
+                    binaryTargets.extend(['bin/test/' + runTarget + '/' + target + '-' + runTarget])
                 else:
                     raise ValueError("Unknown run target: '" + runTarget + "'")
         return binaryTargets
