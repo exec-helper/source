@@ -11,7 +11,7 @@ bool fileExists(const std::string& file) {
 }
 
 void writeToFile(const std::string& file, const std::string& content) {
-    std::uint32_t numberOfRuns = 1U;
+    uint32_t numberOfRuns = 1U;
 
     if(fileExists(file)) {
         std::fstream readFile(file.c_str(), std::ios_base::in);
