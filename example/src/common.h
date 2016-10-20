@@ -3,6 +3,7 @@
 
 #include <string>
 #include <fstream>
+#include <cstdint>
 
 bool fileExists(const std::string& file) {
     std::ifstream infile(file.c_str());
@@ -10,7 +11,7 @@ bool fileExists(const std::string& file) {
 }
 
 void writeToFile(const std::string& file, const std::string& content) {
-    uint32_t numberOfRuns = 1U;
+    std::uint32_t numberOfRuns = 1U;
 
     if(fileExists(file)) {
         std::fstream readFile(file.c_str(), std::ios_base::in);
