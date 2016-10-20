@@ -15,4 +15,6 @@ def parseProfileMap(profileMapFile):
     for profile in profileMapData['profileMap']:
         profiles[profile['id']] = Profile(profile['id'], profile['suffix'], profile['targetDirectory'])
 
-    return profiles
+    allTargets = profileMapData['targets']
+
+    return profiles,allTargets

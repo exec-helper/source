@@ -3,7 +3,7 @@ from exec_utils.options.options import *
 from cm.command import *
 
 class Target:
-    def __init__(self, targets, runTargets, compilers, profileMap = 'exec-helper_profiles'):
+    def __init__(self, targets, runTargets, compilers, profileMap = '.exec-helper_profiles'):
         self.targets = Options.replaceWith(targets, 'all', self.getAllTargetNames())
         self.runTargets = Options.replaceWith(runTargets, 'all', self.getAllRunTargets()) 
         self.compilers = compilers

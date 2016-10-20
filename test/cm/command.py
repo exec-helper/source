@@ -2,19 +2,19 @@ from cm.unique_ordered_list import *
 
 class Command:
     @staticmethod
-    def distclean(profileMap = 'exec-helper_profiles'):
+    def distclean(profileMap = '.exec-helper_profiles'):
         cmd = ['distclean']
         cmd.extend(getProfileMap())
         return cmd
 
     @staticmethod
-    def clean(profileMap = 'exec-helper_profiles'):
+    def clean(profileMap = '.exec-helper_profiles'):
         cmd = ['clean']
         cmd.extend(getProfileMap())
         return cmd
 
     @staticmethod
-    def getBuildCommand(profileMap = 'exec-helper_profiles'):
+    def getBuildCommand(profileMap = '.exec-helper_profiles'):
         cmd = ['build']
         cmd.extend(Command.getProfileMapOption())
         return cmd
@@ -46,7 +46,7 @@ class Command:
         return optionLine
 
     @staticmethod
-    def getProfileMapOption(profileMap = 'exec-helper_profiles'):
+    def getProfileMapOption(profileMap = '.exec-helper_profiles'):
         if profileMap is None:
             return []
         else:

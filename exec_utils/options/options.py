@@ -15,10 +15,8 @@ class Options:
         self.profileMethods = ['perf']
         self.toolchainPath = ['']
         self.currentDir = getCurrentDir()
-        self.profileMap = '.exec-helper_profiles.py'
-        self.profiles = parseProfileMap(self.profileMap)
+        self.profileMap = '.exec-helper_profiles'
         self.relative_path_reference = relative_path_reference
-        pass 
 
     def parse(self, args):
         """ Parse the given arguments. Calling the respective getters before this function is called, results in the default values being returned. """
@@ -34,6 +32,10 @@ class Options:
         self.profileMethods = args.profile_method 
         self.showStuff = args.show_stuff
         self.profileMap = args.profile_map[0]
+        
+        self.profiles,self.allTargets = parseProfileMap(self.profileMap)
+        if self.allTargets:
+            self.replaceWith(self.targets, 'all', self.allTargets) 
 
     @staticmethod
     def replaceWith(hayStack, needle, replacementNeedle):
@@ -54,9 +56,6 @@ class Options:
         return self.modes
 
     def getTargets(self):
-        realTargets = getTargets(self.currentDir, False)
-        if realTargets:
-            self.replaceWith(self.targets, 'all', realTargets) 
         return self.targets
 
     def getRunTargets(self):

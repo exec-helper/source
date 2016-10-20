@@ -8,5 +8,6 @@
             "suffix" : "-unittest",
             "targetDirectory" : "bin/test/unittest"
         }
-    ]
+    ],
+    "targets" : ["example"]
 }

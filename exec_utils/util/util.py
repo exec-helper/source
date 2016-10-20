@@ -46,12 +46,6 @@ def getAllTargets(dir):
     targets.extend(getAllPhonyTargets())
     return targets
 
-def getTargets(dir, returnAll = True):
-    targets = ['example']
-    if returnAll:
-        targets.append('all')
-    return targets
-
 def getSrcDir(target = None):
     return SRC_DIR
 
