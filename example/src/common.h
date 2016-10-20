@@ -3,7 +3,7 @@
 
 #include <string>
 #include <fstream>
-#include <cstdint>
+#include <stdint.h>
 
 bool fileExists(const std::string& file) {
     std::ifstream infile(file.c_str());
