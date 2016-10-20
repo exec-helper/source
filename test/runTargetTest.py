@@ -24,11 +24,15 @@ def testRunning(target, pythonVersion, testObject):
     errorFile = 'output/' + testObject.id() + '.error'
     testObject.assertTrue(executeTarget([RUN_COMMAND], target, pythonVersion, outputFile, errorFile))
 
-    # Check that the right targets were run
+    # Check that the right targets were run the right number of times
     for compiler in target.getCompilers():
         for binary in target.getAllBinaries():
             outputFile = getTestRootDir() + '/' + os.path.basename(binary) + '.cpp.output'
             testObject.assertTrue(checkThatFileExists(outputFile), "Target '" + binary + "' did not run.")
+            with open(outputFile, 'r') as f:
+                numberOfRuns = int(f.read());
+                numberOfExpectedRuns = len(target.getCompilers())
+                testObject.assertEqual(numberOfRuns, numberOfExpectedRuns, 'The number of runs was ' + str(numberOfRuns) + ', but should have been ' + str(numberOfExpectedRuns))
 
 class TestRunTargets(unittest.TestCase):
     @classmethod

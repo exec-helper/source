@@ -1,7 +1,8 @@
 class UniqueOrderedList:
     """ Class that makes sure the added values are unique, while preserving the order of the elements """
     def __init__(self, initial_list = []):
-        self.sortedList = self.removeDuplicates(initial_list)
+        self.sortedList = []
+        self.sortedList.extend(self.removeDuplicates(initial_list))
 
     def append(self, element):
         if self.count(element) == 0:
@@ -26,6 +27,12 @@ class UniqueOrderedList:
     
     def reverse(self):
         self.sortedList.reverse()
+
+    def size(self):
+        return len(self.sortedList)
+
+    def __repr__(self):
+        return str(self.sortedList)
 
     def __iter__(self):
         """ Enables iteration over this object """

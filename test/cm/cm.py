@@ -100,6 +100,9 @@ class Compiler:
     def getOutputDirectory(self):
         return 'build/' + self.name + '/' + self.mode
 
+    def __repr__(self):
+        return "Compiler: name = " + self.name + ", mode = " + self.mode
+
     @staticmethod
     def getAllCompilers():
         return  [
