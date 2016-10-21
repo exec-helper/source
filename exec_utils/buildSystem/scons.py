@@ -33,7 +33,7 @@ class Scons:
         if toolchainPath is not None and toolchainPath != '':
             build_command.append('toolchainPath=' + toolchainPath)
 
-        if(not target or target == 'default'):
+        if(not target or target == 'all'):
             print("Building default targets in {0} mode".format(mode))
         else:
             target = target + profile.suffix

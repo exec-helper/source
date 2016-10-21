@@ -72,6 +72,9 @@ class Options:
         self.profileMap = args.profile_map[0]
         self.buildSystemName = args.build_system
         self.buildSystem = self.getBuildSystemFromName(self.buildSystemName)
+
+        if self.allTargets:
+            self.replaceWith(self.targets, 'all', self.allTargets) 
         
     def parseProfileMap(self, profileMapFile):
         profileMapData = parseProfileMap(self.profileMap)
