@@ -1,5 +1,38 @@
+import argparse
+
 from exec_utils.util.util import *
 from exec_utils.profileMap.parse import *
+
+def getArgParser(options):
+    commandOptions = ['init', 'build', 'clean', 'distclean', 'rebuild', 'run', 'analyze', 'profile']
+    buildModeOptions = ['debug', 'release']
+    compilerOptions = ['gcc', 'clang']
+    analyzeOptions = getAnalyzeMethods()
+    profileOptions = ['perf', 'callgrind']
+
+    parser = argparse.ArgumentParser(description='Convenience script for executing commands')
+    parser.add_argument('commands', metavar='commands', nargs='+', choices=commandOptions,
+		   help="Commands to execute. Possible values: {0}.".format(commandOptions))
+    parser.add_argument('-m', '--mode', nargs='+', choices=buildModeOptions, default=options.getModes(),
+		   help="Build mode to use.")
+    parser.add_argument('-t', '--target', nargs='+', default=options.getTargets(),
+		   help="Target to build.")
+    parser.add_argument('-r', '--run', nargs='+', default=options.runTargets,
+		   help="Modes of the target to run.")
+    parser.add_argument('-c', '--compiler', nargs='+', choices=compilerOptions, default=options.getCompilers(),
+		   help="Compiler to use.")
+    parser.add_argument('-b', '--show-stuff', action='store_true', help="Enable this to automatically open or show the results")
+    parser.add_argument('-v', '--verbose-make', action='store_true', help="Enable make in verbose mode")
+    parser.add_argument('-s', '--build-single-threaded', action='store_true', help="Build in single threaded mode")
+    parser.add_argument('-a', '--analyze-method', nargs='+', choices=analyzeOptions, default=options.getAnalyzeMethods(),
+		   help="Run analysis.")
+    parser.add_argument('-l', '--profile-method', nargs='+', choices=profileOptions, default=options.getProfileMethods(),
+		   help="Select performance tool.")
+    parser.add_argument('-p', '--toolchain-path', nargs=1, default=options.getToolchainPath(),
+		   help="Path to the compiler")
+    parser.add_argument('-i', '--profile-map', nargs=1, default=options.getProfileMap(),
+                    help="Path to profile map")
+    return parser
 
 class Options:
     def __init__(self, relative_path_reference = getCurrentDir()):
@@ -33,9 +66,56 @@ class Options:
         self.showStuff = args.show_stuff
         self.profileMap = args.profile_map[0]
         
-        self.profiles,self.allTargets = parseProfileMap(self.profileMap)
+    def parseProfileMap(self, profileMapFile):
+        profileMapData = parseProfileMap(self.profileMap)
+        self.profiles = {}
+        for profile in profileMapData['profileMap']:
+            self.profiles[profile['id']] = Profile(profile['id'], profile['suffix'], profile['targetDirectory'])
+
+        self.allTargets = profileMapData['targets']
         if self.allTargets:
             self.replaceWith(self.targets, 'all', self.allTargets) 
+
+        if 'compilers' in profileMapData:
+            self.compilers = profileMapData['compilers']
+        if 'modes' in profileMapData:
+            self.modes = profileMapData['modes']
+        if 'verbosity' in profileMapData and profileMapData['verbosity'] == 'yes':
+            self.verbosity = True
+        if 'single-threaded' in profileMapData and profileMapData['single-threaded'] == 'yes':
+            self.buildSingleThreaded = True
+        if 'analyze-methods' in profileMapData:
+            self.analyzeMethods = profileMapData['analyzeMethods']
+        if 'toolchain-path' in profileMapData:
+            self.toolchainPath = profileMapData['toolchain-path']
+        if  'show-stuff' in profileMapData:
+            self.showStuff = profileMapData['show-stuff']
+
+    def __repr__(self):
+        return "Commands: " + str(self.commands) + " " + '\n' + \
+                    "Compilers: " + str(self.compilers) + " " + '\n' + \
+                    "modes: " + str(self.modes) + " " + '\n' + \
+                    "targets: " + str(self.targets) + '\n' + \
+                    "Run targets: " + str(self.runTargets) + '\n' + \
+                    "Verbosity: " + str(self.verbosity) + '\n' + \
+                    "Build single threaded: " + str(self.buildSingleThreaded) + '\n' + \
+                    "Analyze methods: " + str(self.analyzeMethods) + '\n' + \
+                    "Toolchain path: " + str(self.toolchainPath) + '\n' + \
+                    "Profile methods: " + str(self.profileMethods) + '\n' + \
+                    "Show stuff: " + str(self.showStuff) + '\n' + \
+                    "Profile map: " + str(self.profileMap)
+
+        self.targets = args.target
+        self.runTargets = args.run
+        self.compilers = args.compiler
+        self.verbosity = args.verbose_make
+        self.buildSingleThreaded = args.build_single_threaded
+        self.analyzeMethods = args.analyze_method
+        self.toolchainPath = args.toolchain_path[0]
+        self.profileMethods = args.profile_method 
+        self.showStuff = args.show_stuff
+        self.profileMap = args.profile_map[0]
+
 
     @staticmethod
     def replaceWith(hayStack, needle, replacementNeedle):

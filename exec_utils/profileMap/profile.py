@@ -8,3 +8,4 @@ class Profile:
 
     def getExecPath(self):
         return self.execPath
+

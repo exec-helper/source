@@ -9,5 +9,9 @@
             "targetDirectory" : "bin/test/unittest"
         }
     ],
-    "targets" : ["example"]
+    "targets" : ["example"],
+    "compilers" : ["clang"],
+    "modes" : ["release"],
+    "verbosity" : "no",
+    "single-threaded" : "no"
 }
