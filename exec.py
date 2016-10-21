@@ -73,7 +73,7 @@ def main():
 		   help="Select performance tool.")
     parser.add_argument('-p', '--toolchain-path', nargs=1, default=args.getToolchainPath(),
 		   help="Path to the compiler")
-    parser.add_argument('-i', '--profile-map', nargs=1, default=args.getProfileMap(),
+    parser.add_argument('-i', '--profile-map', nargs=1, default=[args.getProfileMap()],
                     help="Path to profile map")
 
     args.parse(parser.parse_args())
