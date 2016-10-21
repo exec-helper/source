@@ -11,11 +11,3 @@ def parseProfileMap(profileMapFile):
     with open(profileMapFile) as jsonFile:    
         profileMapData = json.load(jsonFile)
     return profileMapData
-
-    # profiles = {}
-    # for profile in profileMapData['profileMap']:
-        # profiles[profile['id']] = Profile(profile['id'], profile['suffix'], profile['targetDirectory'])
-
-    # allTargets = profileMapData['targets']
-
-    # return profiles,allTargets

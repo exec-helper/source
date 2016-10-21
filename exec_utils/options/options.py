@@ -2,6 +2,7 @@ import argparse
 
 from exec_utils.util.util import *
 from exec_utils.profileMap.parse import *
+from exec_utils.buildSystem.scons import *
 
 def getArgParser(options):
     commandOptions = ['init', 'build', 'clean', 'distclean', 'rebuild', 'run', 'analyze', 'profile']
@@ -21,7 +22,7 @@ def getArgParser(options):
 		   help="Modes of the target to run.")
     parser.add_argument('-c', '--compiler', nargs='+', choices=compilerOptions, default=options.getCompilers(),
 		   help="Compiler to use.")
-    parser.add_argument('-b', '--show-stuff', action='store_true', help="Enable this to automatically open or show the results")
+    parser.add_argument('-d', '--show-stuff', action='store_true', help="Enable this to automatically open or show the results")
     parser.add_argument('-v', '--verbose-make', action='store_true', help="Enable make in verbose mode")
     parser.add_argument('-s', '--build-single-threaded', action='store_true', help="Build in single threaded mode")
     parser.add_argument('-a', '--analyze-method', nargs='+', choices=analyzeOptions, default=options.getAnalyzeMethods(),
@@ -32,6 +33,8 @@ def getArgParser(options):
 		   help="Path to the compiler")
     parser.add_argument('-i', '--profile-map', nargs=1, default=options.getProfileMap(),
                     help="Path to profile map")
+    parser.add_argument('-b', '--build-system', nargs=1, default=options.getBuildSystemName(),
+                    help="Build system to use")
     return parser
 
 class Options:
@@ -50,6 +53,8 @@ class Options:
         self.currentDir = getCurrentDir()
         self.profileMap = '.exec-helper_profiles'
         self.relative_path_reference = relative_path_reference
+        self.buildSystemName = 'scons'
+        self.buildSystem = self.getBuildSystemFromName(self.buildSystemName)
 
     def parse(self, args):
         """ Parse the given arguments. Calling the respective getters before this function is called, results in the default values being returned. """
@@ -65,6 +70,8 @@ class Options:
         self.profileMethods = args.profile_method 
         self.showStuff = args.show_stuff
         self.profileMap = args.profile_map[0]
+        self.buildSystemName = args.build_system
+        self.buildSystem = self.getBuildSystemFromName(self.buildSystemName)
         
     def parseProfileMap(self, profileMapFile):
         profileMapData = parseProfileMap(self.profileMap)
@@ -88,8 +95,10 @@ class Options:
             self.analyzeMethods = profileMapData['analyzeMethods']
         if 'toolchain-path' in profileMapData:
             self.toolchainPath = profileMapData['toolchain-path']
-        if  'show-stuff' in profileMapData:
+        if 'show-stuff' in profileMapData:
             self.showStuff = profileMapData['show-stuff']
+        if 'build-system' in profileMapData:
+            self.buildSystemName = profileMapData['build-system']
 
     def __repr__(self):
         return "Commands: " + str(self.commands) + " " + '\n' + \
@@ -185,3 +194,17 @@ class Options:
 
     def getAllProfiles(self):
         return self.profiles
+
+    def getBuildSystem(self):
+        return self.buildSystem
+
+    def getBuildSystemName(self):
+        return self.buildSystemName
+
+    @staticmethod
+    def getBuildSystemFromName(buildSystemName):
+        if buildSystemName == 'scons':
+            return Scons()
+        else:
+            print('Error: invalid build system name: ' + buildSystemName)
+            return None

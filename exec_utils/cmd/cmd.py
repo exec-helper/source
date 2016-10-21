@@ -9,7 +9,7 @@ from ..profile.profile import *
 from exec_utils.options.options import Options
 
 def init(workingDir, options):
-    return initVcs() and initBuildSystem(workingDir, options.getModes())
+    return initVcs() and initBuildSystem(options, workingDir, options.getModes())
 
 def build(options):
     for mode in options.getModes():
@@ -24,7 +24,7 @@ def clean(options):
     for mode in options.getModes():
         for target in options.getTargets():
             for compiler in options.getCompilers():
-                if not cleanBuildSystem(target, mode, compiler, options.getVerbosity()):
+                if not cleanBuildSystem(options, target, mode, compiler, options.getVerbosity()):
                     return False
     return True
 
@@ -32,7 +32,7 @@ def distclean(options):
     # TODO: Use python to clean python files
     for mode in options.getModes():
         for compiler in options.getCompilers():
-            if not distcleanBuildSystem(mode, compiler):
+            if not distcleanBuildSystem(options, mode, compiler):
                 return False
     return True
 

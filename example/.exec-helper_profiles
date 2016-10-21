@@ -13,5 +13,6 @@
     "compilers" : ["clang"],
     "modes" : ["release"],
     "verbosity" : "no",
-    "single-threaded" : "no"
+    "single-threaded" : "no",
+    "build-system" : "scons"
 }
