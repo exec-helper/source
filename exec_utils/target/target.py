@@ -51,6 +51,9 @@ class Target:
     def getAnalyzeMethod(self):
         return self.analyzeMethods[0]
 
+    def getProfileMethod(self):
+        return self.profileMethods[0]
+
     def getTargets(self, replaceAllTarget = True):
         targetNames = self.targets
 
@@ -116,6 +119,16 @@ class Target:
             analyzeMethods.append(newTargets)
         return analyzeMethods
 
+    def getProfileMethods(self):
+        profileNames = self.profileMethods
+
+        profileMethods = []
+        for profileName in profileNames:
+            newTargets = copy.copy(self)
+            newTargets.profileMethods = [profileName]
+            profileMethods.append(newTargets)
+        return profileMethods
+
     def iterateTargets(self, *parameters):
         targetNames = [self]
         for parameter in parameters:
@@ -135,6 +148,9 @@ class Target:
             elif parameter == 'analyzeMethod':
                 for targetName in targetNames:
                     newTargetNames.extend(targetName.getAnalyzeMethods())
+            elif parameter == 'profileMethod':
+                for targetName in targetNames:
+                    newTargetNames.extend(targetName.getProfileMethods())
             else:
                 newTargetNames = targetNames
             targetNames = newTargetNames

@@ -48,13 +48,9 @@ def analyze(options, target):
             return False
     return True
 
-def profile(options):
-    for mode in options.getModes():
-        for profileMethod in options.getProfileMethods():
-            for target in options.getTargets():
-                for profile in options.getProfiles(options.getRunTargets()):
-                    for compiler in options.getCompilers():
-                        if not profileSystem(target, mode, profile, compiler, profileMethod, options.getShowStuff(), options):
-                            return False
+def profile(options, target):
+    for profileTarget in target.iterateTargets('profileMethod', 'mode', 'compiler', 'target', 'runTarget'):
+        if not profileSystem(profileTarget, options.getShowStuff(), options):
+            return False
     return True
 

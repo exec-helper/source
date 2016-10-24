@@ -6,7 +6,11 @@ from ..filter.filterchain import FilterChain
 from ..filter.perf import Perf
 from ..filter.valgrindCallgrind import ValgrindCallgrind
 
-def profileSystem(target, mode, runTarget, compiler, profileMethod, showStuff, options):
+def profileSystem(target, showStuff, options):
+    mode = target.getMode()
+    compiler = target.getCompiler()
+    profileMethod = target.getProfileMethod()
+
     filterchain = FilterChain()
     if profileMethod == 'perf':
         filterchain.addFilter(Perf(getBuildDir(mode, compiler), showStuff))
@@ -15,7 +19,7 @@ def profileSystem(target, mode, runTarget, compiler, profileMethod, showStuff, o
         filterchain.addFilter(ValgrindCallgrind(getBuildDir(mode, compiler), showStuff))
 
     else:
-        print('Error: unknown method to analyze project: ' + method)
+        print('Error: unknown method to profile project: ' + profileMethod)
         return False
 
-    return runner(target, mode, runTarget, compiler, showStuff, options, filterchain)
+    return runner(target, showStuff, options, filterchain)

@@ -35,7 +35,7 @@ def execute(options):
             if not analyze(options, target):
                 return False
         elif(command == 'profile'):
-            if not profile(options):
+            if not profile(options, target):
                 return False
         else:
             print("Error: invalid command")
