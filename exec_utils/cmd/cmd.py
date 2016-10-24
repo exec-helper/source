@@ -25,12 +25,11 @@ def clean(options):
                     return False
     return True
 
-def distclean(options):
+def distclean(options, target):
     # TODO: Use python to clean python files
-    for mode in options.getModes():
-        for compiler in options.getCompilers():
-            if not distcleanBuildSystem(options, mode, compiler):
-                return False
+    for buildTarget in target.iterateTargets('mode', 'compiler'):
+        if not distcleanBuildSystem(options, target):
+            return False
     return True
 
 def run(options, target):

@@ -11,5 +11,5 @@ def buildBuildSystem(target, verbosity, options, prependCommand = None):
 def cleanBuildSystem(options, target, mode, compiler, verbose):
     return options.getBuildSystem().clean(target, mode, compiler, verbose)
 
-def distcleanBuildSystem(options, mode, compiler):
-    return options.getBuildSystem().distclean(mode, compiler)
+def distcleanBuildSystem(options, target):
+    return options.getBuildSystem().distclean(options, target)

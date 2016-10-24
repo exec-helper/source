@@ -66,7 +66,9 @@ class Scons:
         print("Cleaning {0}".format(target))
         return isSuccess(executeInShell(clean_command))
 
-    def distclean(self, mode, compiler):
+    def distclean(self, options, target):
+        mode = target.getMode()
+        compiler = target.getCompiler()
         buildDir = getBuildDir(mode, compiler)
         print("Dist cleaning {0}".format(buildDir))
 

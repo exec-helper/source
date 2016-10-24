@@ -26,7 +26,7 @@ def execute(options):
                 print("Clean failed")
                 return False
         elif(command == 'distclean'):
-                if not distclean(options):
+                if not distclean(options, target):
                     return False
         elif(command == 'run'):
             if not run(options, target):
