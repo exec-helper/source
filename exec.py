@@ -5,18 +5,20 @@ import inspect
 from exec_utils.util.util import *
 from exec_utils.cmd.cmd import *
 from exec_utils.options.options import *
+from exec_utils.target.target import *
 import sys
 
 EXIT_SUCCESS = 0
 EXIT_ERROR = 1
 
 def execute(options):
+    target = Target(options)
     for command in options.getCommands():
         if(command == 'init'):
             if not init(options.getCurrentDir(), options):
                 return False
         elif(command == 'build'):
-            if not build(options):
+            if not build(options, target):
                 print("Build failed")
                 return False
         elif(command == 'clean'):

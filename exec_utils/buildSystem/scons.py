@@ -16,29 +16,33 @@ class Scons:
     def init(self, workingDir, mode):
         return True
 
-    def build(self, target, mode, profile, compiler, toolchainPath, verbose, singleThreaded, options, prependCommand = None):
+    def build(self, target, verbose, options, prependCommand = None):
         if prependCommand is None:
             build_command = self.getBuildCommand()
         else:
             build_command = prependCommand
             build_command.extend(self.getBuildCommand())
 
+        mode = target.getMode()
         build_command.append('mode={0}'.format(mode))
 
         # Add multithreaded building by default
-        if not singleThreaded:
+        if not target.getBuildSingleThreaded():
             build_command.append('-j8')
 
-        build_command.append('compiler=' + compiler) 
+        build_command.append('compiler=' + target.getCompiler()) 
+        toolchainPath = target.getToolchainPath()
         if toolchainPath is not None and toolchainPath != '':
             build_command.append('toolchainPath=' + toolchainPath)
 
-        if(not target or target == 'all'):
+        targetName = target.getTargetName()
+        profile = target.getProfile()
+        if(not targetName or targetName == 'all'):
             print("Building default targets in {0} mode".format(mode))
         else:
-            target = target + profile.suffix
-            print("Building target {0} in {1} mode".format(target, mode))
-            build_command.append(target)
+            targetName = targetName + profile.suffix
+            print("Building target {0} in {1} mode".format(targetName, mode))
+            build_command.append(targetName)
 
         if verbose:
             build_command.extend(['--debug=explain'])

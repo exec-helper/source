@@ -73,9 +73,6 @@ class Options:
         self.buildSystemName = args.build_system
         self.buildSystem = self.getBuildSystemFromName(self.buildSystemName)
 
-        if self.allTargets:
-            self.replaceWith(self.targets, 'all', self.allTargets) 
-        
     def parseProfileMap(self, profileMapFile):
         profileMapData = parseProfileMap(self.profileMap)
         self.profiles = {}
@@ -83,8 +80,6 @@ class Options:
             self.profiles[profile['id']] = Profile(profile['id'], profile['suffix'], profile['targetDirectory'])
 
         self.allTargets = profileMapData['targets']
-        if self.allTargets:
-            self.replaceWith(self.targets, 'all', self.allTargets) 
 
         if 'compilers' in profileMapData:
             self.compilers = profileMapData['compilers']
@@ -117,31 +112,8 @@ class Options:
                     "Show stuff: " + str(self.showStuff) + '\n' + \
                     "Profile map: " + str(self.profileMap)
 
-        self.targets = args.target
-        self.runTargets = args.run
-        self.compilers = args.compiler
-        self.verbosity = args.verbose_make
-        self.buildSingleThreaded = args.build_single_threaded
-        self.analyzeMethods = args.analyze_method
-        self.toolchainPath = args.toolchain_path[0]
-        self.profileMethods = args.profile_method 
-        self.showStuff = args.show_stuff
-        self.profileMap = args.profile_map[0]
-
-
-    @staticmethod
-    def replaceWith(hayStack, needle, replacementNeedle):
-        while hayStack.count(needle) > 0:
-            index = hayStack.index(needle)
-            hayStack.pop(index)
-            insertIndex = index
-            for replacement in replacementNeedle:
-                hayStack.insert(insertIndex, replacement) 
-                insertIndex = insertIndex + 1
-        return hayStack
-
     def getCommands(self):
-        self.replaceWith(self.commands, 'rebuild', ['distclean', 'build'])
+        replaceWith(self.commands, 'rebuild', ['distclean', 'build'])
         return self.commands
 
     def getModes(self):
@@ -154,7 +126,7 @@ class Options:
         allTarget = 'all'
         realRunTargets = getRunTargets(self.profiles, False)
         if realRunTargets:
-            self.replaceWith(self.runTargets, allTarget, realRunTargets) 
+            replaceWith(self.runTargets, allTarget, realRunTargets) 
         else:
             while(self.runTargets.count(allTarget) > 0):
                 self.runTargets.remove(allTarget)
@@ -170,7 +142,7 @@ class Options:
         return self.buildSingleThreaded
 
     def getAnalyzeMethods(self):
-        self.replaceWith(self.analyzeMethods, 'all', getAnalyzeMethods(False)) 
+        replaceWith(self.analyzeMethods, 'all', getAnalyzeMethods(False)) 
         return self.analyzeMethods
 
     def getToolchainPath(self):
@@ -203,6 +175,9 @@ class Options:
 
     def getBuildSystemName(self):
         return self.buildSystemName
+
+    def getAllTargets(self):
+        return self.allTargets
 
     @staticmethod
     def getBuildSystemFromName(buildSystemName):

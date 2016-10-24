@@ -129,3 +129,13 @@ def getAllDirsThatContainPattern(rootDir, extension):
 
 def isSuccess(retValue):
     return retValue == EXIT_SUCCESS
+
+def replaceWith(hayStack, needle, replacementNeedle):
+    while hayStack.count(needle) > 0:
+        index = hayStack.index(needle)
+        hayStack.pop(index)
+        insertIndex = index
+        for replacement in replacementNeedle:
+            hayStack.insert(insertIndex, replacement) 
+            insertIndex = insertIndex + 1
+    return hayStack

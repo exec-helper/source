@@ -1,11 +1,12 @@
+from exec_utils.util.util import *
 from exec_utils.options.options import *
 
 from cm.command import *
 
 class Target:
     def __init__(self, targets, runTargets, compilers, profileMap = '.exec-helper_profiles'):
-        self.targets = Options.replaceWith(targets, 'all', self.getAllTargetNames())
-        self.runTargets = Options.replaceWith(runTargets, 'all', self.getAllRunTargets()) 
+        self.targets = replaceWith(targets, 'all', Target.getAllTargetNames())
+        self.runTargets = replaceWith(runTargets, 'all', Target.getAllRunTargets()) 
         self.compilers = compilers
         self.profileMap = profileMap
 

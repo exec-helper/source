@@ -5,8 +5,8 @@ from .scons import Scons
 def initBuildSystem(options, workingDir, mode):
     return options.getBuildSystem().init(workingDir, mode)
 
-def buildBuildSystem(target, mode, profile, compiler, toolchainPath, verbose, singleThreaded, options, prependCommand = None):
-    return options.getBuildSystem().build(target, mode, profile, compiler, toolchainPath, verbose, singleThreaded, options, prependCommand)
+def buildBuildSystem(target, verbosity, options, prependCommand = None):
+    return options.getBuildSystem().build(target, verbosity, options, prependCommand)
 
 def cleanBuildSystem(options, target, mode, compiler, verbose):
     return options.getBuildSystem().clean(target, mode, compiler, verbose)

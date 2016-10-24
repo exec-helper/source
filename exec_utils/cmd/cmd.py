@@ -11,13 +11,10 @@ from exec_utils.options.options import Options
 def init(workingDir, options):
     return initVcs() and initBuildSystem(options, workingDir, options.getModes())
 
-def build(options):
-    for mode in options.getModes():
-        for target in options.getTargets():
-            for profile in options.getProfiles(options.getRunTargets()):
-                for compiler in options.getCompilers():
-                    if not buildBuildSystem(target, mode, profile, compiler, options.getToolchainPath(), options.getVerbosity(), options.getBuildSingleThreaded(), options):
-                        return False
+def build(options, target):
+    for buildTarget in target.iterateTargets('mode', 'compiler', 'target', 'runTarget'):
+        if not buildBuildSystem(buildTarget, options.getVerbosity(), options):
+            return False
     return True
 
 def clean(options):
