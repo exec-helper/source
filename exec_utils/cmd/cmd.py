@@ -33,13 +33,10 @@ def distclean(options):
                 return False
     return True
 
-def run(options):
-    for mode in options.getModes():
-        for target in options.getTargets():
-            for profile in options.getProfiles(options.getRunTargets()):
-                for compiler in options.getCompilers():
-                    if not runner(target, mode, profile, compiler, options.getShowStuff(), options):
-                        return False
+def run(options, target):
+    for runTarget in target.iterateTargets('mode', 'compiler', 'target', 'runTarget'):
+        if not runner(runTarget, options.getShowStuff(), options):
+            return False
     return True
 
 def analyze(options):

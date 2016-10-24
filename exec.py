@@ -29,7 +29,7 @@ def execute(options):
                 if not distclean(options):
                     return False
         elif(command == 'run'):
-            if not run(options):
+            if not run(options, target):
                 return False
         elif(command == 'analyze'):
             if not analyze(options):
