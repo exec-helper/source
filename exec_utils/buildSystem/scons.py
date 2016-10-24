@@ -13,7 +13,7 @@ class Scons:
     def __init__(self):
         pass
 
-    def init(self, workingDir, mode):
+    def init(self, options, target):
         return True
 
     def build(self, target, verbose, options, prependCommand = None):
@@ -49,21 +49,22 @@ class Scons:
 
         return isSuccess(executeInShell(build_command))
 
-    def clean(self, target, mode, compiler, verbose):
+    def clean(self, options, target, verbose):
+        targetName = target.getTargetName()
+        compiler = target.getCompiler()
+        mode = target.getMode()
+
         clean_command = self.getBuildCommand()
         clean_command.append('--clean')
         clean_command.append('compiler=' + compiler) 
 
-        if(target and target != 'all'):
-            clean_command.append(target)
+        if(targetName and targetName != 'all'):
+            clean_command.append(targetName)
         else:
-            target = 'all'
+            targetName = 'all'
         clean_command.append(mode)
 
-        if verbose:
-            pass
-
-        print("Cleaning {0}".format(target))
+        print("Cleaning {0}".format(targetName))
         return isSuccess(executeInShell(clean_command))
 
     def distclean(self, options, target):

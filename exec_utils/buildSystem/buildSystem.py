@@ -2,14 +2,14 @@
 
 from .scons import Scons
 
-def initBuildSystem(options, workingDir, mode):
-    return options.getBuildSystem().init(workingDir, mode)
+def initBuildSystem(options, target):
+    return options.getBuildSystem().init(options, target)
 
 def buildBuildSystem(target, verbosity, options, prependCommand = None):
     return options.getBuildSystem().build(target, verbosity, options, prependCommand)
 
-def cleanBuildSystem(options, target, mode, compiler, verbose):
-    return options.getBuildSystem().clean(target, mode, compiler, verbose)
+def cleanBuildSystem(options, target, verbose):
+    return options.getBuildSystem().clean(options, target, verbose)
 
 def distcleanBuildSystem(options, target):
     return options.getBuildSystem().distclean(options, target)

@@ -6,8 +6,8 @@ from ..runner.runner import runner
 from ..filter.filterchain import FilterChain
 from ..filter.valgrindMemcheck import ValgrindMemcheck
 
-def analyzeClang(mode, target, profile, verbose, options):
-    return buildBuildSystem(target, mode, profile, 'CC', '', options.getVerbosity(), False, options, prependCommand = ['scan-build', '-o', 'build/clang-static-analyze'])
+def analyzeClang(target, verbose, options):
+    return buildBuildSystem(target, options.getVerbosity(), options, prependCommand = ['scan-build', '-o', 'build/clang-static-analyze'])
 
 def analyzeCppcheck(target, verbose):
     binary_name = 'cppcheck'
@@ -92,24 +92,28 @@ def analyzeCpd(target, verbose):
     cmd.append(' '.join(includes))
     return isSuccess(executeInShell(cmd))
 
-def analyzeBuildSystem(method, mode, target, profile, verbose, showStuff, options):
+def analyzeBuildSystem(target, verbose, showStuff, options):
+    mode = target.getMode()
+    targetName = target.getTargetName()
+    profile = target.getProfile()
+    compiler = target.getCompiler()
+    method = target.getAnalyzeMethod()
+    
     if method == 'clang':
-        return analyzeClang(mode, target, profile, verbose, options)
+        return analyzeClang(target, verbose, options)
     elif method == 'cppcheck':
-        return analyzeCppcheck(target, verbose)
+        return analyzeCppcheck(targetName, verbose)
     elif method == 'cpplint':
-        return analyzeCpplint(target, verbose)
+        return analyzeCpplint(targetName, verbose)
     elif method == 'simian':
-        return analyzeSimian(target, verbose)
+        return analyzeSimian(targetName, verbose)
     elif method == 'cpd':
-        return analyzeCpd(target, verbose)
+        return analyzeCpd(targetName, verbose)
     elif method == 'valgrind':
-        for compiler in options.getCompilers():
-            for profile in options.getProfiles(options.getRunTargets()):
-                filterchain = FilterChain()
-                filterchain.addFilter(ValgrindMemcheck())
-                if not runner(target, mode, profile, compiler, showStuff, options, filterchain):
-                    return False
+        filterchain = FilterChain()
+        filterchain.addFilter(ValgrindMemcheck())
+        if not runner(target, showStuff, options, filterchain):
+            return False
         return True
     else:
         print('Error: unknown method to analyze project: ' + method)

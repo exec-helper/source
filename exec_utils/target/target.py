@@ -48,6 +48,9 @@ class Target:
     def getBuildSingleThreaded(self):
         return self.buildSingleThreaded
 
+    def getAnalyzeMethod(self):
+        return self.analyzeMethods[0]
+
     def getTargets(self, replaceAllTarget = True):
         targetNames = self.targets
 
@@ -103,6 +106,16 @@ class Target:
             profileMethods.append(newTargets)
         return profileMethods
 
+    def getAnalyzeMethods(self):
+        analyzeNames = self.analyzeMethods
+
+        analyzeMethods = []
+        for analyzeName in analyzeNames:
+            newTargets = copy.copy(self)
+            newTargets.analyzeMethods = [analyzeName]
+            analyzeMethods.append(newTargets)
+        return analyzeMethods
+
     def iterateTargets(self, *parameters):
         targetNames = [self]
         for parameter in parameters:
@@ -119,6 +132,9 @@ class Target:
             elif parameter == 'runTarget':
                 for targetName in targetNames:
                     newTargetNames.extend(targetName.getRunTargets())
+            elif parameter == 'analyzeMethod':
+                for targetName in targetNames:
+                    newTargetNames.extend(targetName.getAnalyzeMethods())
             else:
                 newTargetNames = targetNames
             targetNames = newTargetNames

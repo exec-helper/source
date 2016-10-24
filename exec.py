@@ -15,14 +15,14 @@ def execute(options):
     target = Target(options)
     for command in options.getCommands():
         if(command == 'init'):
-            if not init(options.getCurrentDir(), options):
+            if not init(options, target):
                 return False
         elif(command == 'build'):
             if not build(options, target):
                 print("Build failed")
                 return False
         elif(command == 'clean'):
-            if not clean(options):
+            if not clean(options, target):
                 print("Clean failed")
                 return False
         elif(command == 'distclean'):
@@ -32,7 +32,7 @@ def execute(options):
             if not run(options, target):
                 return False
         elif(command == 'analyze'):
-            if not analyze(options):
+            if not analyze(options, target):
                 return False
         elif(command == 'profile'):
             if not profile(options):
