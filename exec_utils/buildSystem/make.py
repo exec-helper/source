@@ -15,10 +15,14 @@ class Make:
     def __init__(self):
         pass
 
-    def init(self, workingDir, mode):
+    def init(self, options, target):
         return True
 
-    def build(self, target, mode, profile, compiler, toolchainPath, verbose, singleThreaded, options, prependCommand = None):
+    def build(self, target, verbose, options, prependCommand = None):
+        targetName = target.getTargetName()
+        mode = target.getMode()
+        profile = target.getProfile()
+
         if prependCommand is None:
             build_command = self.getBuildCommand()
         else:
@@ -26,38 +30,41 @@ class Make:
             build_command.extend(self.getBuildCommand())
 
         # Add multithreaded building by default
-        if not singleThreaded:
+        if not target.getBuildSingleThreaded():
             build_command.append('-j8')
 
-        if(not target or target == 'default'):
-            print("Building default targets in {0} mode".format(mode))
+        if(not targetName or targetName == 'default'):
+            print("Building default targetNames in {0} mode".format(mode))
             build_command.extend(['-C', 'build/wheezy/i386']) 
         else:
-            target = target + profile.suffix
-            build_command.extend(['-C', 'build/wheezy/i386/' + target]) 
-            print("Building target {0} in {1} mode".format(target, mode))
+            targetName = targetName + profile.suffix
+            build_command.extend(['-C', 'build/wheezy/i386/' + targetName]) 
+            print("Building targetName {0} in {1} mode".format(targetName, mode))
 
         if verbose:
             build_command.extend(['V=1'])
 
         return isSuccess(executeInShell(build_command))
 
-    def clean(self, target, mode, compiler, verbose):
+    def clean(self, options, target, verbose):
+        targetName = target.getTargetName()
+
         clean_command = self.getBuildCommand()
         clean_command.append('clean')
 
-        if(target and target != 'all'):
-            clean_command.extend(['-C', 'build/wheezy/i386/' + target]) 
+        if(targetName and targetName != 'all'):
+            clean_command.extend(['-C', 'build/wheezy/i386/' + targetName]) 
         else:
             clean_command.extend(['-C', 'build/wheezy/i386']) 
 
         if verbose:
             pass
 
-        print("Cleaning {0}".format(target))
+        print("Cleaning {0}".format(targetName))
         return isSuccess(executeInShell(clean_command))
 
-    def distclean(self, mode, compiler):
+    def distclean(self, options, target):
+        mode = target.getMode()
         buildDir = 'build/wheezy/i386'
         print("Dist cleaning {0}".format(buildDir))
 

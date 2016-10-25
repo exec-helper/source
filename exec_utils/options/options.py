@@ -3,6 +3,7 @@ import argparse
 from exec_utils.util.util import *
 from exec_utils.profileMap.parse import *
 from exec_utils.buildSystem.scons import *
+from exec_utils.buildSystem.make import *
 
 def getArgParser(options):
     commandOptions = ['init', 'build', 'clean', 'distclean', 'rebuild', 'run', 'analyze', 'profile']
@@ -183,6 +184,8 @@ class Options:
     def getBuildSystemFromName(buildSystemName):
         if buildSystemName == 'scons':
             return Scons()
+        elif buildSystemName == 'make':
+            return Make()
         else:
             print('Error: invalid build system name: ' + buildSystemName)
             return None
