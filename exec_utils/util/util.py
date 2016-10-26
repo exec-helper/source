@@ -7,7 +7,6 @@ import glob
 import fnmatch
 import importlib
 
-BUILD_DIR = 'build'
 BIN_DIR = 'bin'
 SRC_DIR = 'src'
 EXIT_SUCCESS = 0
@@ -30,12 +29,6 @@ def goToDir(path):
 
 def pwd():
     print("Current working dir: {0}".format(getCurrentDir()))
-
-def getBuildDirWithoutMode():
-    return BUILD_DIR
-
-def getBuildDir(mode, compiler):
-    return BUILD_DIR + '/' + compiler + '/' + mode
 
 def getBinDir(mode):
     return BIN_DIR + '/' + mode

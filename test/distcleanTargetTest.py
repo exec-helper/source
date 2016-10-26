@@ -10,7 +10,7 @@ def testDistCleaning(target, pythonVersion, testObject):
     # Touch files so we can check they have been removed
     for compiler in target.getCompilers():
         for binary in target.getAllBinaries():
-            fileToDistClean = getTestRootDir() + '/' + compiler.getOutputDirectory() + '/' + binary
+            fileToDistClean = getTestRootDir() + '/' + target.getRootBuildDir(compiler) + '/' + binary
             writeFile(fileToDistClean, "Hello!")
             testObject.assertTrue(checkThatFileExists(fileToDistClean), "'" + fileToDistClean + "' was not created. Failing test.'")
 
@@ -22,7 +22,7 @@ def testDistCleaning(target, pythonVersion, testObject):
     # Check that the files were cleaned
     for compiler in target.getCompilers():
         for binary in target.getAllBinaries():
-            targetFile = getTestRootDir() + '/' + compiler.getOutputDirectory() + '/' + binary
+            targetFile = getTestRootDir() + '/' + target.getRootBuildDir(compiler) + '/' + binary
             testObject.assertFalse(checkThatFileExists(targetFile), "'" + targetFile + "' was not cleaned.")
 
 class TestDistcleanTargets(unittest.TestCase):

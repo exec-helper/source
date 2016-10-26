@@ -29,6 +29,8 @@ Exec-helper can be configured so your often used options can be set by default. 
 | Analyze methods   | The analyze methods to use with the *analyze* command | "analyze-system" : JSON array of strings |
 | Toolchain path    | Path to the toolchain to use with the *build* command | "toolchain-path" : JSON string |
 | Show stuff        | Enable/disable interactive results | "show-stuff" : "yes" or "no" to enable/disable |
+| Build system      | The build system to use for the backend. See below for a list of the supported ones | "build-system" : "<buildsystem>" |
+| Root build dir    | The root directory to use for a certain build. The following patterns can be used in the string and will be replaced by its respective value: {COMPILER} for the compiler name and {MODE} for the build mode | "root-build-dir" : "build/{COMPILER}/{MODE} |
 
 An example of the configuration file can be found in *example/.exec-helper_profiles*.
 
@@ -52,7 +54,8 @@ Note: it is currently not possible to add your own custom systems
 
 ### Build systems
 - scons
-- make
+- make (only for one specific configuration, no support for a generic make system yet)
+- fake (for testing purposes)
 
 ### Compilers
 - gcc

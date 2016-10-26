@@ -39,6 +39,14 @@ class Command:
         return Command.buildOption('--compiler', compilerNames)
 
     @staticmethod
+    def getBuilderOption(builderName):
+        return Command.buildOption('--build-system', [builderName])
+
+    @staticmethod
+    def getRootBuildDirOption(rootBuildDir):
+        return Command.buildOption('--root-build-dir', [rootBuildDir])
+
+    @staticmethod
     def buildOption(optionCommand, options):
         optionLine = UniqueOrderedList([optionCommand])
         for option in options:

@@ -13,6 +13,7 @@ class Target:
         self.analyzeMethods = options.getAnalyzeMethods()
         self.profileMethods = options.getProfileMethods()
         self.toolchainPath = options.getToolchainPath()
+        self.rootBuildDir = options.getRootBuildDir()
         self.profiles = []
         allProfiles = options.getAllProfiles()
         for runTarget in options.getRunTargets():
@@ -53,6 +54,12 @@ class Target:
 
     def getProfileMethod(self):
         return self.profileMethods[0]
+
+    def getRootBuildDir(self):
+        rootDir = self.rootBuildDir
+        rootDir = rootDir.replace('{COMPILER}', self.getCompiler())
+        rootDir = rootDir.replace('{MODE}', self.getMode())
+        return rootDir
 
     def getTargets(self, replaceAllTarget = True):
         targetNames = self.targets

@@ -10,7 +10,7 @@ def testBuilding(target, pythonVersion, testObject):
     # Check that the environment is currently clean
     for compiler in target.getCompilers():
         for binary in target.getAllBinaries():
-            targetFile = getTestRootDir() + '/' + compiler.getOutputDirectory() + '/' + binary
+            targetFile = getTestRootDir() + '/' + target.getRootBuildDir(compiler) + '/' + binary
             testObject.assertFalse(checkThatFileExists(targetFile), "'" + targetFile + "' already exists.")
 
     # Build
@@ -21,7 +21,7 @@ def testBuilding(target, pythonVersion, testObject):
     # Check that the right files were built
     for compiler in target.getCompilers():
         for binary in target.getAllBinaries():
-            targetFile = getTestRootDir() + '/' + compiler.getOutputDirectory() + '/' + binary
+            targetFile = getTestRootDir() + '/' + target.getRootBuildDir(compiler) + '/' + binary
             testObject.assertTrue(checkThatFileExists(targetFile), "'" + targetFile + "' does not exist.")
 
 class TestBuildTargets(unittest.TestCase):

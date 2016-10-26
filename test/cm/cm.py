@@ -74,6 +74,8 @@ def executeTarget(commandList, target, pythonVersion = PYTHON3, outputFile = Non
     cmd.extend(target.getTargetOptions())
     cmd.extend(target.getRunTargetOptions())
     cmd.extend(target.getModeOptions())
+    cmd.extend(target.getBuilderOptions())
+    cmd.extend(target.getRootBuildDirOptions())
     return execute(cmd, outputFile, errorFile)
 
 def checkThatFileExists(path):
@@ -96,9 +98,6 @@ class Compiler:
 
     def getMode(self):
         return self.mode
-
-    def getOutputDirectory(self):
-        return 'build/' + self.name + '/' + self.mode
 
     def __repr__(self):
         return "Compiler: name = " + self.name + ", mode = " + self.mode

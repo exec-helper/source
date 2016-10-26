@@ -4,6 +4,7 @@ from exec_utils.util.util import *
 from exec_utils.profileMap.parse import *
 from exec_utils.buildSystem.scons import *
 from exec_utils.buildSystem.make import *
+from exec_utils.buildSystem.fakeBuilder import *
 
 def getArgParser(options):
     commandOptions = ['init', 'build', 'clean', 'distclean', 'rebuild', 'run', 'analyze', 'profile']
@@ -36,6 +37,8 @@ def getArgParser(options):
                     help="Path to profile map")
     parser.add_argument('-b', '--build-system', nargs=1, default=options.getBuildSystemName(),
                     help="Build system to use")
+    parser.add_argument('-e', '--root-build-dir', nargs=1, default=[options.getRootBuildDir()],
+                    help="Root build directory to build in")
     return parser
 
 class Options:
@@ -54,8 +57,9 @@ class Options:
         self.currentDir = getCurrentDir()
         self.profileMap = '.exec-helper_profiles'
         self.relative_path_reference = relative_path_reference
-        self.buildSystemName = 'scons'
-        self.buildSystem = self.getBuildSystemFromName(self.buildSystemName)
+        self.buildSystemName = ['scons']
+        self.buildSystem = self.getBuildSystemFromName(self.buildSystemName[0])
+        self.rootBuildDir = 'build'
 
     def parse(self, args):
         """ Parse the given arguments. Calling the respective getters before this function is called, results in the default values being returned. """
@@ -72,7 +76,8 @@ class Options:
         self.showStuff = args.show_stuff
         self.profileMap = args.profile_map[0]
         self.buildSystemName = args.build_system
-        self.buildSystem = self.getBuildSystemFromName(self.buildSystemName)
+        self.buildSystem = self.getBuildSystemFromName(self.buildSystemName[0])
+        self.rootBuildDir = args.root_build_dir[0]
 
     def parseProfileMap(self, profileMapFile):
         profileMapData = parseProfileMap(self.profileMap)
@@ -98,6 +103,8 @@ class Options:
             self.showStuff = profileMapData['show-stuff']
         if 'build-system' in profileMapData:
             self.buildSystemName = profileMapData['build-system']
+        if 'root-build-dir' in profileMapData:
+            self.rootBuildDir = profileMapData['root-build-dir']
 
     def __repr__(self):
         return "Commands: " + str(self.commands) + " " + '\n' + \
@@ -111,7 +118,8 @@ class Options:
                     "Toolchain path: " + str(self.toolchainPath) + '\n' + \
                     "Profile methods: " + str(self.profileMethods) + '\n' + \
                     "Show stuff: " + str(self.showStuff) + '\n' + \
-                    "Profile map: " + str(self.profileMap)
+                    "Profile map: " + str(self.profileMap) + '\n' + \
+                    "Root build dir: " + str(self.rootBuildDir)
 
     def getCommands(self):
         replaceWith(self.commands, 'rebuild', ['distclean', 'build'])
@@ -180,12 +188,16 @@ class Options:
     def getAllTargets(self):
         return self.allTargets
 
+    def getRootBuildDir(self):
+        return self.rootBuildDir
+
     @staticmethod
     def getBuildSystemFromName(buildSystemName):
         if buildSystemName == 'scons':
             return Scons()
         elif buildSystemName == 'make':
             return Make()
+        elif buildSystemName == 'fake':
+            return FakeBuilder()
         else:
-            print('Error: invalid build system name: ' + buildSystemName)
-            return None
+            raise ValueError('Error: invalid build system name: ' + buildSystemName)

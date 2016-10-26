@@ -1,5 +1,3 @@
-#!/usr/bin/python
-
 import shutil
 
 from ..util.util import *
@@ -70,7 +68,7 @@ class Scons:
     def distclean(self, options, target):
         mode = target.getMode()
         compiler = target.getCompiler()
-        buildDir = getBuildDir(mode, compiler)
+        buildDir = target.getRootBuildDir()
         print("Dist cleaning {0}".format(buildDir))
 
         if exists(buildDir):

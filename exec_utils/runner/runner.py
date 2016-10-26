@@ -16,7 +16,7 @@ def run(target, showStuff, options, filterchain = None):
 
     print('Running target: ' + target_to_run)
 
-    buildDir = getBuildDir(mode, compiler)
+    buildDir = target.getRootBuildDir()
     directoryToRun = buildDir + '/' + profile.targetDirectory
     filterchain.addFilter(RunTest(target_to_run, mode, directoryToRun))
     return filterchain.execute()

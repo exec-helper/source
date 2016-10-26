@@ -10,7 +10,7 @@ from cm.cm import *
 def testRunning(target, pythonVersion, testObject):
     for compiler in target.getCompilers():
         for binary in target.getAllBinaries():
-            targetFile = getTestRootDir() + '/' + compiler.getOutputDirectory() + '/' + binary
+            targetFile = getTestRootDir() + '/' + target.getRootBuildDir(compiler) + '/' + binary
     
             # Check that the targets to run exist
             testObject.assertTrue(checkThatFileExists(targetFile), "'" + targetFile + "' does not exist.")
@@ -27,11 +27,11 @@ def testRunning(target, pythonVersion, testObject):
     # Check that the right targets were run the right number of times
     for compiler in target.getCompilers():
         for binary in target.getAllBinaries():
-            outputFile = getTestRootDir() + '/' + os.path.basename(binary) + '.cpp.output'
-            testObject.assertTrue(checkThatFileExists(outputFile), "Target '" + binary + "' did not run.")
+            outputFile = getTestRootDir() + '/' + target.getRootBuildDir(compiler) + '/' + binary + '.output'
+            testObject.assertTrue(checkThatFileExists(outputFile), "Target '" + outputFile + "' did not run.")
             with open(outputFile, 'r') as f:
                 numberOfRuns = int(f.read());
-                numberOfExpectedRuns = len(target.getCompilers())
+                numberOfExpectedRuns = 1
                 testObject.assertEqual(numberOfRuns, numberOfExpectedRuns, 'The number of runs was ' + str(numberOfRuns) + ', but should have been ' + str(numberOfExpectedRuns))
 
 class TestRunTargets(unittest.TestCase):
@@ -42,12 +42,6 @@ class TestRunTargets(unittest.TestCase):
 
         target = Target(['all'], ['all'], Compiler.getAllCompilers())
         executeTarget([DISTCLEAN_COMMAND, BUILD_COMMAND], target, self.pythonVersion)
-
-    @classmethod
-    def tearDown(self):
-        # Clean output files
-        for f in glob.glob(getTestRootDir() + "/*.output"):
-            os.remove(f)
 
     def test_runAllCompilers(self):
         target = Target(['all'], ['all'], Compiler.getAllCompilers())
