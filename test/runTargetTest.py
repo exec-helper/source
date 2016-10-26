@@ -8,16 +8,18 @@ sys.path.append(path.dirname(path.dirname(path.abspath(__file__ + '/../exec_util
 from cm.cm import *
 
 def testRunning(target, pythonVersion, testObject):
-    for compiler in target.getCompilers():
-        for binary in target.getAllBinaries():
-            targetFile = getTestRootDir() + '/' + target.getRootBuildDir(compiler) + '/' + binary
-    
-            # Check that the targets to run exist
-            testObject.assertTrue(checkThatFileExists(targetFile), "'" + targetFile + "' does not exist.")
+    for distribution in target.getDistributions():
+        for architecture in target.getArchitectures():
+            for compiler in target.getCompilers():
+                for binary in target.getAllBinaries():
+                    targetFile = getTestRootDir() + '/' + target.getRootBuildDir(compiler, distribution, architecture) + '/' + binary
+            
+                    # Check that the targets to run exist
+                    testObject.assertTrue(checkThatFileExists(targetFile), "'" + targetFile + "' does not exist.")
 
-            # Check that it has not been run yet
-            outputFile = getTestRootDir() + '/' + os.path.basename(binary) + '.cpp.output'
-            testObject.assertFalse(checkThatFileExists(outputFile), "'" + outputFile + "' already exists.")
+                    # Check that it has not been run yet
+                    outputFile = getTestRootDir() + '/' + os.path.basename(binary) + '.cpp.output'
+                    testObject.assertFalse(checkThatFileExists(outputFile), "'" + outputFile + "' already exists.")
 
     # Build
     outputFile = 'output/' + testObject.id() + '.output'
@@ -25,14 +27,16 @@ def testRunning(target, pythonVersion, testObject):
     testObject.assertTrue(executeTarget([RUN_COMMAND], target, pythonVersion, outputFile, errorFile))
 
     # Check that the right targets were run the right number of times
-    for compiler in target.getCompilers():
-        for binary in target.getAllBinaries():
-            outputFile = getTestRootDir() + '/' + target.getRootBuildDir(compiler) + '/' + binary + '.output'
-            testObject.assertTrue(checkThatFileExists(outputFile), "Target '" + outputFile + "' did not run.")
-            with open(outputFile, 'r') as f:
-                numberOfRuns = int(f.read());
-                numberOfExpectedRuns = 1
-                testObject.assertEqual(numberOfRuns, numberOfExpectedRuns, 'The number of runs was ' + str(numberOfRuns) + ', but should have been ' + str(numberOfExpectedRuns))
+    for distribution in target.getDistributions():
+        for architecture in target.getArchitectures():
+            for compiler in target.getCompilers():
+                for binary in target.getAllBinaries():
+                    outputFile = getTestRootDir() + '/' + target.getRootBuildDir(compiler, distribution, architecture) + '/' + binary + '.output'
+                    testObject.assertTrue(checkThatFileExists(outputFile), "Target '" + outputFile + "' did not run.")
+                    with open(outputFile, 'r') as f:
+                        numberOfRuns = int(f.read());
+                        numberOfExpectedRuns = 1
+                        testObject.assertEqual(numberOfRuns, numberOfExpectedRuns, 'The number of runs was ' + str(numberOfRuns) + ', but should have been ' + str(numberOfExpectedRuns))
 
 class TestRunTargets(unittest.TestCase):
     @classmethod

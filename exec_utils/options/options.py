@@ -39,6 +39,10 @@ def getArgParser(options):
                     help="Build system to use")
     parser.add_argument('-e', '--root-build-dir', nargs=1, default=[options.getRootBuildDir()],
                     help="Root build directory to build in")
+    parser.add_argument('-f', '--architecture', nargs='+', default=options.getArchitectures(),
+                    help="The architecture to use")
+    parser.add_argument('-g', '--distribution', nargs='+', default=options.getDistributions(),
+                    help="The distribution to use")
     return parser
 
 class Options:
@@ -60,6 +64,8 @@ class Options:
         self.buildSystemName = ['scons']
         self.buildSystem = self.getBuildSystemFromName(self.buildSystemName[0])
         self.rootBuildDir = 'build'
+        self.architectures = ['all']
+        self.distributions = ['all']
 
     def parse(self, args):
         """ Parse the given arguments. Calling the respective getters before this function is called, results in the default values being returned. """
@@ -78,12 +84,15 @@ class Options:
         self.buildSystemName = args.build_system
         self.buildSystem = self.getBuildSystemFromName(self.buildSystemName[0])
         self.rootBuildDir = args.root_build_dir[0]
+        self.architectures = args.architecture
+        self.distributions = args.distribution
 
     def parseProfileMap(self, profileMapFile):
         profileMapData = parseProfileMap(self.profileMap)
         self.profiles = {}
-        for profile in profileMapData['profileMap']:
-            self.profiles[profile['id']] = Profile(profile['id'], profile['suffix'], profile['targetDirectory'])
+        if 'profileMap' in profileMapData:
+            for profile in profileMapData['profileMap']:
+                self.profiles[profile['id']] = Profile(profile['id'], profile['suffix'], profile['targetDirectory'])
 
         self.allTargets = profileMapData['targets']
 
@@ -105,6 +114,10 @@ class Options:
             self.buildSystemName = [profileMapData['build-system']]
         if 'root-build-dir' in profileMapData:
             self.rootBuildDir = profileMapData['root-build-dir']
+        if 'architecture' in profileMapData:
+            self.architectures = profileMapData['architecture']
+        if 'distribution' in profileMapData:
+            self.distributions = profileMapData['distribution']
 
     def __repr__(self):
         return "Commands: " + str(self.commands) + " " + '\n' + \
@@ -119,7 +132,9 @@ class Options:
                     "Profile methods: " + str(self.profileMethods) + '\n' + \
                     "Show stuff: " + str(self.showStuff) + '\n' + \
                     "Profile map: " + str(self.profileMap) + '\n' + \
-                    "Root build dir: " + str(self.rootBuildDir)
+                    "Root build dir: " + str(self.rootBuildDir) + '\n' + \
+                    "Architecture: " + str(self.architectures) + '\n' + \
+                    "Distribution: " + str(self.distributions)
 
     def getCommands(self):
         replaceWith(self.commands, 'rebuild', ['distclean', 'build'])
@@ -165,6 +180,12 @@ class Options:
 
     def getCurrentDir(self):
         return self.currentDir
+
+    def getDistributions(self):
+        return self.distributions
+
+    def getArchitectures(self):
+        return self.architectures
 
     def getProfileMap(self):
         return self.profileMap

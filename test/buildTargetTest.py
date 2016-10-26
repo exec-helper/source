@@ -8,10 +8,12 @@ from cm.cm import *
 
 def testBuilding(target, pythonVersion, testObject):
     # Check that the environment is currently clean
-    for compiler in target.getCompilers():
-        for binary in target.getAllBinaries():
-            targetFile = getTestRootDir() + '/' + target.getRootBuildDir(compiler) + '/' + binary
-            testObject.assertFalse(checkThatFileExists(targetFile), "'" + targetFile + "' already exists.")
+    for distribution in target.getDistributions():
+        for architecture in target.getArchitectures():
+            for compiler in target.getCompilers():
+                for binary in target.getAllBinaries():
+                    targetFile = getTestRootDir() + '/' + target.getRootBuildDir(compiler, distribution, architecture) + '/' + binary
+                    testObject.assertFalse(checkThatFileExists(targetFile), "'" + targetFile + "' already exists.")
 
     # Build
     outputFile = 'output/' + testObject.id() + '.output'
@@ -19,10 +21,12 @@ def testBuilding(target, pythonVersion, testObject):
     testObject.assertTrue(executeTarget([BUILD_COMMAND], target, pythonVersion, outputFile, errorFile))
 
     # Check that the right files were built
-    for compiler in target.getCompilers():
-        for binary in target.getAllBinaries():
-            targetFile = getTestRootDir() + '/' + target.getRootBuildDir(compiler) + '/' + binary
-            testObject.assertTrue(checkThatFileExists(targetFile), "'" + targetFile + "' does not exist.")
+    for distribution in target.getDistributions():
+        for architecture in target.getArchitectures():
+            for compiler in target.getCompilers():
+                for binary in target.getAllBinaries():
+                    targetFile = getTestRootDir() + '/' + target.getRootBuildDir(compiler, distribution, architecture) + '/' + binary
+                    testObject.assertTrue(checkThatFileExists(targetFile), "'" + targetFile + "' does not exist.")
 
 class TestBuildTargets(unittest.TestCase):
     @classmethod

@@ -14,6 +14,8 @@ class Target:
         self.profileMethods = options.getProfileMethods()
         self.toolchainPath = options.getToolchainPath()
         self.rootBuildDir = options.getRootBuildDir()
+        self.architectures = options.getArchitectures()
+        self.distributions = options.getDistributions()
         self.profiles = []
         allProfiles = options.getAllProfiles()
         for runTarget in options.getRunTargets():
@@ -29,7 +31,9 @@ class Target:
                     "Build single threaded: " + str(self.buildSingleThreaded) + '\n' + \
                     "Analyze methods: " + str(self.analyzeMethods) + '\n' + \
                     "Profile methos: " + str(self.profileMethods) + '\n' + \
-                    "Toolchain path: " + str(self.toolchainPath)
+                    "Toolchain path: " + str(self.toolchainPath) + '\n' + \
+                    "Architectures: " + str(self.architectures) + '\n' + \
+                    "Distributions: " + str(self.distributions) + '\n'
 
     def getTargetName(self):
         return self.targets[0]
@@ -55,8 +59,17 @@ class Target:
     def getProfileMethod(self):
         return self.profileMethods[0]
 
+    def getArchitecture(self):
+        return self.architectures[0]
+
+    def getDistribution(self):
+        return self.distributions[0]
+
     def getRootBuildDir(self):
         rootDir = self.rootBuildDir
+        print("Distribution = " + str(self.getDistribution()))
+        rootDir = rootDir.replace('{DISTRIBUTION}', self.getDistribution())
+        rootDir = rootDir.replace('{ARCHITECTURE}', self.getArchitecture())
         rootDir = rootDir.replace('{COMPILER}', self.getCompiler())
         rootDir = rootDir.replace('{MODE}', self.getMode())
         return rootDir
@@ -136,6 +149,26 @@ class Target:
             profileMethods.append(newTargets)
         return profileMethods
 
+    def getArchitectures(self):
+        architectureNames = self.architectures
+
+        architectures = []
+        for architectureName in architectureNames:
+            newTargets = copy.copy(self)
+            newTargets.architectures = [architectureName]
+            architectures.append(newTargets)
+        return architectures
+
+    def getDistributions(self):
+        distributionNames = self.distributions
+
+        distributions = []
+        for distributionName in distributionNames:
+            newTargets = copy.copy(self)
+            newTargets.distributions = [distributionName]
+            distributions.append(newTargets)
+        return distributions
+
     def iterateTargets(self, *parameters):
         targetNames = [self]
         for parameter in parameters:
@@ -158,6 +191,12 @@ class Target:
             elif parameter == 'profileMethod':
                 for targetName in targetNames:
                     newTargetNames.extend(targetName.getProfileMethods())
+            elif parameter == 'architecture':
+                for targetName in targetNames:
+                    newTargetNames.extend(targetName.getArchitectures())
+            elif parameter == 'distribution':
+                for targetName in targetNames:
+                    newTargetNames.extend(targetName.getDistributions())
             else:
                 newTargetNames = targetNames
             targetNames = newTargetNames

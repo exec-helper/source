@@ -39,7 +39,7 @@ class UnittestOptions:
 
 
 def getTestRootDir():
-    return 'example'
+    return '.'
 
 def writeFile(filename, content, writeMode='w'):
     directory = os.path.dirname(filename)
@@ -76,6 +76,9 @@ def executeTarget(commandList, target, pythonVersion = PYTHON3, outputFile = Non
     cmd.extend(target.getModeOptions())
     cmd.extend(target.getBuilderOptions())
     cmd.extend(target.getRootBuildDirOptions())
+    cmd.extend(target.getArchitectureOptions())
+    cmd.extend(target.getDistributionOptions())
+#    print(' '.join(cmd))
     return execute(cmd, outputFile, errorFile)
 
 def checkThatFileExists(path):

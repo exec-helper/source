@@ -47,6 +47,14 @@ class Command:
         return Command.buildOption('--root-build-dir', [rootBuildDir])
 
     @staticmethod
+    def getArchitectureOption(architectures):
+        return Command.buildOption('--architecture', architectures)
+
+    @staticmethod
+    def getDistributionOption(distributions):
+        return Command.buildOption('--distribution', distributions)
+
+    @staticmethod
     def buildOption(optionCommand, options):
         optionLine = UniqueOrderedList([optionCommand])
         for option in options:

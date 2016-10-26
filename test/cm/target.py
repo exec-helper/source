@@ -4,19 +4,27 @@ from exec_utils.options.options import *
 from cm.command import *
 
 class Target:
-    def __init__(self, targets, runTargets, compilers, profileMap = '.exec-helper_profiles', rootBuildDir = 'build/{COMPILER}/{MODE}', builder = 'fake'):
+    def __init__(self, targets, runTargets, compilers, profileMap = '.exec-helper_profiles', rootBuildDir = 'build/{DISTRIBUTION}/{ARCHITECTURE}/{COMPILER}/{MODE}', builder = 'fake', distributions = ['arch-linux', 'jessie', 'xenial'], architectures = ['i386', 'amd64']):
         self.targets = replaceWith(targets, 'all', Target.getAllTargetNames())
         self.runTargets = replaceWith(runTargets, 'all', Target.getAllRunTargets()) 
         self.compilers = compilers
         self.profileMap = profileMap
         self.rootBuildDir = rootBuildDir
         self.builder = builder
+        self.distributions = distributions
+        self.architectures = architectures
 
     def getRunTargets(self):
         runTargets = []
         for runTarget in self.runTargets:
             runTargets.append(Target(self.target, runTarget, self.compilers))
         return runTargets
+
+    def getDistributions(self):
+        return self.distributions
+
+    def getArchitectures(self):
+        return self.architectures
 
     def getAllBinaries(self):
         binaryTargets = []
@@ -57,8 +65,16 @@ class Target:
     def getRootBuildDirOptions(self):
         return Command.getRootBuildDirOption(self.rootBuildDir)
 
-    def getRootBuildDir(self, compiler):
+    def getDistributionOptions(self):
+        return Command.getDistributionOption(self.distributions)
+
+    def getArchitectureOptions(self):
+        return Command.getArchitectureOption(self.architectures)
+
+    def getRootBuildDir(self, compiler, distribution, architecture):
         rootBuildDir = self.rootBuildDir
+        rootBuildDir = rootBuildDir.replace('{DISTRIBUTION}', distribution)
+        rootBuildDir = rootBuildDir.replace('{ARCHITECTURE}', architecture)
         rootBuildDir = rootBuildDir.replace('{COMPILER}', compiler.getName())
         rootBuildDir = rootBuildDir.replace('{MODE}', compiler.getMode())
         return rootBuildDir
