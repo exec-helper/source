@@ -13,10 +13,10 @@ def profileSystem(target, showStuff, options):
 
     filterchain = FilterChain()
     if profileMethod == 'perf':
-        filterchain.addFilter(Perf(options.getRootBuildDir(compiler, mode), showStuff))
+        filterchain.addFilter(Perf(target.getRootBuildDir(), showStuff))
 
     elif profileMethod == 'callgrind':
-        filterchain.addFilter(ValgrindCallgrind(getRootBuildDir(compiler, mode), showStuff))
+        filterchain.addFilter(ValgrindCallgrind(target.getRootBuildDir(), showStuff))
 
     else:
         print('Error: unknown method to profile project: ' + profileMethod)
