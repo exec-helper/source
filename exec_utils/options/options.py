@@ -102,7 +102,7 @@ class Options:
         if 'show-stuff' in profileMapData:
             self.showStuff = profileMapData['show-stuff']
         if 'build-system' in profileMapData:
-            self.buildSystemName = profileMapData['build-system']
+            self.buildSystemName = [profileMapData['build-system']]
         if 'root-build-dir' in profileMapData:
             self.rootBuildDir = profileMapData['root-build-dir']
 
