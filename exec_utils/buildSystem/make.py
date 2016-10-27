@@ -5,6 +5,7 @@
 import shutil
 
 from ..util.util import *
+from ..target.target import *
 
 class Make:
     @staticmethod
@@ -22,6 +23,7 @@ class Make:
         targetName = target.getTargetName()
         mode = target.getMode()
         profile = target.getProfile()
+        buildDir = target.getRootBuildDir()
 
         if prependCommand is None:
             build_command = self.getBuildCommand()
@@ -35,10 +37,10 @@ class Make:
 
         if(not targetName or targetName == 'default'):
             print("Building default targetNames in {0} mode".format(mode))
-            build_command.extend(['-C', 'build/wheezy/i386']) 
+            build_command.extend(['-C', buildDir]) 
         else:
             targetName = targetName + profile.suffix
-            build_command.extend(['-C', 'build/wheezy/i386/' + targetName]) 
+            build_command.extend(['-C', buildDir + '/' + targetName]) 
             print("Building targetName {0} in {1} mode".format(targetName, mode))
 
         if verbose:
@@ -48,24 +50,29 @@ class Make:
 
     def clean(self, options, target, verbose):
         targetName = target.getTargetName()
+        distribution = target.getDistribution()
+        architecture = target.getArchitecture()
+        buildDir = target.getRootBuildDir()
 
         clean_command = self.getBuildCommand()
         clean_command.append('clean')
 
         if(targetName and targetName != 'all'):
-            clean_command.extend(['-C', 'build/wheezy/i386/' + targetName]) 
+            cleanTarget = buildDir + '/' + targetName
         else:
-            clean_command.extend(['-C', 'build/wheezy/i386']) 
+            cleanTarget = buildDir
+
+        clean_command.extend(['-C', cleanTarget]) 
 
         if verbose:
             pass
 
-        print("Cleaning {0}".format(targetName))
+        print("Cleaning {0}".format(cleanTarget))
         return isSuccess(executeInShell(clean_command))
 
     def distclean(self, options, target):
         mode = target.getMode()
-        buildDir = 'build/wheezy/i386'
+        buildDir = target.getRootBuildDir()
         print("Dist cleaning {0}".format(buildDir))
 
         if exists(buildDir):

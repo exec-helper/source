@@ -67,7 +67,6 @@ class Target:
 
     def getRootBuildDir(self):
         rootDir = self.rootBuildDir
-        print("Distribution = " + str(self.getDistribution()))
         rootDir = rootDir.replace('{DISTRIBUTION}', self.getDistribution())
         rootDir = rootDir.replace('{ARCHITECTURE}', self.getArchitecture())
         rootDir = rootDir.replace('{COMPILER}', self.getCompiler())
