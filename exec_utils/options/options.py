@@ -25,7 +25,7 @@ def getArgParser(options):
     parser.add_argument('-c', '--compiler', nargs='+', choices=compilerOptions, default=options.getCompilers(),
 		   help="Compiler to use.")
     parser.add_argument('-d', '--show-stuff', action='store_true', help="Enable this to automatically open or show the results")
-    parser.add_argument('-v', '--verbose-make', action='store_true', help="Enable make in verbose mode")
+    parser.add_argument('-v', '--verbose', action='store_true', help="Enable make in verbose mode")
     parser.add_argument('-s', '--build-single-threaded', action='store_true', help="Build in single threaded mode")
     parser.add_argument('-a', '--analyze-method', nargs='+', choices=analyzeOptions, default=options.getAnalyzeMethods(),
 		   help="Run analysis.")
@@ -74,7 +74,7 @@ class Options:
         self.targets = args.target
         self.runTargets = args.run
         self.compilers = args.compiler
-        self.verbosity = args.verbose_make
+        self.verbosity = args.verbose
         self.buildSingleThreaded = args.build_single_threaded
         self.analyzeMethods = args.analyze_method
         self.toolchainPath = args.toolchain_path[0]

@@ -24,6 +24,15 @@ class bcolors:
 def coloredOutput(output, color):
     return color + output + bcolors.ENDC
 
+def info(outputString):
+    print(outputString)
+
+def error(outputString):
+    print(coloredOutput(outputString, bcolors.FAIL))
+
+def warning(outputString):
+    print(coloredOutput(outputString, bcolors.WARNING))
+
 def listToString(list, separator):
     return separator.join(list)
 

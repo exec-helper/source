@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import inspect
+import traceback
 
 from exec_utils.util.util import *
 from exec_utils.cmd.cmd import *
@@ -51,21 +51,29 @@ def main():
 
     # First parse the argument to find the defaults in settings file
     firstPhaseArguments = firstPhaseParser.parse_args()
-    print('Profile map file = ' + firstPhaseArguments.profile_map[0])
+    print('Using settings file = ' + firstPhaseArguments.profile_map[0])
     args.parseProfileMap(firstPhaseArguments.profile_map[0])
 
     # Find the options overridden on the command line
     secondPhaseParser = getArgParser(args)
     args.parse(secondPhaseParser.parse_args())
 
-    print("Configuration: ")
-    print(str(args))
+    if args.getVerbosity():
+        print("Configuration: ")
+        print(str(args))
 
-    retCode = execute(args)
+    try:
+        retCode = execute(args)
+    except Exception as e:
+        error("Exception caught: " + str(e))
+        info("Stack trace:")
+        traceback.print_exc()
+        retCode = False
 
     if retCode:
         sys.exit(EXIT_SUCCESS)
     else:
+        error("Failed to execute all commands")
         sys.exit(EXIT_ERROR)
 
 if __name__ == "__main__":

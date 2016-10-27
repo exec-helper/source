@@ -78,7 +78,6 @@ class Target:
 
         if replaceAllTarget and self.allTargets:
             replaceWith(targetNames, ALL_TARGET, self.allTargets) 
-        print("Target names = " + str(targetNames))
 
         targets = []
         for targetName in targetNames:
@@ -105,7 +104,6 @@ class Target:
             newTargets = copy.copy(self)
             newTargets.modes = [modeName]
             modes.append(newTargets)
-        print("Modes = " + str(modes))
         return modes
 
     def getCompilers(self):
