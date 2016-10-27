@@ -11,6 +11,19 @@ BIN_DIR = 'bin'
 SRC_DIR = 'src'
 EXIT_SUCCESS = 0
 
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
+def coloredOutput(output, color):
+    return color + output + bcolors.ENDC
+
 def listToString(list, separator):
     return separator.join(list)
 
@@ -58,16 +71,17 @@ def getAnalyzeMethods(returnAll = True):
 
 def executeInShell(cmd, working_directory = '.'):
     pwd()
-    print("\nExecuting '{0}' in '{1}'".format(listToString(cmd, ' '), working_directory))
+    print(coloredOutput("\nExecuting '{0}' in '{1}'".format(listToString(cmd, ' '), working_directory), bcolors.OKBLUE))
     return subprocess.call(cmd, cwd = working_directory)
 
 def getShellOutput(cmd, working_directory = '.'):
-    print("\nExecuting '{0}' in '{1}'".format(listToString(cmd, ' '), working_directory))
+    print(coloredOutput("\nExecuting '{0}' in '{1}'".format(listToString(cmd, ' '), working_directory), bcolors.OKBLUE))
     process = subprocess.Popen(cmd, stdout=subprocess.PIPE, cwd = working_directory)
     out, err = process.communicate()
     return out,err
 
 def getShellOutputAndReturnCode(cmd, working_directory = '.', verbose = True):
+    print(colored('hello', 'red'))
     if verbose:
         print("\nExecuting '{0}' in '{1}'".format(listToString(cmd, ' '), working_directory))
     process = subprocess.Popen(cmd, stdout=subprocess.PIPE, cwd = working_directory)
@@ -132,3 +146,5 @@ def replaceWith(hayStack, needle, replacementNeedle):
             hayStack.insert(insertIndex, replacement) 
             insertIndex = insertIndex + 1
     return hayStack
+
+
