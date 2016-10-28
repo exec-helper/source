@@ -90,7 +90,6 @@ def getShellOutput(cmd, working_directory = '.'):
     return out,err
 
 def getShellOutputAndReturnCode(cmd, working_directory = '.', verbose = True):
-    print(colored('hello', 'red'))
     if verbose:
         print("\nExecuting '{0}' in '{1}'".format(listToString(cmd, ' '), working_directory))
     process = subprocess.Popen(cmd, stdout=subprocess.PIPE, cwd = working_directory)
