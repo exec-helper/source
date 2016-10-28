@@ -26,12 +26,15 @@ def coloredOutput(output, color):
 
 def info(outputString):
     print(outputString)
+    sys.stdout.flush()
 
 def error(outputString):
     print(coloredOutput(outputString, bcolors.FAIL))
+    sys.stdout.flush()
 
 def warning(outputString):
     print(coloredOutput(outputString, bcolors.WARNING))
+    sys.stdout.flush()
 
 def listToString(list, separator):
     return separator.join(list)
@@ -50,7 +53,7 @@ def goToDir(path):
     os.chdir(path)
 
 def pwd():
-    print("Current working dir: {0}".format(getCurrentDir()))
+    info("Current working dir: {0}".format(getCurrentDir()))
 
 def getBinDir(mode):
     return BIN_DIR + '/' + mode
@@ -80,18 +83,18 @@ def getAnalyzeMethods(returnAll = True):
 
 def executeInShell(cmd, working_directory = '.'):
     pwd()
-    print(coloredOutput("\nExecuting '{0}' in '{1}'".format(listToString(cmd, ' '), working_directory), bcolors.OKBLUE))
+    info(coloredOutput("\nExecuting '{0}' in '{1}'".format(listToString(cmd, ' '), working_directory), bcolors.OKBLUE))
     return subprocess.call(cmd, cwd = working_directory)
 
 def getShellOutput(cmd, working_directory = '.'):
-    print(coloredOutput("\nExecuting '{0}' in '{1}'".format(listToString(cmd, ' '), working_directory), bcolors.OKBLUE))
+    info(coloredOutput("\nExecuting '{0}' in '{1}'".format(listToString(cmd, ' '), working_directory), bcolors.OKBLUE))
     process = subprocess.Popen(cmd, stdout=subprocess.PIPE, cwd = working_directory)
     out, err = process.communicate()
     return out,err
 
 def getShellOutputAndReturnCode(cmd, working_directory = '.', verbose = True):
-    if verbose:
-        print("\nExecuting '{0}' in '{1}'".format(listToString(cmd, ' '), working_directory))
+    info("\nExecuting '{0}' in '{1}'".format(listToString(cmd, ' '), working_directory))
+
     process = subprocess.Popen(cmd, stdout=subprocess.PIPE, cwd = working_directory)
     out, err = process.communicate()
     retCode = process.returncode

@@ -51,7 +51,7 @@ def main():
 
     # First parse the argument to find the defaults in settings file
     firstPhaseArguments = firstPhaseParser.parse_args()
-    print('Using settings file = ' + firstPhaseArguments.profile_map[0])
+#    info('Using settings file = ' + firstPhaseArguments.profile_map[0])
     args.parseProfileMap(firstPhaseArguments.profile_map[0])
 
     # Find the options overridden on the command line
@@ -59,8 +59,8 @@ def main():
     args.parse(secondPhaseParser.parse_args())
 
     if args.getVerbosity():
-        print("Configuration: ")
-        print(str(args))
+        info("Configuration: ")
+        info(str(args))
 
     try:
         retCode = execute(args)

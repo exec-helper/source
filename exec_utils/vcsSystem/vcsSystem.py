@@ -6,4 +6,5 @@ vcsSystem = Git()
 
 def initVcs():
     print("Initializing git submodules...")
-    return vcsSystem.init()
+    return True
+#    return vcsSystem.init()

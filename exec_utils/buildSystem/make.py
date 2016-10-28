@@ -17,7 +17,9 @@ class Make:
         pass
 
     def init(self, options, target):
-        return True
+        command = ['./cross-bootstrap']
+        buildDir = target.getRootBuildDir()
+        return isSuccess(executeInShell(command, buildDir))
 
     def build(self, target, verbose, options, prependCommand = None):
         targetName = target.getTargetName()
