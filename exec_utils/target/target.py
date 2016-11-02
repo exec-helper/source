@@ -1,5 +1,6 @@
 import copy
 from exec_utils.util.util import *
+from .compiler import *
 
 ALL_TARGET = 'all'
 
@@ -8,11 +9,11 @@ class Target:
         self.modes = options.getModes()
         self.targets= options.getTargets()
         self.allTargets = options.getAllTargets()
-        self.compilers = options.getCompilers()
+        self.toolchainPath = options.getToolchainPath()
+        self.compilers = self.names2Compilers(options.getCompilers(), self.toolchainPath)
         self.buildSingleThreaded = options.getBuildSingleThreaded()
         self.analyzeMethods = options.getAnalyzeMethods()
         self.profileMethods = options.getProfileMethods()
-        self.toolchainPath = options.getToolchainPath()
         self.rootBuildDir = options.getRootBuildDir()
         self.architectures = options.getArchitectures()
         self.distributions = options.getDistributions()
@@ -69,7 +70,7 @@ class Target:
         rootDir = self.rootBuildDir
         rootDir = rootDir.replace('{DISTRIBUTION}', self.getDistribution())
         rootDir = rootDir.replace('{ARCHITECTURE}', self.getArchitecture())
-        rootDir = rootDir.replace('{COMPILER}', self.getCompiler())
+        rootDir = rootDir.replace('{COMPILER}', self.getCompiler().getCCompiler())
         rootDir = rootDir.replace('{MODE}', self.getMode())
         return rootDir
 
@@ -198,3 +199,17 @@ class Target:
                 newTargetNames = targetNames
             targetNames = newTargetNames
         return targetNames
+
+    @staticmethod
+    def names2Compilers(names, toolchainPath):
+        compilers = []
+
+        for name in names:
+            if name == 'gcc':
+                compilers.append(Gcc(toolchainPath))
+            elif name == 'clang':
+                compilers.append(Clang(toolchainPath))
+            else:
+                raise ValueError('Unknown compiler: ' + name)
+
+        return compilers

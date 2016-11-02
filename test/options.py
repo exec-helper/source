@@ -19,9 +19,9 @@ def parseArgs():
 
     for compiler in args.compiler:
         if compiler == GCC:
-            UnittestOptions.addCompiler(Gcc(COMPILER_RELEASE_MODE))
+            UnittestOptions.addCompiler(Gcc(COMPILER_RELEASE_MODE, '/random/compiler/path'))
         elif compiler == CLANG:
-            UnittestOptions.addCompiler(Clang(COMPILER_RELEASE_MODE))
+            UnittestOptions.addCompiler(Clang(COMPILER_RELEASE_MODE, '/random/compiler/path'))
         else:
             print("Error: unkown compiler")
 

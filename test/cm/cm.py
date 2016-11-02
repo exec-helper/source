@@ -92,9 +92,10 @@ COMPILER_DEBUG_MODE = 'debug'
 COMPILER_RELEASE_MODE = 'release'
 
 class Compiler:
-    def __init__(self, mode, name):
+    def __init__(self, mode, name, toolchainPath):
         self.mode = mode
         self.name = name
+        self.toolchainPath = toolchainPath
 
     def getName(self):
         return self.name
@@ -102,22 +103,25 @@ class Compiler:
     def getMode(self):
         return self.mode
 
+    def getToolchainPath(self):
+        return self.toolchainPath
+
     def __repr__(self):
         return "Compiler: name = " + self.name + ", mode = " + self.mode
 
     @staticmethod
     def getAllCompilers():
         return  [
-                    Gcc(COMPILER_RELEASE_MODE), 
-                    Gcc(COMPILER_DEBUG_MODE),
-                    Clang(COMPILER_RELEASE_MODE),
-                    Clang(COMPILER_DEBUG_MODE)
+                    Gcc(COMPILER_RELEASE_MODE, '/all/compilers/'), 
+                    Gcc(COMPILER_DEBUG_MODE, '/all/compilers/'),
+                    Clang(COMPILER_RELEASE_MODE, '/all/compilers/'),
+                    Clang(COMPILER_DEBUG_MODE, '/all/compilers/')
                 ]
 
 class Gcc(Compiler):
-    def __init__(self, mode = 'release'):
-        super(Gcc, self).__init__(mode, 'gcc')
+    def __init__(self, mode = 'release', toolchainPath = None):
+        super(Gcc, self).__init__(mode, 'gcc', toolchainPath)
 
 class Clang(Compiler):
-    def __init__(self, mode = 'release'):
-        super(Clang, self).__init__(mode, 'clang')
+    def __init__(self, mode = 'release', toolchainPath = None):
+        super(Clang, self).__init__(mode, 'clang', toolchainPath)

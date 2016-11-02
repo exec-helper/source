@@ -28,7 +28,7 @@ class Scons:
         if not target.getBuildSingleThreaded():
             build_command.append('-j8')
 
-        build_command.append('compiler=' + target.getCompiler()) 
+        build_command.append('compiler=' + target.getCompiler().getCCompiler()) 
         toolchainPath = target.getToolchainPath()
         if toolchainPath is not None and toolchainPath != '':
             build_command.append('toolchainPath=' + toolchainPath)
@@ -49,7 +49,7 @@ class Scons:
 
     def clean(self, options, target, verbose):
         targetName = target.getTargetName()
-        compiler = target.getCompiler()
+        compiler = target.getCompiler().getCCompiler()
         mode = target.getMode()
 
         clean_command = self.getBuildCommand()
@@ -67,7 +67,7 @@ class Scons:
 
     def distclean(self, options, target):
         mode = target.getMode()
-        compiler = target.getCompiler()
+        compiler = target.getCompiler().getCCompiler()
         buildDir = target.getRootBuildDir()
         print("Dist cleaning {0}".format(buildDir))
 

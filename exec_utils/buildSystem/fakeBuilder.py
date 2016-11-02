@@ -1,6 +1,7 @@
 import os
 import shutil
 import stat
+import json
 
 from ..profileMap.profile import *
 
@@ -19,6 +20,10 @@ class FakeBuilder:
         profile = target.getProfile()
         targetName = target.getTargetName()
         return FakeBuilder.getTargetBuildDirectory(target) + '/' + targetName + profile.suffix
+
+    @staticmethod
+    def getToolchainInformationFile(target):
+        return FakeBuilder.getTargetBuildFile(target) + '.toolchain'
 
     @staticmethod
     def getExecutableContent():
@@ -68,12 +73,27 @@ class FakeBuilder:
         fileStatus = os.stat(targetBuildFile)
         os.chmod(targetBuildFile, fileStatus.st_mode | stat.S_IEXEC)
 
+        # Write toolchain information file
+        try:
+            compiler = target.getCompiler()
+            targetToolchainInformationFile = self.getToolchainInformationFile(target)
+
+            with open(targetToolchainInformationFile, 'w') as f:
+                toolchainInformation = {'toolchain-path' : compiler.getToolchainPath() }
+                json.dump(toolchainInformation, f, sort_keys=True)
+        except:
+            print("Error: could not create toolchain information file '" + targetToolchainInformationFile + "'")
+            return False
+
         return True
 
     def clean(self, options, target, verbose):
         targetBuildFile = self.getTargetBuildFile(target)
+        targetToolchainInformationFile = self.getToolchainInformationFile(target)
+
         try:
             os.remove(targetBuildFile)
+            os.remove(targetToolchainInformationFile)
         except:
             print("Error: could not remove file '" + targetBuildFile + "'")
             return False

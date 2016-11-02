@@ -5,9 +5,15 @@ from ..buildSystem.buildSystem import *
 from ..runner.runner import runner
 from ..filter.filterchain import FilterChain
 from ..filter.valgrindMemcheck import ValgrindMemcheck
+from ..target.compiler import ClangStaticAnalyzer
 
 def analyzeClang(target, verbose, options):
-    return buildBuildSystem(target, options.getVerbosity(), options, prependCommand = ['scan-build', '-o', 'build/clang-static-analyze'])
+    clangStaticAnalyzerCommand = []
+    clangStaticAnalyzerCommand.append('scan-build')
+    clangStaticAnalyzerCommand.append('--use-analyzer=' + target.getToolchainPath() + '/' + target.getCompiler().getCCompiler())
+    clangStaticAnalyzerCommand.append('--use-cc=' + target.getToolchainPath() + '/' + target.getCompiler().getCCompiler())
+    clangStaticAnalyzerCommand.append('--use-c++=' + target.getToolchainPath() + '/' + target.getCompiler().getCxxCompiler())
+    return buildBuildSystem(target, options.getVerbosity(), options, prependCommand = clangStaticAnalyzerCommand)
 
 def analyzeCppcheck(target, verbose):
     binary_name = 'cppcheck'
@@ -96,7 +102,6 @@ def analyzeBuildSystem(target, verbose, showStuff, options):
     mode = target.getMode()
     targetName = target.getTargetName()
     profile = target.getProfile()
-    compiler = target.getCompiler()
     method = target.getAnalyzeMethod()
     
     if method == 'clang':

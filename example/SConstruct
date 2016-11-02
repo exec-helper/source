@@ -46,6 +46,17 @@ env['ROOT_DIR'] = Dir('.').abspath
 env['BUILD_DIR'] = buildDir
 env['BIN_DIR'] = '{buildDir}/bin'.format(buildDir = buildDir)
 
+toolchain = env['toolchainPath'] + '/'
+compiler = env['compiler']
+
+if compiler == 'gcc':
+    env['CC'] = toolchain + compiler
+    env['CXX'] = toolchain + 'g++'
+
+elif compiler == 'clang':
+    env['CC'] = toolchain + compiler
+    env['CXX'] = toolchain + compiler + '++'
+
 ################################## Print stuff ###############################
 print("Building in {buildDir}".format(buildDir=buildDir))
 

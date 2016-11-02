@@ -34,9 +34,13 @@ class Command:
     @staticmethod
     def getCompilerOption(compilers):
         compilerNames = []
+        compilerPaths = []
         for compiler in compilers:
             compilerNames.append(compiler.getName())
-        return Command.buildOption('--compiler', compilerNames)
+            compilerPaths.append(compiler.getToolchainPath())
+        command = Command.buildOption('--compiler', compilerNames)
+        command.extend(Command.buildOption('--toolchain-path', compilerPaths))
+        return command
 
     @staticmethod
     def getBuilderOption(builderName):

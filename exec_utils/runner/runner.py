@@ -11,7 +11,6 @@ def run(target, showStuff, options, filterchain = None):
 
     profile = target.getProfile()
     mode = target.getMode()
-    compiler = target.getCompiler()
     target_to_run = target.getTargetName() + profile.suffix
 
     print('Running target: ' + target_to_run)

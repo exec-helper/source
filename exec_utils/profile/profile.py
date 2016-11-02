@@ -8,7 +8,6 @@ from ..filter.valgrindCallgrind import ValgrindCallgrind
 
 def profileSystem(target, showStuff, options):
     mode = target.getMode()
-    compiler = target.getCompiler()
     profileMethod = target.getProfileMethod()
 
     filterchain = FilterChain()

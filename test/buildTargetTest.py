@@ -20,13 +20,19 @@ def testBuilding(target, pythonVersion, testObject):
     errorFile = 'output/' + testObject.id() + '.error'
     testObject.assertTrue(executeTarget([BUILD_COMMAND], target, pythonVersion, outputFile, errorFile))
 
-    # Check that the right files were built
     for distribution in target.getDistributions():
         for architecture in target.getArchitectures():
             for compiler in target.getCompilers():
                 for binary in target.getAllBinaries():
                     targetFile = getTestRootDir() + '/' + target.getRootBuildDir(compiler, distribution, architecture) + '/' + binary
+                    # Check that the right file was built
                     testObject.assertTrue(checkThatFileExists(targetFile), "'" + targetFile + "' does not exist.")
+
+                    # Check that the right builder was used
+                    toolchainInformationFile = getTestRootDir() + '/' + target.getRootBuildDir(compiler, distribution, architecture) + '/' + binary + '.toolchain'
+                    with open(toolchainInformationFile, 'r') as f:
+                        toolchainInformation = json.load(f)
+                        testObject.assertEqual(toolchainInformation['toolchain-path'], compiler.getToolchainPath())
 
 class TestBuildTargets(unittest.TestCase):
     @classmethod
