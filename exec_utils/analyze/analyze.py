@@ -10,9 +10,13 @@ from ..target.compiler import ClangStaticAnalyzer
 def analyzeClang(target, verbose, options):
     clangStaticAnalyzerCommand = []
     clangStaticAnalyzerCommand.append('scan-build')
-    clangStaticAnalyzerCommand.append('--use-analyzer=' + target.getToolchainPath() + '/' + target.getCompiler().getCCompiler())
-    clangStaticAnalyzerCommand.append('--use-cc=' + target.getToolchainPath() + '/' + target.getCompiler().getCCompiler())
-    clangStaticAnalyzerCommand.append('--use-c++=' + target.getToolchainPath() + '/' + target.getCompiler().getCxxCompiler())
+    prefix = ''
+    if target.getToolchainPath() is not None and target.getToolchainPath() != '':
+        prefix = target.getToolchainPath() + '/' 
+    if target.getCompiler().getCCompiler == 'clang':
+        clangStaticAnalyzerCommand.append('--use-analyzer=' + prefix + target.getCompiler().getCCompiler())
+    clangStaticAnalyzerCommand.append('--use-cc=' + prefix + target.getCompiler().getCCompiler())
+    clangStaticAnalyzerCommand.append('--use-c++=' + prefix + target.getCompiler().getCxxCompiler())
     return buildBuildSystem(target, options.getVerbosity(), options, prependCommand = clangStaticAnalyzerCommand)
 
 def analyzeCppcheck(target, verbose):
