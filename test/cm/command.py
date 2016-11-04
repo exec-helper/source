@@ -1,4 +1,4 @@
-from cm.unique_ordered_list import *
+from .unique_ordered_list import *
 
 class Command:
     @staticmethod

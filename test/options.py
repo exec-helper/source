@@ -5,13 +5,13 @@ sys.path.append(path.dirname(path.dirname(path.abspath(__file__ + '/../exec_util
 from cm.cm import *
 
 def parseArgs():
-    pythonOptions = [PYTHON2, PYTHON3]
+    pythonOptions = [PYTHON2[0], PYTHON3[0], PYTHON_COVERAGE[0]]
     compilerOptions = [GCC, CLANG]
 
     parser = argparse.ArgumentParser(description='Integration test parameters')
     parser.add_argument('-c', '--compiler', nargs='+', choices=compilerOptions, default=[GCC],
 		   help="Compiler to test.")
-    parser.add_argument('-p', '--python-version', nargs=1, choices=pythonOptions, default=[PYTHON3],
+    parser.add_argument('-p', '--python-version', nargs=1, choices=pythonOptions, default=[PYTHON3[0]],
 		   help="Python version to test.")
   
     args = parser.parse_args()
@@ -25,7 +25,7 @@ def parseArgs():
         else:
             print("Error: unkown compiler")
 
-    print("Python version = " + UnittestOptions.getPythonVersion())
+    print("Python version = " + UnittestOptions.getPythonVersion()[0])
 
     compilerNames = []
     for compiler in UnittestOptions.getCompilers():

@@ -1,7 +1,7 @@
 from exec_utils.util.util import *
 from exec_utils.options.options import *
 
-from cm.command import *
+from .command import *
 
 class Target:
     def __init__(self, targets, runTargets, compilers, profileMap = '.exec-helper_profiles', rootBuildDir = 'build/{DISTRIBUTION}/{ARCHITECTURE}/{COMPILER}/{MODE}', builder = 'fake', distributions = ['arch-linux', 'jessie', 'xenial'], architectures = ['i386', 'amd64']):
