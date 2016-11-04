@@ -13,7 +13,7 @@ def analyzeClang(target, verbose, options):
     prefix = ''
     if target.getToolchainPath() is not None and target.getToolchainPath() != '':
         prefix = target.getToolchainPath() + '/' 
-    if target.getCompiler().getCCompiler == 'clang':
+    if target.getCompiler().getCCompiler() == 'clang':
         clangStaticAnalyzerCommand.append('--use-analyzer=' + prefix + target.getCompiler().getCCompiler())
     clangStaticAnalyzerCommand.append('--use-cc=' + prefix + target.getCompiler().getCCompiler())
     clangStaticAnalyzerCommand.append('--use-c++=' + prefix + target.getCompiler().getCxxCompiler())
