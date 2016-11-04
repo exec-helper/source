@@ -25,7 +25,7 @@ def coloredOutput(output, color):
     return color + output + bcolors.ENDC
 
 def info(outputString):
-    print(outputString)
+    print(coloredOutput(outputString, bcolors.OKBLUE))
     sys.stdout.flush()
 
 def error(outputString):
@@ -87,17 +87,21 @@ def executeInShell(cmd, working_directory = '.'):
     return subprocess.call(cmd, cwd = working_directory)
 
 def getShellOutput(cmd, working_directory = '.'):
-    info(coloredOutput("\nExecuting '{0}' in '{1}'".format(listToString(cmd, ' '), working_directory), bcolors.OKBLUE))
-    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, cwd = working_directory)
-    out, err = process.communicate()
+    retCode,out,err = getShellOutputAndReturnCode(cmd, working_directory)
     return out,err
 
 def getShellOutputAndReturnCode(cmd, working_directory = '.', verbose = True):
-    info("\nExecuting '{0}' in '{1}'".format(listToString(cmd, ' '), working_directory))
+    if verbose:
+        info("\nExecuting '{0}' in '{1}'".format(listToString(cmd, ' '), working_directory))
 
-    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, cwd = working_directory)
-    out, err = process.communicate()
-    retCode = process.returncode
+    try:
+        out = subprocess.check_output(cmd, cwd = working_directory)
+        err = ''
+        retCode = 0
+    except subprocess.CalledProcessError as subprocessError:
+        out = subprocessError.stdout
+        err = subprocessError.stderr
+        retCode = subprocessError.returncode
     return retCode,out,err
 
 def isInstalled(binary):
