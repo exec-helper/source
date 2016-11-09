@@ -1,0 +1,34 @@
+Import('env')
+
+import copy
+import buildTools
+import setupTools
+
+includes = [
+    'include/core',
+]
+
+includeUsageRequirements = [ 
+    '{rootDir}/core/include'.format(rootDir = env['BUILD_DIR']),
+]
+
+libUsageRequirements = [ 
+    'boost_program_options'
+]
+
+libs = [
+    libUsageRequirements
+]
+
+libs_path = [
+    env['LIBS_DIR'],
+    env['THIRD_PARTY_LIBS_DIR'],
+]
+
+env_core = env.Clone()
+setupTools.noIgnoredAttribute(env_core)
+
+env_core['CPPPATH'].extend(includes)
+
+sources = Glob('src/*.cpp')
+buildTools.createLib(env, 'core', sources, includes, includeUsageRequirements, libUsageRequirements)

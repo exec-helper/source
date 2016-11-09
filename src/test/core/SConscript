@@ -1,0 +1,27 @@
+Import('env')
+
+import copy
+import buildTools
+import setupTools
+
+includes = [
+    'include',
+    '../../core/include'
+]
+
+libs = [
+    'core'
+]
+
+libs_path = [
+    env['LIBS_DIR'],
+    env['THIRD_PARTY_LIBS_DIR'],
+]
+
+env_core_test = env.Clone()
+setupTools.noIgnoredAttribute(env_core_test)
+
+sources = Glob('src/*.cpp')
+unittest = buildTools.createUnittest(env_core_test, 'execHelperOptions-unittest', sources, includes, libs, libs_path)
+bin = env.Alias("unittest", unittest)
+bin = env.Alias("test", unittest)

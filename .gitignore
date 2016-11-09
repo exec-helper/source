@@ -87,6 +87,7 @@ ENV/
 
 # Scons temporary files
 .sconsign.dblite
+3rdparty/*.commit
 
 # Vim temporary files
 *.swp

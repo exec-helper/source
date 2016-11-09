@@ -1,0 +1,25 @@
+Import('env')
+
+import copy
+import buildTools
+import setupTools
+
+includes = []
+
+libs = [
+    'boost_program_options',
+    'core'
+]
+
+libs_path = [
+    env['LIBS_DIR'],
+    env['THIRD_PARTY_LIBS_DIR'],
+]
+
+env_core = env.Clone()
+setupTools.noIgnoredAttribute(env_core)
+
+env_core['CPPPATH'].extend(includes)
+
+sources = ['exec-helper.cpp']
+buildTools.createProgram(env, 'exec-helper', sources, includes, libs, libs_path, env['BIN_DIR'])

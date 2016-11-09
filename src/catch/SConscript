@@ -1,0 +1,21 @@
+Import('env')
+
+lib_files = [
+	'catch.cpp'
+]
+
+env['LIB_UNITTEST'] = [
+    'catch'
+]
+
+env['INCLUDE_UNITTEST'] = [
+    '3rdparty/Catch/include'
+]
+
+env_catch = env.Clone()
+env_catch['CPPPATH'].append(env['ROOT_DIR'] + '/3rdparty/Catch/include')
+
+lib = env_catch.Library('catch', lib_files)
+installed_lib = env_catch.Install("{libs_dir}".format(libs_dir=env['LIBS_DIR']), lib)
+env_catch.Alias('unittest', installed_lib)
+env_catch.Alias('buildLibs', installed_lib)
