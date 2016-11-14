@@ -2,7 +2,7 @@
 
 #include "core/execHelperOptions.h"
 
-using execHelper::ExecHelperOptions;
+using execHelper::core::ExecHelperOptions;
 
 int main(int argc, char** argv) {
     ExecHelperOptions options;

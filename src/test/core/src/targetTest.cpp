@@ -1,0 +1,94 @@
+#include <vector>
+#include <string>
+
+#include <catch.hpp>
+
+#include "core/target.h"
+
+using std::string;
+using std::vector;
+
+using execHelper::core::TargetDescription;
+
+namespace {
+    struct TargetParameters {
+        TargetDescription::TargetCollection target; 
+        TargetDescription::RunTargetCollection runTarget;
+    };
+}
+
+namespace execHelper { namespace core {
+    namespace test {
+        SCENARIO("Creating a target description", "[target][targetdescription]") {
+            GIVEN("Certain parameters for the target description") {
+                TargetDescription::TargetCollection actualTargets = {"test", "test1"};
+                TargetDescription::RunTargetCollection actualRunTargets = {"bin", "unittest"};
+
+                WHEN("We create a target description with these parameters") {
+                   TargetDescription targetToTest(actualTargets, actualRunTargets); 
+
+                    THEN("We should get the same parameters back") {
+                        REQUIRE(targetToTest.getTargets() == actualTargets);
+                        REQUIRE(targetToTest.getRunTargets() == actualRunTargets);
+                    }
+                }
+            }
+        }
+        SCENARIO("Looping over a target description", "[target][targetdescription]") {
+            GIVEN("A target collection over which we can loop and all combinations of these") {
+                TargetDescription::TargetCollection actualTargets = {"test", "test1"};
+                TargetDescription::RunTargetCollection actualRunTargets = {"bin", "unittest"};
+                const TargetDescription target(actualTargets, actualRunTargets); 
+
+                vector<TargetParameters> orderedCombinations;
+
+                // Construct the combination matrix
+                for(const auto& actualTarget : actualTargets) {
+                    for(const auto& runTarget : actualRunTargets) {
+                        TargetParameters targetParameters;
+                        targetParameters.target = {actualTarget};
+                        targetParameters.runTarget = {runTarget};
+                        orderedCombinations.push_back(targetParameters);
+                    }
+                }
+
+                WHEN("We try too loop over the collection") {
+                    THEN("We should be able to loop over it using iterators") {
+                        size_t orderedCombinationsIndex = 0U;
+                        for(TargetDescription::const_iterator it = target.begin(); it != target.end(); ++it) {
+                            const TargetDescription iteratedTargetDescription = *it;
+                            REQUIRE(orderedCombinationsIndex < orderedCombinations.size());
+                            REQUIRE(iteratedTargetDescription.getTargets() == orderedCombinations[orderedCombinationsIndex].target);
+                            REQUIRE(iteratedTargetDescription.getRunTargets() == orderedCombinations[orderedCombinationsIndex].runTarget);
+                            ++orderedCombinationsIndex;
+                        } 
+                        REQUIRE(orderedCombinationsIndex == orderedCombinations.size());
+                    }
+                    THEN("We should be able to loop over it using for each loops") {
+                        size_t orderedCombinationsIndex = 0U;
+                        for(const auto& iteratedTargetDescription : target) {
+                            REQUIRE(orderedCombinationsIndex < orderedCombinations.size());
+                            REQUIRE(iteratedTargetDescription.getTargets() == orderedCombinations[orderedCombinationsIndex].target);
+                            REQUIRE(iteratedTargetDescription.getRunTargets() == orderedCombinations[orderedCombinationsIndex].runTarget);
+                            ++orderedCombinationsIndex;
+                        } 
+                        REQUIRE(orderedCombinationsIndex == orderedCombinations.size());
+                    }
+                }
+            }
+        }
+        SCENARIO("Special cases for target iteration", "[target][targetdescription]") {
+            GIVEN("Empty collections for the target") {
+                TargetDescription::TargetCollection actualTargets = {};
+                TargetDescription::RunTargetCollection actualRunTargets = {};
+                const TargetDescription target(actualTargets, actualRunTargets); 
+
+                WHEN("We get the begin iterator") {
+                    THEN("The begin iterator should be equal to the end iterator") {
+                        REQUIRE(target.begin() == target.end());
+                    }
+                }
+            }
+        }
+    }
+} }

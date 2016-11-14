@@ -5,23 +5,25 @@
 #include <vector>
 
 namespace execHelper {
-    typedef std::vector<std::string> CommandCollection;
-    typedef std::vector<std::string> TargetCollection;
+    namespace core {
+        typedef std::vector<std::string> CommandCollection;
+        typedef std::vector<std::string> TargetCollection;
 
-    class ExecHelperOptions {
-        public:
-            ExecHelperOptions();
-            bool parse(int argc, char** argv);
+        class ExecHelperOptions {
+            public:
+                ExecHelperOptions();
+                bool parse(int argc, char** argv);
 
-            bool getVerbosity() const;
-            const CommandCollection& getCommands() const;
-            const TargetCollection& getTargets() const;
+                bool getVerbosity() const;
+                const CommandCollection& getCommands() const;
+                const TargetCollection& getTargets() const;
 
-        private:
-            bool m_verbose;
-            CommandCollection m_commands;
-            TargetCollection m_targets;
-    };
+            private:
+                bool m_verbose;
+                CommandCollection m_commands;
+                TargetCollection m_targets;
+        };
+    }
 }
 
 #endif /* __EXEC_HELPER_OPTIONS_H__ */

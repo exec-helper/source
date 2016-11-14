@@ -18,20 +18,23 @@ using boost::program_options::command_line_parser;
 using boost::program_options::value;
 using boost::program_options::positional_options_description;
 
+using execHelper::core::CommandCollection;
+using execHelper::core::TargetCollection;
+
 namespace {
     options_description getOptionDescriptions() {
         options_description descriptions("Allowed options");
         descriptions.add_options()
             ("help,h", "Produce help message")
             ("verbose,v", "Set verbosity")
-            ("command,c", value<execHelper::CommandCollection>()->multitoken(), "Set commands")
-            ("target,t", value<execHelper::TargetCollection>()->multitoken(), "Set targets")
+            ("command,c", value<CommandCollection>()->multitoken(), "Set commands")
+            ("target,t", value<TargetCollection>()->multitoken(), "Set targets")
         ;
         return descriptions;
     }
 }
 
-namespace execHelper {
+namespace execHelper { namespace core {
     ExecHelperOptions::ExecHelperOptions() :
         m_verbose(false),
         m_targets{"all"}
@@ -43,11 +46,11 @@ namespace execHelper {
         return m_verbose;
     }
 
-    const execHelper::CommandCollection& ExecHelperOptions::getCommands() const {
+    const execHelper::core::CommandCollection& ExecHelperOptions::getCommands() const {
         return m_commands;
     }
 
-    const execHelper::TargetCollection& ExecHelperOptions::getTargets() const {
+    const execHelper::core::TargetCollection& ExecHelperOptions::getTargets() const {
         return m_targets;
     }
 
@@ -82,4 +85,4 @@ namespace execHelper {
         }
         return true;
     }
-}
+} }

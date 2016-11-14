@@ -22,6 +22,6 @@ env_core_test = env.Clone()
 setupTools.noIgnoredAttribute(env_core_test)
 
 sources = Glob('src/*.cpp')
-unittest = buildTools.createUnittest(env_core_test, 'execHelperOptions-unittest', sources, includes, libs, libs_path)
+unittest = buildTools.createUnittest(env_core_test, 'core-unittest', sources, includes, libs, libs_path)
 bin = env.Alias("unittest", unittest)
 bin = env.Alias("test", unittest)

@@ -33,9 +33,9 @@ namespace {
     }
 }
 
-namespace execHelper {
+namespace execHelper { namespace core {
     namespace test {
-        SCENARIO("Test options with no arguments", "[options]") {
+        SCENARIO("Test options with no arguments", "[execHelperOptions]") {
             GIVEN("A command line with no arguments and the default values for each parameter") {
                 vector<string> arguments;
                 arguments.emplace_back("UNITTEST");
@@ -58,7 +58,7 @@ namespace execHelper {
             }
         }
 
-        SCENARIO("Test options with specific arguments", "[options]") {
+        SCENARIO("Test options with specific arguments", "[execHelperOptions]") {
             GIVEN("The command line we want to pass using long options") {
                 const CommandCollection actualCommands = {"init", "build", "run"};
                 const TargetCollection actualTargets = {"target1", "target2"};
@@ -126,4 +126,4 @@ namespace execHelper {
             }
         }
     }
-}
+} }
