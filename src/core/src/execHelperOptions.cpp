@@ -9,6 +9,7 @@ using std::cout;
 using std::endl;
 using std::string;
 using std::vector;
+using std::make_shared;
 
 using boost::program_options::options_description;
 using boost::program_options::variables_map;
@@ -19,7 +20,7 @@ using boost::program_options::value;
 using boost::program_options::positional_options_description;
 
 using execHelper::core::CommandCollection;
-using execHelper::core::TargetCollection;
+using execHelper::core::TargetDescription;
 
 namespace {
     options_description getOptionDescriptions() {
@@ -28,7 +29,7 @@ namespace {
             ("help,h", "Produce help message")
             ("verbose,v", "Set verbosity")
             ("command,c", value<CommandCollection>()->multitoken(), "Set commands")
-            ("target,t", value<TargetCollection>()->multitoken(), "Set targets")
+            ("target,t", value<TargetDescription::TargetCollection>()->multitoken(), "Set targets")
         ;
         return descriptions;
     }
@@ -36,22 +37,22 @@ namespace {
 
 namespace execHelper { namespace core {
     ExecHelperOptions::ExecHelperOptions() :
-        m_verbose(false),
-        m_targets{"all"}
+        m_verbose(false)
     {
         ;
     }
 
-    bool ExecHelperOptions::getVerbosity() const {
+    bool ExecHelperOptions::getVerbosity() const noexcept {
         return m_verbose;
     }
 
-    const execHelper::core::CommandCollection& ExecHelperOptions::getCommands() const {
+    const execHelper::core::CommandCollection& ExecHelperOptions::getCommands() const noexcept {
         return m_commands;
     }
 
-    const execHelper::core::TargetCollection& ExecHelperOptions::getTargets() const {
-        return m_targets;
+    const TargetDescription& ExecHelperOptions::getTarget() const noexcept {
+        assert(m_target);
+        return *m_target;
     }
 
     bool ExecHelperOptions::parse(int argc, char** argv) {
@@ -79,10 +80,13 @@ namespace execHelper { namespace core {
             m_commands = optionsMap["command"].as<CommandCollection>();
         }
 
+        TargetDescription::TargetCollection targets = {"all"};
         if(optionsMap.count("target")) {
-            m_targets.clear();
-            m_targets = optionsMap["target"].as<TargetCollection>();
+            targets = optionsMap["target"].as<TargetDescription::TargetCollection>();
         }
+
+        TargetDescription::RunTargetCollection runTargets = {"all"};
+        m_target = make_shared<TargetDescription>(targets, runTargets);
         return true;
     }
 } }

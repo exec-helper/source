@@ -42,7 +42,7 @@ namespace execHelper { namespace core {
 
                 const bool default_verbosity = false;
                 const CommandCollection default_commands = {};
-                const TargetCollection default_targets = {"all"};
+                const TargetDescription::TargetCollection default_targets = {"all"};
 
                 WHEN("We parse the variables") {
                     MainVariables mainVariables = convertToMainArguments(arguments);
@@ -52,7 +52,7 @@ namespace execHelper { namespace core {
                     THEN("We should get the default variables") {
                         REQUIRE(options.getVerbosity() == default_verbosity);
                         REQUIRE(options.getCommands() == default_commands);
-                        REQUIRE(options.getTargets() == default_targets);
+                        REQUIRE(options.getTarget().getTargets() == default_targets);
                     }
                 }
             }
@@ -61,7 +61,7 @@ namespace execHelper { namespace core {
         SCENARIO("Test options with specific arguments", "[execHelperOptions]") {
             GIVEN("The command line we want to pass using long options") {
                 const CommandCollection actualCommands = {"init", "build", "run"};
-                const TargetCollection actualTargets = {"target1", "target2"};
+                const TargetDescription::TargetCollection actualTargets = {"target1", "target2"};
 
                 vector<string> arguments;
                 arguments.emplace_back("UNITTEST");
@@ -78,14 +78,14 @@ namespace execHelper { namespace core {
                     THEN("It should be parsed properly") {
                         REQUIRE(options.getVerbosity() == true);
                         REQUIRE(options.getCommands() == actualCommands);
-                        REQUIRE(options.getTargets() == actualTargets);
+                        REQUIRE(options.getTarget().getTargets() == actualTargets);
                     }
                 }
             }
 
             GIVEN("The command line we want to pass using long options") {
                 const CommandCollection actualCommands = {"init", "build", "run"};
-                const TargetCollection actualTargets = {"target1", "target2"};
+                const TargetDescription::TargetCollection actualTargets = {"target1", "target2"};
 
                 vector<string> arguments;
                 arguments.emplace_back("UNITTEST");
@@ -102,7 +102,7 @@ namespace execHelper { namespace core {
                     THEN("It should be parsed accordingly") {
                         REQUIRE(options.getVerbosity() == true);
                         REQUIRE(options.getCommands() == actualCommands);
-                        REQUIRE(options.getTargets() == actualTargets);
+                        REQUIRE(options.getTarget().getTargets() == actualTargets);
                     }
                 }
             }
