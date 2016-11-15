@@ -1,4 +1,3 @@
-#include <vector>
 #include <string>
 #include <sstream>
 
@@ -7,7 +6,6 @@
 #include "core/task.h"
 
 using std::string;
-using std::vector;
 using std::istringstream;
 using std::stringstream;
 using std::istream_iterator;
@@ -149,6 +147,53 @@ namespace execHelper { namespace core {
                     }
                     THEN("We should get the accumulated string") {
                         REQUIRE(task.toString() == actualCommand); 
+                    }
+                }
+            }
+        }
+
+        SCENARIO("Check the task comparison operators", "[task]") {
+            GIVEN("One task") {
+                Task actualTask;
+                actualTask.append("task1");
+                actualTask.append("task2");
+
+                WHEN("We compare it with itself") {
+                    THEN("It should be true") {
+                        REQUIRE(actualTask == actualTask);
+                        REQUIRE_FALSE(actualTask != actualTask);
+                    }
+                }
+            }
+            GIVEN("Two matching tasks") {
+                Task task1;
+                task1.append("task1");
+                task1.append("task2");
+
+                Task task2;
+                task2.append("task1");
+                task2.append("task2");
+
+                WHEN("We compare them") {
+                    THEN("It should return true") {
+                        REQUIRE(task1 == task2);
+                        REQUIRE_FALSE(task1 != task2);
+                    }
+                }
+            }
+            GIVEN("Two non-matching tasks") {
+                Task task1;
+                task1.append("task1");
+                task1.append("task2");
+
+                Task task2;
+                task2.append("task2");
+                task2.append("task1");
+
+                WHEN("We compare them") {
+                    THEN("It should return false") {
+                        REQUIRE_FALSE(task1 == task2);
+                        REQUIRE(task1 != task2);
                     }
                 }
             }

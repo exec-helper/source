@@ -26,11 +26,11 @@ namespace {
 
 namespace execHelper { namespace core {
 
-    const execHelper::core::TaskCollection& Task::getTask() noexcept {
+    const execHelper::core::TaskCollection& Task::getTask() const noexcept {
         return m_task;
     }
 
-    string Task::toString() {
+    string Task::toString() const {
         return implodeVector(m_task);
     }
 
@@ -54,5 +54,13 @@ namespace execHelper { namespace core {
         m_task.reserve(m_task.size() + taskPart.size());
         move(taskPart.begin(), taskPart.end(), back_inserter(m_task));
         return true;
+    }
+
+    bool Task::operator==(const Task& other) const noexcept {
+        return m_task == other.m_task;
+    }
+
+    bool Task::operator!=(const Task& other) const noexcept {
+        return !(*this == other);
     }
 } }

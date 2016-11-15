@@ -6,7 +6,8 @@ import setupTools
 
 includes = [
     'include',
-    '../../core/include'
+    'stubs',
+    '../../core/include',
 ]
 
 libs = [
