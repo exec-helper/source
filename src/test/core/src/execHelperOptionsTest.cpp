@@ -43,6 +43,9 @@ namespace execHelper { namespace core {
                 const bool default_verbosity = false;
                 const CommandCollection default_commands = {};
                 const TargetDescription::TargetCollection default_targets = {"all"};
+                const TargetDescription::RunTargetCollection defaultRunTargets = {"all"};
+
+                TargetDescription defaultTarget(default_targets, defaultRunTargets);
 
                 WHEN("We parse the variables") {
                     MainVariables mainVariables = convertToMainArguments(arguments);
@@ -52,7 +55,7 @@ namespace execHelper { namespace core {
                     THEN("We should get the default variables") {
                         REQUIRE(options.getVerbosity() == default_verbosity);
                         REQUIRE(options.getCommands() == default_commands);
-                        REQUIRE(options.getTarget().getTargets() == default_targets);
+                        REQUIRE(options.getTarget() == defaultTarget);
                     }
                 }
             }
@@ -61,14 +64,16 @@ namespace execHelper { namespace core {
         SCENARIO("Test options with specific arguments", "[execHelperOptions]") {
             GIVEN("The command line we want to pass using long options") {
                 const CommandCollection actualCommands = {"init", "build", "run"};
-                const TargetDescription::TargetCollection actualTargets = {"target1", "target2"};
+                const TargetDescription actualTarget({"target1", "target2"}, {"runTarget1", "runTarget2"});
 
                 vector<string> arguments;
                 arguments.emplace_back("UNITTEST");
                 appendVectors(arguments, actualCommands);
                 arguments.emplace_back("--verbose");
                 arguments.emplace_back("--target");
-                appendVectors(arguments, actualTargets);
+                appendVectors(arguments, actualTarget.getTargets());
+                arguments.emplace_back("--run-target");
+                appendVectors(arguments, actualTarget.getRunTargets());
 
                 WHEN("We convert it and parse the variables") {
                     MainVariables mainVariables = convertToMainArguments(arguments);
@@ -78,21 +83,23 @@ namespace execHelper { namespace core {
                     THEN("It should be parsed properly") {
                         REQUIRE(options.getVerbosity() == true);
                         REQUIRE(options.getCommands() == actualCommands);
-                        REQUIRE(options.getTarget().getTargets() == actualTargets);
+                        REQUIRE(options.getTarget() == actualTarget);
                     }
                 }
             }
 
             GIVEN("The command line we want to pass using long options") {
                 const CommandCollection actualCommands = {"init", "build", "run"};
-                const TargetDescription::TargetCollection actualTargets = {"target1", "target2"};
+                const TargetDescription actualTarget({"target1", "target2"}, {"runTarget1", "runTarget2"});
 
                 vector<string> arguments;
                 arguments.emplace_back("UNITTEST");
                 appendVectors(arguments, actualCommands);
                 arguments.emplace_back("-v");
                 arguments.emplace_back("-t");
-                appendVectors(arguments, actualTargets);
+                appendVectors(arguments, actualTarget.getTargets());
+                arguments.emplace_back("-r");
+                appendVectors(arguments, actualTarget.getRunTargets());
 
                 WHEN("We convert it and parse the variables") {
                     MainVariables mainVariables = convertToMainArguments(arguments);
@@ -102,7 +109,7 @@ namespace execHelper { namespace core {
                     THEN("It should be parsed accordingly") {
                         REQUIRE(options.getVerbosity() == true);
                         REQUIRE(options.getCommands() == actualCommands);
-                        REQUIRE(options.getTarget().getTargets() == actualTargets);
+                        REQUIRE(options.getTarget() == actualTarget);
                     }
                 }
             }

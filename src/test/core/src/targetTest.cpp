@@ -90,5 +90,55 @@ namespace execHelper { namespace core {
                 }
             }
         }
+
+        SCENARIO("Test the comparisons of the targets", "[target][targetdescription]") {
+            GIVEN("One test target") {
+                TargetDescription actualTarget({"target1", "target2"}, {"runTarget1", "runTarget2"});
+
+                WHEN("We compare the target with itself") {
+                    THEN("We should get it to be equal") {
+                        REQUIRE(actualTarget == actualTarget);
+                        REQUIRE_FALSE(actualTarget != actualTarget);
+                    }
+                }
+            }
+            GIVEN("Two different targets with the same content") {
+                TargetDescription target1({"target1", "target2"}, {"runTarget1", "runTarget2"});
+                TargetDescription target2({"target1", "target2"}, {"runTarget1", "runTarget2"});
+
+                WHEN("We compare the targets") {
+                    THEN("We should get them to be equal") {
+                        REQUIRE(target1 == target2);
+                        REQUIRE_FALSE(target1 != target2);
+                    }
+                }
+            }
+            GIVEN("Two different targets with a different content") {
+                TargetDescription target1({"target1", "target2"}, {"runTarget1", "runTarget2"});
+                TargetDescription target2({"target1"}, {"runTarget1", "runTarget2"});
+                TargetDescription target3({"target1", "target2"}, {"runTarget1"});
+                TargetDescription target4({}, {});
+                TargetDescription target5({"target1", "target2"}, {});
+                TargetDescription target6({}, {"runTarget1", "runTarget2"});
+
+                WHEN("We compare the targets") {
+                    THEN("We should get them to be not equal") {
+                        REQUIRE_FALSE(target1 == target2);
+                        REQUIRE_FALSE(target1 == target3);
+                        REQUIRE_FALSE(target2 == target3);
+                        REQUIRE_FALSE(target1 == target4);
+                        REQUIRE_FALSE(target1 == target5);
+                        REQUIRE_FALSE(target1 == target6);
+
+                        REQUIRE(target1 != target2);
+                        REQUIRE(target1 != target3);
+                        REQUIRE(target2 != target3);
+                        REQUIRE(target1 != target4);
+                        REQUIRE(target1 != target5);
+                        REQUIRE(target1 != target6);
+                    }
+                }
+            }
+        }
     }
 } }

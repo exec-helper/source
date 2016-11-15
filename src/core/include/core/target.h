@@ -20,6 +20,9 @@ namespace execHelper {
                 const TargetCollection& getTargets() const noexcept;
                 const RunTargetCollection& getRunTargets() const noexcept;
 
+                bool operator==(const TargetDescription& other) const noexcept;
+                bool operator!=(const TargetDescription& other) const noexcept;
+
                 // Iterator implementation
                 template <typename IteratorType> 
                 class TargetIterator : public std::iterator<

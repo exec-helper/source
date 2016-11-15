@@ -17,6 +17,14 @@ namespace execHelper {
             return m_runTargets;
         }
 
+        bool TargetDescription::operator==(const TargetDescription& other) const noexcept {
+            return m_targets == other.m_targets && m_runTargets == other.m_runTargets;
+        }
+
+        bool TargetDescription::operator!=(const TargetDescription& other) const noexcept {
+            return !(*this == other);
+        }
+
         execHelper::core::TargetDescription::iterator TargetDescription::begin() noexcept {
             return iterator(*this);
         }

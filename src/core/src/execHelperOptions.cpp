@@ -29,6 +29,7 @@ namespace {
             ("verbose,v", "Set verbosity")
             ("command,c", value<CommandCollection>()->multitoken(), "Set commands")
             ("target,t", value<TargetDescription::TargetCollection>()->multitoken(), "Set targets")
+            ("run-target,r", value<TargetDescription::RunTargetCollection>()->multitoken(), "Set run targets")
         ;
         return descriptions;
     }
@@ -85,6 +86,10 @@ namespace execHelper { namespace core {
         }
 
         TargetDescription::RunTargetCollection runTargets = {"all"};
+        if(optionsMap.count("run-target")) {
+            runTargets = optionsMap["run-target"].as<TargetDescription::RunTargetCollection>();
+        }
+
         m_target.reset(new TargetDescription(targets, runTargets));
         return true;
     }
