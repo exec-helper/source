@@ -9,7 +9,6 @@ using std::cout;
 using std::endl;
 using std::string;
 using std::vector;
-using std::make_shared;
 
 using boost::program_options::options_description;
 using boost::program_options::variables_map;
@@ -86,7 +85,7 @@ namespace execHelper { namespace core {
         }
 
         TargetDescription::RunTargetCollection runTargets = {"all"};
-        m_target = make_shared<TargetDescription>(targets, runTargets);
+        m_target.reset(new TargetDescription(targets, runTargets));
         return true;
     }
 } }

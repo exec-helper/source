@@ -23,7 +23,7 @@ namespace execHelper {
             private:
                 bool m_verbose;
                 CommandCollection m_commands;
-                std::shared_ptr<TargetDescription> m_target;
+                std::unique_ptr<TargetDescription> m_target;
         };
     }
 }
