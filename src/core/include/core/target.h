@@ -24,6 +24,7 @@ namespace execHelper {
                 bool operator!=(const TargetDescription& other) const noexcept;
 
                 // Iterator implementation
+                // Note: modifications to the internal collections of the associated TargetDescription will invalidate all current iterators
                 template <typename IteratorType> 
                 class TargetIterator : public std::iterator<
                             std::forward_iterator_tag,   // iterator_category
