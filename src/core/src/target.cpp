@@ -25,20 +25,20 @@ namespace execHelper {
             return !(*this == other);
         }
 
-        execHelper::core::TargetDescription::iterator TargetDescription::begin() noexcept {
-            return iterator(*this);
+        TargetDescription::iterator TargetDescription::begin() noexcept {
+            return permutationBeginIterator(*this, m_targets, m_runTargets);
         }
 
-        execHelper::core::TargetDescription::const_iterator TargetDescription::begin() const noexcept {
-            return const_iterator(*this);
+        TargetDescription::const_iterator TargetDescription::begin() const noexcept {
+            return permutationBeginIterator(*this, m_targets, m_runTargets);
         }
 
-        execHelper::core::TargetDescription::iterator TargetDescription::end() noexcept {
-            return iterator(*this, true);
+        TargetDescription::iterator TargetDescription::end() noexcept {
+            return permutationEndIterator(*this, m_targets, m_runTargets);
         }
 
-        execHelper::core::TargetDescription::const_iterator TargetDescription::end() const noexcept {
-            return const_iterator(*this, true);
+        TargetDescription::const_iterator TargetDescription::end() const noexcept {
+            return permutationEndIterator(*this, m_targets, m_runTargets);
         }
     }
 }

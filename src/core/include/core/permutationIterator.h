@@ -1,7 +1,7 @@
 #ifndef __PERMUTATION_ITERATOR_H__
 #define __PERMUTATION_ITERATOR_H__
 
-#include <iterator>
+#include <cassert>
 
 namespace execHelper {
     namespace core {
@@ -81,7 +81,10 @@ namespace execHelper {
                     m_outerEndIterator(c1EndIterator),
                     m_innerIterator(c2BeginIterator, c2EndIterator)
                 {
-                    ;
+                    if(c2BeginIterator == c2EndIterator) {
+                        // Means the collection is empty
+                        m_outerIterator = m_outerEndIterator;  
+                    }
                 }
 
                 iterator& operator++() noexcept {
@@ -122,6 +125,17 @@ namespace execHelper {
                     return m_outerIterator == m_outerEndIterator;
                 }
         };
+
+        template<typename IteratorType, typename CollectionType1, typename CollectionType2>
+        PermutationIterator<IteratorType, CollectionType1, CollectionType2> permutationBeginIterator(IteratorType& iterateObject, const CollectionType1& collection1, const CollectionType2& collection2) {
+            return PermutationIterator<IteratorType, CollectionType1, CollectionType2>(iterateObject, collection1.begin(), collection1.end(), collection2.begin(), collection2.end());
+        }
+
+        template<typename IteratorType, typename CollectionType1, typename CollectionType2>
+        PermutationIterator<IteratorType, CollectionType1, CollectionType2> permutationEndIterator(IteratorType& iterateObject, const CollectionType1& collection1, const CollectionType2& collection2) {
+            return PermutationIterator<IteratorType, CollectionType1, CollectionType2>(iterateObject, collection1.end(), collection1.end(), collection2.end(), collection2.end());
+        }
+
     }
 }
 

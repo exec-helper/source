@@ -26,19 +26,19 @@ namespace execHelper {
         }
 
         CompilerDescription::iterator CompilerDescription::begin() noexcept {
-            return iterator(*this, m_compilers.begin(), m_compilers.end(), m_modes.begin(), m_modes.end());
+            return permutationBeginIterator(*this, m_compilers, m_modes);
         }
 
         CompilerDescription::const_iterator CompilerDescription::begin() const noexcept {
-            return const_iterator(*this, m_compilers.begin(), m_compilers.end(), m_modes.begin(), m_modes.end());
+            return permutationBeginIterator(*this, m_compilers, m_modes);
         }
 
         CompilerDescription::iterator CompilerDescription::end() noexcept {
-            return iterator(*this, m_compilers.end(), m_compilers.end(), m_modes.end(), m_modes.end());
+            return permutationEndIterator(*this, m_compilers, m_modes);
         }
 
         CompilerDescription::const_iterator CompilerDescription::end() const noexcept {
-            return const_iterator(*this, m_compilers.end(), m_compilers.end(), m_modes.end(), m_modes.end());
+            return permutationEndIterator(*this, m_compilers, m_modes);
         }
     }
 }
