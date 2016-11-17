@@ -82,6 +82,7 @@ if env['mode'] == 'release':
 else:
     setupTools.enableOptimization(env)
     setupTools.enableDebuggingSymbols(env)
+    setupTools.enableCodeCoverage(env)
 
 ##################################### Profiling related stuff ##############################
 # Default when profiling is enabled: perf

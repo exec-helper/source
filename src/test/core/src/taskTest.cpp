@@ -9,6 +9,7 @@ using std::string;
 using std::istringstream;
 using std::stringstream;
 using std::istream_iterator;
+using std::move;
 
 namespace execHelper { namespace core {
     namespace test {
@@ -67,19 +68,6 @@ namespace execHelper { namespace core {
                 istringstream iss(actualCommand);
                 TaskCollection actualCommandCollection{istream_iterator<string>{iss}, istream_iterator<string>{}};
 
-                WHEN("We add each command separately to the task") {
-                    for(const auto& command : actualCommandCollection) {
-                        task.append(command);
-                    }
-
-                    THEN("We should be able to find back all commands in order") {
-                        REQUIRE(task.getTask() == actualCommandCollection); 
-                    }
-                    THEN("We should get the accumulated string") {
-                        REQUIRE(task.toString() == actualCommand); 
-                    }
-                }
-
                 WHEN("We add the entire string as one single command parameter") {
                     task.append(actualCommand);
 
@@ -113,19 +101,6 @@ namespace execHelper { namespace core {
                 istringstream iss(actualCommand);
                 TaskCollection actualCommandCollection{istream_iterator<string>{iss}, istream_iterator<string>{}};
 
-                WHEN("We add each command separately to the task") {
-                    for(const auto& command : actualCommandCollection) {
-                        task.append(command);
-                    }
-
-                    THEN("We should be able to find back all commands in order") {
-                        REQUIRE(task.getTask() == actualCommandCollection); 
-                    }
-                    THEN("We should get the accumulated string") {
-                        REQUIRE(task.toString() == actualCommand); 
-                    }
-                }
-
                 WHEN("We add the entire string as one single command parameter") {
                     task.append(actualCommand);
 
@@ -141,6 +116,38 @@ namespace execHelper { namespace core {
 
                 WHEN("We add each command as a collection to the task") {
                     task.append(actualCommandCollection);
+
+                    THEN("We should be able to find back all commands in order") {
+                        REQUIRE(task.getTask() == actualCommandCollection); 
+                    }
+                    THEN("We should get the accumulated string") {
+                        REQUIRE(task.toString() == actualCommand); 
+                    }
+                }
+            }
+            GIVEN("A task and a line of commands") {
+                Task task;
+                string actualCommand = "command1 command2 command3";
+
+                // Convert the string command to a collection of separate commands
+                istringstream iss(actualCommand);
+                TaskCollection actualCommandCollection{istream_iterator<string>{iss}, istream_iterator<string>{}};
+                TaskCollection moveCommandCollection = actualCommandCollection;
+
+                WHEN("We move each command separately to the task") {
+                    for(const auto& command : moveCommandCollection) {
+                        task.append(move(command));
+                    }
+
+                    THEN("We should be able to find back all commands in order") {
+                        REQUIRE(task.getTask() == actualCommandCollection); 
+                    }
+                    THEN("We should get the accumulated string") {
+                        REQUIRE(task.toString() == actualCommand); 
+                    }
+                }
+                WHEN("We move all command together to the task") {
+                    task.append(move(moveCommandCollection));
 
                     THEN("We should be able to find back all commands in order") {
                         REQUIRE(task.getTask() == actualCommandCollection); 

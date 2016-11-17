@@ -77,11 +77,16 @@ class Gcc:
     def stopAtAssembler(env):
         env['CPPFLAGS'].extend(['-S', '-fverbose-asm', '-Wa,-adhln'])
 
-    @staticmethod
+    staticmethod
     def enableDiagnostics(env):
         pass    # TODO
 
     @staticmethod
     def noIgnoredAttribute(env):
         env['CPPFLAGS'].append('-Wno-ignored-attributes')
+
+    @staticmethod
+    def enableCodeCoverage(env):
+        env['CPPFLAGS'].append('--coverage')
+        env['LINKFLAGS'].append('--coverage')
 

@@ -36,7 +36,7 @@ namespace execHelper { namespace core { namespace test {
     }
 
     SCENARIO("Looping over a compiler description", "[compiler][CompilerDescription]") {
-        GIVEN("A compiler collection over which we can loop and all combinations of these") {
+        GIVEN("A const compiler collection over which we can loop and all combinations of these") {
             const CompilerDescription compilerDescription({CompilerStub(), CompilerStub()}, {ModeStub(), ModeStub()}); 
 
             vector<CompilerParameters> orderedCombinations;
@@ -67,6 +67,46 @@ namespace execHelper { namespace core { namespace test {
                 THEN("We should be able to loop over it using for each loops") {
                     size_t orderedCombinationsIndex = 0U;
                     for(const auto& iteratedCompilerDescription : compilerDescription) {
+                        REQUIRE(orderedCombinationsIndex < orderedCombinations.size());
+                        REQUIRE(iteratedCompilerDescription.getCompilers() == orderedCombinations[orderedCombinationsIndex].compiler);
+                        REQUIRE(iteratedCompilerDescription.getModes() == orderedCombinations[orderedCombinationsIndex].mode);
+                        ++orderedCombinationsIndex;
+                    } 
+                    REQUIRE(orderedCombinationsIndex == orderedCombinations.size());
+                }
+            }
+        }
+        GIVEN("A non-const compiler collection over which we can loop and all combinations of these") {
+            CompilerDescription compilerDescription({CompilerStub(), CompilerStub()}, {ModeStub(), ModeStub()}); 
+
+            vector<CompilerParameters> orderedCombinations;
+
+            // Construct the combination matrix
+            for(const auto& compiler : compilerDescription.getCompilers()) {
+                for(const auto& mode : compilerDescription.getModes()) {
+                    CompilerParameters compilerParameters;
+                    compilerParameters.compiler = {compiler};
+                    compilerParameters.mode = {mode};
+                    orderedCombinations.push_back(compilerParameters);
+                }
+            }
+
+            WHEN("We try too loop over the collection") {
+                THEN("We should be able to loop over it using iterators") {
+                    size_t orderedCombinationsIndex = 0U;
+                    for(CompilerDescription::iterator it = compilerDescription.begin(); it != compilerDescription.end(); ++it) {
+                        REQUIRE(orderedCombinationsIndex < orderedCombinations.size());
+
+                        const CompilerDescription iteratedCompilerDescription = *it;
+                        REQUIRE(iteratedCompilerDescription.getCompilers() == orderedCombinations[orderedCombinationsIndex].compiler);
+                        REQUIRE(iteratedCompilerDescription.getModes() == orderedCombinations[orderedCombinationsIndex].mode);
+                        ++orderedCombinationsIndex;
+                    } 
+                    REQUIRE(orderedCombinationsIndex == orderedCombinations.size());
+                }
+                THEN("We should be able to loop over it using for each loops") {
+                    size_t orderedCombinationsIndex = 0U;
+                    for(auto iteratedCompilerDescription : compilerDescription) {
                         REQUIRE(orderedCombinationsIndex < orderedCombinations.size());
                         REQUIRE(iteratedCompilerDescription.getCompilers() == orderedCombinations[orderedCombinationsIndex].compiler);
                         REQUIRE(iteratedCompilerDescription.getModes() == orderedCombinations[orderedCombinationsIndex].mode);

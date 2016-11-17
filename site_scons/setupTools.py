@@ -82,6 +82,9 @@ def enableDiagnostics(env):
 def noIgnoredAttribute(env):
     env['SETUPCONFIG_TOOLCHAIN'].noIgnoredAttribute(env)
 
+def enableCodeCoverage(env):
+    env['SETUPCONFIG_TOOLCHAIN'].enableCodeCoverage(env)
+
 class Submodule:
     def __init__(self, name, commitHash):
         self.name = name

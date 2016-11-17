@@ -107,7 +107,7 @@ namespace execHelper {
                         // If the outer iterator is at the end, we do not care about the state of the inner iterators
                         return m_outerIterator == other.m_outerIterator;
                     }
-                    return (m_outerIterator == other.m_outerIterator && m_innerIterator == other.m_innerIterator);
+                    return (m_innerIterator == other.m_innerIterator && m_outerIterator == other.m_outerIterator);
                 }
 
                 bool operator!=(const iterator& other) const {

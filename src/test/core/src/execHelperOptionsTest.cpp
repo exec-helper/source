@@ -35,6 +35,21 @@ namespace {
 
 namespace execHelper { namespace core {
     namespace test {
+        SCENARIO("Test the help function", "[execHelperOptions]") {
+            GIVEN("A command line with the help argument") {
+                vector<string> arguments = {"UNITTEST", "--help"};
+
+                WHEN("We convert it to main function arguments") {
+                    MainVariables mainVariables = convertToMainArguments(arguments);
+
+                    THEN("The parsing should succeed") {
+                        ExecHelperOptions options; 
+                        REQUIRE(options.parse(mainVariables.argc, mainVariables.argv.get()));
+                    }
+                }
+            }
+        }
+
         SCENARIO("Test options with no arguments", "[execHelperOptions]") {
             GIVEN("A command line with no arguments and the default values for each parameter") {
                 vector<string> arguments;

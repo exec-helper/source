@@ -35,7 +35,7 @@ namespace execHelper { namespace core {
             }
         }
         SCENARIO("Looping over a target description", "[target][targetdescription]") {
-            GIVEN("A target collection over which we can loop and all combinations of these") {
+            GIVEN("A const target collection over which we can loop and all combinations of these") {
                 TargetDescription::TargetCollection actualTargets = {"test", "test1"};
                 TargetDescription::RunTargetCollection actualRunTargets = {"bin", "unittest"};
                 const TargetDescription target(actualTargets, actualRunTargets); 
@@ -76,6 +76,48 @@ namespace execHelper { namespace core {
                     }
                 }
             }
+            GIVEN("A non-const target collection over which we can loop and all combinations of these") {
+                TargetDescription::TargetCollection actualTargets = {"test", "test1"};
+                TargetDescription::RunTargetCollection actualRunTargets = {"bin", "unittest"};
+                TargetDescription target(actualTargets, actualRunTargets); 
+
+                vector<TargetParameters> orderedCombinations;
+
+                // Construct the combination matrix
+                for(const auto& actualTarget : actualTargets) {
+                    for(const auto& runTarget : actualRunTargets) {
+                        TargetParameters targetParameters;
+                        targetParameters.target = {actualTarget};
+                        targetParameters.runTarget = {runTarget};
+                        orderedCombinations.push_back(targetParameters);
+                    }
+                }
+
+                WHEN("We try too loop over the collection") {
+                    THEN("We should be able to loop over it using iterators") {
+                        size_t orderedCombinationsIndex = 0U;
+                        for(TargetDescription::iterator it = target.begin(); it != target.end(); ++it) {
+                            const TargetDescription iteratedTargetDescription = *it;
+                            REQUIRE(orderedCombinationsIndex < orderedCombinations.size());
+                            REQUIRE(iteratedTargetDescription.getTargets() == orderedCombinations[orderedCombinationsIndex].target);
+                            REQUIRE(iteratedTargetDescription.getRunTargets() == orderedCombinations[orderedCombinationsIndex].runTarget);
+                            ++orderedCombinationsIndex;
+                        } 
+                        REQUIRE(orderedCombinationsIndex == orderedCombinations.size());
+                    }
+                    THEN("We should be able to loop over it using for each loops") {
+                        size_t orderedCombinationsIndex = 0U;
+                        for(auto iteratedTargetDescription : target) {
+                            REQUIRE(orderedCombinationsIndex < orderedCombinations.size());
+                            REQUIRE(iteratedTargetDescription.getTargets() == orderedCombinations[orderedCombinationsIndex].target);
+                            REQUIRE(iteratedTargetDescription.getRunTargets() == orderedCombinations[orderedCombinationsIndex].runTarget);
+                            ++orderedCombinationsIndex;
+                        } 
+                        REQUIRE(orderedCombinationsIndex == orderedCombinations.size());
+                    }
+                }
+            }
+
         }
         SCENARIO("Special cases for target iteration", "[target][targetdescription]") {
             GIVEN("Empty collections for the target") {
