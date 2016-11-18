@@ -16,7 +16,7 @@ test-distcleanTarget-python3:
     stage: test
     script: 
         - pip3 install coverage
-        - python3 $(which coverage) run -p test/distcleanTargetTest.py --compiler gcc clang --python-version coverage"
+        - python3 $(which coverage) run -p test/distcleanTargetTest.py --compiler gcc clang --python-version coverage
 
 test-buildTarget-python2:
     stage: test
