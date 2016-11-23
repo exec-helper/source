@@ -20,8 +20,4 @@ namespace execHelper { namespace core {
     {
         ;
     }
-
-    size_t YamlWrapper::getSize(const std::string& key) const {
-        return m_node[key].size();
-    }
 } }

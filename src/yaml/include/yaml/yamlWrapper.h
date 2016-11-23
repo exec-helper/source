@@ -18,8 +18,6 @@ namespace execHelper {
                 YamlWrapper(const YamlWrapperFile& file);
                 YamlWrapper(const std::string& yamlConfig);
 
-                size_t getSize(const std::string& key) const;
-
                 template<typename T>
                 T get(const std::initializer_list<std::string>& keys) {
                     YAML::Node node = Clone(m_node);
