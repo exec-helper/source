@@ -55,6 +55,9 @@ def enableDebuggingSymbols(env):
 def enableWarnings(env, warningLevel = WARNING_LEVEL_ALL):
     env['SETUPCONFIG_TOOLCHAIN'].enableWarnings(env, warningLevel)
 
+def disableShadowWarnings(env):
+    env['SETUPCONFIG_TOOLCHAIN'].disableShadowWarnings(env)
+
 def enableCxxVersion(env, cxxVersion = CXX_VERSION_03):
     env['SETUPCONFIG_TOOLCHAIN'].enableCxxVersion(env, cxxVersion)
 

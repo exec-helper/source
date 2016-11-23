@@ -4,16 +4,19 @@ import copy
 import buildTools
 import setupTools
 
-includes = [
-    'include/core',
-]
-
 includeUsageRequirements = [ 
     '{rootDir}/core/include'.format(rootDir = env['BUILD_DIR']),
+    env['THIRD_PARTY_DIR'] + '/yaml-cpp/include'
+]
+
+includes = [
+    'include/core',
+    includeUsageRequirements
 ]
 
 libUsageRequirements = [ 
-    'boost_program_options'
+    'boost_program_options',
+    'yaml'
 ]
 
 libs = [
@@ -31,4 +34,4 @@ setupTools.noIgnoredAttribute(env_core)
 env_core['CPPPATH'].extend(includes)
 
 sources = Glob('src/*.cpp')
-buildTools.createLib(env, 'core', sources, includes, includeUsageRequirements, libUsageRequirements)
+buildTools.createLib(env_core, 'core', sources, includes, env, includeUsageRequirements, libUsageRequirements)

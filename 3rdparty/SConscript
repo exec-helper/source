@@ -1,5 +1,6 @@
 files = [
-	'catch.SConscript'
+	'catch.SConscript',
+	'yaml-cpp.SConscript'
 ]
 
 SConscript(files)

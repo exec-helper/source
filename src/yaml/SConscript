@@ -1,0 +1,30 @@
+Import('env')
+
+import copy
+import buildTools
+import setupTools
+
+yaml_env = env.Clone()
+yaml_includeUsageRequirements = [ 
+    env['THIRD_PARTY_DIR'] + '/yaml-cpp/include'
+]
+
+yaml_includes = [
+    'include/yaml',
+    yaml_includeUsageRequirements
+]
+
+yaml_libUsageRequirements = [ 
+    'yaml-cpp'
+]
+
+yaml_libs_path = [
+    env['LIBS_DIR'],
+    env['THIRD_PARTY_LIBS_DIR'],
+]
+
+setupTools.disableWarningAsError(yaml_env)
+setupTools.disableShadowWarnings(yaml_env)
+
+yaml_sources = Glob('src/*.cpp')
+buildTools.createLib(yaml_env, 'yaml', yaml_sources, yaml_includes, env, yaml_includeUsageRequirements, yaml_libUsageRequirements)

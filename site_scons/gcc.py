@@ -49,6 +49,10 @@ class Gcc:
             env['CPPFLAGS'].extend(['-Wextra', '-Wshadow',  '-Wpointer-arith', '-Wcast-qual'])
 
     @staticmethod
+    def disableShadowWarnings(env):
+        env['CPPFLAGS'].remove('-Wshadow')
+
+    @staticmethod
     def enableCxxVersion(env, cxxVersion = CXX_VERSION_03):
         if cxxVersion == CXX_VERSION_11:
             env['CPPFLAGS'].append('-std=c++11')

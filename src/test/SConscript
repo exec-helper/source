@@ -2,6 +2,7 @@ Import('env')
 
 folders = [
 	'core/SConscript',
+	'yaml/SConscript',
 ]
 
 SConscript(folders)

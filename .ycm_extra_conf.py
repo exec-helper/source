@@ -35,13 +35,14 @@ import ycm_core
 
 flags = [
     '-isystem3rdparty/include',
+    '-isystem3rdparty/yaml-cpp/include',
     '-Wall',
     '-Wextra',
     '-Wshadow',
     '-Wpointer-arith',
     '-Wcast-qual',
     '-Werror',
-    '-std=c++11'
+    '-std=c++11',
     '-I.',
     '-I3rdparty/include',
     '-I3rdparty/Catch/include',
@@ -49,6 +50,7 @@ flags = [
     '-Isrc/test/core/stubs',
     '-Isrc/core/include',
     '-Isrc/core/include/core',
+    '-Isrc/yaml/include/yaml',
     '-Isrc/applications',
     '-Isrc/catch'
 ]

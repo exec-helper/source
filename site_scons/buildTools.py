@@ -15,7 +15,7 @@ def buildCmake(env, output, sources, cmakeRootDir, buildDir, cmakeOptions, outpu
             scons_utils.listToString(cmakeOptions, ' ') +
             '-DCMAKE_C_COMPILER=' + env['CC'] + ' ' +
             '-DCMAKE_CXX_COMPILER=' + env['CXX'],
-        'make -C' + buildDir + ' -j',
+        'make -C' + buildDir + ' -j8',
         'cp ' + buildDir + '/' + outputAfterCmakeBuild + ' $TARGET'
     ])
 
@@ -116,9 +116,9 @@ def createAssembler(env, name, sources, includes, libs, libs_path):
 
     return targets
 
-def createLib(env, name, sources, includes, includeUsageRequirements, libUsageRequirements):
-    createIncludeUsageRequirement(env, name, includeUsageRequirements)
-    createLibUsageRequirement(env, name, libUsageRequirements)
+def createLib(env, name, sources, includes, global_env, includeUsageRequirements, libUsageRequirements):
+    createIncludeUsageRequirement(global_env, name, includeUsageRequirements)
+    createLibUsageRequirement(global_env, name, libUsageRequirements)
 
     env_lib = env.Clone()
     env_lib['CPPPATH'].extend(includes)

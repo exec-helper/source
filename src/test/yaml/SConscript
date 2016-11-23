@@ -1,0 +1,29 @@
+Import('env')
+
+import copy
+import buildTools
+import setupTools
+
+includes = [
+    '../../yaml/include'
+]
+
+libs = [
+    'yaml'
+]
+
+libs_path = [
+    env['LIBS_DIR'],
+    env['THIRD_PARTY_LIBS_DIR'],
+]
+
+env_yaml_test = env.Clone()
+
+sources = Glob('src/*.cpp')
+unittest = buildTools.createUnittest(env_yaml_test, 'yaml-unittest', sources, includes, libs, libs_path)
+bin = env.Alias("unittest", unittest)
+bin = env.Alias("test", unittest)
+
+install_files = env_yaml_test.Install('test/yaml/', 'test.yaml') 
+bin = env.Alias("unittest", install_files)
+bin = env.Alias("test", install_files)
