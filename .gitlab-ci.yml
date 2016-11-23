@@ -2,7 +2,14 @@ before_script:
     - apt-get update -qq && apt-get install --yes -qq scons gcc clang python3
 
 stages:
+    - build
     - test
+
+build-gcc:
+    stage: build
+    script: 
+        - scons compiler=gcc mode=debug
+        - scons compiler=gcc mode=release
 
 test-distcleanTarget-python2:
     script: "python3 test/distcleanTargetTest.py --compiler gcc clang --python-version python2"
@@ -55,3 +62,18 @@ python3-perf:
         - wget https://github.com/torvalds/linux/archive/master.zip && unzip master.zip && pushd linux-master/tools/perf && make && export PATH=$PATH:$(pwd); popd
         - cd example
         - "python3 exec distclean clean init build profile -m release -t all -r all -c gcc clang -l perf -i .exec-helper_profiles"
+
+unittest-core:
+    stage: test
+    script:
+        - build/gcc/release/test/core/core-unittest
+
+memory-check:
+    stage: test
+    script:
+        - make check-memory
+
+coverage:
+    stage: test
+    script:
+        - make coverage

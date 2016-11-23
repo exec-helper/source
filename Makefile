@@ -1,5 +1,5 @@
 build:
-	scons compiler=gcc -j8
+	scons compiler=gcc -j8 mode=debug
 
 coverage: build
 	lcov --base-directory . --directory . --zerocounters -q
