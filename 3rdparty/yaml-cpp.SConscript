@@ -8,7 +8,7 @@ yaml_env = env.Clone()
 setupTools.disableWarningAsError(yaml_env)
 
 # Download the library
-target = yaml_env.Command('yaml-cpp/node/node.h', 'yaml-cpp.commit', 'git submodule init 3rdparty/yaml-cpp && git submodule update 3rdparty/yaml-cpp')
+target = yaml_env.Command('yaml-cpp/yaml.h', 'yaml-cpp.commit', 'git submodule init 3rdparty/yaml-cpp && git submodule update 3rdparty/yaml-cpp')
 
 # Build the library
 cmake_options = [
