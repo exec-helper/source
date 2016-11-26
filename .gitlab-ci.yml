@@ -5,12 +5,16 @@ stages:
     - build
     - test
 
-build-gcc:
+build:gcc:
     stage: build
     script: 
         - git submodule update --init
         - scons compiler=gcc mode=debug
         - scons compiler=gcc mode=release
+    artifacts:
+        expire_in: 1 day
+        path:
+            - build/
 
 test-distcleanTarget-python2:
     script: "python3 test/distcleanTargetTest.py --compiler gcc clang --python-version python2"
@@ -64,17 +68,23 @@ python3-perf:
         - cd example
         - "python3 exec distclean clean init build profile -m release -t all -r all -c gcc clang -l perf -i .exec-helper_profiles"
 
-unittest-core:
+unittest-core:gcc:
     stage: test
+    dependencies:
+        - build:gcc
     script:
         - build/gcc/release/test/core/core-unittest
 
 memory-check:
     stage: test
+    dependencies:
+        - build:gcc
     script:
         - make check-memory
 
 coverage:
     stage: test
+    dependencies:
+        - build:gcc
     script:
         - make coverage
