@@ -29,7 +29,7 @@ memory-check:
     dependencies:
         - build:gcc
     script:
-        - apt-get install valgrind
+        - apt-get install --yes valgrind
         - make check-memory
 
 coverage:
@@ -37,5 +37,5 @@ coverage:
     dependencies:
         - build:gcc
     script:
-        - apt-get install lcov
+        - apt-get install --yes lcov
         - make coverage
