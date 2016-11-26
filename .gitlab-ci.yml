@@ -8,6 +8,7 @@ stages:
 build-gcc:
     stage: build
     script: 
+        - git submodule update --init
         - scons compiler=gcc mode=debug
         - scons compiler=gcc mode=release
 
