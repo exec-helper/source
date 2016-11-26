@@ -1,13 +1,15 @@
+before_script:
+    - apt-get update -qq && apt-get install --yes -qq libboost-program-options1.55.0
+
 stages:
     - build
     - test
 
 build:gcc:
     stage: build
-    before_script:
-        - apt-get update -qq && apt-get install --yes -qq scons gcc g++ cmake libboost-program-options1.55-dev libboost-program-options1.55.0
-        - git submodule update --init
     script: 
+        - apt-get install --yes -qq scons gcc g++ cmake libboost-program-options1.55-dev
+        - git submodule update --init
         - scons compiler=gcc mode=debug
         - scons compiler=gcc mode=release
     artifacts:
@@ -26,16 +28,14 @@ memory-check:
     stage: test
     dependencies:
         - build:gcc
-    before_script:
-        - apt-get update -qq && apt-get install valgrind
     script:
+        - apt-get install valgrind
         - make check-memory
 
 coverage:
     stage: test
     dependencies:
         - build:gcc
-    before_script:
-        - apt-get update -qq && apt-get install lcov
     script:
+        - apt-get install lcov
         - make coverage
