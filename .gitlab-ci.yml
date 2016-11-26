@@ -1,72 +1,19 @@
-before_script:
-    - apt-get update -qq && apt-get install --yes -qq scons gcc g++ clang python3 cmake libboost-program-options1.55-dev libboost-program-options1.55.0
-
 stages:
     - build
     - test
 
 build:gcc:
     stage: build
-    script: 
+    before_script:
+        - apt-get install --yes -qq scons gcc g++ cmake libboost-program-options1.55-dev libboost-program-options1.55.0
         - git submodule update --init
+    script: 
         - scons compiler=gcc mode=debug
         - scons compiler=gcc mode=release
     artifacts:
         expire_in: 1 day
         paths:
             - build/
-
-test-distcleanTarget-python2:
-    script: "python3 test/distcleanTargetTest.py --compiler gcc clang --python-version python2"
-    stage: test
-
-test-distcleanTarget-python3:
-    script: "python3 test/distcleanTargetTest.py --compiler gcc clang --python-version python3"
-    stage: test
-
-test-buildTarget-python2:
-    script: "python3 test/buildTargetTest.py --compiler gcc clang --python-version python2"
-    stage: test
-
-test-buildTarget-python3:
-    script: "python3 test/buildTargetTest.py --compiler gcc clang --python-version python3"
-    stage: test
-
-test-runTarget-python2:
-    script: "python3 test/runTargetTest.py --compiler gcc clang --python-version python2"
-    stage: test
-
-test-runTarget-python3:
-    script: "python3 test/runTargetTest.py --compiler gcc clang --python-version python3"
-    stage: test
-
-python2-compatibility:
-    script:
-        - apt-get install --yes -qq valgrind cppcheck
-        - cd example
-        - "python2 exec distclean clean init build run rebuild analyze profile -m release -t all -r all -c gcc clang -a clang cppcheck -l callgrind -i .exec-helper_profiles"
-    stage: test
-
-python3-compatibility:
-    script:
-        - apt-get install --yes -qq valgrind cppcheck
-        - cd example
-        - "python3 exec distclean clean init build run rebuild analyze profile -m release -t all -r all -c gcc clang -a clang cppcheck -l callgrind -i .exec-helper_profiles"
-    stage: test
-
-python2-perf:
-    script:
-        - apt-get install --yes -qq unzip default-jre unzip flex bison
-        - wget https://github.com/torvalds/linux/archive/master.zip && unzip master.zip && pushd linux-master/tools/perf && make && export PATH=$PATH:$(pwd); popd
-        - cd example
-        - "python2 exec distclean clean init build profile -m release -t all -r all -c gcc clang -l perf -i .exec-helper_profiles"
-
-python3-perf:
-    script:
-        - apt-get install --yes -qq unzip default-jre unzip flex bison
-        - wget https://github.com/torvalds/linux/archive/master.zip && unzip master.zip && pushd linux-master/tools/perf && make && export PATH=$PATH:$(pwd); popd
-        - cd example
-        - "python3 exec distclean clean init build profile -m release -t all -r all -c gcc clang -l perf -i .exec-helper_profiles"
 
 unittest-core:gcc:
     stage: test
@@ -79,14 +26,16 @@ memory-check:
     stage: test
     dependencies:
         - build:gcc
-    script:
+    before_script:
         - apt-get install valgrind
+    script:
         - make check-memory
 
 coverage:
     stage: test
     dependencies:
         - build:gcc
-    script:
+    before_script:
         - apt-get install lcov
+    script:
         - make coverage
