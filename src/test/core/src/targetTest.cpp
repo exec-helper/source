@@ -3,7 +3,7 @@
 
 #include <catch.hpp>
 
-#include "core/target.h"
+#include "core/targetDescription.h"
 
 using std::string;
 using std::vector;

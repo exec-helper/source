@@ -5,7 +5,7 @@
 #include <vector>
 #include <memory>
 
-#include "target.h"
+#include "targetDescription.h"
 
 #include "config/settingsNode.h"
 
