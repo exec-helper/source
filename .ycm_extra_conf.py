@@ -55,6 +55,8 @@ flags = [
     '-Isrc/yaml/include/yaml',
     '-Isrc/config/include',
     '-Isrc/config/include/config',
+    '-Isrc/plugins/include',
+    '-Isrc/plugins/include/plugins',
     '-Isrc/applications',
     '-Isrc/catch'
 ]

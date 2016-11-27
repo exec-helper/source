@@ -5,16 +5,16 @@ import buildTools
 import setupTools
 
 includes = [
-    'include',
     '../stubs',
 ]
 
 dependencies = [
-    'core'
+    'core',
+    'plugins'
 ]
 
 env_core_test = env.Clone()
 setupTools.noIgnoredAttribute(env_core_test)
 
 sources = Glob('src/*.cpp')
-unittest = buildTools.createUnittest(env_core_test, 'core-unittest', sources, includes, dependencies, None, dependencies)
+unittest = buildTools.createUnittest(env_core_test, 'plugins-unittest', sources, includes, dependencies, None, dependencies)

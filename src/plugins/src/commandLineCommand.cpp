@@ -8,8 +8,8 @@ using execHelper::core::TaskCollection;
 using execHelper::config::SettingsNode;
 
 namespace execHelper { namespace plugins {
-    void CommandLineCommand::apply(Task& task, const ExecHelperOptions& options) const noexcept {
-        const SettingsNode& settings = options.getSettings({"CommandLineCommand"});  
+    void CommandLineCommand::apply(const std::string& /*command*/, Task& task, const ExecHelperOptions& options) const noexcept {
+        const SettingsNode& settings = options.getSettings({"command-line-command"});  
         TaskCollection tasks = settings["command"].toStringCollection();
         task.append(tasks);
         registerTask(task, options);
