@@ -14,7 +14,7 @@ check-memory: build
 	valgrind --tool=memcheck build/gcc/debug/test/core/core-unittest
 	valgrind --tool=memcheck build/gcc/debug/test/yaml/yaml-unittest
 
-test:
+test: build
 	build/gcc/debug/test/core/core-unittest
 	build/gcc/debug/test/yaml/yaml-unittest
 

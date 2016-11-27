@@ -21,16 +21,15 @@ namespace {
 
     struct MainVariables {
         int argc;
-        unique_ptr<char*> argv;
+        char* argv[10];
     };
 
     MainVariables convertToMainArguments(const vector<string>& arguments) {
         MainVariables result;
         result.argc = static_cast<int>(arguments.size());
-        result.argv.reset(new char*[result.argc]());
 
         for(size_t i = 0; i < arguments.size(); ++i) {
-            result.argv.get()[i] = const_cast<char*>(arguments[i].c_str());
+            result.argv[i] = const_cast<char*>(arguments[i].c_str());
         }
         return result;
     }
@@ -64,7 +63,7 @@ namespace execHelper { namespace core {
 
                     THEN("The parsing should succeed") {
                         ExecHelperOptions options; 
-                        REQUIRE(options.parse(mainVariables.argc, mainVariables.argv.get()));
+                        REQUIRE(options.parse(mainVariables.argc, mainVariables.argv));
                     }
                 }
             }
@@ -85,7 +84,7 @@ namespace execHelper { namespace core {
                 WHEN("We parse the variables") {
                     MainVariables mainVariables = convertToMainArguments(arguments);
                     ExecHelperOptions options; 
-                    options.parse(mainVariables.argc, mainVariables.argv.get());
+                    options.parse(mainVariables.argc, mainVariables.argv);
 
                     THEN("We should get the default variables") {
                         REQUIRE(options.getVerbosity() == default_verbosity);
@@ -113,7 +112,7 @@ namespace execHelper { namespace core {
                 WHEN("We convert it and parse the variables") {
                     MainVariables mainVariables = convertToMainArguments(arguments);
                     ExecHelperOptions options; 
-                    options.parse(mainVariables.argc, mainVariables.argv.get());
+                    options.parse(mainVariables.argc, mainVariables.argv);
 
                     THEN("It should be parsed properly") {
                         REQUIRE(options.getVerbosity() == true);
@@ -139,7 +138,7 @@ namespace execHelper { namespace core {
                 WHEN("We convert it and parse the variables") {
                     MainVariables mainVariables = convertToMainArguments(arguments);
                     ExecHelperOptions options; 
-                    options.parse(mainVariables.argc, mainVariables.argv.get());
+                    options.parse(mainVariables.argc, mainVariables.argv);
 
                     THEN("It should be parsed accordingly") {
                         REQUIRE(options.getVerbosity() == true);
@@ -159,7 +158,7 @@ namespace execHelper { namespace core {
                 WHEN("We convert it and parse the variables") {
                     MainVariables mainVariables = convertToMainArguments(arguments);
                     ExecHelperOptions options; 
-                    options.parse(mainVariables.argc, mainVariables.argv.get());
+                    options.parse(mainVariables.argc, mainVariables.argv);
 
                     THEN("We should get the default variables") {
                         REQUIRE(options.getCommands() == actualCommands);
@@ -177,7 +176,7 @@ namespace execHelper { namespace core {
                     MainVariables mainVariables = convertToMainArguments(arguments);
 
                     THEN("We should get the default") {
-                        REQUIRE(options.getSettingsFile(mainVariables.argc, mainVariables.argv.get()) == ".exec-helper");
+                        REQUIRE(options.getSettingsFile(mainVariables.argc, mainVariables.argv) == ".exec-helper");
                     }
                 }
             }
@@ -191,7 +190,7 @@ namespace execHelper { namespace core {
                     MainVariables mainVariables = convertToMainArguments(arguments);
 
                     THEN("We should get the default") {
-                        REQUIRE(options.getSettingsFile(mainVariables.argc, mainVariables.argv.get()) == settingsFile);
+                        REQUIRE(options.getSettingsFile(mainVariables.argc, mainVariables.argv) == settingsFile);
                     }
                 }
             }
@@ -205,7 +204,7 @@ namespace execHelper { namespace core {
                     MainVariables mainVariables = convertToMainArguments(arguments);
 
                     THEN("We should get the default") {
-                        REQUIRE(options.getSettingsFile(mainVariables.argc, mainVariables.argv.get()) == settingsFile);
+                        REQUIRE(options.getSettingsFile(mainVariables.argc, mainVariables.argv) == settingsFile);
                     }
                 }
             }
