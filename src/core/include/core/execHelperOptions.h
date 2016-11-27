@@ -7,6 +7,8 @@
 
 #include "target.h"
 
+#include "config/settingsNode.h"
+
 namespace execHelper {
     namespace core {
         typedef std::vector<std::string> CommandCollection;
@@ -14,16 +16,20 @@ namespace execHelper {
         class ExecHelperOptions {
             public:
                 ExecHelperOptions();
+                std::string getSettingsFile(int argc, char** argv) const noexcept;
                 bool parse(int argc, char** argv);
+                bool parseSettingsFile(const std::string& file) noexcept;
 
                 bool getVerbosity() const noexcept;
                 const CommandCollection& getCommands() const noexcept;
                 const TargetDescription& getTarget() const noexcept;
+                const config::SettingsNode& getSettings(const std::string& key) const noexcept;
 
             private:
                 bool m_verbose;
                 CommandCollection m_commands;
                 std::unique_ptr<TargetDescription> m_target;
+                config::SettingsNode m_settings;
         };
     }
 }

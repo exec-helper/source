@@ -7,11 +7,11 @@ import setupTools
 includes = [
     'include',
     'stubs',
-    '../../core/include'
 ]
 
 libs = [
-    'core'
+    'core',
+    'yaml'
 ]
 
 libs_path = [

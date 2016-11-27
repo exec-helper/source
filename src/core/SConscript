@@ -6,12 +6,13 @@ import setupTools
 
 includeUsageRequirements = [ 
     '{rootDir}/core/include'.format(rootDir = env['BUILD_DIR']),
-    env['THIRD_PARTY_DIR'] + '/yaml-cpp/include'
+    '{rootDir}/yaml/include'.format(rootDir = env['BUILD_DIR']),
 ]
 
 includes = [
     'include/core',
-    includeUsageRequirements
+    includeUsageRequirements,
+    env['BUILD_DIR'] + '/config/include'
 ]
 
 libUsageRequirements = [ 

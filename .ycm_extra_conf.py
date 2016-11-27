@@ -34,6 +34,7 @@ import os
 import ycm_core
 
 flags = [
+    'c++',
     '-isystem3rdparty/include',
     '-isystem3rdparty/yaml-cpp/include',
     '-Wall',
@@ -50,7 +51,10 @@ flags = [
     '-Isrc/test/core/stubs',
     '-Isrc/core/include',
     '-Isrc/core/include/core',
+    '-Isrc/yaml/include',
     '-Isrc/yaml/include/yaml',
+    '-Isrc/config/include',
+    '-Isrc/config/include/config',
     '-Isrc/applications',
     '-Isrc/catch'
 ]

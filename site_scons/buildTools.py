@@ -51,6 +51,9 @@ def addLibUsageRequirement(env, lib):
     lib_lib_requirements_name = generateLibUsageRequirementName(lib)
     if lib_lib_requirements_name in env: 
         toAdd.extend(env[lib_lib_requirements_name])
+
+        for extraLib in env[lib_lib_requirements_name]:
+            toAdd.extend(addLibUsageRequirement(env, extraLib))
     return toAdd
 
 def createUnittest(env, name, sources, includes, libs, libs_path):

@@ -6,8 +6,10 @@
 
 #include <yaml-cpp/yaml.h>
 
+#include "config/settingsNode.h"
+
 namespace execHelper { 
-    namespace core {
+    namespace yaml {
         // Struct is mainly meant to identify the correct constructor to use
         struct YamlWrapperFile {
             std::string file;
@@ -19,7 +21,7 @@ namespace execHelper {
                 YamlWrapper(const std::string& yamlConfig);
 
                 template<typename T>
-                T get(const std::initializer_list<std::string>& keys) {
+                T get(const std::initializer_list<std::string>& keys) const {
                     YAML::Node node = Clone(m_node);
                     for(const auto& key : keys) {
                         node = node[key];
@@ -27,7 +29,13 @@ namespace execHelper {
                     return node.as<T>();
                 }
 
+                // Convenience wrapper for parsing the whole tree
+                config::SettingsNode getTree(const std::initializer_list<std::string>& keys) const noexcept;
+                static config::SettingsNode getTree(const YAML::Node& rootNode) noexcept;
+
             private:
+                static void getSubTree(const YAML::Node& node, config::SettingsNode& yamlNode) noexcept;
+
                 const YAML::Node m_node;
         };
     }

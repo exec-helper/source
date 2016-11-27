@@ -6,33 +6,36 @@
 #include <sstream>
 #include <memory>
 
+#include "config/settingsNode.h"
+#include "config/configInputFile.h"
+
 // Yaml classes are being wrapped using pimpl 
 namespace execHelper {
-    namespace core {
+    namespace yaml {
         class YamlWrapper;
     }
 }
 
 namespace execHelper { 
-    namespace core {
+    namespace yaml {
         // Struct is mainly meant to identify the correct constructor to use
         struct YamlFile {
             std::string file;
         };
 
-        class Yaml {
+        class Yaml : public config::ConfigInputFile {
             public:
                 Yaml(const YamlFile& file);
                 Yaml(const std::string& yamlConfig);
-                ~Yaml();
-
-                size_t getSize(const std::string& key) const;
+                virtual ~Yaml();
 
                 std::string getValue(const std::initializer_list<std::string>& keys);
                 std::vector<std::string> getValueCollection(const std::initializer_list<std::string>& keys);
 
+                virtual config::SettingsNode getTree(const std::initializer_list<std::string>& keys) const noexcept;
+
             private:
-                YamlWrapper* m_yaml;
+                std::unique_ptr<YamlWrapper> m_yaml;
         };
     }
 }

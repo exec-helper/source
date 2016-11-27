@@ -4,7 +4,9 @@ import copy
 import buildTools
 import setupTools
 
-includes = []
+includes = [
+    env['BUILD_DIR'] + '/config/include'
+]
 
 libs = [
     'boost_program_options',

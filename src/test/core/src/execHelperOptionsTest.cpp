@@ -1,6 +1,8 @@
 #include <vector>
 #include <string>
 #include <memory>
+#include <fstream>
+#include <iostream>
 
 #include <catch.hpp>
 
@@ -9,6 +11,7 @@
 using std::string;
 using std::vector;
 using std::unique_ptr;
+using std::ofstream;
 
 namespace {
     template<typename T>
@@ -31,6 +34,23 @@ namespace {
         }
         return result;
     }
+
+    const string YAML_CONFIG_KEY_DELIMITER(": ");
+    const string YAML_CONFIG_DELIMITER("\n");
+    const string YAML_CONFIG_OPTION_CHARACTER("    - ");
+
+    string convertToConfig(const string& key, const vector<string>& values) {
+        string config(key + YAML_CONFIG_KEY_DELIMITER);
+        for(const auto& value : values) {
+            config += YAML_CONFIG_DELIMITER + YAML_CONFIG_OPTION_CHARACTER + value;
+        }
+        config += YAML_CONFIG_DELIMITER;
+        return config;
+    }
+
+    //string convertToConfig(string key, string value) {
+        //return string(key + YAML_CONFIG_KEY_DELIMITER + value);
+    //}
 }
 
 namespace execHelper { namespace core {
@@ -143,6 +163,76 @@ namespace execHelper { namespace core {
 
                     THEN("We should get the default variables") {
                         REQUIRE(options.getCommands() == actualCommands);
+                    }
+                }
+            }
+        }
+
+        SCENARIO("Test the getter for the settings file", "[execHelperOptions]") {
+            GIVEN("A command line without the options for the settings file and an options object") {
+                ExecHelperOptions options;
+                vector<string> arguments = {"UNITTEST"};
+
+                WHEN("We request the settings file") {
+                    MainVariables mainVariables = convertToMainArguments(arguments);
+
+                    THEN("We should get the default") {
+                        REQUIRE(options.getSettingsFile(mainVariables.argc, mainVariables.argv.get()) == ".exec-helper");
+                    }
+                }
+            }
+
+            GIVEN("A command line with the long option for the settings file and an options object") {
+                string settingsFile("test-settings-file.exec-helper");
+                ExecHelperOptions options;
+                vector<string> arguments = {"UNITTEST", "--settings-file", settingsFile};
+
+                WHEN("We request the settings file") {
+                    MainVariables mainVariables = convertToMainArguments(arguments);
+
+                    THEN("We should get the default") {
+                        REQUIRE(options.getSettingsFile(mainVariables.argc, mainVariables.argv.get()) == settingsFile);
+                    }
+                }
+            }
+
+            GIVEN("A command line with the short option for the settings file and an options object") {
+                string settingsFile("test-settings-file.exec-helper");
+                ExecHelperOptions options;
+                vector<string> arguments = {"UNITTEST", "-s", settingsFile};
+
+                WHEN("We request the settings file") {
+                    MainVariables mainVariables = convertToMainArguments(arguments);
+
+                    THEN("We should get the default") {
+                        REQUIRE(options.getSettingsFile(mainVariables.argc, mainVariables.argv.get()) == settingsFile);
+                    }
+                }
+            }
+        }
+
+        SCENARIO("Test the parsing of the settings file", "[execHelperOptions]") {
+            GIVEN("A file containing specific settings") {
+                const string settingsFile("test-settings-file.exec-helper");
+                const string commandsKey("commands");
+                const string command1Key("command1");
+                const vector<string> commandsValues = {command1Key, "command2", "command3"};
+                const vector<string> command1Values = {"command1a", "command1b"};
+
+                ofstream file;
+                file.open(settingsFile, std::ios::out | std::ios::trunc);
+                file << convertToConfig(commandsKey, commandsValues);
+                file << convertToConfig(command1Key, command1Values);
+                file.close();
+
+                ExecHelperOptions options;
+
+                WHEN("We parse the settings file") {
+                    REQUIRE(options.parseSettingsFile(settingsFile));
+
+                    THEN("We should get the settings found") {
+                        REQUIRE(options.getSettings(commandsKey).toString() == commandsValues);
+                        REQUIRE(options.getSettings(command1Key).toString() == command1Values);
                     }
                 }
             }

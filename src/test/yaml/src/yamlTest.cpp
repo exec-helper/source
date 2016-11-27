@@ -5,14 +5,18 @@
 #include <catch.hpp>
 
 #include "yaml/yaml.h"
+#include "config/settingsNode.h"
 
 using std::string;
 using std::vector;
+
+using execHelper::config::SettingsNode;
 
 namespace {
     const string YAML_CONFIG_KEY_DELIMITER(": ");
     const string YAML_CONFIG_DELIMITER("\n");
     const string YAML_CONFIG_OPTION_CHARACTER("    - ");
+
     string convertToConfig(const string& key, const vector<string>& values) {
         string config(key + YAML_CONFIG_KEY_DELIMITER);
         for(const auto& value : values) {
@@ -32,7 +36,7 @@ namespace {
     }
 }
 
-namespace execHelper { namespace core { namespace test {
+namespace execHelper { namespace yaml { namespace test {
     SCENARIO("Yaml wrapper test", "[yaml][yamlwrapper]") {
         GIVEN("A yaml config string to parse") {
             const string key("commands");
@@ -89,6 +93,47 @@ namespace execHelper { namespace core { namespace test {
                     REQUIRE(yaml.getValue({"scons", "command-line"}) == correctSconsCommandLine);
                     REQUIRE(yaml.getValue({"pmd", "auto-install"}) == correctPmdAutoInstall);
                     REQUIRE(yaml.getValue({"shellRunner", "command-line"}) == correctRunCommandLine);
+                }
+            }
+        }
+    }
+
+    SCENARIO("Yaml wrapper tree test", "[yaml][yamlwrapper]") {
+        GIVEN("A yaml config string to parse") {
+            YamlFile file;
+            file.file = basename(__FILE__) + "/../test.yaml";
+
+            vector<string> correctCommands = {"init", "build", "run", "analyze"};
+            vector<string> correctInit = {"git-submodules", "configure"};
+            vector<string> correctBuild = {"scons", "make"};
+            vector<string> correctRun = {"shellRunner"};
+            vector<string> correctAnalyze = {"cppcheck", "clang-static-analyzer", "pmd", "simian"};
+            vector<string> correctSubmodules = {"3rdparty/Catch", "3rdparty/benchmark"};
+            vector<string> correctSconsPatterns = {"COMPILER", "MODE"};
+            string correctSconsBuildDir("build/{COMPILER}/{MODE}");
+            string correctSconsSingleThreaded("yes");
+            string correctSconsCommandLine("compiler={COMPILER} mode={MODE}");
+            string correctPmdAutoInstall("yes");
+            string correctRunCommandLine("echo \"hello\"");
+
+            WHEN("We pass the config to the yaml wrapper") {
+                Yaml yaml(file);
+
+                THEN("We should find them all in the subtree") {
+                    SettingsNode settings = yaml.getTree({});
+                    REQUIRE(settings.getValues({"commands"}).toString() == correctCommands);
+                    REQUIRE(settings.getValues({"init"}).toString() == correctInit);
+                    REQUIRE(settings.getValues({"build"}).toString() == correctBuild);
+                    REQUIRE(settings.getValues({"run"}).toString() == correctRun);
+                    REQUIRE(settings.getValues({"analyze"}).toString() == correctAnalyze);
+                    REQUIRE(settings.getValues({"git-submodules", "submodules"}).toString() == correctSubmodules);
+                    REQUIRE(settings.getValues({"scons", "patterns"}).toString() == correctSconsPatterns);
+
+                    REQUIRE(settings.getValues({"scons", "build-dir"}).toString()[0] == correctSconsBuildDir);
+                    REQUIRE(settings.getValues({"scons", "single-threaded"}).toString()[0] == correctSconsSingleThreaded);
+                    REQUIRE(settings.getValues({"scons", "command-line"}).toString()[0] == correctSconsCommandLine);
+                    REQUIRE(settings.getValues({"pmd", "auto-install"}).toString()[0] == correctPmdAutoInstall);
+                    REQUIRE(settings.getValues({"shellRunner", "command-line"}).toString()[0] == correctRunCommandLine);
                 }
             }
         }
