@@ -7,6 +7,7 @@
 #include <catch.hpp>
 
 #include "core/execHelperOptions.h"
+#include "executorStub.h"
 
 using std::string;
 using std::vector;
@@ -231,6 +232,20 @@ namespace execHelper { namespace core {
                     THEN("We should get the settings found") {
                         REQUIRE(options.getSettings(commandsKey).toString() == commandsValues);
                         REQUIRE(options.getSettings(command1Key).toString() == command1Values);
+                    }
+                }
+            }
+        }
+        SCENARIO("Test the get/set executor settings", "[execHelperOptions]") {
+            GIVEN("An executor to set") {
+                ExecutorStub executor;
+                ExecHelperOptions options;
+
+                WHEN("We set the executor") {
+                    options.setExecutor(&executor);
+
+                    THEN("We should get the same executor") {
+                        REQUIRE(options.getExecutor() == &executor);
                     }
                 }
             }

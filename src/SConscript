@@ -4,6 +4,7 @@ folders = [
     'catch/SConscript',
     'yaml/SConscript',
     'core/SConscript',
+    'plugins/SConscript',
     'test/SConscript',
     'applications/SConscript'
 ]

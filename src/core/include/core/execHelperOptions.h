@@ -11,6 +11,12 @@
 
 namespace execHelper {
     namespace core {
+        class ExecutorInterface;
+    }
+}
+
+namespace execHelper {
+    namespace core {
         typedef std::vector<std::string> CommandCollection;
 
         class ExecHelperOptions {
@@ -25,11 +31,16 @@ namespace execHelper {
                 const TargetDescription& getTarget() const noexcept;
                 const config::SettingsNode& getSettings(const std::string& key) const noexcept;
 
+                void setExecutor(ExecutorInterface* const executor) noexcept;
+                ExecutorInterface* getExecutor() const noexcept;
+
             private:
                 bool m_verbose;
                 CommandCollection m_commands;
                 std::unique_ptr<TargetDescription> m_target;
                 config::SettingsNode m_settings;
+
+                static ExecutorInterface* m_executor;       // Non-owning pointer
         };
     }
 }

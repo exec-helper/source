@@ -7,6 +7,7 @@
 
 #include "yaml/yaml.h"
 #include "config/settingsNode.h"
+#include "executorInterface.h"
 
 using std::cout;
 using std::endl;
@@ -55,13 +56,18 @@ namespace {
         notify(optionsMap);    
         return optionsMap;
     }
+    
 }
 
 namespace execHelper { namespace core {
+    ExecutorInterface* ExecHelperOptions::m_executor(0);
+
     ExecHelperOptions::ExecHelperOptions() :
         m_verbose(false)
     {
-        ;
+        if(! m_executor) {
+
+        }
     }
 
     bool ExecHelperOptions::getVerbosity() const noexcept {
@@ -125,5 +131,13 @@ namespace execHelper { namespace core {
 
     const config::SettingsNode& ExecHelperOptions::getSettings(const std::string& key) const noexcept {
        return m_settings[key]; 
+    }
+
+    void ExecHelperOptions::setExecutor(ExecutorInterface* const executor) noexcept {
+        m_executor = executor;
+    }
+
+    ExecutorInterface* ExecHelperOptions::getExecutor() const noexcept {
+        return m_executor;
     }
 } }
