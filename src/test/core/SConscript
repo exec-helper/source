@@ -9,20 +9,12 @@ includes = [
     'stubs',
 ]
 
-libs = [
-    'core',
-    'yaml'
-]
-
-libs_path = [
-    env['LIBS_DIR'],
-    env['THIRD_PARTY_LIBS_DIR'],
+dependencies = [
+    'core'
 ]
 
 env_core_test = env.Clone()
 setupTools.noIgnoredAttribute(env_core_test)
 
 sources = Glob('src/*.cpp')
-unittest = buildTools.createUnittest(env_core_test, 'core-unittest', sources, includes, libs, libs_path)
-bin = env.Alias("unittest", unittest)
-bin = env.Alias("test", unittest)
+unittest = buildTools.createUnittest(env_core_test, 'core-unittest', sources, includes, dependencies, None, dependencies)

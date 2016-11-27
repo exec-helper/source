@@ -2,8 +2,8 @@ Import('env')
 
 folders = [
     'catch/SConscript',
-    'core/SConscript',
     'yaml/SConscript',
+    'core/SConscript',
     'test/SConscript',
     'applications/SConscript'
 ]

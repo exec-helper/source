@@ -4,24 +4,12 @@ import copy
 import buildTools
 import setupTools
 
-includes = [
-    env['BUILD_DIR'] + '/config/include'
-]
-
-libs = [
-    'boost_program_options',
+dependencies = [
     'core'
-]
-
-libs_path = [
-    env['LIBS_DIR'],
-    env['THIRD_PARTY_LIBS_DIR'],
 ]
 
 env_core = env.Clone()
 setupTools.noIgnoredAttribute(env_core)
 
-env_core['CPPPATH'].extend(includes)
-
 sources = ['exec-helper.cpp']
-buildTools.createProgram(env, 'exec-helper', sources, includes, libs, libs_path, env['BIN_DIR'])
+buildTools.createProgram(env, 'exec-helper', sources, None, dependencies, None, env['BIN_DIR'], dependencies)

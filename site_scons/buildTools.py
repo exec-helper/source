@@ -5,6 +5,14 @@ from SCons.Script import *
 import scons_utils
 import setupTools
 
+class LibUsageRequirements:
+    def __init__(self, name, includeUsageRequirements, libUsageRequirements, libPathUsageRequirements, dependencies):
+        self.name = name
+        self.includeUsageRequirements = includeUsageRequirements
+        self.libUsageRequirements = libUsageRequirements
+        self.libPathUsageRequirements = libPathUsageRequirements
+        self.dependencies = dependencies
+
 def buildCmake(env, output, sources, cmakeRootDir, buildDir, cmakeOptions, outputAfterCmakeBuild):
     return env.Command(output, sources, 
     [
@@ -19,129 +27,101 @@ def buildCmake(env, output, sources, cmakeRootDir, buildDir, cmakeOptions, outpu
         'cp ' + buildDir + '/' + outputAfterCmakeBuild + ' $TARGET'
     ])
 
-def generateIncludeUsageRequirementName(libName):
-    return 'LIB_' + libName.upper() + '_INCLUDES'
-
 def generateLibUsageRequirementName(libName):
-    return 'LIB_' + libName.upper() + '_LIB'
+    return 'LIB_USAGE_REQUIREMENTS_' + libName.upper()
 
-def createIncludeUsageRequirement(env, libName, includes):
-    lib_include_requirements_name = generateIncludeUsageRequirementName(libName)
+def createUsageRequirements(env, name, includeUsageRequirements, libUsageRequirements, libPathUsageRequirements, dependencies):
+    libUsageRequirementName = generateLibUsageRequirementName(name)
+    env[libUsageRequirementName] = LibUsageRequirements(name, includeUsageRequirements, libUsageRequirements, libPathUsageRequirements, dependencies)
 
-    if lib_include_requirements_name in env: 
-        env[lib_include_requirements_name].extend(includes)
-    else:
-        env[lib_include_requirements_name] = includes
-
-def createLibUsageRequirement(env, libName, libs):
-    lib_lib_requirements_name = generateLibUsageRequirementName(libName)
-
-    if lib_lib_requirements_name in env: 
-        env[lib_lib_requirements_name].extend(libs)
-    else:
-        env[lib_lib_requirements_name] = libs
-
-def addIncludeUsageRequirement(env, lib, toAdd):
-    lib_include_requirements_name = generateIncludeUsageRequirementName(lib)
-    if lib_include_requirements_name in env: 
-        toAdd.extend(env[lib_include_requirements_name])
-
-def addLibUsageRequirement(env, lib):
+def addIncludeUsageRequirement(env, dependency):
     toAdd = []
-    lib_lib_requirements_name = generateLibUsageRequirementName(lib)
-    if lib_lib_requirements_name in env: 
-        toAdd.extend(env[lib_lib_requirements_name])
+    libUsageRequirementName = generateLibUsageRequirementName(dependency)
+    if libUsageRequirementName in env: 
+        if env[libUsageRequirementName].includeUsageRequirements is not None:
+            toAdd.extend(env[libUsageRequirementName].includeUsageRequirements)
 
-        for extraLib in env[lib_lib_requirements_name]:
-            toAdd.extend(addLibUsageRequirement(env, extraLib))
+        if env[libUsageRequirementName].dependencies is not None:
+            for dependentDependency in env[libUsageRequirementName].dependencies:
+                toAdd.extend(addIncludeUsageRequirement(env, dependentDependency))
     return toAdd
 
-def createUnittest(env, name, sources, includes, libs, libs_path):
+def addLibUsageRequirement(env, dependency):
+    toAdd = []
+    libUsageRequirementName = generateLibUsageRequirementName(dependency)
+    if libUsageRequirementName in env: 
+        if env[libUsageRequirementName].libUsageRequirements is not None:
+            toAdd.extend(env[libUsageRequirementName].libUsageRequirements)
+
+        if env[libUsageRequirementName].dependencies is not None:
+            for extraLib in env[libUsageRequirementName].dependencies:
+                toAdd.extend(addLibUsageRequirement(env, extraLib))
+    return toAdd
+
+def addLibPathUsageRequirement(env, dependency):
+    toAdd = []
+    libUsageRequirementName = generateLibUsageRequirementName(dependency)
+    if libUsageRequirementName in env: 
+        if env[libUsageRequirementName].libPathUsageRequirements is not None:
+            toAdd.extend(env[libUsageRequirementName].libPathUsageRequirements)
+
+        if env[libUsageRequirementName].dependencies is not None:
+            for extraLib in env[libUsageRequirementName].dependencies:
+                toAdd.extend(addLibPathUsageRequirement(env, extraLib))
+    return toAdd
+
+def createUnittest(env, name, sources, includes, libs, libs_path, dependencies):
     env_unittest = env.Clone()
 
     env_unittest['CPPPATH'].append(env['ROOT_DIR'] + '/3rdparty/Catch/include')
 
-    libs_unittest = copy.deepcopy(libs)
+    if libs is not None:
+        libs_unittest = copy.deepcopy(libs)
+    else:
+        libs_unittest = []
     libs_unittest.extend(env['LIB_UNITTEST'])
 
-    target = createProgram(env_unittest, name, sources, includes, libs_unittest, libs_path, env['UNITTEST_BIN_DIR'])
+    target = createProgram(env_unittest, name, sources, includes, libs_unittest, libs_path, env['UNITTEST_BIN_DIR'], dependencies)
     env.Alias("unittests", target)
+    env.Alias("test", target)
     return target
 
-def createBenchmark(env, name, sources, includes, libs, libs_path, TEMPS = []):
-    env_benchmark = env.Clone()
-    libs_benchmark = copy.deepcopy(libs)
-
-    env_benchmark['CPPPATH'].extend(includes)
-
-    addIncludeUsageRequirement(env, 'benchmark', env['CPPPATH'])
-    addIncludeUsageRequirement(env_benchmark, 'benchmark', env_benchmark['CPPPATH'])
-    for lib in libs:
-        addIncludeUsageRequirement(env_benchmark, lib, env_benchmark['CPPPATH'])
-        libs_unittest.extend(addLibUsageRequirement(env_unittest, lib))
-
-    libs_benchmark.extend(env['LIB_BENCHMARK'])
-    libs_benchmark.extend(env['STD_LIBS'])
-
-
-    target = env_benchmark.Program(name, sources, LIBS=libs_benchmark, LIBPATH=libs_path)
-    installed_bin = env_benchmark.Install("{bin_dir}".format(bin_dir=env['BENCHMARK_BIN_DIR']), target)
-    env_benchmark.Alias(name, installed_bin)
-    env_benchmark.Alias("benchmarks", installed_bin)
-
-    targetList = [installed_bin]
-
-    # Create temps
-    for temp in TEMPS:
-        if temp == '.s' or temp == '.S':
-            asm_files = createAssembler(env, name, sources, includes, libs, libs_path)
-            targetList.append(asm_files)
-
-    return targetList
-
-def createAssembler(env, name, sources, includes, libs, libs_path):
-    env_benchmark = env.Clone()
-
-    env_benchmark['CPPPATH'].extend(includes)
-    setupTools.stopAtAssembler(env_benchmark)
-
-    for lib in libs:
-        addIncludeUsageRequirement(env_benchmark, lib, env_benchmark['CPPPATH'])
-
-    # Build target sources
-    targets = []
-    for source in sources:
-        targetFile = os.path.splitext(source.rstr())[0]+'.s'
-        target = env_benchmark.StaticObject(targetFile, source )
-        targets.append(target)
-        env.Alias(name, target)
-        env.Alias("benchmarks", target)
-
-    return targets
-
-def createLib(env, name, sources, includes, global_env, includeUsageRequirements, libUsageRequirements):
-    createIncludeUsageRequirement(global_env, name, includeUsageRequirements)
-    createLibUsageRequirement(global_env, name, libUsageRequirements)
+def createLib(env, name, sources, includes, global_env, includeUsageRequirements, libUsageRequirements, libPathUsageRequirements, dependencies):
+    createUsageRequirements(global_env, name, includeUsageRequirements, libUsageRequirements, libPathUsageRequirements, dependencies)
 
     env_lib = env.Clone()
     env_lib['CPPPATH'].extend(includes)
+
+    if dependencies is not None:
+        for dependency in dependencies:
+            env_lib['CPPPATH'].extend(addIncludeUsageRequirement(env_lib, dependency))
 
     lib = env_lib.Library(name, sources)
     installed_lib = env.Install("{libs_dir}".format(libs_dir=env['LIBS_DIR']), lib)
     env.Alias(name, installed_lib)
     env.Alias('buildLibs', installed_lib)
 
-def createProgram(env, name, sources, includes, libs, libs_path, install_dir):
+def createProgram(env, name, sources, includes, libs, libs_path, install_dir, dependencies):
     env_program = env.Clone()
-    libs_program = copy.deepcopy(libs)
 
-    env_program['CPPPATH'].extend(includes)
+    if libs is not None:
+        libs_program = copy.deepcopy(libs)
+    else:
+        libs_program = []
 
-    for lib in libs:
-        addIncludeUsageRequirement(env_program, lib, env_program['CPPPATH'])
-        libs_program.extend(addLibUsageRequirement(env_program, lib))
+    if libs_path is None:
+        libs_path = []
+
+    if includes is not None:
+        env_program['CPPPATH'].extend(includes)
+
+    for dependency in dependencies:
+        env_program['CPPPATH'].extend(addIncludeUsageRequirement(env_program, dependency))
+        libs_program.extend(addLibUsageRequirement(env_program, dependency))
+        libs_path.extend(addLibPathUsageRequirement(env_program, dependency))
 
     libs_program.extend(env['STD_LIBS'])
+    libs_path.extend([env['LIBS_DIR'], env['THIRD_PARTY_LIBS_DIR']])
 
     target = env_program.Program(name, sources, LIBS=libs_program, LIBPATH=libs_path)
     installed_bin = env.Install("{bin_dir}".format(bin_dir=install_dir), target)
