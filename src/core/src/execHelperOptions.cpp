@@ -125,7 +125,7 @@ namespace execHelper { namespace core {
         YamlFile yamlFile;
         yamlFile.file = file;
         Yaml yaml(yamlFile);
-        m_settings = yaml.getTree({}); 
+        yaml.getTree({}, m_settings); 
         return true;
     }
 

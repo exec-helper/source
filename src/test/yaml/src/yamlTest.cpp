@@ -120,20 +120,21 @@ namespace execHelper { namespace yaml { namespace test {
                 Yaml yaml(file);
 
                 THEN("We should find them all in the subtree") {
-                    SettingsNode settings = yaml.getTree({});
-                    REQUIRE(settings.getValues({"commands"}).toString() == correctCommands);
-                    REQUIRE(settings.getValues({"init"}).toString() == correctInit);
-                    REQUIRE(settings.getValues({"build"}).toString() == correctBuild);
-                    REQUIRE(settings.getValues({"run"}).toString() == correctRun);
-                    REQUIRE(settings.getValues({"analyze"}).toString() == correctAnalyze);
-                    REQUIRE(settings.getValues({"git-submodules", "submodules"}).toString() == correctSubmodules);
-                    REQUIRE(settings.getValues({"scons", "patterns"}).toString() == correctSconsPatterns);
+                    SettingsNode settings;
+                    yaml.getTree({}, settings);
+                    REQUIRE(settings["commands"].toStringCollection() == correctCommands);
+                    REQUIRE(settings["init"].toStringCollection() == correctInit);
+                    REQUIRE(settings["build"].toStringCollection() == correctBuild);
+                    REQUIRE(settings["run"].toStringCollection() == correctRun);
+                    REQUIRE(settings["analyze"].toStringCollection() == correctAnalyze);
+                    REQUIRE(settings["git-submodules"]["submodules"].toStringCollection() == correctSubmodules);
+                    REQUIRE(settings["scons"]["patterns"].toStringCollection() == correctSconsPatterns);
 
-                    REQUIRE(settings.getValues({"scons", "build-dir"}).toString()[0] == correctSconsBuildDir);
-                    REQUIRE(settings.getValues({"scons", "single-threaded"}).toString()[0] == correctSconsSingleThreaded);
-                    REQUIRE(settings.getValues({"scons", "command-line"}).toString()[0] == correctSconsCommandLine);
-                    REQUIRE(settings.getValues({"pmd", "auto-install"}).toString()[0] == correctPmdAutoInstall);
-                    REQUIRE(settings.getValues({"shellRunner", "command-line"}).toString()[0] == correctRunCommandLine);
+                    REQUIRE(settings["scons"]["build-dir"].toStringCollection()[0] == correctSconsBuildDir);
+                    REQUIRE(settings["scons"]["single-threaded"].toStringCollection()[0] == correctSconsSingleThreaded);
+                    REQUIRE(settings["scons"]["command-line"].toStringCollection()[0] == correctSconsCommandLine);
+                    REQUIRE(settings["pmd"]["auto-install"].toStringCollection()[0] == correctPmdAutoInstall);
+                    REQUIRE(settings["shellRunner"]["command-line"].toStringCollection()[0] == correctRunCommandLine);
                 }
             }
         }

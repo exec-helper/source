@@ -30,8 +30,8 @@ namespace execHelper {
                 }
 
                 // Convenience wrapper for parsing the whole tree
-                config::SettingsNode getTree(const std::initializer_list<std::string>& keys) const noexcept;
-                static config::SettingsNode getTree(const YAML::Node& rootNode) noexcept;
+                void getTree(const std::initializer_list<std::string>& keys, config::SettingsNode& settings) const noexcept;
+                static void getTree(const YAML::Node& rootNode, config::SettingsNode& settings) noexcept;
 
             private:
                 static void getSubTree(const YAML::Node& node, config::SettingsNode& yamlNode) noexcept;

@@ -36,8 +36,8 @@ namespace execHelper { namespace yaml {
         return m_yaml->get<vector<string>>(keys);
     }
 
-    SettingsNode Yaml::getTree(const initializer_list<string>& keys) const noexcept {
-        return m_yaml->getTree(keys);
+    void Yaml::getTree(const initializer_list<string>& keys, SettingsNode& settings) const noexcept {
+        return m_yaml->getTree(keys, settings);
     }
 } }
 

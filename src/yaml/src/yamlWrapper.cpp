@@ -26,37 +26,31 @@ namespace execHelper { namespace yaml {
         ;
     }
 
-    SettingsNode YamlWrapper::getTree(const initializer_list<string>& keys) const noexcept {
+    void YamlWrapper::getTree(const initializer_list<string>& keys, SettingsNode& settings) const noexcept {
         const YAML::Node& node = get<YAML::Node>(keys);
-        return getTree(node);
+        getTree(node, settings);
     }
 
-    SettingsNode YamlWrapper::getTree(const YAML::Node& rootNode) noexcept {
+    void YamlWrapper::getTree(const YAML::Node& rootNode, SettingsNode& settings) noexcept {
         YAML::Node node = Clone(rootNode);
-        SettingsNode yamlNode;
-        yamlNode.key = "<root>";
-        getSubTree(node, yamlNode);
-        return yamlNode;
+        settings.key = "<root>";
+        getSubTree(node, settings);
     }
 
     void YamlWrapper::getSubTree(const YAML::Node& node, SettingsNode& yamlNode) noexcept {
         for(const auto& element : node) {
-            if(! yamlNode.values) {
-                yamlNode.values.reset(new vector<SettingsNode>());
-            }
-            yamlNode.values->push_back(SettingsNode()); 
-            yamlNode.values->back().key = element.first.as<string>();
+            yamlNode.values.emplace_back(SettingsNode()); 
+            yamlNode.values.back().key = element.first.as<string>();
             if(element.second.IsMap()) {
-                YamlWrapper::getSubTree(element.second, yamlNode.values->back());
+                YamlWrapper::getSubTree(element.second, yamlNode.values.back());
             } else {
-                yamlNode.values->back().values.reset(new vector<SettingsNode>());
                 if(element.second.size() == 0) {
-                    yamlNode.values->back().values->push_back(SettingsNode());
-                    yamlNode.values->back().values->back().key = element.second.as<string>();
+                    yamlNode.values.back().values.emplace_back(SettingsNode());
+                    yamlNode.values.back().values.back().key = element.second.as<string>();
                 }
                 for(const auto& el : element.second) {
-                    yamlNode.values->back().values->push_back(SettingsNode());
-                    yamlNode.values->back().values->back().key = el.as<string>();
+                    yamlNode.values.back().values.emplace_back(SettingsNode());
+                    yamlNode.values.back().values.back().key = el.as<string>();
                 }
             }
         }

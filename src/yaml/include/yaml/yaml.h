@@ -32,7 +32,7 @@ namespace execHelper {
                 std::string getValue(const std::initializer_list<std::string>& keys);
                 std::vector<std::string> getValueCollection(const std::initializer_list<std::string>& keys);
 
-                virtual config::SettingsNode getTree(const std::initializer_list<std::string>& keys) const noexcept;
+                virtual void getTree(const std::initializer_list<std::string>& keys, config::SettingsNode& settings) const noexcept;
 
             private:
                 std::unique_ptr<YamlWrapper> m_yaml;

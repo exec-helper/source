@@ -230,8 +230,8 @@ namespace execHelper { namespace core {
                     REQUIRE(options.parseSettingsFile(settingsFile));
 
                     THEN("We should get the settings found") {
-                        REQUIRE(options.getSettings(commandsKey).toString() == commandsValues);
-                        REQUIRE(options.getSettings(command1Key).toString() == command1Values);
+                        REQUIRE(options.getSettings(commandsKey).toStringCollection() == commandsValues);
+                        REQUIRE(options.getSettings(command1Key).toStringCollection() == command1Values);
                     }
                 }
             }

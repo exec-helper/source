@@ -1,0 +1,31 @@
+Import('env')
+
+import copy
+import buildTools
+import setupTools
+
+includeUsageRequirements = [ 
+    '{rootDir}/plugins/include'.format(rootDir = env['BUILD_DIR'])
+]
+
+includes = [
+    'include/plugins',
+    includeUsageRequirements
+]
+
+dependencies = [
+    'core'
+]
+
+libUsageRequirements = [ 
+    dependencies
+]
+
+libs = [
+    libUsageRequirements,
+]
+
+env_core = env.Clone()
+
+sources = Glob('src/*.cpp')
+buildTools.createLib(env_core, 'plugins', sources, includes, env, includeUsageRequirements, libUsageRequirements, None, dependencies)

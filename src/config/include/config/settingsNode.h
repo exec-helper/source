@@ -10,7 +10,11 @@ namespace execHelper {
     namespace config {
         struct SettingsNode {
             std::string key;
-            std::unique_ptr<std::vector<SettingsNode>> values;
+            std::vector<SettingsNode> values;
+
+            ~SettingsNode() {
+                ;
+            }
 
             SettingsNode& operator[](const std::string& requestedKey) noexcept {
                 const SettingsNode& node = *this;
@@ -18,37 +22,32 @@ namespace execHelper {
             }
 
             const SettingsNode& operator[](const std::string& requestedKey) const noexcept {
-                if(values) {
-                    for(const auto& value : *values) {
-                        if(requestedKey == value.key) {
-                            return value;
-                        }
+                for(const auto& value : values) {
+                    if(requestedKey == value.key) {
+                        return value;
                     }
                 }
                 return *this;
             }
 
-            const SettingsNode& getValues(const std::initializer_list<std::string>& keys) const noexcept {
-                const SettingsNode* node = this;
-                for(const auto& requestedKey : keys) {
-                    node = &(*node)[requestedKey];
-                }
-                return *node;
-            }
-
-            std::vector<std::string> toString() const noexcept {
+            std::vector<std::string> toStringCollection() const noexcept {
                 std::vector<std::string> results;
 
-                if(values) {
-                    results.reserve(values->size());
-                    for(const auto& value : *values) {
-                        results.push_back(value.key);
-                    }
+                results.reserve(values.size());
+                for(const auto& value : values) {
+                    results.push_back(value.key);
                 }
                 return results;
             }
-        };
 
+            bool operator==(const SettingsNode& other) const noexcept {
+                return key == other.key && values == other.values;
+            }
+
+            bool operator!=(const SettingsNode& other) const noexcept {
+                return !(*this == other);
+            }
+        };
     }
 }
 
