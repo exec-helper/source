@@ -1,0 +1,21 @@
+commands:
+    - build
+    - clean
+    - distclean
+
+build:
+    - scons
+
+clean:
+    - scons
+
+distclean:
+    - scons
+
+scons:
+    patterns:
+        - COMPILER
+        - MODE
+    build-dir: build/{COMPILER}/{MODE}
+    single-threaded: yes
+    command-line: compiler={COMPILER} mode={MODE}

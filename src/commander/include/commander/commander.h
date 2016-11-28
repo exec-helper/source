@@ -15,19 +15,19 @@ namespace execHelper {
 }
 
 namespace execHelper {
-    namespace core {
+    namespace commander {
         class Commander {
             public:
-                Commander(const ExecHelperOptions& options);
+                Commander(const core::ExecHelperOptions& options);
 
-                void run() noexcept;
+                bool run() noexcept;
 
             private:
-                void executePlugin(const std::string& pluginName, const std::string& command, const ExecHelperOptions& options) noexcept;
+                bool executePlugin(const std::string& pluginName, const std::string& command, const core::ExecHelperOptions& options) noexcept;
 
                 static std::shared_ptr<plugins::Plugin> getPlugin(const std::string& pluginName) noexcept;
 
-                const ExecHelperOptions& m_options;
+                const core::ExecHelperOptions& m_options;
         };
     }
 }

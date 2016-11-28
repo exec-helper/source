@@ -21,9 +21,10 @@ using execHelper::test::appendVectors;
 using execHelper::test::convertToConfig;
 
 using execHelper::core::ExecHelperOptions;
+using execHelper::core::Task;
 using execHelper::core::test::ExecutorStub;
 
-namespace execHelper { namespace core { namespace test {
+namespace execHelper { namespace commander { namespace test {
     SCENARIO("Basic test the commander", "[commander]") {
         GIVEN("A fully configured commander and a configuration file") {
             string actualCommand("echo 'Hello world'");
@@ -65,7 +66,7 @@ namespace execHelper { namespace core { namespace test {
             Commander commander(options);
 
             WHEN("We apply the configuration and run the commander") {
-                commander.run();
+                REQUIRE(commander.run() == true);
 
                 THEN("We should get the tasks executed") {
                     REQUIRE(executor.getExecutedTasks() == vector<Task>({actualTask1, actualTask2})); 
@@ -107,7 +108,7 @@ namespace execHelper { namespace core { namespace test {
             Commander commander(options);
 
             WHEN("We apply the configuration and run the commander") {
-                commander.run();
+                REQUIRE(commander.run() == false);
 
                 THEN("We should have no executed tasks") {
                     REQUIRE(executor.getExecutedTasks() == vector<Task>({})); 
@@ -150,7 +151,7 @@ namespace execHelper { namespace core { namespace test {
             Commander commander(options);
 
             WHEN("We apply the configuration and run the commander") {
-                commander.run();
+                REQUIRE(commander.run() == false);
 
                 THEN("We should have no executed tasks") {
                     REQUIRE(executor.getExecutedTasks() == vector<Task>({})); 

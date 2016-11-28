@@ -5,7 +5,8 @@ import buildTools
 import setupTools
 
 dependencies = [
-    'core'
+    'core',
+    'commander'
 ]
 
 env_core = env.Clone()

@@ -6,6 +6,7 @@
 #include <memory>
 
 #include "targetDescription.h"
+#include "compilerDescription.h"
 
 #include "config/settingsNode.h"
 
@@ -29,6 +30,7 @@ namespace execHelper {
                 bool getVerbosity() const noexcept;
                 const CommandCollection& getCommands() const noexcept;
                 const TargetDescription& getTarget() const noexcept;
+                const CompilerDescription& getCompiler() const noexcept;
                 const config::SettingsNode& getSettings(const std::string& key) const noexcept;
 
                 void setExecutor(ExecutorInterface* const executor) noexcept;
@@ -38,6 +40,7 @@ namespace execHelper {
                 bool m_verbose;
                 CommandCollection m_commands;
                 std::unique_ptr<TargetDescription> m_target;
+                std::unique_ptr<CompilerDescription> m_compiler;
                 config::SettingsNode m_settings;
 
                 static ExecutorInterface* m_executor;       // Non-owning pointer
