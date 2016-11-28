@@ -168,4 +168,43 @@ namespace execHelper { namespace commander { namespace test {
             }
         }
     }
+
+    SCENARIO("Test the calling of the plugins", "[commander]") {
+        GIVEN("Nothing") {
+            WHEN("We have the environment to use the scons plugin") {
+                string command("build");
+                vector<string> commands({command});
+
+                string filename("test.exec-helper");
+
+                string config;
+                config += convertToConfig("commands", commands);
+                config += convertToConfig(command, vector<string>({"scons"}));
+
+                ofstream fileWriter;
+                fileWriter.open(filename);
+                fileWriter << config;
+                fileWriter.close();
+
+                vector<string> arguments;
+                arguments.emplace_back("UNITTEST");
+                appendVectors(arguments, commands);
+
+                ExecutorStub executor;
+
+                ExecHelperOptions options;
+                options.setExecutor(&executor);
+                options.parseSettingsFile(filename);
+
+                MainVariables mainVariables(arguments);
+                REQUIRE(options.parse(mainVariables.argc, mainVariables.argv.get()));
+
+                Commander commander(options);
+                
+                THEN("We should have no executed tasks") {
+                    REQUIRE(commander.run() == true);
+                }
+            }
+        }
+    }
 } } }
