@@ -20,35 +20,47 @@ build:gcc:
         paths:
             - build/
 
-unittest-core:gcc:
+build:clang:
+    stage: build
+    script: 
+        - apt-get install --yes -qq scons clang cmake libboost-program-options1.61-dev git
+        - git submodule update --init
+        - scons compiler=clang mode=debug
+        - scons compiler=clang mode=release
+    artifacts:
+        expire_in: 1 day
+        paths:
+            - build/
+
+unittest-core:
     stage: test
     dependencies:
         - build:gcc
     script:
         - build/gcc/release/test/core/core-unittest
 
-unittest-yaml:gcc:
+unittest-yaml:
     stage: test
     dependencies:
         - build:gcc
     script:
         - build/gcc/release/test/yaml/yaml-unittest
 
-unittest-config:gcc:
+unittest-config:
     stage: test
     dependencies:
         - build:gcc
     script:
         - build/gcc/release/test/config/config-unittest
 
-unittest-plugins:gcc:
+unittest-plugins:
     stage: test
     dependencies:
         - build:gcc
     script:
         - build/gcc/release/test/plugins/plugins-unittest
 
-unittest-commander:gcc:
+unittest-commander:
     stage: test
     dependencies:
         - build:gcc
