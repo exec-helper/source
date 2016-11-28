@@ -2,6 +2,7 @@
 
 #include <iostream>
 
+#include "log/log.h"
 #include "config/settingsNode.h"
 #include "core/execHelperOptions.h"
 #include "core/task.h"
@@ -33,7 +34,7 @@ namespace execHelper { namespace commander {
         } else if(pluginName == "scons") {
             return make_shared<plugins::Scons>(); 
         }
-        std::cout << "'" << pluginName << "' not registered" << std::endl;
+        user_feedback("'" << pluginName << "' not registered");
         return shared_ptr<Plugin>();
     }
 
@@ -41,7 +42,7 @@ namespace execHelper { namespace commander {
         Task task;
         shared_ptr<Plugin> plugin = getPlugin(pluginName);
         if(plugin) {
-            plugin->apply(command, task, options);
+            return plugin->apply(command, task, options);
         }
         return false;
     }
@@ -51,7 +52,7 @@ namespace execHelper { namespace commander {
 
         for(const auto& command : m_options.getCommands()) {
             if(! commandSettings.contains(command)) {
-                cout << "Error: undefined command" << endl;
+                user_feedback("Error: undefined command");
                 return false;
             }        
             const SettingsNode commandSpecificSettings = m_options.getSettings(command);

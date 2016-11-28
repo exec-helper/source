@@ -6,7 +6,8 @@ import setupTools
 
 includes = [
     '../include',
-    '../stubs'
+    '../stubs',
+    '{rootDir}/log/include'.format(rootDir = env['BUILD_DIR'])
 ]
 
 dependencies = [

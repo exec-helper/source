@@ -47,6 +47,7 @@ flags = [
     '-I.',
     '-I3rdparty/include',
     '-I3rdparty/Catch/include',
+    '-Isrc/log/include',
     '-Isrc/test/include',
     '-Isrc/test/stubs',
     '-Isrc/test/core/include',

@@ -6,6 +6,13 @@
 
 #include <catch.hpp>
 
+#include "log/log.h"
+#undef LOG
+#define LOG(x)
+
+#undef user_feedback 
+#define user_feedback(x)
+
 #include "core/execHelperOptions.h"
 #include "executorStub.h"
 #include "utils.h"

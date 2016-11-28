@@ -4,6 +4,15 @@
 #include <string>
 #include <iostream>
 
+#include <log/log.h>
+
+// Silence the logs for now
+//#undef LOG
+//#define LOG(x)
+
+//#undef user_feedback 
+//#define user_feedback(x)
+
 #include "core/execHelperOptions.h"
 #include "commander/commander.h"
 
