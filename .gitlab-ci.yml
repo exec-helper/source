@@ -4,6 +4,7 @@ before_script:
 stages:
     - build
     - test
+    - deploy
 
 build:gcc:
     stage: build
@@ -67,3 +68,19 @@ coverage:
     script:
         - apt-get install --yes lcov
         - make coverage
+     artifacts:
+         paths:
+            - test_coverage/
+
+pages:
+	stage: deploy
+  	dependencies:
+    	- coverage
+  	script:
+    	- mv test_coverage/ public/
+  	artifacts:
+    	paths:
+      		- public
+ 		expire_in: 30 days
+	only:
+    	- generalize-approach
