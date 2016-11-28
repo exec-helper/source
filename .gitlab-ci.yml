@@ -91,7 +91,7 @@ pages:
     dependencies:
         - coverage
     script:
-        - mv test_coverage/ public/
+        - mv test_coverage/ public/coverage
     artifacts:
         paths:
             - public
