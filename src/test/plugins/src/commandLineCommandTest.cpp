@@ -24,9 +24,10 @@ namespace execHelper { namespace plugins { namespace test {
             string commandLineToExecute1("echo Hello");
             string commandLineToExecute2("echo world!!!");
 
-            Task actualTasks;
-            actualTasks.append(commandLineToExecute1);
-            actualTasks.append(commandLineToExecute2);
+            Task actualTask1;
+            actualTask1.append(commandLineToExecute1);
+            Task actualTask2;
+            actualTask2.append(commandLineToExecute2);
 
             string filename("test.exec-helper");
             ofstream configFile;
@@ -51,7 +52,7 @@ namespace execHelper { namespace plugins { namespace test {
                 plugin.apply("random-command", task, options); 
 
                 THEN("We should get the specifics of the Debug mode object") {
-                    REQUIRE(executor.getExecutedTasks() == vector<Task>({actualTasks})); 
+                    REQUIRE(executor.getExecutedTasks() == vector<Task>({actualTask1, actualTask2})); 
                 }
             }
         }

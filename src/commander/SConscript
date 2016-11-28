@@ -1,0 +1,32 @@
+Import('env')
+
+import copy
+import buildTools
+import setupTools
+
+includeUsageRequirements = [ 
+    '{rootDir}/commander/include'.format(rootDir = env['BUILD_DIR'])
+]
+
+includes = [
+    'include/commander',
+    includeUsageRequirements
+]
+
+dependencies = [
+    'core',
+    'plugins'
+]
+
+libUsageRequirements = [ 
+    dependencies
+]
+
+libs = [
+    libUsageRequirements,
+]
+
+env_commander = env.Clone()
+
+sources = Glob('src/*.cpp')
+buildTools.createLib(env_commander, 'commander', sources, includes, env, includeUsageRequirements, libUsageRequirements, None, dependencies)

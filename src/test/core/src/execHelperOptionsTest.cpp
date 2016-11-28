@@ -8,48 +8,18 @@
 
 #include "core/execHelperOptions.h"
 #include "executorStub.h"
+#include "utils.h"
 
 using std::string;
 using std::vector;
 using std::unique_ptr;
 using std::ofstream;
 
+using execHelper::test::MainVariables;
+using execHelper::test::appendVectors;
+using execHelper::test::convertToConfig;
+
 namespace {
-    template<typename T>
-    void appendVectors(T& appendTo, const T& appendFrom) {
-        appendTo.insert(std::end(appendTo), std::begin(appendFrom), std::end(appendFrom));
-    }
-
-    struct MainVariables {
-        int argc;
-        unique_ptr<char*[]> argv;
-
-        MainVariables(const vector<string>& arguments) {
-            argc = static_cast<int>(arguments.size());
-            argv.reset(new char*[argc]);
-
-            for(size_t i = 0; i < arguments.size(); ++i) {
-                argv.get()[i] = const_cast<char*>(arguments[i].c_str());
-            }
-        }
-    };
-
-    const string YAML_CONFIG_KEY_DELIMITER(": ");
-    const string YAML_CONFIG_DELIMITER("\n");
-    const string YAML_CONFIG_OPTION_CHARACTER("    - ");
-
-    string convertToConfig(const string& key, const vector<string>& values) {
-        string config(key + YAML_CONFIG_KEY_DELIMITER);
-        for(const auto& value : values) {
-            config += YAML_CONFIG_DELIMITER + YAML_CONFIG_OPTION_CHARACTER + value;
-        }
-        config += YAML_CONFIG_DELIMITER;
-        return config;
-    }
-
-    //string convertToConfig(string key, string value) {
-        //return string(key + YAML_CONFIG_KEY_DELIMITER + value);
-    //}
 }
 
 namespace execHelper { namespace core {

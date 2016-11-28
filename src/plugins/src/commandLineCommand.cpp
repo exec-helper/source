@@ -11,7 +11,10 @@ namespace execHelper { namespace plugins {
     void CommandLineCommand::apply(const std::string& /*command*/, Task& task, const ExecHelperOptions& options) const noexcept {
         const SettingsNode& settings = options.getSettings({"command-line-command"});  
         TaskCollection tasks = settings["command"].toStringCollection();
-        task.append(tasks);
-        registerTask(task, options);
+        for(const auto& command : tasks) {
+            Task forkedTask = task;
+            forkedTask.append(command);
+            registerTask(forkedTask, options);
+        }
     }
 } }

@@ -5,6 +5,7 @@ folders = [
 	'yaml/SConscript',
 	'config/SConscript',
 	'plugins/SConscript',
+	'commander/SConscript',
 ]
 
 SConscript(folders)

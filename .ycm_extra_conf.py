@@ -47,8 +47,9 @@ flags = [
     '-I.',
     '-I3rdparty/include',
     '-I3rdparty/Catch/include',
-    '-Isrc/test/core/include'
-    '-Isrc/test/core/stubs',
+    '-Isrc/test/include',
+    '-Isrc/test/stubs',
+    '-Isrc/test/core/include',
     '-Isrc/core/include',
     '-Isrc/core/include/core',
     '-Isrc/yaml/include',
@@ -57,6 +58,8 @@ flags = [
     '-Isrc/config/include/config',
     '-Isrc/plugins/include',
     '-Isrc/plugins/include/plugins',
+    '-Isrc/commander/include',
+    '-Isrc/commander/include/commander',
     '-Isrc/applications',
     '-Isrc/catch'
 ]

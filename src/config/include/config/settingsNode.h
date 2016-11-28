@@ -5,6 +5,7 @@
 #include <vector>
 #include <memory>
 #include <iostream>
+#include <algorithm>
 
 namespace execHelper {
     namespace config {
@@ -28,6 +29,10 @@ namespace execHelper {
                     }
                 }
                 return *this;
+            }
+
+            bool contains(const std::string& findKey) const noexcept {
+                return this->operator[](findKey) != *this;
             }
 
             std::vector<std::string> toStringCollection() const noexcept {

@@ -24,6 +24,34 @@ unittest-core:gcc:
     script:
         - build/gcc/release/test/core/core-unittest
 
+unittest-yaml:gcc:
+    stage: test
+    dependencies:
+        - build:gcc
+    script:
+        - build/gcc/release/test/yaml/yaml-unittest
+
+unittest-config:gcc:
+    stage: test
+    dependencies:
+        - build:gcc
+    script:
+        - build/gcc/release/test/config/config-unittest
+
+unittest-plugins:gcc:
+    stage: test
+    dependencies:
+        - build:gcc
+    script:
+        - build/gcc/release/test/plugins/plugins-unittest
+
+unittest-commander:gcc:
+    stage: test
+    dependencies:
+        - build:gcc
+    script:
+        - build/gcc/release/test/commander/commander-unittest
+
 memory-check:
     stage: test
     dependencies:

@@ -34,6 +34,11 @@ namespace execHelper { namespace core { namespace test {
             rootNode.values.push_back(level1bNode);
 
             WHEN("We apply the array subscript operator") {
+                THEN("Only these keys should exist") {
+                    REQUIRE(rootNode.contains("wrong-key") == false);
+                    REQUIRE(rootNode.contains(level1aNodeKey) == true);
+                    REQUIRE(rootNode.contains(level1bNodeKey) == true);
+                }
                 THEN("We should find the same values") {
                     REQUIRE(rootNode["wrong-key"] == rootNode);
                     REQUIRE(rootNode[level1aNodeKey] == level1aNode);
