@@ -32,9 +32,9 @@ build:clang:
         paths:
             - build/
 
-build:arch-linux:
+test-distribution:arch-linux:
     image: logankoester/archlinux
-    stage: build
+    stage: test
     before_script:
         - pacman -Sy --noconfirm
         - pacman -S --noconfirm archlinux-keyring
