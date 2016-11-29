@@ -37,7 +37,7 @@ build:arch-linux:
     stage: build
     before_script:
         - pacman -Sy --noconfirm
-        - pacman -S --noconfirm scons gcc g++ cmake boost boost-libs git
+        - pacman -S --noconfirm scons gcc cmake boost boost-libs git
     script:
         - scons compiler=gcc mode=debug
         - scons compiler=gcc mode=release
