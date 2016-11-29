@@ -13,8 +13,8 @@ build:gcc:
     script: 
         - apt-get install --yes -qq scons gcc g++ cmake libboost-program-options1.61-dev git
         - git submodule update --init
-        - scons compiler=gcc mode=debug
-        - scons compiler=gcc mode=release
+        - scons -j8 compiler=gcc mode=debug
+        - scons -j8 compiler=gcc mode=release
     artifacts:
         expire_in: 1 day
         paths:
@@ -25,8 +25,8 @@ build:clang:
     script: 
         - apt-get install --yes -qq scons clang cmake libboost-program-options1.61-dev git
         - git submodule update --init
-        - scons compiler=clang mode=debug
-        - scons compiler=clang mode=release
+        - scons -j8 compiler=clang mode=debug
+        - scons -j8 compiler=clang mode=release
     artifacts:
         expire_in: 1 day
         paths:
@@ -38,7 +38,7 @@ test-distribution:arch-linux:
     before_script:
         - pacman -Sy --noconfirm
         - pacman -S --noconfirm archlinux-keyring
-        - pacman -S --noconfirm scons gcc clang cmake make boost boost-libs git libunistring
+        - pacman -S --noconfirm scons gcc clang cmake make boost boost-libs git libunistring ncurses
         - git submodule update --init
     script:
         - scons -j8 compiler=gcc mode=debug
