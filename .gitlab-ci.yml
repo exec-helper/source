@@ -32,6 +32,17 @@ build:clang:
         paths:
             - build/
 
+build:arch:
+    stage: build
+    before_script:
+        - pacman -Syu --no-confirm
+        - pacman -S --no-confirm scons gcc g++ cmake boost boost-libs git
+    script:
+        - scons compiler=gcc mode=debug
+        - scons compiler=gcc mode=release
+        - scons compiler=clang mode=debug
+        - scons compiler=clang mode=release
+
 unittest-core:
     stage: test
     dependencies:
