@@ -38,14 +38,13 @@ build:arch-linux:
     before_script:
         - pacman -Sy --noconfirm
         - pacman -S --noconfirm archlinux-keyring
-        - pacman -Su --noconfirm
-        - pacman-db-upgrade
-        - pacman -S --noconfirm scons gcc cmake boost boost-libs git
+        - pacman -S --noconfirm scons gcc cmake make boost boost-libs git libunistring
+        - git submodule update --init
     script:
-        - scons compiler=gcc mode=debug
-        - scons compiler=gcc mode=release
-        - scons compiler=clang mode=debug
-        - scons compiler=clang mode=release
+        - scons -j8 compiler=gcc mode=debug
+        - scons -j8 compiler=gcc mode=release
+        - scons -j8 compiler=clang mode=debug
+        - scons -j8 compiler=clang mode=release
 
 unittest-core:
     stage: test

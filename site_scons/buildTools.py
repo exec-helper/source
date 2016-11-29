@@ -20,7 +20,7 @@ def buildCmake(env, output, sources, cmakeRootDir, buildDir, cmakeOptions, outpu
         'mkdir -p ' + buildDir,
         'cmake -B' + buildDir + ' ' + '-H' + cmakeRootDir +' ' + 
             '-DCMAKE_BUILD_TYPE=Release ' +
-            scons_utils.listToString(cmakeOptions, ' ') +
+            scons_utils.listToString(cmakeOptions, ' ') + ' ' +
             '-DCMAKE_C_COMPILER=' + env['CC'] + ' ' +
             '-DCMAKE_CXX_COMPILER=' + env['CXX'],
         'make -C' + buildDir + ' -j8',
