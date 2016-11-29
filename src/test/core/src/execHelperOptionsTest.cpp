@@ -17,17 +17,24 @@
 #include "executorStub.h"
 #include "utils.h"
 
+#include "core/compiler.h"
+#include "core/mode.h"
+#include "core/compilerDescription.h"
+
 using std::string;
 using std::vector;
 using std::unique_ptr;
 using std::ofstream;
 
+using execHelper::core::CompilerDescription;
+using execHelper::core::Gcc;
+using execHelper::core::Clang;
+using execHelper::core::Debug;
+using execHelper::core::Release;
+
 using execHelper::test::MainVariables;
 using execHelper::test::appendVectors;
 using execHelper::test::convertToConfig;
-
-namespace {
-}
 
 namespace execHelper { namespace core {
     namespace test {
@@ -41,6 +48,8 @@ namespace execHelper { namespace core {
                     THEN("The parsing should succeed") {
                         ExecHelperOptions options; 
                         REQUIRE(options.parse(mainVariables.argc, mainVariables.argv.get()));
+                        REQUIRE(options.containsHelp() == true);
+                        options.printHelp();
                     }
                 }
             }
@@ -76,6 +85,9 @@ namespace execHelper { namespace core {
             GIVEN("The command line we want to pass using long options") {
                 const CommandCollection actualCommands = {"init", "build", "run"};
                 const TargetDescription actualTarget({"target1", "target2"}, {"runTarget1", "runTarget2"});
+                const CompilerDescription::CompilerNames actualCompilerNames({"clang", "gcc"});
+                const CompilerDescription::ModeNames actualModes({"debug", "release"});
+                const CompilerDescription actualCompilers(actualCompilerNames, actualModes);
 
                 vector<string> arguments;
                 arguments.emplace_back("UNITTEST");
@@ -85,6 +97,15 @@ namespace execHelper { namespace core {
                 appendVectors(arguments, actualTarget.getTargets());
                 arguments.emplace_back("--run-target");
                 appendVectors(arguments, actualTarget.getRunTargets());
+                arguments.emplace_back("--compiler");
+                appendVectors(arguments, actualCompilerNames);
+                arguments.emplace_back("--mode");
+                appendVectors(arguments, actualModes);
+
+                for(const auto& argument : arguments) {
+                    std::cout << argument << " ";
+                }
+                std::cout << std::endl;
 
                 WHEN("We convert it and parse the variables") {
                     MainVariables mainVariables(arguments);
@@ -95,6 +116,7 @@ namespace execHelper { namespace core {
                         REQUIRE(options.getVerbosity() == true);
                         REQUIRE(options.getCommands() == actualCommands);
                         REQUIRE(options.getTarget() == actualTarget);
+                        REQUIRE(options.getCompiler() == actualCompilers);
                     }
                 }
             }
@@ -102,6 +124,9 @@ namespace execHelper { namespace core {
             GIVEN("The command line we want to pass using long options") {
                 const CommandCollection actualCommands = {"init", "build", "run"};
                 const TargetDescription actualTarget({"target1", "target2"}, {"runTarget1", "runTarget2"});
+                const CompilerDescription::CompilerNames actualCompilerNames({"clang", "gcc"});
+                const CompilerDescription::ModeNames actualModes({"debug", "release"});
+                const CompilerDescription actualCompilers(actualCompilerNames, actualModes);
 
                 vector<string> arguments;
                 arguments.emplace_back("UNITTEST");
@@ -111,6 +136,10 @@ namespace execHelper { namespace core {
                 appendVectors(arguments, actualTarget.getTargets());
                 arguments.emplace_back("-r");
                 appendVectors(arguments, actualTarget.getRunTargets());
+                arguments.emplace_back("-c");
+                appendVectors(arguments, actualCompilerNames);
+                arguments.emplace_back("-m");
+                appendVectors(arguments, actualModes);
 
                 WHEN("We convert it and parse the variables") {
                     MainVariables mainVariables(arguments);
@@ -121,6 +150,7 @@ namespace execHelper { namespace core {
                         REQUIRE(options.getVerbosity() == true);
                         REQUIRE(options.getCommands() == actualCommands);
                         REQUIRE(options.getTarget() == actualTarget);
+                        REQUIRE(options.getCompiler() == actualCompilers);
                     }
                 }
             }

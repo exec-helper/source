@@ -32,11 +32,15 @@ namespace execHelper {
                 const TargetDescription& getTarget() const noexcept;
                 const CompilerDescription& getCompiler() const noexcept;
                 const config::SettingsNode& getSettings(const std::string& key) const noexcept;
+                bool containsHelp() const noexcept;
+
+                void printHelp() const noexcept;
 
                 void setExecutor(ExecutorInterface* const executor) noexcept;
                 ExecutorInterface* getExecutor() const noexcept;
 
             private:
+                bool m_help;
                 bool m_verbose;
                 CommandCollection m_commands;
                 std::unique_ptr<TargetDescription> m_target;

@@ -1,5 +1,6 @@
 #include <vector>
 #include <cassert>
+#include <string>
 
 #include <catch.hpp>
 
@@ -8,6 +9,7 @@
 #include "modeStub.h"
 
 using std::vector;
+using std::string;
 
 using execHelper::core::CompilerDescription;
 
@@ -19,6 +21,29 @@ namespace {
 }
 
 namespace execHelper { namespace core { namespace test {
+    SCENARIO("Testing the convertTo* functions", "[compiler][CompilerDescription]") {
+        GIVEN("Nothin in particular") {
+            WHEN("We have a collection of compiler names and the associated compiler collection") {
+                vector<string> compilerNames({"gcc", "clang"});
+                CompilerDescription::CompilerCollection actualCompilers({Gcc(), Clang()});
+
+                THEN("We should find the corresponding compilers") {
+                    CompilerDescription::CompilerCollection foundCompilers = CompilerDescription::convertToCompilerCollection(compilerNames);
+                    REQUIRE(foundCompilers == actualCompilers);
+                }
+            }
+            WHEN("We have a collection of mode names and the associated mode collection") {
+                vector<string> modeNames({"debug", "release"});
+                CompilerDescription::ModeCollection actualModes({Debug(), Release()});
+
+                THEN("We should find the corresponding modes") {
+                    CompilerDescription::ModeCollection foundModes = CompilerDescription::convertToModeCollection(modeNames);
+                    REQUIRE(foundModes == actualModes);
+                }
+            }
+        }
+    }
+
     SCENARIO("Creating a compiler description", "[compiler][CompilerDescription]") {
         GIVEN("Certain parameters for the compiler description") {
             CompilerDescription::CompilerCollection actualCompilers = {CompilerStub(), CompilerStub()};
@@ -34,6 +59,27 @@ namespace execHelper { namespace core { namespace test {
             }
         }
     }
+
+    SCENARIO("Creating a compiler description using string collections", "[compiler][CompilerDescription]") {
+        GIVEN("Certain parameters for the compiler description") {
+            vector<string> compilers({"gcc", "clang"});
+            vector<string> modes({"debug", "release"});
+
+            // NOTE: we can only test it this way if the convertTo* functions are tested separately
+            CompilerDescription::CompilerCollection actualCompilers = CompilerDescription::convertToCompilerCollection(compilers);
+            CompilerDescription::ModeCollection actualModes = CompilerDescription::convertToModeCollection(modes);
+
+            WHEN("We create a compiler description with these parameters") {
+               CompilerDescription compilerToTest(compilers, modes); 
+
+                THEN("We should get the same parameters back") {
+                    REQUIRE(compilerToTest.getCompilers() == actualCompilers);
+                    REQUIRE(compilerToTest.getModes() == actualModes);
+                }
+            }
+        }
+    }
+
 
     SCENARIO("Looping over a compiler description", "[compiler][CompilerDescription]") {
         GIVEN("A const compiler collection over which we can loop and all combinations of these") {
@@ -120,7 +166,7 @@ namespace execHelper { namespace core { namespace test {
 
     SCENARIO("Special cases for compiler iteration", "[compiler][CompilerDescription]") {
         GIVEN("Empty collections for the target") {
-            const CompilerDescription target({}, {}); 
+            const CompilerDescription target((CompilerDescription::CompilerCollection()), CompilerDescription::ModeCollection()); 
 
             WHEN("We get the begin iterator") {
                 THEN("The begin iterator should be equal to the end iterator") {
@@ -156,7 +202,7 @@ namespace execHelper { namespace core { namespace test {
             CompilerDescription target1({CompilerStub(), CompilerStub()}, {ModeStub(), ModeStub()});
             CompilerDescription target2({CompilerStub()}, {ModeStub(), ModeStub()});
             CompilerDescription target3({CompilerStub(), CompilerStub()}, {ModeStub()});
-            CompilerDescription target4({}, {});
+            CompilerDescription target4((CompilerDescription::CompilerCollection()), {});
             CompilerDescription target5({CompilerStub(), CompilerStub()}, {});
             CompilerDescription target6({}, {ModeStub(), ModeStub()});
 

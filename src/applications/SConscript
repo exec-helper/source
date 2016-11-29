@@ -4,6 +4,10 @@ import copy
 import buildTools
 import setupTools
 
+includes = [
+    '{rootDir}/log/include'.format(rootDir = env['BUILD_DIR']),
+]
+
 dependencies = [
     'core',
     'commander'
@@ -13,4 +17,4 @@ env_core = env.Clone()
 setupTools.noIgnoredAttribute(env_core)
 
 sources = ['exec-helper.cpp']
-buildTools.createProgram(env, 'exec-helper', sources, None, dependencies, None, env['BIN_DIR'], dependencies)
+buildTools.createProgram(env, 'exec-helper', sources, includes, dependencies, None, env['BIN_DIR'], dependencies)

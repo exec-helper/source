@@ -10,7 +10,7 @@ namespace execHelper {
         // Interface for configuration input files
         class ConfigInputFile {
             public:
-                virtual void getTree(const std::initializer_list<std::string>& keys, SettingsNode& settings) const noexcept = 0;
+                virtual bool getTree(const std::initializer_list<std::string>& keys, SettingsNode& settings) const noexcept = 0;
 
             protected:
                 ConfigInputFile() {}

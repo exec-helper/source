@@ -5,6 +5,7 @@
 
 #include <boost/program_options.hpp>
 
+#include "log/log.h"
 #include "yaml/yaml.h"
 #include "config/settingsNode.h"
 #include "compiler.h"
@@ -42,8 +43,8 @@ namespace {
             ("command,z", value<CommandCollection>()->multitoken(), "Set commands")
             ("target,t", value<TargetDescription::TargetCollection>()->multitoken(), "Set targets")
             ("run-target,r", value<TargetDescription::RunTargetCollection>()->multitoken(), "Set run targets")
-            ("compiler,c", value<vector<string>>()->multitoken(), "Set compilers")
-            ("mode,m", value<vector<string>>()->multitoken(), "Set modes")
+            ("compiler,c", value<CompilerDescription::CompilerNames>()->multitoken(), "Set compilers")
+            ("mode,m", value<CompilerDescription::ModeNames>()->multitoken(), "Set modes")
             ("settings-file,s", value<string>(), "Set settings file")
         ;
         return descriptions;
@@ -57,8 +58,12 @@ namespace {
         positionalOptionsDesc.add("command", -1);
        
         variables_map optionsMap;
-        store(command_line_parser(argc, argv).options(optionDescriptions).positional(positionalOptionsDesc).run(), optionsMap);
-        notify(optionsMap);    
+        try {
+            store(command_line_parser(argc, argv).options(optionDescriptions).positional(positionalOptionsDesc).run(), optionsMap);
+            notify(optionsMap);    
+        } catch(boost::bad_any_cast& e) {
+            LOG("Parsing options threw exception: " << e.what());
+        }
         return optionsMap;
     }
     
@@ -68,6 +73,7 @@ namespace execHelper { namespace core {
     ExecutorInterface* ExecHelperOptions::m_executor(0);
 
     ExecHelperOptions::ExecHelperOptions() :
+        m_help(false),
         m_verbose(false)
     {
         if(! m_executor) {
@@ -104,7 +110,7 @@ namespace execHelper { namespace core {
     bool ExecHelperOptions::parse(int argc, char** argv) {
         variables_map optionsMap = getOptionsMap(argc, argv);
         if(optionsMap.count("help")) {
-            cout << getOptionDescriptions() << endl;
+            m_help = true;
             return true;
         }
 
@@ -128,37 +134,17 @@ namespace execHelper { namespace core {
         }
         m_target.reset(new TargetDescription(targets, runTargets));
 
-        vector<string> compilerNames = {"gcc", "clang"};
+        CompilerDescription::CompilerNames compilers = {"gcc", "clang"};
         if(optionsMap.count("compiler")) {
-            compilerNames = optionsMap["compiler"].as<vector<string>>();
-        }
-        CompilerDescription::CompilerCollection compilers;
-        for(const auto& compilerName : compilerNames) {
-            if(compilerName == "gcc") {
-                compilers.emplace_back(Gcc());
-            } else if(compilerName == "clang") {
-                compilers.emplace_back(Clang());
-            } else {
-                std::cout << "Invalid compiler: " << compilerName << std::endl;
-                return false;
-            }
+            compilers = optionsMap["compiler"].as<CompilerDescription::CompilerNames>();
         }
 
-        vector<string> modeNames = {"debug", "release"};
+        CompilerDescription::ModeNames modes = {"debug", "release"};
         if(optionsMap.count("mode")) {
-            modeNames = optionsMap["modes"].as<vector<string>>();
-        }
-        CompilerDescription::ModeCollection modes;
-        for(const auto& modeName : modeNames) {
-            if(modeName == "release") {
-                modes.emplace_back(Release());
-            } else if(modeName == "debug") {
-                modes.emplace_back(Debug());
-            } else {
-                std::cout << "Invalid mode: " << modeName << std::endl;
-            }
+            modes = optionsMap["mode"].as<CompilerDescription::ModeNames>();
         }
         m_compiler.reset(new CompilerDescription(compilers, modes));
+        
 
         return true;
     }
@@ -167,8 +153,11 @@ namespace execHelper { namespace core {
         YamlFile yamlFile;
         yamlFile.file = file;
         Yaml yaml(yamlFile);
-        yaml.getTree({}, m_settings); 
-        return true;
+        return yaml.getTree({}, m_settings); 
+    }
+
+    bool ExecHelperOptions::containsHelp() const noexcept {
+        return m_help;
     }
 
     const config::SettingsNode& ExecHelperOptions::getSettings(const std::string& key) const noexcept {
@@ -181,5 +170,9 @@ namespace execHelper { namespace core {
 
     ExecutorInterface* ExecHelperOptions::getExecutor() const noexcept {
         return m_executor;
+    }
+
+    void ExecHelperOptions::printHelp() const noexcept {
+        user_feedback(getOptionDescriptions());
     }
 } }

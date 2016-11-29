@@ -12,12 +12,15 @@ namespace execHelper {
     namespace core {
         class CompilerDescription {
             public:
+                typedef std::vector<std::string> CompilerNames;
+                typedef std::vector<std::string> ModeNames;
                 typedef std::vector<Compiler> CompilerCollection;
                 typedef std::vector<Mode> ModeCollection;
 
                 typedef PermutationIterator<CompilerDescription, CompilerCollection, ModeCollection> iterator;
                 typedef PermutationIterator<const CompilerDescription, CompilerCollection, ModeCollection> const_iterator;
 
+                CompilerDescription(const CompilerNames& compilerNames, const ModeNames& modeNames);
                 CompilerDescription(const CompilerCollection& compilers, const ModeCollection& modes);
 
                 const CompilerCollection& getCompilers() const noexcept;
@@ -30,6 +33,9 @@ namespace execHelper {
                 const_iterator begin() const noexcept;
                 iterator end() noexcept;
                 const_iterator end() const noexcept;
+
+                static CompilerCollection convertToCompilerCollection(const CompilerNames& compilers) noexcept;
+                static ModeCollection convertToModeCollection(const ModeNames& compilers) noexcept;
 
             private:
                 CompilerDescription() = delete;

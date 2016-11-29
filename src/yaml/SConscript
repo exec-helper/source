@@ -7,12 +7,13 @@ import setupTools
 yaml_env = env.Clone()
 yaml_includeUsageRequirements = [ 
     env['BUILD_DIR'] + '/yaml/include',
-    env['BUILD_DIR'] + '/config/include'
+    env['BUILD_DIR'] + '/config/include',
 ]
 
 yaml_includes = [
     'include/yaml',
     env['THIRD_PARTY_DIR'] + '/yaml-cpp/include',
+    env['BUILD_DIR'] + '/log/include',
     yaml_includeUsageRequirements
 ]
 
