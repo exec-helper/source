@@ -32,12 +32,12 @@ build:clang:
         paths:
             - build/
 
-build:arch:
+build:arch-linux:
     image: logankoester/archlinux
     stage: build
     before_script:
-        - pacman -Syu --no-confirm
-        - pacman -S --no-confirm scons gcc g++ cmake boost boost-libs git
+        - pacman -Syu --noconfirm
+        - pacman -S --noconfirm scons gcc g++ cmake boost boost-libs git
     script:
         - scons compiler=gcc mode=debug
         - scons compiler=gcc mode=release
