@@ -38,7 +38,8 @@ build:arch-linux:
     before_script:
         - pacman -Sy --noconfirm
         - pacman -S --noconfirm archlinux-keyring
-        - pacman -Syu --noconfirm
+        - pacman -Su --noconfirm
+        - pacman-db-upgrade
         - pacman -S --noconfirm scons gcc cmake boost boost-libs git
     script:
         - scons compiler=gcc mode=debug
