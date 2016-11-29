@@ -36,7 +36,7 @@ build:arch-linux:
     image: logankoester/archlinux
     stage: build
     before_script:
-        - pacman -Syu --noconfirm
+        - pacman -Sy --noconfirm
         - pacman -S --noconfirm scons gcc g++ cmake boost boost-libs git
     script:
         - scons compiler=gcc mode=debug
