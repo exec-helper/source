@@ -33,11 +33,10 @@ build:clang:
             - build/
 
 test-distribution:arch-linux:
-    image: logankoester/archlinux
+    image: dock0/arch
     stage: test
     before_script:
         - pacman -Sy --noconfirm
-        - pacman -S --noconfirm archlinux-keyring
         - pacman -S --noconfirm scons gcc clang cmake make boost boost-libs git libunistring ncurses
         - git submodule update --init
     script:
