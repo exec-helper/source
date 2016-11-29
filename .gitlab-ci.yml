@@ -38,7 +38,7 @@ build:arch-linux:
     before_script:
         - pacman -Sy --noconfirm
         - pacman -S --noconfirm archlinux-keyring
-        - pacman -S --noconfirm scons gcc cmake make boost boost-libs git libunistring
+        - pacman -S --noconfirm scons gcc clang cmake make boost boost-libs git libunistring
         - git submodule update --init
     script:
         - scons -j8 compiler=gcc mode=debug
