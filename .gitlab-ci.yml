@@ -33,6 +33,7 @@ build:clang:
             - build/
 
 build:arch:
+    image: logankoester/archlinux
     stage: build
     before_script:
         - pacman -Syu --no-confirm
