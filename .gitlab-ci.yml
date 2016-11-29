@@ -36,8 +36,10 @@ build:arch-linux:
     image: logankoester/archlinux
     stage: build
     before_script:
-        - yes | pacman -Syu --noconfirm
-        - yes | pacman -S --noconfirm scons gcc cmake boost boost-libs git
+        - pacman -Sy --noconfirm
+        - pacman -S --noconfirm archlinux-keyring
+        - pacman -Syu --noconfirm
+        - pacman -S --noconfirm scons gcc cmake boost boost-libs git
     script:
         - scons compiler=gcc mode=debug
         - scons compiler=gcc mode=release
