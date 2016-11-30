@@ -141,7 +141,7 @@ namespace execHelper { namespace core {
         }
 
         if(optionsMap.count("mode")) {
-            CompilerDescription::ModeCollection modes = CompilerDescription::convertToModeCollection(optionsMap["modes"].as<CompilerDescription::ModeNames>());
+            CompilerDescription::ModeCollection modes = CompilerDescription::convertToModeCollection(optionsMap["mode"].as<CompilerDescription::ModeNames>());
             m_compiler.reset(new CompilerDescription(m_compiler->getCompilers(), modes));
         }
 
