@@ -9,6 +9,7 @@ using std::vector;
 using std::accumulate;
 using std::move;
 using std::back_inserter;
+using std::initializer_list;
 
 namespace {
     inline string implodeVector(const vector<string>& toImplode, string delimiter = string(" ")) {
@@ -25,6 +26,16 @@ namespace {
 }
 
 namespace execHelper { namespace core {
+
+    Task::Task() {
+        ;
+    }
+
+    Task::Task(const initializer_list<string>& subtasks) :
+        m_task(subtasks)
+    {
+        ;
+    }
 
     const execHelper::core::TaskCollection& Task::getTask() const noexcept {
         return m_task;
