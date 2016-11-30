@@ -5,7 +5,8 @@ import buildTools
 import setupTools
 
 includes = [
-    '../../yaml/include'
+    '../../yaml/include',
+    '../include',
 ]
 
 dependencies = [

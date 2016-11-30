@@ -24,9 +24,13 @@ namespace execHelper {
                 bool operator==(const Task& other) const noexcept;
                 bool operator!=(const Task& other) const noexcept;
 
+                //std::ostream& operator<<(std::ostream& os) const noexcept;
+
             private:
                 TaskCollection m_task;
         };
+        
+        std::ostream& operator<<( std::ostream& os, const Task& task ) noexcept;
     }
 }
 #endif /* __TASK_H__ */

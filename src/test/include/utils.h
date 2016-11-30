@@ -1,5 +1,5 @@
-#ifndef __UTILS_H__
-#define __UTILS_H__
+#ifndef __TEST_UTILS_H__
+#define __TEST_UTILS_H__
 
 #include <string>
 #include <memory>
@@ -44,7 +44,18 @@ namespace execHelper {
         std::string convertToConfig(std::string key, std::string value) {
             return std::string(key + YAML_CONFIG_KEY_DELIMITER + value) + YAML_CONFIG_DELIMITER + YAML_CONFIG_DELIMITER;
         }
+
+        std::string convertToConfig(const std::string& key, const std::initializer_list<std::string>& values) {
+            std::vector<std::string> vectorValues(values);
+            return convertToConfig(key, vectorValues);
+        }
+
+
+        std::string basename(const std::string& file) {
+            unsigned int found = file.find_last_of("/\\");
+            return file.substr(0,found);
+        }
     }
 }
 
-#endif  /* __UTILS_H__ */
+#endif  /* __TEST_UTILS_H__ */

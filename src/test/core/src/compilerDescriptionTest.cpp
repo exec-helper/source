@@ -32,11 +32,29 @@ namespace execHelper { namespace core { namespace test {
                     REQUIRE(foundCompilers == actualCompilers);
                 }
             }
+            WHEN("We have a wrong compiler name in the collection of compiler names") {
+                vector<string> compilerNames({"gcc", "random-compiler", "clang", "other-random-compiler"});
+                CompilerDescription::CompilerCollection actualCompilers({Gcc(), Clang()});
+
+                THEN("We should only find the existing corresponding compilers") {
+                    CompilerDescription::CompilerCollection foundCompilers = CompilerDescription::convertToCompilerCollection(compilerNames);
+                    REQUIRE(foundCompilers == actualCompilers);
+                }
+            }
             WHEN("We have a collection of mode names and the associated mode collection") {
                 vector<string> modeNames({"debug", "release"});
                 CompilerDescription::ModeCollection actualModes({Debug(), Release()});
 
                 THEN("We should find the corresponding modes") {
+                    CompilerDescription::ModeCollection foundModes = CompilerDescription::convertToModeCollection(modeNames);
+                    REQUIRE(foundModes == actualModes);
+                }
+            }
+            WHEN("We have a wrong mode name in the associated mode collection") {
+                vector<string> modeNames({"debug", "random-mode", "release", "other-random-mode"});
+                CompilerDescription::ModeCollection actualModes({Debug(), Release()});
+
+                THEN("We should only find the existing corresponding modes") {
                     CompilerDescription::ModeCollection foundModes = CompilerDescription::convertToModeCollection(modeNames);
                     REQUIRE(foundModes == actualModes);
                 }

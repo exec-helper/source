@@ -3,6 +3,7 @@
 #include <utility>
 #include <numeric>
 #include <algorithm>
+#include <ostream>
 
 using std::string;
 using std::vector;
@@ -10,6 +11,7 @@ using std::accumulate;
 using std::move;
 using std::back_inserter;
 using std::initializer_list;
+using std::ostream;
 
 namespace {
     inline string implodeVector(const vector<string>& toImplode, string delimiter = string(" ")) {
@@ -73,5 +75,15 @@ namespace execHelper { namespace core {
 
     bool Task::operator!=(const Task& other) const noexcept {
         return !(*this == other);
+    }
+
+    std::ostream& operator<<( std::ostream& os, const Task& task ) noexcept {
+        os << std::string( "Task: {");
+
+        for(const auto& subTask : task.getTask()) {
+            os << std::string(" ") << subTask;
+        }
+        os << std::string(" }");
+        return os;
     }
 } }

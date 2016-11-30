@@ -58,12 +58,8 @@ namespace {
         positionalOptionsDesc.add("command", -1);
        
         variables_map optionsMap;
-        try {
-            store(command_line_parser(argc, argv).options(optionDescriptions).positional(positionalOptionsDesc).run(), optionsMap);
-            notify(optionsMap);    
-        } catch(boost::bad_any_cast& e) {
-            LOG("Parsing options threw exception: " << e.what());
-        }
+        store(command_line_parser(argc, argv).options(optionDescriptions).positional(positionalOptionsDesc).run(), optionsMap);
+        notify(optionsMap);    
         return optionsMap;
     }
     

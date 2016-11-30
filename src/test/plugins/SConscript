@@ -6,6 +6,7 @@ import setupTools
 
 includes = [
     '../stubs',
+    '../include',
 ]
 
 dependencies = [

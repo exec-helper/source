@@ -22,9 +22,7 @@ namespace execHelper {
             private:
                 bool build(core::Task& task, const core::ExecHelperOptions& options) const noexcept;
                 bool clean(core::Task& task, const core::ExecHelperOptions& options) const noexcept;
-                bool distclean(core::Task& task, const core::ExecHelperOptions& options) const noexcept;
 
-                static core::TaskCollection getBuildDir(const config::SettingsNode& settings, const core::CompilerDescription& compiler) noexcept;
                 static core::TaskCollection getCommandLine(const config::SettingsNode& settings, const core::CompilerDescription& compiler) noexcept;
                 static core::TaskCollection getMultiThreaded(const config::SettingsNode& settings) noexcept;
         };

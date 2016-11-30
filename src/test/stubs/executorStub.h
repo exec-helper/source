@@ -2,6 +2,7 @@
 #define __EXECUTOR_STUB_H__
 
 #include <vector>
+#include <ostream>
 
 #include "core/executorInterface.h"
 #include "core/task.h"

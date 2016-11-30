@@ -8,12 +8,15 @@
 #include "yaml/yaml.h"
 #include "config/settingsNode.h"
 
+#include "utils.h"
+
 using std::string;
 using std::vector;
 using std::stringstream;
 using std::endl;
 
 using execHelper::config::SettingsNode;
+using execHelper::test::basename;
 
 namespace {
     const string YAML_CONFIG_KEY_DELIMITER(": ");
@@ -31,11 +34,6 @@ namespace {
 
     string convertToConfig(string key, string value) {
         return string(key + YAML_CONFIG_KEY_DELIMITER + value);
-    }
-
-    string basename(const string& file) {
-		unsigned int found = file.find_last_of("/\\");
-		return file.substr(0,found);
     }
 }
 
