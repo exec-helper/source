@@ -9,6 +9,8 @@
 #include "plugins/plugin.h"
 #include "plugins/commandLineCommand.h"
 #include "plugins/scons.h"
+#include "plugins/make.h"
+#include "plugins/bootstrap.h"
 
 using std::cout;
 using std::endl;
@@ -33,6 +35,10 @@ namespace execHelper { namespace commander {
             return make_shared<plugins::CommandLineCommand>();
         } else if(pluginName == "scons") {
             return make_shared<plugins::Scons>(); 
+        } else if(pluginName == "make") {
+            return make_shared<plugins::Make>(); 
+        } else if(pluginName == "bootstrap") {
+            return make_shared<plugins::Bootstrap>(); 
         }
         user_feedback("'" << pluginName << "' not registered");
         return shared_ptr<Plugin>();

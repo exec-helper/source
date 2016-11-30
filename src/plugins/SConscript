@@ -10,6 +10,7 @@ includeUsageRequirements = [
 
 includes = [
     'include/plugins',
+    '{rootDir}/log/include'.format(rootDir = env['BUILD_DIR']),
     includeUsageRequirements
 ]
 

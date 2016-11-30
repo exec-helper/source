@@ -14,6 +14,8 @@ namespace execHelper {
             public:
                 typedef std::vector<std::string> CompilerNames;
                 typedef std::vector<std::string> ModeNames;
+                typedef std::vector<std::string> ArchitectureNames;
+
                 typedef std::vector<Compiler> CompilerCollection;
                 typedef std::vector<Mode> ModeCollection;
 
