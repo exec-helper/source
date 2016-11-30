@@ -74,7 +74,8 @@ namespace execHelper { namespace core {
 
     ExecHelperOptions::ExecHelperOptions() :
         m_help(false),
-        m_verbose(false)
+        m_verbose(false),
+        m_compiler(new CompilerDescription({Gcc(), Clang()}, {Debug(), Release()}))
     {
         if(! m_executor) {
 
@@ -134,17 +135,15 @@ namespace execHelper { namespace core {
         }
         m_target.reset(new TargetDescription(targets, runTargets));
 
-        CompilerDescription::CompilerNames compilers = {"gcc", "clang"};
         if(optionsMap.count("compiler")) {
-            compilers = optionsMap["compiler"].as<CompilerDescription::CompilerNames>();
+            CompilerDescription::CompilerCollection compilers = CompilerDescription::convertToCompilerCollection(optionsMap["compiler"].as<CompilerDescription::CompilerNames>());
+            m_compiler.reset(new CompilerDescription(compilers, m_compiler->getModes()));
         }
 
-        CompilerDescription::ModeNames modes = {"debug", "release"};
         if(optionsMap.count("mode")) {
-            modes = optionsMap["mode"].as<CompilerDescription::ModeNames>();
+            CompilerDescription::ModeCollection modes = CompilerDescription::convertToModeCollection(optionsMap["modes"].as<CompilerDescription::ModeNames>());
+            m_compiler.reset(new CompilerDescription(m_compiler->getCompilers(), modes));
         }
-        m_compiler.reset(new CompilerDescription(compilers, modes));
-        
 
         return true;
     }
@@ -153,7 +152,22 @@ namespace execHelper { namespace core {
         YamlFile yamlFile;
         yamlFile.file = file;
         Yaml yaml(yamlFile);
-        return yaml.getTree({}, m_settings); 
+        if(! yaml.getTree({}, m_settings)) {
+            LOG("Could not get settings tree");
+            return false;
+        }
+
+        if(m_settings.contains("default-compilers")) {
+            CompilerDescription::CompilerCollection compilers = CompilerDescription::convertToCompilerCollection(m_settings["default-compilers"].toStringCollection());
+            m_compiler.reset(new CompilerDescription(compilers, m_compiler->getModes()));
+        }
+
+        if(m_settings.contains("default-modes")) {
+            CompilerDescription::ModeCollection modes = CompilerDescription::convertToModeCollection(m_settings["default-modes"].toStringCollection());
+            m_compiler.reset(new CompilerDescription(m_compiler->getCompilers(), modes));
+        }
+
+        return true;
     }
 
     bool ExecHelperOptions::containsHelp() const noexcept {
