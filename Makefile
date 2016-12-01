@@ -6,7 +6,7 @@ build:
 test:: build
 	$(foreach test,$(UNITTESTS),$(test) || exit 1;)
 
-coverage: build
+coverage:
 	lcov --base-directory . --directory . --zerocounters -q
 	$(foreach test,$(UNITTESTS),$(test) || exit 1;)
 	lcov --base-directory . --directory . -c -o libexechelper_test.info
@@ -14,7 +14,7 @@ coverage: build
 	rm -rf test_coverage
 	genhtml -o test_coverage -t "exec-helper test coverage" --num-spaces 4 libexechelper_test.info
 
-check-memory: build
+check-memory:
 	$(foreach test,$(UNITTESTS), valgrind --tool=memcheck $(test) || exit 1;)
 
 check: build test coverage check-memory
