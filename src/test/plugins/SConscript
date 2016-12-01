@@ -6,12 +6,12 @@ import setupTools
 
 includes = [
     '../stubs',
-    '../include',
 ]
 
 dependencies = [
     'core',
-    'plugins'
+    'plugins',
+    'testutils'
 ]
 
 env_core_test = env.Clone()

@@ -6,17 +6,10 @@
 
 #include <log/log.h>
 
-// Silence the logs for now
-//#undef LOG
-//#define LOG(x)
-
-//#undef user_feedback 
-//#define user_feedback(x)
-
 #include "core/execHelperOptions.h"
 #include "commander/commander.h"
 
-#include "utils.h"
+#include "utils/utils.h"
 #include "executorStub.h"
 
 using std::ofstream;
@@ -25,9 +18,9 @@ using std::string;
 using std::cout;
 using std::endl;
 
-using execHelper::test::MainVariables;
-using execHelper::test::appendVectors;
-using execHelper::test::convertToConfig;
+using execHelper::test::utils::MainVariables;
+using execHelper::test::utils::appendVectors;
+using execHelper::test::utils::convertToConfig;
 
 using execHelper::core::ExecHelperOptions;
 using execHelper::core::Task;
@@ -200,8 +193,76 @@ namespace execHelper { namespace commander { namespace test {
                 REQUIRE(options.parse(mainVariables.argc, mainVariables.argv.get()));
 
                 Commander commander(options);
+
+                THEN("We should be able to run it successfully") {
+                    REQUIRE(commander.run() == true);
+                }
+            }
+            WHEN("We have the environment to use the bootstrap plugin") {
+                string command("init");
+                vector<string> commands({command});
+
+                string filename("test.exec-helper");
+
+                string config;
+                config += convertToConfig("commands", commands);
+                config += convertToConfig(command, vector<string>({"bootstrap"}));
+
+                ofstream fileWriter;
+                fileWriter.open(filename);
+                fileWriter << config;
+                fileWriter.close();
+
+                vector<string> arguments;
+                arguments.emplace_back("UNITTEST");
+                appendVectors(arguments, commands);
+
+                ExecutorStub executor;
+
+                ExecHelperOptions options;
+                options.setExecutor(&executor);
+                options.parseSettingsFile(filename);
+
+                MainVariables mainVariables(arguments);
+                REQUIRE(options.parse(mainVariables.argc, mainVariables.argv.get()));
+
+                Commander commander(options);
                 
-                THEN("We should have no executed tasks") {
+                THEN("We should be able to run it successfully") {
+                    REQUIRE(commander.run() == true);
+                }
+            }
+            WHEN("We have the environment to use the make plugin") {
+                string command("build");
+                vector<string> commands({command});
+
+                string filename("test.exec-helper");
+
+                string config;
+                config += convertToConfig("commands", commands);
+                config += convertToConfig(command, vector<string>({"make"}));
+
+                ofstream fileWriter;
+                fileWriter.open(filename);
+                fileWriter << config;
+                fileWriter.close();
+
+                vector<string> arguments;
+                arguments.emplace_back("UNITTEST");
+                appendVectors(arguments, commands);
+
+                ExecutorStub executor;
+
+                ExecHelperOptions options;
+                options.setExecutor(&executor);
+                options.parseSettingsFile(filename);
+
+                MainVariables mainVariables(arguments);
+                REQUIRE(options.parse(mainVariables.argc, mainVariables.argv.get()));
+
+                Commander commander(options);
+
+                THEN("We should be able to run it successfully") {
                     REQUIRE(commander.run() == true);
                 }
             }

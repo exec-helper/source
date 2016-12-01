@@ -8,7 +8,7 @@
 #include "yaml/yaml.h"
 #include "config/settingsNode.h"
 
-#include "utils.h"
+#include "utils/utils.h"
 
 using std::string;
 using std::vector;
@@ -16,7 +16,7 @@ using std::stringstream;
 using std::endl;
 
 using execHelper::config::SettingsNode;
-using execHelper::test::basename;
+using execHelper::test::utils::basename;
 
 namespace {
     const string YAML_CONFIG_KEY_DELIMITER(": ");
@@ -160,13 +160,13 @@ namespace execHelper { namespace yaml { namespace test {
                 THEN("We should not be able to get a tree and should give the strong guarantee") {
                     string settingsKey("blaat");
                     SettingsNode settings;
-                    settings.key = settingsKey;
+                    settings.m_key = settingsKey;
                     REQUIRE(yaml.getTree({"commands"}, settings) == false);
                     REQUIRE(yaml.getTree({"commands", "command1"}, settings) == false);
 
                     // Check the strong guarantee
-                    REQUIRE(settings.key == settingsKey);
-                    REQUIRE(settings.values.empty() == true);
+                    REQUIRE(settings.m_key == settingsKey);
+                    REQUIRE(settings.m_values.empty() == true);
                 }
             }
         }
@@ -192,13 +192,13 @@ namespace execHelper { namespace yaml { namespace test {
                 THEN("We should not be able to get a tree and should give the strong guarantee") {
                     string settingsKey("blaat");
                     SettingsNode settings;
-                    settings.key = settingsKey;
+                    settings.m_key = settingsKey;
                     REQUIRE(yaml.getTree({"commands"}, settings) == false);
                     REQUIRE(yaml.getTree({"commands", "command1"}, settings) == false);
 
                     // Check the strong guarantee
-                    REQUIRE(settings.key == settingsKey);
-                    REQUIRE(settings.values.empty() == true);
+                    REQUIRE(settings.m_key == settingsKey);
+                    REQUIRE(settings.m_values.empty() == true);
                 }
             }
         }
@@ -229,13 +229,13 @@ namespace execHelper { namespace yaml { namespace test {
                 THEN("We should not be able to get invalid trees and the settings node is unaltered") {
                     string settingsKey("some-key");
                     SettingsNode settings;
-                    settings.key = settingsKey;
+                    settings.m_key = settingsKey;
 
                     REQUIRE(yaml.getTree({"invalid-key"}, settings) == false);
                     REQUIRE(yaml.getTree({"invalid-key", "invalid-subkey"}, settings) == false);
 
-                    REQUIRE(settings.key == settingsKey);
-                    REQUIRE(settings.values.empty() == true);
+                    REQUIRE(settings.m_key == settingsKey);
+                    REQUIRE(settings.m_values.empty() == true);
                 }
             }
         }

@@ -171,7 +171,10 @@ namespace execHelper { namespace core {
     }
 
     const config::SettingsNode& ExecHelperOptions::getSettings(const std::string& key) const noexcept {
-       return m_settings[key]; 
+        if(m_settings.contains(key)) {
+            return m_settings[key]; 
+        }
+        return m_settings;
     }
 
     void ExecHelperOptions::setExecutor(ExecutorInterface* const executor) noexcept {

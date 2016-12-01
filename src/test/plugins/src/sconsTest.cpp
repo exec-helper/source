@@ -11,7 +11,7 @@
 #include "core/compilerDescription.h"
 #include "core/targetDescription.h"
 
-#include "utils.h"
+#include "utils/utils.h"
 
 using std::vector;
 using std::string;
@@ -25,9 +25,10 @@ using execHelper::core::CompilerDescription;
 using execHelper::core::TargetDescription;
 using execHelper::core::CommandCollection;
 
-using execHelper::test::MainVariables;
-using execHelper::test::basename;
-using execHelper::test::convertToConfig;
+using execHelper::test::utils::MainVariables;
+using execHelper::test::utils::basename;
+using execHelper::test::utils::convertToConfig;
+using execHelper::test::utils::appendVectors;
 
 namespace execHelper { namespace plugins { namespace test {
     SCENARIO("Testing the scons plugin, multithreaded", "[plugins][scons]") {
@@ -40,15 +41,15 @@ namespace execHelper { namespace plugins { namespace test {
 
             vector<string> arguments;
             arguments.emplace_back("UNITTEST");
-            ::execHelper::test::appendVectors(arguments, actualCommands);
+            appendVectors(arguments, actualCommands);
             arguments.emplace_back("--target");
-            ::execHelper::test::appendVectors(arguments, actualTarget.getTargets());
+            appendVectors(arguments, actualTarget.getTargets());
             arguments.emplace_back("--run-target");
-            ::execHelper::test::appendVectors(arguments, actualTarget.getRunTargets());
+            appendVectors(arguments, actualTarget.getRunTargets());
             arguments.emplace_back("--compiler");
-            ::execHelper::test::appendVectors(arguments, actualCompilerNames);
+            appendVectors(arguments, actualCompilerNames);
             arguments.emplace_back("--mode");
-            ::execHelper::test::appendVectors(arguments, actualModes);
+            appendVectors(arguments, actualModes);
 
             string configFile;
             configFile += convertToConfig("commands", {"build", "clean", "distclean"});
@@ -137,15 +138,15 @@ namespace execHelper { namespace plugins { namespace test {
 
             vector<string> arguments;
             arguments.emplace_back("UNITTEST");
-            ::execHelper::test::appendVectors(arguments, actualCommands);
+            appendVectors(arguments, actualCommands);
             arguments.emplace_back("--target");
-            ::execHelper::test::appendVectors(arguments, actualTarget.getTargets());
+            appendVectors(arguments, actualTarget.getTargets());
             arguments.emplace_back("--run-target");
-            ::execHelper::test::appendVectors(arguments, actualTarget.getRunTargets());
+            appendVectors(arguments, actualTarget.getRunTargets());
             arguments.emplace_back("--compiler");
-            ::execHelper::test::appendVectors(arguments, actualCompilerNames);
+            appendVectors(arguments, actualCompilerNames);
             arguments.emplace_back("--mode");
-            ::execHelper::test::appendVectors(arguments, actualModes);
+            appendVectors(arguments, actualModes);
 
             string configFile;
             configFile += convertToConfig("commands", {"build", "clean", "distclean"});

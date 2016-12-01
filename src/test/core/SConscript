@@ -12,7 +12,8 @@ includes = [
 ]
 
 dependencies = [
-    'core'
+    'core',
+    'testutils'
 ]
 
 env_core_test = env.Clone()

@@ -43,25 +43,25 @@ namespace execHelper { namespace yaml {
 
     bool YamlWrapper::getTree(const YAML::Node& rootNode, SettingsNode& settings) noexcept {
         YAML::Node node = Clone(rootNode);
-        settings.key = "<root>";
+        settings.m_key = "<root>";
         getSubTree(node, settings);
         return true;
     }
 
     void YamlWrapper::getSubTree(const YAML::Node& node, SettingsNode& yamlNode) {
         for(const auto& element : node) {
-            yamlNode.values.emplace_back(SettingsNode()); 
-            yamlNode.values.back().key = element.first.as<string>();
+            yamlNode.m_values.emplace_back(SettingsNode()); 
+            yamlNode.m_values.back().m_key = element.first.as<string>();
             if(element.second.IsMap()) {
-                YamlWrapper::getSubTree(element.second, yamlNode.values.back());
+                YamlWrapper::getSubTree(element.second, yamlNode.m_values.back());
             } else {
                 if(element.second.size() == 0) {
-                    yamlNode.values.back().values.emplace_back(SettingsNode());
-                    yamlNode.values.back().values.back().key = element.second.as<string>();
+                    yamlNode.m_values.back().m_values.emplace_back(SettingsNode());
+                    yamlNode.m_values.back().m_values.back().m_key = element.second.as<string>();
                 }
                 for(const auto& el : element.second) {
-                    yamlNode.values.back().values.emplace_back(SettingsNode());
-                    yamlNode.values.back().values.back().key = el.as<string>();
+                    yamlNode.m_values.back().m_values.emplace_back(SettingsNode());
+                    yamlNode.m_values.back().m_values.back().m_key = el.as<string>();
                 }
             }
         }

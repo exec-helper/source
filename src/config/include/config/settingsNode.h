@@ -10,8 +10,8 @@
 namespace execHelper {
     namespace config {
         struct SettingsNode {
-            std::string key;
-            std::vector<SettingsNode> values;
+            std::string m_key;
+            std::vector<SettingsNode> m_values;
 
             ~SettingsNode() {
                 ;
@@ -23,8 +23,8 @@ namespace execHelper {
             }
 
             const SettingsNode& operator[](const std::string& requestedKey) const noexcept {
-                for(const auto& value : values) {
-                    if(requestedKey == value.key) {
+                for(const SettingsNode& value : m_values) {
+                    if(requestedKey == value.m_key) {
                         return value;
                     }
                 }
@@ -38,15 +38,15 @@ namespace execHelper {
             std::vector<std::string> toStringCollection() const noexcept {
                 std::vector<std::string> results;
 
-                results.reserve(values.size());
-                for(const auto& value : values) {
-                    results.push_back(value.key);
+                results.reserve(m_values.size());
+                for(const auto& value : m_values) {
+                    results.push_back(value.m_key);
                 }
                 return results;
             }
 
             bool operator==(const SettingsNode& other) const noexcept {
-                return key == other.key && values == other.values;
+                return m_key == other.m_key && m_values == other.m_values;
             }
 
             bool operator!=(const SettingsNode& other) const noexcept {

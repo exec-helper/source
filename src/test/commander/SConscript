@@ -5,13 +5,13 @@ import buildTools
 import setupTools
 
 includes = [
-    '../include',
     '../stubs',
     '{rootDir}/log/include'.format(rootDir = env['BUILD_DIR'])
 ]
 
 dependencies = [
-    'commander'
+    'commander',
+    'testutils'
 ]
 
 env_commander = env.Clone()

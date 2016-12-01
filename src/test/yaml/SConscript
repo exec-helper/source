@@ -10,7 +10,8 @@ includes = [
 ]
 
 dependencies = [
-    'yaml'
+    'yaml',
+    'testutils'
 ]
 
 env_yaml_test = env.Clone()

@@ -7,15 +7,10 @@
 #include <catch.hpp>
 
 #include "log/log.h"
-#undef LOG
-#define LOG(x)
-
-#undef user_feedback 
-#define user_feedback(x)
 
 #include "core/execHelperOptions.h"
 #include "executorStub.h"
-#include "utils.h"
+#include "utils/utils.h"
 
 #include "core/compiler.h"
 #include "core/mode.h"
@@ -32,9 +27,9 @@ using execHelper::core::Clang;
 using execHelper::core::Debug;
 using execHelper::core::Release;
 
-using execHelper::test::MainVariables;
-using execHelper::test::appendVectors;
-using execHelper::test::convertToConfig;
+using execHelper::test::utils::MainVariables;
+using execHelper::test::utils::appendVectors;
+using execHelper::test::utils::convertToConfig;
 
 namespace execHelper { namespace core {
     namespace test {
@@ -239,6 +234,39 @@ namespace execHelper { namespace core {
                     THEN("We should get the settings found") {
                         REQUIRE(options.getSettings(commandsKey).toStringCollection() == commandsValues);
                         REQUIRE(options.getSettings(command1Key).toStringCollection() == command1Values);
+                    }
+                }
+            }
+            GIVEN("A file containing specific default settings") {
+                const string settingsFile("test-settings-file.exec-helper");
+                const string commandsKey("commands");
+                const string command1Key("command1");
+                const string defaultCompilerKey("default-compilers");
+                const string defaultModeKey("default-modes");
+
+                const vector<string> commandsValues = {command1Key, "command2", "command3"};
+                const vector<string> command1Values = {"command1a", "command1b"};
+                const vector<string> defaultCompiler = {"compiler1", "compiler2"};
+                const vector<string> defaultMode = {"compiler1", "compiler2"};
+
+                ofstream file;
+                file.open(settingsFile, std::ios::out | std::ios::trunc);
+                file << convertToConfig(commandsKey, commandsValues);
+                file << convertToConfig(command1Key, command1Values);
+                file << convertToConfig(defaultCompilerKey, defaultCompiler);
+                file << convertToConfig(defaultModeKey, defaultMode);
+                file.close();
+
+                ExecHelperOptions options;
+
+                WHEN("We parse the settings file") {
+                    REQUIRE(options.parseSettingsFile(settingsFile));
+
+                    THEN("We should get the default settings") {
+                        REQUIRE(options.getSettings(commandsKey).toStringCollection() == commandsValues);
+                        REQUIRE(options.getSettings(command1Key).toStringCollection() == command1Values);
+                        REQUIRE(options.getSettings(defaultCompilerKey).toStringCollection() == defaultCompiler);
+                        REQUIRE(options.getSettings(defaultModeKey).toStringCollection() == defaultMode);
                     }
                 }
             }

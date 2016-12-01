@@ -34,9 +34,11 @@ namespace execHelper { namespace plugins {
     }
 
     string Bootstrap::getBootstrapFilename(const SettingsNode& settings) noexcept {
-        TaskCollection commandArguments = settings["filename"].toStringCollection();
-        if(commandArguments.size() > 0U) {
-            return commandArguments[0];
+        if(settings.contains("filename")) {
+            TaskCollection commandArguments = settings["filename"].toStringCollection();
+            if(commandArguments.size() > 0U) {
+                return commandArguments[0];
+            }
         }
         return "bootstrap.sh";
     }

@@ -13,25 +13,25 @@ namespace execHelper { namespace core { namespace test {
     SCENARIO("Testing the array subscript operator", "[settingsnode]") {
         GIVEN("A settings node structure") {
             SettingsNode rootNode;
-            rootNode.key = "<root>";
+            rootNode.m_key = "<root>";
 
             SettingsNode level1aNode;
             string level1aNodeKey("level1a");
-            level1aNode.key = level1aNodeKey;
+            level1aNode.m_key = level1aNodeKey;
 
             SettingsNode level1bNode;
             string level1bNodeKey("level1b");
-            level1bNode.key = level1bNodeKey;
+            level1bNode.m_key = level1bNodeKey;
 
             SettingsNode level2Node;
             string level2NodeKey("level2");
-            level2Node.key = level2NodeKey;
+            level2Node.m_key = level2NodeKey;
 
             // Build the settings node
-            level1aNode.values.push_back(level2Node);
+            level1aNode.m_values.push_back(level2Node);
 
-            rootNode.values.push_back(level1aNode);
-            rootNode.values.push_back(level1bNode);
+            rootNode.m_values.push_back(level1aNode);
+            rootNode.m_values.push_back(level1bNode);
 
             WHEN("We apply the array subscript operator") {
                 THEN("Only these keys should exist") {
@@ -52,25 +52,25 @@ namespace execHelper { namespace core { namespace test {
     SCENARIO("Testing the to string collection method", "[settingsnode]") {
         GIVEN("A settings node structure") {
             SettingsNode rootNode;
-            rootNode.key = "<root>";
+            rootNode.m_key = "<root>";
 
             SettingsNode level1aNode;
             string level1aNodeKey("level1a");
-            level1aNode.key = level1aNodeKey;
+            level1aNode.m_key = level1aNodeKey;
 
             SettingsNode level1bNode;
             string level1bNodeKey("level1b");
-            level1bNode.key = level1bNodeKey;
+            level1bNode.m_key = level1bNodeKey;
 
             SettingsNode level2Node;
             string level2NodeKey("level2");
-            level2Node.key = level2NodeKey;
+            level2Node.m_key = level2NodeKey;
 
             // Build the settings node
-            level1aNode.values.push_back(level2Node);
+            level1aNode.m_values.push_back(level2Node);
 
-            rootNode.values.push_back(level1aNode);
-            rootNode.values.push_back(level1bNode);
+            rootNode.m_values.push_back(level1aNode);
+            rootNode.m_values.push_back(level1bNode);
 
             WHEN("We compare calls of toString of different nodes") {
                 THEN("We should find the correct strings") {
@@ -80,5 +80,4 @@ namespace execHelper { namespace core { namespace test {
             }
         }
     }
-
 } } }
