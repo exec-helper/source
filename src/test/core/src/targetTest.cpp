@@ -12,8 +12,8 @@ using execHelper::core::TargetDescription;
 
 namespace {
     struct TargetParameters {
-        TargetDescription::TargetCollection target; 
-        TargetDescription::RunTargetCollection runTarget;
+        TargetDescription::Target target; 
+        TargetDescription::RunTarget runTarget;
     };
 }
 
@@ -46,8 +46,8 @@ namespace execHelper { namespace core {
                 for(const auto& actualTarget : actualTargets) {
                     for(const auto& runTarget : actualRunTargets) {
                         TargetParameters targetParameters;
-                        targetParameters.target = {actualTarget};
-                        targetParameters.runTarget = {runTarget};
+                        targetParameters.target = actualTarget;
+                        targetParameters.runTarget = runTarget;
                         orderedCombinations.push_back(targetParameters);
                     }
                 }
@@ -56,10 +56,10 @@ namespace execHelper { namespace core {
                     THEN("We should be able to loop over it using iterators") {
                         size_t orderedCombinationsIndex = 0U;
                         for(TargetDescription::const_iterator it = target.begin(); it != target.end(); ++it) {
-                            const TargetDescription iteratedTargetDescription = *it;
+                            const TargetDescriptionElement iteratedTargetDescription = *it;
                             REQUIRE(orderedCombinationsIndex < orderedCombinations.size());
-                            REQUIRE(iteratedTargetDescription.getTargets() == orderedCombinations[orderedCombinationsIndex].target);
-                            REQUIRE(iteratedTargetDescription.getRunTargets() == orderedCombinations[orderedCombinationsIndex].runTarget);
+                            REQUIRE(iteratedTargetDescription.getTarget() == orderedCombinations[orderedCombinationsIndex].target);
+                            REQUIRE(iteratedTargetDescription.getRunTarget() == orderedCombinations[orderedCombinationsIndex].runTarget);
                             ++orderedCombinationsIndex;
                         } 
                         REQUIRE(orderedCombinationsIndex == orderedCombinations.size());
@@ -68,8 +68,8 @@ namespace execHelper { namespace core {
                         size_t orderedCombinationsIndex = 0U;
                         for(const auto& iteratedTargetDescription : target) {
                             REQUIRE(orderedCombinationsIndex < orderedCombinations.size());
-                            REQUIRE(iteratedTargetDescription.getTargets() == orderedCombinations[orderedCombinationsIndex].target);
-                            REQUIRE(iteratedTargetDescription.getRunTargets() == orderedCombinations[orderedCombinationsIndex].runTarget);
+                            REQUIRE(iteratedTargetDescription.getTarget() == orderedCombinations[orderedCombinationsIndex].target);
+                            REQUIRE(iteratedTargetDescription.getRunTarget() == orderedCombinations[orderedCombinationsIndex].runTarget);
                             ++orderedCombinationsIndex;
                         } 
                         REQUIRE(orderedCombinationsIndex == orderedCombinations.size());
@@ -87,8 +87,8 @@ namespace execHelper { namespace core {
                 for(const auto& actualTarget : actualTargets) {
                     for(const auto& runTarget : actualRunTargets) {
                         TargetParameters targetParameters;
-                        targetParameters.target = {actualTarget};
-                        targetParameters.runTarget = {runTarget};
+                        targetParameters.target = actualTarget;
+                        targetParameters.runTarget = runTarget;
                         orderedCombinations.push_back(targetParameters);
                     }
                 }
@@ -97,10 +97,10 @@ namespace execHelper { namespace core {
                     THEN("We should be able to loop over it using iterators") {
                         size_t orderedCombinationsIndex = 0U;
                         for(TargetDescription::iterator it = target.begin(); it != target.end(); ++it) {
-                            const TargetDescription iteratedTargetDescription = *it;
+                            const TargetDescriptionElement iteratedTargetDescription = *it;
                             REQUIRE(orderedCombinationsIndex < orderedCombinations.size());
-                            REQUIRE(iteratedTargetDescription.getTargets() == orderedCombinations[orderedCombinationsIndex].target);
-                            REQUIRE(iteratedTargetDescription.getRunTargets() == orderedCombinations[orderedCombinationsIndex].runTarget);
+                            REQUIRE(iteratedTargetDescription.getTarget() == orderedCombinations[orderedCombinationsIndex].target);
+                            REQUIRE(iteratedTargetDescription.getRunTarget() == orderedCombinations[orderedCombinationsIndex].runTarget);
                             ++orderedCombinationsIndex;
                         } 
                         REQUIRE(orderedCombinationsIndex == orderedCombinations.size());
@@ -109,8 +109,8 @@ namespace execHelper { namespace core {
                         size_t orderedCombinationsIndex = 0U;
                         for(auto iteratedTargetDescription : target) {
                             REQUIRE(orderedCombinationsIndex < orderedCombinations.size());
-                            REQUIRE(iteratedTargetDescription.getTargets() == orderedCombinations[orderedCombinationsIndex].target);
-                            REQUIRE(iteratedTargetDescription.getRunTargets() == orderedCombinations[orderedCombinationsIndex].runTarget);
+                            REQUIRE(iteratedTargetDescription.getTarget() == orderedCombinations[orderedCombinationsIndex].target);
+                            REQUIRE(iteratedTargetDescription.getRunTarget() == orderedCombinations[orderedCombinationsIndex].runTarget);
                             ++orderedCombinationsIndex;
                         } 
                         REQUIRE(orderedCombinationsIndex == orderedCombinations.size());

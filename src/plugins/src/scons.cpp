@@ -10,7 +10,7 @@ using std::string;
 using execHelper::core::Task;
 using execHelper::core::ExecHelperOptions;
 using execHelper::core::TaskCollection;
-using execHelper::core::CompilerDescription;
+using execHelper::core::CompilerDescriptionElement;
 using execHelper::core::Patterns;
 using execHelper::config::SettingsNode;
 
@@ -37,7 +37,7 @@ namespace execHelper { namespace plugins {
         //return TaskCollection({});
     //}
 
-    TaskCollection Scons::getCommandLine(const SettingsNode& settings, const CompilerDescription& compiler) noexcept {
+    TaskCollection Scons::getCommandLine(const SettingsNode& settings, const CompilerDescriptionElement& compiler) noexcept {
         TaskCollection commandArguments = settings["command-line"].toStringCollection();
         Patterns patterns = settings["patterns"].toStringCollection();
         for(auto& argument : commandArguments) {
@@ -62,7 +62,7 @@ namespace execHelper { namespace plugins {
                 Task newTask = task;
                 newTask.append(getMultiThreaded(settings));
                 newTask.append(getCommandLine(settings, compiler));
-                string buildTarget = target.getTargets()[0] + target.getRunTargets()[0];
+                string buildTarget = target.getTarget() + target.getRunTarget();
                 if(buildTarget != "all") {
                     newTask.append(buildTarget);
                 }
@@ -81,7 +81,7 @@ namespace execHelper { namespace plugins {
                 Task newTask = task;
                 newTask.append(getMultiThreaded(settings));
                 newTask.append(getCommandLine(settings, compiler));
-                string buildTarget = target.getTargets()[0] + target.getRunTargets()[0];
+                string buildTarget = target.getTarget() + target.getRunTarget();
                 if(buildTarget != "all") {
                     newTask.append(buildTarget);
                 }

@@ -45,6 +45,7 @@ namespace {
             ("run-target,r", value<TargetDescription::RunTargetCollection>()->multitoken(), "Set run targets")
             ("compiler,c", value<CompilerDescription::CompilerNames>()->multitoken(), "Set compilers")
             ("mode,m", value<CompilerDescription::ModeNames>()->multitoken(), "Set modes")
+            ("architecture,a", value<CompilerDescription::ArchitectureNames>()->multitoken(), "Set architecture")
             ("settings-file,s", value<string>(), "Set settings file")
         ;
         return descriptions;
@@ -71,7 +72,7 @@ namespace execHelper { namespace core {
     ExecHelperOptions::ExecHelperOptions() :
         m_help(false),
         m_verbose(false),
-        m_compiler(new CompilerDescription({Gcc(), Clang()}, {Debug(), Release()}))
+        m_compiler(new CompilerDescription({Gcc(), Clang()}, {Debug(), Release()}, {Architecture("x64")}))
     {
         if(! m_executor) {
 
@@ -133,12 +134,17 @@ namespace execHelper { namespace core {
 
         if(optionsMap.count("compiler")) {
             CompilerDescription::CompilerCollection compilers = CompilerDescription::convertToCompilerCollection(optionsMap["compiler"].as<CompilerDescription::CompilerNames>());
-            m_compiler.reset(new CompilerDescription(compilers, m_compiler->getModes()));
+            m_compiler.reset(new CompilerDescription(compilers, m_compiler->getModes(), m_compiler->getArchitectures()));
         }
 
         if(optionsMap.count("mode")) {
             CompilerDescription::ModeCollection modes = CompilerDescription::convertToModeCollection(optionsMap["mode"].as<CompilerDescription::ModeNames>());
-            m_compiler.reset(new CompilerDescription(m_compiler->getCompilers(), modes));
+            m_compiler.reset(new CompilerDescription(m_compiler->getCompilers(), modes, m_compiler->getArchitectures()));
+        }
+
+        if(optionsMap.count("architecture")) {
+            CompilerDescription::ArchitectureCollection architectures = CompilerDescription::convertToArchitectureCollection(optionsMap["architecture"].as<CompilerDescription::ArchitectureNames>());
+            m_compiler.reset(new CompilerDescription(m_compiler->getCompilers(), m_compiler->getModes(), architectures));
         }
 
         return true;
@@ -155,12 +161,17 @@ namespace execHelper { namespace core {
 
         if(m_settings.contains("default-compilers")) {
             CompilerDescription::CompilerCollection compilers = CompilerDescription::convertToCompilerCollection(m_settings["default-compilers"].toStringCollection());
-            m_compiler.reset(new CompilerDescription(compilers, m_compiler->getModes()));
+            m_compiler.reset(new CompilerDescription(compilers, m_compiler->getModes(), m_compiler->getArchitectures()));
         }
 
         if(m_settings.contains("default-modes")) {
             CompilerDescription::ModeCollection modes = CompilerDescription::convertToModeCollection(m_settings["default-modes"].toStringCollection());
-            m_compiler.reset(new CompilerDescription(m_compiler->getCompilers(), modes));
+            m_compiler.reset(new CompilerDescription(m_compiler->getCompilers(), modes, m_compiler->getArchitectures()));
+        }
+
+        if(m_settings.contains("default-architectures")) {
+            CompilerDescription::ArchitectureCollection architectures = CompilerDescription::convertToArchitectureCollection(m_settings["default-architectures"].toStringCollection());
+            m_compiler.reset(new CompilerDescription(m_compiler->getCompilers(), m_compiler->getModes(), architectures));
         }
 
         return true;

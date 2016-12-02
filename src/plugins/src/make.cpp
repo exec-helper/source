@@ -11,7 +11,7 @@ using std::string;
 using execHelper::core::Task;
 using execHelper::core::ExecHelperOptions;
 using execHelper::core::TaskCollection;
-using execHelper::core::CompilerDescription;
+using execHelper::core::CompilerDescriptionElement;
 using execHelper::core::Patterns;
 using execHelper::config::SettingsNode;
 
@@ -29,7 +29,7 @@ namespace execHelper { namespace plugins {
         return false;
     }
 
-    TaskCollection Make::getBuildDir(const SettingsNode& settings, const CompilerDescription& compiler) noexcept {
+    TaskCollection Make::getBuildDir(const SettingsNode& settings, const CompilerDescriptionElement& compiler) noexcept {
         TaskCollection commandArguments = settings["build-dir"].toStringCollection();
         Patterns patterns = settings["patterns"].toStringCollection();
         if(commandArguments.size() == 1U) {
@@ -38,7 +38,7 @@ namespace execHelper { namespace plugins {
         return TaskCollection({});
     }
 
-    TaskCollection Make::getCommandLine(const SettingsNode& settings, const CompilerDescription& compiler) noexcept {
+    TaskCollection Make::getCommandLine(const SettingsNode& settings, const CompilerDescriptionElement& compiler) noexcept {
         TaskCollection commandArguments = settings["command-line"].toStringCollection();
         Patterns patterns = settings["patterns"].toStringCollection();
         if(commandArguments.size() == 1U) {
@@ -64,7 +64,7 @@ namespace execHelper { namespace plugins {
                 newTask.append(getMultiThreaded(settings));
                 newTask.append(getCommandLine(settings, compiler));
                 TaskCollection buildTarget = getBuildDir(settings, compiler);
-                string targetName = target.getTargets()[0];
+                string targetName = target.getTarget();
                 if(targetName != "all") {
                     buildTarget.back() += "/" + targetName;
                 }
@@ -86,7 +86,7 @@ namespace execHelper { namespace plugins {
                 newTask.append(getMultiThreaded(settings));
                 newTask.append(getCommandLine(settings, compiler));
                 TaskCollection buildTarget = getBuildDir(settings, compiler);
-                string targetName = target.getTargets()[0];
+                string targetName = target.getTarget();
                 if(targetName != "all") {
                     buildTarget.back() += "/" + targetName;
                 }

@@ -6,7 +6,7 @@
 
 namespace execHelper {
     namespace core {
-        class CompilerDescription;
+        class CompilerDescriptionElement;
     }    
 }
 
@@ -15,7 +15,7 @@ namespace execHelper {
         typedef std::vector<std::string> Patterns;
 
         std::string replacePatterns(const std::string& subject, const std::string& pattern, const std::string& replacement) noexcept;
-        std::string replacePatterns(const std::string& subject, const Patterns& patterns, const core::CompilerDescription& compiler) noexcept;
+        std::string replacePatterns(const std::string& subject, const Patterns& patterns, const core::CompilerDescriptionElement& compiler) noexcept;
     }
 }
 

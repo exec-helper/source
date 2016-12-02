@@ -12,7 +12,7 @@ using std::string;
 using execHelper::core::Task;
 using execHelper::core::ExecHelperOptions;
 using execHelper::core::TaskCollection;
-using execHelper::core::CompilerDescription;
+using execHelper::core::CompilerDescriptionElement;
 using execHelper::core::Patterns;
 using execHelper::config::SettingsNode;
 
@@ -24,7 +24,7 @@ namespace execHelper { namespace plugins {
         return false;
     }
 
-    TaskCollection Bootstrap::getBuildDir(const SettingsNode& settings, const CompilerDescription& compiler) noexcept {
+    TaskCollection Bootstrap::getBuildDir(const SettingsNode& settings, const CompilerDescriptionElement& compiler) noexcept {
         TaskCollection commandArguments = settings["build-dir"].toStringCollection();
         Patterns patterns = settings["patterns"].toStringCollection();
         if(commandArguments.size() == 1U) {
