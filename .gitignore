@@ -92,3 +92,8 @@ ENV/
 # Vim temporary files
 *.swp
 output/*
+
+# Test files
+test_coverage/
+test*.exec-helper
+libexechelper_test.info

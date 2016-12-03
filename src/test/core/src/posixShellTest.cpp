@@ -13,7 +13,7 @@ using std::endl;
 namespace execHelper { namespace core { namespace test {
     SCENARIO("Test the posix shell for successfull commands", "[shell][posixshell]") {
         GIVEN("A posix shell and a file that can be shown in it") {
-            string filename("test.file");
+            string filename("test-posix-shell.exec-helper");
             string fileContent("Hello world!");
             ofstream file;
             file.open(filename);

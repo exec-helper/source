@@ -60,7 +60,7 @@ namespace execHelper { namespace plugins { namespace test {
                             + "    build-dir: build/{COMPILER}/{MODE}/{ARCHITECTURE}\n"
                             + "    filename: " + bootstrapFilename + "\n";
 
-            string filename = "bootstrap-test.yaml";
+            string filename = "test-bootstrap.exec-helper";
             ofstream fileStream;
             fileStream.open(filename);
             fileStream << configFile;
@@ -120,7 +120,7 @@ namespace execHelper { namespace plugins { namespace test {
                             + "        - ARCHITECTURE\n"
                             + "    build-dir: build/{COMPILER}/{MODE}/{ARCHITECTURE}\n";
 
-            string filename = "bootstrap-test.yaml";
+            string filename = "test-bootstrap.exec-helper";
             ofstream fileStream;
             fileStream.open(filename);
             fileStream << configFile;

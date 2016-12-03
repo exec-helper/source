@@ -71,7 +71,7 @@ namespace execHelper { namespace plugins { namespace test {
                             + "        - mode={MODE}\n"
                             + "        - arch={ARCHITECTURE}\n";
 
-            string filename = "scons-test.yaml";
+            string filename = "test-scons.exec-helper";
             ofstream fileStream;
             fileStream.open(filename);
             fileStream << configFile;
@@ -175,7 +175,7 @@ namespace execHelper { namespace plugins { namespace test {
                             + "        - mode={MODE}\n"
                             + "        - arch={ARCHITECTURE}\n";
 
-            string filename = "scons-test.yaml";
+            string filename = "test-scons.exec-helper";
             ofstream fileStream;
             fileStream.open(filename);
             fileStream << configFile;
