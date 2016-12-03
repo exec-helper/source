@@ -37,18 +37,9 @@ namespace execHelper { namespace core { namespace test {
         GIVEN("Nothin in particular") {
             WHEN("We have a collection of compiler names and the associated compiler collection") {
                 vector<string> compilerNames({"gcc", "clang"});
-                CompilerDescription::CompilerCollection actualCompilers({Gcc(), Clang()});
+                CompilerDescription::CompilerCollection actualCompilers({Compiler("gcc"), Compiler("clang")});
 
                 THEN("We should find the corresponding compilers") {
-                    CompilerDescription::CompilerCollection foundCompilers = CompilerDescription::convertToCompilerCollection(compilerNames);
-                    REQUIRE(foundCompilers == actualCompilers);
-                }
-            }
-            WHEN("We have a wrong compiler name in the collection of compiler names") {
-                vector<string> compilerNames({"gcc", "random-compiler", "clang", "other-random-compiler"});
-                CompilerDescription::CompilerCollection actualCompilers({Gcc(), Clang()});
-
-                THEN("We should only find the existing corresponding compilers") {
                     CompilerDescription::CompilerCollection foundCompilers = CompilerDescription::convertToCompilerCollection(compilerNames);
                     REQUIRE(foundCompilers == actualCompilers);
                 }

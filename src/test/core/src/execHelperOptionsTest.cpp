@@ -27,8 +27,7 @@ using std::unique_ptr;
 using std::ofstream;
 
 using execHelper::core::CompilerDescription;
-using execHelper::core::Gcc;
-using execHelper::core::Clang;
+using execHelper::core::Compiler;
 using execHelper::core::Debug;
 using execHelper::core::Release;
 

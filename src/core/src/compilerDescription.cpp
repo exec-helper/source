@@ -62,13 +62,7 @@ namespace execHelper {
         CompilerDescription::CompilerCollection CompilerDescription::convertToCompilerCollection(const CompilerNames& compilers) noexcept {
             CompilerCollection result;
             for(const auto& compilerName : compilers) {
-                if(compilerName == "gcc") {
-                    result.push_back(Gcc());
-                } else if(compilerName == "clang") {
-                    result.push_back(Clang());
-                } else {
-                    LOG("Error: invalid compiler name: '" << compilerName << "'");
-                }
+                result.push_back(Compiler(compilerName));
             }
             return result;
         }
