@@ -1,5 +1,8 @@
 #!/usr/bin/python
 
+import os
+import distutils.spawn
+
 from ..util.util import *
 from ..buildSystem.buildSystem import *
 from ..runner.runner import runner
@@ -13,7 +16,9 @@ def analyzeClang(target, verbose, options):
     prefix = ''
     if target.getToolchainPath() is not None and target.getToolchainPath() != '':
         prefix = target.getToolchainPath() + '/' 
-    if target.getCompiler().getCCompiler == 'clang':
+    else:
+        prefix = os.path.dirname(distutils.spawn.find_executable(target.getCompiler().getCCompiler(), path=None)) + '/'
+    if target.getCompiler().getCCompiler() == 'clang':
         clangStaticAnalyzerCommand.append('--use-analyzer=' + prefix + target.getCompiler().getCCompiler())
     clangStaticAnalyzerCommand.append('--use-cc=' + prefix + target.getCompiler().getCCompiler())
     clangStaticAnalyzerCommand.append('--use-c++=' + prefix + target.getCompiler().getCxxCompiler())

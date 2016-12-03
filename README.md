@@ -2,7 +2,9 @@
 A helper for executing development related stuff more efficiently. Exec-helper aims for configurability.
 
 ## Continuous integration
-Check the mirrored [Gitlab project](https://gitlab.com/bverhagen/exec-helper) for the build and test status of the project.
+[![build status](https://gitlab.com/bverhagen/exec-helper/badges/master/build.svg)](https://gitlab.com/bverhagen/exec-helper/commits/master)
+
+Check the mirrored [Gitlab project](https://gitlab.com/bverhagen/exec-helper) for more information about the build and test status of the project.
 
 ## Why
 The development workflow contains several repeatable actions (initialize a workspace, build in several configurations, run and profile the built files...). Exec-helper wants to make life easier for the developer by bundling all these actions into one reusable command line. It aims to be a wrapper on top of several (of the supported) systems.

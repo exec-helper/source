@@ -2,12 +2,13 @@ import os
 
 from exec_utils.util.util import *
 
-from cm.target import *
+from .target import *
 
 SHELL_RETURN_CODE = 0
 
-PYTHON2 = 'python2'
-PYTHON3 = 'python3'
+PYTHON2 = ['python2']
+PYTHON3 = ['python3']
+PYTHON_COVERAGE = ['coverage', 'run', '-p']
 
 GCC = 'gcc'
 CLANG = 'clang'
@@ -31,7 +32,14 @@ class UnittestOptions:
 
     @staticmethod
     def setPythonVersion(newPythonVersion):
-        UnittestOptions.pythonVersion = newPythonVersion
+        if newPythonVersion == PYTHON2[0]:
+            UnittestOptions.pythonVersion = PYTHON2
+        elif newPythonVersion == PYTHON3[0]:
+            UnittestOptions.pythonVersion = PYTHON3
+        elif newPythonVersion == PYTHON_COVERAGE[0]:
+            UnittestOptions.pythonVersion = PYTHON_COVERAGE
+        else:
+            raise ValueError("Invalid python version: '" + newPythonVersion + "'")
 
     @staticmethod
     def getPythonVersion():
@@ -66,7 +74,7 @@ def execute(cmd, outputFile = None, errorFile = None):
 
 def executeTarget(commandList, target, pythonVersion = PYTHON3, outputFile = None, errorFile = None, execCommand = 'exec'):
     cmd = []
-    cmd.append(pythonVersion)
+    cmd.extend(pythonVersion)
     cmd.append(execCommand)
     cmd.extend(commandList)
     cmd.extend(target.getProfileMapOptions())
@@ -91,7 +99,7 @@ def checkThatDirExists(path):
 COMPILER_DEBUG_MODE = 'debug'
 COMPILER_RELEASE_MODE = 'release'
 
-class Compiler:
+class Compiler(object):
     def __init__(self, mode, name, toolchainPath):
         self.mode = mode
         self.name = name
