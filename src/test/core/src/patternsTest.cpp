@@ -31,18 +31,24 @@ namespace execHelper { namespace core { namespace test {
         GIVEN("A string to replace patterns in") {
             const string compilerPattern("COMPILER");
             const string modePattern("MODE");
-            const Gcc compiler;
-            const CompilerDescription::CompilerCollection compilers({compiler});
-            const Release mode;
-            const CompilerDescription::ModeCollection modes({mode});
-            const CompilerDescription compilerDescription(compilers, modes);
-            const Patterns patterns({compilerPattern, modePattern});
+            const string architecturePattern("ARCHITECTURE");
 
-            const string beginString = string("test/{") + compilerPattern + "}/blaat/{" + modePattern + "}/{HELLO}";
-            const string actualString = string("test/") + compiler.getName() + "/blaat/" + mode.getMode() + "/{HELLO}";
+            const string compilerName("compiler1");
+            const string modeName("mode1");
+            const string architectureName("architectureA");
+
+            const Compiler compiler(compilerName);
+            const Mode mode(modeName);
+            const Architecture architecture(architectureName);
+
+            const CompilerDescriptionElement compilerDescriptionElement(compiler, mode, architecture);
+            const Patterns patterns({compilerPattern, modePattern, architecturePattern});
+
+            const string beginString = string("test/{") + compilerPattern + "}/blaat/{" + modePattern + "}/{HELLO}/{" + architecturePattern + "}";
+            const string actualString = string("test/") + compilerName + "/blaat/" + modeName + "/{HELLO}/" + architectureName;
 
             WHEN("We replace the patterns in the begin string") {
-                string resultingString = replacePatterns(beginString, patterns, compilerDescription); 
+                string resultingString = replacePatterns(beginString, patterns, compilerDescriptionElement); 
 
                 THEN("We should get the replaced result") {
                     REQUIRE(resultingString == actualString);

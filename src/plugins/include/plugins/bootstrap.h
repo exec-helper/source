@@ -9,7 +9,7 @@ namespace execHelper {
     }
     namespace core {
         class Task;
-        class CompilerDescription;
+        class CompilerDescriptionElement;
     }
 }
 
@@ -22,7 +22,7 @@ namespace execHelper {
             private:
                 bool init(core::Task& task, const core::ExecHelperOptions& options) const noexcept;
 
-                static core::TaskCollection getBuildDir(const config::SettingsNode& settings, const core::CompilerDescription& compiler) noexcept;
+                static core::TaskCollection getBuildDir(const config::SettingsNode& settings, const core::CompilerDescriptionElement& compiler) noexcept;
                 static std::string getBootstrapFilename(const config::SettingsNode& settings) noexcept;
         };
     }

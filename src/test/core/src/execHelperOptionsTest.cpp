@@ -22,10 +22,8 @@ using std::unique_ptr;
 using std::ofstream;
 
 using execHelper::core::CompilerDescription;
-using execHelper::core::Gcc;
-using execHelper::core::Clang;
-using execHelper::core::Debug;
-using execHelper::core::Release;
+using execHelper::core::Compiler;
+using execHelper::core::Mode;
 
 using execHelper::test::utils::MainVariables;
 using execHelper::test::utils::appendVectors;
@@ -82,7 +80,8 @@ namespace execHelper { namespace core {
                 const TargetDescription actualTarget({"target1", "target2"}, {"runTarget1", "runTarget2"});
                 const CompilerDescription::CompilerNames actualCompilerNames({"clang", "gcc"});
                 const CompilerDescription::ModeNames actualModes({"debug", "release"});
-                const CompilerDescription actualCompilers(actualCompilerNames, actualModes);
+                const CompilerDescription::ArchitectureNames actualArchitectures({"i386", "armel"});
+                const CompilerDescription actualCompilers(actualCompilerNames, actualModes, actualArchitectures);
 
                 vector<string> arguments;
                 arguments.emplace_back("UNITTEST");
@@ -96,6 +95,8 @@ namespace execHelper { namespace core {
                 appendVectors(arguments, actualCompilerNames);
                 arguments.emplace_back("--mode");
                 appendVectors(arguments, actualModes);
+                arguments.emplace_back("--architecture");
+                appendVectors(arguments, actualArchitectures);
 
                 for(const auto& argument : arguments) {
                     std::cout << argument << " ";
@@ -121,7 +122,8 @@ namespace execHelper { namespace core {
                 const TargetDescription actualTarget({"target1", "target2"}, {"runTarget1", "runTarget2"});
                 const CompilerDescription::CompilerNames actualCompilerNames({"clang", "gcc"});
                 const CompilerDescription::ModeNames actualModes({"debug", "release"});
-                const CompilerDescription actualCompilers(actualCompilerNames, actualModes);
+                const CompilerDescription::ArchitectureNames actualArchitectures({"i386", "armel"});
+                const CompilerDescription actualCompilers(actualCompilerNames, actualModes, actualArchitectures);
 
                 vector<string> arguments;
                 arguments.emplace_back("UNITTEST");
@@ -135,6 +137,8 @@ namespace execHelper { namespace core {
                 appendVectors(arguments, actualCompilerNames);
                 arguments.emplace_back("-m");
                 appendVectors(arguments, actualModes);
+                arguments.emplace_back("-a");
+                appendVectors(arguments, actualArchitectures);
 
                 WHEN("We convert it and parse the variables") {
                     MainVariables mainVariables(arguments);

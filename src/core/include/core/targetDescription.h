@@ -9,15 +9,30 @@
 
 namespace execHelper { 
     namespace core {
-        class TargetDescription {
+        class TargetDescriptionElement {
             public:
                 typedef std::string Target;
                 typedef std::string RunTarget;
+
+                TargetDescriptionElement(const Target& target, const RunTarget& runTarget);
+
+                Target getTarget() const noexcept;
+                RunTarget getRunTarget() const noexcept;
+              
+            private:
+                const Target m_target;
+                const RunTarget m_runTarget;
+        };
+
+        class TargetDescription {
+            public:
+                typedef TargetDescriptionElement::Target Target;
+                typedef TargetDescriptionElement::RunTarget RunTarget;
                 typedef std::vector<Target> TargetCollection;
                 typedef std::vector<RunTarget> RunTargetCollection;
 
-                typedef PermutationIterator<TargetDescription, TargetCollection, RunTargetCollection> iterator;
-                typedef PermutationIterator<const TargetDescription, TargetCollection, RunTargetCollection> const_iterator;
+                typedef PermutationIterator<TargetDescriptionElement, TargetCollection, RunTargetCollection> iterator;
+                typedef PermutationIterator<const TargetDescriptionElement, const TargetCollection, const RunTargetCollection> const_iterator;
 
                 TargetDescription(const TargetCollection& targets, const RunTargetCollection& runTarget);
 

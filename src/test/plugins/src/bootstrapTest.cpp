@@ -36,7 +36,8 @@ namespace execHelper { namespace plugins { namespace test {
             const CommandCollection actualCommands = {"init", "build", "run"};
             const CompilerDescription::CompilerNames actualCompilerNames({"gcc", "clang"});
             const CompilerDescription::ModeNames actualModes({"debug", "release"});
-            const CompilerDescription actualCompilers(actualCompilerNames, actualModes);
+            const CompilerDescription::ArchitectureNames actualArchitectures({"i386", "armel"});
+            const CompilerDescription actualCompilers(actualCompilerNames, actualModes, actualArchitectures);
 
             string bootstrapFilename("unittest-bootstrap.sh");
 
@@ -55,7 +56,8 @@ namespace execHelper { namespace plugins { namespace test {
                             + "    patterns:\n"
                             + "        - COMPILER\n"
                             + "        - MODE\n"
-                            + "    build-dir: build/{COMPILER}/{MODE}\n"
+                            + "        - ARCHITECTURE\n"
+                            + "    build-dir: build/{COMPILER}/{MODE}/{ARCHITECTURE}\n"
                             + "    filename: " + bootstrapFilename + "\n";
 
             string filename = "bootstrap-test.yaml";
@@ -79,11 +81,12 @@ namespace execHelper { namespace plugins { namespace test {
 
                 ExecutorStub::TaskQueue expectedQueue;
                 for(const auto& compiler : options.getCompiler()) {
-                    string compilerName = compiler.getCompilers()[0].getName();
-                    string modeName = compiler.getModes()[0].getMode();
+                    string compilerName = compiler.getCompiler().getName();
+                    string modeName = compiler.getMode().getMode();
+                    string architectureName = compiler.getArchitecture().getArchitecture();
 
                     Task expectedTask;
-                    expectedTask.append(TaskCollection({"cd", "build/" + compilerName + "/" + modeName, "&&", "./" + bootstrapFilename}));
+                    expectedTask.append(TaskCollection({"cd", "build/" + compilerName + "/" + modeName + "/" + architectureName, "&&", "./" + bootstrapFilename}));
                     expectedQueue.push_back(expectedTask);
                 }
 
@@ -96,7 +99,8 @@ namespace execHelper { namespace plugins { namespace test {
             const CommandCollection actualCommands = {"init", "build", "run"};
             const CompilerDescription::CompilerNames actualCompilerNames({"gcc", "clang"});
             const CompilerDescription::ModeNames actualModes({"debug", "release"});
-            const CompilerDescription actualCompilers(actualCompilerNames, actualModes);
+            const CompilerDescription::ArchitectureNames actualArchitectures({"i386", "armel"});
+            const CompilerDescription actualCompilers(actualCompilerNames, actualModes, actualArchitectures);
 
             vector<string> arguments;
             arguments.emplace_back("UNITTEST");
@@ -113,7 +117,8 @@ namespace execHelper { namespace plugins { namespace test {
                             + "    patterns:\n"
                             + "        - COMPILER\n"
                             + "        - MODE\n"
-                            + "    build-dir: build/{COMPILER}/{MODE}\n";
+                            + "        - ARCHITECTURE\n"
+                            + "    build-dir: build/{COMPILER}/{MODE}/{ARCHITECTURE}\n";
 
             string filename = "bootstrap-test.yaml";
             ofstream fileStream;
@@ -136,11 +141,12 @@ namespace execHelper { namespace plugins { namespace test {
 
                 ExecutorStub::TaskQueue expectedQueue;
                 for(const auto& compiler : options.getCompiler()) {
-                    string compilerName = compiler.getCompilers()[0].getName();
-                    string modeName = compiler.getModes()[0].getMode();
+                    string compilerName = compiler.getCompiler().getName();
+                    string modeName = compiler.getMode().getMode();
+                    string architectureName = compiler.getArchitecture().getArchitecture();
 
                     Task expectedTask;
-                    expectedTask.append(TaskCollection({"cd", "build/" + compilerName + "/" + modeName, "&&", "./bootstrap.sh"}));
+                    expectedTask.append(TaskCollection({"cd", "build/" + compilerName + "/" + modeName + "/" + architectureName, "&&", "./bootstrap.sh"}));
                     expectedQueue.push_back(expectedTask);
                 }
 

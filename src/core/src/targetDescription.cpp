@@ -26,19 +26,35 @@ namespace execHelper {
         }
 
         TargetDescription::iterator TargetDescription::begin() noexcept {
-            return permutationBeginIterator(*this, m_targets, m_runTargets);
+            return iterator(m_targets.begin(), m_runTargets.begin(), m_targets.end(), m_runTargets.end());
         }
 
         TargetDescription::const_iterator TargetDescription::begin() const noexcept {
-            return permutationBeginIterator(*this, m_targets, m_runTargets);
+            return const_iterator(m_targets.begin(), m_runTargets.begin(), m_targets.end(), m_runTargets.end());
         }
 
         TargetDescription::iterator TargetDescription::end() noexcept {
-            return permutationEndIterator(*this, m_targets, m_runTargets);
+            return iterator(m_targets.end(), m_runTargets.end(), m_targets.end(), m_runTargets.end());
         }
 
         TargetDescription::const_iterator TargetDescription::end() const noexcept {
-            return permutationEndIterator(*this, m_targets, m_runTargets);
+            return const_iterator(m_targets.end(), m_runTargets.end(), m_targets.end(), m_runTargets.end());
         }
+
+        TargetDescriptionElement::TargetDescriptionElement(const Target& target, const RunTarget& runTarget) :
+            m_target(target),
+            m_runTarget(runTarget)
+        {
+            ;
+        }
+
+        TargetDescriptionElement::Target TargetDescriptionElement::getTarget() const noexcept {
+            return m_target;
+        }
+
+        TargetDescriptionElement::RunTarget TargetDescriptionElement::getRunTarget() const noexcept {
+            return m_runTarget;
+        }
+ 
     }
 }

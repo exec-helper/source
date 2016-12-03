@@ -1,69 +1,45 @@
 #include <catch.hpp>
 
+#include <string>
+
 #include "core/compiler.h"
+
+using std::string;
 
 namespace execHelper { namespace core { namespace test {
     SCENARIO("Basic gcc compiler test", "[compiler]") {
-        GIVEN("A gcc compiler object") {
-            Gcc gcc;
+        GIVEN("A compiler object") {
+            string compilerName("gcc");
+            Compiler compiler(compilerName);
 
             WHEN("We check its member functions") {
                 THEN("We should get the specifics of the Gcc compiler object") {
-                    REQUIRE(gcc.getName() == "gcc");
+                    REQUIRE(compiler.getName() == compilerName);
                 }
             }
         }
-        GIVEN("Two gcc compiler objects") {
-            Gcc gcc1;
-            Gcc gcc2;
+        GIVEN("Two compiler objects with the same name") {
+            string compilerName("gcc");
+            Compiler compiler1(compilerName);
+            Compiler compiler2(compilerName);
 
             WHEN("We compare the two objects") {
                 THEN("They should be equal") {
-                    REQUIRE(gcc1 == gcc2);
+                    REQUIRE(compiler1 == compiler2);
                 }
             }
         }
-        GIVEN("A gcc compiler and an other object") {
-            Gcc gcc;
-            Clang clang;
+        GIVEN("Two different compilers") {
+            string compiler1Name("gcc");
+            string compiler2Name("clang");
+            Compiler compiler1(compiler1Name);
+            Compiler compiler2(compiler2Name);
 
             WHEN("We compare the two objects") {
                 THEN("They should not be equal") {
-                    REQUIRE(gcc != clang);
+                    REQUIRE(compiler1 != compiler2);
                 }
             }
         }
     }
-    SCENARIO("Basic clang compiler test", "[compiler]") {
-        GIVEN("A clang compiler object") {
-            Clang clang;
-
-            WHEN("We check its member functions") {
-                THEN("We should get the specifics of the Gcc compiler object") {
-                    REQUIRE(clang.getName() == "clang");
-                }
-            }
-        }
-        GIVEN("Two clang compiler objects") {
-            Clang clang1;
-            Clang clang2;
-
-            WHEN("We compare the two objects") {
-                THEN("They should be equal") {
-                    REQUIRE(clang1 == clang2);
-                }
-            }
-        }
-        GIVEN("A clang compiler and an other object") {
-            Clang clang;
-            Gcc gcc;
-
-            WHEN("We compare the two objects") {
-                THEN("They should not be equal") {
-                    REQUIRE(clang != gcc);
-                }
-            }
-        }
-    }
-
 } } }

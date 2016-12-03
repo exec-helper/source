@@ -11,19 +11,47 @@ using std::deque;
 using std::string;
 
 using execHelper::core::PermutationIterator;
-using execHelper::core::permutationBeginIterator;
-using execHelper::core::permutationEndIterator;
 
 namespace {
-    class PermuteObject {
+    class PermuteObjectElement {
         public:
             typedef string Object1;
             typedef uint8_t Object2;
-            typedef vector<Object1> Collection1;
-            typedef deque<Object2> Collection2;
+            PermuteObjectElement(const Object1 object1, const Object2 object2) :
+                m_object1(object1),
+                m_object2(object2)
+            {
+                ;
+            }
 
-            typedef PermutationIterator<PermuteObject, Collection1, Collection2> iterator;
-            typedef PermutationIterator<const PermuteObject, Collection1, Collection2> const_iterator;
+            bool operator==(const PermuteObjectElement& other) const noexcept {
+                return m_object1 == other.m_object1 && m_object2 == other.m_object2;
+            }
+
+            bool operator!=(const PermuteObjectElement& other) const noexcept {
+                return !(*this == other);
+            }
+
+            Object1 getObject1() const noexcept {
+                return m_object1;
+            }
+
+            Object2 getObject2() const noexcept {
+                return m_object2;
+            }
+
+        private:
+            const Object1 m_object1;
+            const Object2 m_object2;
+    };
+
+    class PermuteObject {
+        public:
+            typedef vector<PermuteObjectElement::Object1> Collection1;
+            typedef deque<PermuteObjectElement::Object2> Collection2;
+
+            typedef PermutationIterator<PermuteObjectElement, Collection1, Collection2> iterator;
+            typedef PermutationIterator<const PermuteObjectElement, const Collection1, const Collection2> const_iterator;
 
             PermuteObject(const Collection1& collection1, const Collection2& collection2) noexcept :
                 m_collection1(collection1),
@@ -49,19 +77,19 @@ namespace {
             }
 
             iterator begin() noexcept {
-                return permutationBeginIterator(*this, m_collection1, m_collection2);
+                return iterator(m_collection1.begin(), m_collection2.begin(), m_collection1.end(), m_collection2.end());
             }
 
             const_iterator begin() const noexcept {
-                return permutationBeginIterator(*this, m_collection1, m_collection2);
+                return const_iterator(m_collection1.begin(), m_collection2.begin(), m_collection1.end(), m_collection2.end());
             }
 
             iterator end() noexcept {
-                return permutationEndIterator(*this, m_collection1, m_collection2);
+                return iterator(m_collection1.end(), m_collection2.end(), m_collection1.end(), m_collection2.end());
             }
 
             const_iterator end() const noexcept {
-                return permutationEndIterator(*this, m_collection1, m_collection2);
+                return const_iterator(m_collection1.end(), m_collection2.end(), m_collection1.end(), m_collection2.end());
             }
 
         private:
@@ -69,6 +97,7 @@ namespace {
             Collection2 m_collection2;
 
     };
+
 }
 
 namespace execHelper { namespace core { namespace test {
@@ -76,10 +105,10 @@ namespace execHelper { namespace core { namespace test {
         GIVEN("Some non-const collections to iterate over using permutations of its content and the ordered combinations") {
             PermuteObject permute({"object1", "object2"}, {1, 2});
 
-            vector<PermuteObject> orderedCombinations;
+            vector<PermuteObjectElement> orderedCombinations;
             for(const auto& object1 : permute.getCollection1()) {
                 for(const auto& object2 : permute.getCollection2()) {
-                    PermuteObject combination({object1}, {object2});
+                    PermuteObjectElement combination(object1, object2);
                     orderedCombinations.push_back(combination);
                 }
             }
@@ -109,10 +138,10 @@ namespace execHelper { namespace core { namespace test {
         GIVEN("Some const collections to iterate over using permutations of its content and the ordered combinations") {
             const PermuteObject permute({"object1", "object2"}, {1, 2});
 
-            vector<PermuteObject> orderedCombinations;
+            vector<PermuteObjectElement> orderedCombinations;
             for(const auto& object1 : permute.getCollection1()) {
                 for(const auto& object2 : permute.getCollection2()) {
-                    PermuteObject combination({object1}, {object2});
+                    PermuteObjectElement combination(object1, object2);
                     orderedCombinations.push_back(combination);
                 }
             }
@@ -165,7 +194,7 @@ namespace execHelper { namespace core { namespace test {
         GIVEN("Some non-const collections to partially iterate over using permutations of its content and the ordered combinations") {
             PermuteObject permute({"object1", "object2", "object3", "object4"}, {1, 2, 3, 4, 5, 6, 7, 8});
 
-            vector<PermuteObject> orderedCombinations;
+            vector<PermuteObjectElement> orderedCombinations;
             const size_t beginIndexObject1 = 1U;
             const size_t endIndexObject1 = permute.getCollection1().size() - 1U;
             const size_t beginIndexObject2 = 1U;
@@ -173,10 +202,7 @@ namespace execHelper { namespace core { namespace test {
 
             for(size_t i = beginIndexObject1; i < endIndexObject1; ++i) {
                 for(size_t j = beginIndexObject2; j < endIndexObject2; ++j) {
-                    PermuteObject::Collection1 object1 = {permute.getCollection1()[i]};
-                    PermuteObject::Collection2 object2 = {permute.getCollection2()[j]};
-
-                    PermuteObject combination(object1, object2);
+                    PermuteObjectElement combination(permute.getCollection1()[i], permute.getCollection2()[j]);
                     orderedCombinations.push_back(combination);
                 }
             }
@@ -184,8 +210,8 @@ namespace execHelper { namespace core { namespace test {
             WHEN("We iterate over them partially") {
                 THEN("We should get the same ordered combinations") {
                     size_t orderedCombinationsIndex = 0U;
-                    for(auto it = PermutationIterator<PermuteObject, PermuteObject::Collection1, PermuteObject::Collection2>(permute, permute.getCollection1().begin() + beginIndexObject1, permute.getCollection1().begin() + endIndexObject1, permute.getCollection2().begin() + beginIndexObject2, permute.getCollection2().begin() + endIndexObject2);
-                            it != PermutationIterator<PermuteObject, PermuteObject::Collection1, PermuteObject::Collection2>(permute, permute.getCollection1().begin() + endIndexObject1, permute.getCollection1().begin() + endIndexObject1, permute.getCollection2().begin() + endIndexObject2, permute.getCollection2().begin() + endIndexObject2);
+                    for(auto it = PermutationIterator<PermuteObjectElement, PermuteObject::Collection1, PermuteObject::Collection2>(permute.getCollection1().begin() + beginIndexObject1, permute.getCollection2().begin() + beginIndexObject2, permute.getCollection1().begin() + endIndexObject1, permute.getCollection2().begin() + endIndexObject2);
+                            it != PermutationIterator<PermuteObjectElement, PermuteObject::Collection1, PermuteObject::Collection2>(permute.getCollection1().begin() + endIndexObject1, permute.getCollection2().begin() + endIndexObject2, permute.getCollection1().begin() + endIndexObject1, permute.getCollection2().begin() + endIndexObject2);
                             ++it) {
                         REQUIRE(orderedCombinationsIndex < orderedCombinations.size());
                         REQUIRE(*it == orderedCombinations[orderedCombinationsIndex]);
@@ -196,20 +222,19 @@ namespace execHelper { namespace core { namespace test {
             }
         }
         GIVEN("Some const collections to partially iterate over using permutations of its content and the ordered combinations") {
-            const PermuteObject permute({"object1", "object2", "object3", "object4"}, {1, 2, 3, 4, 5, 6, 7, 8});
+            PermuteObject::Collection1 collection1({"object1", "object2", "object3", "object4"});
+            PermuteObject::Collection2 collection2({1, 2, 3, 4, 5, 6, 7, 8});
+            const PermuteObject permute(collection1, collection2);
 
-            vector<PermuteObject> orderedCombinations;
+            vector<PermuteObjectElement> orderedCombinations;
             const size_t beginIndexObject1 = 1U;
-            const size_t endIndexObject1 = permute.getCollection1().size() - 1U;
+            const size_t endIndexObject1 = collection1.size() - 1U;
             const size_t beginIndexObject2 = 1U;
-            const size_t endIndexObject2 = permute.getCollection2().size() - 1U;
+            const size_t endIndexObject2 = collection2.size() - 1U;
 
             for(size_t i = beginIndexObject1; i < endIndexObject1; ++i) {
-                for(size_t j = beginIndexObject2; j < endIndexObject2; ++j) {
-                    PermuteObject::Collection1 object1 = {permute.getCollection1()[i]};
-                    PermuteObject::Collection2 object2 = {permute.getCollection2()[j]};
-
-                    PermuteObject combination(object1, object2);
+                for(size_t j = beginIndexObject2; j <endIndexObject2; ++j) {
+                    PermuteObjectElement combination(collection1[i], collection2[j]);
                     orderedCombinations.push_back(combination);
                 }
             }
@@ -217,8 +242,8 @@ namespace execHelper { namespace core { namespace test {
             WHEN("We iterate over them partially") {
                 THEN("We should get the same ordered combinations") {
                     size_t orderedCombinationsIndex = 0U;
-                    for(auto it = PermutationIterator<const PermuteObject, PermuteObject::Collection1, PermuteObject::Collection2>(permute, permute.getCollection1().begin() + beginIndexObject1, permute.getCollection1().begin() + endIndexObject1, permute.getCollection2().begin() + beginIndexObject2, permute.getCollection2().begin() + endIndexObject2);
-                            it != PermutationIterator<const PermuteObject, PermuteObject::Collection1, PermuteObject::Collection2>(permute, permute.getCollection1().begin() + endIndexObject1, permute.getCollection1().begin() + endIndexObject1, permute.getCollection2().begin() + endIndexObject2, permute.getCollection2().begin() + endIndexObject2);
+                    for(auto it = PermutationIterator<const PermuteObjectElement, const PermuteObject::Collection1, const PermuteObject::Collection2>(permute.getCollection1().begin() + beginIndexObject1, permute.getCollection2().begin() + beginIndexObject2, permute.getCollection1().begin() + endIndexObject1, permute.getCollection2().begin() + endIndexObject2);
+                            it != PermutationIterator<const PermuteObjectElement, const PermuteObject::Collection1, const PermuteObject::Collection2>(permute.getCollection1().begin() + endIndexObject1, permute.getCollection2().begin() + endIndexObject2, permute.getCollection1().begin() + endIndexObject1, permute.getCollection2().begin() + endIndexObject2);
                             ++it) {
                         REQUIRE(orderedCombinationsIndex < orderedCombinations.size());
                         REQUIRE(*it == orderedCombinations[orderedCombinationsIndex]);
