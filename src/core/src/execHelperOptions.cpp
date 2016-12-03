@@ -72,7 +72,7 @@ namespace execHelper { namespace core {
     ExecHelperOptions::ExecHelperOptions() :
         m_help(false),
         m_verbose(false),
-        m_compiler(new CompilerDescription({Compiler("gcc"), Compiler("clang")}, {Debug(), Release()}, {Architecture("x64")}))
+        m_compiler(new CompilerDescription({Compiler("gcc"), Compiler("clang")}, {Mode("debug"), Mode("release")}, {Architecture("x64")}))
     {
         if(! m_executor) {
 

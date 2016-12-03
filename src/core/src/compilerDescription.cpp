@@ -71,9 +71,9 @@ namespace execHelper {
             ModeCollection result;
             for(const auto& modeName : modes) {
                 if(modeName == "debug") {
-                    result.push_back(Debug());
+                    result.push_back(Mode("debug"));
                 } else if(modeName == "release") {
-                    result.push_back(Release());
+                    result.push_back(Mode("release"));
                 } else {
                     LOG("Error: invalid mode name: '" << modeName << "'");
                 }

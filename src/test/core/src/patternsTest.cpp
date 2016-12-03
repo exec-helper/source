@@ -34,17 +34,18 @@ namespace execHelper { namespace core { namespace test {
             const string architecturePattern("ARCHITECTURE");
 
             const string compilerName("compiler1");
+            const string modeName("mode1");
             const string architectureName("architectureA");
 
             const Compiler compiler(compilerName);
-            const Release mode;
+            const Mode mode(modeName);
             const Architecture architecture(architectureName);
 
             const CompilerDescriptionElement compilerDescriptionElement(compiler, mode, architecture);
             const Patterns patterns({compilerPattern, modePattern, architecturePattern});
 
             const string beginString = string("test/{") + compilerPattern + "}/blaat/{" + modePattern + "}/{HELLO}/{" + architecturePattern + "}";
-            const string actualString = string("test/") + compilerName + "/blaat/" + mode.getMode() + "/{HELLO}/" + architectureName;
+            const string actualString = string("test/") + compilerName + "/blaat/" + modeName + "/{HELLO}/" + architectureName;
 
             WHEN("We replace the patterns in the begin string") {
                 string resultingString = replacePatterns(beginString, patterns, compilerDescriptionElement); 

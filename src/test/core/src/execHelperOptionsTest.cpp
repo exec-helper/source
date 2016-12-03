@@ -28,8 +28,7 @@ using std::ofstream;
 
 using execHelper::core::CompilerDescription;
 using execHelper::core::Compiler;
-using execHelper::core::Debug;
-using execHelper::core::Release;
+using execHelper::core::Mode;
 
 using execHelper::test::MainVariables;
 using execHelper::test::appendVectors;

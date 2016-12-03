@@ -46,7 +46,7 @@ namespace execHelper { namespace core { namespace test {
             }
             WHEN("We have a collection of mode names and the associated mode collection") {
                 vector<string> modeNames({"debug", "release"});
-                CompilerDescription::ModeCollection actualModes({Debug(), Release()});
+                CompilerDescription::ModeCollection actualModes({Mode("debug"), Mode("release")});
 
                 THEN("We should find the corresponding modes") {
                     CompilerDescription::ModeCollection foundModes = CompilerDescription::convertToModeCollection(modeNames);
@@ -55,7 +55,7 @@ namespace execHelper { namespace core { namespace test {
             }
             WHEN("We have a wrong mode name in the associated mode collection") {
                 vector<string> modeNames({"debug", "random-mode", "release", "other-random-mode"});
-                CompilerDescription::ModeCollection actualModes({Debug(), Release()});
+                CompilerDescription::ModeCollection actualModes({Mode("debug"), Mode("release")});
 
                 THEN("We should only find the existing corresponding modes") {
                     CompilerDescription::ModeCollection foundModes = CompilerDescription::convertToModeCollection(modeNames);
