@@ -4,24 +4,10 @@
 #include <cassert>
 #include <tuple>
 
+#include "createObject.h"
+
 namespace execHelper {
     namespace core {
-        namespace detail {
-            template<typename ReturnType, typename Tup, bool end, int Total, int... N>
-            struct createObject {
-                static ReturnType getObject(Tup&& tuple) {
-                    return createObject<ReturnType, Tup, Total ==  1 + sizeof...(N), Total, N..., sizeof...(N)>::getObject(std::forward<Tup>(tuple));
-                }
-            };
-            
-            template<typename ReturnType, typename Tup, int Total, int... N>
-            struct createObject<ReturnType, Tup, true, Total, N...> {
-                static ReturnType getObject(Tup&& tuple) {
-                    return ReturnType(std::get<N>(std::forward<Tup>(tuple))...);
-                }
-            };
-        }
-
         // Currently the PermutationIterator implements std::forward_iterator_tag interface
         template<typename IteratorType, typename CollectionType1, typename... CollectionTypes>
         class PermutationIterator {
@@ -44,10 +30,6 @@ namespace execHelper {
                     m_outerEndIterator(c1EndIterator),
                     m_innerIterator(otherBeginIterators..., otherEndIterators...)
                 {
-                    //if(c1BeginIterator == c1EndIterator) {
-                        //// Means the collection is empty
-                        //m_outerIterator = m_outerEndIterator;  
-                    //}
                     if(hasEmptyCollection()) {
                         m_outerIterator = m_outerEndIterator;
                     }
@@ -94,8 +76,6 @@ namespace execHelper {
                     assert(!m_innerIterator.atEnd());
                     typedef typename std::decay<Tuple>::type ttype;
                     return detail::createObject<IteratorType, Tuple, 0 == std::tuple_size<ttype>::value, std::tuple_size<ttype>::value>::getObject(getElementValue());
-//                    return IteratorType(*m_outerIterator, std::get<CollectionTypes::value_type...>(std::forward<Tuple>(m_innerIterator.getElementValue()))...);
-//                    return IteratorType(*m_outerIterator, std::get<1,2,...,N>(std::forward<Tuple>(m_innerIterator.getElementValue()))...);
                 }
 
                 bool atEnd() const {
