@@ -228,13 +228,13 @@ namespace execHelper { namespace core { namespace test {
 
             vector<PermuteObjectElement> orderedCombinations;
             const size_t beginIndexObject1 = 1U;
-            const size_t endIndexObject1 = permute.getCollection1().size() - 1U;
+            const size_t endIndexObject1 = collection1.size() - 1U;
             const size_t beginIndexObject2 = 1U;
-            const size_t endIndexObject2 = permute.getCollection2().size() - 1U;
+            const size_t endIndexObject2 = collection2.size() - 1U;
 
-            for(const auto& object1 : collection1) {
-                for(const auto& object2 : collection2) {
-                    PermuteObjectElement combination(object1, object2);
+            for(size_t i = beginIndexObject1; i < endIndexObject1; ++i) {
+                for(size_t j = beginIndexObject2; j <endIndexObject2; ++j) {
+                    PermuteObjectElement combination(collection1[i], collection2[j]);
                     orderedCombinations.push_back(combination);
                 }
             }

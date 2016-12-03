@@ -48,6 +48,9 @@ namespace execHelper {
                         //// Means the collection is empty
                         //m_outerIterator = m_outerEndIterator;  
                     //}
+                    if(hasEmptyCollection()) {
+                        m_outerIterator = m_outerEndIterator;
+                    }
                 }
 
                 iterator& operator++() noexcept {
@@ -63,6 +66,10 @@ namespace execHelper {
                         }
                     }
                     return *this;
+                }
+
+                bool hasEmptyCollection() const noexcept {
+                    return m_outerBeginIterator == m_outerEndIterator || m_innerIterator.hasEmptyCollection();
                 }
 
                 bool operator==(const iterator& other) const {
@@ -132,6 +139,10 @@ namespace execHelper {
 
                 bool atEnd() const {
                     return m_collectionIterator == m_collectionEndIterator;
+                }
+
+                bool hasEmptyCollection() const noexcept {
+                    return m_collectionBeginIterator == m_collectionEndIterator;
                 }
 
                 bool operator==(const iterator& other) const {
