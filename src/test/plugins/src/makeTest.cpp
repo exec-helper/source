@@ -236,6 +236,96 @@ namespace execHelper { namespace plugins { namespace test {
         }
     }
 
+    SCENARIO("Testing the all target of the make plugin", "[plugins][make]") {
+        GIVEN("A scons plugin object and some options") {
+            const CommandCollection actualCommands({"init", "build", "run"});
+            const CompilerDescription::CompilerNames actualCompilerNames({"gcc", "clang"});
+            const CompilerDescription::ModeNames actualModes({"debug", "release"});
+            const CompilerDescription::ArchitectureNames actualArchitectures({"i386", "armel"});
+            const CompilerDescription actualCompilers(actualCompilerNames, actualModes, actualArchitectures);
+
+            vector<string> arguments;
+            arguments.emplace_back("UNITTEST");
+            appendVectors(arguments, actualCommands);
+            arguments.emplace_back("--compiler");
+            appendVectors(arguments, actualCompilerNames);
+            arguments.emplace_back("--mode");
+            appendVectors(arguments, actualModes);
+            arguments.emplace_back("--architecture");
+            appendVectors(arguments, actualArchitectures);
+
+            string configFile;
+            configFile += convertToConfig("commands", {"init"});
+            configFile += convertToConfig("init", {"bootstrap"});
+            configFile += string("make:\n")
+                            + "    patterns:\n"
+                            + "        - COMPILER\n"
+                            + "        - MODE\n"
+                            + "        - ARCHITECTURE\n"
+                            + "    build-dir: build/{COMPILER}/{MODE}/{ARCHITECTURE}\n"
+                            + "    single-threaded: no\n"
+                            + "    command-line:\n"
+                            + "        - V=1\n"
+                            + "        - --dry-run\n";
+
+
+            string filename = "test-make.exec-helper";
+            ofstream fileStream;
+            fileStream.open(filename);
+            fileStream << configFile;
+            fileStream.close();
+
+            ExecutorStub executor;
+            MainVariables mainVariables(arguments);
+            ExecHelperOptions options; 
+            options.setExecutor(&executor);
+            options.parseSettingsFile(filename);
+            options.parse(mainVariables.argc, mainVariables.argv.get());
+
+            Make plugin;
+
+            WHEN("We use the plugin to build") {
+                Task task;
+                REQUIRE(plugin.apply("build", task, options) == true);
+
+                ExecutorStub::TaskQueue expectedQueue;
+                for(const auto& compiler : options.getCompiler()) {
+                    string compilerName = compiler.getCompiler().getName();
+                    string modeName = compiler.getMode().getMode();
+                    string architectureName = compiler.getArchitecture().getArchitecture();
+
+                    Task expectedTask;
+                    expectedTask.append(TaskCollection({"make", "-j8", "V=1", "--dry-run", "-C", "build/" + compilerName + "/" + modeName + "/" + architectureName}));
+                    expectedQueue.push_back(expectedTask);
+                }
+
+                THEN("We should get the expected tasks") {
+                    REQUIRE(expectedQueue == executor.getExecutedTasks());
+                }
+            }
+
+            WHEN("We use the plugin to clean") {
+                Task task;
+                REQUIRE(plugin.apply("clean", task, options) == true);
+
+                ExecutorStub::TaskQueue expectedQueue;
+                for(const auto& compiler : options.getCompiler()) {
+                    string compilerName = compiler.getCompiler().getName();
+                    string modeName = compiler.getMode().getMode();
+                    string architectureName = compiler.getArchitecture().getArchitecture();
+
+                    Task expectedTask;
+                    expectedTask.append(TaskCollection({"make", "clean", "-j8", "V=1", "--dry-run", "-C", "build/" + compilerName + "/" + modeName + "/" + architectureName}));
+                    expectedQueue.push_back(expectedTask);
+                }
+
+                THEN("We should get the expected tasks") {
+                    REQUIRE(expectedQueue == executor.getExecutedTasks());
+                }
+            }
+
+        }
+    }
 
     SCENARIO("Testing invalid make plugin commands", "[plugins][make]") {
         GIVEN("Nothing in particular") {

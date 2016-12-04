@@ -62,8 +62,8 @@ namespace execHelper { namespace plugins {
                 Task newTask = task;
                 newTask.append(getMultiThreaded(settings));
                 newTask.append(getCommandLine(settings, compiler));
-                string buildTarget = target.getTarget() + target.getRunTarget();
-                if(buildTarget != "all") {
+                if(target.getTarget() != "all") {
+                    string buildTarget = target.getTarget() + target.getRunTarget();
                     newTask.append(buildTarget);
                 }
                 registerTask(newTask, options);
@@ -81,8 +81,8 @@ namespace execHelper { namespace plugins {
                 Task newTask = task;
                 newTask.append(getMultiThreaded(settings));
                 newTask.append(getCommandLine(settings, compiler));
-                string buildTarget = target.getTarget() + target.getRunTarget();
-                if(buildTarget != "all") {
+                if(target.getTarget() != "all") {
+                    string buildTarget = target.getTarget() + target.getRunTarget();
                     newTask.append(buildTarget);
                 }
                 registerTask(newTask, options);

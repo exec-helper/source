@@ -1,0 +1,19 @@
+commands:
+    - build
+    - clean
+    - distclean
+
+build:
+    - scons
+
+clean:
+    - clean
+
+scons:
+    patterns:
+        - COMPILER
+        - MODE
+    single-threaded: no
+    command-line: 
+        - compiler={COMPILER}
+        - mode={MODE}
