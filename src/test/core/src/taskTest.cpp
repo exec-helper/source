@@ -1,15 +1,20 @@
 #include <string>
 #include <sstream>
+#include <vector>
 
 #include <catch.hpp>
 
+#include "utils/utils.h"
 #include "core/task.h"
 
 using std::string;
 using std::istringstream;
 using std::stringstream;
 using std::istream_iterator;
+using std::vector;
 using std::move;
+
+using execHelper::test::utils::appendVectors;
 
 namespace execHelper { namespace core {
     namespace test {
@@ -154,6 +159,25 @@ namespace execHelper { namespace core {
                     }
                     THEN("We should get the accumulated string") {
                         REQUIRE(task.toString() == actualCommand); 
+                    }
+                }
+            }
+            GIVEN("A task and an initializer list that initializes it") {
+                Task task({"task1", "task2", "task3"});
+                vector<string> additionalTasks({"taskA", "taskB", "taskC"});
+                TaskCollection additionalCollection({"taskAlpha", "taskBeta"});
+
+                WHEN("We add the additional tasks") {
+                    for(const auto& subtask : additionalTasks) {
+                        task.append(subtask);
+                    } 
+                    task.append(additionalCollection);
+
+                    THEN("We should find all tasks in order") {
+                        TaskCollection correctResults({"task1", "task2", "task3"});
+                        appendVectors(correctResults, additionalTasks);
+                        appendVectors(correctResults, additionalCollection);
+                        REQUIRE(task.getTask() == correctResults);
                     }
                 }
             }

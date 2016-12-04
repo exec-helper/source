@@ -247,11 +247,13 @@ namespace execHelper { namespace core {
                 const string command1Key("command1");
                 const string defaultCompilerKey("default-compilers");
                 const string defaultModeKey("default-modes");
+                const string defaultArchitectureKey("default-architectures");
 
                 const vector<string> commandsValues = {command1Key, "command2", "command3"};
                 const vector<string> command1Values = {"command1a", "command1b"};
                 const vector<string> defaultCompiler = {"compiler1", "compiler2"};
-                const vector<string> defaultMode = {"compiler1", "compiler2"};
+                const vector<string> defaultMode = {"mode1", "mode2"};
+                const vector<string> defaultArchitecture = {"architecture1", "architecture2"};
 
                 ofstream file;
                 file.open(settingsFile, std::ios::out | std::ios::trunc);
@@ -259,6 +261,7 @@ namespace execHelper { namespace core {
                 file << convertToConfig(command1Key, command1Values);
                 file << convertToConfig(defaultCompilerKey, defaultCompiler);
                 file << convertToConfig(defaultModeKey, defaultMode);
+                file << convertToConfig(defaultArchitectureKey, defaultArchitecture);
                 file.close();
 
                 ExecHelperOptions options;
@@ -271,6 +274,16 @@ namespace execHelper { namespace core {
                         REQUIRE(options.getSettings(command1Key).toStringCollection() == command1Values);
                         REQUIRE(options.getSettings(defaultCompilerKey).toStringCollection() == defaultCompiler);
                         REQUIRE(options.getSettings(defaultModeKey).toStringCollection() == defaultMode);
+                        REQUIRE(options.getSettings(defaultArchitectureKey).toStringCollection() == defaultArchitecture);
+                    }
+                    THEN("We should get the chosen default settings for their respective settings") {
+                        const CompilerDescription::CompilerCollection correctCompilers = CompilerDescription::convertToCompilerCollection(defaultCompiler);
+                        const CompilerDescription::ModeCollection correctModes = CompilerDescription::convertToModeCollection(defaultMode);
+                        const CompilerDescription::ArchitectureCollection correctArchitecturs = CompilerDescription::convertToArchitectureCollection(defaultArchitecture);
+
+                        REQUIRE(options.getCompiler().getCompilers() == correctCompilers);
+                        REQUIRE(options.getCompiler().getModes() == correctModes);
+                        REQUIRE(options.getCompiler().getArchitectures() == correctArchitecturs);
                     }
                 }
             }

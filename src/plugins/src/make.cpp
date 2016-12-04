@@ -41,15 +41,15 @@ namespace execHelper { namespace plugins {
     TaskCollection Make::getCommandLine(const SettingsNode& settings, const CompilerDescriptionElement& compiler) noexcept {
         TaskCollection commandArguments = settings["command-line"].toStringCollection();
         Patterns patterns = settings["patterns"].toStringCollection();
-        if(commandArguments.size() == 1U) {
-            return TaskCollection({replacePatterns(commandArguments[0], patterns, compiler)});
+        for(auto& argument : commandArguments) {
+            argument = replacePatterns(argument, patterns, compiler);
         }
-        return TaskCollection({});
+        return commandArguments;
     }
 
     TaskCollection Make::getMultiThreaded(const SettingsNode& settings) noexcept {
         TaskCollection commandArguments = settings["single-threaded"].toStringCollection();
-        if(commandArguments[0] != "no") {
+        if(commandArguments[0] != "yes") {
             return TaskCollection({"-j8"});
         }
         return TaskCollection();
@@ -65,8 +65,14 @@ namespace execHelper { namespace plugins {
                 newTask.append(getCommandLine(settings, compiler));
                 TaskCollection buildTarget = getBuildDir(settings, compiler);
                 string targetName = target.getTarget();
+                string runTargetName = target.getRunTarget();
                 if(targetName != "all") {
-                    buildTarget.back() += "/" + targetName;
+                    if(buildTarget.size() == 0) {
+                        buildTarget.push_back("");
+                    } else {
+                        buildTarget.back() += "/";
+                    }
+                    buildTarget.back() += targetName + runTargetName;
                 }
                 newTask.append("-C");
                 newTask.append(buildTarget);
@@ -87,8 +93,14 @@ namespace execHelper { namespace plugins {
                 newTask.append(getCommandLine(settings, compiler));
                 TaskCollection buildTarget = getBuildDir(settings, compiler);
                 string targetName = target.getTarget();
+                string runTargetName = target.getRunTarget();
                 if(targetName != "all") {
-                    buildTarget.back() += "/" + targetName;
+                    if(buildTarget.size() == 0) {
+                        buildTarget.push_back("");
+                    } else {
+                        buildTarget.back() += "/";
+                    }
+                    buildTarget.back() += targetName + runTargetName;
                 }
                 newTask.append("-C");
                 newTask.append(buildTarget);

@@ -70,13 +70,7 @@ namespace execHelper {
         CompilerDescription::ModeCollection CompilerDescription::convertToModeCollection(const ModeNames& modes) noexcept {
             ModeCollection result;
             for(const auto& modeName : modes) {
-                if(modeName == "debug") {
-                    result.push_back(Mode("debug"));
-                } else if(modeName == "release") {
-                    result.push_back(Mode("release"));
-                } else {
-                    LOG("Error: invalid mode name: '" << modeName << "'");
-                }
+                result.push_back(Mode(modeName));
             }
             return result;
         }

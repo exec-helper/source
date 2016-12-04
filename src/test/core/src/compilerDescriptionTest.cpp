@@ -53,15 +53,6 @@ namespace execHelper { namespace core { namespace test {
                     REQUIRE(foundModes == actualModes);
                 }
             }
-            WHEN("We have a wrong mode name in the associated mode collection") {
-                vector<string> modeNames({"debug", "random-mode", "release", "other-random-mode"});
-                CompilerDescription::ModeCollection actualModes({Mode("debug"), Mode("release")});
-
-                THEN("We should only find the existing corresponding modes") {
-                    CompilerDescription::ModeCollection foundModes = CompilerDescription::convertToModeCollection(modeNames);
-                    REQUIRE(foundModes == actualModes);
-                }
-            }
         }
     }
 
