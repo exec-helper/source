@@ -15,17 +15,20 @@ using execHelper::core::CompilerDescription;
 using execHelper::core::Compiler;
 using execHelper::core::Mode;
 using execHelper::core::Architecture;
+using execHelper::core::Distribution;
 
 namespace {
     struct CompilerParameters {
         Compiler compiler; 
         Mode mode;
         Architecture architecture;
+        Distribution distribution;
 
-        CompilerParameters(const Compiler& theCompiler, const Mode& theMode, const Architecture& theArchitecture) :
+        CompilerParameters(const Compiler& theCompiler, const Mode& theMode, const Architecture& theArchitecture, const Distribution& theDistribution) :
             compiler(theCompiler),
             mode(theMode),
-            architecture(theArchitecture)
+            architecture(theArchitecture),
+            distribution(theDistribution)
         {
             ;
         }
@@ -61,14 +64,16 @@ namespace execHelper { namespace core { namespace test {
             CompilerDescription::CompilerCollection actualCompilers = {CompilerStub(), CompilerStub()};
             CompilerDescription::ModeCollection actualModes = {ModeStub(), ModeStub()};
             CompilerDescription::ArchitectureCollection actualArchitectures = {Architecture("i386"), Architecture("armel")};
+            CompilerDescription::DistributionCollection actualDistributions = {Distribution("distri1"), Distribution("distri2")};
 
             WHEN("We create a compiler description with these parameters") {
-               CompilerDescription compilerToTest(actualCompilers, actualModes, actualArchitectures); 
+               CompilerDescription compilerToTest(actualCompilers, actualModes, actualArchitectures, actualDistributions); 
 
                 THEN("We should get the same parameters back") {
                     REQUIRE(compilerToTest.getCompilers() == actualCompilers);
                     REQUIRE(compilerToTest.getModes() == actualModes);
                     REQUIRE(compilerToTest.getArchitectures() == actualArchitectures);
+                    REQUIRE(compilerToTest.getDistributions() == actualDistributions);
                 }
             }
         }
@@ -79,19 +84,22 @@ namespace execHelper { namespace core { namespace test {
             CompilerDescription::CompilerNames compilers({"gcc", "clang"});
             CompilerDescription::ModeNames modes({"debug", "release"});
             CompilerDescription::ArchitectureNames architectures({"i386", "armel"});
+            CompilerDescription::DistributionNames distributions({"distri1", "distri2"});
 
             // NOTE: we can only test it this way if the convertTo* functions are tested separately
             CompilerDescription::CompilerCollection actualCompilers = CompilerDescription::convertToCompilerCollection(compilers);
             CompilerDescription::ModeCollection actualModes = CompilerDescription::convertToModeCollection(modes);
             CompilerDescription::ArchitectureCollection actualArchitectures = CompilerDescription::convertToArchitectureCollection(architectures);
+            CompilerDescription::DistributionCollection actualDistributions = CompilerDescription::convertToDistributionCollection(distributions);
 
             WHEN("We create a compiler description with these parameters") {
-               CompilerDescription compilerToTest(compilers, modes, architectures); 
+               CompilerDescription compilerToTest(compilers, modes, architectures, distributions); 
 
                 THEN("We should get the same parameters back") {
                     REQUIRE(compilerToTest.getCompilers() == actualCompilers);
                     REQUIRE(compilerToTest.getModes() == actualModes);
                     REQUIRE(compilerToTest.getArchitectures() == actualArchitectures);
+                    REQUIRE(compilerToTest.getDistributions() == actualDistributions);
                 }
             }
         }
@@ -100,7 +108,7 @@ namespace execHelper { namespace core { namespace test {
 
     SCENARIO("Looping over a compiler description", "[compiler][CompilerDescription]") {
         GIVEN("A const compiler collection over which we can loop and all combinations of these") {
-            const CompilerDescription compilerDescription({CompilerStub(), CompilerStub()}, {ModeStub(), ModeStub()}, {Architecture("i386"), Architecture("armel")}); 
+            const CompilerDescription compilerDescription({CompilerStub(), CompilerStub()}, {ModeStub(), ModeStub()}, {Architecture("i386"), Architecture("armel")}, {Distribution("distri1"), Distribution("distri2")}); 
 
             vector<CompilerParameters> orderedCombinations;
 
@@ -108,8 +116,10 @@ namespace execHelper { namespace core { namespace test {
             for(const auto& compiler : compilerDescription.getCompilers()) {
                 for(const auto& mode : compilerDescription.getModes()) {
                     for(const auto& architecture : compilerDescription.getArchitectures()) {
-                        CompilerParameters compilerParameters(compiler, mode, architecture);
-                        orderedCombinations.push_back(compilerParameters);
+                        for(const auto& distribution : compilerDescription.getDistributions()) {
+                            CompilerParameters compilerParameters(compiler, mode, architecture, distribution);
+                            orderedCombinations.push_back(compilerParameters);
+                        }
                     }
                 }
             }
@@ -141,7 +151,7 @@ namespace execHelper { namespace core { namespace test {
         }
 
         GIVEN("A non-const compiler collection over which we can loop and all combinations of these") {
-            CompilerDescription compilerDescription({CompilerStub(), CompilerStub()}, {ModeStub(), ModeStub()}, {Architecture("architectureA"), Architecture("architectureB")}); 
+            CompilerDescription compilerDescription({CompilerStub(), CompilerStub()}, {ModeStub(), ModeStub()}, {Architecture("architectureA"), Architecture("architectureB")}, {Distribution("distri1"), Distribution("distri2")}); 
 
             vector<CompilerParameters> orderedCombinations;
 
@@ -149,8 +159,10 @@ namespace execHelper { namespace core { namespace test {
             for(const auto& compiler : compilerDescription.getCompilers()) {
                 for(const auto& mode : compilerDescription.getModes()) {
                     for(const auto& architecture : compilerDescription.getArchitectures()) {
-                        CompilerParameters compilerParameters(compiler, mode, architecture);
-                        orderedCombinations.push_back(compilerParameters);
+                        for(const auto& distribution : compilerDescription.getDistributions()) {
+                            CompilerParameters compilerParameters(compiler, mode, architecture, distribution);
+                            orderedCombinations.push_back(compilerParameters);
+                        }
                     }
                 }
             }
@@ -184,7 +196,7 @@ namespace execHelper { namespace core { namespace test {
 
     SCENARIO("Special cases for compiler iteration", "[compiler][CompilerDescription]") {
         GIVEN("Empty collections for the target") {
-            const CompilerDescription target((CompilerDescription::CompilerCollection()), CompilerDescription::ModeCollection(), CompilerDescription::ArchitectureCollection()); 
+            const CompilerDescription target((CompilerDescription::CompilerCollection()), CompilerDescription::ModeCollection(), CompilerDescription::ArchitectureCollection(), CompilerDescription::DistributionCollection()); 
 
             WHEN("We get the begin iterator") {
                 THEN("The begin iterator should be equal to the end iterator") {
@@ -196,7 +208,7 @@ namespace execHelper { namespace core { namespace test {
 
     SCENARIO("Test the comparisons of the compilers", "[compiler][CompilerDescription]") {
         GIVEN("One test target") {
-            CompilerDescription actualCompilerDescription({CompilerStub(), CompilerStub()}, {ModeStub(), ModeStub()}, {Architecture("architectureA"), Architecture("architectureB")});
+            CompilerDescription actualCompilerDescription({CompilerStub(), CompilerStub()}, {ModeStub(), ModeStub()}, {Architecture("architectureA"), Architecture("architectureB")}, {Distribution("distri1"), Distribution("distri2")});
 
             WHEN("We compare the target with itself") {
                 THEN("We should get it to be equal") {
@@ -206,8 +218,8 @@ namespace execHelper { namespace core { namespace test {
             }
         }
         GIVEN("Two different targets with the same content") {
-            CompilerDescription target1({CompilerStub(), CompilerStub()}, {ModeStub(), ModeStub()}, {Architecture("architectureA"), Architecture("architectureB")});
-            CompilerDescription target2({CompilerStub(), CompilerStub()}, {ModeStub(), ModeStub()}, {Architecture("architectureA"), Architecture("architectureB")});
+            CompilerDescription target1({CompilerStub(), CompilerStub()}, {ModeStub(), ModeStub()}, {Architecture("architectureA"), Architecture("architectureB")}, {Distribution("distri1"), Distribution("distri2")});
+            CompilerDescription target2({CompilerStub(), CompilerStub()}, {ModeStub(), ModeStub()}, {Architecture("architectureA"), Architecture("architectureB")}, {Distribution("distri1"), Distribution("distri2")});
 
             WHEN("We compare the targets") {
                 THEN("We should get them to be equal") {
@@ -217,12 +229,12 @@ namespace execHelper { namespace core { namespace test {
             }
         }
         GIVEN("Two different targets with a different content") {
-            CompilerDescription target1({CompilerStub(), CompilerStub()}, {ModeStub(), ModeStub()}, {Architecture("architectureA"), Architecture("architectureB")});
-            CompilerDescription target2({CompilerStub()}, {ModeStub(), ModeStub()}, {Architecture("architectureA"), Architecture("architectureB")});
-            CompilerDescription target3({CompilerStub(), CompilerStub()}, {ModeStub()}, {});
-            CompilerDescription target4((CompilerDescription::CompilerCollection()), {}, {Architecture("architectureA"), Architecture("architectureB")});
-            CompilerDescription target5({CompilerStub(), CompilerStub()}, {}, {Architecture("architectureA"), Architecture("architectureB")} );
-            CompilerDescription target6({}, {ModeStub(), ModeStub()}, {});
+            CompilerDescription target1({CompilerStub(), CompilerStub()}, {ModeStub(), ModeStub()}, {Architecture("architectureA"), Architecture("architectureB")}, {Distribution("distri1"), Distribution("distri2")});
+            CompilerDescription target2({CompilerStub()}, {ModeStub(), ModeStub()}, {Architecture("architectureA"), Architecture("architectureB")}, {Distribution("distri1"), Distribution("distri2")});
+            CompilerDescription target3({CompilerStub(), CompilerStub()}, {ModeStub()}, {}, {Distribution("distri1"), Distribution("distri2")});
+            CompilerDescription target4((CompilerDescription::CompilerCollection()), {}, {Architecture("architectureA"), Architecture("architectureB")}, {Distribution("distri1"), Distribution("distri2")});
+            CompilerDescription target5({CompilerStub(), CompilerStub()}, {}, {Architecture("architectureA"), Architecture("architectureB")}, {} );
+            CompilerDescription target6({}, {ModeStub(), ModeStub()}, {}, {Distribution("distri1"), Distribution("distri2")});
 
             WHEN("We compare the targets") {
                 THEN("We should get them to be not equal") {

@@ -39,7 +39,8 @@ namespace execHelper { namespace plugins { namespace test {
             const CompilerDescription::CompilerNames actualCompilerNames({"gcc", "clang"});
             const CompilerDescription::ModeNames actualModes({"debug", "release"});
             const CompilerDescription::ArchitectureNames actualArchitectures({"i386", "armel"});
-            const CompilerDescription actualCompilers(actualCompilerNames, actualModes, actualArchitectures);
+            const CompilerDescription::DistributionNames actualDistributions({"wheezy", "jessie"});
+            const CompilerDescription actualCompilers(actualCompilerNames, actualModes, actualArchitectures, actualDistributions);
 
             vector<string> arguments;
             arguments.emplace_back("UNITTEST");
@@ -146,30 +147,29 @@ namespace execHelper { namespace plugins { namespace test {
             const CompilerDescription::CompilerNames actualCompilerNames({"gcc", "clang"});
             const CompilerDescription::ModeNames actualModes({"debug", "release"});
             const CompilerDescription::ArchitectureNames actualArchitectures({"i386", "armel"});
-            const CompilerDescription actualCompilers(actualCompilerNames, actualModes, actualArchitectures);
+            const CompilerDescription::DistributionNames actualDistributions({"wheezy", "jessie"});
+            const CompilerDescription actualCompilers(actualCompilerNames, actualModes, actualArchitectures, actualDistributions);
 
             vector<string> arguments;
             arguments.emplace_back("UNITTEST");
             appendVectors(arguments, actualCommands);
+            arguments.emplace_back("--target");
+            appendVectors(arguments, actualTargets);
+            arguments.emplace_back("--run-target");
+            appendVectors(arguments, actualRunTargets);
             arguments.emplace_back("--compiler");
             appendVectors(arguments, actualCompilerNames);
             arguments.emplace_back("--mode");
             appendVectors(arguments, actualModes);
             arguments.emplace_back("--architecture");
             appendVectors(arguments, actualArchitectures);
-            arguments.emplace_back("--target");
-            appendVectors(arguments, actualTargets);
-            arguments.emplace_back("--run-target");
-            appendVectors(arguments, actualRunTargets);
+            arguments.emplace_back("--distribution");
+            appendVectors(arguments, actualDistributions);
 
             string configFile;
             configFile += convertToConfig("commands", {"init"});
             configFile += convertToConfig("init", {"bootstrap"});
             configFile += string("make:\n")
-                            + "    patterns:\n"
-                            + "        - COMPILER\n"
-                            + "        - MODE\n"
-                            + "        - ARCHITECTURE\n"
                             + "    single-threaded: yes\n"
                             + "    command-line:\n"
                             + "        - V=1\n"
@@ -242,7 +242,8 @@ namespace execHelper { namespace plugins { namespace test {
             const CompilerDescription::CompilerNames actualCompilerNames({"gcc", "clang"});
             const CompilerDescription::ModeNames actualModes({"debug", "release"});
             const CompilerDescription::ArchitectureNames actualArchitectures({"i386", "armel"});
-            const CompilerDescription actualCompilers(actualCompilerNames, actualModes, actualArchitectures);
+            const CompilerDescription::DistributionNames actualDistributions({"wheezy", "jessie"});
+            const CompilerDescription actualCompilers(actualCompilerNames, actualModes, actualArchitectures, actualDistributions);
 
             vector<string> arguments;
             arguments.emplace_back("UNITTEST");
@@ -253,6 +254,8 @@ namespace execHelper { namespace plugins { namespace test {
             appendVectors(arguments, actualModes);
             arguments.emplace_back("--architecture");
             appendVectors(arguments, actualArchitectures);
+            arguments.emplace_back("--distribution");
+            appendVectors(arguments, actualDistributions);
 
             string configFile;
             configFile += convertToConfig("commands", {"init"});
@@ -262,7 +265,8 @@ namespace execHelper { namespace plugins { namespace test {
                             + "        - COMPILER\n"
                             + "        - MODE\n"
                             + "        - ARCHITECTURE\n"
-                            + "    build-dir: build/{COMPILER}/{MODE}/{ARCHITECTURE}\n"
+                            + "        - DISTRIBUTION\n"
+                            + "    build-dir: build/{COMPILER}/{MODE}/{ARCHITECTURE}/{DISTRIBUTION}\n"
                             + "    single-threaded: no\n"
                             + "    command-line:\n"
                             + "        - V=1\n"
@@ -293,9 +297,10 @@ namespace execHelper { namespace plugins { namespace test {
                     string compilerName = compiler.getCompiler().getName();
                     string modeName = compiler.getMode().getMode();
                     string architectureName = compiler.getArchitecture().getArchitecture();
+                    string distributionName = compiler.getDistribution().getDistribution();
 
                     Task expectedTask;
-                    expectedTask.append(TaskCollection({"make", "-j8", "V=1", "--dry-run", "-C", "build/" + compilerName + "/" + modeName + "/" + architectureName}));
+                    expectedTask.append(TaskCollection({"make", "-j8", "V=1", "--dry-run", "-C", "build/" + compilerName + "/" + modeName + "/" + architectureName + "/" + distributionName}));
                     expectedQueue.push_back(expectedTask);
                 }
 
@@ -313,9 +318,10 @@ namespace execHelper { namespace plugins { namespace test {
                     string compilerName = compiler.getCompiler().getName();
                     string modeName = compiler.getMode().getMode();
                     string architectureName = compiler.getArchitecture().getArchitecture();
+                    string distributionName = compiler.getDistribution().getDistribution();
 
                     Task expectedTask;
-                    expectedTask.append(TaskCollection({"make", "clean", "-j8", "V=1", "--dry-run", "-C", "build/" + compilerName + "/" + modeName + "/" + architectureName}));
+                    expectedTask.append(TaskCollection({"make", "clean", "-j8", "V=1", "--dry-run", "-C", "build/" + compilerName + "/" + modeName + "/" + architectureName + "/" + distributionName}));
                     expectedQueue.push_back(expectedTask);
                 }
 

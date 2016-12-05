@@ -46,6 +46,7 @@ namespace {
             ("compiler,c", value<CompilerDescription::CompilerNames>()->multitoken(), "Set compilers")
             ("mode,m", value<CompilerDescription::ModeNames>()->multitoken(), "Set modes")
             ("architecture,a", value<CompilerDescription::ArchitectureNames>()->multitoken(), "Set architecture")
+            ("distribution,d", value<CompilerDescription::DistributionNames>()->multitoken(), "Set distribution")
             ("settings-file,s", value<string>(), "Set settings file")
         ;
         return descriptions;
@@ -72,7 +73,7 @@ namespace execHelper { namespace core {
     ExecHelperOptions::ExecHelperOptions() :
         m_help(false),
         m_verbose(false),
-        m_compiler(new CompilerDescription({Compiler("gcc"), Compiler("clang")}, {Mode("debug"), Mode("release")}, {Architecture("x64")}))
+        m_compiler(new CompilerDescription({Compiler("gcc"), Compiler("clang")}, {Mode("debug"), Mode("release")}, {Architecture("x64")}, {Distribution("arch-linux")}))
     {
         if(! m_executor) {
 
@@ -134,17 +135,22 @@ namespace execHelper { namespace core {
 
         if(optionsMap.count("compiler")) {
             CompilerDescription::CompilerCollection compilers = CompilerDescription::convertToCompilerCollection(optionsMap["compiler"].as<CompilerDescription::CompilerNames>());
-            m_compiler.reset(new CompilerDescription(compilers, m_compiler->getModes(), m_compiler->getArchitectures()));
+            m_compiler.reset(new CompilerDescription(compilers, m_compiler->getModes(), m_compiler->getArchitectures(), m_compiler->getDistributions()));
         }
 
         if(optionsMap.count("mode")) {
             CompilerDescription::ModeCollection modes = CompilerDescription::convertToModeCollection(optionsMap["mode"].as<CompilerDescription::ModeNames>());
-            m_compiler.reset(new CompilerDescription(m_compiler->getCompilers(), modes, m_compiler->getArchitectures()));
+            m_compiler.reset(new CompilerDescription(m_compiler->getCompilers(), modes, m_compiler->getArchitectures(), m_compiler->getDistributions()));
         }
 
         if(optionsMap.count("architecture")) {
             CompilerDescription::ArchitectureCollection architectures = CompilerDescription::convertToArchitectureCollection(optionsMap["architecture"].as<CompilerDescription::ArchitectureNames>());
-            m_compiler.reset(new CompilerDescription(m_compiler->getCompilers(), m_compiler->getModes(), architectures));
+            m_compiler.reset(new CompilerDescription(m_compiler->getCompilers(), m_compiler->getModes(), architectures, m_compiler->getDistributions()));
+        }
+
+        if(optionsMap.count("distribution")) {
+            CompilerDescription::DistributionCollection distributions = CompilerDescription::convertToDistributionCollection(optionsMap["distribution"].as<CompilerDescription::DistributionNames>());
+            m_compiler.reset(new CompilerDescription(m_compiler->getCompilers(), m_compiler->getModes(), m_compiler->getArchitectures(), distributions));
         }
 
         return true;
@@ -161,19 +167,23 @@ namespace execHelper { namespace core {
 
         if(m_settings.contains("default-compilers")) {
             CompilerDescription::CompilerCollection compilers = CompilerDescription::convertToCompilerCollection(m_settings["default-compilers"].toStringCollection());
-            m_compiler.reset(new CompilerDescription(compilers, m_compiler->getModes(), m_compiler->getArchitectures()));
+            m_compiler.reset(new CompilerDescription(compilers, m_compiler->getModes(), m_compiler->getArchitectures(), m_compiler->getDistributions()));
         }
 
         if(m_settings.contains("default-modes")) {
             CompilerDescription::ModeCollection modes = CompilerDescription::convertToModeCollection(m_settings["default-modes"].toStringCollection());
-            m_compiler.reset(new CompilerDescription(m_compiler->getCompilers(), modes, m_compiler->getArchitectures()));
+            m_compiler.reset(new CompilerDescription(m_compiler->getCompilers(), modes, m_compiler->getArchitectures(), m_compiler->getDistributions()));
         }
 
         if(m_settings.contains("default-architectures")) {
             CompilerDescription::ArchitectureCollection architectures = CompilerDescription::convertToArchitectureCollection(m_settings["default-architectures"].toStringCollection());
-            m_compiler.reset(new CompilerDescription(m_compiler->getCompilers(), m_compiler->getModes(), architectures));
+            m_compiler.reset(new CompilerDescription(m_compiler->getCompilers(), m_compiler->getModes(), architectures, m_compiler->getDistributions()));
         }
 
+        if(m_settings.contains("default-compilers")) {
+            CompilerDescription::DistributionCollection distributions = CompilerDescription::convertToDistributionCollection(m_settings["default-distributions"].toStringCollection());
+            m_compiler.reset(new CompilerDescription(m_compiler->getCompilers(), m_compiler->getModes(), m_compiler->getArchitectures(), m_compiler->getDistributions()));
+        }
         return true;
     }
 

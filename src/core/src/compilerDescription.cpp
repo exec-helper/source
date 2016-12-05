@@ -7,18 +7,20 @@ namespace {
 
 namespace execHelper {
     namespace core {
-        CompilerDescription::CompilerDescription(const CompilerNames& compilerNames, const ModeNames& modeNames, const ArchitectureNames& architectureNames) :
+        CompilerDescription::CompilerDescription(const CompilerNames& compilerNames, const ModeNames& modeNames, const ArchitectureNames& architectureNames, const DistributionNames& distributions) :
             m_compilers(convertToCompilerCollection(compilerNames)),
             m_modes(convertToModeCollection(modeNames)),
-            m_architectures(convertToArchitectureCollection(architectureNames))
+            m_architectures(convertToArchitectureCollection(architectureNames)),
+            m_distributions(convertToDistributionCollection(distributions))
         {
-
+            ;
         }
 
-        CompilerDescription::CompilerDescription(const CompilerCollection& compilers, const ModeCollection& modes, const ArchitectureCollection& architectures) :
+        CompilerDescription::CompilerDescription(const CompilerCollection& compilers, const ModeCollection& modes, const ArchitectureCollection& architectures, const DistributionCollection& distributions) :
             m_compilers(compilers),
             m_modes(modes),
-            m_architectures(architectures)
+            m_architectures(architectures),
+            m_distributions(distributions)
         {
             ;
         }
@@ -35,8 +37,12 @@ namespace execHelper {
             return m_architectures;
         }
 
+        const CompilerDescription::DistributionCollection& CompilerDescription::getDistributions() const noexcept {
+            return m_distributions;
+        }
+
         bool CompilerDescription::operator==(const CompilerDescription& other) const noexcept {
-            return m_compilers == other.m_compilers && m_modes == other.m_modes;
+            return m_compilers == other.m_compilers && m_modes == other.m_modes && m_architectures == other.m_architectures && m_distributions == other.m_distributions;
         }
 
         bool CompilerDescription::operator!=(const CompilerDescription& other) const noexcept {
@@ -44,19 +50,19 @@ namespace execHelper {
         }
 
         CompilerDescription::iterator CompilerDescription::begin() noexcept {
-            return iterator(m_compilers.begin(), m_modes.begin(), m_architectures.begin(), m_compilers.end(), m_modes.end(), m_architectures.end());
+            return iterator(m_compilers.begin(), m_modes.begin(), m_architectures.begin(), m_distributions.begin(), m_compilers.end(), m_modes.end(), m_architectures.end(), m_distributions.end());
         }
 
         CompilerDescription::const_iterator CompilerDescription::begin() const noexcept {
-            return const_iterator(m_compilers.begin(), m_modes.begin(), m_architectures.begin(), m_compilers.end(), m_modes.end(), m_architectures.end());
+            return const_iterator(m_compilers.begin(), m_modes.begin(), m_architectures.begin(), m_distributions.begin(), m_compilers.end(), m_modes.end(), m_architectures.end(), m_distributions.end());
         }
 
         CompilerDescription::iterator CompilerDescription::end() noexcept {
-            return iterator(m_compilers.end(), m_modes.end(), m_architectures.end(), m_compilers.end(), m_modes.end(), m_architectures.end());
+            return iterator(m_compilers.end(), m_modes.end(), m_architectures.end(), m_distributions.end(), m_compilers.end(), m_modes.end(), m_architectures.end(), m_distributions.end());
         }
 
         CompilerDescription::const_iterator CompilerDescription::end() const noexcept {
-            return const_iterator(m_compilers.end(), m_modes.end(), m_architectures.end(), m_compilers.end(), m_modes.end(), m_architectures.end());
+            return const_iterator(m_compilers.end(), m_modes.end(), m_architectures.end(), m_distributions.end(), m_compilers.end(), m_modes.end(), m_architectures.end(), m_distributions.end());
         }
 
         CompilerDescription::CompilerCollection CompilerDescription::convertToCompilerCollection(const CompilerNames& compilers) noexcept {
@@ -82,11 +88,20 @@ namespace execHelper {
             }
             return result;
         }
+        
+        CompilerDescription::DistributionCollection CompilerDescription::convertToDistributionCollection(const DistributionNames& distributions) noexcept {
+            DistributionCollection result;
+            for(const auto& distribution : distributions) {
+                result.push_back(distribution);
+            }
+            return result;
+        }
 
-        CompilerDescriptionElement::CompilerDescriptionElement(const Compiler& compiler, const Mode& mode, const Architecture& architecture) noexcept :
+        CompilerDescriptionElement::CompilerDescriptionElement(const Compiler& compiler, const Mode& mode, const Architecture& architecture, const Distribution& distribution) noexcept :
             m_compiler(compiler),
             m_mode(mode),
-            m_architecture(architecture)
+            m_architecture(architecture),
+            m_distribution(distribution)
         {
             ;
         }
@@ -101,6 +116,10 @@ namespace execHelper {
 
         Architecture CompilerDescriptionElement::getArchitecture() const noexcept {
             return m_architecture;
+        }
+
+        Distribution CompilerDescriptionElement::getDistribution() const noexcept {
+            return m_distribution;
         }
     }
 }

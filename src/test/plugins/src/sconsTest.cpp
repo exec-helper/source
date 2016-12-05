@@ -38,7 +38,8 @@ namespace execHelper { namespace plugins { namespace test {
             const CompilerDescription::CompilerNames actualCompilerNames({"gcc", "clang"});
             const CompilerDescription::ModeNames actualModes({"debug", "release"});
             const CompilerDescription::ArchitectureNames actualArchitectures({"architectureA", "architectureB"});
-            const CompilerDescription actualCompilers(actualCompilerNames, actualModes, actualArchitectures);
+            const CompilerDescription::DistributionNames actualDistributions({"distribution1", "distribution2"});
+            const CompilerDescription actualCompilers(actualCompilerNames, actualModes, actualArchitectures, actualDistributions);
 
             vector<string> arguments;
             arguments.emplace_back("UNITTEST");
@@ -53,6 +54,8 @@ namespace execHelper { namespace plugins { namespace test {
             appendVectors(arguments, actualModes);
             arguments.emplace_back("--architecture");
             appendVectors(arguments, actualArchitectures);
+            arguments.emplace_back("--distribution");
+            appendVectors(arguments, actualDistributions);
 
             string configFile;
             configFile += convertToConfig("commands", {"build", "clean", "distclean"});
@@ -64,12 +67,14 @@ namespace execHelper { namespace plugins { namespace test {
                             + "        - COMPILER\n"
                             + "        - MODE\n"
                             + "        - ARCHITECTURE\n"
-                            + "    build-dir: build/{COMPILER}/{ARCHITECTURE}/{MODE}\n"
+                            + "        - DISTRIBUTION\n"
+                            + "    build-dir: build/{COMPILER}/{ARCHITECTURE}/{MODE}/{DISTRIBUTION}\n"
                             + "    single-threaded: no\n"
                             + "    command-line:\n"
                             + "        - compiler={COMPILER}\n"
                             + "        - mode={MODE}\n"
-                            + "        - arch={ARCHITECTURE}\n";
+                            + "        - arch={ARCHITECTURE}\n"
+                            + "        - distribution={DISTRIBUTION}\n";
 
             string filename = "test-scons.exec-helper";
             ofstream fileStream;
@@ -95,12 +100,13 @@ namespace execHelper { namespace plugins { namespace test {
                     string compilerName = compiler.getCompiler().getName();
                     string modeName = compiler.getMode().getMode();
                     string architectureName = compiler.getArchitecture().getArchitecture();
+                    string distributionName = compiler.getDistribution().getDistribution();
 
                     for(const auto& target : options.getTarget()) {
                         string targetName = target.getTarget();
                         string runTargetName = target.getRunTarget();
                         Task expectedTask;
-                        expectedTask.append(TaskCollection({"scons", "-j8", "compiler=" + compilerName, "mode=" + modeName, "arch=" + architectureName, targetName + runTargetName}));
+                        expectedTask.append(TaskCollection({"scons", "-j8", "compiler=" + compilerName, "mode=" + modeName, "arch=" + architectureName, "distribution=" + distributionName, targetName + runTargetName}));
                         expectedQueue.push_back(expectedTask);
                     }
                 }
@@ -118,12 +124,13 @@ namespace execHelper { namespace plugins { namespace test {
                     string compilerName = compiler.getCompiler().getName();
                     string modeName = compiler.getMode().getMode();
                     string architectureName = compiler.getArchitecture().getArchitecture();
+                    string distributionName = compiler.getDistribution().getDistribution();
 
                     for(const auto& target : options.getTarget()) {
                         string targetName = target.getTarget();
                         string runTargetName = target.getRunTarget();
                         Task expectedTask;
-                        expectedTask.append(TaskCollection({"scons", "clean", "-j8", "compiler=" + compilerName, "mode=" + modeName, "arch=" + architectureName, targetName + runTargetName}));
+                        expectedTask.append(TaskCollection({"scons", "clean", "-j8", "compiler=" + compilerName, "mode=" + modeName, "arch=" + architectureName, "distribution=" + distributionName, targetName + runTargetName}));
                         expectedQueue.push_back(expectedTask);
                     }
                 }
@@ -142,7 +149,8 @@ namespace execHelper { namespace plugins { namespace test {
             const CompilerDescription::CompilerNames actualCompilerNames({"gcc", "clang"});
             const CompilerDescription::ModeNames actualModes({"debug", "release"});
             const CompilerDescription::ArchitectureNames actualArchitectures({"architectureA", "architectureB"});
-            const CompilerDescription actualCompilers(actualCompilerNames, actualModes, actualArchitectures);
+            const CompilerDescription::DistributionNames actualDistributions({"distribution1", "distribution2"});
+            const CompilerDescription actualCompilers(actualCompilerNames, actualModes, actualArchitectures, actualDistributions);
 
             vector<string> arguments;
             arguments.emplace_back("UNITTEST");
@@ -157,6 +165,8 @@ namespace execHelper { namespace plugins { namespace test {
             appendVectors(arguments, actualModes);
             arguments.emplace_back("--architecture");
             appendVectors(arguments, actualArchitectures);
+            arguments.emplace_back("--distribution");
+            appendVectors(arguments, actualDistributions);
 
             string configFile;
             configFile += convertToConfig("commands", {"build", "clean", "distclean"});
@@ -168,12 +178,14 @@ namespace execHelper { namespace plugins { namespace test {
                             + "        - COMPILER\n"
                             + "        - MODE\n"
                             + "        - ARCHITECTURE\n"
-                            + "    build-dir: build/{COMPILER}/{ARCHITECTURE}/{MODE}\n"
+                            + "        - DISTRIBUTION\n"
+                            + "    build-dir: build/{COMPILER}/{ARCHITECTURE}/{MODE}/{DISTRIBUTION}\n"
                             + "    single-threaded: yes\n"
                             + "    command-line:\n"
                             + "        - compiler={COMPILER}\n"
                             + "        - mode={MODE}\n"
-                            + "        - arch={ARCHITECTURE}\n";
+                            + "        - arch={ARCHITECTURE}\n"
+                            + "        - distribution={DISTRIBUTION}\n";
 
             string filename = "test-scons.exec-helper";
             ofstream fileStream;
@@ -199,12 +211,13 @@ namespace execHelper { namespace plugins { namespace test {
                     string compilerName = compiler.getCompiler().getName();
                     string modeName = compiler.getMode().getMode();
                     string architectureName = compiler.getArchitecture().getArchitecture();
+                    string distributionName = compiler.getDistribution().getDistribution();
 
                     for(const auto& target : options.getTarget()) {
                         string targetName = target.getTarget();
                         string runTargetName = target.getRunTarget();
                         Task expectedTask;
-                        expectedTask.append(TaskCollection({"scons", "compiler=" + compilerName, "mode=" + modeName, "arch=" + architectureName, targetName + runTargetName}));
+                        expectedTask.append(TaskCollection({"scons", "compiler=" + compilerName, "mode=" + modeName, "arch=" + architectureName, "distribution=" + distributionName, targetName + runTargetName}));
                         expectedQueue.push_back(expectedTask);
                     }
                 }
@@ -222,12 +235,13 @@ namespace execHelper { namespace plugins { namespace test {
                     string compilerName = compiler.getCompiler().getName();
                     string modeName = compiler.getMode().getMode();
                     string architectureName = compiler.getArchitecture().getArchitecture();
+                    string distributionName = compiler.getDistribution().getDistribution();
 
                     for(const auto& target : options.getTarget()) {
                         string targetName = target.getTarget();
                         string runTargetName = target.getRunTarget();
                         Task expectedTask;
-                        expectedTask.append(TaskCollection({"scons", "clean", "compiler=" + compilerName, "mode=" + modeName, "arch=" + architectureName, targetName + runTargetName}));
+                        expectedTask.append(TaskCollection({"scons", "clean", "compiler=" + compilerName, "mode=" + modeName, "arch=" + architectureName, "distribution=" + distributionName, targetName + runTargetName}));
                         expectedQueue.push_back(expectedTask);
                     }
                 }
@@ -245,7 +259,8 @@ namespace execHelper { namespace plugins { namespace test {
             const CompilerDescription::CompilerNames actualCompilerNames({"gcc", "clang"});
             const CompilerDescription::ModeNames actualModes({"debug", "release"});
             const CompilerDescription::ArchitectureNames actualArchitectures({"architectureA", "architectureB"});
-            const CompilerDescription actualCompilers(actualCompilerNames, actualModes, actualArchitectures);
+            const CompilerDescription::DistributionNames actualDistributions({"distribution1", "distribution2"});
+            const CompilerDescription actualCompilers(actualCompilerNames, actualModes, actualArchitectures, actualDistributions);
 
             vector<string> arguments;
             arguments.emplace_back("UNITTEST");
@@ -256,6 +271,8 @@ namespace execHelper { namespace plugins { namespace test {
             appendVectors(arguments, actualModes);
             arguments.emplace_back("--architecture");
             appendVectors(arguments, actualArchitectures);
+            arguments.emplace_back("--distribution");
+            appendVectors(arguments, actualDistributions);
 
             string configFile;
             configFile += convertToConfig("commands", {"build", "clean", "distclean"});

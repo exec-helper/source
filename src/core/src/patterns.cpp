@@ -28,6 +28,8 @@ namespace execHelper { namespace core {
                 result = replacePatterns(result, pattern, compiler.getMode().getMode());  
             } else if(pattern == "ARCHITECTURE") {
                 result = replacePatterns(result, pattern, compiler.getArchitecture().getArchitecture());
+            } else if(pattern == "DISTRIBUTION") {
+                result = replacePatterns(result, pattern, compiler.getDistribution().getDistribution());
             }
         }
         return result;

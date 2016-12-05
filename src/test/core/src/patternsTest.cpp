@@ -32,20 +32,23 @@ namespace execHelper { namespace core { namespace test {
             const string compilerPattern("COMPILER");
             const string modePattern("MODE");
             const string architecturePattern("ARCHITECTURE");
+            const string distributionPattern("DISTRIBUTION");
 
             const string compilerName("compiler1");
             const string modeName("mode1");
             const string architectureName("architectureA");
+            const string distributionName("distribution1");
 
             const Compiler compiler(compilerName);
             const Mode mode(modeName);
             const Architecture architecture(architectureName);
+            const Distribution distribution(distributionName);
 
-            const CompilerDescriptionElement compilerDescriptionElement(compiler, mode, architecture);
-            const Patterns patterns({compilerPattern, modePattern, architecturePattern});
+            const CompilerDescriptionElement compilerDescriptionElement(compiler, mode, architecture, distribution);
+            const Patterns patterns({compilerPattern, modePattern, architecturePattern, distributionPattern});
 
-            const string beginString = string("test/{") + compilerPattern + "}/blaat/{" + modePattern + "}/{HELLO}/{" + architecturePattern + "}";
-            const string actualString = string("test/") + compilerName + "/blaat/" + modeName + "/{HELLO}/" + architectureName;
+            const string beginString = string("test/{") + compilerPattern + "}/blaat/{" + modePattern + "}/{HELLO}/{" + architecturePattern + "}/{" + distributionPattern + "}";
+            const string actualString = string("test/") + compilerName + "/blaat/" + modeName + "/{HELLO}/" + architectureName + "/" + distributionName;
 
             WHEN("We replace the patterns in the begin string") {
                 string resultingString = replacePatterns(beginString, patterns, compilerDescriptionElement); 

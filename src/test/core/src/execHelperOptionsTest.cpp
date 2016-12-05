@@ -81,7 +81,8 @@ namespace execHelper { namespace core {
                 const CompilerDescription::CompilerNames actualCompilerNames({"clang", "gcc"});
                 const CompilerDescription::ModeNames actualModes({"debug", "release"});
                 const CompilerDescription::ArchitectureNames actualArchitectures({"i386", "armel"});
-                const CompilerDescription actualCompilers(actualCompilerNames, actualModes, actualArchitectures);
+                const CompilerDescription::DistributionNames actualDistributions({"wheezy", "jessie"});
+                const CompilerDescription actualCompilers(actualCompilerNames, actualModes, actualArchitectures, actualDistributions);
 
                 vector<string> arguments;
                 arguments.emplace_back("UNITTEST");
@@ -97,6 +98,8 @@ namespace execHelper { namespace core {
                 appendVectors(arguments, actualModes);
                 arguments.emplace_back("--architecture");
                 appendVectors(arguments, actualArchitectures);
+                arguments.emplace_back("--distribution");
+                appendVectors(arguments, actualDistributions);
 
                 for(const auto& argument : arguments) {
                     std::cout << argument << " ";
@@ -123,7 +126,8 @@ namespace execHelper { namespace core {
                 const CompilerDescription::CompilerNames actualCompilerNames({"clang", "gcc"});
                 const CompilerDescription::ModeNames actualModes({"debug", "release"});
                 const CompilerDescription::ArchitectureNames actualArchitectures({"i386", "armel"});
-                const CompilerDescription actualCompilers(actualCompilerNames, actualModes, actualArchitectures);
+                const CompilerDescription::DistributionNames actualDistributions({"wheezy", "jessie"});
+                const CompilerDescription actualCompilers(actualCompilerNames, actualModes, actualArchitectures, actualDistributions);
 
                 vector<string> arguments;
                 arguments.emplace_back("UNITTEST");
@@ -139,6 +143,8 @@ namespace execHelper { namespace core {
                 appendVectors(arguments, actualModes);
                 arguments.emplace_back("-a");
                 appendVectors(arguments, actualArchitectures);
+                arguments.emplace_back("-d");
+                appendVectors(arguments, actualDistributions);
 
                 WHEN("We convert it and parse the variables") {
                     MainVariables mainVariables(arguments);
