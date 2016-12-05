@@ -6,6 +6,12 @@
 #include <vector>
 
 namespace execHelper {
+    namespace config {
+        struct SettingsNode;
+    }
+}
+
+namespace execHelper {
     namespace test {
         namespace utils {
             template<typename T>
@@ -24,6 +30,12 @@ namespace execHelper {
             std::string convertToConfig(std::string key, std::string value);
             std::string convertToConfig(const std::string& key, const std::initializer_list<std::string>& values);
             std::string basename(const std::string& file);
+
+            config::SettingsNode& getSetting(config::SettingsNode& settings, const std::string& key) noexcept;
+            void addSettings(config::SettingsNode& settings, const std::string& value) noexcept;
+            void addSettings(config::SettingsNode& settings, const std::string& key, const std::string& value) noexcept;
+            void addSettings(config::SettingsNode& settings, const std::string& key, const std::initializer_list<std::string>& values) noexcept;
+            void addSettings(config::SettingsNode& settings, const std::string& key, const std::vector<std::string>& values) noexcept;
         }
     }
 }

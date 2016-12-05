@@ -1,21 +1,26 @@
 #ifndef __PLUGIN_H__
 #define __PLUGIN_H__
 
-#include "core/execHelperOptions.h"
-#include "core/task.h"
-#include "core/executorInterface.h"
+#include "core/options.h"
+
+namespace execHelper {
+    namespace core {
+        class Task;
+        class ExecutorInterface;
+    }
+}
 
 namespace execHelper {
     namespace plugins {
         class Plugin {
             public: 
-                virtual bool apply(const std::string& command, core::Task& task, const core::ExecHelperOptions& options) const noexcept = 0;
+                virtual bool apply(const std::string& command, core::Task& task, const core::Options& options) const noexcept = 0;
 
             protected:
                 Plugin() {}
         };
 
-        void registerTask(const core::Task& task, const core::ExecHelperOptions& options) noexcept;
+        void registerTask(const core::Task& task, const core::Options& options) noexcept;
     }
 }
 

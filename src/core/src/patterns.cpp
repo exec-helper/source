@@ -2,12 +2,13 @@
 
 #include <regex>
 
-#include "execHelperOptions.h"
+#include "options.h"
+
+#include "compilerDescription.h"
 
 using std::string;
 using std::regex;
 using std::regex_replace;
-using execHelper::core::ExecHelperOptions;
 
 namespace {
     const string PATTERN_PREFIX("\\{");

@@ -5,39 +5,33 @@
 #include <vector>
 #include <memory>
 
-#include "targetDescription.h"
-#include "compilerDescription.h"
+#include "options.h"
 
 #include "config/settingsNode.h"
 
-namespace execHelper {
-    namespace core {
-        class ExecutorInterface;
-    }
-}
+#include "targetDescription.h"
+#include "compilerDescription.h"
 
 namespace execHelper {
     namespace core {
-        typedef std::vector<std::string> CommandCollection;
-
-        class ExecHelperOptions {
+        class ExecHelperOptions : public Options {
             public:
                 ExecHelperOptions();
                 std::string getSettingsFile(int argc, char** argv) const noexcept;
-                bool parse(int argc, char** argv);
-                bool parseSettingsFile(const std::string& file) noexcept;
+                virtual bool parse(int argc, char** argv) override;
+                virtual bool parseSettingsFile(const std::string& file) noexcept override;
 
-                bool getVerbosity() const noexcept;
-                const CommandCollection& getCommands() const noexcept;
-                const TargetDescription& getTarget() const noexcept;
-                const CompilerDescription& getCompiler() const noexcept;
-                const config::SettingsNode& getSettings(const std::string& key) const noexcept;
-                bool containsHelp() const noexcept;
+                virtual bool getVerbosity() const noexcept override;
+                virtual const CommandCollection& getCommands() const noexcept override;
+                virtual const TargetDescription& getTarget() const noexcept override;
+                virtual const CompilerDescription& getCompiler() const noexcept override;
+                virtual const config::SettingsNode& getSettings(const std::string& key) const noexcept override;
+                virtual bool containsHelp() const noexcept override;
 
                 void printHelp() const noexcept;
 
-                void setExecutor(ExecutorInterface* const executor) noexcept;
-                ExecutorInterface* getExecutor() const noexcept;
+                virtual void setExecutor(ExecutorInterface* const executor) noexcept override;
+                virtual ExecutorInterface* getExecutor() const noexcept override;
 
             private:
                 bool m_help;

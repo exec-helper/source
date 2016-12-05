@@ -18,13 +18,13 @@ using std::string;
 using std::shared_ptr;
 using std::make_shared;
 
-using execHelper::core::ExecHelperOptions;
+using execHelper::core::Options;
 using execHelper::core::Task;
 using execHelper::config::SettingsNode;
 using execHelper::plugins::Plugin;
 
 namespace execHelper { namespace commander {
-    Commander::Commander(const ExecHelperOptions& options) :
+    Commander::Commander(const Options& options) :
         m_options(options)
     {
         ;
@@ -44,7 +44,7 @@ namespace execHelper { namespace commander {
         return shared_ptr<Plugin>();
     }
 
-    bool Commander::executePlugin(const string& pluginName, const string& command, const ExecHelperOptions& options) noexcept {
+    bool Commander::executePlugin(const string& pluginName, const string& command, const Options& options) noexcept {
         Task task;
         shared_ptr<Plugin> plugin = getPlugin(pluginName);
         if(plugin) {

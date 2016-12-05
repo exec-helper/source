@@ -7,7 +7,7 @@ namespace execHelper {
     namespace plugins {
         class CommandLineCommand : public Plugin {
             public:
-                virtual bool apply(const std::string& command, core::Task& task, const core::ExecHelperOptions& options) const noexcept;
+                virtual bool apply(const std::string& command, core::Task& task, const core::Options& options) const noexcept override;
         };
     }
 }

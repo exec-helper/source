@@ -10,14 +10,14 @@
 
 using std::string;
 using execHelper::core::Task;
-using execHelper::core::ExecHelperOptions;
+using execHelper::core::Options;
 using execHelper::core::TaskCollection;
 using execHelper::core::CompilerDescriptionElement;
 using execHelper::core::Patterns;
 using execHelper::config::SettingsNode;
 
 namespace execHelper { namespace plugins {
-    bool Bootstrap::apply(const std::string& command, Task& task, const ExecHelperOptions& options) const noexcept {
+    bool Bootstrap::apply(const std::string& command, Task& task, const Options& options) const noexcept {
         if(command == "init") {
             return init(task, options);
         }
@@ -43,7 +43,7 @@ namespace execHelper { namespace plugins {
         return "bootstrap.sh";
     }
 
-    bool Bootstrap::init(core::Task& task, const core::ExecHelperOptions& options) const noexcept {
+    bool Bootstrap::init(core::Task& task, const core::Options& options) const noexcept {
         const SettingsNode& settings = options.getSettings({"bootstrap"});  
         for(const auto& compiler : options.getCompiler()) {
             Task bootstrapTask = task;

@@ -1,12 +1,16 @@
 #include "utils.h"
 
+#include "config/settingsNode.h"
+
 using std::vector;
 using std::string;
 
+using execHelper::config::SettingsNode;
+
 namespace {
-    const std::string YAML_CONFIG_KEY_DELIMITER(": ");
-    const std::string YAML_CONFIG_DELIMITER("\n");
-    const std::string YAML_CONFIG_OPTION_CHARACTER("    - ");
+    const string YAML_CONFIG_KEY_DELIMITER(": ");
+    const string YAML_CONFIG_DELIMITER("\n");
+    const string YAML_CONFIG_OPTION_CHARACTER("    - ");
 }
 
 namespace execHelper { namespace test { namespace utils {
@@ -20,7 +24,7 @@ namespace execHelper { namespace test { namespace utils {
     }
 
     string convertToConfig(const string& key, const vector<string>& values) {
-        std::string config;
+        string config;
         config += key + YAML_CONFIG_KEY_DELIMITER;
         for(const auto& value : values) {
             config += YAML_CONFIG_DELIMITER + YAML_CONFIG_OPTION_CHARACTER + value;
@@ -31,11 +35,11 @@ namespace execHelper { namespace test { namespace utils {
     }
 
     string convertToConfig(string key, string value) {
-        return std::string(key + YAML_CONFIG_KEY_DELIMITER + value) + YAML_CONFIG_DELIMITER + YAML_CONFIG_DELIMITER;
+        return string(key + YAML_CONFIG_KEY_DELIMITER + value) + YAML_CONFIG_DELIMITER + YAML_CONFIG_DELIMITER;
     }
 
-    string convertToConfig(const std::string& key, const std::initializer_list<std::string>& values) {
-        std::vector<std::string> vectorValues(values);
+    string convertToConfig(const string& key, const std::initializer_list<string>& values) {
+        std::vector<string> vectorValues(values);
         return convertToConfig(key, vectorValues);
     }
 
@@ -44,4 +48,30 @@ namespace execHelper { namespace test { namespace utils {
         return file.substr(0,found);
     }
 
+    void addSettings(SettingsNode& settings, const string& key, const string& value) noexcept {
+        addSettings(settings, key, {value});
+    }
+
+    void addSettings(SettingsNode& settings, const string& key, const std::initializer_list<string>& values) noexcept {
+        addSettings(settings, key, vector<string>(values));
+    }
+
+    void addSettings(SettingsNode& settings, const string& key, const std::vector<string>& values) noexcept {
+        SettingsNode& settingsToWriteTo = getSetting(settings, key);
+        for(const auto& value : values) {
+            SettingsNode valueSetting;
+            valueSetting.m_key = value;
+            settingsToWriteTo.m_values.emplace_back(valueSetting);
+        }
+    }
+
+    SettingsNode& getSetting(SettingsNode& settings, const string& key) noexcept {
+        if(settings.contains(key)) {
+            return settings[key];
+        }
+
+        settings.m_values.emplace_back(SettingsNode());
+        settings.m_values.back().m_key = key;
+        return settings.m_values.back();
+    }
 } } }

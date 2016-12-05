@@ -4,13 +4,15 @@
 
 #include "config/settingsNode.h"
 #include "core/task.h"
+#include "core/targetDescription.h"
 #include "core/compilerDescription.h"
 #include "core/patterns.h"
 
 using std::string;
 using execHelper::core::Task;
-using execHelper::core::ExecHelperOptions;
+using execHelper::core::Options;
 using execHelper::core::TaskCollection;
+using execHelper::core::TargetDescription;
 using execHelper::core::CompilerDescriptionElement;
 using execHelper::core::Patterns;
 using execHelper::config::SettingsNode;
@@ -20,7 +22,7 @@ namespace {
 }
 
 namespace execHelper { namespace plugins {
-    bool Make::apply(const std::string& command, Task& task, const ExecHelperOptions& options) const noexcept {
+    bool Make::apply(const std::string& command, Task& task, const Options& options) const noexcept {
         if(command == "build") {
             return build(task, options);
         } else if(command == "clean") {
@@ -55,7 +57,7 @@ namespace execHelper { namespace plugins {
         return TaskCollection();
     }
 
-    bool Make::build(core::Task& task, const core::ExecHelperOptions& options) const noexcept {
+    bool Make::build(core::Task& task, const core::Options& options) const noexcept {
         const SettingsNode& settings = options.getSettings({"make"});  
         task.append(MAKE_COMMAND);
         for(const auto& compiler : options.getCompiler()) {
@@ -82,7 +84,7 @@ namespace execHelper { namespace plugins {
         return true;
     }
 
-    bool Make::clean(core::Task& task, const core::ExecHelperOptions& options) const noexcept {
+    bool Make::clean(core::Task& task, const core::Options& options) const noexcept {
         task.append(MAKE_COMMAND);
         task.append("clean");
         const SettingsNode& settings = options.getSettings({"make"});  

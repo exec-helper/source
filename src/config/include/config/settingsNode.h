@@ -52,7 +52,17 @@ namespace execHelper {
             bool operator!=(const SettingsNode& other) const noexcept {
                 return !(*this == other);
             }
+
         };
+
+        static std::ostream& operator<<( std::ostream& os, const SettingsNode& settings) noexcept {
+            os << settings.m_key << ": ";
+            for(const auto& value : settings.m_values) {
+                os << "{" << value << "};";
+            }
+            return os;
+        }
+
     }
 }
 

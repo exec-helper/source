@@ -10,7 +10,8 @@ includeUsageRequirements = [
 
 includes = [
     'include/utils',
-    includeUsageRequirements
+    includeUsageRequirements,
+    env['BUILD_DIR'] + '/config/include',
 ]
 
 dependencies = [

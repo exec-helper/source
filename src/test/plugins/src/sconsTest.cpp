@@ -7,6 +7,7 @@
 #include "plugins/scons.h"
 
 #include "executorStub.h"
+#include "optionsStub.h"
 #include "core/execHelperOptions.h"
 #include "core/compilerDescription.h"
 #include "core/targetDescription.h"
@@ -16,78 +17,47 @@
 using std::vector;
 using std::string;
 using std::ofstream;
+using std::shared_ptr;
+using std::make_shared;
 
+using execHelper::config::SettingsNode;
+using execHelper::core::ExecutorInterface;
 using execHelper::core::test::ExecutorStub;
-using execHelper::core::ExecHelperOptions;
 using execHelper::core::Task;
 using execHelper::core::TaskCollection;
 using execHelper::core::CompilerDescription;
 using execHelper::core::TargetDescription;
 using execHelper::core::CommandCollection;
 
-using execHelper::test::utils::MainVariables;
-using execHelper::test::utils::basename;
-using execHelper::test::utils::convertToConfig;
-using execHelper::test::utils::appendVectors;
+using execHelper::test::utils::addSettings;
+using execHelper::test::OptionsStub;
+
+namespace {
+    void setupBasicOptions(OptionsStub& options, const TargetDescription& targets, const CompilerDescription& compilers) {
+        addSettings(options.m_settings, "commands", {"build", "clean"});
+        addSettings(options.m_settings, "build", {"scons"});
+        addSettings(options.m_settings, "clean", {"scons"});
+        addSettings(options.m_settings, "scons", {"single-threaded"});
+
+        options.m_targets = targets;
+        options.m_compilers = compilers;
+    }
+}
 
 namespace execHelper { namespace plugins { namespace test {
-    SCENARIO("Testing the scons plugin, multithreaded", "[plugins][scons]") {
-        GIVEN("A scons plugin object and some options") {
-            const CommandCollection actualCommands = {"init", "build", "run"};
-            const TargetDescription actualTarget({"target1", "target2"}, {"runTarget1", "runTarget2"});
-            const CompilerDescription::CompilerNames actualCompilerNames({"gcc", "clang"});
-            const CompilerDescription::ModeNames actualModes({"debug", "release"});
-            const CompilerDescription::ArchitectureNames actualArchitectures({"architectureA", "architectureB"});
-            const CompilerDescription::DistributionNames actualDistributions({"distribution1", "distribution2"});
-            const CompilerDescription actualCompilers(actualCompilerNames, actualModes, actualArchitectures, actualDistributions);
+    SCENARIO("Testing the default options of the scons plugin", "[plugins][scons]") {
+        GIVEN("A scons plugin object, basic settings and the multi-threaded option") {
+            const TargetDescription actualTargets({"target1", "target2"}, {"runTarget1", "runTarget2"});
+            const CompilerDescription actualCompilers(CompilerDescription::CompilerNames({"compiler1", "compiler2"}), 
+                                                                                         {"mode1", "mode2"}, 
+                                                                                         {"architectureA", "architectureB"},
+                                                                                         {"distribution1", "distribution2"}
+                                                                                        );
 
-            vector<string> arguments;
-            arguments.emplace_back("UNITTEST");
-            appendVectors(arguments, actualCommands);
-            arguments.emplace_back("--target");
-            appendVectors(arguments, actualTarget.getTargets());
-            arguments.emplace_back("--run-target");
-            appendVectors(arguments, actualTarget.getRunTargets());
-            arguments.emplace_back("--compiler");
-            appendVectors(arguments, actualCompilerNames);
-            arguments.emplace_back("--mode");
-            appendVectors(arguments, actualModes);
-            arguments.emplace_back("--architecture");
-            appendVectors(arguments, actualArchitectures);
-            arguments.emplace_back("--distribution");
-            appendVectors(arguments, actualDistributions);
-
-            string configFile;
-            configFile += convertToConfig("commands", {"build", "clean", "distclean"});
-            configFile += convertToConfig("build", {"scons"});
-            configFile += convertToConfig("clean", {"scons"});
-            configFile += convertToConfig("distclean", {"scons"});
-            configFile += string("scons:\n")
-                            + "    patterns:\n"
-                            + "        - COMPILER\n"
-                            + "        - MODE\n"
-                            + "        - ARCHITECTURE\n"
-                            + "        - DISTRIBUTION\n"
-                            + "    build-dir: build/{COMPILER}/{ARCHITECTURE}/{MODE}/{DISTRIBUTION}\n"
-                            + "    single-threaded: no\n"
-                            + "    command-line:\n"
-                            + "        - compiler={COMPILER}\n"
-                            + "        - mode={MODE}\n"
-                            + "        - arch={ARCHITECTURE}\n"
-                            + "        - distribution={DISTRIBUTION}\n";
-
-            string filename = "test-scons.exec-helper";
-            ofstream fileStream;
-            fileStream.open(filename);
-            fileStream << configFile;
-            fileStream.close();
-
+            OptionsStub options;
+            setupBasicOptions(options, actualTargets, actualCompilers);
             ExecutorStub executor;
-            MainVariables mainVariables(arguments);
-            ExecHelperOptions options; 
             options.setExecutor(&executor);
-            options.parseSettingsFile(filename);
-            options.parse(mainVariables.argc, mainVariables.argv.get());
 
             Scons plugin;
 
@@ -95,23 +65,22 @@ namespace execHelper { namespace plugins { namespace test {
                 Task task;
                 REQUIRE(plugin.apply("build", task, options) == true);
 
-                ExecutorStub::TaskQueue expectedQueue;
-                for(const auto& compiler : options.getCompiler()) {
-                    string compilerName = compiler.getCompiler().getName();
-                    string modeName = compiler.getMode().getMode();
-                    string architectureName = compiler.getArchitecture().getArchitecture();
-                    string distributionName = compiler.getDistribution().getDistribution();
-
-                    for(const auto& target : options.getTarget()) {
-                        string targetName = target.getTarget();
-                        string runTargetName = target.getRunTarget();
-                        Task expectedTask;
-                        expectedTask.append(TaskCollection({"scons", "-j8", "compiler=" + compilerName, "mode=" + modeName, "arch=" + architectureName, "distribution=" + distributionName, targetName + runTargetName}));
-                        expectedQueue.push_back(expectedTask);
-                    }
-                }
-
                 THEN("We should get the expected task") {
+                    ExecutorStub::TaskQueue expectedQueue;
+                    for(const auto& compiler : actualCompilers) {
+                        string compilerName = compiler.getCompiler().getName();
+                        string modeName = compiler.getMode().getMode();
+                        string architectureName = compiler.getArchitecture().getArchitecture();
+
+                        for(const auto& target : actualTargets) {
+                            string targetName = target.getTarget();
+                            string runTargetName = target.getRunTarget();
+                            Task expectedTask;
+                            expectedTask.append(TaskCollection({"scons", "-j8", targetName + runTargetName}));
+                            expectedQueue.push_back(expectedTask);
+                        }
+                    }
+
                     REQUIRE(expectedQueue == executor.getExecutedTasks());
                 }
             }
@@ -124,13 +93,12 @@ namespace execHelper { namespace plugins { namespace test {
                     string compilerName = compiler.getCompiler().getName();
                     string modeName = compiler.getMode().getMode();
                     string architectureName = compiler.getArchitecture().getArchitecture();
-                    string distributionName = compiler.getDistribution().getDistribution();
 
                     for(const auto& target : options.getTarget()) {
                         string targetName = target.getTarget();
                         string runTargetName = target.getRunTarget();
                         Task expectedTask;
-                        expectedTask.append(TaskCollection({"scons", "clean", "-j8", "compiler=" + compilerName, "mode=" + modeName, "arch=" + architectureName, "distribution=" + distributionName, targetName + runTargetName}));
+                        expectedTask.append(TaskCollection({"scons", "clean", "-j8", targetName + runTargetName}));
                         expectedQueue.push_back(expectedTask);
                     }
                 }
@@ -142,63 +110,19 @@ namespace execHelper { namespace plugins { namespace test {
         }
     }
 
-    SCENARIO("Testing the scons plugin single-threaded", "[plugins][scons]") {
-        GIVEN("A scons plugin object and some options") {
-            const CommandCollection actualCommands = {"init", "build", "run"};
-            const TargetDescription actualTarget({"target1", "target2"}, {"runTarget1", "runTarget2"});
-            const CompilerDescription::CompilerNames actualCompilerNames({"gcc", "clang"});
-            const CompilerDescription::ModeNames actualModes({"debug", "release"});
-            const CompilerDescription::ArchitectureNames actualArchitectures({"architectureA", "architectureB"});
-            const CompilerDescription::DistributionNames actualDistributions({"distribution1", "distribution2"});
-            const CompilerDescription actualCompilers(actualCompilerNames, actualModes, actualArchitectures, actualDistributions);
+    SCENARIO("Testing the all target of the scons plugin", "[plugins][scons]") {
+        GIVEN("A scons plugin object, basic settings and the multi-threaded option") {
+            const TargetDescription actualTargets({"all"}, {""});
+            const CompilerDescription actualCompilers(CompilerDescription::CompilerNames({"compiler1", "compiler2"}), 
+                                                                                         {"mode1", "mode2"}, 
+                                                                                         {"architectureA", "architectureB"},
+                                                                                         {"distribution1", "distribution2"}
+                                                                                        );
 
-            vector<string> arguments;
-            arguments.emplace_back("UNITTEST");
-            appendVectors(arguments, actualCommands);
-            arguments.emplace_back("--target");
-            appendVectors(arguments, actualTarget.getTargets());
-            arguments.emplace_back("--run-target");
-            appendVectors(arguments, actualTarget.getRunTargets());
-            arguments.emplace_back("--compiler");
-            appendVectors(arguments, actualCompilerNames);
-            arguments.emplace_back("--mode");
-            appendVectors(arguments, actualModes);
-            arguments.emplace_back("--architecture");
-            appendVectors(arguments, actualArchitectures);
-            arguments.emplace_back("--distribution");
-            appendVectors(arguments, actualDistributions);
-
-            string configFile;
-            configFile += convertToConfig("commands", {"build", "clean", "distclean"});
-            configFile += convertToConfig("build", {"scons"});
-            configFile += convertToConfig("clean", {"scons"});
-            configFile += convertToConfig("distclean", {"scons"});
-            configFile += string("scons:\n")
-                            + "    patterns:\n"
-                            + "        - COMPILER\n"
-                            + "        - MODE\n"
-                            + "        - ARCHITECTURE\n"
-                            + "        - DISTRIBUTION\n"
-                            + "    build-dir: build/{COMPILER}/{ARCHITECTURE}/{MODE}/{DISTRIBUTION}\n"
-                            + "    single-threaded: yes\n"
-                            + "    command-line:\n"
-                            + "        - compiler={COMPILER}\n"
-                            + "        - mode={MODE}\n"
-                            + "        - arch={ARCHITECTURE}\n"
-                            + "        - distribution={DISTRIBUTION}\n";
-
-            string filename = "test-scons.exec-helper";
-            ofstream fileStream;
-            fileStream.open(filename);
-            fileStream << configFile;
-            fileStream.close();
-
+            OptionsStub options;
+            setupBasicOptions(options, actualTargets, actualCompilers);
             ExecutorStub executor;
-            MainVariables mainVariables(arguments);
-            ExecHelperOptions options; 
             options.setExecutor(&executor);
-            options.parseSettingsFile(filename);
-            options.parse(mainVariables.argc, mainVariables.argv.get());
 
             Scons plugin;
 
@@ -206,23 +130,22 @@ namespace execHelper { namespace plugins { namespace test {
                 Task task;
                 REQUIRE(plugin.apply("build", task, options) == true);
 
-                ExecutorStub::TaskQueue expectedQueue;
-                for(const auto& compiler : options.getCompiler()) {
-                    string compilerName = compiler.getCompiler().getName();
-                    string modeName = compiler.getMode().getMode();
-                    string architectureName = compiler.getArchitecture().getArchitecture();
-                    string distributionName = compiler.getDistribution().getDistribution();
-
-                    for(const auto& target : options.getTarget()) {
-                        string targetName = target.getTarget();
-                        string runTargetName = target.getRunTarget();
-                        Task expectedTask;
-                        expectedTask.append(TaskCollection({"scons", "compiler=" + compilerName, "mode=" + modeName, "arch=" + architectureName, "distribution=" + distributionName, targetName + runTargetName}));
-                        expectedQueue.push_back(expectedTask);
-                    }
-                }
-
                 THEN("We should get the expected task") {
+                    ExecutorStub::TaskQueue expectedQueue;
+                    for(const auto& compiler : actualCompilers) {
+                        string compilerName = compiler.getCompiler().getName();
+                        string modeName = compiler.getMode().getMode();
+                        string architectureName = compiler.getArchitecture().getArchitecture();
+
+                        for(const auto& target : actualTargets) {
+                            string targetName = target.getTarget();
+                            string runTargetName = target.getRunTarget();
+                            Task expectedTask;
+                            expectedTask.append(TaskCollection({"scons", "-j8"}));
+                            expectedQueue.push_back(expectedTask);
+                        }
+                    }
+
                     REQUIRE(expectedQueue == executor.getExecutedTasks());
                 }
             }
@@ -235,13 +158,12 @@ namespace execHelper { namespace plugins { namespace test {
                     string compilerName = compiler.getCompiler().getName();
                     string modeName = compiler.getMode().getMode();
                     string architectureName = compiler.getArchitecture().getArchitecture();
-                    string distributionName = compiler.getDistribution().getDistribution();
 
                     for(const auto& target : options.getTarget()) {
                         string targetName = target.getTarget();
                         string runTargetName = target.getRunTarget();
                         Task expectedTask;
-                        expectedTask.append(TaskCollection({"scons", "clean", "compiler=" + compilerName, "mode=" + modeName, "arch=" + architectureName, "distribution=" + distributionName, targetName + runTargetName}));
+                        expectedTask.append(TaskCollection({"scons", "clean", "-j8"}));
                         expectedQueue.push_back(expectedTask);
                     }
                 }
@@ -252,76 +174,45 @@ namespace execHelper { namespace plugins { namespace test {
             }
         }
     }
-    
-    SCENARIO("Use all target", "[plugins][scons]") {
-        GIVEN("A scons plugin object and some options") {
-            const CommandCollection actualCommands = {"init", "build", "run"};
-            const CompilerDescription::CompilerNames actualCompilerNames({"gcc", "clang"});
-            const CompilerDescription::ModeNames actualModes({"debug", "release"});
-            const CompilerDescription::ArchitectureNames actualArchitectures({"architectureA", "architectureB"});
-            const CompilerDescription::DistributionNames actualDistributions({"distribution1", "distribution2"});
-            const CompilerDescription actualCompilers(actualCompilerNames, actualModes, actualArchitectures, actualDistributions);
 
-            vector<string> arguments;
-            arguments.emplace_back("UNITTEST");
-            appendVectors(arguments, actualCommands);
-            arguments.emplace_back("--compiler");
-            appendVectors(arguments, actualCompilerNames);
-            arguments.emplace_back("--mode");
-            appendVectors(arguments, actualModes);
-            arguments.emplace_back("--architecture");
-            appendVectors(arguments, actualArchitectures);
-            arguments.emplace_back("--distribution");
-            appendVectors(arguments, actualDistributions);
+    SCENARIO("Testing the single-threaded option of the scons plugin", "[plugins][scons]") {
+        const TargetDescription actualTargets({"target1", "target2"}, {"runTarget1", "runTarget2"});
+        const CompilerDescription actualCompilers(CompilerDescription::CompilerNames({"compiler1", "compiler2"}), 
+                                                                                     {"mode1", "mode2"}, 
+                                                                                     {"architectureA", "architectureB"},
+                                                                                     {"distribution1", "distribution2"}
+                                                                                    );
 
-            string configFile;
-            configFile += convertToConfig("commands", {"build", "clean", "distclean"});
-            configFile += convertToConfig("build", {"scons"});
-            configFile += convertToConfig("clean", {"scons"});
-            configFile += convertToConfig("distclean", {"scons"});
-            configFile += string("scons:\n")
-                            + "    patterns:\n"
-                            + "        - COMPILER\n"
-                            + "        - MODE\n"
-                            + "        - ARCHITECTURE\n"
-                            + "    build-dir: build/{COMPILER}/{ARCHITECTURE}/{MODE}\n"
-                            + "    single-threaded: yes\n"
-                            + "    command-line:\n"
-                            + "        - compiler={COMPILER}\n"
-                            + "        - mode={MODE}\n"
-                            + "        - arch={ARCHITECTURE}\n";
+        OptionsStub options;
+        setupBasicOptions(options, actualTargets, actualCompilers);
+        ExecutorStub executor;
+        options.setExecutor(&executor);
+            
+        Scons plugin;
 
-            string filename = "test-scons.exec-helper";
-            ofstream fileStream;
-            fileStream.open(filename);
-            fileStream << configFile;
-            fileStream.close();
+        GIVEN("A scons plugin object, basic settings and the single-threaded option") {
+            addSettings(options.m_settings["scons"], "single-threaded", "yes");
 
-            ExecutorStub executor;
-            MainVariables mainVariables(arguments);
-            ExecHelperOptions options; 
-            options.setExecutor(&executor);
-            options.parseSettingsFile(filename);
-            options.parse(mainVariables.argc, mainVariables.argv.get());
-
-            Scons plugin;
-
-            WHEN("We build the plugin") {
+            WHEN("We build the plugin wit the single threaded option") {
                 Task task;
                 REQUIRE(plugin.apply("build", task, options) == true);
 
-                ExecutorStub::TaskQueue expectedQueue;
-                for(const auto& compiler : options.getCompiler()) {
-                    string compilerName = compiler.getCompiler().getName();
-                    string modeName = compiler.getMode().getMode();
-                    string architectureName = compiler.getArchitecture().getArchitecture();
-
-                    Task expectedTask;
-                    expectedTask.append(TaskCollection({"scons", "compiler=" + compilerName, "mode=" + modeName, "arch=" + architectureName}));
-                    expectedQueue.push_back(expectedTask);
-                }
-
                 THEN("We should get the expected task") {
+                    ExecutorStub::TaskQueue expectedQueue;
+                    for(const auto& compiler : actualCompilers) {
+                        string compilerName = compiler.getCompiler().getName();
+                        string modeName = compiler.getMode().getMode();
+                        string architectureName = compiler.getArchitecture().getArchitecture();
+
+                        for(const auto& target : actualTargets) {
+                            string targetName = target.getTarget();
+                            string runTargetName = target.getRunTarget();
+                            Task expectedTask;
+                            expectedTask.append(TaskCollection({"scons", targetName + runTargetName}));
+                            expectedQueue.push_back(expectedTask);
+                        }
+                    }
+
                     REQUIRE(expectedQueue == executor.getExecutedTasks());
                 }
             }
@@ -335,9 +226,13 @@ namespace execHelper { namespace plugins { namespace test {
                     string modeName = compiler.getMode().getMode();
                     string architectureName = compiler.getArchitecture().getArchitecture();
 
-                    Task expectedTask;
-                    expectedTask.append(TaskCollection({"scons", "clean", "compiler=" + compilerName, "mode=" + modeName, "arch=" + architectureName}));
-                    expectedQueue.push_back(expectedTask);
+                    for(const auto& target : options.getTarget()) {
+                        string targetName = target.getTarget();
+                        string runTargetName = target.getRunTarget();
+                        Task expectedTask;
+                        expectedTask.append(TaskCollection({"scons", "clean", targetName + runTargetName}));
+                        expectedQueue.push_back(expectedTask);
+                    }
                 }
 
                 THEN("We should get the expected task") {
@@ -346,11 +241,61 @@ namespace execHelper { namespace plugins { namespace test {
             }
         }
 
+        GIVEN("A scons plugin object, basic settings and the multi-threaded option") {
+            addSettings(options.m_settings["scons"], "single-threaded", "no");
+
+            WHEN("We build the plugin wit the single threaded option") {
+                Task task;
+                REQUIRE(plugin.apply("build", task, options) == true);
+
+                THEN("We should get the expected task") {
+                    ExecutorStub::TaskQueue expectedQueue;
+                    for(const auto& compiler : actualCompilers) {
+                        string compilerName = compiler.getCompiler().getName();
+                        string modeName = compiler.getMode().getMode();
+                        string architectureName = compiler.getArchitecture().getArchitecture();
+
+                        for(const auto& target : actualTargets) {
+                            string targetName = target.getTarget();
+                            string runTargetName = target.getRunTarget();
+                            Task expectedTask;
+                            expectedTask.append(TaskCollection({"scons", "-j8", targetName + runTargetName}));
+                            expectedQueue.push_back(expectedTask);
+                        }
+                    }
+
+                    REQUIRE(expectedQueue == executor.getExecutedTasks());
+                }
+            }
+            WHEN("We clean the plugin") {
+                Task task;
+                REQUIRE(plugin.apply("clean", task, options) == true);
+
+                ExecutorStub::TaskQueue expectedQueue;
+                for(const auto& compiler : options.getCompiler()) {
+                    string compilerName = compiler.getCompiler().getName();
+                    string modeName = compiler.getMode().getMode();
+                    string architectureName = compiler.getArchitecture().getArchitecture();
+
+                    for(const auto& target : options.getTarget()) {
+                        string targetName = target.getTarget();
+                        string runTargetName = target.getRunTarget();
+                        Task expectedTask;
+                        expectedTask.append(TaskCollection({"scons", "clean", "-j8", targetName + runTargetName}));
+                        expectedQueue.push_back(expectedTask);
+                    }
+                }
+
+                THEN("We should get the expected task") {
+                    REQUIRE(expectedQueue == executor.getExecutedTasks());
+                }
+            }
+        }
     }
 
     SCENARIO("Testing invalid scons plugin commands", "[plugins][scons]") {
         GIVEN("Nothing in particular") {
-            ExecHelperOptions options;
+            OptionsStub options;
 
             WHEN("We pass an invalid command to scons") {
                 Scons scons;
