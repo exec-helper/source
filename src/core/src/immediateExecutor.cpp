@@ -16,7 +16,7 @@ namespace execHelper { namespace core {
     }
 
     bool ImmediateExecutor::execute(const Task& task) noexcept {
-        user_feedback("Executing " << task.toString());
+        user_feedback_info("Executing " << task.toString());
         return m_shell.isExecutedSuccessfully(m_shell.execute(task));
     }
 } }
