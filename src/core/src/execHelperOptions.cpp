@@ -180,7 +180,7 @@ namespace execHelper { namespace core {
             m_compiler.reset(new CompilerDescription(m_compiler->getCompilers(), m_compiler->getModes(), architectures, m_compiler->getDistributions()));
         }
 
-        if(m_settings.contains("default-compilers")) {
+        if(m_settings.contains("default-distributions")) {
             CompilerDescription::DistributionCollection distributions = CompilerDescription::convertToDistributionCollection(m_settings["default-distributions"].toStringCollection());
             m_compiler.reset(new CompilerDescription(m_compiler->getCompilers(), m_compiler->getModes(), m_compiler->getArchitectures(), m_compiler->getDistributions()));
         }
