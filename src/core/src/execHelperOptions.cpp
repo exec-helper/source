@@ -182,7 +182,7 @@ namespace execHelper { namespace core {
 
         if(m_settings.contains("default-distributions")) {
             CompilerDescription::DistributionCollection distributions = CompilerDescription::convertToDistributionCollection(m_settings["default-distributions"].toStringCollection());
-            m_compiler.reset(new CompilerDescription(m_compiler->getCompilers(), m_compiler->getModes(), m_compiler->getArchitectures(), m_compiler->getDistributions()));
+            m_compiler.reset(new CompilerDescription(m_compiler->getCompilers(), m_compiler->getModes(), m_compiler->getArchitectures(), distributions));
         }
         return true;
     }
