@@ -76,7 +76,7 @@ namespace execHelper { namespace plugins { namespace test {
                             string targetName = target.getTarget();
                             string runTargetName = target.getRunTarget();
                             Task expectedTask;
-                            expectedTask.append(TaskCollection({"scons", "-j8", targetName + runTargetName}));
+                            expectedTask.append(TaskCollection({"scons", "--jobs", "8", targetName + runTargetName}));
                             expectedQueue.push_back(expectedTask);
                         }
                     }
@@ -120,7 +120,7 @@ namespace execHelper { namespace plugins { namespace test {
                             string targetName = target.getTarget();
                             string runTargetName = target.getRunTarget();
                             Task expectedTask;
-                            expectedTask.append(TaskCollection({"scons", "-j8"}));
+                            expectedTask.append(TaskCollection({"scons", "--jobs", "8"}));
                             expectedQueue.push_back(expectedTask);
                         }
                     }
@@ -143,7 +143,7 @@ namespace execHelper { namespace plugins { namespace test {
                             string targetName = target.getTarget();
                             string runTargetName = target.getRunTarget();
                             Task expectedTask;
-                            expectedTask.append(TaskCollection({"scons", "-j8", "clean"}));
+                            expectedTask.append(TaskCollection({"scons", "--jobs", "8", "clean"}));
                             expectedQueue.push_back(expectedTask);
                         }
                     }
@@ -240,7 +240,7 @@ namespace execHelper { namespace plugins { namespace test {
                             string targetName = target.getTarget();
                             string runTargetName = target.getRunTarget();
                             Task expectedTask;
-                            expectedTask.append(TaskCollection({"scons", "-j8", targetName + runTargetName}));
+                            expectedTask.append(TaskCollection({"scons", "--jobs", "8", targetName + runTargetName}));
                             expectedQueue.push_back(expectedTask);
                         }
                     }
@@ -263,7 +263,7 @@ namespace execHelper { namespace plugins { namespace test {
                             string targetName = target.getTarget();
                             string runTargetName = target.getRunTarget();
                             Task expectedTask;
-                            expectedTask.append(TaskCollection({"scons", "-j8", "clean", targetName + runTargetName}));
+                            expectedTask.append(TaskCollection({"scons", "--jobs", "8", "clean", targetName + runTargetName}));
                             expectedQueue.push_back(expectedTask);
                         }
                     }
@@ -313,7 +313,7 @@ namespace execHelper { namespace plugins { namespace test {
                             string targetName = target.getTarget();
                             string runTargetName = target.getRunTarget();
                             Task expectedTask;
-                            expectedTask.append(TaskCollection({"scons", "-j8", "compiler=" + compilerName, "mode=" + modeName, architectureName, "hello" + distributionName + "world", targetName + runTargetName}));
+                            expectedTask.append(TaskCollection({"scons", "--jobs", "8", "compiler=" + compilerName, "mode=" + modeName, architectureName, "hello" + distributionName + "world", targetName + runTargetName}));
                             expectedQueue.push_back(expectedTask);
                         }
                     }
@@ -337,7 +337,7 @@ namespace execHelper { namespace plugins { namespace test {
                             string targetName = target.getTarget();
                             string runTargetName = target.getRunTarget();
                             Task expectedTask;
-                            expectedTask.append(TaskCollection({"scons", "-j8", "clean", "compiler=" + compilerName, "mode=" + modeName, architectureName, "hello" + distributionName + "world", targetName + runTargetName}));
+                            expectedTask.append(TaskCollection({"scons", "--jobs", "8", "clean", "compiler=" + compilerName, "mode=" + modeName, architectureName, "hello" + distributionName + "world", targetName + runTargetName}));
                             expectedQueue.push_back(expectedTask);
                         }
                     }

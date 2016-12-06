@@ -10,6 +10,7 @@
 
 using std::string;
 using execHelper::core::Task;
+using execHelper::core::Command;
 using execHelper::core::Options;
 using execHelper::core::TaskCollection;
 using execHelper::core::TargetDescription;
@@ -22,94 +23,28 @@ namespace {
 }
 
 namespace execHelper { namespace plugins {
-    bool Make::apply(const std::string& command, Task& task, const Options& options) const noexcept {
-        if(command == "build") {
-            return build(task, options);
-        } else if(command == "clean") {
-            return clean(task, options);
-        }
-        return false;
-    }
-
-    TaskCollection Make::getBuildDir(const SettingsNode& settings, const CompilerDescriptionElement& compiler) noexcept {
-        TaskCollection commandArguments = settings["build-dir"].toStringCollection();
-        Patterns patterns = settings["patterns"].toStringCollection();
-        if(commandArguments.size() == 1U) {
-            return TaskCollection({replacePatterns(commandArguments[0], patterns, compiler)});
-        }
-        return TaskCollection({});
-    }
-
-    TaskCollection Make::getCommandLine(const SettingsNode& settings, const CompilerDescriptionElement& compiler) noexcept {
-        TaskCollection commandArguments = settings["command-line"].toStringCollection();
-        Patterns patterns = settings["patterns"].toStringCollection();
-        for(auto& argument : commandArguments) {
-            argument = replacePatterns(argument, patterns, compiler);
-        }
-        return commandArguments;
-    }
-
-    TaskCollection Make::getMultiThreaded(const SettingsNode& settings) noexcept {
-        TaskCollection commandArguments = settings["single-threaded"].toStringCollection();
-        if(commandArguments[0] != "yes") {
-            return TaskCollection({"-j8"});
-        }
-        return TaskCollection();
-    }
-
-    bool Make::build(core::Task& task, const core::Options& options) const noexcept {
+    bool Make::apply(const Command& command, Task& task, const Options& options) const noexcept {
         const SettingsNode& settings = options.getSettings({"make"});  
         task.append(MAKE_COMMAND);
         for(const auto& compiler : options.getCompiler()) {
             for(const auto& target : options.getTarget()) {
                 Task newTask = task;
-                newTask.append(getMultiThreaded(settings));
-                newTask.append(getCommandLine(settings, compiler));
-                TaskCollection buildTarget = getBuildDir(settings, compiler);
+                newTask.append(getMultiThreaded(command, settings));
+                newTask.append(getCommandLine(command, settings, compiler));
+                TaskCollection buildTarget = getBuildDir(command, settings, compiler);
+                if(!buildTarget.empty()) {
+                    newTask.append("--directory=" + buildTarget[0]);
+                }
+
                 string targetName = target.getTarget();
                 string runTargetName = target.getRunTarget();
                 if(targetName != "all") {
-                    if(buildTarget.size() == 0) {
-                        buildTarget.push_back("");
-                    } else {
-                        buildTarget.back() += "/";
-                    }
-                    buildTarget.back() += targetName + runTargetName;
+                    newTask.append(targetName + runTargetName);
                 }
-                newTask.append("-C");
-                newTask.append(buildTarget);
                 registerTask(newTask, options);
             }
         }
         return true;
-    }
 
-    bool Make::clean(core::Task& task, const core::Options& options) const noexcept {
-        task.append(MAKE_COMMAND);
-        task.append("clean");
-        const SettingsNode& settings = options.getSettings({"make"});  
-        for(const auto& compiler : options.getCompiler()) {
-            for(const auto& target : options.getTarget()) {
-                Task newTask = task;
-                newTask.append(getMultiThreaded(settings));
-                newTask.append(getCommandLine(settings, compiler));
-                TaskCollection buildTarget = getBuildDir(settings, compiler);
-                string targetName = target.getTarget();
-                string runTargetName = target.getRunTarget();
-                if(targetName != "all") {
-                    if(buildTarget.size() == 0) {
-                        buildTarget.push_back("");
-                    } else {
-                        buildTarget.back() += "/";
-                    }
-                    buildTarget.back() += targetName + runTargetName;
-                }
-                newTask.append("-C");
-                newTask.append(buildTarget);
-
-                registerTask(newTask, options);
-            }
-        }
-        return true;
     }
 } }

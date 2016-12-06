@@ -7,7 +7,7 @@
 #include "plugins/make.h"
 
 #include "executorStub.h"
-#include "core/execHelperOptions.h"
+#include "optionsStub.h"
 #include "core/compilerDescription.h"
 #include "core/targetDescription.h"
 
@@ -18,181 +18,46 @@ using std::string;
 using std::ofstream;
 
 using execHelper::core::test::ExecutorStub;
-using execHelper::core::ExecHelperOptions;
 using execHelper::core::Task;
 using execHelper::core::TaskCollection;
 using execHelper::core::CompilerDescription;
 using execHelper::core::TargetDescription;
 using execHelper::core::CommandCollection;
 
-using execHelper::test::utils::MainVariables;
-using execHelper::test::utils::basename;
-using execHelper::test::utils::convertToConfig;
-using execHelper::test::utils::appendVectors;
+using execHelper::test::OptionsStub;
+using execHelper::test::utils::addSettings;
+
+namespace {
+    void setupBasicOptions(OptionsStub& options, const TargetDescription& targets, const CompilerDescription& compilers) {
+        addSettings(options.m_settings, "commands", {"build", "clean"});
+        addSettings(options.m_settings, "build", {"make"});
+        addSettings(options.m_settings, "clean", {"make"});
+
+        options.m_targets = targets;
+        options.m_compilers = compilers;
+    }
+}
 
 namespace execHelper { namespace plugins { namespace test {
-    SCENARIO("Testing the make plugin, multithreaded", "[plugins][make]") {
-        GIVEN("A scons plugin object and some options") {
-            const CommandCollection actualCommands({"init", "build", "run"});
-            const TargetDescription::TargetCollection actualTargets({"target1", "target2"});
-            const TargetDescription::RunTargetCollection actualRunTargets({"run-target1", "run-target2"});
-            const CompilerDescription::CompilerNames actualCompilerNames({"gcc", "clang"});
-            const CompilerDescription::ModeNames actualModes({"debug", "release"});
-            const CompilerDescription::ArchitectureNames actualArchitectures({"i386", "armel"});
-            const CompilerDescription::DistributionNames actualDistributions({"wheezy", "jessie"});
-            const CompilerDescription actualCompilers(actualCompilerNames, actualModes, actualArchitectures, actualDistributions);
+    SCENARIO("Testing the default make settings", "[plugins][make]") {
+        GIVEN("A make plugin object and the default options") {
+            const TargetDescription actualTargets({"target1", "target2"}, {"runTarget1", "runTarget2"});
+            const CompilerDescription actualCompilers(CompilerDescription::CompilerNames({"compiler1", "compiler2"}), 
+                                                                                         {"mode1", "mode2"}, 
+                                                                                         {"architectureA", "architectureB"},
+                                                                                         {"distribution1", "distribution2"}
+                                                                                        );
 
-            vector<string> arguments;
-            arguments.emplace_back("UNITTEST");
-            appendVectors(arguments, actualCommands);
-            arguments.emplace_back("--compiler");
-            appendVectors(arguments, actualCompilerNames);
-            arguments.emplace_back("--mode");
-            appendVectors(arguments, actualModes);
-            arguments.emplace_back("--architecture");
-            appendVectors(arguments, actualArchitectures);
-            arguments.emplace_back("--target");
-            appendVectors(arguments, actualTargets);
-            arguments.emplace_back("--run-target");
-            appendVectors(arguments, actualRunTargets);
-
-            string configFile;
-            configFile += convertToConfig("commands", {"init"});
-            configFile += convertToConfig("init", {"bootstrap"});
-            configFile += string("make:\n")
-                            + "    patterns:\n"
-                            + "        - COMPILER\n"
-                            + "        - MODE\n"
-                            + "        - ARCHITECTURE\n"
-                            + "    build-dir: build/{COMPILER}/{MODE}/{ARCHITECTURE}\n"
-                            + "    single-threaded: no\n"
-                            + "    command-line:\n"
-                            + "        - V=1\n"
-                            + "        - --dry-run\n";
-
-
-            string filename = "test-make.exec-helper";
-            ofstream fileStream;
-            fileStream.open(filename);
-            fileStream << configFile;
-            fileStream.close();
-
+            OptionsStub options;
+            setupBasicOptions(options, actualTargets, actualCompilers);
             ExecutorStub executor;
-            MainVariables mainVariables(arguments);
-            ExecHelperOptions options; 
             options.setExecutor(&executor);
-            options.parseSettingsFile(filename);
-            options.parse(mainVariables.argc, mainVariables.argv.get());
 
             Make plugin;
 
-            WHEN("We use the plugin to build") {
+            WHEN("We use the plugin") {
                 Task task;
-                REQUIRE(plugin.apply("build", task, options) == true);
-
-                ExecutorStub::TaskQueue expectedQueue;
-                for(const auto& compiler : options.getCompiler()) {
-                    string compilerName = compiler.getCompiler().getName();
-                    string modeName = compiler.getMode().getMode();
-                    string architectureName = compiler.getArchitecture().getArchitecture();
-
-                    for(const auto& target : options.getTarget()) {
-                        string targetName = target.getTarget();
-                        string runTargetName = target.getRunTarget();
-
-                        Task expectedTask;
-                        expectedTask.append(TaskCollection({"make", "-j8", "V=1", "--dry-run", "-C", "build/" + compilerName + "/" + modeName + "/" + architectureName + "/" + targetName + runTargetName}));
-                        expectedQueue.push_back(expectedTask);
-                    }
-                }
-
-                THEN("We should get the expected tasks") {
-                    REQUIRE(expectedQueue == executor.getExecutedTasks());
-                }
-            }
-
-            WHEN("We use the plugin to clean") {
-                Task task;
-                REQUIRE(plugin.apply("clean", task, options) == true);
-
-                ExecutorStub::TaskQueue expectedQueue;
-                for(const auto& compiler : options.getCompiler()) {
-                    string compilerName = compiler.getCompiler().getName();
-                    string modeName = compiler.getMode().getMode();
-                    string architectureName = compiler.getArchitecture().getArchitecture();
-
-                    for(const auto& target : options.getTarget()) {
-                        string targetName = target.getTarget();
-                        string runTargetName = target.getRunTarget();
-
-                        Task expectedTask;
-                        expectedTask.append(TaskCollection({"make", "clean", "-j8", "V=1", "--dry-run", "-C", "build/" + compilerName + "/" + modeName + "/" + architectureName + "/" + targetName + runTargetName}));
-                        expectedQueue.push_back(expectedTask);
-                    }
-                }
-
-                THEN("We should get the expected tasks") {
-                    REQUIRE(expectedQueue == executor.getExecutedTasks());
-                }
-            }
-
-        }
-    }
-
-    SCENARIO("Testing the make plugin, single-threaded", "[plugins][make]") {
-        GIVEN("A scons plugin object and some options") {
-            const CommandCollection actualCommands({"init", "build", "run"});
-            const TargetDescription::TargetCollection actualTargets({"target1", "target2"});
-            const TargetDescription::RunTargetCollection actualRunTargets({"run-target1", "run-target2"});
-            const CompilerDescription::CompilerNames actualCompilerNames({"gcc", "clang"});
-            const CompilerDescription::ModeNames actualModes({"debug", "release"});
-            const CompilerDescription::ArchitectureNames actualArchitectures({"i386", "armel"});
-            const CompilerDescription::DistributionNames actualDistributions({"wheezy", "jessie"});
-            const CompilerDescription actualCompilers(actualCompilerNames, actualModes, actualArchitectures, actualDistributions);
-
-            vector<string> arguments;
-            arguments.emplace_back("UNITTEST");
-            appendVectors(arguments, actualCommands);
-            arguments.emplace_back("--target");
-            appendVectors(arguments, actualTargets);
-            arguments.emplace_back("--run-target");
-            appendVectors(arguments, actualRunTargets);
-            arguments.emplace_back("--compiler");
-            appendVectors(arguments, actualCompilerNames);
-            arguments.emplace_back("--mode");
-            appendVectors(arguments, actualModes);
-            arguments.emplace_back("--architecture");
-            appendVectors(arguments, actualArchitectures);
-            arguments.emplace_back("--distribution");
-            appendVectors(arguments, actualDistributions);
-
-            string configFile;
-            configFile += convertToConfig("commands", {"init"});
-            configFile += convertToConfig("init", {"bootstrap"});
-            configFile += string("make:\n")
-                            + "    single-threaded: yes\n"
-                            + "    command-line:\n"
-                            + "        - V=1\n"
-                            + "        - --dry-run\n";
-
-            string filename = "test-make.exec-helper";
-            ofstream fileStream;
-            fileStream.open(filename);
-            fileStream << configFile;
-            fileStream.close();
-
-            ExecutorStub executor;
-            MainVariables mainVariables(arguments);
-            ExecHelperOptions options; 
-            options.setExecutor(&executor);
-            options.parseSettingsFile(filename);
-            options.parse(mainVariables.argc, mainVariables.argv.get());
-
-            Make plugin;
-
-            WHEN("We use the plugin to build") {
-                Task task;
-                REQUIRE(plugin.apply("build", task, options) == true);
+                REQUIRE(plugin.apply("random-command", task, options) == true);
 
                 ExecutorStub::TaskQueue expectedQueue;
                 for(const auto& compiler : options.getCompiler()) {
@@ -201,30 +66,7 @@ namespace execHelper { namespace plugins { namespace test {
                         string runTargetName = target.getRunTarget();
 
                         Task expectedTask;
-                        expectedTask.append(TaskCollection({"make", "V=1", "--dry-run", "-C", targetName + runTargetName}));
-                        expectedQueue.push_back(expectedTask);
-                    }
-                }
-
-                THEN("We should get the expected tasks") {
-                    REQUIRE(expectedQueue == executor.getExecutedTasks());
-                }
-            }
-
-
-
-            WHEN("We use the plugin to clean") {
-                Task task;
-                REQUIRE(plugin.apply("clean", task, options) == true);
-
-                ExecutorStub::TaskQueue expectedQueue;
-                for(const auto& compiler : options.getCompiler()) {
-                    for(const auto& target : options.getTarget()) {
-                        string targetName = target.getTarget();
-                        string runTargetName = target.getRunTarget();
-
-                        Task expectedTask;
-                        expectedTask.append(TaskCollection({"make", "clean", "V=1", "--dry-run", "-C", targetName + runTargetName}));
+                        expectedTask.append(TaskCollection({"make", "--jobs", "8", targetName + runTargetName}));
                         expectedQueue.push_back(expectedTask);
                     }
                 }
@@ -236,59 +78,201 @@ namespace execHelper { namespace plugins { namespace test {
         }
     }
 
-    SCENARIO("Testing the all target of the make plugin", "[plugins][make]") {
-        GIVEN("A scons plugin object and some options") {
-            const CommandCollection actualCommands({"init", "build", "run"});
-            const CompilerDescription::CompilerNames actualCompilerNames({"gcc", "clang"});
-            const CompilerDescription::ModeNames actualModes({"debug", "release"});
-            const CompilerDescription::ArchitectureNames actualArchitectures({"i386", "armel"});
-            const CompilerDescription::DistributionNames actualDistributions({"wheezy", "jessie"});
-            const CompilerDescription actualCompilers(actualCompilerNames, actualModes, actualArchitectures, actualDistributions);
+    SCENARIO("Testing the make multi-threaded setting", "[plugins][make]") {
+        const TargetDescription actualTargets({"target1", "target2"}, {"runTarget1", "runTarget2"});
+        const CompilerDescription actualCompilers(CompilerDescription::CompilerNames({"compiler1", "compiler2"}), 
+                                                                                     {"mode1", "mode2"}, 
+                                                                                     {"architectureA", "architectureB"},
+                                                                                     {"distribution1", "distribution2"}
+                                                                                    );
 
-            vector<string> arguments;
-            arguments.emplace_back("UNITTEST");
-            appendVectors(arguments, actualCommands);
-            arguments.emplace_back("--compiler");
-            appendVectors(arguments, actualCompilerNames);
-            arguments.emplace_back("--mode");
-            appendVectors(arguments, actualModes);
-            arguments.emplace_back("--architecture");
-            appendVectors(arguments, actualArchitectures);
-            arguments.emplace_back("--distribution");
-            appendVectors(arguments, actualDistributions);
+        OptionsStub options;
+        setupBasicOptions(options, actualTargets, actualCompilers);
+        ExecutorStub executor;
+        options.setExecutor(&executor);
+        addSettings(options.m_settings["make"], "clean", "command-line");
+        addSettings(options.m_settings["make"]["clean"], "command-line", "clean");
+            
+        Make plugin;
 
-            string configFile;
-            configFile += convertToConfig("commands", {"init"});
-            configFile += convertToConfig("init", {"bootstrap"});
-            configFile += string("make:\n")
-                            + "    patterns:\n"
-                            + "        - COMPILER\n"
-                            + "        - MODE\n"
-                            + "        - ARCHITECTURE\n"
-                            + "        - DISTRIBUTION\n"
-                            + "    build-dir: build/{COMPILER}/{MODE}/{ARCHITECTURE}/{DISTRIBUTION}\n"
-                            + "    single-threaded: no\n"
-                            + "    command-line:\n"
-                            + "        - V=1\n"
-                            + "        - --dry-run\n";
+        GIVEN("A make plugin object and the single-threaded option") {
+            addSettings(options.m_settings["make"], "single-threaded", "yes");
 
+            WHEN("We build the plugin") {
+                Task task;
+                REQUIRE(plugin.apply("build", task, options) == true);
 
-            string filename = "test-make.exec-helper";
-            ofstream fileStream;
-            fileStream.open(filename);
-            fileStream << configFile;
-            fileStream.close();
+                ExecutorStub::TaskQueue expectedQueue;
+                for(const auto& compiler : options.getCompiler()) {
+                    for(const auto& target : options.getTarget()) {
+                        string targetName = target.getTarget();
+                        string runTargetName = target.getRunTarget();
 
+                        Task expectedTask;
+                        expectedTask.append(TaskCollection({"make", targetName + runTargetName}));
+                        expectedQueue.push_back(expectedTask);
+                    }
+                }
+
+                THEN("We should get the expected tasks") {
+                    REQUIRE(expectedQueue == executor.getExecutedTasks());
+                }
+            }
+
+            WHEN("We clean the plugin") {
+                Task task;
+                REQUIRE(plugin.apply("clean", task, options) == true);
+
+                ExecutorStub::TaskQueue expectedQueue;
+                for(const auto& compiler : options.getCompiler()) {
+                    for(const auto& target : options.getTarget()) {
+                        string targetName = target.getTarget();
+                        string runTargetName = target.getRunTarget();
+
+                        Task expectedTask;
+                        expectedTask.append(TaskCollection({"make", "clean", targetName + runTargetName}));
+                        expectedQueue.push_back(expectedTask);
+                    }
+                }
+
+                THEN("We should get the expected tasks") {
+                    REQUIRE(expectedQueue == executor.getExecutedTasks());
+                }
+            }
+        }
+
+        GIVEN("A make plugin object and the multi-threaded option") {
+            addSettings(options.m_settings["make"], "single-threaded", "no");
+
+            WHEN("We build the plugin") {
+                Task task;
+                REQUIRE(plugin.apply("build", task, options) == true);
+
+                ExecutorStub::TaskQueue expectedQueue;
+                for(const auto& compiler : options.getCompiler()) {
+                    for(const auto& target : options.getTarget()) {
+                        string targetName = target.getTarget();
+                        string runTargetName = target.getRunTarget();
+
+                        Task expectedTask;
+                        expectedTask.append(TaskCollection({"make", "--jobs", "8", targetName + runTargetName}));
+                        expectedQueue.push_back(expectedTask);
+                    }
+                }
+
+                THEN("We should get the expected tasks") {
+                    REQUIRE(expectedQueue == executor.getExecutedTasks());
+                }
+            }
+
+            WHEN("We clean the plugin") {
+                Task task;
+                REQUIRE(plugin.apply("clean", task, options) == true);
+
+                ExecutorStub::TaskQueue expectedQueue;
+                for(const auto& compiler : options.getCompiler()) {
+                    for(const auto& target : options.getTarget()) {
+                        string targetName = target.getTarget();
+                        string runTargetName = target.getRunTarget();
+
+                        Task expectedTask;
+                        expectedTask.append(TaskCollection({"make", "--jobs", "8", "clean", targetName + runTargetName}));
+                        expectedQueue.push_back(expectedTask);
+                    }
+                }
+
+                THEN("We should get the expected tasks") {
+                    REQUIRE(expectedQueue == executor.getExecutedTasks());
+                }
+            }
+        }
+    }
+
+    SCENARIO("Testing the command-line make settings", "[plugins][make]") {
+        GIVEN("A make plugin object and the default options") {
+            const TargetDescription actualTargets({"target1", "target2"}, {"runTarget1", "runTarget2"});
+            const CompilerDescription actualCompilers(CompilerDescription::CompilerNames({"compiler1", "compiler2"}), 
+                                                                                         {"mode1", "mode2"}, 
+                                                                                         {"architectureA", "architectureB"},
+                                                                                         {"distribution1", "distribution2"}
+                                                                                        );
+
+            OptionsStub options;
+            setupBasicOptions(options, actualTargets, actualCompilers);
             ExecutorStub executor;
-            MainVariables mainVariables(arguments);
-            ExecHelperOptions options; 
             options.setExecutor(&executor);
-            options.parseSettingsFile(filename);
-            options.parse(mainVariables.argc, mainVariables.argv.get());
+            addSettings(options.m_settings["make"], "clean", "command-line");
+            addSettings(options.m_settings["make"], "command-line", {"V=1", "--jobs", "4"});
+            addSettings(options.m_settings["make"]["clean"], "command-line", {"clean", "V=1", "--jobs", "4"});
 
             Make plugin;
 
-            WHEN("We use the plugin to build") {
+            WHEN("We build the plugin") {
+                Task task;
+                REQUIRE(plugin.apply("build", task, options) == true);
+
+                ExecutorStub::TaskQueue expectedQueue;
+                for(const auto& compiler : options.getCompiler()) {
+                    for(const auto& target : options.getTarget()) {
+                        string targetName = target.getTarget();
+                        string runTargetName = target.getRunTarget();
+
+                        Task expectedTask;
+                        expectedTask.append(TaskCollection({"make", "--jobs", "8", "V=1", "--jobs", "4", targetName + runTargetName}));
+                        expectedQueue.push_back(expectedTask);
+                    }
+                }
+
+                THEN("We should get the expected tasks") {
+                    REQUIRE(expectedQueue == executor.getExecutedTasks());
+                }
+            }
+
+            WHEN("We clean the plugin") {
+                Task task;
+                REQUIRE(plugin.apply("clean", task, options) == true);
+
+                ExecutorStub::TaskQueue expectedQueue;
+                for(const auto& compiler : options.getCompiler()) {
+                    for(const auto& target : options.getTarget()) {
+                        string targetName = target.getTarget();
+                        string runTargetName = target.getRunTarget();
+
+                        Task expectedTask;
+                        expectedTask.append(TaskCollection({"make", "--jobs", "8", "clean", "V=1", "--jobs", "4", targetName + runTargetName}));
+                        expectedQueue.push_back(expectedTask);
+                    }
+                }
+
+                THEN("We should get the expected tasks") {
+                    REQUIRE(expectedQueue == executor.getExecutedTasks());
+                }
+            }
+        }
+    }
+
+    SCENARIO("Testing the build-dir make settings", "[plugins][make]") {
+        GIVEN("A make plugin object and the default options") {
+            const TargetDescription actualTargets({"target1", "target2"}, {"runTarget1", "runTarget2"});
+            const CompilerDescription actualCompilers(CompilerDescription::CompilerNames({"compiler1", "compiler2"}), 
+                                                                                         {"mode1", "mode2"}, 
+                                                                                         {"architectureA", "architectureB"},
+                                                                                         {"distribution1", "distribution2"}
+                                                                                        );
+
+            OptionsStub options;
+            setupBasicOptions(options, actualTargets, actualCompilers);
+            ExecutorStub executor;
+            options.setExecutor(&executor);
+            addSettings(options.m_settings["make"], "clean", "command-line");
+            addSettings(options.m_settings["make"]["clean"], "command-line", {"clean"});
+            addSettings(options.m_settings["make"], "patterns", {"DISTRIBUTION", "ARCHITECTURE", "COMPILER", "MODE"});
+            addSettings(options.m_settings["make"], "build-dir", "build/{DISTRIBUTION}/{ARCHITECTURE}/{HELLO}/{COMPILER}/hello{MODE}world");
+            addSettings(options.m_settings["make"]["clean"], "build-dir", "clean/{DISTRIBUTION}/{ARCHITECTURE}/{HELLO}/{COMPILER}/hello{MODE}world");
+
+            Make plugin;
+
+            WHEN("We build the plugin") {
                 Task task;
                 REQUIRE(plugin.apply("build", task, options) == true);
 
@@ -299,9 +283,14 @@ namespace execHelper { namespace plugins { namespace test {
                     string architectureName = compiler.getArchitecture().getArchitecture();
                     string distributionName = compiler.getDistribution().getDistribution();
 
-                    Task expectedTask;
-                    expectedTask.append(TaskCollection({"make", "-j8", "V=1", "--dry-run", "-C", "build/" + compilerName + "/" + modeName + "/" + architectureName + "/" + distributionName}));
-                    expectedQueue.push_back(expectedTask);
+                    for(const auto& target : options.getTarget()) {
+                        string targetName = target.getTarget();
+                        string runTargetName = target.getRunTarget();
+
+                        Task expectedTask;
+                        expectedTask.append(TaskCollection({"make", "--jobs", "8", "--directory=build/" + distributionName + "/" + architectureName + "/{HELLO}/" + compilerName + "/hello" + modeName + "world", targetName + runTargetName}));
+                        expectedQueue.push_back(expectedTask);
+                    }
                 }
 
                 THEN("We should get the expected tasks") {
@@ -309,7 +298,7 @@ namespace execHelper { namespace plugins { namespace test {
                 }
             }
 
-            WHEN("We use the plugin to clean") {
+            WHEN("We clean the plugin") {
                 Task task;
                 REQUIRE(plugin.apply("clean", task, options) == true);
 
@@ -320,22 +309,28 @@ namespace execHelper { namespace plugins { namespace test {
                     string architectureName = compiler.getArchitecture().getArchitecture();
                     string distributionName = compiler.getDistribution().getDistribution();
 
-                    Task expectedTask;
-                    expectedTask.append(TaskCollection({"make", "clean", "-j8", "V=1", "--dry-run", "-C", "build/" + compilerName + "/" + modeName + "/" + architectureName + "/" + distributionName}));
-                    expectedQueue.push_back(expectedTask);
+                    for(const auto& target : options.getTarget()) {
+                        string targetName = target.getTarget();
+                        string runTargetName = target.getRunTarget();
+
+                        Task expectedTask;
+                        expectedTask.append(TaskCollection({"make", "--jobs", "8", "clean", "--directory=clean/" + distributionName + "/" + architectureName + "/{HELLO}/" + compilerName + "/hello" + modeName + "world", targetName + runTargetName}));
+                        expectedQueue.push_back(expectedTask);
+                    }
                 }
 
                 THEN("We should get the expected tasks") {
                     REQUIRE(expectedQueue == executor.getExecutedTasks());
                 }
             }
-
         }
     }
+
+
 
     SCENARIO("Testing invalid make plugin commands", "[plugins][make]") {
         GIVEN("Nothing in particular") {
-            ExecHelperOptions options;
+            OptionsStub options;
 
             WHEN("We pass an invalid command to scons") {
                 Make plugin;

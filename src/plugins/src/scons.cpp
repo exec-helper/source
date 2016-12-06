@@ -19,7 +19,6 @@ using execHelper::config::SettingsNode;
 
 namespace {
     const string SCONS_COMMAND("scons");
-    const string patternsKey("patterns");
 }
 
 namespace execHelper { namespace plugins {
@@ -40,40 +39,5 @@ namespace execHelper { namespace plugins {
             }
         }
         return true;
-    }
-
-    TaskCollection Scons::getCommandLine(const Command& command, const SettingsNode& rootSettings, const CompilerDescriptionElement& compiler) noexcept {
-        static const string commandLineKey("command-line");
-        const SettingsNode settings = getContainingSettings(command, rootSettings, commandLineKey); 
-        if(! settings.contains(commandLineKey)) {
-            return TaskCollection();
-        }
-
-        TaskCollection commandArguments = settings[commandLineKey].toStringCollection();
-        const SettingsNode patternSettings = getContainingSettings(command, rootSettings, patternsKey); 
-        Patterns patterns = patternSettings[patternsKey].toStringCollection();
-        for(auto& argument : commandArguments) {
-            argument = replacePatterns(argument, patterns, compiler);
-        }
-        return commandArguments;
-    }
-
-    const SettingsNode& Scons::getContainingSettings(const Command& command, const SettingsNode& rootSettings, const string& key) noexcept {
-        if(rootSettings.contains(command) && rootSettings[command].contains(key)) {
-            return rootSettings[command]; 
-        }
-        return rootSettings;
-    }
-
-    TaskCollection Scons::getMultiThreaded(const std::string& command, const SettingsNode& rootSettings) noexcept {
-        static const string singleThreadedKey("single-threaded");
-        const SettingsNode settings = getContainingSettings(command, rootSettings, singleThreadedKey); 
-        if(settings.contains(singleThreadedKey)) {
-            TaskCollection commandArguments = settings[singleThreadedKey].toStringCollection();
-            if(commandArguments.size() > 0 && commandArguments[0] == "yes") {
-                return TaskCollection();
-            }
-        }
-        return TaskCollection({"-j8"});
     }
 } }
