@@ -14,7 +14,7 @@ namespace execHelper {
     namespace plugins {
         class Plugin {
             public: 
-                virtual bool apply(const std::string& command, core::Task& task, const core::Options& options) const noexcept = 0;
+                virtual bool apply(const core::Command& command, core::Task& task, const core::Options& options) const noexcept = 0;
 
             protected:
                 Plugin() {}

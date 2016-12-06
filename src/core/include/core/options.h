@@ -18,7 +18,8 @@ namespace execHelper {
 
 namespace execHelper {
     namespace core {
-        typedef std::vector<std::string> CommandCollection;
+        typedef std::string Command;
+        typedef std::vector<Command> CommandCollection;
 
         class Options {
             public:
