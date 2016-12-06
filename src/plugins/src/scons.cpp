@@ -76,41 +76,4 @@ namespace execHelper { namespace plugins {
         }
         return TaskCollection({"-j8"});
     }
-
-    //bool Scons::build(core::Task& task, const core::Options& options) const noexcept {
-        //const SettingsNode& settings = options.getSettings({"scons"});  
-        //task.append(SCONS_COMMAND);
-        //for(const auto& compiler : options.getCompiler()) {
-            //for(const auto& target : options.getTarget()) {
-                //Task newTask = task;
-                //newTask.append(getMultiThreaded(settings));
-                //newTask.append(getCommandLine(settings, compiler));
-                //if(target.getTarget() != "all") {
-                    //string buildTarget = target.getTarget() + target.getRunTarget();
-                    //newTask.append(buildTarget);
-                //}
-                //registerTask(newTask, options);
-            //}
-        //}
-        //return true;
-    //}
-
-    //bool Scons::clean(core::Task& task, const core::Options& options) const noexcept {
-        //task.append(SCONS_COMMAND);
-        //task.append("clean");
-        //const SettingsNode& settings = options.getSettings({"scons"});  
-        //for(const auto& compiler : options.getCompiler()) {
-            //for(const auto& target : options.getTarget()) {
-                //Task newTask = task;
-                //newTask.append(getMultiThreaded(settings));
-                //newTask.append(getCommandLine(settings, compiler));
-                //if(target.getTarget() != "all") {
-                    //string buildTarget = target.getTarget() + target.getRunTarget();
-                    //newTask.append(buildTarget);
-                //}
-                //registerTask(newTask, options);
-            //}
-        //}
-        //return true;
-    //}
 } }
