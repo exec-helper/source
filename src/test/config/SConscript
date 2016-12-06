@@ -5,10 +5,10 @@ import buildTools
 import setupTools
 
 includes = [
-    '{rootDir}/config/include'.format(rootDir = env['BUILD_DIR'])
 ]
 
 dependencies = [
+    'config'
 ]
 
 env_config_test = env.Clone()

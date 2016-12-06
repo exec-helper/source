@@ -7,7 +7,6 @@ import setupTools
 yaml_env = env.Clone()
 yaml_includeUsageRequirements = [ 
     env['BUILD_DIR'] + '/yaml/include',
-    env['BUILD_DIR'] + '/config/include',
 ]
 
 yaml_includes = [
@@ -17,8 +16,13 @@ yaml_includes = [
     yaml_includeUsageRequirements
 ]
 
+dependencies = [
+    'config'
+]
+
 yaml_libUsageRequirements = [ 
-    'yaml-cpp'
+    'yaml-cpp',
+    dependencies
 ]
 
 yaml_libs_path = [
@@ -30,4 +34,4 @@ yaml_libs_path = [
 setupTools.disableShadowWarnings(yaml_env)
 
 yaml_sources = Glob('src/*.cpp')
-buildTools.createLib(yaml_env, 'yaml', yaml_sources, yaml_includes, env, yaml_includeUsageRequirements, yaml_libUsageRequirements, None, None)
+buildTools.createLib(yaml_env, 'yaml', yaml_sources, yaml_includes, env, yaml_includeUsageRequirements, yaml_libUsageRequirements, None, dependencies)
