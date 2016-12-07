@@ -104,7 +104,9 @@ pages:
     dependencies:
         - coverage
     script:
-        - mkdir public && mv test_coverage/ public/coverage
+        - mkdir public
+        - mv pages/index.html public/
+        - mv test_coverage/ public/coverage
     artifacts:
         paths:
             - public
