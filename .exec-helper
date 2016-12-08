@@ -25,6 +25,7 @@ scons:
         command-line: 
             - compiler={COMPILER}
             - mode={MODE}
+            - verbose=no
     clean:
         command-line:
             - --clean

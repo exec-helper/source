@@ -31,11 +31,23 @@ opts.Add(EnumVariable('multithreading', 'Set multithreading', 'none',
 					map = {},
 					ignorecase=2))
 
+opts.Add(EnumVariable('verbose', 'Set verbosity of scons output', 'no',
+					allowed_values=('yes', 'no'),
+					map = {},
+					ignorecase=2))
+
+
+
 # Tools
 tools_list = ['default']
 
 env=Environment(variables=opts, tools = tools_list, ENV = {'PATH' : os.environ['PATH']})
 Export('env')
+
+if env['verbose'] == 'no':
+    env['CCCOMSTR'] = "Compiling $TARGET"
+    env['CXXCOMSTR'] = "Compiling $TARGET"
+    env['LINKCOMSTR'] = "Linking $TARGET"
 
 setupTools.setupToolchain(env, env['compiler'], env['toolchainPrefix'], env['toolchainPath'])
 
