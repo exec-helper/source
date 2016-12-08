@@ -48,7 +48,7 @@ namespace {
             ("architecture,a", value<CompilerDescription::ArchitectureNames>()->multitoken(), "Set architecture")
             ("distribution,d", value<CompilerDescription::DistributionNames>()->multitoken(), "Set distribution")
             ("settings-file,s", value<string>(), "Set settings file")
-            ("single-threaded,z", "Set multithreaded")
+            ("single-threaded,u", "Set multithreaded")
         ;
         return descriptions;
     }

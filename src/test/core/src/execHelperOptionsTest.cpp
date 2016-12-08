@@ -54,6 +54,7 @@ namespace execHelper { namespace core {
                 arguments.emplace_back("UNITTEST");
 
                 const bool default_verbosity = false;
+                const bool default_singleThreaded = false;
                 const CommandCollection default_commands = {};
                 const TargetDescription::TargetCollection default_targets = {"all"};
                 const TargetDescription::RunTargetCollection defaultRunTargets = {"all"};
@@ -67,6 +68,7 @@ namespace execHelper { namespace core {
 
                     THEN("We should get the default variables") {
                         REQUIRE(options.getVerbosity() == default_verbosity);
+                        REQUIRE(options.getSingleThreaded() == default_singleThreaded);
                         REQUIRE(options.getCommands() == default_commands);
                         REQUIRE(options.getTarget() == defaultTarget);
                     }
@@ -88,6 +90,7 @@ namespace execHelper { namespace core {
                 arguments.emplace_back("UNITTEST");
                 appendVectors(arguments, actualCommands);
                 arguments.emplace_back("--verbose");
+                arguments.emplace_back("--single-threaded");
                 arguments.emplace_back("--target");
                 appendVectors(arguments, actualTarget.getTargets());
                 arguments.emplace_back("--run-target");
@@ -113,6 +116,7 @@ namespace execHelper { namespace core {
 
                     THEN("It should be parsed properly") {
                         REQUIRE(options.getVerbosity() == true);
+                        REQUIRE(options.getSingleThreaded() == true);
                         REQUIRE(options.getCommands() == actualCommands);
                         REQUIRE(options.getTarget() == actualTarget);
                         REQUIRE(options.getCompiler() == actualCompilers);
@@ -133,6 +137,7 @@ namespace execHelper { namespace core {
                 arguments.emplace_back("UNITTEST");
                 appendVectors(arguments, actualCommands);
                 arguments.emplace_back("-v");
+                arguments.emplace_back("-u");
                 arguments.emplace_back("-t");
                 appendVectors(arguments, actualTarget.getTargets());
                 arguments.emplace_back("-r");
@@ -153,6 +158,7 @@ namespace execHelper { namespace core {
 
                     THEN("It should be parsed accordingly") {
                         REQUIRE(options.getVerbosity() == true);
+                        REQUIRE(options.getSingleThreaded() == true);
                         REQUIRE(options.getCommands() == actualCommands);
                         REQUIRE(options.getTarget() == actualTarget);
                         REQUIRE(options.getCompiler() == actualCompilers);
@@ -254,12 +260,14 @@ namespace execHelper { namespace core {
                 const string defaultCompilerKey("default-compilers");
                 const string defaultModeKey("default-modes");
                 const string defaultArchitectureKey("default-architectures");
+                const string defaultDistributionKey("default-distributions");
 
                 const vector<string> commandsValues = {command1Key, "command2", "command3"};
                 const vector<string> command1Values = {"command1a", "command1b"};
                 const vector<string> defaultCompiler = {"compiler1", "compiler2"};
                 const vector<string> defaultMode = {"mode1", "mode2"};
                 const vector<string> defaultArchitecture = {"architecture1", "architecture2"};
+                const vector<string> defaultDistribution = {"distribution1", "distribution2"};
 
                 ofstream file;
                 file.open(settingsFile, std::ios::out | std::ios::trunc);
@@ -268,6 +276,7 @@ namespace execHelper { namespace core {
                 file << convertToConfig(defaultCompilerKey, defaultCompiler);
                 file << convertToConfig(defaultModeKey, defaultMode);
                 file << convertToConfig(defaultArchitectureKey, defaultArchitecture);
+                file << convertToConfig(defaultDistributionKey, defaultDistribution);
                 file.close();
 
                 ExecHelperOptions options;
@@ -281,15 +290,18 @@ namespace execHelper { namespace core {
                         REQUIRE(options.getSettings(defaultCompilerKey).toStringCollection() == defaultCompiler);
                         REQUIRE(options.getSettings(defaultModeKey).toStringCollection() == defaultMode);
                         REQUIRE(options.getSettings(defaultArchitectureKey).toStringCollection() == defaultArchitecture);
+                        REQUIRE(options.getSettings(defaultDistributionKey).toStringCollection() == defaultDistribution);
                     }
                     THEN("We should get the chosen default settings for their respective settings") {
                         const CompilerDescription::CompilerCollection correctCompilers = CompilerDescription::convertToCompilerCollection(defaultCompiler);
                         const CompilerDescription::ModeCollection correctModes = CompilerDescription::convertToModeCollection(defaultMode);
                         const CompilerDescription::ArchitectureCollection correctArchitecturs = CompilerDescription::convertToArchitectureCollection(defaultArchitecture);
+                        const CompilerDescription::DistributionCollection correctDistributions = CompilerDescription::convertToDistributionCollection(defaultDistribution);
 
                         REQUIRE(options.getCompiler().getCompilers() == correctCompilers);
                         REQUIRE(options.getCompiler().getModes() == correctModes);
                         REQUIRE(options.getCompiler().getArchitectures() == correctArchitecturs);
+                        REQUIRE(options.getCompiler().getDistributions() == correctDistributions);
                     }
                 }
             }
