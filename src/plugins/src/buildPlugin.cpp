@@ -6,6 +6,8 @@
 #include "core/compilerDescription.h"
 #include "core/patterns.h"
 
+#include "pluginUtils.h"
+
 using std::string;
 
 using execHelper::config::SettingsNode;
@@ -15,32 +17,9 @@ using execHelper::core::CompilerDescriptionElement;
 using execHelper::core::Patterns;
 using execHelper::core::replacePatterns;
 
-namespace {
-    const string patternsKey("patterns");
-}
-
 namespace execHelper { namespace plugins {
     TaskCollection BuildPlugin::getCommandLine(const Command& command, const SettingsNode& rootSettings, const CompilerDescriptionElement& compiler) noexcept {
-        static const string commandLineKey("command-line");
-        const SettingsNode settings = getContainingSettings(command, rootSettings, commandLineKey); 
-        if(! settings.contains(commandLineKey)) {
-            return TaskCollection();
-        }
-
-        TaskCollection commandArguments = settings[commandLineKey].toStringCollection();
-        const SettingsNode patternSettings = getContainingSettings(command, rootSettings, patternsKey); 
-        Patterns patterns = patternSettings[patternsKey].toStringCollection();
-        for(auto& argument : commandArguments) {
-            argument = replacePatterns(argument, patterns, compiler);
-        }
-        return commandArguments;
-    }
-
-    const SettingsNode& BuildPlugin::getContainingSettings(const Command& command, const SettingsNode& rootSettings, const string& key) noexcept {
-        if(rootSettings.contains(command) && rootSettings[command].contains(key)) {
-            return rootSettings[command]; 
-        }
-        return rootSettings;
+        return ::execHelper::plugins::getCommandLine(command, rootSettings, compiler);
     }
 
     TaskCollection BuildPlugin::getMultiThreaded(const std::string& command, const SettingsNode& rootSettings) noexcept {
@@ -65,8 +44,8 @@ namespace execHelper { namespace plugins {
         }
         TaskCollection commandArguments = settings[buildDirKey].toStringCollection();
         
-        const SettingsNode patternSettings = getContainingSettings(command, rootSettings, patternsKey); 
-        Patterns patterns = patternSettings[patternsKey].toStringCollection();
+        const SettingsNode patternSettings = getContainingSettings(command, rootSettings, getPatternsKey()); 
+        Patterns patterns = patternSettings[getPatternsKey()].toStringCollection();
         for(const auto& argument : commandArguments) {
             result.push_back(replacePatterns(argument, patterns, compiler));
         }

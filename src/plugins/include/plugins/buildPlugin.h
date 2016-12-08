@@ -20,7 +20,6 @@ namespace execHelper {
             protected:
                 BuildPlugin() {}
 
-                static const config::SettingsNode& getContainingSettings(const std::string& command, const config::SettingsNode& rootSettings, const std::string& key) noexcept;
                 static core::TaskCollection getCommandLine(const core::Command& command, const config::SettingsNode& settings, const core::CompilerDescriptionElement& compiler) noexcept;
                 static core::TaskCollection getMultiThreaded(const core::Command& command, const config::SettingsNode& settings) noexcept;
                 static core::TaskCollection getBuildDir(const core::Command& command, const config::SettingsNode& settings, const core::CompilerDescriptionElement& compiler) noexcept;
