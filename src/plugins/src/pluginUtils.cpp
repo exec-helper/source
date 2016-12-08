@@ -38,8 +38,4 @@ namespace execHelper { namespace plugins {
         }
         return commandArguments;
     }
-
-
-
-
 } }
