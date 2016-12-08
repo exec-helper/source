@@ -22,6 +22,7 @@ namespace execHelper {
                 virtual bool parseSettingsFile(const std::string& file) noexcept override;
 
                 virtual bool getVerbosity() const noexcept override;
+                virtual bool getSingleThreaded() const noexcept override;
                 virtual const CommandCollection& getCommands() const noexcept override;
                 virtual const TargetDescription& getTarget() const noexcept override;
                 virtual const CompilerDescription& getCompiler() const noexcept override;
@@ -36,6 +37,7 @@ namespace execHelper {
             private:
                 bool m_help;
                 bool m_verbose;
+                bool m_singleThreaded;
                 CommandCollection m_commands;
                 std::unique_ptr<TargetDescription> m_target;
                 std::unique_ptr<CompilerDescription> m_compiler;

@@ -11,6 +11,7 @@ namespace execHelper {
 
     namespace core {
         class CompilerDescriptionElement;
+        class Options;
     }
 }
 
@@ -21,7 +22,7 @@ namespace execHelper {
                 BuildPlugin() {}
 
                 static core::TaskCollection getCommandLine(const core::Command& command, const config::SettingsNode& settings, const core::CompilerDescriptionElement& compiler) noexcept;
-                static core::TaskCollection getMultiThreaded(const core::Command& command, const config::SettingsNode& settings) noexcept;
+                static core::TaskCollection getMultiThreaded(const core::Command& command, const config::SettingsNode& settings, const core::Options& options) noexcept;
                 static core::TaskCollection getBuildDir(const core::Command& command, const config::SettingsNode& settings, const core::CompilerDescriptionElement& compiler) noexcept;
         };
     }

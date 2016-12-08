@@ -48,6 +48,7 @@ namespace {
             ("architecture,a", value<CompilerDescription::ArchitectureNames>()->multitoken(), "Set architecture")
             ("distribution,d", value<CompilerDescription::DistributionNames>()->multitoken(), "Set distribution")
             ("settings-file,s", value<string>(), "Set settings file")
+            ("single-threaded,z", "Set multithreaded")
         ;
         return descriptions;
     }
@@ -73,6 +74,7 @@ namespace execHelper { namespace core {
     ExecHelperOptions::ExecHelperOptions() :
         m_help(false),
         m_verbose(false),
+        m_singleThreaded(false),
         m_compiler(new CompilerDescription({Compiler("gcc"), Compiler("clang")}, {Mode("debug"), Mode("release")}, {Architecture("x64")}, {Distribution("arch-linux")}))
     {
         if(! m_executor) {
@@ -82,6 +84,10 @@ namespace execHelper { namespace core {
 
     bool ExecHelperOptions::getVerbosity() const noexcept {
         return m_verbose;
+    }
+
+    bool ExecHelperOptions::getSingleThreaded() const noexcept {
+        return m_singleThreaded;
     }
 
     const CommandCollection& ExecHelperOptions::getCommands() const noexcept {
@@ -115,6 +121,10 @@ namespace execHelper { namespace core {
 
         if(optionsMap.count("verbose")) {
             m_verbose = true;
+        }
+
+        if(optionsMap.count("single-threaded")) {
+            m_singleThreaded = true;
         }
 
         if(optionsMap.count("command")) {

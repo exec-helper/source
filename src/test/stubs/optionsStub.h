@@ -15,6 +15,7 @@ namespace execHelper {
                 OptionsStub() :
                     Options(),
                     m_verbosity(false),
+                    m_singleThreaded(false),
                     m_targets({}, {}),
                     m_compilers(core::CompilerDescription::CompilerCollection({}), {}, {}, {})
                 {
@@ -31,6 +32,10 @@ namespace execHelper {
 
                 virtual bool getVerbosity() const noexcept override {
                     return m_verbosity;
+                }
+
+                virtual bool getSingleThreaded() const noexcept override {
+                    return m_singleThreaded;
                 }
 
                 virtual const core::CommandCollection& getCommands() const noexcept override {
@@ -62,6 +67,7 @@ namespace execHelper {
                 }
 
                 bool m_verbosity;
+                bool m_singleThreaded;
                 core::CommandCollection m_commands;
                 core::TargetDescription m_targets;
                 core::CompilerDescription m_compilers;

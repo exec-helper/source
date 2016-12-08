@@ -29,7 +29,7 @@ namespace execHelper { namespace plugins {
         for(const auto& compiler : options.getCompiler()) {
             for(const auto& target : options.getTarget()) {
                 Task newTask = task;
-                newTask.append(getMultiThreaded(command, settings));
+                newTask.append(getMultiThreaded(command, settings, options));
                 newTask.append(getCommandLine(command, settings, compiler));
                 if(target.getTarget() != "all") {
                     string buildTarget = target.getTarget() + target.getRunTarget();

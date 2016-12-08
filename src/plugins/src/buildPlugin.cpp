@@ -5,12 +5,14 @@
 #include "config/settingsNode.h"
 #include "core/compilerDescription.h"
 #include "core/patterns.h"
+#include "core/options.h"
 
 #include "pluginUtils.h"
 
 using std::string;
 
 using execHelper::config::SettingsNode;
+using execHelper::core::Options;
 using execHelper::core::TaskCollection;
 using execHelper::core::Command;
 using execHelper::core::CompilerDescriptionElement;
@@ -22,8 +24,13 @@ namespace execHelper { namespace plugins {
         return ::execHelper::plugins::getCommandLine(command, rootSettings, compiler);
     }
 
-    TaskCollection BuildPlugin::getMultiThreaded(const std::string& command, const SettingsNode& rootSettings) noexcept {
+    TaskCollection BuildPlugin::getMultiThreaded(const std::string& command, const SettingsNode& rootSettings, const Options& options) noexcept {
         static const string singleThreadedKey("single-threaded");
+
+        if(options.getSingleThreaded()) {
+            return TaskCollection();
+        }
+
         const SettingsNode settings = getContainingSettings(command, rootSettings, singleThreadedKey); 
         if(settings.contains(singleThreadedKey)) {
             TaskCollection commandArguments = settings[singleThreadedKey].toStringCollection();

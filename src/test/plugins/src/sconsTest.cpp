@@ -101,7 +101,7 @@ namespace execHelper { namespace plugins { namespace test {
             ExecutorStub executor;
             options.setExecutor(&executor);
             addSettings(options.m_settings["scons"], "clean", "command-line");
-            addSettings(options.m_settings["scons"]["clean"], "command-line", {"clean"});
+            addSettings(options.m_settings["scons"]["clean"], "command-line", {"--clean"});
 
             Scons plugin;
 
@@ -143,7 +143,7 @@ namespace execHelper { namespace plugins { namespace test {
                             string targetName = target.getTarget();
                             string runTargetName = target.getRunTarget();
                             Task expectedTask;
-                            expectedTask.append(TaskCollection({"scons", "--jobs", "8", "clean"}));
+                            expectedTask.append(TaskCollection({"scons", "--jobs", "8", "--clean"}));
                             expectedQueue.push_back(expectedTask);
                         }
                     }
@@ -167,7 +167,7 @@ namespace execHelper { namespace plugins { namespace test {
         ExecutorStub executor;
         options.setExecutor(&executor);
         addSettings(options.m_settings["scons"], "clean", "command-line");
-        addSettings(options.m_settings["scons"]["clean"], "command-line", {"clean"});
+        addSettings(options.m_settings["scons"]["clean"], "command-line", {"--clean"});
             
         Scons plugin;
 
@@ -212,7 +212,7 @@ namespace execHelper { namespace plugins { namespace test {
                             string targetName = target.getTarget();
                             string runTargetName = target.getRunTarget();
                             Task expectedTask;
-                            expectedTask.append(TaskCollection({"scons", "clean", targetName + runTargetName}));
+                            expectedTask.append(TaskCollection({"scons", "--clean", targetName + runTargetName}));
                             expectedQueue.push_back(expectedTask);
                         }
                     }
@@ -263,7 +263,7 @@ namespace execHelper { namespace plugins { namespace test {
                             string targetName = target.getTarget();
                             string runTargetName = target.getRunTarget();
                             Task expectedTask;
-                            expectedTask.append(TaskCollection({"scons", "--jobs", "8", "clean", targetName + runTargetName}));
+                            expectedTask.append(TaskCollection({"scons", "--jobs", "8", "--clean", targetName + runTargetName}));
                             expectedQueue.push_back(expectedTask);
                         }
                     }
@@ -288,7 +288,7 @@ namespace execHelper { namespace plugins { namespace test {
             ExecutorStub executor;
             options.setExecutor(&executor);
             addSettings(options.m_settings["scons"], "clean", "command-line");
-            addSettings(options.m_settings["scons"]["clean"], "command-line", {"clean"});
+            addSettings(options.m_settings["scons"]["clean"], "command-line", {"--clean"});
 
             vector<string> commandLine({"compiler={COMPILER}", "mode={MODE}", "{ARCHITECTURE}", "hello{DISTRIBUTION}world"});
             addSettings(options.m_settings["scons"], "patterns", {"COMPILER", "MODE", "ARCHITECTURE", "DISTRIBUTION"});
@@ -337,7 +337,7 @@ namespace execHelper { namespace plugins { namespace test {
                             string targetName = target.getTarget();
                             string runTargetName = target.getRunTarget();
                             Task expectedTask;
-                            expectedTask.append(TaskCollection({"scons", "--jobs", "8", "clean", "compiler=" + compilerName, "mode=" + modeName, architectureName, "hello" + distributionName + "world", targetName + runTargetName}));
+                            expectedTask.append(TaskCollection({"scons", "--jobs", "8", "--clean", "compiler=" + compilerName, "mode=" + modeName, architectureName, "hello" + distributionName + "world", targetName + runTargetName}));
                             expectedQueue.push_back(expectedTask);
                         }
                     }

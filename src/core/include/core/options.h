@@ -27,6 +27,7 @@ namespace execHelper {
                 virtual bool parseSettingsFile(const std::string& file) noexcept = 0;
 
                 virtual bool getVerbosity() const noexcept = 0;
+                virtual bool getSingleThreaded() const noexcept = 0;
                 virtual const CommandCollection& getCommands() const noexcept = 0;
                 virtual const TargetDescription& getTarget() const noexcept = 0;
                 virtual const CompilerDescription& getCompiler() const noexcept = 0;
