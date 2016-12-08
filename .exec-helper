@@ -1,19 +1,32 @@
 commands:
     - build
     - clean
-    - distclean
 
 build:
     - scons
 
 clean:
-    - clean
+    - scons
+
+default-compilers:
+    - gcc
+    - clang
+
+default-modes:
+    - debug
+    - release
 
 scons:
     patterns:
         - COMPILER
         - MODE
     single-threaded: no
-    command-line: 
-        - compiler={COMPILER}
-        - mode={MODE}
+    build:
+        command-line: 
+            - compiler={COMPILER}
+            - mode={MODE}
+    clean:
+        command-line:
+            - --clean
+            - compiler={COMPILER}
+            - mode={MODE}

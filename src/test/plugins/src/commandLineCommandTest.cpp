@@ -33,7 +33,7 @@ namespace execHelper { namespace plugins { namespace test {
             ofstream configFile;
             configFile.open(filename);
             configFile << "command-line-command:" << endl 
-                       <<"    command:" << endl
+                       <<"    command-line:" << endl
                        << "        - " << commandLineToExecute1 << endl
                        << "        - " << commandLineToExecute2 << endl;
 
