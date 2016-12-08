@@ -19,9 +19,9 @@ namespace {
         return accumulate(toImplode.begin(), toImplode.end(), string(),
                 [&delimiter](std::string& a, const std::string& b) {
 					if(a.empty()) {
-                        return b;
+                        return string(b);
 					} else {
-                        return a + delimiter + b;
+                        return string(a + delimiter + b);
                     }
 				});
     }
