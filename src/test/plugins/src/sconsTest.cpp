@@ -46,7 +46,7 @@ namespace {
 
 namespace execHelper { namespace plugins { namespace test {
     SCENARIO("Testing the default options of the scons plugin", "[plugins][scons]") {
-        GIVEN("A scons plugin object, basic settings and the multi-threaded option") {
+        GIVEN("A scons plugin object and basic settings") {
             const TargetDescription actualTargets({"target1", "target2"}, {"runTarget1", "runTarget2"});
             const CompilerDescription actualCompilers(CompilerDescription::CompilerNames({"compiler1", "compiler2"}), 
                                                                                          {"mode1", "mode2"}, 
