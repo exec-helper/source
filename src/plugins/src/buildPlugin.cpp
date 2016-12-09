@@ -24,21 +24,21 @@ namespace execHelper { namespace plugins {
         return ::execHelper::plugins::getCommandLine(command, rootSettings, compiler);
     }
 
-    TaskCollection BuildPlugin::getMultiThreaded(const std::string& command, const SettingsNode& rootSettings, const Options& options) noexcept {
+    bool BuildPlugin::getMultiThreaded(const std::string& command, const SettingsNode& rootSettings, const Options& options) noexcept {
         static const string singleThreadedKey("single-threaded");
 
         if(options.getSingleThreaded()) {
-            return TaskCollection();
+            return false;
         }
 
         const SettingsNode settings = getContainingSettings(command, rootSettings, singleThreadedKey); 
         if(settings.contains(singleThreadedKey)) {
             TaskCollection commandArguments = settings[singleThreadedKey].toStringCollection();
             if(commandArguments.size() > 0 && commandArguments[0] == "yes") {
-                return TaskCollection();
+                return false;
             }
         }
-        return TaskCollection({"--jobs", "8"});
+        return true;
     }
 
     TaskCollection BuildPlugin::getBuildDir(const Command& command, const SettingsNode& rootSettings, const CompilerDescriptionElement& compiler) noexcept {

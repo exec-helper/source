@@ -18,12 +18,13 @@ namespace execHelper {
 namespace execHelper {
     namespace plugins {
         class BuildPlugin : public Plugin {
+            public:
+                static core::TaskCollection getCommandLine(const core::Command& command, const config::SettingsNode& settings, const core::CompilerDescriptionElement& compiler) noexcept;
+                static bool getMultiThreaded(const core::Command& command, const config::SettingsNode& settings, const core::Options& options) noexcept;
+                static core::TaskCollection getBuildDir(const core::Command& command, const config::SettingsNode& settings, const core::CompilerDescriptionElement& compiler) noexcept;
+
             protected:
                 BuildPlugin() {}
-
-                static core::TaskCollection getCommandLine(const core::Command& command, const config::SettingsNode& settings, const core::CompilerDescriptionElement& compiler) noexcept;
-                static core::TaskCollection getMultiThreaded(const core::Command& command, const config::SettingsNode& settings, const core::Options& options) noexcept;
-                static core::TaskCollection getBuildDir(const core::Command& command, const config::SettingsNode& settings, const core::CompilerDescriptionElement& compiler) noexcept;
         };
     }
 }

@@ -3,6 +3,10 @@ UNITTESTS=build/gcc/debug/test/core/core-unittest build/gcc/debug/test/yaml/yaml
 build:
 	scons compiler=gcc -j8 mode=debug
 
+make clean:
+	scons --clean compiler=gcc mode=debug -j8
+	rm *.exec-helper
+
 test:: build
 	$(foreach test,$(UNITTESTS),$(test) || exit 1;)
 
