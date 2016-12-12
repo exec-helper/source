@@ -75,6 +75,7 @@ namespace execHelper { namespace core {
         m_help(false),
         m_verbose(false),
         m_singleThreaded(false),
+        m_target(new TargetDescription({"all"}, {"all"})),
         m_compiler(new CompilerDescription({Compiler("gcc"), Compiler("clang")}, {Mode("debug"), Mode("release")}, {Architecture("x64")}, {Distribution("arch-linux")}))
     {
         if(! m_executor) {
@@ -132,16 +133,15 @@ namespace execHelper { namespace core {
             m_commands = optionsMap["command"].as<CommandCollection>();
         }
 
-        TargetDescription::TargetCollection targets = {"all"};
         if(optionsMap.count("target")) {
-            targets = optionsMap["target"].as<TargetDescription::TargetCollection>();
+            TargetDescription::TargetCollection targets = optionsMap["target"].as<TargetDescription::TargetCollection>();
+            m_target.reset(new TargetDescription(targets, m_target->getRunTargets()));
         }
 
-        TargetDescription::RunTargetCollection runTargets = {"all"};
         if(optionsMap.count("run-target")) {
-            runTargets = optionsMap["run-target"].as<TargetDescription::RunTargetCollection>();
+            TargetDescription::RunTargetCollection runTargets = optionsMap["run-target"].as<TargetDescription::RunTargetCollection>();
+            m_target.reset(new TargetDescription(m_target->getTargets(), runTargets));
         }
-        m_target.reset(new TargetDescription(targets, runTargets));
 
         if(optionsMap.count("compiler")) {
             CompilerDescription::CompilerCollection compilers = CompilerDescription::convertToCompilerCollection(optionsMap["compiler"].as<CompilerDescription::CompilerNames>());
@@ -173,6 +173,16 @@ namespace execHelper { namespace core {
         if(! yaml.getTree({}, m_settings)) {
             LOG("Could not get settings tree");
             return false;
+        }
+
+        if(m_settings.contains("default-targets")) {
+            TargetDescription::TargetCollection targets = m_settings["default-targets"].toStringCollection();
+            m_target.reset(new TargetDescription(targets, m_target->getRunTargets()));
+        }
+
+        if(m_settings.contains("default-run-targets")) {
+            TargetDescription::RunTargetCollection runTargets = m_settings["default-run-targets"].toStringCollection();
+            m_target.reset(new TargetDescription(m_target->getTargets(), runTargets));
         }
 
         if(m_settings.contains("default-compilers")) {
