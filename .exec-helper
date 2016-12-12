@@ -1,12 +1,16 @@
 commands:
     - build
     - clean
+    - analyze
 
 build:
     - scons
 
 clean:
     - scons
+
+analyze:
+    - cppcheck
 
 default-compilers:
     - gcc
@@ -31,3 +35,9 @@ scons:
             - --clean
             - compiler={COMPILER}
             - mode={MODE}
+
+cppcheck:
+    src-dir: src
+    command-line:
+        - --std=c++11
+        - --error-exitcode=1

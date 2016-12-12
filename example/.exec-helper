@@ -1,7 +1,7 @@
 commands:
     - build
     - clean
-    - distclean
+    - analyze
 
 build:
     - scons
@@ -9,13 +9,26 @@ build:
 clean:
     - scons
 
-distclean:
-    - scons
+analyze:
+    - cppcheck
 
 scons:
     patterns:
         - COMPILER
         - MODE
     build-dir: build/{COMPILER}/{MODE}
-    single-threaded: yes
+    single-threaded: no
     command-line: compiler={COMPILER} mode={MODE}
+    clean:
+        command-line: 
+            - --clean
+            - compiler={COMPILER}
+            - mode={MODE}
+
+cppcheck:
+    src-dir: src
+    command-line:
+        - --std=c++11
+        - --error-exitcode=1
+    enable-checks:
+        - all

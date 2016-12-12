@@ -32,14 +32,6 @@ namespace {
                 return !(*this == other);
             }
 
-            Object1 getObject1() const noexcept {
-                return m_object1;
-            }
-
-            Object2 getObject2() const noexcept {
-                return m_object2;
-            }
-
         private:
             const Object1 m_object1;
             const Object2 m_object2;

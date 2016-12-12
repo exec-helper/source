@@ -8,6 +8,7 @@ namespace execHelper {
     namespace core {
         class TargetDescription;
         class CompilerDescription;
+        class AnalyzeDescription;
         class ExecutorInterface;
     }
 
@@ -31,6 +32,7 @@ namespace execHelper {
                 virtual const CommandCollection& getCommands() const noexcept = 0;
                 virtual const TargetDescription& getTarget() const noexcept = 0;
                 virtual const CompilerDescription& getCompiler() const noexcept = 0;
+                virtual const AnalyzeDescription& getAnalyzeMethods() const noexcept = 0;
                 virtual const config::SettingsNode& getSettings(const std::string& key) const noexcept = 0;
                 virtual bool containsHelp() const noexcept = 0;
 

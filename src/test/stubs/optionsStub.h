@@ -6,6 +6,7 @@
 #include "core/options.h"
 #include "core/targetDescription.h"
 #include "core/compilerDescription.h"
+#include "core/analyzeDescription.h"
 #include "config/settingsNode.h"
 
 namespace execHelper {
@@ -17,7 +18,8 @@ namespace execHelper {
                     m_verbosity(false),
                     m_singleThreaded(false),
                     m_targets({}, {}),
-                    m_compilers(core::CompilerDescription::CompilerCollection({}), {}, {}, {})
+                    m_compilers(core::CompilerDescription::CompilerCollection({}), {}, {}, {}),
+                    m_analyze({})
                 {
                     ;
                 }
@@ -50,6 +52,10 @@ namespace execHelper {
                     return m_compilers;
                 }
 
+                virtual const core::AnalyzeDescription& getAnalyzeMethods() const noexcept override {
+                    return m_analyze;
+                }
+
                 virtual const config::SettingsNode& getSettings(const std::string& key) const noexcept override {
                     return m_settings[key];
                 }
@@ -71,6 +77,7 @@ namespace execHelper {
                 core::CommandCollection m_commands;
                 core::TargetDescription m_targets;
                 core::CompilerDescription m_compilers;
+                core::AnalyzeDescription m_analyze;
                 config::SettingsNode m_settings;
                 bool m_containsHelp;
                 core::ExecutorInterface* m_executor;

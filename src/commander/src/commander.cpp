@@ -11,6 +11,7 @@
 #include "plugins/scons.h"
 #include "plugins/make.h"
 #include "plugins/bootstrap.h"
+#include "plugins/cppcheck.h"
 
 using std::cout;
 using std::endl;
@@ -39,6 +40,8 @@ namespace execHelper { namespace commander {
             return make_shared<plugins::Make>(); 
         } else if(pluginName == "bootstrap") {
             return make_shared<plugins::Bootstrap>(); 
+        } else if(pluginName == "cppcheck") {
+            return make_shared<plugins::Cppcheck>();
         }
         user_feedback("'" << pluginName << "' not registered");
         return shared_ptr<Plugin>();

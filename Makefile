@@ -21,9 +21,12 @@ coverage:
 	rm -rf test_coverage
 	genhtml -o test_coverage -t "exec-helper test coverage" --num-spaces 4 libexechelper_test.info
 
+cppcheck:
+	build/gcc/release/bin/exec-helper analyze
+
 check-memory:
 	$(foreach test,$(UNITTESTS), valgrind --tool=memcheck $(test) || exit 1;)
 
-check: build test coverage check-memory
+check: build test coverage check-memory cppcheck
 
 .PHONY: build coverage check-memory test check

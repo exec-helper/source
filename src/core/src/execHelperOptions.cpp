@@ -28,6 +28,7 @@ using boost::program_options::positional_options_description;
 using execHelper::core::CommandCollection;
 using execHelper::core::TargetDescription;
 using execHelper::core::CompilerDescription;
+using execHelper::core::AnalyzeDescription;
 
 using execHelper::config::SettingsNode;
 
@@ -47,6 +48,7 @@ namespace {
             ("mode,m", value<CompilerDescription::ModeNames>()->multitoken(), "Set modes")
             ("architecture,a", value<CompilerDescription::ArchitectureNames>()->multitoken(), "Set architecture")
             ("distribution,d", value<CompilerDescription::DistributionNames>()->multitoken(), "Set distribution")
+            ("analyze,y", value<AnalyzeDescription::AnalyzeCollection>()->multitoken(), "Set analyze methods")
             ("settings-file,s", value<string>(), "Set settings file")
             ("single-threaded,u", "Set multithreaded")
         ;
@@ -105,6 +107,11 @@ namespace execHelper { namespace core {
         return *m_target;
     }
 
+    const AnalyzeDescription& ExecHelperOptions::getAnalyzeMethods() const noexcept {
+        assert(m_analyze);
+        return *m_analyze;
+    }
+
     string ExecHelperOptions::getSettingsFile(int argc, char** argv) const noexcept {
         variables_map optionsMap = getOptionsMap(argc, argv);
         if(optionsMap.count("settings-file")) {
@@ -161,6 +168,11 @@ namespace execHelper { namespace core {
         if(optionsMap.count("distribution")) {
             CompilerDescription::DistributionCollection distributions = CompilerDescription::convertToDistributionCollection(optionsMap["distribution"].as<CompilerDescription::DistributionNames>());
             m_compiler.reset(new CompilerDescription(m_compiler->getCompilers(), m_compiler->getModes(), m_compiler->getArchitectures(), distributions));
+        }
+
+        if(optionsMap.count("analyze")) {
+            AnalyzeDescription::AnalyzeCollection analyzeMethods = optionsMap["analyze"].as<AnalyzeDescription::AnalyzeCollection>();
+            m_analyze.reset(new AnalyzeDescription(analyzeMethods));
         }
 
         return true;

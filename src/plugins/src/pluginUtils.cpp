@@ -23,14 +23,19 @@ namespace execHelper { namespace plugins {
         return rootSettings;
     }
 
-    TaskCollection getCommandLine(const Command& command, const SettingsNode& rootSettings, const CompilerDescriptionElement& compiler) noexcept {
+    TaskCollection getCommandLine(const Command& command, const SettingsNode& rootSettings) noexcept {
         static const string commandLineKey("command-line");
         const SettingsNode settings = getContainingSettings(command, rootSettings, commandLineKey); 
         if(! settings.contains(commandLineKey)) {
             return TaskCollection();
         }
 
-        TaskCollection commandArguments = settings[commandLineKey].toStringCollection();
+        return settings[commandLineKey].toStringCollection();
+    }
+
+
+    TaskCollection getCommandLine(const Command& command, const SettingsNode& rootSettings, const CompilerDescriptionElement& compiler) noexcept {
+        TaskCollection commandArguments = getCommandLine(command, rootSettings);
         const SettingsNode patternSettings = getContainingSettings(command, rootSettings, getPatternsKey()); 
         Patterns patterns = patternSettings[getPatternsKey()].toStringCollection();
         for(auto& argument : commandArguments) {
