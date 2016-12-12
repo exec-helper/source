@@ -24,6 +24,7 @@ namespace execHelper {
                 static bool getMultiThreaded(const core::Command& command, const config::SettingsNode& settings, const core::Options& options) noexcept;
                 static core::TaskCollection getBuildDir(const core::Command& command, const config::SettingsNode& settings, const core::CompilerDescriptionElement& compiler) noexcept;
                 static core::TaskCollection getBuildDir(const core::Command& command, const config::SettingsNode& settings, const core::TargetDescriptionElement& target, const core::CompilerDescriptionElement& compiler) noexcept;
+                static core::TaskCollection getTarget(const core::Command& command, const config::SettingsNode& settings, const core::TargetDescriptionElement& target) noexcept;
 
             protected:
                 BuildPlugin() {}

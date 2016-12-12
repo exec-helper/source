@@ -40,9 +40,7 @@ namespace execHelper { namespace plugins {
 
                 string targetName = target.getTarget();
                 string runTargetName = target.getRunTarget();
-                if(runTargetName != "all") {
-                    newTask.append(runTargetName);
-                }
+                newTask.append(getTarget(command, settings, target));
                 registerTask(newTask, options);
             }
         }
