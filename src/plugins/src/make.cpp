@@ -33,15 +33,15 @@ namespace execHelper { namespace plugins {
                     newTask.append(TaskCollection({"--jobs", "8"}));
                 }
                 newTask.append(getCommandLine(command, settings, compiler));
-                TaskCollection buildTarget = getBuildDir(command, settings, compiler);
+                TaskCollection buildTarget = getBuildDir(command, settings, target, compiler);
                 if(!buildTarget.empty()) {
                     newTask.append("--directory=" + buildTarget[0]);
                 }
 
                 string targetName = target.getTarget();
                 string runTargetName = target.getRunTarget();
-                if(targetName != "all") {
-                    newTask.append(targetName + runTargetName);
+                if(runTargetName != "all") {
+                    newTask.append(runTargetName);
                 }
                 registerTask(newTask, options);
             }

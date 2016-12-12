@@ -3,7 +3,7 @@
 #include <regex>
 
 #include "options.h"
-
+#include "targetDescription.h"
 #include "compilerDescription.h"
 
 using std::string;
@@ -18,6 +18,18 @@ namespace {
 namespace execHelper { namespace core {
     string replacePatterns(const string& subject, const string& pattern, const string& replacement) noexcept {
         return regex_replace(subject, regex(PATTERN_PREFIX + pattern + PATTERN_POSTFIX), replacement);
+    }
+
+    string replacePatterns(const string& subject, const Patterns& patterns, const TargetDescriptionElement& target) noexcept {
+        string result(subject);
+        for(const auto& pattern : patterns) {
+            if(pattern == "TARGET") {
+                result = replacePatterns(result, pattern, target.getTarget());  
+            } else if(pattern == "RUNTARGET") {
+                result = replacePatterns(result, pattern, target.getRunTarget());  
+            }
+        }
+        return result;
     }
 
     string replacePatterns(const string& subject, const Patterns& patterns, const CompilerDescriptionElement& compiler) noexcept {
