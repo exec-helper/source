@@ -19,6 +19,7 @@ using std::ofstream;
 
 using execHelper::core::test::ExecutorStub;
 using execHelper::core::Task;
+using execHelper::core::TargetDescription;
 using execHelper::core::TaskCollection;
 using execHelper::core::CommandCollection;
 
@@ -31,6 +32,7 @@ namespace {
     void setupBasicOptions(OptionsStub& options) {
         addSettings(options.m_settings, "commands", {analyzeCommand});
         addSettings(options.m_settings, analyzeCommand, {cppcheckCommand});
+        options.m_targets = TargetDescription({"all"}, {"all"});
     }
 }
 

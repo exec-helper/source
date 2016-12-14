@@ -7,6 +7,8 @@
 #include "config/settingsNode.h"
 #include "core/task.h"
 #include "core/patterns.h"
+#include "core/execHelperOptions.h"
+#include "core/targetDescription.h"
 
 #include "pluginUtils.h"
 
@@ -18,6 +20,8 @@ using execHelper::core::Options;
 using execHelper::core::TaskCollection;
 using execHelper::core::Patterns;
 using execHelper::core::Command;
+using execHelper::core::ExecHelperOptions;
+using execHelper::core::TargetDescriptionElement;
 using execHelper::config::SettingsNode;
 
 namespace {
@@ -30,23 +34,36 @@ namespace execHelper { namespace plugins {
         const SettingsNode& rootSettings = options.getSettings(cppcheckKey);  
         task.append(cppcheckCommand);
         task.append(getEnabledChecks(command, rootSettings));
-        task.append(getCommandLine(command, rootSettings));
 
-        task.append(getSourceDir(command, rootSettings));
-        registerTask(task, options);
+        for(const auto& target : options.getTarget()) {
+            Task cppcheckTargetTask = task;
+            cppcheckTargetTask.append(getCommandLine(command, rootSettings, target));
+            cppcheckTargetTask.append(getSourceDir(command, rootSettings, target));
+            registerTask(cppcheckTargetTask, options);
+        }
         return true;
     }
 
-    TaskCollection Cppcheck::getSourceDir(const Command& command, const SettingsNode& rootSettings) noexcept {
+    TaskCollection Cppcheck::getSourceDir(const Command& command, const SettingsNode& rootSettings, const TargetDescriptionElement& target) noexcept {
         static const string sourceDirKey("src-dir");
+        static const string targetDirKey("target-path");
 
-        TaskCollection result;
-        const SettingsNode settings = getContainingSettings(command, rootSettings, sourceDirKey); 
-        if(! settings.contains(sourceDirKey)) {
-            result.push_back(".");
-            return result;
+        string sourceDir;
+        const SettingsNode sourceSettings = getContainingSettings(command, rootSettings, sourceDirKey); 
+        if(! sourceSettings.contains(sourceDirKey)) {
+            sourceDir += ".";
+        } else {
+            TaskCollection sourceDirSettings = sourceSettings[sourceDirKey].toStringCollection();
+            sourceDir += sourceDirSettings.back();
         }
-        return settings[sourceDirKey].toStringCollection();
+        if(target.getTarget() != "all") {
+            const SettingsNode targetSettings = getContainingSettings(command, rootSettings, targetDirKey); 
+
+            const SettingsNode patternSettings = getContainingSettings(command, rootSettings, getPatternsKey()); 
+            Patterns patterns = patternSettings[getPatternsKey()].toStringCollection();
+            sourceDir += "/" + replacePatterns(targetSettings[targetDirKey].toStringCollection().back(), patterns, target);
+        }
+        return TaskCollection({sourceDir});
     }
 
     TaskCollection Cppcheck::getEnabledChecks(const Command& command, const SettingsNode& rootSettings) noexcept {

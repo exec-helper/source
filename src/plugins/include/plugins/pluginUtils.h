@@ -11,6 +11,7 @@ namespace execHelper {
         struct SettingsNode;
     }
     namespace core {
+        class TargetDescriptionElement;
         class CompilerDescriptionElement;
     }
 }
@@ -20,6 +21,7 @@ namespace execHelper {
         const std::string& getPatternsKey() noexcept;
         const config::SettingsNode& getContainingSettings(const std::string& command, const config::SettingsNode& rootSettings, const std::string& key) noexcept;
         core::TaskCollection getCommandLine(const core::Command& command, const config::SettingsNode& settings) noexcept;
+        core::TaskCollection getCommandLine(const core::Command& command, const config::SettingsNode& rootSettings, const core::TargetDescriptionElement& target) noexcept;
         core::TaskCollection getCommandLine(const core::Command& command, const config::SettingsNode& settings, const core::CompilerDescriptionElement& compiler) noexcept;
     }
 }

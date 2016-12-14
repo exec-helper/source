@@ -2,12 +2,14 @@
 
 #include "config/settingsNode.h"
 #include "core/patterns.h"
+#include "core/targetDescription.h"
 
 using std::string;
 using execHelper::config::SettingsNode;
 using execHelper::core::Command;
 using execHelper::core::TaskCollection;
 using execHelper::core::CompilerDescriptionElement;
+using execHelper::core::TargetDescriptionElement;
 using execHelper::core::Patterns;
 
 namespace execHelper { namespace plugins {
@@ -33,6 +35,15 @@ namespace execHelper { namespace plugins {
         return settings[commandLineKey].toStringCollection();
     }
 
+    TaskCollection getCommandLine(const Command& command, const SettingsNode& rootSettings, const TargetDescriptionElement& target) noexcept {
+        TaskCollection commandArguments = getCommandLine(command, rootSettings);
+        const SettingsNode patternSettings = getContainingSettings(command, rootSettings, getPatternsKey()); 
+        Patterns patterns = patternSettings[getPatternsKey()].toStringCollection();
+        for(auto& argument : commandArguments) {
+            argument = replacePatterns(argument, patterns, target);
+        }
+        return commandArguments;
+    }
 
     TaskCollection getCommandLine(const Command& command, const SettingsNode& rootSettings, const CompilerDescriptionElement& compiler) noexcept {
         TaskCollection commandArguments = getCommandLine(command, rootSettings);

@@ -20,6 +20,12 @@ default-modes:
     - debug
     - release
 
+default-targets:
+    -''
+
+default-run-targets:
+    -*
+
 scons:
     patterns:
         - COMPILER
