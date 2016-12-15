@@ -21,10 +21,10 @@ default-modes:
     - release
 
 default-targets:
-    -''
+    - ''
 
 default-run-targets:
-    -*
+    - "*"
 
 scons:
     patterns:
@@ -41,6 +41,7 @@ scons:
             - --clean
             - compiler={COMPILER}
             - mode={MODE}
+    target: "{TARGET}-{RUNTARGET}"
 
 cppcheck:
     src-dir: src

@@ -7,8 +7,8 @@ make clean:
 	scons --clean compiler=gcc mode=debug -j8
 	rm *.exec-helper
 
-release:
-	scons compiler=gcc -j8 mode=release
+app:
+	scons compiler=gcc -j8 mode=release exec-helper
 
 test:: build
 	$(foreach test,$(UNITTESTS),$(test) || exit 1;)
