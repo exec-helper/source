@@ -3,8 +3,9 @@ opts = Variables()
 
 import setupTools
 
+# Note: CC will take the CC variable in the environment, cc will take the cc program in the path
 opts.Add(EnumVariable('compiler', 'Set toolchain', 'gcc',
-                    allowed_values=('gcc', 'clang', 'cc'),
+                    allowed_values=('gcc', 'clang', 'cc', 'envcc'),
                     map={},
                     ignorecase=2))
 

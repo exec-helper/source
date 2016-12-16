@@ -32,24 +32,6 @@ class ClangStaticAnalyzer(Clang):
 
     @staticmethod
     def setupToolChain(env):
+        Clang.setupToolChain(env, "")
         env['CXX'] = os.environ['CXX']
         env["ENV"].update(x for x in os.environ.items() if x[0].startswith("CCC_"))
-
-        env['CPPPATH'] = []
-        env['CPPFLAGS'] = []
-        env['CXXFLAGS'] = []
-        env['LDFLAGS'] = []
-        env['CFLAGS'] = []
-        env['LINKFLAGS'] = []
-
-    @staticmethod
-    def disableWarningAsError(env):
-        env['CC'] = '/usr/bin/cc'
-        env['CXX'] = '/usr/bin/c++'
-
-    def enableWarningAsError(self, env):
-        env['CC'] = os.environ['CC']
-        env['CXX'] = os.environ['CXX']
-
-        # TODO replace this by a super() call that actually works
-        env['CPPFLAGS'].append('-Werror')
