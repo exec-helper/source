@@ -3,9 +3,12 @@
 
 #include "executorInterface.h"
 
+#include <functional>
+
+#include "shell.h"
+
 namespace execHelper {
     namespace core {
-        class Shell;
         class Task;
     }
 }
@@ -14,12 +17,15 @@ namespace execHelper {
     namespace core {
         class ImmediateExecutor : public ExecutorInterface {
             public:
-                ImmediateExecutor(Shell& shell) noexcept;
+                typedef std::function<void(Shell::ShellReturnCode)> Callback;
 
-                virtual bool execute(const Task& task) noexcept;
+                ImmediateExecutor(Shell& shell, Callback& callback) noexcept;
+
+                virtual bool execute(const Task& task) noexcept override;
 
             private:
                 Shell& m_shell;
+                Callback& m_callback;
         };
     }
 }

@@ -12,6 +12,7 @@ using std::string;
 using std::ifstream;
 using execHelper::core::ExecHelperOptions;
 using execHelper::core::PosixShell;
+using execHelper::core::Shell;
 using execHelper::core::ImmediateExecutor;
 using execHelper::commander::Commander;
 
@@ -50,13 +51,21 @@ int execHelperMain(int argc, char** argv) {
     }
 
     PosixShell shell;
-    ImmediateExecutor executor(shell);
+    execHelper::core::ImmediateExecutor::Callback callback = 
+                 [](Shell::ShellReturnCode /*returnCode*/) { 
+                    user_feedback_error("Error executing commands");
+                    exit(EXIT_FAILURE);
+                 };
+    ImmediateExecutor executor(shell, callback);
     options.setExecutor(&executor);
 
     Commander commander(options);
-    commander.run();
-
-    return EXIT_SUCCESS;
+    if(commander.run()) {
+        return EXIT_SUCCESS;
+    } else {
+        user_feedback_error("Error executing commands");
+        return EXIT_FAILURE;
+    }
 }
 
 int main(int argc, char** argv) {

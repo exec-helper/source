@@ -7,6 +7,13 @@
 
 using std::string;
 
+using execHelper::core::ImmediateExecutor;
+using execHelper::core::Shell;
+
+namespace {
+    ImmediateExecutor::Callback IGNORE_CALLBACK = [](Shell::ShellReturnCode) {};
+}
+
 namespace execHelper { namespace core {
     namespace test {
         SCENARIO("Test the execution of the immediateExecutor", "[ExecutorInterface][ImmediateExecutor]") {
@@ -20,7 +27,7 @@ namespace execHelper { namespace core {
 
                 ShellStub::TaskQueue actualTasks = {task1, task2, task3};
                 ShellStub shell;
-                ImmediateExecutor executor(shell);
+                ImmediateExecutor executor(shell, IGNORE_CALLBACK);
 
                 WHEN("We schedule each task and run the executor") {
                     executor.execute(task1);

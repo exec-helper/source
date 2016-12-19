@@ -8,15 +8,22 @@
 #include "task.h"
 
 namespace execHelper { namespace core {
-    ImmediateExecutor::ImmediateExecutor(Shell& shell) noexcept :
+    ImmediateExecutor::ImmediateExecutor(Shell& shell, Callback& callback) noexcept :
         ExecutorInterface(),
-        m_shell(shell)    
+        m_shell(shell),
+        m_callback(callback)
     {
         ;
     }
 
     bool ImmediateExecutor::execute(const Task& task) noexcept {
         user_feedback_info("Executing " << task.toString());
-        return m_shell.isExecutedSuccessfully(m_shell.execute(task));
+        Shell::ShellReturnCode returnCode = m_shell.execute(task);
+        if(! m_shell.isExecutedSuccessfully(returnCode)) {
+            m_callback(returnCode);
+            return false;
+        }
+        return true;
+
     }
 } }
