@@ -17,9 +17,11 @@ namespace execHelper {
     namespace core {
         class ExecHelperOptions : public Options {
             public:
-                ExecHelperOptions();
-                std::string getSettingsFile(int argc, char** argv) const noexcept;
-                virtual bool parse(int argc, char** argv) override;
+                ExecHelperOptions() noexcept;
+                ExecHelperOptions(const ExecHelperOptions& other) noexcept;
+
+                std::string getSettingsFile(int argc, const char* const * argv) const noexcept;
+                virtual bool parse(int argc, const char* const * argv) override;
                 virtual bool parseSettingsFile(const std::string& file) noexcept override;
 
                 virtual bool getVerbosity() const noexcept override;
@@ -29,8 +31,10 @@ namespace execHelper {
                 virtual const CompilerDescription& getCompiler() const noexcept override;
                 virtual const AnalyzeDescription& getAnalyzeMethods() const noexcept override;
                 virtual const config::SettingsNode& getSettings() const noexcept override;
+                virtual config::SettingsNode& getSettings(const std::string& key) noexcept override;
                 virtual const config::SettingsNode& getSettings(const std::string& key) const noexcept override;
                 virtual bool containsHelp() const noexcept override;
+                virtual std::shared_ptr<Options> clone() const noexcept override;
 
                 void printHelp() const noexcept;
 
@@ -47,7 +51,7 @@ namespace execHelper {
                 std::unique_ptr<AnalyzeDescription> m_analyze;
                 config::SettingsNode m_settings;
 
-                static ExecutorInterface* m_executor;       // Non-owning pointer
+                ExecutorInterface* m_executor;       // Non-owning pointer
         };
     }
 }

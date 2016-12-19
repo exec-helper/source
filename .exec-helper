@@ -16,6 +16,7 @@ rebuild:
 
 analyze:
     - cppcheck
+    - clang-static-analyzer
 
 default-compilers:
     - gcc
@@ -26,10 +27,10 @@ default-modes:
     - release
 
 default-targets:
-    - ''
+    - all
 
 default-run-targets:
-    - "*"
+    - ""
 
 scons:
     patterns:
@@ -49,7 +50,18 @@ scons:
     target: "{TARGET}-{RUNTARGET}"
 
 cppcheck:
+    patterns:
+        - TARGET
+        - RUNTARGET
     src-dir: src
+    target-path: "{TARGET}{RUNTARGET}.cpp"
     command-line:
         - --std=c++11
         - --error-exitcode=1
+    enable-checks:
+        - all
+
+clang-static-analyzer:
+    build-command: build
+    clean-command: clean
+    compiler: envcc

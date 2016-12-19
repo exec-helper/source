@@ -24,7 +24,7 @@ namespace execHelper {
                     ;
                 }
 
-                virtual bool parse(int /*argc*/, char** /*argv*/) override {
+                virtual bool parse(int /*argc*/, const char* const * /*argv*/) override {
                     assert(false);  //  This function is currently not supported
                 }
 
@@ -60,7 +60,17 @@ namespace execHelper {
                     return m_settings;
                 }
 
+                virtual config::SettingsNode& getSettings(const std::string& key) noexcept override {
+                    if(m_settings.contains(key)) {
+                        return m_settings[key];
+                    }
+                    return m_settings;
+                }
+
                 virtual const config::SettingsNode& getSettings(const std::string& key) const noexcept override {
+                    if(m_settings.contains(key)) {
+                        return m_settings[key];
+                    }
                     return m_settings[key];
                 }
 
@@ -74,6 +84,10 @@ namespace execHelper {
 
                 virtual core::ExecutorInterface* getExecutor() const noexcept override {
                     return m_executor;
+                }
+  
+                virtual std::shared_ptr<Options> clone() const noexcept override {
+                    return std::make_shared<OptionsStub>(*this);
                 }
 
                 bool m_verbosity;

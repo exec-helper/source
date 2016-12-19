@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 
 namespace execHelper {
     namespace core {
@@ -24,7 +25,7 @@ namespace execHelper {
 
         class Options {
             public:
-                virtual bool parse(int argc, char** argv) = 0;
+                virtual bool parse(int argc, const char* const * argv) = 0;
                 virtual bool parseSettingsFile(const std::string& file) noexcept = 0;
 
                 virtual bool getVerbosity() const noexcept = 0;
@@ -34,8 +35,10 @@ namespace execHelper {
                 virtual const CompilerDescription& getCompiler() const noexcept = 0;
                 virtual const AnalyzeDescription& getAnalyzeMethods() const noexcept = 0;
                 virtual const config::SettingsNode& getSettings() const noexcept = 0;
+                virtual config::SettingsNode& getSettings(const std::string& key) noexcept = 0;
                 virtual const config::SettingsNode& getSettings(const std::string& key) const noexcept = 0;
                 virtual bool containsHelp() const noexcept = 0;
+                virtual std::shared_ptr<Options> clone() const noexcept = 0;
 
                 virtual void setExecutor(ExecutorInterface* const executor) noexcept = 0;
                 virtual ExecutorInterface* getExecutor() const noexcept = 0;

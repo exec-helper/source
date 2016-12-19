@@ -12,7 +12,6 @@ using std::cout;
 using std::endl;
 using std::string;
 using std::shared_ptr;
-using std::make_shared;
 
 using execHelper::core::Options;
 using execHelper::core::Task;

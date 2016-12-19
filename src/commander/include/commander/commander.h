@@ -21,11 +21,9 @@ namespace execHelper {
                 Commander(const core::Options& options);
 
                 bool run() noexcept;
-
+                
             private:
                 bool executePlugin(const std::string& pluginName, const std::string& command, const core::Options& options) noexcept;
-
-                static std::shared_ptr<plugins::Plugin> getPlugin(const std::string& pluginName) noexcept;
 
                 const core::Options& m_options;
         };

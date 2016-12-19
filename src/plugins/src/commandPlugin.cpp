@@ -21,14 +21,7 @@ namespace execHelper { namespace plugins {
             user_feedback("Error: undefined command");
             return false;
         }        
-        SettingsNode executePluginSettings;
-        executePluginSettings.m_key = commandKey;
-
-        SettingsNode executeCommandSettings;
-        executeCommandSettings.m_key = command;
-        executePluginSettings.m_values.emplace_back(executeCommandSettings);
-
-        ExecutePlugin executePlugin(executePluginSettings);
+        ExecutePlugin executePlugin({command});
         return executePlugin.apply(command, task, options);
     }
 } }

@@ -24,7 +24,7 @@ libUsageRequirements = [
 ]
 
 libs = [
-    libUsageRequirements,
+    libUsageRequirements
 ]
 
 env_commander = env.Clone()

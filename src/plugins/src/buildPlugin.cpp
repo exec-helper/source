@@ -22,6 +22,11 @@ using execHelper::core::Patterns;
 using execHelper::core::replacePatterns;
 
 namespace execHelper { namespace plugins {
+    const std::string& BuildPlugin::getBuildDirKey() noexcept {
+        static const string buildDirKey("build-dir");
+        return buildDirKey;
+    }
+
     TaskCollection BuildPlugin::getCommandLine(const Command& command, const SettingsNode& rootSettings, const CompilerDescriptionElement& compiler) noexcept {
         return ::execHelper::plugins::getCommandLine(command, rootSettings, compiler);
     }
@@ -44,7 +49,7 @@ namespace execHelper { namespace plugins {
     }
 
     TaskCollection BuildPlugin::getBuildDir(const Command& command, const SettingsNode& rootSettings, const CompilerDescriptionElement& compiler) noexcept {
-        static const string buildDirKey("build-dir");
+        const string buildDirKey = getBuildDirKey();
 
         TaskCollection result;
         const SettingsNode settings = getContainingSettings(command, rootSettings, buildDirKey); 
@@ -62,7 +67,7 @@ namespace execHelper { namespace plugins {
     }
 
     TaskCollection BuildPlugin::getBuildDir(const Command& command, const SettingsNode& rootSettings, const TargetDescriptionElement& target, const CompilerDescriptionElement& compiler) noexcept {
-        static const string buildDirKey("build-dir");
+        const string buildDirKey = getBuildDirKey();
 
         TaskCollection result;
         const SettingsNode settings = getContainingSettings(command, rootSettings, buildDirKey); 

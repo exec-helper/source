@@ -16,6 +16,15 @@ rebuild:
 
 analyze:
     - cppcheck
+    - clang-static-analyzer
+
+default-compilers:
+    - gcc
+    - clang
+
+default-modes:
+    - debug
+    - release
 
 scons:
     patterns:
@@ -41,3 +50,9 @@ cppcheck:
         - --error-exitcode=1
     enable-checks:
         - all
+
+clang-static-analyzer:
+    build-command: build
+    clean-command: clean
+    compiler: envcc
+    build-dir: build/clang-static-analyzer

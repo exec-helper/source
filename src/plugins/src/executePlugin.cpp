@@ -11,8 +11,10 @@
 #include "plugins/make.h"
 #include "plugins/bootstrap.h"
 #include "plugins/cppcheck.h"
+#include "plugins/clangStaticAnalyzer.h"
 
 using std::string;
+using std::vector;
 using std::shared_ptr;
 using std::make_shared;
 
@@ -22,23 +24,23 @@ using execHelper::core::Task;
 using execHelper::core::Options;
 
 namespace execHelper { namespace plugins {
-    ExecutePlugin::ExecutePlugin(const SettingsNode& settings) :
-        m_settings(settings)
+    ExecutePlugin::ExecutePlugin(const vector<string>& commands) noexcept :
+        m_commands(commands)
     {
         ;
     }
 
     bool ExecutePlugin::apply(const Command& command, Task& task, const Options& options) const noexcept {
-        for(const auto& pluginName : m_settings.m_values) {
+        for(const auto& pluginName : m_commands) {
             Task newTask = task;
-            shared_ptr<Plugin> plugin = getPlugin(pluginName.m_key);
+            shared_ptr<Plugin> plugin = getPlugin(pluginName);
             Command commandToPass = command;
             if(!plugin) {
                 // Check if it exists as an other target in the settings
-                if(options.getSettings(pluginName.m_key) != options.getSettings()) {
+                if(options.getSettings(pluginName) != options.getSettings()) {
                     // Then use executeplugin as the plugin 
-                    plugin = make_shared<ExecutePlugin>(options.getSettings(pluginName.m_key));
-                    commandToPass = pluginName.m_key;
+                    plugin = make_shared<ExecutePlugin>(options.getSettings(pluginName).toStringCollection());
+                    commandToPass = pluginName;
                 } else {
                     user_feedback("Could not find a command or plugin called " << pluginName);
                     return false;
@@ -62,6 +64,8 @@ namespace execHelper { namespace plugins {
             return make_shared<Bootstrap>(); 
         } else if(pluginName == "cppcheck") {
             return make_shared<Cppcheck>();
+        } else if(pluginName == "clang-static-analyzer") {
+            return make_shared<ClangStaticAnalyzer>();
         }
         return shared_ptr<Plugin>();
     }

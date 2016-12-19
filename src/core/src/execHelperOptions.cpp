@@ -16,6 +16,8 @@ using std::cout;
 using std::endl;
 using std::string;
 using std::vector;
+using std::shared_ptr;
+using std::make_shared;
 
 using boost::program_options::options_description;
 using boost::program_options::variables_map;
@@ -55,7 +57,7 @@ namespace {
         return descriptions;
     }
 
-    variables_map getOptionsMap(int argc, char** argv) {
+    variables_map getOptionsMap(int argc, const char* const * argv) {
         const options_description optionDescriptions = getOptionDescriptions();
 
         // Assign positional arguments
@@ -71,18 +73,28 @@ namespace {
 }
 
 namespace execHelper { namespace core {
-    ExecutorInterface* ExecHelperOptions::m_executor(0);
-
-    ExecHelperOptions::ExecHelperOptions() :
+    ExecHelperOptions::ExecHelperOptions() noexcept :
         m_help(false),
         m_verbose(false),
         m_singleThreaded(false),
         m_target(new TargetDescription({"all"}, {"all"})),
-        m_compiler(new CompilerDescription({Compiler("gcc")}, {Mode("release")}, {Architecture("x64")}, {Distribution("arch-linux")}))
+        m_compiler(new CompilerDescription({Compiler("gcc")}, {Mode("release")}, {Architecture("x64")}, {Distribution("arch-linux")})),
+        m_analyze(new AnalyzeDescription({"cppcheck", "clang-static-analyzer"}))
     {
-        if(! m_executor) {
+        ;
+    }
 
-        }
+    ExecHelperOptions::ExecHelperOptions(const ExecHelperOptions& other) noexcept :
+        m_help(other.m_help), 
+        m_verbose(other.m_verbose),
+        m_singleThreaded(other.m_singleThreaded),
+        m_target(new TargetDescription(other.getTarget().getTargets(), other.getTarget().getRunTargets())),
+        m_compiler(new CompilerDescription(other.getCompiler().getCompilers(), other.getCompiler().getModes(), other.getCompiler().getArchitectures(), other.getCompiler().getDistributions())),
+        m_analyze(new AnalyzeDescription(other.getAnalyzeMethods())),
+        m_settings(other.m_settings),
+        m_executor(other.m_executor)
+    {
+        ;
     }
 
     bool ExecHelperOptions::getVerbosity() const noexcept {
@@ -112,7 +124,7 @@ namespace execHelper { namespace core {
         return *m_analyze;
     }
 
-    string ExecHelperOptions::getSettingsFile(int argc, char** argv) const noexcept {
+    string ExecHelperOptions::getSettingsFile(int argc, const char* const * argv) const noexcept {
         variables_map optionsMap = getOptionsMap(argc, argv);
         if(optionsMap.count("settings-file")) {
             return optionsMap["settings-file"].as<string>();
@@ -120,7 +132,7 @@ namespace execHelper { namespace core {
         return ".exec-helper";
     }
 
-    bool ExecHelperOptions::parse(int argc, char** argv) {
+    bool ExecHelperOptions::parse(int argc, const char* const * argv) {
         variables_map optionsMap = getOptionsMap(argc, argv);
         if(optionsMap.count("help")) {
             m_help = true;
@@ -227,12 +239,20 @@ namespace execHelper { namespace core {
         return m_settings;
     }
 
+    config::SettingsNode& ExecHelperOptions::getSettings(const std::string& key) noexcept {
+        if(m_settings.contains(key)) {
+            return m_settings[key]; 
+        }
+        return m_settings;
+    }
+
     const config::SettingsNode& ExecHelperOptions::getSettings(const std::string& key) const noexcept {
         if(m_settings.contains(key)) {
             return m_settings[key]; 
         }
         return m_settings;
     }
+
 
     void ExecHelperOptions::setExecutor(ExecutorInterface* const executor) noexcept {
         m_executor = executor;
@@ -244,5 +264,9 @@ namespace execHelper { namespace core {
 
     void ExecHelperOptions::printHelp() const noexcept {
         user_feedback(getOptionDescriptions());
+    }
+
+    shared_ptr<Options> ExecHelperOptions::clone() const noexcept {
+        return make_shared<ExecHelperOptions>(*this);
     }
 } }

@@ -2,6 +2,7 @@
 #define __PLUGIN_UTILS_H__
 
 #include <string>
+#include <memory>
 
 #include "core/options.h"
 #include "core/task.h"
@@ -14,6 +15,9 @@ namespace execHelper {
         class TargetDescriptionElement;
         class CompilerDescriptionElement;
     }
+    namespace plugins {
+        class Plugin;
+    }
 }
 
 namespace execHelper {
@@ -23,6 +27,8 @@ namespace execHelper {
         core::TaskCollection getCommandLine(const core::Command& command, const config::SettingsNode& settings) noexcept;
         core::TaskCollection getCommandLine(const core::Command& command, const config::SettingsNode& rootSettings, const core::TargetDescriptionElement& target) noexcept;
         core::TaskCollection getCommandLine(const core::Command& command, const config::SettingsNode& settings, const core::CompilerDescriptionElement& compiler) noexcept;
+
+        std::shared_ptr<Plugin> getPlugin(const std::string& pluginName) noexcept;
     }
 }
 
