@@ -28,6 +28,7 @@ namespace execHelper {
                 virtual const TargetDescription& getTarget() const noexcept override;
                 virtual const CompilerDescription& getCompiler() const noexcept override;
                 virtual const AnalyzeDescription& getAnalyzeMethods() const noexcept override;
+                virtual const config::SettingsNode& getSettings() const noexcept override;
                 virtual const config::SettingsNode& getSettings(const std::string& key) const noexcept override;
                 virtual bool containsHelp() const noexcept override;
 

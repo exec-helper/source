@@ -56,6 +56,10 @@ namespace execHelper {
                     return m_analyze;
                 }
 
+                virtual const config::SettingsNode& getSettings() const noexcept override {
+                    return m_settings;
+                }
+
                 virtual const config::SettingsNode& getSettings(const std::string& key) const noexcept override {
                     return m_settings[key];
                 }

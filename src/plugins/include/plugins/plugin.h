@@ -6,7 +6,7 @@
 namespace execHelper {
     namespace core {
         class Task;
-        class ExecutorInterface;
+        class Options;
     }
 }
 

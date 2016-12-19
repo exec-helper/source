@@ -78,7 +78,7 @@ namespace execHelper { namespace core {
         m_verbose(false),
         m_singleThreaded(false),
         m_target(new TargetDescription({"all"}, {"all"})),
-        m_compiler(new CompilerDescription({Compiler("gcc"), Compiler("clang")}, {Mode("debug"), Mode("release")}, {Architecture("x64")}, {Distribution("arch-linux")}))
+        m_compiler(new CompilerDescription({Compiler("gcc")}, {Mode("release")}, {Architecture("x64")}, {Distribution("arch-linux")}))
     {
         if(! m_executor) {
 
@@ -221,6 +221,10 @@ namespace execHelper { namespace core {
 
     bool ExecHelperOptions::containsHelp() const noexcept {
         return m_help;
+    }
+
+    const config::SettingsNode& ExecHelperOptions::getSettings() const noexcept {
+        return m_settings;
     }
 
     const config::SettingsNode& ExecHelperOptions::getSettings(const std::string& key) const noexcept {

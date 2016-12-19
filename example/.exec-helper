@@ -1,6 +1,7 @@
 commands:
     - build
     - clean
+    - rebuild
     - analyze
 
 build:
@@ -8,6 +9,10 @@ build:
 
 clean:
     - scons
+
+rebuild:
+    - clean
+    - build
 
 analyze:
     - cppcheck
