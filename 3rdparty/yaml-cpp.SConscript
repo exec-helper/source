@@ -12,10 +12,13 @@ target = yaml_env.Command('yaml-cpp/yaml.h', 'yaml-cpp.commit', 'git submodule i
 
 # Build the library
 cmake_options = [
-    '-DYAML_CPP_BUILD_CONTRIB=NO',
-    '-DYAML_CPP_BUILD_TOOLS=NO',
-    '-DBUILD_SHARED_LIBS=NO',
-    '-DMSVC_SHARED_RT=NO'
+    '-DYAML_CPP_BUILD_CONTRIB=OFF',
+    '-DYAML_CPP_BUILD_TOOLS=OFF',
+    '-DBUILD_SHARED_LIBS=OFF',
+    '-DMSVC_SHARED_RT=OFF',
+    '-DMSVC_STHREADED_RT=OFF',
+    '-Dgtest_force_shared_crt=OFF',
+    '-DAPPLE_UNIVERSAL_BIN=OFF'
 ]
 
 sources = [

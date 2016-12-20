@@ -8,7 +8,7 @@ make clean:
 	rm *.exec-helper
 
 app:
-	scons compiler=gcc -j8 mode=release exec-helper
+	scons compiler=cc -j8 mode=release exec-helper
 
 test:: build
 	$(foreach test,$(UNITTESTS),$(test) || exit 1;)
