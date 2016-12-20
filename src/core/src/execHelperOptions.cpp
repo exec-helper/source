@@ -38,38 +38,50 @@ using execHelper::yaml::Yaml;
 using execHelper::yaml::YamlFile;
 
 namespace {
-    options_description getOptionDescriptions() {
-        options_description descriptions("Allowed options");
-        descriptions.add_options()
-            ("help,h", "Produce help message")
-            ("verbose,v", "Set verbosity")
-            ("command,z", value<CommandCollection>()->multitoken(), "Set commands")
-            ("target,t", value<TargetDescription::TargetCollection>()->multitoken(), "Set targets")
-            ("run-target,r", value<TargetDescription::RunTargetCollection>()->multitoken(), "Set run targets")
-            ("compiler,c", value<CompilerDescription::CompilerNames>()->multitoken(), "Set compilers")
-            ("mode,m", value<CompilerDescription::ModeNames>()->multitoken(), "Set modes")
-            ("architecture,a", value<CompilerDescription::ArchitectureNames>()->multitoken(), "Set architecture")
-            ("distribution,d", value<CompilerDescription::DistributionNames>()->multitoken(), "Set distribution")
-            ("analyze,y", value<AnalyzeDescription::AnalyzeCollection>()->multitoken(), "Set analyze methods")
-            ("settings-file,s", value<string>(), "Set settings file")
-            ("single-threaded,u", "Set multithreaded")
-        ;
-        return descriptions;
-    }
+    class OptionDescriptions {
+        public:
+            OptionDescriptions() {
+                // Add the default options
+                m_optionDescription.add_options()
+                    ("help,h", "Produce help message")
+                    ("verbose,v", "Set verbosity")
+                    ("command,z", value<CommandCollection>()->multitoken(), "Set commands")
+                    ("target,t", value<TargetDescription::TargetCollection>()->multitoken(), "Set targets")
+                    ("run-target,r", value<TargetDescription::RunTargetCollection>()->multitoken(), "Set run targets")
+                    ("compiler,c", value<CompilerDescription::CompilerNames>()->multitoken(), "Set compilers")
+                    ("mode,m", value<CompilerDescription::ModeNames>()->multitoken(), "Set modes")
+                    ("architecture,a", value<CompilerDescription::ArchitectureNames>()->multitoken(), "Set architecture")
+                    ("distribution,d", value<CompilerDescription::DistributionNames>()->multitoken(), "Set distribution")
+                    ("analyze,y", value<AnalyzeDescription::AnalyzeCollection>()->multitoken(), "Set analyze methods")
+                    ("settings-file,s", value<string>(), "Set settings file")
+                    ("single-threaded,u", "Set multithreaded")
+                ;
+            }
 
-    variables_map getOptionsMap(int argc, const char* const * argv) {
-        const options_description optionDescriptions = getOptionDescriptions();
+            options_description getOptionDescriptions() {
+                return m_optionDescription;
+            }
 
-        // Assign positional arguments
-        positional_options_description positionalOptionsDesc; 
-        positionalOptionsDesc.add("command", -1);
-       
-        variables_map optionsMap;
-        store(command_line_parser(argc, argv).options(optionDescriptions).positional(positionalOptionsDesc).run(), optionsMap);
-        notify(optionsMap);    
-        return optionsMap;
-    }
-    
+            variables_map getOptionsMap(int argc, const char* const* argv, bool allowUnregistered = false) {
+                // Assign positional arguments
+                positional_options_description positionalOptionsDesc;
+                positionalOptionsDesc.add("command", -1);
+
+                variables_map optionsMap;
+                if(! allowUnregistered) {
+                    store(command_line_parser(argc, argv).options(m_optionDescription).positional(positionalOptionsDesc).run(), optionsMap);
+                } else {
+                    store(command_line_parser(argc, argv).options(m_optionDescription).positional(positionalOptionsDesc).options(m_optionDescription).allow_unregistered().run(), optionsMap);
+                }
+                notify(optionsMap);
+                return optionsMap;
+            }
+
+        private:
+            options_description m_optionDescription;
+    };
+
+    OptionDescriptions optionsDescriptions;
 }
 
 namespace execHelper { namespace core {
@@ -125,7 +137,7 @@ namespace execHelper { namespace core {
     }
 
     string ExecHelperOptions::getSettingsFile(int argc, const char* const * argv) const noexcept {
-        variables_map optionsMap = getOptionsMap(argc, argv);
+        variables_map optionsMap = optionsDescriptions.getOptionsMap(argc, argv, true);
         if(optionsMap.count("settings-file")) {
             return optionsMap["settings-file"].as<string>();
         }
@@ -133,7 +145,7 @@ namespace execHelper { namespace core {
     }
 
     bool ExecHelperOptions::parse(int argc, const char* const * argv) {
-        variables_map optionsMap = getOptionsMap(argc, argv);
+        variables_map optionsMap = optionsDescriptions.getOptionsMap(argc, argv);
         if(optionsMap.count("help")) {
             m_help = true;
             return true;
@@ -263,7 +275,7 @@ namespace execHelper { namespace core {
     }
 
     void ExecHelperOptions::printHelp() const noexcept {
-        user_feedback(getOptionDescriptions());
+        user_feedback(optionsDescriptions.getOptionDescriptions());
     }
 
     shared_ptr<Options> ExecHelperOptions::clone() const noexcept {
