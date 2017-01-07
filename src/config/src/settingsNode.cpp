@@ -5,12 +5,12 @@ namespace execHelper { namespace config {
         ;
     }
 
-    SettingsNode& SettingsNode::operator[](const std::string& requestedKey) noexcept {
+    SettingsNode& SettingsNode::operator[](const SettingsKey& requestedKey) noexcept {
         const SettingsNode& node = *this;
         return const_cast<SettingsNode&>(node[requestedKey]);
     }
 
-    const SettingsNode& SettingsNode::operator[](const std::string& requestedKey) const noexcept {
+    const SettingsNode& SettingsNode::operator[](const SettingsKey& requestedKey) const noexcept {
         for(const SettingsNode& value : m_values) {
             if(requestedKey == value.m_key) {
                 return value;
@@ -19,12 +19,12 @@ namespace execHelper { namespace config {
         return *this;
     }
 
-    bool SettingsNode::contains(const std::string& findKey) const noexcept {
+    bool SettingsNode::contains(const SettingsKey& findKey) const noexcept {
         return this->operator[](findKey) != *this;
     }
 
-    std::vector<std::string> SettingsNode::toStringCollection() const noexcept {
-        std::vector<std::string> results;
+    SettingsNode::SettingsCollection SettingsNode::toStringCollection() const noexcept {
+        std::vector<SettingsKey> results;
 
         results.reserve(m_values.size());
         for(const auto& value : m_values) {

@@ -15,19 +15,26 @@
 #include "core/compiler.h"
 #include "core/mode.h"
 #include "core/compilerDescription.h"
+#include "core/patternsHandler.h"
+
+#include "optionsStub.h"
 
 using std::string;
 using std::vector;
 using std::unique_ptr;
 using std::ofstream;
 
+using execHelper::config::SettingsNode;
 using execHelper::core::CompilerDescription;
 using execHelper::core::Compiler;
 using execHelper::core::Mode;
+using execHelper::core::PatternsHandler;
 
+using execHelper::test::OptionsStub;
 using execHelper::test::utils::MainVariables;
 using execHelper::test::utils::appendVectors;
 using execHelper::test::utils::convertToConfig;
+using execHelper::test::utils::addSettings;
 
 namespace execHelper { namespace core {
     namespace test {
@@ -77,37 +84,15 @@ namespace execHelper { namespace core {
         }
 
         SCENARIO("Test options with specific arguments", "[execHelperOptions]") {
-            GIVEN("The command line we want to pass using long options") {
+            GIVEN("The command line we want to pass using the default long options") {
                 const CommandCollection actualCommands = {"init", "build", "run"};
                 const TargetDescription actualTarget({"target1", "target2"}, {"runTarget1", "runTarget2"});
-                const CompilerDescription::CompilerNames actualCompilerNames({"clang", "gcc"});
-                const CompilerDescription::ModeNames actualModes({"debug", "release"});
-                const CompilerDescription::ArchitectureNames actualArchitectures({"i386", "armel"});
-                const CompilerDescription::DistributionNames actualDistributions({"wheezy", "jessie"});
-                const CompilerDescription actualCompilers(actualCompilerNames, actualModes, actualArchitectures, actualDistributions);
 
                 vector<string> arguments;
                 arguments.emplace_back("UNITTEST");
                 appendVectors(arguments, actualCommands);
                 arguments.emplace_back("--verbose");
                 arguments.emplace_back("--single-threaded");
-                arguments.emplace_back("--target");
-                appendVectors(arguments, actualTarget.getTargets());
-                arguments.emplace_back("--run-target");
-                appendVectors(arguments, actualTarget.getRunTargets());
-                arguments.emplace_back("--compiler");
-                appendVectors(arguments, actualCompilerNames);
-                arguments.emplace_back("--mode");
-                appendVectors(arguments, actualModes);
-                arguments.emplace_back("--architecture");
-                appendVectors(arguments, actualArchitectures);
-                arguments.emplace_back("--distribution");
-                appendVectors(arguments, actualDistributions);
-
-                for(const auto& argument : arguments) {
-                    std::cout << argument << " ";
-                }
-                std::cout << std::endl;
 
                 WHEN("We convert it and parse the variables") {
                     MainVariables mainVariables(arguments);
@@ -118,8 +103,71 @@ namespace execHelper { namespace core {
                         REQUIRE(options.getVerbosity() == true);
                         REQUIRE(options.getSingleThreaded() == true);
                         REQUIRE(options.getCommands() == actualCommands);
-                        REQUIRE(options.getTarget() == actualTarget);
-                        REQUIRE(options.getCompiler() == actualCompilers);
+                    }
+                }
+            }
+
+            GIVEN("The command line we want to pass using the extra configured long options") {
+                const string settingsFile("test-settings-file.exec-helper");
+                const CommandCollection actualCommands = {"init", "build", "run"};
+                const TargetDescription actualTarget({"target1", "target2"}, {"runTarget1", "runTarget2"});
+
+                const string pattern1Key("PATTERN1");
+                const vector<string> pattern1Value({"test-pattern1A", "test-pattern1B"});
+                const string pattern2Key("PATTERN2");
+                const vector<string> pattern2Value({"test-pattern2"});
+                const string pattern3Key("PATTERN3");
+                const vector<string> pattern3Value({"test-pattern3", "pattern2B"});
+                const string pattern4Key("PATTERN4");
+                const vector<string> pattern4Value({"pattern4A", "pattern4B"});
+
+                const Pattern pattern1(pattern1Key, {"pattern1A", "pattern1B"}, 'a', "patternA");
+                const Pattern pattern2(pattern2Key, {"pattern2A", "pattern2B"}, 'b', "patternB");
+                const Pattern pattern3(pattern3Key, {"pattern3A", "pattern3B"}, 'c', "patternC");
+                const Pattern pattern4(pattern4Key, {"pattern4A", "pattern4B"}, 'd', "patternD");
+                const vector<Pattern> patterns = {pattern1, pattern2, pattern3, pattern4};
+                SettingsNode settings;
+                
+                ofstream file;
+                file.open(settingsFile, std::ios::out | std::ios::trunc);
+                file << convertToConfig(settings, patterns);
+                file.close();
+
+                vector<string> arguments;
+                arguments.emplace_back("UNITTEST");
+                appendVectors(arguments, actualCommands);
+                arguments.emplace_back("--verbose");
+                arguments.emplace_back("--single-threaded");
+                arguments.emplace_back("--patternA");
+                appendVectors(arguments, pattern1Value);
+                arguments.emplace_back("--patternB");
+                appendVectors(arguments, pattern2Value);
+                arguments.emplace_back("--patternC");
+                appendVectors(arguments, pattern3Value);
+                arguments.emplace_back("--patternD");
+                appendVectors(arguments, pattern4Value);
+
+                WHEN("We convert it and parse the variables") {
+                    MainVariables mainVariables(arguments);
+
+                    ExecHelperOptions options; 
+                    REQUIRE(options.parseSettingsFile(settingsFile));
+                    options.parse(mainVariables.argc, mainVariables.argv.get());
+
+                    THEN("It should be parsed properly") {
+                        REQUIRE(options.getVerbosity() == true);
+                        REQUIRE(options.getSingleThreaded() == true);
+                    }
+                    THEN("The patterns should contain the right values") {
+                        const PatternsHandler& handler = options.getPatternsHandler();
+                        REQUIRE(handler.contains(pattern1Key) == true);
+                        REQUIRE(handler.contains(pattern2Key) == true);
+                        REQUIRE(handler.contains(pattern3Key) == true);
+                        REQUIRE(handler.contains(pattern4Key) == true);
+                        REQUIRE(options.getValues(handler.getPattern(pattern1Key)) == pattern1Value);
+                        REQUIRE(options.getValues(handler.getPattern(pattern2Key)) == pattern2Value);
+                        REQUIRE(options.getValues(handler.getPattern(pattern3Key)) == pattern3Value);
+                        REQUIRE(options.getValues(handler.getPattern(pattern4Key)) == pattern4Value);
                     }
                 }
             }
@@ -127,29 +175,12 @@ namespace execHelper { namespace core {
             GIVEN("The command line we want to pass using long options") {
                 const CommandCollection actualCommands = {"init", "build", "run"};
                 const TargetDescription actualTarget({"target1", "target2"}, {"runTarget1", "runTarget2"});
-                const CompilerDescription::CompilerNames actualCompilerNames({"clang", "gcc"});
-                const CompilerDescription::ModeNames actualModes({"debug", "release"});
-                const CompilerDescription::ArchitectureNames actualArchitectures({"i386", "armel"});
-                const CompilerDescription::DistributionNames actualDistributions({"wheezy", "jessie"});
-                const CompilerDescription actualCompilers(actualCompilerNames, actualModes, actualArchitectures, actualDistributions);
 
                 vector<string> arguments;
                 arguments.emplace_back("UNITTEST");
                 appendVectors(arguments, actualCommands);
                 arguments.emplace_back("-v");
                 arguments.emplace_back("-u");
-                arguments.emplace_back("-t");
-                appendVectors(arguments, actualTarget.getTargets());
-                arguments.emplace_back("-r");
-                appendVectors(arguments, actualTarget.getRunTargets());
-                arguments.emplace_back("-c");
-                appendVectors(arguments, actualCompilerNames);
-                arguments.emplace_back("-m");
-                appendVectors(arguments, actualModes);
-                arguments.emplace_back("-a");
-                appendVectors(arguments, actualArchitectures);
-                arguments.emplace_back("-d");
-                appendVectors(arguments, actualDistributions);
 
                 WHEN("We convert it and parse the variables") {
                     MainVariables mainVariables(arguments);
@@ -160,8 +191,6 @@ namespace execHelper { namespace core {
                         REQUIRE(options.getVerbosity() == true);
                         REQUIRE(options.getSingleThreaded() == true);
                         REQUIRE(options.getCommands() == actualCommands);
-                        REQUIRE(options.getTarget() == actualTarget);
-                        REQUIRE(options.getCompiler() == actualCompilers);
                     }
                 }
             }
@@ -253,30 +282,32 @@ namespace execHelper { namespace core {
                     }
                 }
             }
-            GIVEN("A file containing specific default settings") {
+            GIVEN("A file containing specific default settings for patterns") {
                 const string settingsFile("test-settings-file.exec-helper");
-                const string commandsKey("commands");
+                const string commandKey("commands");
                 const string command1Key("command1");
-                const string defaultCompilerKey("default-compilers");
-                const string defaultModeKey("default-modes");
-                const string defaultArchitectureKey("default-architectures");
-                const string defaultDistributionKey("default-distributions");
+                const string pattern1Key("PATTERN1");
+                const string pattern2Key("PATTERN2");
+                const string pattern3Key("PATTERN3");
+                const string pattern4Key("PATTERN4");
 
-                const vector<string> commandsValues = {command1Key, "command2", "command3"};
+                const vector<string> commandValues = {command1Key, "command2", "command3"};
                 const vector<string> command1Values = {"command1a", "command1b"};
-                const vector<string> defaultCompiler = {"compiler1", "compiler2"};
-                const vector<string> defaultMode = {"mode1", "mode2"};
-                const vector<string> defaultArchitecture = {"architecture1", "architecture2"};
-                const vector<string> defaultDistribution = {"distribution1", "distribution2"};
+
+                const Pattern pattern1(pattern1Key, {"pattern1A", "pattern1B"}, 'a', "pattern1");
+                const Pattern pattern2(pattern2Key, {"pattern2A", "pattern2B"}, 'b', "pattern2");
+                const Pattern pattern3(pattern3Key, {"pattern3A", "pattern3B"}, 'c', "pattern3");
+                const Pattern pattern4(pattern4Key, {"pattern4A", "pattern4B"}, 'd', "pattern4");
+
+                const vector<Pattern> patterns = {pattern1, pattern2, pattern3, pattern4};
+
+                SettingsNode settings;
+                addSettings(settings, commandKey, commandValues);
+                addSettings(settings, command1Key, command1Values);
 
                 ofstream file;
                 file.open(settingsFile, std::ios::out | std::ios::trunc);
-                file << convertToConfig(commandsKey, commandsValues);
-                file << convertToConfig(command1Key, command1Values);
-                file << convertToConfig(defaultCompilerKey, defaultCompiler);
-                file << convertToConfig(defaultModeKey, defaultMode);
-                file << convertToConfig(defaultArchitectureKey, defaultArchitecture);
-                file << convertToConfig(defaultDistributionKey, defaultDistribution);
+                file << convertToConfig(settings, patterns);
                 file.close();
 
                 ExecHelperOptions options;
@@ -284,24 +315,19 @@ namespace execHelper { namespace core {
                 WHEN("We parse the settings file") {
                     REQUIRE(options.parseSettingsFile(settingsFile));
 
+                    const PatternsHandler& handler = options.getPatternsHandler();
+
                     THEN("We should get the default settings") {
-                        REQUIRE(options.getSettings(commandsKey).toStringCollection() == commandsValues);
-                        REQUIRE(options.getSettings(command1Key).toStringCollection() == command1Values);
-                        REQUIRE(options.getSettings(defaultCompilerKey).toStringCollection() == defaultCompiler);
-                        REQUIRE(options.getSettings(defaultModeKey).toStringCollection() == defaultMode);
-                        REQUIRE(options.getSettings(defaultArchitectureKey).toStringCollection() == defaultArchitecture);
-                        REQUIRE(options.getSettings(defaultDistributionKey).toStringCollection() == defaultDistribution);
+                        for(const auto& pattern : patterns) {
+                            REQUIRE(handler.getPattern(pattern.getKey()).getDefaultValues() == pattern.getDefaultValues());
+                        }
                     }
                     THEN("We should get the chosen default settings for their respective settings") {
-                        const CompilerDescription::CompilerCollection correctCompilers = CompilerDescription::convertToCompilerCollection(defaultCompiler);
-                        const CompilerDescription::ModeCollection correctModes = CompilerDescription::convertToModeCollection(defaultMode);
-                        const CompilerDescription::ArchitectureCollection correctArchitecturs = CompilerDescription::convertToArchitectureCollection(defaultArchitecture);
-                        const CompilerDescription::DistributionCollection correctDistributions = CompilerDescription::convertToDistributionCollection(defaultDistribution);
-
-                        REQUIRE(options.getCompiler().getCompilers() == correctCompilers);
-                        REQUIRE(options.getCompiler().getModes() == correctModes);
-                        REQUIRE(options.getCompiler().getArchitectures() == correctArchitecturs);
-                        REQUIRE(options.getCompiler().getDistributions() == correctDistributions);
+                        REQUIRE(options.getSettings(commandKey).toStringCollection() == commandValues);
+                        REQUIRE(options.getSettings(command1Key).toStringCollection() == command1Values);
+                        for(const auto& pattern : patterns) {
+                            REQUIRE(handler.getPattern(pattern.getKey()) == pattern);
+                        }
                     }
                 }
             }

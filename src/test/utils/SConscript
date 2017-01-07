@@ -15,6 +15,7 @@ includes = [
 ]
 
 dependencies = [
+    'core'
 ]
 
 libUsageRequirements = [ 

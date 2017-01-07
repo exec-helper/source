@@ -2,7 +2,6 @@
 
 #include <regex>
 
-#include "options.h"
 #include "targetDescription.h"
 #include "compilerDescription.h"
 
@@ -20,7 +19,7 @@ namespace execHelper { namespace core {
         return regex_replace(subject, regex(PATTERN_PREFIX + pattern + PATTERN_POSTFIX), replacement);
     }
 
-    string replacePatterns(const string& subject, const Patterns& patterns, const TargetDescriptionElement& target) noexcept {
+    string replacePatterns(const string& subject, const PatternKeys& patterns, const TargetDescriptionElement& target) noexcept {
         string result(subject);
         for(const auto& pattern : patterns) {
             if(pattern == "TARGET") {
@@ -32,7 +31,7 @@ namespace execHelper { namespace core {
         return result;
     }
 
-    string replacePatterns(const string& subject, const Patterns& patterns, const CompilerDescriptionElement& compiler) noexcept {
+    string replacePatterns(const string& subject, const PatternKeys& patterns, const CompilerDescriptionElement& compiler) noexcept {
         string result(subject);
         for(const auto& pattern : patterns) {
             if(pattern == "COMPILER") {

@@ -9,8 +9,7 @@
 #include "executorStub.h"
 #include "optionsStub.h"
 #include "core/execHelperOptions.h"
-#include "core/compilerDescription.h"
-#include "core/targetDescription.h"
+#include "core/pattern.h"
 
 #include "utils/utils.h"
 
@@ -25,37 +24,41 @@ using execHelper::core::ExecutorInterface;
 using execHelper::core::test::ExecutorStub;
 using execHelper::core::Task;
 using execHelper::core::TaskCollection;
-using execHelper::core::CompilerDescription;
-using execHelper::core::TargetDescription;
 using execHelper::core::CommandCollection;
+using execHelper::core::Pattern;
+using execHelper::core::PatternKeys;
 
 using execHelper::test::utils::addSettings;
 using execHelper::test::OptionsStub;
+using execHelper::test::utils::TargetUtil;
+using execHelper::test::utils::CompilerUtil;
+using execHelper::test::utils::getAllPatterns;
+using execHelper::test::utils::getAllPatternKeys;
+using execHelper::test::utils::Patterns;
 
 namespace {
-    void setupBasicOptions(OptionsStub& options, const TargetDescription& targets, const CompilerDescription& compilers) {
+    void setupBasicOptions(OptionsStub& options, const Patterns& patterns) {
         addSettings(options.m_settings, "commands", {"build", "clean"});
         addSettings(options.m_settings, "build", {"scons"});
         addSettings(options.m_settings, "clean", {"scons"});
-        addSettings(options.m_settings, "scons", {"single-threaded"});
+        addSettings(options.m_settings["scons"], "clean", "command-line");
+        addSettings(options.m_settings["scons"]["clean"], "command-line", {"--clean"});
 
-        options.m_targets = targets;
-        options.m_compilers = compilers;
+        for(const auto& pattern : patterns) {
+            options.m_patternsHandler->addPattern(pattern);
+        }
     }
+
 }
 
 namespace execHelper { namespace plugins { namespace test {
     SCENARIO("Testing the default options of the scons plugin", "[plugins][scons]") {
         GIVEN("A scons plugin object and basic settings") {
-            const TargetDescription actualTargets({"target1", "target2"}, {"runTarget1", "runTarget2"});
-            const CompilerDescription actualCompilers(CompilerDescription::CompilerNames({"compiler1", "compiler2"}), 
-                                                                                         {"mode1", "mode2"}, 
-                                                                                         {"architectureA", "architectureB"},
-                                                                                         {"distribution1", "distribution2"}
-                                                                                        );
-
             OptionsStub options;
-            setupBasicOptions(options, actualTargets, actualCompilers);
+            TargetUtil targetUtil;
+            CompilerUtil compilerUtil;
+            Patterns patterns = getAllPatterns({targetUtil, compilerUtil});
+            setupBasicOptions(options, patterns);
             ExecutorStub executor;
             options.setExecutor(&executor);
 
@@ -67,19 +70,9 @@ namespace execHelper { namespace plugins { namespace test {
 
                 THEN("We should get the expected task") {
                     ExecutorStub::TaskQueue expectedQueue;
-                    for(const auto& compiler : actualCompilers) {
-                        string compilerName = compiler.getCompiler().getName();
-                        string modeName = compiler.getMode().getMode();
-                        string architectureName = compiler.getArchitecture().getArchitecture();
-
-                        for(const auto& target : actualTargets) {
-                            string targetName = target.getTarget();
-                            string runTargetName = target.getRunTarget();
-                            Task expectedTask;
-                            expectedTask.append(TaskCollection({"scons", "--jobs", "8", targetName + runTargetName}));
-                            expectedQueue.push_back(expectedTask);
-                        }
-                    }
+                    Task expectedTask;
+                    expectedTask.append(TaskCollection({"scons", "--jobs", "8"}));
+                    expectedQueue.push_back(expectedTask);
 
                     REQUIRE(expectedQueue == executor.getExecutedTasks());
                 }
@@ -89,19 +82,15 @@ namespace execHelper { namespace plugins { namespace test {
 
     SCENARIO("Testing the all target of the scons plugin", "[plugins][scons]") {
         GIVEN("A scons plugin object, basic settings and the all target") {
-            const TargetDescription actualTargets({"all"}, {""});
-            const CompilerDescription actualCompilers(CompilerDescription::CompilerNames({"compiler1", "compiler2"}), 
-                                                                                         {"mode1", "mode2"}, 
-                                                                                         {"architectureA", "architectureB"},
-                                                                                         {"distribution1", "distribution2"}
-                                                                                        );
-
             OptionsStub options;
-            setupBasicOptions(options, actualTargets, actualCompilers);
+
+            TargetUtil targetUtil;
+            CompilerUtil compilerUtil;
+            Patterns patterns = getAllPatterns({targetUtil, compilerUtil});
+            setupBasicOptions(options, patterns);
+
             ExecutorStub executor;
             options.setExecutor(&executor);
-            addSettings(options.m_settings["scons"], "clean", "command-line");
-            addSettings(options.m_settings["scons"]["clean"], "command-line", {"--clean"});
 
             Scons plugin;
 
@@ -111,19 +100,9 @@ namespace execHelper { namespace plugins { namespace test {
 
                 THEN("We should get the expected task") {
                     ExecutorStub::TaskQueue expectedQueue;
-                    for(const auto& compiler : actualCompilers) {
-                        string compilerName = compiler.getCompiler().getName();
-                        string modeName = compiler.getMode().getMode();
-                        string architectureName = compiler.getArchitecture().getArchitecture();
-
-                        for(const auto& target : actualTargets) {
-                            string targetName = target.getTarget();
-                            string runTargetName = target.getRunTarget();
-                            Task expectedTask;
-                            expectedTask.append(TaskCollection({"scons", "--jobs", "8"}));
-                            expectedQueue.push_back(expectedTask);
-                        }
-                    }
+                    Task expectedTask;
+                    expectedTask.append(TaskCollection({"scons", "--jobs", "8"}));
+                    expectedQueue.push_back(expectedTask);
 
                     REQUIRE(expectedQueue == executor.getExecutedTasks());
                 }
@@ -134,19 +113,9 @@ namespace execHelper { namespace plugins { namespace test {
 
                 THEN("We should get the expected task") {
                     ExecutorStub::TaskQueue expectedQueue;
-                    for(const auto& compiler : options.getCompiler()) {
-                        string compilerName = compiler.getCompiler().getName();
-                        string modeName = compiler.getMode().getMode();
-                        string architectureName = compiler.getArchitecture().getArchitecture();
-
-                        for(const auto& target : options.getTarget()) {
-                            string targetName = target.getTarget();
-                            string runTargetName = target.getRunTarget();
-                            Task expectedTask;
-                            expectedTask.append(TaskCollection({"scons", "--jobs", "8", "--clean"}));
-                            expectedQueue.push_back(expectedTask);
-                        }
-                    }
+                    Task expectedTask;
+                    expectedTask.append(TaskCollection({"scons", "--jobs", "8", "--clean"}));
+                    expectedQueue.push_back(expectedTask);
 
                     REQUIRE(expectedQueue == executor.getExecutedTasks());
                 }
@@ -155,20 +124,12 @@ namespace execHelper { namespace plugins { namespace test {
     }
 
     SCENARIO("Testing the single-threaded option of the scons plugin", "[plugins][scons]") {
-        const TargetDescription actualTargets({"target1", "target2"}, {"runTarget1", "runTarget2"});
-        const CompilerDescription actualCompilers(CompilerDescription::CompilerNames({"compiler1", "compiler2"}), 
-                                                                                     {"mode1", "mode2"}, 
-                                                                                     {"architectureA", "architectureB"},
-                                                                                     {"distribution1", "distribution2"}
-                                                                                    );
-
         OptionsStub options;
-        setupBasicOptions(options, actualTargets, actualCompilers);
+        setupBasicOptions(options, {});
+
         ExecutorStub executor;
         options.setExecutor(&executor);
-        addSettings(options.m_settings["scons"], "clean", "command-line");
-        addSettings(options.m_settings["scons"]["clean"], "command-line", {"--clean"});
-            
+
         Scons plugin;
 
         GIVEN("A scons plugin object, basic settings and the single-threaded option") {
@@ -180,19 +141,9 @@ namespace execHelper { namespace plugins { namespace test {
 
                 THEN("We should get the expected task") {
                     ExecutorStub::TaskQueue expectedQueue;
-                    for(const auto& compiler : actualCompilers) {
-                        string compilerName = compiler.getCompiler().getName();
-                        string modeName = compiler.getMode().getMode();
-                        string architectureName = compiler.getArchitecture().getArchitecture();
-
-                        for(const auto& target : actualTargets) {
-                            string targetName = target.getTarget();
-                            string runTargetName = target.getRunTarget();
-                            Task expectedTask;
-                            expectedTask.append(TaskCollection({"scons", targetName + runTargetName}));
-                            expectedQueue.push_back(expectedTask);
-                        }
-                    }
+                    Task expectedTask;
+                    expectedTask.append(TaskCollection({"scons"}));
+                    expectedQueue.push_back(expectedTask);
 
                     REQUIRE(expectedQueue == executor.getExecutedTasks());
                 }
@@ -203,19 +154,9 @@ namespace execHelper { namespace plugins { namespace test {
 
                 THEN("We should get the expected task") {
                     ExecutorStub::TaskQueue expectedQueue;
-                    for(const auto& compiler : options.getCompiler()) {
-                        string compilerName = compiler.getCompiler().getName();
-                        string modeName = compiler.getMode().getMode();
-                        string architectureName = compiler.getArchitecture().getArchitecture();
-
-                        for(const auto& target : options.getTarget()) {
-                            string targetName = target.getTarget();
-                            string runTargetName = target.getRunTarget();
-                            Task expectedTask;
-                            expectedTask.append(TaskCollection({"scons", "--clean", targetName + runTargetName}));
-                            expectedQueue.push_back(expectedTask);
-                        }
-                    }
+                    Task expectedTask;
+                    expectedTask.append(TaskCollection({"scons", "--clean"}));
+                    expectedQueue.push_back(expectedTask);
 
                     REQUIRE(expectedQueue == executor.getExecutedTasks());
                 }
@@ -231,19 +172,9 @@ namespace execHelper { namespace plugins { namespace test {
 
                 THEN("We should get the expected task") {
                     ExecutorStub::TaskQueue expectedQueue;
-                    for(const auto& compiler : actualCompilers) {
-                        string compilerName = compiler.getCompiler().getName();
-                        string modeName = compiler.getMode().getMode();
-                        string architectureName = compiler.getArchitecture().getArchitecture();
-
-                        for(const auto& target : actualTargets) {
-                            string targetName = target.getTarget();
-                            string runTargetName = target.getRunTarget();
-                            Task expectedTask;
-                            expectedTask.append(TaskCollection({"scons", "--jobs", "8", targetName + runTargetName}));
-                            expectedQueue.push_back(expectedTask);
-                        }
-                    }
+                    Task expectedTask;
+                    expectedTask.append(TaskCollection({"scons", "--jobs", "8"}));
+                    expectedQueue.push_back(expectedTask);
 
                     REQUIRE(expectedQueue == executor.getExecutedTasks());
                 }
@@ -254,19 +185,9 @@ namespace execHelper { namespace plugins { namespace test {
 
                 THEN("We should get the expected task") {
                     ExecutorStub::TaskQueue expectedQueue;
-                    for(const auto& compiler : options.getCompiler()) {
-                        string compilerName = compiler.getCompiler().getName();
-                        string modeName = compiler.getMode().getMode();
-                        string architectureName = compiler.getArchitecture().getArchitecture();
-
-                        for(const auto& target : options.getTarget()) {
-                            string targetName = target.getTarget();
-                            string runTargetName = target.getRunTarget();
-                            Task expectedTask;
-                            expectedTask.append(TaskCollection({"scons", "--jobs", "8", "--clean", targetName + runTargetName}));
-                            expectedQueue.push_back(expectedTask);
-                        }
-                    }
+                    Task expectedTask;
+                    expectedTask.append(TaskCollection({"scons", "--jobs", "8", "--clean"}));
+                    expectedQueue.push_back(expectedTask);
 
                     REQUIRE(expectedQueue == executor.getExecutedTasks());
                 }
@@ -276,22 +197,19 @@ namespace execHelper { namespace plugins { namespace test {
 
     SCENARIO("Testing the command line option of the scons plugin", "[plugins][scons]") {
         GIVEN("A scons plugin object, basic settings and the multi-threaded option") {
-            const TargetDescription actualTargets({"target1", "target2"}, {"runTarget1", "runTarget2"});
-            const CompilerDescription actualCompilers(CompilerDescription::CompilerNames({"compiler1", "compiler2"}), 
-                                                                                         {"mode1", "mode2"}, 
-                                                                                         {"architectureA", "architectureB"},
-                                                                                         {"distribution1", "distribution2"}
-                                                                                        );
-
             OptionsStub options;
-            setupBasicOptions(options, actualTargets, actualCompilers);
+
+            TargetUtil targetUtil;
+            CompilerUtil compilerUtil;
+            Patterns patterns = getAllPatterns({targetUtil, compilerUtil});
+            PatternKeys patternKeys = getAllPatternKeys({targetUtil, compilerUtil});
+            setupBasicOptions(options, patterns);
+
             ExecutorStub executor;
             options.setExecutor(&executor);
-            addSettings(options.m_settings["scons"], "clean", "command-line");
-            addSettings(options.m_settings["scons"]["clean"], "command-line", {"--clean"});
 
-            vector<string> commandLine({"compiler={COMPILER}", "mode={MODE}", "{ARCHITECTURE}", "hello{DISTRIBUTION}world"});
-            addSettings(options.m_settings["scons"], "patterns", {"COMPILER", "MODE", "ARCHITECTURE", "DISTRIBUTION"});
+            vector<string> commandLine({"compiler={" + compilerUtil.compiler.getKey() + "}", "mode={" + compilerUtil.mode.getKey() + "}", "{" + compilerUtil.architecture.getKey() + "}", "hello{" + compilerUtil.distribution.getKey() + "}world", "{" + targetUtil.target.getKey() + "}{" + targetUtil.runTarget.getKey() + "}"});
+            addSettings(options.m_settings["scons"], "patterns", patternKeys);
             addSettings(options.m_settings["scons"], "command-line", commandLine);
             addSettings(options.m_settings["scons"]["clean"], "command-line", commandLine);
         
@@ -303,15 +221,15 @@ namespace execHelper { namespace plugins { namespace test {
 
                 THEN("We should get the expected task") {
                     ExecutorStub::TaskQueue expectedQueue;
-                    for(const auto& compiler : actualCompilers) {
-                        string compilerName = compiler.getCompiler().getName();
-                        string modeName = compiler.getMode().getMode();
-                        string architectureName = compiler.getArchitecture().getArchitecture();
-                        string distributionName = compiler.getDistribution().getDistribution();
+                    for(const auto& pattern : compilerUtil.makePatternPermutator()) {
+                        string compilerName = pattern.at(compilerUtil.compiler.getKey());
+                        string modeName = pattern.at(compilerUtil.mode.getKey());
+                        string architectureName = pattern.at(compilerUtil.architecture.getKey());
+                        string distributionName = pattern.at(compilerUtil.distribution.getKey());
 
-                        for(const auto& target : actualTargets) {
-                            string targetName = target.getTarget();
-                            string runTargetName = target.getRunTarget();
+                        for(const auto& target : targetUtil.makePatternPermutator()) {
+                            string targetName = target.at(targetUtil.target.getKey());
+                            string runTargetName = target.at(targetUtil.runTarget.getKey());
                             Task expectedTask;
                             expectedTask.append(TaskCollection({"scons", "--jobs", "8", "compiler=" + compilerName, "mode=" + modeName, architectureName, "hello" + distributionName + "world", targetName + runTargetName}));
                             expectedQueue.push_back(expectedTask);
@@ -327,15 +245,16 @@ namespace execHelper { namespace plugins { namespace test {
 
                 THEN("We should get the expected task") {
                     ExecutorStub::TaskQueue expectedQueue;
-                    for(const auto& compiler : options.getCompiler()) {
-                        string compilerName = compiler.getCompiler().getName();
-                        string modeName = compiler.getMode().getMode();
-                        string architectureName = compiler.getArchitecture().getArchitecture();
-                        string distributionName = compiler.getDistribution().getDistribution();
+                    for(const auto& pattern : compilerUtil.makePatternPermutator()) {
+                        string compilerName = pattern.at(compilerUtil.compiler.getKey());
+                        string modeName = pattern.at(compilerUtil.mode.getKey());
+                        string architectureName = pattern.at(compilerUtil.architecture.getKey());
+                        string distributionName = pattern.at(compilerUtil.distribution.getKey());
 
-                        for(const auto& target : options.getTarget()) {
-                            string targetName = target.getTarget();
-                            string runTargetName = target.getRunTarget();
+                        for(const auto& target : targetUtil.makePatternPermutator()) {
+                            string targetName = target.at(targetUtil.target.getKey());
+                            string runTargetName = target.at(targetUtil.runTarget.getKey());
+ 
                             Task expectedTask;
                             expectedTask.append(TaskCollection({"scons", "--jobs", "8", "--clean", "compiler=" + compilerName, "mode=" + modeName, architectureName, "hello" + distributionName + "world", targetName + runTargetName}));
                             expectedQueue.push_back(expectedTask);

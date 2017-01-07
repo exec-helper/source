@@ -3,8 +3,6 @@
 #include <string>
 
 #include "config/settingsNode.h"
-#include "core/targetDescription.h"
-#include "core/compilerDescription.h"
 #include "core/patterns.h"
 #include "core/options.h"
 
@@ -16,19 +14,13 @@ using execHelper::config::SettingsNode;
 using execHelper::core::Options;
 using execHelper::core::TaskCollection;
 using execHelper::core::Command;
-using execHelper::core::TargetDescriptionElement;
-using execHelper::core::CompilerDescriptionElement;
-using execHelper::core::Patterns;
 using execHelper::core::replacePatterns;
+using execHelper::core::PatternCombinations;
 
 namespace execHelper { namespace plugins {
     const std::string& BuildPlugin::getBuildDirKey() noexcept {
         static const string buildDirKey("build-dir");
         return buildDirKey;
-    }
-
-    TaskCollection BuildPlugin::getCommandLine(const Command& command, const SettingsNode& rootSettings, const CompilerDescriptionElement& compiler) noexcept {
-        return ::execHelper::plugins::getCommandLine(command, rootSettings, compiler);
     }
 
     bool BuildPlugin::getMultiThreaded(const std::string& command, const SettingsNode& rootSettings, const Options& options) noexcept {
@@ -48,7 +40,7 @@ namespace execHelper { namespace plugins {
         return true;
     }
 
-    TaskCollection BuildPlugin::getBuildDir(const Command& command, const SettingsNode& rootSettings, const CompilerDescriptionElement& compiler) noexcept {
+    TaskCollection BuildPlugin::getBuildDir(const Command& command, const SettingsNode& rootSettings, const PatternCombinations patternCombinations) noexcept {
         const string buildDirKey = getBuildDirKey();
 
         TaskCollection result;
@@ -57,54 +49,28 @@ namespace execHelper { namespace plugins {
             return result;
         }
         TaskCollection commandArguments = settings[buildDirKey].toStringCollection();
-        
-        const SettingsNode patternSettings = getContainingSettings(command, rootSettings, getPatternsKey()); 
-        Patterns patterns = patternSettings[getPatternsKey()].toStringCollection();
-        for(const auto& argument : commandArguments) {
-            result.push_back(replacePatterns(argument, patterns, compiler));
-        }
-        return result;
+        replacePatternCombinations(commandArguments, patternCombinations);
+        return commandArguments;
     }
 
-    TaskCollection BuildPlugin::getBuildDir(const Command& command, const SettingsNode& rootSettings, const TargetDescriptionElement& target, const CompilerDescriptionElement& compiler) noexcept {
-        const string buildDirKey = getBuildDirKey();
+    //TaskCollection BuildPlugin::getTarget(const Command& command, const SettingsNode& rootSettings, const TargetDescriptionElement& target) noexcept {
+        //static const string targetKey("target");
 
-        TaskCollection result;
-        const SettingsNode settings = getContainingSettings(command, rootSettings, buildDirKey); 
-        if(! settings.contains(buildDirKey)) {
-            return result;
-        }
-        TaskCollection commandArguments = settings[buildDirKey].toStringCollection();
-        
-        const SettingsNode patternSettings = getContainingSettings(command, rootSettings, getPatternsKey()); 
-        Patterns patterns = patternSettings[getPatternsKey()].toStringCollection();
-        for(const auto& argument : commandArguments) {
-            string replacedString(argument);
-            replacedString = replacePatterns(replacedString, patterns, target);
-            replacedString = replacePatterns(replacedString, patterns, compiler);
-            result.push_back(replacedString);
-        }
-        return result;
-    }
+        //TaskCollection result;
+        //const SettingsNode settings = getContainingSettings(command, rootSettings, targetKey); 
+        //if(! settings.contains(targetKey)) {
+            //return TaskCollection({target.getTarget() + target.getRunTarget()});
+        //}
+        //TaskCollection commandArguments = settings[targetKey].toStringCollection();
 
-    TaskCollection BuildPlugin::getTarget(const Command& command, const SettingsNode& rootSettings, const TargetDescriptionElement& target) noexcept {
-        static const string targetKey("target");
-
-        TaskCollection result;
-        const SettingsNode settings = getContainingSettings(command, rootSettings, targetKey); 
-        if(! settings.contains(targetKey)) {
-            return TaskCollection({target.getTarget() + target.getRunTarget()});
-        }
-        TaskCollection commandArguments = settings[targetKey].toStringCollection();
-
-        const SettingsNode patternSettings = getContainingSettings(command, rootSettings, getPatternsKey()); 
-        Patterns patterns = patternSettings[getPatternsKey()].toStringCollection();
-        for(const auto& argument : commandArguments) {
-            string replacedString(argument);
-            replacedString = replacePatterns(replacedString, patterns, target);
-            result.push_back(replacedString);
-        }
-        return result;
-    }
+        //const SettingsNode patternSettings = getContainingSettings(command, rootSettings, getPatternsKey()); 
+        //Patterns patterns = patternSettings[getPatternsKey()].toStringCollection();
+        //for(const auto& argument : commandArguments) {
+            //string replacedString(argument);
+            //replacedString = replacePatterns(replacedString, patterns, target);
+            //result.push_back(replacedString);
+        //}
+        //return result;
+    //}
 } }
 

@@ -7,6 +7,7 @@
 #include "core/targetDescription.h"
 #include "core/compilerDescription.h"
 #include "core/analyzeDescription.h"
+#include "core/patternsHandler.h"
 #include "config/settingsNode.h"
 
 namespace execHelper {
@@ -19,7 +20,8 @@ namespace execHelper {
                     m_singleThreaded(false),
                     m_targets({}, {}),
                     m_compilers(core::CompilerDescription::CompilerCollection({}), {}, {}, {}),
-                    m_analyze({})
+                    m_analyze({}),
+                    m_patternsHandler(new core::PatternsHandler())
                 {
                     ;
                 }
@@ -90,6 +92,36 @@ namespace execHelper {
                     return std::make_shared<OptionsStub>(*this);
                 }
 
+                virtual bool contains(const std::string& /*longOptions*/) const noexcept override {
+                    return false;
+                }
+
+                virtual std::vector<std::string> getLongOption(const std::string& /*longOptions*/) const noexcept override {
+                    return std::vector<std::string>();
+                }
+
+                virtual const core::PatternsHandler& getPatternsHandler() const noexcept override {
+                    return *m_patternsHandler;
+                }
+
+                virtual core::PatternValues getValues(const core::Pattern& pattern) const noexcept override {
+                    return pattern.getDefaultValues();
+                }
+
+                virtual core::PatternPermutator makePatternPermutator(const core::PatternKeys& patterns) const noexcept override {
+                    std::map<core::PatternKey, core::PatternValues> patternValuesMatrix;
+                    if(patterns.empty()) {
+                        // Invent a map so we permutate at least once
+                        patternValuesMatrix["NOKEY"] = {"NOKEY"};
+                    } else {
+                        for(const auto& patternKey : patterns) {
+                            core::Pattern pattern = m_patternsHandler->getPattern(patternKey);
+                            patternValuesMatrix.emplace(pattern.getKey(), getValues(pattern));
+                        }
+                    }
+                    return core::PatternPermutator(patternValuesMatrix);
+                }
+
                 bool m_verbosity;
                 bool m_singleThreaded;
                 core::CommandCollection m_commands;
@@ -99,6 +131,7 @@ namespace execHelper {
                 config::SettingsNode m_settings;
                 bool m_containsHelp;
                 core::ExecutorInterface* m_executor;
+                std::shared_ptr<core::PatternsHandler> m_patternsHandler;
         };
     }
 }

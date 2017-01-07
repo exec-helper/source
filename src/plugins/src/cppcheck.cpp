@@ -18,10 +18,11 @@ using std::vector;
 using execHelper::core::Task;
 using execHelper::core::Options;
 using execHelper::core::TaskCollection;
-using execHelper::core::Patterns;
+using execHelper::core::PatternKeys;
 using execHelper::core::Command;
 using execHelper::core::ExecHelperOptions;
 using execHelper::core::TargetDescriptionElement;
+using execHelper::core::PatternCombinations;
 using execHelper::config::SettingsNode;
 
 namespace {
@@ -35,16 +36,21 @@ namespace execHelper { namespace plugins {
         task.append(cppcheckCommand);
         task.append(getEnabledChecks(command, rootSettings));
 
-        for(const auto& target : options.getTarget()) {
+        const SettingsNode patternSettings = getContainingSettings(command, rootSettings, getPatternsKey()); 
+        PatternKeys patterns; 
+        if(patternSettings.contains(getPatternsKey())) {
+            patterns = patternSettings[getPatternsKey()].toStringCollection();
+        }
+        for(const auto& combination : options.makePatternPermutator(patterns)) {
             Task cppcheckTargetTask = task;
-            cppcheckTargetTask.append(getCommandLine(command, rootSettings, target));
-            cppcheckTargetTask.append(getSourceDir(command, rootSettings, target));
+            cppcheckTargetTask.append(getCommandLine(command, rootSettings, combination));
+            cppcheckTargetTask.append(getSourceDir(command, rootSettings, combination));
             registerTask(cppcheckTargetTask, options);
         }
         return true;
     }
 
-    TaskCollection Cppcheck::getSourceDir(const Command& command, const SettingsNode& rootSettings, const TargetDescriptionElement& target) noexcept {
+    TaskCollection Cppcheck::getSourceDir(const Command& command, const SettingsNode& rootSettings, const PatternCombinations& /*patternCombinations*/) noexcept {
         static const string sourceDirKey("src-dir");
         static const string targetDirKey("target-path");
 
@@ -56,13 +62,12 @@ namespace execHelper { namespace plugins {
             TaskCollection sourceDirSettings = sourceSettings[sourceDirKey].toStringCollection();
             sourceDir += sourceDirSettings.back();
         }
-        if(target.getTarget() != "all") {
-            const SettingsNode targetSettings = getContainingSettings(command, rootSettings, targetDirKey); 
-
-            const SettingsNode patternSettings = getContainingSettings(command, rootSettings, getPatternsKey()); 
-            Patterns patterns = patternSettings[getPatternsKey()].toStringCollection();
-            sourceDir += "/" + replacePatterns(targetSettings[targetDirKey].toStringCollection().back(), patterns, target);
-        }
+        const SettingsNode targetSettings = getContainingSettings(command, rootSettings, targetDirKey); 
+        //if(target.getTarget() != "all") {
+            //const SettingsNode patternSettings = getContainingSettings(command, rootSettings, getPatternsKey()); 
+            //Patterns patterns = patternSettings[getPatternsKey()].toStringCollection();
+            //sourceDir += "/" + replacePatterns(targetSettings[targetDirKey].toStringCollection().back(), patterns, target);
+        //}
         return TaskCollection({sourceDir});
     }
 

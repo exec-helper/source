@@ -2,7 +2,7 @@ import os
 opts = Variables()
 
 opts.Add(EnumVariable('compiler', 'Set toolchain', 'gcc',
-                    allowed_values=('gcc', 'clang', 'cc'),
+                    allowed_values=('gcc', 'clang', 'cc', 'envcc'),
                     map={},
                     ignorecase=2))
 

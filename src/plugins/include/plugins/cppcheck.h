@@ -3,6 +3,7 @@
 
 #include "plugin.h"
 #include "core/task.h"
+#include "core/patternsHandler.h"
 
 namespace execHelper {
     namespace config {
@@ -19,7 +20,7 @@ namespace execHelper {
             public:
                 virtual bool apply(const core::Command& command, core::Task& task, const core::Options& options) const noexcept override;
             private:
-                static core::TaskCollection getSourceDir(const core::Command& command, const config::SettingsNode& rootSettings, const core::TargetDescriptionElement& target) noexcept;
+                static core::TaskCollection getSourceDir(const core::Command& command, const config::SettingsNode& rootSettings, const core::PatternCombinations& patternCombinations) noexcept;
                 static core::TaskCollection getEnabledChecks(const core::Command& command, const config::SettingsNode& rootSettings) noexcept;
         };
     }

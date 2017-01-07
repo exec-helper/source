@@ -25,6 +25,17 @@ namespace {
 
 int execHelperMain(int argc, char** argv) {
     ExecHelperOptions options;
+    string settingsFile = options.getSettingsFile(argc, argv);
+    if(! fileExist(settingsFile)) {
+        user_feedback("Could not find a settings file");
+        options.printHelp();
+        return EXIT_FAILURE;
+    }
+    if(! options.parseSettingsFile(settingsFile)) {
+        user_feedback("Could not parse settings file '" << settingsFile << "'");
+        options.printHelp();
+        return EXIT_FAILURE;
+    }
     if(! options.parse(argc, argv)) {
         user_feedback("Invalid option");
         options.printHelp();
@@ -33,21 +44,6 @@ int execHelperMain(int argc, char** argv) {
     if(options.containsHelp()) {
         options.printHelp();
         return EXIT_SUCCESS;
-    }
-
-    string settingsFile = options.getSettingsFile(argc, argv);
-    if(! fileExist(settingsFile)) {
-        user_feedback("Could not find a settings file");
-        return EXIT_FAILURE;
-    }
-    if(! options.parseSettingsFile(settingsFile)) {
-        user_feedback("Could not parse settings file '" << settingsFile << "'");
-        return EXIT_FAILURE;
-    }
-    if(! options.parse(argc, argv)) {
-        user_feedback("Invalid option");
-        options.printHelp();
-        return EXIT_FAILURE;
     }
 
     PosixShell shell;

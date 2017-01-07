@@ -5,6 +5,8 @@
 #include <vector>
 #include <memory>
 
+#include <boost/program_options.hpp>
+
 #include "options.h"
 
 #include "config/settingsNode.h"
@@ -12,6 +14,14 @@
 #include "targetDescription.h"
 #include "compilerDescription.h"
 #include "analyzeDescription.h"
+#include "optionDescriptions.h"
+#include "patternsHandler.h"
+
+namespace execHelper {
+    namespace core {
+        class OptionDescriptions;
+    }
+}
 
 namespace execHelper {
     namespace core {
@@ -35,6 +45,11 @@ namespace execHelper {
                 virtual const config::SettingsNode& getSettings(const std::string& key) const noexcept override;
                 virtual bool containsHelp() const noexcept override;
                 virtual std::shared_ptr<Options> clone() const noexcept override;
+                virtual bool contains(const std::string& longOptions) const noexcept override;
+                virtual std::vector<std::string> getLongOption(const std::string& longOptions) const noexcept override;
+                virtual const PatternsHandler& getPatternsHandler() const noexcept override;
+                virtual PatternValues getValues(const Pattern& pattern) const noexcept override;
+                virtual PatternPermutator makePatternPermutator(const PatternKeys& patterns) const noexcept override;
 
                 void printHelp() const noexcept;
 
@@ -50,6 +65,9 @@ namespace execHelper {
                 std::unique_ptr<CompilerDescription> m_compiler;
                 std::unique_ptr<AnalyzeDescription> m_analyze;
                 config::SettingsNode m_settings;
+                boost::program_options::variables_map m_optionsMap;
+                PatternsHandler m_patternsHandler;
+                OptionDescriptions m_optionsDescriptions;
 
                 ExecutorInterface* m_executor;       // Non-owning pointer
         };

@@ -1,14 +1,16 @@
 UNITTESTS=build/gcc/debug/test/core/core-unittest build/gcc/debug/test/yaml/yaml-unittest build/gcc/debug/test/config/config-unittest build/gcc/debug/test/plugins/plugins-unittest build/gcc/debug/test/commander/commander-unittest
 
+NB_OF_CORES:=$(shell grep -c ^processor /proc/cpuinfo)
+
 build:
-	scons compiler=gcc -j8 mode=debug
+	scons compiler=gcc --jobs $(NB_OF_CORES) mode=debug
 
 make clean:
-	scons --clean compiler=gcc mode=debug -j8
+	scons --clean compiler=gcc mode=debug --jobs $(NB_OF_CORES)
 	rm *.exec-helper
 
 app:
-	scons compiler=cc -j8 mode=release exec-helper
+	scons compiler=cc --jobs $(NB_OF_CORES) mode=release exec-helper
 
 test:: build
 	$(foreach test,$(UNITTESTS),$(test) || exit 1;)

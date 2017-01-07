@@ -2,8 +2,8 @@
 
 #include "log/log.h"
 #include "config/settingsNode.h"
-#include "core/patterns.h"
 #include "core/targetDescription.h"
+#include "core/patterns.h"
 
 #include "commandLineCommand.h"
 #include "scons.h"
@@ -21,7 +21,9 @@ using execHelper::core::Command;
 using execHelper::core::TaskCollection;
 using execHelper::core::CompilerDescriptionElement;
 using execHelper::core::TargetDescriptionElement;
-using execHelper::core::Patterns;
+using execHelper::core::PatternCombinations;
+using execHelper::core::PatternsHandler;
+using execHelper::core::replacePatterns;
 
 namespace execHelper { namespace plugins {
     const string& getPatternsKey() noexcept {
@@ -47,6 +49,14 @@ namespace execHelper { namespace plugins {
         return shared_ptr<Plugin>();
     }
 
+    void replacePatternCombinations(TaskCollection& commandArguments, const PatternCombinations& patternCombinations) noexcept {
+        for(auto& argument : commandArguments) {
+            for(const auto& pattern : patternCombinations) {
+                argument = replacePatterns(argument, pattern.first, pattern.second);
+            }
+        }
+    }
+
     const SettingsNode& getContainingSettings(const Command& command, const SettingsNode& rootSettings, const string& key) noexcept {
         if(rootSettings.contains(command) && rootSettings[command].contains(key)) {
             return rootSettings[command]; 
@@ -54,33 +64,29 @@ namespace execHelper { namespace plugins {
         return rootSettings;
     }
 
-    TaskCollection getCommandLine(const Command& command, const SettingsNode& rootSettings) noexcept {
+    SettingsNode::SettingsKey getSetting(const SettingsNode& settings, const SettingsNode::SettingsKey& key, const SettingsNode::SettingsKey& defaultValue) noexcept {
+        const SettingsNode::SettingsCollection settingsKey = getSettings(settings, key, {defaultValue});
+        if(settingsKey.empty()) {
+            return defaultValue;
+        }
+        return settingsKey.back();
+    }
+
+    SettingsNode::SettingsCollection getSettings(const SettingsNode& settings, const SettingsNode::SettingsKey& key, const SettingsNode::SettingsCollection& defaultValues) noexcept {
+        if(! settings.contains(key)) {
+            return defaultValues;
+        }
+        return settings[key].toStringCollection();
+    }
+
+    TaskCollection getCommandLine(const Command& command, const SettingsNode& rootSettings, const PatternCombinations& patternCombinations) noexcept {
         static const string commandLineKey("command-line");
         const SettingsNode settings = getContainingSettings(command, rootSettings, commandLineKey); 
         if(! settings.contains(commandLineKey)) {
             return TaskCollection();
         }
-
-        return settings[commandLineKey].toStringCollection();
-    }
-
-    TaskCollection getCommandLine(const Command& command, const SettingsNode& rootSettings, const TargetDescriptionElement& target) noexcept {
-        TaskCollection commandArguments = getCommandLine(command, rootSettings);
-        const SettingsNode patternSettings = getContainingSettings(command, rootSettings, getPatternsKey()); 
-        Patterns patterns = patternSettings[getPatternsKey()].toStringCollection();
-        for(auto& argument : commandArguments) {
-            argument = replacePatterns(argument, patterns, target);
-        }
-        return commandArguments;
-    }
-
-    TaskCollection getCommandLine(const Command& command, const SettingsNode& rootSettings, const CompilerDescriptionElement& compiler) noexcept {
-        TaskCollection commandArguments = getCommandLine(command, rootSettings);
-        const SettingsNode patternSettings = getContainingSettings(command, rootSettings, getPatternsKey()); 
-        Patterns patterns = patternSettings[getPatternsKey()].toStringCollection();
-        for(auto& argument : commandArguments) {
-            argument = replacePatterns(argument, patterns, compiler);
-        }
+        TaskCollection commandArguments = settings[commandLineKey].toStringCollection();
+        replacePatternCombinations(commandArguments, patternCombinations);
         return commandArguments;
     }
 } }

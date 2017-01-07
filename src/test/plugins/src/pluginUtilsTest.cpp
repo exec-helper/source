@@ -25,7 +25,9 @@ using execHelper::core::Mode;
 using execHelper::core::Architecture;
 using execHelper::core::Distribution;
 using execHelper::core::TaskCollection;
+using execHelper::core::PatternCombinations;
 using execHelper::test::utils::addSettings;
+using execHelper::test::utils::createPatternCombination;
 
 namespace execHelper { namespace plugins { namespace test {
     SCENARIO("Test the patterns key", "[plugins][pluginUtils]") {
@@ -98,10 +100,10 @@ namespace execHelper { namespace plugins { namespace test {
             addSettings(rootSettings, command, key);
             addSettings(rootSettings[command], key, "random-value");
 
-            CompilerDescriptionElement compilerElement(Compiler("compiler"), Mode("mode"), Architecture("architecture"), Distribution("distribution"));
+            PatternCombinations combination = createPatternCombination({"COMPILER", "MODE", "ARCHITECTURE", "DISTRIBUTION"}, {"compiler", "mode", "architecture", "distribution"});
 
             WHEN("We request the command line settings") {
-                TaskCollection actualTaskCollection = getCommandLine(command, rootSettings, compilerElement);
+                TaskCollection actualTaskCollection = getCommandLine(command, rootSettings, combination);
 
                 THEN("We should get an empty response") {
                     REQUIRE(actualTaskCollection.empty() == true);
@@ -114,10 +116,10 @@ namespace execHelper { namespace plugins { namespace test {
             SettingsNode rootSettings;
             addSettings(rootSettings, command, key);
 
-            CompilerDescriptionElement compilerElement(Compiler("compiler"), Mode("mode"), Architecture("architecture"), Distribution("distribution"));
+            PatternCombinations combination = createPatternCombination({"COMPILER", "MODE", "ARCHITECTURE", "DISTRIBUTION"}, {"compiler", "mode", "architecture", "distribution"});
 
             WHEN("We request the command line settings") {
-                TaskCollection actualTaskCollection = getCommandLine(command, rootSettings, compilerElement);
+                TaskCollection actualTaskCollection = getCommandLine(command, rootSettings, combination);
 
                 THEN("We should get an empty response") {
                     REQUIRE(actualTaskCollection.empty() == true);
@@ -132,10 +134,10 @@ namespace execHelper { namespace plugins { namespace test {
             addSettings(rootSettings, command, key);
             addSettings(rootSettings[command], key, value);
 
-            CompilerDescriptionElement compilerElement(Compiler("compiler"), Mode("mode"), Architecture("architecture"), Distribution("distribution"));
+            PatternCombinations combination = createPatternCombination({"COMPILER", "MODE", "ARCHITECTURE", "DISTRIBUTION"}, {"compiler", "mode", "architecture", "distribution"});
 
             WHEN("We request the command line settings") {
-                TaskCollection actualTaskCollection = getCommandLine(command, rootSettings, compilerElement);
+                TaskCollection actualTaskCollection = getCommandLine(command, rootSettings, combination);
 
                 THEN("We should get an empty response") {
                     TaskCollection correctTaskCollection({value});
@@ -158,10 +160,10 @@ namespace execHelper { namespace plugins { namespace test {
             addSettings(rootSettings, innerCommand2, "inner-command-command");
             addSettings(rootSettings, key, value2);
 
-            CompilerDescriptionElement compilerElement(Compiler("compiler"), Mode("mode"), Architecture("architecture"), Distribution("distribution"));
+            PatternCombinations combination = createPatternCombination({"COMPILER", "MODE", "ARCHITECTURE", "DISTRIBUTION"}, {"compiler", "mode", "architecture", "distribution"});
 
             WHEN("We request the command line settings of the outer command") {
-                TaskCollection actualTaskCollection = getCommandLine(command, rootSettings, compilerElement);
+                TaskCollection actualTaskCollection = getCommandLine(command, rootSettings, combination);
 
                 THEN("We should get the outer response") {
                     TaskCollection correctTaskCollection({value2});
@@ -169,7 +171,7 @@ namespace execHelper { namespace plugins { namespace test {
                 }
             }
             WHEN("We request the command line settings of the first inner command") {
-                TaskCollection actualTaskCollection = getCommandLine(innerCommand1, rootSettings, compilerElement);
+                TaskCollection actualTaskCollection = getCommandLine(innerCommand1, rootSettings, combination);
 
                 THEN("We should get the inner response") {
                     TaskCollection correctTaskCollection({value1});
@@ -177,7 +179,7 @@ namespace execHelper { namespace plugins { namespace test {
                 }
             }
             WHEN("We request the command line settings of the second inner command") {
-                TaskCollection actualTaskCollection = getCommandLine(innerCommand2, rootSettings, compilerElement);
+                TaskCollection actualTaskCollection = getCommandLine(innerCommand2, rootSettings, combination);
 
                 THEN("We should get the general one") {
                     TaskCollection correctTaskCollection({value2});
@@ -204,13 +206,13 @@ namespace execHelper { namespace plugins { namespace test {
             addSettings(rootSettings, key, value2);
             addSettings(rootSettings, "patterns", patterns);
 
-            CompilerDescriptionElement compilerElement(Compiler("compiler"), Mode("mode"), Architecture("architecture"), Distribution("distribution"));
+            PatternCombinations combination = createPatternCombination({"COMPILER", "MODE", "ARCHITECTURE", "DISTRIBUTION"}, {"compiler", "mode", "architecture", "distribution"});
 
             vector<string> replacedValue1({"build/compiler", "mode=mode", "hello"});
             vector<string> replacedValue2({"other-build/distribution-2", "architecture=architecture", "random-command-line2"});
 
             WHEN("We request the command line settings of the outer command") {
-                TaskCollection actualTaskCollection = getCommandLine(command, rootSettings, compilerElement);
+                TaskCollection actualTaskCollection = getCommandLine(command, rootSettings, combination);
 
                 THEN("We should get the outer response") {
                     TaskCollection correctTaskCollection({replacedValue2});
@@ -218,7 +220,7 @@ namespace execHelper { namespace plugins { namespace test {
                 }
             }
             WHEN("We request the command line settings of the first inner command") {
-                TaskCollection actualTaskCollection = getCommandLine(innerCommand1, rootSettings, compilerElement);
+                TaskCollection actualTaskCollection = getCommandLine(innerCommand1, rootSettings, combination);
 
                 THEN("We should get the inner response") {
                     TaskCollection correctTaskCollection({replacedValue1});
@@ -226,7 +228,7 @@ namespace execHelper { namespace plugins { namespace test {
                 }
             }
             WHEN("We request the command line settings of the second inner command") {
-                TaskCollection actualTaskCollection = getCommandLine(innerCommand2, rootSettings, compilerElement);
+                TaskCollection actualTaskCollection = getCommandLine(innerCommand2, rootSettings, combination);
 
                 THEN("We should get the general one") {
                     TaskCollection correctTaskCollection({replacedValue2});

@@ -12,7 +12,6 @@ using std::string;
 using execHelper::core::Task;
 using execHelper::core::Options;
 using execHelper::core::TaskCollection;
-using execHelper::core::Patterns;
 using execHelper::config::SettingsNode;
 
 namespace execHelper { namespace plugins {

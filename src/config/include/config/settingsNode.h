@@ -10,15 +10,18 @@
 namespace execHelper {
     namespace config {
         struct SettingsNode {
-            std::string m_key;
+            typedef std::string SettingsKey;
+            typedef std::vector<SettingsKey> SettingsCollection;
+
+            SettingsKey m_key;
             std::vector<SettingsNode> m_values;
 
             ~SettingsNode();
 
-            SettingsNode& operator[](const std::string& requestedKey) noexcept;
-            const SettingsNode& operator[](const std::string& requestedKey) const noexcept ;
-            bool contains(const std::string& findKey) const noexcept;
-            std::vector<std::string> toStringCollection() const noexcept;
+            SettingsNode& operator[](const SettingsKey& requestedKey) noexcept;
+            const SettingsNode& operator[](const SettingsKey& requestedKey) const noexcept ;
+            bool contains(const SettingsKey& findKey) const noexcept;
+            SettingsCollection toStringCollection() const noexcept;
             bool operator==(const SettingsNode& other) const noexcept;
             bool operator!=(const SettingsNode& other) const noexcept;
         };

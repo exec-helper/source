@@ -1,12 +1,14 @@
 #include "bootstrap.h"
 
 #include <string>
+#include <iostream>
 
 #include "log/log.h"
 #include "config/settingsNode.h"
 #include "core/task.h"
 #include "core/compilerDescription.h"
 #include "core/patterns.h"
+#include "core/patternsHandler.h"
 
 #include "pluginUtils.h"
 
@@ -14,8 +16,7 @@ using std::string;
 using execHelper::core::Task;
 using execHelper::core::Options;
 using execHelper::core::TaskCollection;
-using execHelper::core::CompilerDescriptionElement;
-using execHelper::core::Patterns;
+using execHelper::core::PatternKeys;
 using execHelper::core::Command;
 using execHelper::config::SettingsNode;
 
@@ -23,16 +24,19 @@ namespace execHelper { namespace plugins {
     bool Bootstrap::apply(const Command& command, Task& task, const Options& options) const noexcept {
         static string bootstrapKey("bootstrap");
         const SettingsNode& rootSettings = options.getSettings(bootstrapKey);  
-        for(const auto& compiler : options.getCompiler()) {
-            Task bootstrapTask = task;
-            TaskCollection buildDir = getBuildDir(command, rootSettings, compiler);
-            for(const auto& argument : buildDir) {
-                const SettingsNode patternSettings = getContainingSettings(command, rootSettings, getPatternsKey()); 
-                Patterns patterns = patternSettings[getPatternsKey()].toStringCollection();
-                string replacedBuildDir = replacePatterns(argument, patterns, compiler);
+        const SettingsNode patternSettings = getContainingSettings(command, rootSettings, getPatternsKey()); 
 
+        PatternKeys patterns; 
+        if(patternSettings.contains(getPatternsKey())) {
+            patterns = patternSettings[getPatternsKey()].toStringCollection();
+        }
+
+        for(const auto& combination : options.makePatternPermutator(patterns)) {
+            Task bootstrapTask = task;
+            TaskCollection buildDir = getBuildDir(command, rootSettings, combination);
+            for(const auto& argument : buildDir) {
                 bootstrapTask.append("cd");
-                bootstrapTask.append(replacedBuildDir);
+                bootstrapTask.append(argument);
                 bootstrapTask.append("&&");
             }
 

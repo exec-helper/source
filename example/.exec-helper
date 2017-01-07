@@ -1,3 +1,33 @@
+patterns:
+    COMPILER:
+        default-values:
+            - gcc
+            - clang
+        short-option: c
+        long-option: compiler
+    MODE:
+        default-values:
+            - debug
+            - release
+        short-option: m
+        long-option: mode
+    TARGET:
+        default-values:
+            - ""
+        short-option: t
+        long-option: target
+    RUNTARGET:
+        default-values:
+            - all
+        short-option: r
+        long-option: run-target
+    ANALYZE:
+        default-values:
+            - cppcheck
+            - clang-static-analyzer
+        short-option: a
+        long-option: analyze
+
 commands:
     - build
     - clean
@@ -18,26 +48,23 @@ analyze:
     - cppcheck
     - clang-static-analyzer
 
-default-compilers:
-    - gcc
-    - clang
-
-default-modes:
-    - debug
-    - release
-
 scons:
     patterns:
         - COMPILER
         - MODE
+        - TARGET
     build-dir: build/{COMPILER}/{MODE}
     single-threaded: no
-    command-line: compiler={COMPILER} mode={MODE}
+    command-line: 
+        - compiler={COMPILER}
+        - mode={MODE}
+        - "{TARGET}"
     clean:
         command-line: 
             - --clean
             - compiler={COMPILER}
             - mode={MODE}
+            - "{TARGET}"
 
 cppcheck:
     patterns:

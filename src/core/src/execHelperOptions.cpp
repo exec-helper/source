@@ -2,8 +2,7 @@
 
 #include <iostream>
 #include <string>
-
-#include <boost/program_options.hpp>
+#include <assert.h>
 
 #include "log/log.h"
 #include "yaml/yaml.h"
@@ -11,6 +10,8 @@
 #include "compiler.h"
 #include "mode.h"
 #include "executorInterface.h"
+#include "pattern.h"
+#include "patternsHandler.h"
 
 using std::cout;
 using std::endl;
@@ -19,13 +20,7 @@ using std::vector;
 using std::shared_ptr;
 using std::make_shared;
 
-using boost::program_options::options_description;
 using boost::program_options::variables_map;
-using boost::program_options::store;
-using boost::program_options::notify;
-using boost::program_options::command_line_parser;
-using boost::program_options::value;
-using boost::program_options::positional_options_description;
 
 using execHelper::core::CommandCollection;
 using execHelper::core::TargetDescription;
@@ -37,53 +32,6 @@ using execHelper::config::SettingsNode;
 using execHelper::yaml::Yaml;
 using execHelper::yaml::YamlFile;
 
-namespace {
-    class OptionDescriptions {
-        public:
-            OptionDescriptions() {
-                // Add the default options
-                m_optionDescription.add_options()
-                    ("help,h", "Produce help message")
-                    ("verbose,v", "Set verbosity")
-                    ("command,z", value<CommandCollection>()->multitoken(), "Set commands")
-                    ("target,t", value<TargetDescription::TargetCollection>()->multitoken(), "Set targets")
-                    ("run-target,r", value<TargetDescription::RunTargetCollection>()->multitoken(), "Set run targets")
-                    ("compiler,c", value<CompilerDescription::CompilerNames>()->multitoken(), "Set compilers")
-                    ("mode,m", value<CompilerDescription::ModeNames>()->multitoken(), "Set modes")
-                    ("architecture,a", value<CompilerDescription::ArchitectureNames>()->multitoken(), "Set architecture")
-                    ("distribution,d", value<CompilerDescription::DistributionNames>()->multitoken(), "Set distribution")
-                    ("analyze,y", value<AnalyzeDescription::AnalyzeCollection>()->multitoken(), "Set analyze methods")
-                    ("settings-file,s", value<string>(), "Set settings file")
-                    ("single-threaded,u", "Set multithreaded")
-                ;
-            }
-
-            options_description getOptionDescriptions() {
-                return m_optionDescription;
-            }
-
-            variables_map getOptionsMap(int argc, const char* const* argv, bool allowUnregistered = false) {
-                // Assign positional arguments
-                positional_options_description positionalOptionsDesc;
-                positionalOptionsDesc.add("command", -1);
-
-                variables_map optionsMap;
-                if(! allowUnregistered) {
-                    store(command_line_parser(argc, argv).options(m_optionDescription).positional(positionalOptionsDesc).run(), optionsMap);
-                } else {
-                    store(command_line_parser(argc, argv).options(m_optionDescription).positional(positionalOptionsDesc).options(m_optionDescription).allow_unregistered().run(), optionsMap);
-                }
-                notify(optionsMap);
-                return optionsMap;
-            }
-
-        private:
-            options_description m_optionDescription;
-    };
-
-    OptionDescriptions optionsDescriptions;
-}
-
 namespace execHelper { namespace core {
     ExecHelperOptions::ExecHelperOptions() noexcept :
         m_help(false),
@@ -91,7 +39,8 @@ namespace execHelper { namespace core {
         m_singleThreaded(false),
         m_target(new TargetDescription({"all"}, {"all"})),
         m_compiler(new CompilerDescription({Compiler("gcc")}, {Mode("release")}, {Architecture("x64")}, {Distribution("arch-linux")})),
-        m_analyze(new AnalyzeDescription({"cppcheck", "clang-static-analyzer"}))
+        m_analyze(new AnalyzeDescription({"cppcheck", "clang-static-analyzer"})),
+        m_executor(0)
     {
         ;
     }
@@ -137,7 +86,7 @@ namespace execHelper { namespace core {
     }
 
     string ExecHelperOptions::getSettingsFile(int argc, const char* const * argv) const noexcept {
-        variables_map optionsMap = optionsDescriptions.getOptionsMap(argc, argv, true);
+        variables_map optionsMap = m_optionsDescriptions.getOptionsMap(argc, argv, true);
         if(optionsMap.count("settings-file")) {
             return optionsMap["settings-file"].as<string>();
         }
@@ -145,57 +94,57 @@ namespace execHelper { namespace core {
     }
 
     bool ExecHelperOptions::parse(int argc, const char* const * argv) {
-        variables_map optionsMap = optionsDescriptions.getOptionsMap(argc, argv);
-        if(optionsMap.count("help")) {
+        m_optionsMap = m_optionsDescriptions.getOptionsMap(argc, argv);
+        if(m_optionsMap.count("help")) {
             m_help = true;
             return true;
         }
 
-        if(optionsMap.count("verbose")) {
+        if(m_optionsMap.count("verbose")) {
             m_verbose = true;
         }
 
-        if(optionsMap.count("single-threaded")) {
+        if(m_optionsMap.count("single-threaded")) {
             m_singleThreaded = true;
         }
 
-        if(optionsMap.count("command")) {
+        if(m_optionsMap.count("command")) {
             m_commands.clear();
-            m_commands = optionsMap["command"].as<CommandCollection>();
+            m_commands = m_optionsMap["command"].as<CommandCollection>();
         }
 
-        if(optionsMap.count("target")) {
-            TargetDescription::TargetCollection targets = optionsMap["target"].as<TargetDescription::TargetCollection>();
+        if(m_optionsMap.count("target")) {
+            TargetDescription::TargetCollection targets = m_optionsMap["target"].as<TargetDescription::TargetCollection>();
             m_target.reset(new TargetDescription(targets, m_target->getRunTargets()));
         }
 
-        if(optionsMap.count("run-target")) {
-            TargetDescription::RunTargetCollection runTargets = optionsMap["run-target"].as<TargetDescription::RunTargetCollection>();
+        if(m_optionsMap.count("run-target")) {
+            TargetDescription::RunTargetCollection runTargets = m_optionsMap["run-target"].as<TargetDescription::RunTargetCollection>();
             m_target.reset(new TargetDescription(m_target->getTargets(), runTargets));
         }
 
-        if(optionsMap.count("compiler")) {
-            CompilerDescription::CompilerCollection compilers = CompilerDescription::convertToCompilerCollection(optionsMap["compiler"].as<CompilerDescription::CompilerNames>());
+        if(m_optionsMap.count("compiler")) {
+            CompilerDescription::CompilerCollection compilers = CompilerDescription::convertToCompilerCollection(m_optionsMap["compiler"].as<CompilerDescription::CompilerNames>());
             m_compiler.reset(new CompilerDescription(compilers, m_compiler->getModes(), m_compiler->getArchitectures(), m_compiler->getDistributions()));
         }
 
-        if(optionsMap.count("mode")) {
-            CompilerDescription::ModeCollection modes = CompilerDescription::convertToModeCollection(optionsMap["mode"].as<CompilerDescription::ModeNames>());
+        if(m_optionsMap.count("mode")) {
+            CompilerDescription::ModeCollection modes = CompilerDescription::convertToModeCollection(m_optionsMap["mode"].as<CompilerDescription::ModeNames>());
             m_compiler.reset(new CompilerDescription(m_compiler->getCompilers(), modes, m_compiler->getArchitectures(), m_compiler->getDistributions()));
         }
 
-        if(optionsMap.count("architecture")) {
-            CompilerDescription::ArchitectureCollection architectures = CompilerDescription::convertToArchitectureCollection(optionsMap["architecture"].as<CompilerDescription::ArchitectureNames>());
+        if(m_optionsMap.count("architecture")) {
+            CompilerDescription::ArchitectureCollection architectures = CompilerDescription::convertToArchitectureCollection(m_optionsMap["architecture"].as<CompilerDescription::ArchitectureNames>());
             m_compiler.reset(new CompilerDescription(m_compiler->getCompilers(), m_compiler->getModes(), architectures, m_compiler->getDistributions()));
         }
 
-        if(optionsMap.count("distribution")) {
-            CompilerDescription::DistributionCollection distributions = CompilerDescription::convertToDistributionCollection(optionsMap["distribution"].as<CompilerDescription::DistributionNames>());
+        if(m_optionsMap.count("distribution")) {
+            CompilerDescription::DistributionCollection distributions = CompilerDescription::convertToDistributionCollection(m_optionsMap["distribution"].as<CompilerDescription::DistributionNames>());
             m_compiler.reset(new CompilerDescription(m_compiler->getCompilers(), m_compiler->getModes(), m_compiler->getArchitectures(), distributions));
         }
 
-        if(optionsMap.count("analyze")) {
-            AnalyzeDescription::AnalyzeCollection analyzeMethods = optionsMap["analyze"].as<AnalyzeDescription::AnalyzeCollection>();
+        if(m_optionsMap.count("analyze")) {
+            AnalyzeDescription::AnalyzeCollection analyzeMethods = m_optionsMap["analyze"].as<AnalyzeDescription::AnalyzeCollection>();
             m_analyze.reset(new AnalyzeDescription(analyzeMethods));
         }
 
@@ -211,34 +160,35 @@ namespace execHelper { namespace core {
             return false;
         }
 
-        if(m_settings.contains("default-targets")) {
-            TargetDescription::TargetCollection targets = m_settings["default-targets"].toStringCollection();
-            m_target.reset(new TargetDescription(targets, m_target->getRunTargets()));
-        }
+        static const string patternsKey("patterns");
+        if(m_settings.contains(patternsKey)) {
+            for(const auto& pattern : m_settings[patternsKey].m_values) {
+                PatternKey key = pattern.m_key;
+                PatternValues defaultValues;
+                for(const auto& defaultValue : pattern["default-values"].toStringCollection()) {
+                    defaultValues.push_back(defaultValue);
+                }
+                static const string shortOptionKey("short-option");
+                string shortOptionString;
+                if(pattern.contains(shortOptionKey)) {
+                    shortOptionString = pattern[shortOptionKey].m_values.back().m_key;
+                }
+                char shortOption = '\0';
+                if(shortOptionString.size() > 0) {
+                    shortOption = shortOptionString.at(0);
+                }
 
-        if(m_settings.contains("default-run-targets")) {
-            TargetDescription::RunTargetCollection runTargets = m_settings["default-run-targets"].toStringCollection();
-            m_target.reset(new TargetDescription(m_target->getTargets(), runTargets));
-        }
+                static const string longOptionKey("long-option");
+                string longOption;
+                if(pattern.contains(longOptionKey)) {
+                    longOption = pattern[longOptionKey].m_values.back().m_key;
+                }
 
-        if(m_settings.contains("default-compilers")) {
-            CompilerDescription::CompilerCollection compilers = CompilerDescription::convertToCompilerCollection(m_settings["default-compilers"].toStringCollection());
-            m_compiler.reset(new CompilerDescription(compilers, m_compiler->getModes(), m_compiler->getArchitectures(), m_compiler->getDistributions()));
-        }
-
-        if(m_settings.contains("default-modes")) {
-            CompilerDescription::ModeCollection modes = CompilerDescription::convertToModeCollection(m_settings["default-modes"].toStringCollection());
-            m_compiler.reset(new CompilerDescription(m_compiler->getCompilers(), modes, m_compiler->getArchitectures(), m_compiler->getDistributions()));
-        }
-
-        if(m_settings.contains("default-architectures")) {
-            CompilerDescription::ArchitectureCollection architectures = CompilerDescription::convertToArchitectureCollection(m_settings["default-architectures"].toStringCollection());
-            m_compiler.reset(new CompilerDescription(m_compiler->getCompilers(), m_compiler->getModes(), architectures, m_compiler->getDistributions()));
-        }
-
-        if(m_settings.contains("default-distributions")) {
-            CompilerDescription::DistributionCollection distributions = CompilerDescription::convertToDistributionCollection(m_settings["default-distributions"].toStringCollection());
-            m_compiler.reset(new CompilerDescription(m_compiler->getCompilers(), m_compiler->getModes(), m_compiler->getArchitectures(), distributions));
+                m_patternsHandler.addPattern(Pattern(key, defaultValues, shortOption, longOption));
+                string option = longOption + "," + shortOptionString;
+                string explanation = string("Values for pattern '") + key + "'";
+                m_optionsDescriptions.addOption<PatternValues>(option, explanation, true);
+            }
         }
         return true;
     }
@@ -271,14 +221,54 @@ namespace execHelper { namespace core {
     }
 
     ExecutorInterface* ExecHelperOptions::getExecutor() const noexcept {
+        assert(m_executor != 0);
         return m_executor;
     }
 
     void ExecHelperOptions::printHelp() const noexcept {
-        user_feedback(optionsDescriptions.getOptionDescriptions());
+        user_feedback(m_optionsDescriptions.getOptionDescriptions());
     }
 
     shared_ptr<Options> ExecHelperOptions::clone() const noexcept {
         return make_shared<ExecHelperOptions>(*this);
+    }
+
+    bool ExecHelperOptions::contains(const std::string& longOptions) const noexcept {
+        return m_optionsMap.count(longOptions) > 0;
+    }
+
+    vector<string> ExecHelperOptions::getLongOption(const std::string& longOptions) const noexcept {
+        return m_optionsMap[longOptions].as<vector<string>>();
+    }
+
+    const PatternsHandler& ExecHelperOptions::getPatternsHandler() const noexcept {
+        return m_patternsHandler;
+    }
+
+    PatternValues ExecHelperOptions::getValues(const Pattern& pattern) const noexcept {
+        string longOption = pattern.getLongOption();
+        if(contains(longOption)) {
+            return getLongOption(longOption);
+        }
+        return PatternValues();
+    }
+
+    PatternPermutator ExecHelperOptions::makePatternPermutator(const PatternKeys& patterns) const noexcept {
+        std::map<core::PatternKey, core::PatternValues> patternValuesMatrix;
+        if(patterns.empty()) {
+            // Invent a map so we permutate at least once
+            patternValuesMatrix["NOKEY"] = {"NOKEY"};
+        } else {
+            for(const auto& patternKey : patterns) {
+                core::Pattern pattern = m_patternsHandler.getPattern(patternKey);
+                PatternValues commandlineValues = getValues(pattern);
+                if(commandlineValues.empty()) {
+                    patternValuesMatrix.emplace(pattern.getKey(), pattern.getDefaultValues());
+                } else {
+                    patternValuesMatrix.emplace(pattern.getKey(), commandlineValues);
+                }
+            }
+        }
+        return core::PatternPermutator(patternValuesMatrix);
     }
 } }
