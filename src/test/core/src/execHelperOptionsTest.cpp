@@ -9,13 +9,9 @@
 #include "log/log.h"
 
 #include "core/execHelperOptions.h"
+#include "core/patternsHandler.h"
 #include "executorStub.h"
 #include "utils/utils.h"
-
-#include "core/compiler.h"
-#include "core/mode.h"
-#include "core/compilerDescription.h"
-#include "core/patternsHandler.h"
 
 #include "optionsStub.h"
 
@@ -25,9 +21,6 @@ using std::unique_ptr;
 using std::ofstream;
 
 using execHelper::config::SettingsNode;
-using execHelper::core::CompilerDescription;
-using execHelper::core::Compiler;
-using execHelper::core::Mode;
 using execHelper::core::PatternsHandler;
 
 using execHelper::test::OptionsStub;
@@ -63,10 +56,6 @@ namespace execHelper { namespace core {
                 const bool default_verbosity = false;
                 const bool default_singleThreaded = false;
                 const CommandCollection default_commands = {};
-                const TargetDescription::TargetCollection default_targets = {"all"};
-                const TargetDescription::RunTargetCollection defaultRunTargets = {"all"};
-
-                TargetDescription defaultTarget(default_targets, defaultRunTargets);
 
                 WHEN("We parse the variables") {
                     MainVariables mainVariables(arguments);
@@ -77,7 +66,6 @@ namespace execHelper { namespace core {
                         REQUIRE(options.getVerbosity() == default_verbosity);
                         REQUIRE(options.getSingleThreaded() == default_singleThreaded);
                         REQUIRE(options.getCommands() == default_commands);
-                        REQUIRE(options.getTarget() == defaultTarget);
                     }
                 }
             }
@@ -86,7 +74,6 @@ namespace execHelper { namespace core {
         SCENARIO("Test options with specific arguments", "[execHelperOptions]") {
             GIVEN("The command line we want to pass using the default long options") {
                 const CommandCollection actualCommands = {"init", "build", "run"};
-                const TargetDescription actualTarget({"target1", "target2"}, {"runTarget1", "runTarget2"});
 
                 vector<string> arguments;
                 arguments.emplace_back("UNITTEST");
@@ -110,7 +97,6 @@ namespace execHelper { namespace core {
             GIVEN("The command line we want to pass using the extra configured long options") {
                 const string settingsFile("test-settings-file.exec-helper");
                 const CommandCollection actualCommands = {"init", "build", "run"};
-                const TargetDescription actualTarget({"target1", "target2"}, {"runTarget1", "runTarget2"});
 
                 const string pattern1Key("PATTERN1");
                 const vector<string> pattern1Value({"test-pattern1A", "test-pattern1B"});
@@ -174,7 +160,6 @@ namespace execHelper { namespace core {
 
             GIVEN("The command line we want to pass using long options") {
                 const CommandCollection actualCommands = {"init", "build", "run"};
-                const TargetDescription actualTarget({"target1", "target2"}, {"runTarget1", "runTarget2"});
 
                 vector<string> arguments;
                 arguments.emplace_back("UNITTEST");

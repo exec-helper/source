@@ -4,9 +4,6 @@
 #include <assert.h>
 
 #include "core/options.h"
-#include "core/targetDescription.h"
-#include "core/compilerDescription.h"
-#include "core/analyzeDescription.h"
 #include "core/patternsHandler.h"
 #include "config/settingsNode.h"
 
@@ -20,9 +17,6 @@ namespace execHelper {
                     Options(),
                     m_verbosity(false),
                     m_singleThreaded(false),
-                    m_targets({}, {}),
-                    m_compilers(core::CompilerDescription::CompilerCollection({}), {}, {}, {}),
-                    m_analyze({}),
                     m_executor(),
                     m_patternsHandler(new core::PatternsHandler())
                 {
@@ -47,18 +41,6 @@ namespace execHelper {
 
                 virtual const core::CommandCollection& getCommands() const noexcept override {
                     return m_commands;
-                }
-
-                virtual const core::TargetDescription& getTarget() const noexcept override {
-                    return m_targets;
-                }
-
-                virtual const core::CompilerDescription& getCompiler() const noexcept override {
-                    return m_compilers;
-                }
-
-                virtual const core::AnalyzeDescription& getAnalyzeMethods() const noexcept override {
-                    return m_analyze;
                 }
 
                 virtual const config::SettingsNode& getSettings() const noexcept override {
@@ -147,9 +129,6 @@ namespace execHelper {
                 bool m_singleThreaded;
                 core::CommandCollection m_commands;
                 std::map<std::string, std::vector<std::string>> m_options;
-                core::TargetDescription m_targets;
-                core::CompilerDescription m_compilers;
-                core::AnalyzeDescription m_analyze;
                 config::SettingsNode m_settings;
                 bool m_containsHelp;
                 mutable core::test::ExecutorStub m_executor;

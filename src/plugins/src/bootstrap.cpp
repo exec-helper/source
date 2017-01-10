@@ -6,7 +6,6 @@
 #include "log/log.h"
 #include "config/settingsNode.h"
 #include "core/task.h"
-#include "core/compilerDescription.h"
 #include "core/patterns.h"
 #include "core/patternsHandler.h"
 

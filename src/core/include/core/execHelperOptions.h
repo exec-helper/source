@@ -11,9 +11,6 @@
 
 #include "config/settingsNode.h"
 
-#include "targetDescription.h"
-#include "compilerDescription.h"
-#include "analyzeDescription.h"
 #include "optionDescriptions.h"
 #include "patternsHandler.h"
 
@@ -37,9 +34,6 @@ namespace execHelper {
                 virtual bool getVerbosity() const noexcept override;
                 virtual bool getSingleThreaded() const noexcept override;
                 virtual const CommandCollection& getCommands() const noexcept override;
-                virtual const TargetDescription& getTarget() const noexcept override;
-                virtual const CompilerDescription& getCompiler() const noexcept override;
-                virtual const AnalyzeDescription& getAnalyzeMethods() const noexcept override;
                 virtual const config::SettingsNode& getSettings() const noexcept override;
                 virtual config::SettingsNode& getSettings(const std::string& key) noexcept override;
                 virtual const config::SettingsNode& getSettings(const std::string& key) const noexcept override;
@@ -61,9 +55,6 @@ namespace execHelper {
                 bool m_verbose;
                 bool m_singleThreaded;
                 CommandCollection m_commands;
-                std::unique_ptr<TargetDescription> m_target;
-                std::unique_ptr<CompilerDescription> m_compiler;
-                std::unique_ptr<AnalyzeDescription> m_analyze;
                 config::SettingsNode m_settings;
                 boost::program_options::variables_map m_optionsMap;
                 PatternsHandler m_patternsHandler;

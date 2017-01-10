@@ -7,8 +7,6 @@
 #include "plugins/bootstrap.h"
 
 #include "core/execHelperOptions.h"
-#include "core/compilerDescription.h"
-#include "core/targetDescription.h"
 
 #include "utils/utils.h"
 
@@ -21,8 +19,6 @@ using std::ofstream;
 
 using execHelper::core::Task;
 using execHelper::core::TaskCollection;
-using execHelper::core::CompilerDescription;
-using execHelper::core::TargetDescription;
 using execHelper::core::CommandCollection;
 using execHelper::core::Pattern;
 using execHelper::core::PatternsHandler;
@@ -35,11 +31,10 @@ using execHelper::test::utils::CompilerUtil;
 namespace {
     typedef vector<Pattern> Patterns;
 
-    void setupBasicOptions(OptionsStub& options, const TargetDescription& targets, const Patterns& patterns) {
+    void setupBasicOptions(OptionsStub& options, const Patterns& patterns) {
         addSettings(options.m_settings, "commands", {"init"});
         addSettings(options.m_settings, "init", {"bootstrap"});
 
-        options.m_targets = targets;
         for(const auto& pattern : patterns) {
             options.m_patternsHandler->addPattern(pattern);
         }
@@ -49,11 +44,9 @@ namespace {
 namespace execHelper { namespace plugins { namespace test {
     SCENARIO("Testing the default options of the bootstrap plugin", "[plugins][bootstrap]") {
         GIVEN("A bootstrap plugin object and basic settings") {
-            const TargetDescription actualTargets({"target1", "target2"}, {"runTarget1", "runTarget2"});
-
             CompilerUtil compilerUtil;
             OptionsStub options;
-            setupBasicOptions(options, actualTargets, compilerUtil.getPatterns());
+            setupBasicOptions(options, compilerUtil.getPatterns());
 
             Bootstrap plugin;
 
@@ -74,7 +67,6 @@ namespace execHelper { namespace plugins { namespace test {
 
     SCENARIO("Testing the build-dir option of the bootstrap plugin", "[plugins][bootstrap]") {
         GIVEN("A bootstrap plugin object, basic settings and the build-dir option") {
-            const TargetDescription actualTargets({"target1", "target2"}, {"runTarget1", "runTarget2"});
             CompilerUtil compilerUtil;
 
             string command1("command1");
@@ -82,7 +74,7 @@ namespace execHelper { namespace plugins { namespace test {
             string filename("random-bootstrap");
             string buildDir("build/{COMPILER}/{MODE}/{HELLO}/{ARCHITECTURE}/hello{DISTRIBUTION}world");
             OptionsStub options;
-            setupBasicOptions(options, actualTargets, compilerUtil.getPatterns());
+            setupBasicOptions(options, compilerUtil.getPatterns());
             addSettings(options.m_settings["bootstrap"], "filename", filename);
             addSettings(options.m_settings["bootstrap"], command2, "build-dir");
             addSettings(options.m_settings["bootstrap"][command2], "build-dir", buildDir);

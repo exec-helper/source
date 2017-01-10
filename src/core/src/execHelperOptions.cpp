@@ -7,8 +7,6 @@
 #include "log/log.h"
 #include "yaml/yaml.h"
 #include "config/settingsNode.h"
-#include "compiler.h"
-#include "mode.h"
 #include "executorInterface.h"
 #include "pattern.h"
 #include "patternsHandler.h"
@@ -23,9 +21,6 @@ using std::make_shared;
 using boost::program_options::variables_map;
 
 using execHelper::core::CommandCollection;
-using execHelper::core::TargetDescription;
-using execHelper::core::CompilerDescription;
-using execHelper::core::AnalyzeDescription;
 
 using execHelper::config::SettingsNode;
 
@@ -37,9 +32,6 @@ namespace execHelper { namespace core {
         m_help(false),
         m_verbose(false),
         m_singleThreaded(false),
-        m_target(new TargetDescription({"all"}, {"all"})),
-        m_compiler(new CompilerDescription({Compiler("gcc")}, {Mode("release")}, {Architecture("x64")}, {Distribution("arch-linux")})),
-        m_analyze(new AnalyzeDescription({"cppcheck", "clang-static-analyzer"})),
         m_executor(0)
     {
         ;
@@ -49,9 +41,6 @@ namespace execHelper { namespace core {
         m_help(other.m_help), 
         m_verbose(other.m_verbose),
         m_singleThreaded(other.m_singleThreaded),
-        m_target(new TargetDescription(other.getTarget().getTargets(), other.getTarget().getRunTargets())),
-        m_compiler(new CompilerDescription(other.getCompiler().getCompilers(), other.getCompiler().getModes(), other.getCompiler().getArchitectures(), other.getCompiler().getDistributions())),
-        m_analyze(new AnalyzeDescription(other.getAnalyzeMethods())),
         m_settings(other.m_settings),
         m_executor(other.m_executor)
     {
@@ -68,21 +57,6 @@ namespace execHelper { namespace core {
 
     const CommandCollection& ExecHelperOptions::getCommands() const noexcept {
         return m_commands;
-    }
-
-    const CompilerDescription& ExecHelperOptions::getCompiler() const noexcept {
-        assert(m_compiler);
-        return *m_compiler;
-    }
-
-    const TargetDescription& ExecHelperOptions::getTarget() const noexcept {
-        assert(m_target);
-        return *m_target;
-    }
-
-    const AnalyzeDescription& ExecHelperOptions::getAnalyzeMethods() const noexcept {
-        assert(m_analyze);
-        return *m_analyze;
     }
 
     string ExecHelperOptions::getSettingsFile(int argc, const char* const * argv) const noexcept {
@@ -111,41 +85,6 @@ namespace execHelper { namespace core {
         if(m_optionsMap.count("command")) {
             m_commands.clear();
             m_commands = m_optionsMap["command"].as<CommandCollection>();
-        }
-
-        if(m_optionsMap.count("target")) {
-            TargetDescription::TargetCollection targets = m_optionsMap["target"].as<TargetDescription::TargetCollection>();
-            m_target.reset(new TargetDescription(targets, m_target->getRunTargets()));
-        }
-
-        if(m_optionsMap.count("run-target")) {
-            TargetDescription::RunTargetCollection runTargets = m_optionsMap["run-target"].as<TargetDescription::RunTargetCollection>();
-            m_target.reset(new TargetDescription(m_target->getTargets(), runTargets));
-        }
-
-        if(m_optionsMap.count("compiler")) {
-            CompilerDescription::CompilerCollection compilers = CompilerDescription::convertToCompilerCollection(m_optionsMap["compiler"].as<CompilerDescription::CompilerNames>());
-            m_compiler.reset(new CompilerDescription(compilers, m_compiler->getModes(), m_compiler->getArchitectures(), m_compiler->getDistributions()));
-        }
-
-        if(m_optionsMap.count("mode")) {
-            CompilerDescription::ModeCollection modes = CompilerDescription::convertToModeCollection(m_optionsMap["mode"].as<CompilerDescription::ModeNames>());
-            m_compiler.reset(new CompilerDescription(m_compiler->getCompilers(), modes, m_compiler->getArchitectures(), m_compiler->getDistributions()));
-        }
-
-        if(m_optionsMap.count("architecture")) {
-            CompilerDescription::ArchitectureCollection architectures = CompilerDescription::convertToArchitectureCollection(m_optionsMap["architecture"].as<CompilerDescription::ArchitectureNames>());
-            m_compiler.reset(new CompilerDescription(m_compiler->getCompilers(), m_compiler->getModes(), architectures, m_compiler->getDistributions()));
-        }
-
-        if(m_optionsMap.count("distribution")) {
-            CompilerDescription::DistributionCollection distributions = CompilerDescription::convertToDistributionCollection(m_optionsMap["distribution"].as<CompilerDescription::DistributionNames>());
-            m_compiler.reset(new CompilerDescription(m_compiler->getCompilers(), m_compiler->getModes(), m_compiler->getArchitectures(), distributions));
-        }
-
-        if(m_optionsMap.count("analyze")) {
-            AnalyzeDescription::AnalyzeCollection analyzeMethods = m_optionsMap["analyze"].as<AnalyzeDescription::AnalyzeCollection>();
-            m_analyze.reset(new AnalyzeDescription(analyzeMethods));
         }
 
         return true;

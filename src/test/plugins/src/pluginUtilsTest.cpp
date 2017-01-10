@@ -5,11 +5,6 @@
 #include <catch.hpp>
 
 #include "config/settingsNode.h"
-#include "core/compilerDescription.h"
-#include "core/compiler.h"
-#include "core/mode.h"
-#include "core/architecture.h"
-#include "core/distribution.h"
 #include "core/task.h"
 #include "plugins/pluginUtils.h"
 
@@ -19,11 +14,6 @@ using std::vector;
 using std::string;
 
 using execHelper::config::SettingsNode;
-using execHelper::core::CompilerDescriptionElement;
-using execHelper::core::Compiler;
-using execHelper::core::Mode;
-using execHelper::core::Architecture;
-using execHelper::core::Distribution;
 using execHelper::core::TaskCollection;
 using execHelper::core::PatternCombinations;
 using execHelper::test::utils::addSettings;

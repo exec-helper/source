@@ -2,7 +2,6 @@
 
 #include "log/log.h"
 #include "config/settingsNode.h"
-#include "core/targetDescription.h"
 #include "core/patterns.h"
 
 #include "commandLineCommand.h"
@@ -19,8 +18,6 @@ using std::make_shared;
 using execHelper::config::SettingsNode;
 using execHelper::core::Command;
 using execHelper::core::TaskCollection;
-using execHelper::core::CompilerDescriptionElement;
-using execHelper::core::TargetDescriptionElement;
 using execHelper::core::PatternCombinations;
 using execHelper::core::PatternsHandler;
 using execHelper::core::replacePatterns;

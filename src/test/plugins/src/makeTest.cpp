@@ -8,7 +8,6 @@
 
 #include "executorStub.h"
 #include "optionsStub.h"
-#include "core/targetDescription.h"
 
 #include "utils/utils.h"
 
@@ -19,7 +18,6 @@ using std::ofstream;
 using execHelper::core::test::ExecutorStub;
 using execHelper::core::Task;
 using execHelper::core::TaskCollection;
-using execHelper::core::TargetDescription;
 using execHelper::core::CommandCollection;
 using execHelper::core::Pattern;
 
@@ -44,7 +42,6 @@ namespace {
 namespace execHelper { namespace plugins { namespace test {
     SCENARIO("Testing the default make settings", "[plugins][make]") {
         GIVEN("A make plugin object and the default options") {
-            const TargetDescription actualTargets({"target1", "target2"}, {"runTarget1", "runTarget2"});
             TargetUtil targetUtil;
             CompilerUtil compilerUtil;
             OptionsStub options;
@@ -77,7 +74,6 @@ namespace execHelper { namespace plugins { namespace test {
     }
 
     SCENARIO("Testing the make multi-threaded setting", "[plugins][make]") {
-        const TargetDescription actualTargets({"target1", "target2"}, {"runTarget1", "runTarget2"});
         TargetUtil targetUtil;
         CompilerUtil compilerUtil;
         OptionsStub options;

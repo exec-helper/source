@@ -8,7 +8,6 @@
 #include "core/task.h"
 #include "core/patterns.h"
 #include "core/execHelperOptions.h"
-#include "core/targetDescription.h"
 
 #include "pluginUtils.h"
 
@@ -21,7 +20,6 @@ using execHelper::core::TaskCollection;
 using execHelper::core::PatternKeys;
 using execHelper::core::Command;
 using execHelper::core::ExecHelperOptions;
-using execHelper::core::TargetDescriptionElement;
 using execHelper::core::PatternCombinations;
 using execHelper::config::SettingsNode;
 

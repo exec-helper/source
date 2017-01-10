@@ -11,9 +11,6 @@
 
 namespace execHelper {
     namespace core {
-        class TargetDescription;
-        class CompilerDescription;
-        class AnalyzeDescription;
         class ExecutorInterface;
         class PatternsHandler;
     }
@@ -39,9 +36,6 @@ namespace execHelper {
                 virtual bool getVerbosity() const noexcept = 0;
                 virtual bool getSingleThreaded() const noexcept = 0;
                 virtual const CommandCollection& getCommands() const noexcept = 0;
-                virtual const TargetDescription& getTarget() const noexcept = 0;
-                virtual const CompilerDescription& getCompiler() const noexcept = 0;
-                virtual const AnalyzeDescription& getAnalyzeMethods() const noexcept = 0;
                 virtual const config::SettingsNode& getSettings() const noexcept = 0;
                 virtual config::SettingsNode& getSettings(const std::string& key) noexcept = 0;
                 virtual const config::SettingsNode& getSettings(const std::string& key) const noexcept = 0;
