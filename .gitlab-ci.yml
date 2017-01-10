@@ -94,7 +94,7 @@ cppcheck:
         - build:gcc
     script:
         - apt-get install --yes cppcheck
-        - build/gcc/release/bin/exec-helper analyze -a cppcheck
+        - build/gcc/release/bin/exec-helper analyze --analyze cppcheck
 
 clang-static-analyzer:
     stage: test
@@ -102,7 +102,8 @@ clang-static-analyzer:
         - build:gcc
     script:
         - apt-get install --yes -qq scons clang cmake libboost-program-options1.61-dev git
-        - build/gcc/release/bin/exec-helper analyze -a clang-static-analyzer
+        - git submodule update --init
+        - build/gcc/release/bin/exec-helper analyze --analyze clang-static-analyzer --compiler clang --mode debug
 
 coverage:
     stage: test
