@@ -6,20 +6,19 @@
 
 #include "plugins/bootstrap.h"
 
-#include "executorStub.h"
 #include "core/execHelperOptions.h"
 #include "core/compilerDescription.h"
 #include "core/targetDescription.h"
 
 #include "utils/utils.h"
 
+#include "executorStub.h"
 #include "optionsStub.h"
 
 using std::vector;
 using std::string;
 using std::ofstream;
 
-using execHelper::core::test::ExecutorStub;
 using execHelper::core::Task;
 using execHelper::core::TaskCollection;
 using execHelper::core::CompilerDescription;
@@ -29,6 +28,7 @@ using execHelper::core::Pattern;
 using execHelper::core::PatternsHandler;
 
 using execHelper::test::OptionsStub;
+using execHelper::core::test::ExecutorStub;
 using execHelper::test::utils::addSettings;
 using execHelper::test::utils::CompilerUtil;
 
@@ -54,8 +54,6 @@ namespace execHelper { namespace plugins { namespace test {
             CompilerUtil compilerUtil;
             OptionsStub options;
             setupBasicOptions(options, actualTargets, compilerUtil.getPatterns());
-            ExecutorStub executor;
-            options.setExecutor(&executor);
 
             Bootstrap plugin;
 
@@ -68,7 +66,7 @@ namespace execHelper { namespace plugins { namespace test {
                     Task expectedTask;
                     expectedTask.append(TaskCollection({"./bootstrap.sh"}));
                     expectedQueue.push_back(expectedTask);
-                    REQUIRE(expectedQueue == executor.getExecutedTasks());
+                    REQUIRE(expectedQueue == options.m_executor.getExecutedTasks());
                 }
             }
         }
@@ -89,8 +87,6 @@ namespace execHelper { namespace plugins { namespace test {
             addSettings(options.m_settings["bootstrap"], command2, "build-dir");
             addSettings(options.m_settings["bootstrap"][command2], "build-dir", buildDir);
             addSettings(options.m_settings["bootstrap"][command2], "patterns", compilerUtil.getKeys());
-            ExecutorStub executor;
-            options.setExecutor(&executor);
 
             Bootstrap plugin;
 
@@ -103,7 +99,7 @@ namespace execHelper { namespace plugins { namespace test {
                     Task expectedTask;
                     expectedTask.append(TaskCollection({"./" + filename}));
                     expectedQueue.push_back(expectedTask);
-                    REQUIRE(expectedQueue == executor.getExecutedTasks());
+                    REQUIRE(expectedQueue == options.m_executor.getExecutedTasks());
                 }
             }
             WHEN("We call the second command") {
@@ -122,7 +118,7 @@ namespace execHelper { namespace plugins { namespace test {
                         expectedTask.append(TaskCollection({"cd", "build/" + compilerName + "/" + modeName + "/{HELLO}/" + architectureName + "/hello" + distributionName + "world", "&&", "./" + filename}));
                         expectedQueue.push_back(expectedTask);
                     }
-                    REQUIRE(expectedQueue == executor.getExecutedTasks());
+                    REQUIRE(expectedQueue == options.m_executor.getExecutedTasks());
                 }
             }
         }

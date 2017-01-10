@@ -45,8 +45,7 @@ rebuild:
     - build
 
 analyze:
-    - cppcheck
-    - clang-static-analyzer
+    - selector
 
 scons:
     patterns:
@@ -65,6 +64,10 @@ scons:
             - compiler={COMPILER}
             - mode={MODE}
             - "{TARGET}"
+
+selector:
+    analyze:
+        pattern: ANALYZE
 
 cppcheck:
     patterns:

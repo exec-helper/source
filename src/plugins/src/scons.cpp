@@ -8,7 +8,6 @@
 #include "core/patternsHandler.h"
 
 #include "pluginUtils.h"
-#include "allTarget.h"
 
 using std::string;
 using std::map;
@@ -24,7 +23,6 @@ using execHelper::core::PatternsHandler;
 
 namespace {
     const string SCONS_COMMAND("scons");
-    static const string allTargetsKey("all-target");
 }
 
 namespace execHelper { namespace plugins {

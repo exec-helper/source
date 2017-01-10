@@ -56,8 +56,6 @@ namespace execHelper { namespace plugins { namespace test {
                 patterns.push_back(pattern);
             }
             setupBasicOptions(options, patterns);
-            ExecutorStub executor;
-            options.setExecutor(&executor);
 
             Make plugin;
 
@@ -72,7 +70,7 @@ namespace execHelper { namespace plugins { namespace test {
                 expectedQueue.push_back(expectedTask);
 
                 THEN("We should get the expected tasks") {
-                    REQUIRE(expectedQueue == executor.getExecutedTasks());
+                    REQUIRE(expectedQueue == options.m_executor.getExecutedTasks());
                 }
             }
         }
@@ -99,9 +97,6 @@ namespace execHelper { namespace plugins { namespace test {
         addSettings(options.m_settings["make"], "clean", "command-line");
         addSettings(options.m_settings["make"]["clean"], "command-line", {"clean", "{" + targetUtil.target.getKey() + "}{" + targetUtil.runTarget.getKey() + "}"});
 
-        ExecutorStub executor;
-        options.setExecutor(&executor);
-            
         Make plugin;
 
         GIVEN("A make plugin object and the single-threaded option") {
@@ -124,7 +119,7 @@ namespace execHelper { namespace plugins { namespace test {
                 }
 
                 THEN("We should get the expected tasks") {
-                    REQUIRE(expectedQueue == executor.getExecutedTasks());
+                    REQUIRE(expectedQueue == options.m_executor.getExecutedTasks());
                 }
             }
 
@@ -146,7 +141,7 @@ namespace execHelper { namespace plugins { namespace test {
                 }
 
                 THEN("We should get the expected tasks") {
-                    REQUIRE(expectedQueue == executor.getExecutedTasks());
+                    REQUIRE(expectedQueue == options.m_executor.getExecutedTasks());
                 }
             }
         }
@@ -171,7 +166,7 @@ namespace execHelper { namespace plugins { namespace test {
                 }
 
                 THEN("We should get the expected tasks") {
-                    REQUIRE(expectedQueue == executor.getExecutedTasks());
+                    REQUIRE(expectedQueue == options.m_executor.getExecutedTasks());
                 }
             }
 
@@ -192,7 +187,7 @@ namespace execHelper { namespace plugins { namespace test {
                 }
 
                 THEN("We should get the expected tasks") {
-                    REQUIRE(expectedQueue == executor.getExecutedTasks());
+                    REQUIRE(expectedQueue == options.m_executor.getExecutedTasks());
                 }
             }
         }
@@ -219,9 +214,6 @@ namespace execHelper { namespace plugins { namespace test {
             addSettings(options.m_settings["make"], "command-line", {"V=1", "--jobs", "4", "{" + targetUtil.target.getKey() + "}{" + targetUtil.runTarget.getKey() + "}"});
             addSettings(options.m_settings["make"]["clean"], "command-line", {"clean", "V=1", "--jobs", "4", "{" + targetUtil.target.getKey() + "}{" + targetUtil.runTarget.getKey() + "}"});
 
-            ExecutorStub executor;
-            options.setExecutor(&executor);
-
             Make plugin;
 
             WHEN("We build the plugin") {
@@ -239,7 +231,7 @@ namespace execHelper { namespace plugins { namespace test {
                 }
 
                 THEN("We should get the expected tasks") {
-                    REQUIRE(expectedQueue == executor.getExecutedTasks());
+                    REQUIRE(expectedQueue == options.m_executor.getExecutedTasks());
                 }
             }
 
@@ -258,7 +250,7 @@ namespace execHelper { namespace plugins { namespace test {
                 }
 
                 THEN("We should get the expected tasks") {
-                    REQUIRE(expectedQueue == executor.getExecutedTasks());
+                    REQUIRE(expectedQueue == options.m_executor.getExecutedTasks());
                 }
             }
         }
@@ -280,8 +272,6 @@ namespace execHelper { namespace plugins { namespace test {
                 patternNames.push_back(pattern.getKey());
             }
             setupBasicOptions(options, patterns);
-            ExecutorStub executor;
-            options.setExecutor(&executor);
             addSettings(options.m_settings["make"], "patterns", patternNames);
             addSettings(options.m_settings["make"], "command-line", {"{" + targetUtil.target.getKey() + "}{" + targetUtil.runTarget.getKey() + "}"});
             addSettings(options.m_settings["make"], "clean", "command-line");
@@ -314,7 +304,7 @@ namespace execHelper { namespace plugins { namespace test {
                 }
 
                 THEN("We should get the expected tasks") {
-                    REQUIRE(expectedQueue == executor.getExecutedTasks());
+                    REQUIRE(expectedQueue == options.m_executor.getExecutedTasks());
                 }
             }
 
@@ -340,7 +330,7 @@ namespace execHelper { namespace plugins { namespace test {
                 }
 
                 THEN("We should get the expected tasks") {
-                    REQUIRE(expectedQueue == executor.getExecutedTasks());
+                    REQUIRE(expectedQueue == options.m_executor.getExecutedTasks());
                 }
             }
         }

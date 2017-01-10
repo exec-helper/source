@@ -10,6 +10,8 @@
 #include "core/patternsHandler.h"
 #include "config/settingsNode.h"
 
+#include "executorStub.h"
+
 namespace execHelper {
     namespace test {
         class OptionsStub : public core::Options {
@@ -21,6 +23,7 @@ namespace execHelper {
                     m_targets({}, {}),
                     m_compilers(core::CompilerDescription::CompilerCollection({}), {}, {}, {}),
                     m_analyze({}),
+                    m_executor(),
                     m_patternsHandler(new core::PatternsHandler())
                 {
                     ;
@@ -80,12 +83,13 @@ namespace execHelper {
                     return m_containsHelp;
                 }
 
-                virtual void setExecutor(core::ExecutorInterface* const executor) noexcept override {
-                    m_executor = executor;
+                // Note: executor needs to be allocated on the heap here
+                virtual void setExecutor(core::ExecutorInterface* const /*executor*/) noexcept override {
+                    assert(false);
                 }
 
                 virtual core::ExecutorInterface* getExecutor() const noexcept override {
-                    return m_executor;
+                    return &m_executor;
                 }
   
                 virtual std::shared_ptr<Options> clone() const noexcept override {
@@ -96,8 +100,12 @@ namespace execHelper {
                     return false;
                 }
 
-                virtual std::vector<std::string> getLongOption(const std::string& /*longOptions*/) const noexcept override {
-                    return std::vector<std::string>();
+                virtual std::vector<std::string> getLongOption(const std::string& longOption) const noexcept override {
+                    auto optionValues = m_options.find(longOption);
+                    if(optionValues == m_options.end()) {
+                        return std::vector<std::string>();
+                    }
+                    return optionValues->second;
                 }
 
                 virtual const core::PatternsHandler& getPatternsHandler() const noexcept override {
@@ -105,6 +113,14 @@ namespace execHelper {
                 }
 
                 virtual core::PatternValues getValues(const core::Pattern& pattern) const noexcept override {
+                    const auto longOptionValues = m_options.find(pattern.getLongOption());
+                    if(longOptionValues != m_options.end()) {
+                        return longOptionValues->second;
+                    }
+                    const auto shortOptionValues = m_options.find(std::string(1, pattern.getShortOption()));
+                    if(shortOptionValues != m_options.end()) {
+                        return shortOptionValues->second;
+                    }
                     return pattern.getDefaultValues();
                 }
 
@@ -116,21 +132,27 @@ namespace execHelper {
                     } else {
                         for(const auto& patternKey : patterns) {
                             core::Pattern pattern = m_patternsHandler->getPattern(patternKey);
-                            patternValuesMatrix.emplace(pattern.getKey(), getValues(pattern));
+                            core::PatternValues commandlineValues = getValues(pattern);
+                            if(commandlineValues.empty()) {
+                                patternValuesMatrix.emplace(pattern.getKey(), pattern.getDefaultValues());
+                            } else {
+                                patternValuesMatrix.emplace(pattern.getKey(), commandlineValues);
+                            }
                         }
                     }
-                    return core::PatternPermutator(patternValuesMatrix);
+                    return patternValuesMatrix;
                 }
 
                 bool m_verbosity;
                 bool m_singleThreaded;
                 core::CommandCollection m_commands;
+                std::map<std::string, std::vector<std::string>> m_options;
                 core::TargetDescription m_targets;
                 core::CompilerDescription m_compilers;
                 core::AnalyzeDescription m_analyze;
                 config::SettingsNode m_settings;
                 bool m_containsHelp;
-                core::ExecutorInterface* m_executor;
+                mutable core::test::ExecutorStub m_executor;
                 std::shared_ptr<core::PatternsHandler> m_patternsHandler;
         };
     }

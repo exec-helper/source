@@ -42,9 +42,6 @@ namespace execHelper { namespace plugins { namespace test {
             OptionsStub options;
             setupBasicOptions(options);
 
-            ExecutorStub executor;
-            options.setExecutor(&executor);
-
             Cppcheck plugin;
 
             WHEN("We use the plugin") {
@@ -57,7 +54,7 @@ namespace execHelper { namespace plugins { namespace test {
                     expectedTask.append(TaskCollection({"cppcheck", "--enable=all", "."}));
                     expectedQueue.push_back(expectedTask);
 
-                    REQUIRE(expectedQueue == executor.getExecutedTasks());
+                    REQUIRE(expectedQueue == options.m_executor.getExecutedTasks());
                 }
             }
         }
@@ -69,9 +66,6 @@ namespace execHelper { namespace plugins { namespace test {
             OptionsStub options;
             setupBasicOptions(options);
             addSettings(options.m_settings[cppcheckCommand], srcDirKey, srcDirValue);
-
-            ExecutorStub executor;
-            options.setExecutor(&executor);
 
             Cppcheck plugin;
 
@@ -85,7 +79,7 @@ namespace execHelper { namespace plugins { namespace test {
                     expectedTask.append(TaskCollection({"cppcheck", "--enable=all", srcDirValue}));
                     expectedQueue.push_back(expectedTask);
 
-                    REQUIRE(expectedQueue == executor.getExecutedTasks());
+                    REQUIRE(expectedQueue == options.m_executor.getExecutedTasks());
                 }
             }
         }
@@ -97,9 +91,6 @@ namespace execHelper { namespace plugins { namespace test {
             OptionsStub options;
             setupBasicOptions(options);
             addSettings(options.m_settings[cppcheckCommand], actualKey, actualValue);
-
-            ExecutorStub executor;
-            options.setExecutor(&executor);
 
             Cppcheck plugin;
 
@@ -117,7 +108,7 @@ namespace execHelper { namespace plugins { namespace test {
                     expectedTask.append(".");
                     expectedQueue.push_back(expectedTask);
 
-                    REQUIRE(expectedQueue == executor.getExecutedTasks());
+                    REQUIRE(expectedQueue == options.m_executor.getExecutedTasks());
                 }
             }
         }
@@ -129,9 +120,6 @@ namespace execHelper { namespace plugins { namespace test {
             OptionsStub options;
             setupBasicOptions(options);
             addSettings(options.m_settings[cppcheckCommand], actualKey, actualValue);
-
-            ExecutorStub executor;
-            options.setExecutor(&executor);
 
             Cppcheck plugin;
 
@@ -151,7 +139,7 @@ namespace execHelper { namespace plugins { namespace test {
                     expectedTask.append(".");
                     expectedQueue.push_back(expectedTask);
 
-                    REQUIRE(expectedQueue == executor.getExecutedTasks());
+                    REQUIRE(expectedQueue == options.m_executor.getExecutedTasks());
                 }
             }
         }

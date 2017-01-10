@@ -12,6 +12,8 @@
 #include "plugins/bootstrap.h"
 #include "plugins/cppcheck.h"
 #include "plugins/clangStaticAnalyzer.h"
+#include "plugins/selector.h"
+#include "plugins/memory.h"
 
 using std::string;
 using std::vector;
@@ -37,12 +39,12 @@ namespace execHelper { namespace plugins {
             Command commandToPass = command;
             if(!plugin) {
                 // Check if it exists as an other target in the settings
-                if(options.getSettings(pluginName) != options.getSettings()) {
+                if(options.getSettings().contains(pluginName)) {
                     // Then use executeplugin as the plugin 
                     plugin = make_shared<ExecutePlugin>(options.getSettings(pluginName).toStringCollection());
                     commandToPass = pluginName;
                 } else {
-                    user_feedback("Could not find a command or plugin called " << pluginName);
+                    user_feedback_error("Could not find a command or plugin called '" << pluginName << "'");
                     return false;
                 }
             }
@@ -66,6 +68,10 @@ namespace execHelper { namespace plugins {
             return make_shared<Cppcheck>();
         } else if(pluginName == "clang-static-analyzer") {
             return make_shared<ClangStaticAnalyzer>();
+        } else if(pluginName == "selector") {
+            return make_shared<Selector>();
+        } else if(pluginName == "memory") {
+            return make_shared<Memory>();
         }
         return shared_ptr<Plugin>();
     }

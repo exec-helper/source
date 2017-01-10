@@ -59,8 +59,6 @@ namespace execHelper { namespace plugins { namespace test {
             CompilerUtil compilerUtil;
             Patterns patterns = getAllPatterns({targetUtil, compilerUtil});
             setupBasicOptions(options, patterns);
-            ExecutorStub executor;
-            options.setExecutor(&executor);
 
             Scons plugin;
 
@@ -74,7 +72,7 @@ namespace execHelper { namespace plugins { namespace test {
                     expectedTask.append(TaskCollection({"scons", "--jobs", "8"}));
                     expectedQueue.push_back(expectedTask);
 
-                    REQUIRE(expectedQueue == executor.getExecutedTasks());
+                    REQUIRE(expectedQueue == options.m_executor.getExecutedTasks());
                 }
             }
         }
@@ -89,9 +87,6 @@ namespace execHelper { namespace plugins { namespace test {
             Patterns patterns = getAllPatterns({targetUtil, compilerUtil});
             setupBasicOptions(options, patterns);
 
-            ExecutorStub executor;
-            options.setExecutor(&executor);
-
             Scons plugin;
 
             WHEN("We build the plugin") {
@@ -104,7 +99,7 @@ namespace execHelper { namespace plugins { namespace test {
                     expectedTask.append(TaskCollection({"scons", "--jobs", "8"}));
                     expectedQueue.push_back(expectedTask);
 
-                    REQUIRE(expectedQueue == executor.getExecutedTasks());
+                    REQUIRE(expectedQueue == options.m_executor.getExecutedTasks());
                 }
             }
             WHEN("We clean the plugin") {
@@ -117,7 +112,7 @@ namespace execHelper { namespace plugins { namespace test {
                     expectedTask.append(TaskCollection({"scons", "--jobs", "8", "--clean"}));
                     expectedQueue.push_back(expectedTask);
 
-                    REQUIRE(expectedQueue == executor.getExecutedTasks());
+                    REQUIRE(expectedQueue == options.m_executor.getExecutedTasks());
                 }
             }
         }
@@ -126,9 +121,6 @@ namespace execHelper { namespace plugins { namespace test {
     SCENARIO("Testing the single-threaded option of the scons plugin", "[plugins][scons]") {
         OptionsStub options;
         setupBasicOptions(options, {});
-
-        ExecutorStub executor;
-        options.setExecutor(&executor);
 
         Scons plugin;
 
@@ -145,7 +137,7 @@ namespace execHelper { namespace plugins { namespace test {
                     expectedTask.append(TaskCollection({"scons"}));
                     expectedQueue.push_back(expectedTask);
 
-                    REQUIRE(expectedQueue == executor.getExecutedTasks());
+                    REQUIRE(expectedQueue == options.m_executor.getExecutedTasks());
                 }
             }
             WHEN("We clean the plugin") {
@@ -158,7 +150,7 @@ namespace execHelper { namespace plugins { namespace test {
                     expectedTask.append(TaskCollection({"scons", "--clean"}));
                     expectedQueue.push_back(expectedTask);
 
-                    REQUIRE(expectedQueue == executor.getExecutedTasks());
+                    REQUIRE(expectedQueue == options.m_executor.getExecutedTasks());
                 }
             }
         }
@@ -176,7 +168,7 @@ namespace execHelper { namespace plugins { namespace test {
                     expectedTask.append(TaskCollection({"scons", "--jobs", "8"}));
                     expectedQueue.push_back(expectedTask);
 
-                    REQUIRE(expectedQueue == executor.getExecutedTasks());
+                    REQUIRE(expectedQueue == options.m_executor.getExecutedTasks());
                 }
             }
             WHEN("We clean the plugin") {
@@ -189,7 +181,7 @@ namespace execHelper { namespace plugins { namespace test {
                     expectedTask.append(TaskCollection({"scons", "--jobs", "8", "--clean"}));
                     expectedQueue.push_back(expectedTask);
 
-                    REQUIRE(expectedQueue == executor.getExecutedTasks());
+                    REQUIRE(expectedQueue == options.m_executor.getExecutedTasks());
                 }
             }
         }
@@ -204,9 +196,6 @@ namespace execHelper { namespace plugins { namespace test {
             Patterns patterns = getAllPatterns({targetUtil, compilerUtil});
             PatternKeys patternKeys = getAllPatternKeys({targetUtil, compilerUtil});
             setupBasicOptions(options, patterns);
-
-            ExecutorStub executor;
-            options.setExecutor(&executor);
 
             vector<string> commandLine({"compiler={" + compilerUtil.compiler.getKey() + "}", "mode={" + compilerUtil.mode.getKey() + "}", "{" + compilerUtil.architecture.getKey() + "}", "hello{" + compilerUtil.distribution.getKey() + "}world", "{" + targetUtil.target.getKey() + "}{" + targetUtil.runTarget.getKey() + "}"});
             addSettings(options.m_settings["scons"], "patterns", patternKeys);
@@ -236,7 +225,7 @@ namespace execHelper { namespace plugins { namespace test {
                         }
                     }
 
-                    REQUIRE(expectedQueue == executor.getExecutedTasks());
+                    REQUIRE(expectedQueue == options.m_executor.getExecutedTasks());
                 }
             }
             WHEN("We clean the plugin") {
@@ -261,7 +250,7 @@ namespace execHelper { namespace plugins { namespace test {
                         }
                     }
 
-                    REQUIRE(expectedQueue == executor.getExecutedTasks());
+                    REQUIRE(expectedQueue == options.m_executor.getExecutedTasks());
                 }
             }
         }

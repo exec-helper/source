@@ -1,69 +1,40 @@
 #include <catch.hpp>
-#include <fstream>
 #include <vector>
 #include <string>
-#include <iostream>
+#include <tuple>
 
-#include <log/log.h>
-
-#include "core/execHelperOptions.h"
+#include "plugins/memory.h"
 #include "commander/commander.h"
 
 #include "utils/utils.h"
-#include "executorStub.h"
 
-using std::ofstream;
+#include "executorStub.h"
+#include "optionsStub.h"
+
 using std::vector;
 using std::string;
-using std::cout;
-using std::endl;
+using std::get;
 
-using execHelper::test::utils::MainVariables;
-using execHelper::test::utils::appendVectors;
-using execHelper::test::utils::convertToConfig;
-
-using execHelper::core::ExecHelperOptions;
+using execHelper::core::Command;
 using execHelper::core::Task;
-using execHelper::core::test::ExecutorStub;
+using execHelper::plugins::Memory;
+
+using execHelper::test::OptionsStub;
+using execHelper::test::utils::addSettings;
 
 namespace execHelper { namespace commander { namespace test {
     SCENARIO("Basic test the commander", "[commander]") {
         GIVEN("A fully configured commander and a configuration file") {
-            string actualCommand("echo 'Hello world'");
             string command1("command1");
             string command2("command2");
             vector<string> commands({command1, command2});
 
-            string filename("test.exec-helper");
+            OptionsStub options;
+            addSettings(options.m_settings, "commands", commands);
+            addSettings(options.m_settings, command1, {"memory"});
+            addSettings(options.m_settings, command2, {"memory"});
 
-            string config;
-            config += convertToConfig("commands", commands);
-            config += convertToConfig(command1, vector<string>({"command-line-command"}));
-            config += convertToConfig(command2, vector<string>({"command-line-command"}));
-            config += convertToConfig("command-line-command", actualCommand);
-
-            ofstream fileWriter;
-            fileWriter.open(filename);
-            fileWriter << config;
-            fileWriter.close();
-
-            Task actualTask1;
-            actualTask1.append(actualCommand);
-            Task actualTask2;
-            actualTask2.append(actualCommand);
-
-            vector<string> arguments;
-            arguments.emplace_back("UNITTEST");
-            appendVectors(arguments, commands);
-
-            ExecutorStub executor;
-
-            ExecHelperOptions options;
-            options.setExecutor(&executor);
-            options.parseSettingsFile(filename);
-
-            MainVariables mainVariables(arguments);
-            REQUIRE(options.parse(mainVariables.argc, mainVariables.argv.get()));
+            options.m_commands = commands;
 
             Commander commander(options);
 
@@ -71,7 +42,13 @@ namespace execHelper { namespace commander { namespace test {
                 REQUIRE(commander.run() == true);
 
                 THEN("We should get the tasks executed") {
-                    REQUIRE(executor.getExecutedTasks() == vector<Task>({actualTask1, actualTask2})); 
+                    const Memory::Memories& memories = Memory::getExecutions();
+
+                    REQUIRE(memories.size() == commands.size());
+                    for(size_t i = 0; i < memories.size(); ++i) {
+                        REQUIRE(memories[i].command == commands[i]);
+                    }
+                    Memory::reset();
                 }
             }
         }
@@ -81,189 +58,20 @@ namespace execHelper { namespace commander { namespace test {
         GIVEN("A fully configured commander and a configuration file and a command line with an invalid command") {
             string command1("command1");
             string command2("command2");
-            vector<string> commands({command1});
-
-            string filename("test.exec-helper");
-
-            string config;
-            config += convertToConfig("commands", commands);
-            config += convertToConfig(command1, vector<string>({"command-line-command"}));
-
-            ofstream fileWriter;
-            fileWriter.open(filename);
-            fileWriter << config;
-            fileWriter.close();
-
-            vector<string> arguments;
-            arguments.emplace_back("UNITTEST");
-            appendVectors(arguments, {command2});
-
-            ExecutorStub executor;
-
-            ExecHelperOptions options;
-            options.setExecutor(&executor);
-            options.parseSettingsFile(filename);
-
-            MainVariables mainVariables(arguments);
-            REQUIRE(options.parse(mainVariables.argc, mainVariables.argv.get()));
-
-            Commander commander(options);
-
-            WHEN("We apply the configuration and run the commander") {
-                REQUIRE(commander.run() == false);
-
-                THEN("We should have no executed tasks") {
-                    REQUIRE(executor.getExecutedTasks() == vector<Task>({})); 
-                }
-            }
-        }
-    }
-
-    SCENARIO("Test what happens when an unknown plugin is set", "[commander]") {
-        GIVEN("A fully configured commander and a configuration file with an unkown plugin") {
-            string command1("command1");
-            string command2("command2");
             vector<string> commands({command1, command2});
 
-            string filename("test.exec-helper");
+            OptionsStub options;
+            addSettings(options.m_settings, "commands", commands);
+            addSettings(options.m_settings, command1, {"memory"});
+            addSettings(options.m_settings, command2, {"memory"});
 
-            string config;
-            config += convertToConfig("commands", commands);
-            config += convertToConfig(command1, vector<string>({"unknown-command-1"}));
-            config += convertToConfig(command2, vector<string>({"unknown-command-2"}));
-
-            ofstream fileWriter;
-            fileWriter.open(filename);
-            fileWriter << config;
-            fileWriter.close();
-
-            vector<string> arguments;
-            arguments.emplace_back("UNITTEST");
-            appendVectors(arguments, commands);
-
-            ExecutorStub executor;
-
-            ExecHelperOptions options;
-            options.setExecutor(&executor);
-            options.parseSettingsFile(filename);
-
-            MainVariables mainVariables(arguments);
-            REQUIRE(options.parse(mainVariables.argc, mainVariables.argv.get()));
+            options.m_commands = {"command3"};
 
             Commander commander(options);
 
             WHEN("We apply the configuration and run the commander") {
-                REQUIRE(commander.run() == false);
-
-                THEN("We should have no executed tasks") {
-                    REQUIRE(executor.getExecutedTasks() == vector<Task>({})); 
-                }
-            }
-        }
-    }
-
-    SCENARIO("Test the calling of the plugins", "[commander]") {
-        GIVEN("Nothing") {
-            WHEN("We have the environment to use the scons plugin") {
-                string command("build");
-                vector<string> commands({command});
-
-                string filename("test.exec-helper");
-
-                string config;
-                config += convertToConfig("commands", commands);
-                config += convertToConfig(command, vector<string>({"scons"}));
-
-                ofstream fileWriter;
-                fileWriter.open(filename);
-                fileWriter << config;
-                fileWriter.close();
-
-                vector<string> arguments;
-                arguments.emplace_back("UNITTEST");
-                appendVectors(arguments, commands);
-
-                ExecutorStub executor;
-
-                ExecHelperOptions options;
-                options.setExecutor(&executor);
-                options.parseSettingsFile(filename);
-
-                MainVariables mainVariables(arguments);
-                REQUIRE(options.parse(mainVariables.argc, mainVariables.argv.get()));
-
-                Commander commander(options);
-
-                THEN("We should be able to run it successfully") {
-                    REQUIRE(commander.run() == true);
-                }
-            }
-            WHEN("We have the environment to use the bootstrap plugin") {
-                string command("init");
-                vector<string> commands({command});
-
-                string filename("test.exec-helper");
-
-                string config;
-                config += convertToConfig("commands", commands);
-                config += convertToConfig(command, vector<string>({"bootstrap"}));
-
-                ofstream fileWriter;
-                fileWriter.open(filename);
-                fileWriter << config;
-                fileWriter.close();
-
-                vector<string> arguments;
-                arguments.emplace_back("UNITTEST");
-                appendVectors(arguments, commands);
-
-                ExecutorStub executor;
-
-                ExecHelperOptions options;
-                options.setExecutor(&executor);
-                options.parseSettingsFile(filename);
-
-                MainVariables mainVariables(arguments);
-                REQUIRE(options.parse(mainVariables.argc, mainVariables.argv.get()));
-
-                Commander commander(options);
-                
-                THEN("We should be able to run it successfully") {
-                    REQUIRE(commander.run() == true);
-                }
-            }
-            WHEN("We have the environment to use the make plugin") {
-                string command("build");
-                vector<string> commands({command});
-
-                string filename("test.exec-helper");
-
-                string config;
-                config += convertToConfig("commands", commands);
-                config += convertToConfig(command, vector<string>({"make"}));
-
-                ofstream fileWriter;
-                fileWriter.open(filename);
-                fileWriter << config;
-                fileWriter.close();
-
-                vector<string> arguments;
-                arguments.emplace_back("UNITTEST");
-                appendVectors(arguments, commands);
-
-                ExecutorStub executor;
-
-                ExecHelperOptions options;
-                options.setExecutor(&executor);
-                options.parseSettingsFile(filename);
-
-                MainVariables mainVariables(arguments);
-                REQUIRE(options.parse(mainVariables.argc, mainVariables.argv.get()));
-
-                Commander commander(options);
-
-                THEN("We should be able to run it successfully") {
-                    REQUIRE(commander.run() == true);
+                THEN("It should fail") {
+                    REQUIRE(commander.run() == false);
                 }
             }
         }
