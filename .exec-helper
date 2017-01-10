@@ -1,3 +1,33 @@
+patterns:
+    COMPILER:
+        default-values:
+            - gcc
+            - clang
+        short-option: c
+        long-option: compiler
+    MODE:
+        default-values:
+            - debug
+            - release
+        short-option: m
+        long-option: mode
+    TARGET:
+        default-values:
+            - ""
+        short-option: t
+        long-option: target
+    RUNTARGET:
+        default-values:
+            - all
+        short-option: r
+        long-option: run-target
+    ANALYZE:
+        default-values:
+            - cppcheck
+            - clang-static-analyzer
+        short-option: a
+        long-option: analyze
+
 commands:
     - build
     - clean
@@ -15,22 +45,11 @@ rebuild:
     - build
 
 analyze:
-    - cppcheck
-    - clang-static-analyzer
+    - selector
 
-default-compilers:
-    - gcc
-    - clang
-
-default-modes:
-    - debug
-    - release
-
-default-targets:
-    - all
-
-default-run-targets:
-    - ""
+selector:
+    analyze:
+        pattern: ANALYZE
 
 scons:
     patterns:

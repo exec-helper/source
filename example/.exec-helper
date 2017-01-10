@@ -85,4 +85,3 @@ clang-static-analyzer:
     build-command: build
     clean-command: clean
     compiler: envcc
-    build-dir: build/clang-static-analyzer
