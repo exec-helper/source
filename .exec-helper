@@ -73,7 +73,7 @@ cppcheck:
         - TARGET
         - RUNTARGET
     src-dir: src
-    target-path: "{TARGET}{RUNTARGET}.cpp"
+    target-path: "{TARGET}"
     command-line:
         - --std=c++11
         - --error-exitcode=1
