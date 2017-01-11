@@ -48,7 +48,7 @@ namespace execHelper { namespace plugins {
         return true;
     }
 
-    TaskCollection Cppcheck::getSourceDir(const Command& command, const SettingsNode& rootSettings, const PatternCombinations& /*patternCombinations*/) noexcept {
+    TaskCollection Cppcheck::getSourceDir(const Command& command, const SettingsNode& rootSettings, const PatternCombinations& patternCombinations) noexcept {
         static const string sourceDirKey("src-dir");
         static const string targetDirKey("target-path");
 
@@ -61,12 +61,11 @@ namespace execHelper { namespace plugins {
             sourceDir += sourceDirSettings.back();
         }
         const SettingsNode targetSettings = getContainingSettings(command, rootSettings, targetDirKey); 
-        //if(target.getTarget() != "all") {
-            //const SettingsNode patternSettings = getContainingSettings(command, rootSettings, getPatternsKey()); 
-            //Patterns patterns = patternSettings[getPatternsKey()].toStringCollection();
-            //sourceDir += "/" + replacePatterns(targetSettings[targetDirKey].toStringCollection().back(), patterns, target);
-        //}
-        return TaskCollection({sourceDir});
+        const SettingsNode patternSettings = getContainingSettings(command, rootSettings, getPatternsKey()); 
+        sourceDir += "/" + targetSettings[targetDirKey].toStringCollection().back();
+        TaskCollection sourceDirCollection({sourceDir});
+        replacePatternCombinations(sourceDirCollection, patternCombinations);
+        return sourceDirCollection;
     }
 
     TaskCollection Cppcheck::getEnabledChecks(const Command& command, const SettingsNode& rootSettings) noexcept {
