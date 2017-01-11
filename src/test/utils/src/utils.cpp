@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <sstream>
+#include <fstream>
 
 #include "config/settingsNode.h"
 #include "core/pattern.h"
@@ -14,6 +15,7 @@ using std::endl;
 using std::stringstream;
 using std::initializer_list;
 using std::reference_wrapper;
+using std::ofstream;
 
 using execHelper::config::SettingsNode;
 using execHelper::core::Options;
@@ -114,6 +116,13 @@ namespace execHelper { namespace test { namespace utils {
             valueSetting.m_key = value;
             settingsToWriteTo.m_values.emplace_back(valueSetting);
         }
+    }
+
+    void writeSettingsFile(const string& filename, const SettingsNode& settings, const vector<Pattern>& patterns) noexcept {
+        ofstream file;
+        file.open(filename, std::ios::out | std::ios::trunc);
+        file << convertToConfig(settings, patterns);
+        file.close();
     }
 
     SettingsNode& getSetting(SettingsNode& settings, const string& key) noexcept {

@@ -27,6 +27,9 @@ namespace execHelper {
                 ExecHelperOptions() noexcept;
                 ExecHelperOptions(const ExecHelperOptions& other) noexcept;
 
+                bool operator==(const ExecHelperOptions& other) const noexcept;
+                bool operator!=(const ExecHelperOptions& other) const noexcept;
+
                 std::string getSettingsFile(int argc, const char* const * argv) const noexcept;
                 virtual bool parse(int argc, const char* const * argv) override;
                 virtual bool parseSettingsFile(const std::string& file) noexcept override;
@@ -35,10 +38,9 @@ namespace execHelper {
                 virtual bool getSingleThreaded() const noexcept override;
                 virtual const CommandCollection& getCommands() const noexcept override;
                 virtual const config::SettingsNode& getSettings() const noexcept override;
-                virtual config::SettingsNode& getSettings(const std::string& key) noexcept override;
+                virtual const config::SettingsNode& getSettings(const std::string& key) noexcept override;
                 virtual const config::SettingsNode& getSettings(const std::string& key) const noexcept override;
                 virtual bool containsHelp() const noexcept override;
-                virtual std::shared_ptr<Options> clone() const noexcept override;
                 virtual bool contains(const std::string& longOptions) const noexcept override;
                 virtual std::vector<std::string> getLongOption(const std::string& longOptions) const noexcept override;
                 virtual const PatternsHandler& getPatternsHandler() const noexcept override;
@@ -51,7 +53,6 @@ namespace execHelper {
                 virtual ExecutorInterface* getExecutor() const noexcept override;
 
             private:
-                bool m_help;
                 bool m_verbose;
                 bool m_singleThreaded;
                 CommandCollection m_commands;

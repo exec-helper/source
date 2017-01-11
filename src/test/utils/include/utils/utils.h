@@ -42,6 +42,7 @@ namespace execHelper {
             void addSettings(config::SettingsNode& settings, const std::string& key, const std::string& value) noexcept;
             void addSettings(config::SettingsNode& settings, const std::string& key, const std::initializer_list<std::string>& values) noexcept;
             void addSettings(config::SettingsNode& settings, const std::string& key, const std::vector<std::string>& values) noexcept;
+            void writeSettingsFile(const std::string& filename, const config::SettingsNode& settings, const std::vector<core::Pattern>& patterns) noexcept;
 
             core::PatternCombinations createPatternCombination(const std::initializer_list<core::PatternKey>& keys, const std::initializer_list<core::PatternValue>& values) noexcept;
 

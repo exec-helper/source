@@ -37,10 +37,9 @@ namespace execHelper {
                 virtual bool getSingleThreaded() const noexcept = 0;
                 virtual const CommandCollection& getCommands() const noexcept = 0;
                 virtual const config::SettingsNode& getSettings() const noexcept = 0;
-                virtual config::SettingsNode& getSettings(const std::string& key) noexcept = 0;
+                virtual const config::SettingsNode& getSettings(const std::string& key) noexcept = 0;
                 virtual const config::SettingsNode& getSettings(const std::string& key) const noexcept = 0;
                 virtual bool containsHelp() const noexcept = 0;
-                virtual std::shared_ptr<Options> clone() const noexcept = 0;
                 virtual bool contains(const std::string& longOptions) const noexcept = 0;
                 virtual std::vector<std::string> getLongOption(const std::string& longOptions) const noexcept = 0;
                 virtual const PatternsHandler& getPatternsHandler() const noexcept = 0;

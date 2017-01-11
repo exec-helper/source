@@ -29,7 +29,6 @@ using execHelper::yaml::YamlFile;
 
 namespace execHelper { namespace core {
     ExecHelperOptions::ExecHelperOptions() noexcept :
-        m_help(false),
         m_verbose(false),
         m_singleThreaded(false),
         m_executor(0)
@@ -38,13 +37,26 @@ namespace execHelper { namespace core {
     }
 
     ExecHelperOptions::ExecHelperOptions(const ExecHelperOptions& other) noexcept :
-        m_help(other.m_help), 
         m_verbose(other.m_verbose),
         m_singleThreaded(other.m_singleThreaded),
         m_settings(other.m_settings),
         m_executor(other.m_executor)
     {
         ;
+    }
+
+    bool ExecHelperOptions::operator==(const ExecHelperOptions& other) const noexcept {
+        return ( 
+                    m_verbose == other.m_verbose &&
+                    m_singleThreaded == other.m_singleThreaded &&
+                    m_settings == other.m_settings &&
+                    m_patternsHandler == other.m_patternsHandler &&
+                    m_executor == other.m_executor
+               );
+    }
+
+    bool ExecHelperOptions::operator!=(const ExecHelperOptions& other) const noexcept {
+        return !(*this == other);
     }
 
     bool ExecHelperOptions::getVerbosity() const noexcept {
@@ -69,11 +81,6 @@ namespace execHelper { namespace core {
 
     bool ExecHelperOptions::parse(int argc, const char* const * argv) {
         m_optionsMap = m_optionsDescriptions.getOptionsMap(argc, argv);
-        if(m_optionsMap.count("help")) {
-            m_help = true;
-            return true;
-        }
-
         if(m_optionsMap.count("verbose")) {
             m_verbose = true;
         }
@@ -133,14 +140,14 @@ namespace execHelper { namespace core {
     }
 
     bool ExecHelperOptions::containsHelp() const noexcept {
-        return m_help;
+        return (m_optionsMap.count("help") > 0U);
     }
 
     const config::SettingsNode& ExecHelperOptions::getSettings() const noexcept {
         return m_settings;
     }
 
-    config::SettingsNode& ExecHelperOptions::getSettings(const std::string& key) noexcept {
+    const config::SettingsNode& ExecHelperOptions::getSettings(const std::string& key) noexcept {
         if(m_settings.contains(key)) {
             return m_settings[key]; 
         }
@@ -168,10 +175,6 @@ namespace execHelper { namespace core {
         user_feedback(m_optionsDescriptions.getOptionDescriptions());
     }
 
-    shared_ptr<Options> ExecHelperOptions::clone() const noexcept {
-        return make_shared<ExecHelperOptions>(*this);
-    }
-
     bool ExecHelperOptions::contains(const std::string& longOptions) const noexcept {
         return m_optionsMap.count(longOptions) > 0;
     }
@@ -189,7 +192,7 @@ namespace execHelper { namespace core {
         if(contains(longOption)) {
             return getLongOption(longOption);
         }
-        return PatternValues();
+        return pattern.getDefaultValues();
     }
 
     PatternPermutator ExecHelperOptions::makePatternPermutator(const PatternKeys& patterns) const noexcept {
@@ -201,11 +204,7 @@ namespace execHelper { namespace core {
             for(const auto& patternKey : patterns) {
                 core::Pattern pattern = m_patternsHandler.getPattern(patternKey);
                 PatternValues commandlineValues = getValues(pattern);
-                if(commandlineValues.empty()) {
-                    patternValuesMatrix.emplace(pattern.getKey(), pattern.getDefaultValues());
-                } else {
-                    patternValuesMatrix.emplace(pattern.getKey(), commandlineValues);
-                }
+                patternValuesMatrix.emplace(pattern.getKey(), commandlineValues);
             }
         }
         return core::PatternPermutator(patternValuesMatrix);

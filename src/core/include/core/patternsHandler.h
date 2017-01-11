@@ -12,6 +12,9 @@ namespace execHelper {
                 typedef std::map<PatternKey, Pattern> PatternCollection;
 
             public:
+                bool operator==(const PatternsHandler& other) const noexcept;
+                bool operator!=(const PatternsHandler& other) const noexcept;
+
                 bool contains(const PatternKey& key) const noexcept;
                 void addPattern(const Pattern& pattern) noexcept;
                 const Pattern& getPattern(const PatternKey& key) const noexcept;

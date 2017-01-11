@@ -47,7 +47,7 @@ namespace execHelper {
                     return m_settings;
                 }
 
-                virtual config::SettingsNode& getSettings(const std::string& key) noexcept override {
+                virtual const config::SettingsNode& getSettings(const std::string& key) noexcept override {
                     if(m_settings.contains(key)) {
                         return m_settings[key];
                     }
@@ -74,10 +74,6 @@ namespace execHelper {
                     return &m_executor;
                 }
   
-                virtual std::shared_ptr<Options> clone() const noexcept override {
-                    return std::make_shared<OptionsStub>(*this);
-                }
-
                 virtual bool contains(const std::string& /*longOptions*/) const noexcept override {
                     return false;
                 }
