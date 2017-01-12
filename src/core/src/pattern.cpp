@@ -23,25 +23,6 @@ namespace execHelper { namespace core {
         ;
     }
 
-    Pattern::Pattern(const Pattern& other) noexcept :
-        m_key(other.m_key),
-        m_defaultValues(other.m_defaultValues),
-        m_shortOption(other.m_shortOption),
-        m_longOption(other.m_longOption)
-    {
-        ;
-    }
-
-    Pattern& Pattern::operator=(const Pattern& other) noexcept {
-        if(this != &other) {
-            m_key = other.m_key;
-            m_defaultValues = other.m_defaultValues;
-            m_shortOption = other.m_shortOption;
-            m_longOption = other.m_longOption;
-        }
-        return *this;
-    }
-
     bool Pattern::operator==(const Pattern& other) const noexcept {
         return (m_key == other.m_key && m_defaultValues == other.m_defaultValues && m_shortOption == other.m_shortOption && m_longOption == other.m_longOption);
     }

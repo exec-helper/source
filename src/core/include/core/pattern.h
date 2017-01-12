@@ -14,9 +14,7 @@ namespace execHelper {
         class Pattern {
             public:
                 Pattern(const PatternKey& patternKey, const PatternValues& defaultValue, char shortOption, const std::string& longOption) noexcept;
-                Pattern(const Pattern& other) noexcept;
 
-                Pattern& operator=(const Pattern& other) noexcept;
                 bool operator==(const Pattern& other) const noexcept;
                 bool operator!=(const Pattern& other) const noexcept;
 
