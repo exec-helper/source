@@ -30,13 +30,37 @@ namespace execHelper { namespace core {
                 ImmediateExecutor executor(shell, IGNORE_CALLBACK);
 
                 WHEN("We schedule each task and run the executor") {
-                    executor.execute(task1);
-                    executor.execute(task2);
-                    executor.execute(task3);
+                    REQUIRE(executor.execute(task1) == true);
+                    REQUIRE(executor.execute(task2) == true);
+                    REQUIRE(executor.execute(task3) == true);
 
                     THEN("We should get the same tasks again") {
                         ShellStub::TaskQueue executedTasks = shell.getExecutedTasks();
                         REQUIRE(executedTasks == actualTasks);
+                    }
+                }
+            }
+        }
+
+        SCENARIO("Test the failing of the execution", "[ExecutorInterface][ImmediateExecutor]") {
+            GIVEN("A shell that fails to execute and a task to execute") {
+                Task task1;
+                task1.append("task1");
+                const Shell::ShellReturnCode actualReturnCode = 42U;
+                Shell::ShellReturnCode realReturnCode = 0U;
+
+                ShellStub shell(actualReturnCode);
+                ImmediateExecutor::Callback callback = [&realReturnCode](Shell::ShellReturnCode returnCode) { realReturnCode = returnCode; };
+                ImmediateExecutor executor(shell, callback);
+
+                WHEN("We schedule the task for execution") {
+                    bool returnCode = executor.execute(task1);
+
+                    THEN("The call should fail") {
+                        REQUIRE(returnCode == false);
+                    }
+                    THEN("We should receive the failed return code") {
+                        REQUIRE(realReturnCode == actualReturnCode);
                     }
                 }
             }

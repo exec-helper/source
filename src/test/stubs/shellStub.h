@@ -7,20 +7,22 @@
 #include "core/task.h"
 
 namespace execHelper { namespace core { namespace test {
+    const Shell::ShellReturnCode RETURN_CODE_SUCCESS = 0U;
+
     class ShellStub : public Shell {
         public:
             typedef std::vector<Task> TaskQueue;
 
-            ShellStub() :
+            ShellStub(ShellReturnCode returnCode = RETURN_CODE_SUCCESS) :
                 Shell(),
-                RETURN_CODE_SUCCESS(0U)
+                m_returnCode(returnCode)
             {
                 ;
             }
 
             virtual ShellReturnCode execute(const Task& task) noexcept {
                 m_executedTasks.push_back(task);
-                return RETURN_CODE_SUCCESS;
+                return m_returnCode;
             }
 
             virtual bool isExecutedSuccessfully(ShellReturnCode returnCode) const noexcept {
@@ -32,8 +34,8 @@ namespace execHelper { namespace core { namespace test {
             }
 
         private:
-            const ShellReturnCode RETURN_CODE_SUCCESS;
             TaskQueue m_executedTasks;
+            ShellReturnCode m_returnCode; 
     };
 } } }
 
