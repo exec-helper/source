@@ -17,13 +17,22 @@
 
 using std::string;
 using std::vector;
-using std::shared_ptr;
-using std::make_shared;
+using std::unique_ptr;
+using std::forward;
 
 using execHelper::config::SettingsNode;
 using execHelper::core::Command;
 using execHelper::core::Task;
 using execHelper::core::Options;
+
+namespace {
+    // Create this function our selves in order to stay compliant with c++11
+    template<typename T, typename... Args>
+    std::unique_ptr<T> make_unique(Args&&... args)
+    {
+            return unique_ptr<T>(new T(forward<Args>(args)...));
+    }
+}
 
 namespace execHelper { namespace plugins {
     ExecutePlugin::ExecutePlugin(const vector<string>& commands) noexcept :
@@ -35,13 +44,13 @@ namespace execHelper { namespace plugins {
     bool ExecutePlugin::apply(const Command& command, Task& task, const Options& options) const noexcept {
         for(const auto& pluginName : m_commands) {
             Task newTask = task;
-            shared_ptr<Plugin> plugin = getPlugin(pluginName);
+            unique_ptr<Plugin> plugin = getPlugin(pluginName);
             Command commandToPass = command;
             if(!plugin) {
                 // Check if it exists as an other target in the settings
                 if(options.getSettings().contains(pluginName)) {
                     // Then use executeplugin as the plugin 
-                    plugin = make_shared<ExecutePlugin>(options.getSettings(pluginName).toStringCollection());
+                    plugin = make_unique<ExecutePlugin>(options.getSettings(pluginName).toStringCollection());
                     commandToPass = pluginName;
                 } else {
                     user_feedback_error("Could not find a command or plugin called '" << pluginName << "'");
@@ -55,24 +64,24 @@ namespace execHelper { namespace plugins {
         return true;
     }
 
-    shared_ptr<Plugin> ExecutePlugin::getPlugin(const string& pluginName) noexcept {
+    unique_ptr<Plugin> ExecutePlugin::getPlugin(const string& pluginName) noexcept {
         if(pluginName == "command-line-command") {
-            return make_shared<CommandLineCommand>();
+            return make_unique<CommandLineCommand>();
         } else if(pluginName == "scons") {
-            return make_shared<Scons>(); 
+            return make_unique<Scons>(); 
         } else if(pluginName == "make") {
-            return make_shared<Make>(); 
+            return make_unique<Make>(); 
         } else if(pluginName == "bootstrap") {
-            return make_shared<Bootstrap>(); 
+            return make_unique<Bootstrap>(); 
         } else if(pluginName == "cppcheck") {
-            return make_shared<Cppcheck>();
+            return make_unique<Cppcheck>();
         } else if(pluginName == "clang-static-analyzer") {
-            return make_shared<ClangStaticAnalyzer>();
+            return make_unique<ClangStaticAnalyzer>();
         } else if(pluginName == "selector") {
-            return make_shared<Selector>();
+            return make_unique<Selector>();
         } else if(pluginName == "memory") {
-            return make_shared<Memory>();
+            return make_unique<Memory>();
         }
-        return shared_ptr<Plugin>();
+        return unique_ptr<Plugin>();
     }
 } }

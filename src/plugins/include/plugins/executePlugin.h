@@ -14,7 +14,7 @@ namespace execHelper {
                 ExecutePlugin(const std::vector<std::string>& commands) noexcept;
                 virtual bool apply(const core::Command& command, core::Task& task, const core::Options& options) const noexcept override;
 
-                static std::shared_ptr<Plugin> getPlugin(const std::string& pluginName) noexcept;
+                static std::unique_ptr<Plugin> getPlugin(const std::string& pluginName) noexcept;
 
             private:
                 const std::vector<std::string> m_commands;

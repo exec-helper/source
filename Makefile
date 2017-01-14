@@ -27,7 +27,7 @@ cppcheck:
 	build/gcc/release/bin/exec-helper analyze
 
 check-memory:
-	$(foreach test,$(UNITTESTS), valgrind --tool=memcheck $(test) || exit 1;)
+	$(foreach test,$(UNITTESTS), valgrind --tool=memcheck --leak-check=full $(test) || exit 1;)
 
 check: build test coverage check-memory cppcheck
 

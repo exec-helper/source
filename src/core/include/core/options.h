@@ -30,6 +30,8 @@ namespace execHelper {
 
         class Options {
             public:
+                virtual ~Options() {};
+
                 virtual bool parse(int argc, const char* const * argv) = 0;
                 virtual bool parseSettingsFile(const std::string& file) noexcept = 0;
 
