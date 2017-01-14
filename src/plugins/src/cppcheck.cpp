@@ -61,7 +61,6 @@ namespace execHelper { namespace plugins {
             sourceDir += sourceDirSettings.back();
         }
         const SettingsNode targetSettings = getContainingSettings(command, rootSettings, targetDirKey); 
-        const SettingsNode patternSettings = getContainingSettings(command, rootSettings, getPatternsKey()); 
         if(targetSettings.contains(targetDirKey)) {
             sourceDir += "/" + targetSettings[targetDirKey].toStringCollection().back();
         }

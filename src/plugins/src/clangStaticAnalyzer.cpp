@@ -34,7 +34,16 @@ namespace execHelper { namespace plugins {
         task.append(getCommandLine(command, rootSettings));
 
         string cleanCommand = getSystemName(command, "clean-command", rootSettings);
+        if(cleanCommand.empty()) {
+            user_feedback_error("Missing 'clean-command' option for the '" << command << "' command and the clang-static-analyzer plugin");
+            return false;
+        }
+
         string buildCommand = getSystemName(command, "build-command", rootSettings);
+        if(buildCommand.empty()) {
+            user_feedback_error("Missing 'build-command' option for the '" << command << "' command and the clang-static-analyzer plugin");
+            return false;
+        }
 
         ExecutePlugin executePlugin({cleanCommand, buildCommand});
         return executePlugin.apply(command, task, options);

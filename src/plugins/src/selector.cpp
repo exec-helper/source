@@ -22,20 +22,15 @@ namespace execHelper { namespace plugins {
         if(! options.getSettings().contains(selectorKey)) {
             return false;
         }
-        const SettingsNode& selectorSettings = options.getSettings({"selector"});
-
-        if(! selectorSettings.contains(command)) {
-            user_feedback_error("Could not find command '" << command << "' in the " << selectorKey << " settings");
-            return false;
-        }
-        const SettingsNode rootSettings = selectorSettings[command]; 
-
+        const SettingsNode& rootSettings = options.getSettings({"selector"});
         static const string patternKey("pattern");
-        if(! rootSettings.contains(patternKey)) {
+        const SettingsNode patternSettings = getContainingSettings(command, rootSettings, patternKey); 
+        if(! patternSettings.contains(patternKey)) {
             user_feedback_error("Missing the '" << patternKey << "' keyword in the configuration of " << selectorKey << "[" << command << "] settings");
             return false;
         }
-        PatternKeys patternKeysToCheck = rootSettings[patternKey].toStringCollection();
+
+        PatternKeys patternKeysToCheck = patternSettings[patternKey].toStringCollection();
         vector<string> commandsToExecute;
         for(const auto& pattern : options.makePatternPermutator(patternKeysToCheck)) {
             for(const auto& patternValues : pattern) {
