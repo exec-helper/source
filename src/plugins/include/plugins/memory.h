@@ -34,8 +34,10 @@ namespace execHelper {
                 virtual bool apply(const core::Command& command, core::Task& task, const core::Options& options) const noexcept override;
                 static const Memories& getExecutions() noexcept;
                 static void reset() noexcept;
+                static void setReturnCode(bool returnCode) noexcept;
 
             private:
+                static bool m_returnCode;
                 static Memories m_executions;
         };
     }
