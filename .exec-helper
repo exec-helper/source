@@ -33,6 +33,7 @@ commands:
     - clean
     - rebuild
     - analyze
+    - run-test
 
 build:
     - scons
@@ -46,6 +47,9 @@ rebuild:
 
 analyze:
     - selector
+
+run-test:
+    - command-line-command
 
 selector:
     analyze:
@@ -84,3 +88,12 @@ clang-static-analyzer:
     build-command: build
     clean-command: clean
     compiler: envcc
+
+command-line-command:
+    run-test:
+        patterns:
+            - COMPILER
+            - MODE
+            - RUNTARGET
+            - TARGET
+        command-line: build/{COMPILER}/{MODE}/bin/test/{RUNTARGET}/{TARGET}-{RUNTARGET}

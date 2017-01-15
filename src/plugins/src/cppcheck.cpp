@@ -7,7 +7,7 @@
 #include "config/settingsNode.h"
 #include "core/task.h"
 #include "core/patterns.h"
-#include "core/execHelperOptions.h"
+#include "core/options.h"
 
 #include "pluginUtils.h"
 
@@ -19,7 +19,7 @@ using execHelper::core::Options;
 using execHelper::core::TaskCollection;
 using execHelper::core::PatternKeys;
 using execHelper::core::Command;
-using execHelper::core::ExecHelperOptions;
+using execHelper::core::Options;
 using execHelper::core::PatternCombinations;
 using execHelper::config::SettingsNode;
 
