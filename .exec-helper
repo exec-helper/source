@@ -21,6 +21,15 @@ patterns:
             - all
         short-option: r
         long-option: run-target
+    MODULE:
+        default-values:
+            - config
+            - yaml
+            - core
+            - plugins
+            - commander
+        short-option: e
+        long-option: module
     ANALYZE:
         default-values:
             - cppcheck
@@ -70,12 +79,11 @@ scons:
             - --clean
             - compiler={COMPILER}
             - mode={MODE}
-    target: "{TARGET}-{RUNTARGET}"
+    target: "{TARGET}"
 
 cppcheck:
     patterns:
         - TARGET
-        - RUNTARGET
     src-dir: src
     target-path: "{TARGET}"
     command-line:
@@ -95,5 +103,5 @@ command-line-command:
             - COMPILER
             - MODE
             - RUNTARGET
-            - TARGET
-        command-line: build/{COMPILER}/{MODE}/bin/test/{RUNTARGET}/{TARGET}-{RUNTARGET}
+            - MODULE
+        command-line: build/{COMPILER}/{MODE}/bin/test/{RUNTARGET}/{MODULE}-{RUNTARGET}

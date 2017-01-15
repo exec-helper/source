@@ -1,5 +1,4 @@
-UNITTESTS=build/gcc/debug/test/core/core-unittest build/gcc/debug/test/yaml/yaml-unittest build/gcc/debug/test/config/config-unittest build/gcc/debug/test/plugins/plugins-unittest build/gcc/debug/test/commander/commander-unittest
-UNITTESTS=core yaml config plugins commander
+MODULES=core yaml config plugins commander
 COMPILER=gcc
 
 NB_OF_CORES:=$(shell grep -c ^processor /proc/cpuinfo)
@@ -14,7 +13,7 @@ app:
 	scons compiler=$(COMPILER) --jobs $(NB_OF_CORES) mode=release exec-helper
 
 test:: build
-	$(foreach test,$(UNITTESTS), exec-helper run-test --target $(test) --run-target unittest --compiler $(COMPILER) --mode debug || exit 1;)
+	$(foreach module,$(MODULES), exec-helper run-test --module $(module) --run-target unittest --compiler $(COMPILER) --mode debug || exit 1;)
 
 coverage: clean-coverage test
 	lcov --base-directory . --directory . -c -o libexechelper_test.info
