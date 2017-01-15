@@ -50,35 +50,35 @@ unittest-core:
     dependencies:
         - build:gcc
     script:
-        - build/gcc/release/bin/exec-helper run-test --module core --compiler gcc --mode release
+        - build/gcc/release/bin/exec-helper run-test --module core --run-target unittest --compiler gcc --mode release
 
 unittest-yaml:
     stage: test
     dependencies:
         - build:gcc
     script:
-        - build/gcc/release/bin/exec-helper run-test --module yaml --compiler gcc --mode release
+        - build/gcc/release/bin/exec-helper run-test --module yaml --run-target unittest --compiler gcc --mode release
 
 unittest-config:
     stage: test
     dependencies:
         - build:gcc
     script:
-        - build/gcc/release/bin/exec-helper run-test --module config --compiler gcc --mode release
+        - build/gcc/release/bin/exec-helper run-test --module config --run-target unittest --compiler gcc --mode release
 
 unittest-plugins:
     stage: test
     dependencies:
         - build:gcc
     script:
-        - build/gcc/release/bin/exec-helper run-test --module plugins --compiler gcc --mode release
+        - build/gcc/release/bin/exec-helper run-test --module plugins --run-target unittest --compiler gcc --mode release
 
 unittest-commander:
     stage: test
     dependencies:
         - build:gcc
     script:
-        - build/gcc/release/bin/exec-helper run-test --module commander --compiler gcc --mode release
+        - build/gcc/release/bin/exec-helper run-test --module commander --run-target unittest --compiler gcc --mode release
 
 memory-check:
     stage: test
