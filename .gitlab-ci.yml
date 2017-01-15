@@ -40,9 +40,7 @@ test-distribution:arch-linux:
         - pacman -S --noconfirm scons gcc clang cmake make boost boost-libs git libunistring ncurses
         - git submodule update --init
     script:
-        - scons -j8 compiler=gcc mode=debug
         - scons -j8 compiler=gcc mode=release
-        - scons -j8 compiler=clang mode=debug
         - scons -j8 compiler=clang mode=release
 
 unittest-core:
