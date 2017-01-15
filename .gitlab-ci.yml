@@ -111,6 +111,7 @@ coverage:
         - build:gcc
     script:
         - apt-get install --yes lcov make
+        - export PATH=$PATH:$(pwd)/build/gcc/release/bin
         - make coverage
     artifacts:
         paths:
