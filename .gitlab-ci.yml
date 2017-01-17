@@ -83,8 +83,8 @@ memory-check:
     dependencies:
         - build:gcc
     script:
-        - apt-get install --yes valgrind make
-        - make check-memory
+        - apt-get install --yes valgrind
+        - build/gcc/release/bin/exec-helper analyze --analyze valgrind --compiler gcc --mode debug --run-target unittest
 
 cppcheck:
     stage: test
