@@ -34,6 +34,7 @@ patterns:
         default-values:
             - cppcheck
             - clang-static-analyzer
+            - valgrind
         short-option: a
         long-option: analyze
 
@@ -105,3 +106,10 @@ command-line-command:
             - RUNTARGET
             - MODULE
         command-line: build/{COMPILER}/{MODE}/bin/test/{RUNTARGET}/{MODULE}-{RUNTARGET}
+
+valgrind:
+    run-command: run-test
+    analyze:
+        tool: memcheck
+        command-line:
+           - --leak-check=full 

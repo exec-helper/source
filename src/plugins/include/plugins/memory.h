@@ -32,6 +32,7 @@ namespace execHelper {
                 typedef std::vector<Memory_t> Memories;
 
                 virtual bool apply(const core::Command& command, core::Task& task, const core::Options& options) const noexcept override;
+            protected:
                 static const Memories& getExecutions() noexcept;
                 static void reset() noexcept;
                 static void setReturnCode(bool returnCode) noexcept;
@@ -39,6 +40,16 @@ namespace execHelper {
             private:
                 static bool m_returnCode;
                 static Memories m_executions;
+        };
+
+        class MemoryHandler : public Memory {
+            public:
+                MemoryHandler();
+                ~MemoryHandler();
+
+                const Memories& getExecutions() noexcept;
+                void reset() noexcept;
+                void setReturnCode(bool returnCode) noexcept;
         };
     }
 }

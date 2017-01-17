@@ -27,7 +27,7 @@ clean-coverage:
 	rm -rf test_coverage
 
 check-memory:
-	$(foreach test,$(UNITTESTS), valgrind --tool=memcheck --leak-check=full $(test) || exit 1;)
+	exec-helper analyze --analyze valgrind --run-target unittest --compiler $(COMPILER) --mode debug
 
 check: build test coverage check-memory
 

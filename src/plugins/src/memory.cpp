@@ -24,4 +24,27 @@ namespace execHelper { namespace plugins {
     void Memory::setReturnCode(bool returnCode) noexcept {
         m_returnCode = returnCode;
     }
+
+    MemoryHandler::MemoryHandler() :
+        Memory()
+    {
+        // Reset the memory here too, just to be sure
+        Memory::reset(); 
+    }
+
+    MemoryHandler::~MemoryHandler() {
+        Memory::reset(); 
+    }
+
+    const Memory::Memories& MemoryHandler::getExecutions() noexcept {
+        return Memory::getExecutions();
+    }
+
+    void MemoryHandler::reset() noexcept {
+        Memory::reset();
+    }
+
+    void MemoryHandler::setReturnCode(bool returnCode) noexcept {
+        Memory::setReturnCode(returnCode);
+    }
 } }

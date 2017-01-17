@@ -18,6 +18,7 @@ using std::get;
 using execHelper::core::Command;
 using execHelper::core::Task;
 using execHelper::plugins::Memory;
+using execHelper::plugins::MemoryHandler;
 
 using execHelper::test::OptionsStub;
 using execHelper::test::utils::addSettings;
@@ -36,19 +37,20 @@ namespace execHelper { namespace commander { namespace test {
 
             options.m_commands = commands;
 
+            MemoryHandler memory;
+
             Commander commander(options);
 
             WHEN("We apply the configuration and run the commander") {
                 REQUIRE(commander.run() == true);
 
                 THEN("We should get the tasks executed") {
-                    const Memory::Memories& memories = Memory::getExecutions();
+                    const Memory::Memories& memories = memory.getExecutions();
 
                     REQUIRE(memories.size() == commands.size());
                     for(size_t i = 0; i < memories.size(); ++i) {
                         REQUIRE(memories[i].command == commands[i]);
                     }
-                    Memory::reset();
                 }
             }
         }

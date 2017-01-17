@@ -197,15 +197,10 @@ namespace execHelper { namespace core {
 
     PatternPermutator ExecHelperOptions::makePatternPermutator(const PatternKeys& patterns) const noexcept {
         std::map<core::PatternKey, core::PatternValues> patternValuesMatrix;
-        if(patterns.empty()) {
-            // Invent a map so we permutate at least once
-            patternValuesMatrix["NOKEY"] = {"NOKEY"};
-        } else {
-            for(const auto& patternKey : patterns) {
-                core::Pattern pattern = m_patternsHandler.getPattern(patternKey);
-                PatternValues commandlineValues = getValues(pattern);
-                patternValuesMatrix.emplace(pattern.getKey(), commandlineValues);
-            }
+        for(const auto& patternKey : patterns) {
+            core::Pattern pattern = m_patternsHandler.getPattern(patternKey);
+            PatternValues commandlineValues = getValues(pattern);
+            patternValuesMatrix.emplace(pattern.getKey(), commandlineValues);
         }
         return core::PatternPermutator(patternValuesMatrix);
     }

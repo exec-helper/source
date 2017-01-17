@@ -78,9 +78,10 @@ namespace execHelper { namespace core {
     }
 
     std::ostream& operator<<( std::ostream& os, const Task& task ) noexcept {
-        os << std::string( "Task: {");
+        TaskCollection subtasks = task.getTask();
+        os << std::string( "Task(") << subtasks.size() << ") : {";
 
-        for(const auto& subTask : task.getTask()) {
+        for(const auto& subTask : subtasks) {
             os << std::string(" ") << subTask;
         }
         os << std::string(" }");

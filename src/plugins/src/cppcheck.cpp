@@ -34,12 +34,7 @@ namespace execHelper { namespace plugins {
         task.append(cppcheckCommand);
         task.append(getEnabledChecks(command, rootSettings));
 
-        const SettingsNode patternSettings = getContainingSettings(command, rootSettings, getPatternsKey()); 
-        PatternKeys patterns; 
-        if(patternSettings.contains(getPatternsKey())) {
-            patterns = patternSettings[getPatternsKey()].toStringCollection();
-        }
-        for(const auto& combination : options.makePatternPermutator(patterns)) {
+        for(const auto& combination : makePatternPermutator(command, rootSettings, options)) {
             Task cppcheckTargetTask = task;
             cppcheckTargetTask.append(getCommandLine(command, rootSettings, combination));
             cppcheckTargetTask.append(getSourceDir(command, rootSettings, combination));

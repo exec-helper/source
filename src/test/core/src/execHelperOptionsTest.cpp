@@ -519,12 +519,12 @@ namespace execHelper { namespace core {
                     } 
                 }
                 WHEN("We permutate without passing patterns") {
-                    THEN("We should get only one iteration") {
+                    THEN("We should get no iterations") {
                         size_t index = 0;
                         for(const auto& permutation : options.makePatternPermutator({})) {
                             ++index;
                         }
-                        REQUIRE(index == 1U);
+                        REQUIRE(index == 0U);
                     }
                 }
             }

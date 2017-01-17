@@ -20,6 +20,8 @@ using std::get;
 using execHelper::core::Task;
 using execHelper::core::Pattern;
 
+using execHelper::plugins::MemoryHandler;
+
 using execHelper::test::OptionsStub;
 using execHelper::core::test::ExecutorStub;
 using execHelper::test::utils::Patterns;
@@ -65,6 +67,8 @@ namespace execHelper { namespace plugins { namespace test {
             const string command1("selector-command");
             const string command2("selector-command2");
 
+            MemoryHandler memory;
+
             OptionsStub options;
 
             setupBasicOptions(options, {testPattern1, testPattern2});
@@ -81,14 +85,14 @@ namespace execHelper { namespace plugins { namespace test {
                     REQUIRE(returnCode == true);
                 }
                 THEN("All default actions should be executed") {
-                    const Memory::Memories memories = Memory::getExecutions();
+                    const Memory::Memories memories = memory.getExecutions();
                     REQUIRE(memories.size() == selectionOptions1.size());
                     for(size_t i = 0; i < selectionOptions1.size(); ++i) {
                         REQUIRE(memories[i].command == command1);
                     }
                 }
                 THEN("They should be called with the appropriate values") {
-                    const Memory::Memories memories = Memory::getExecutions();
+                    const Memory::Memories memories = memory.getExecutions();
                     for(size_t i = 0; i < memories.size(); ++i) {
                         for(size_t j = 0; j < i; ++j) {
                             // Note: tasks should point to different objects, but since
@@ -101,7 +105,6 @@ namespace execHelper { namespace plugins { namespace test {
                         }
                     }
                 }
-                Memory::reset();
             }
             WHEN("We apply the selector to command 2") {
                 bool returnCode = plugin.apply(command2, task, options);
@@ -110,14 +113,14 @@ namespace execHelper { namespace plugins { namespace test {
                     REQUIRE(returnCode == true);
                 }
                 THEN("All default actions should be executed") {
-                    const Memory::Memories memories = Memory::getExecutions();
+                    const Memory::Memories memories = memory.getExecutions();
                     REQUIRE(memories.size() == selectionOptions2.size());
                     for(size_t i = 0; i < selectionOptions2.size(); ++i) {
                         REQUIRE(memories[i].command == command2);
                     }
                 }
                 THEN("They should be called with the appropriate values") {
-                    const Memory::Memories memories = Memory::getExecutions();
+                    const Memory::Memories memories = memory.getExecutions();
                     for(size_t i = 0; i < memories.size(); ++i) {
                         for(size_t j = 0; j < i; ++j) {
                             // Note: tasks should point to different objects, but since
@@ -130,7 +133,6 @@ namespace execHelper { namespace plugins { namespace test {
                         }
                     }
                 }
-                Memory::reset();
             }
         }
     }
@@ -147,6 +149,8 @@ namespace execHelper { namespace plugins { namespace test {
             vector<string> commandLineOptions2 = {command2};
             Pattern testPattern1("TESTPATTERN1", selectionOptions1, 't', "--test-pattern1");
             Pattern testPattern2("TESTPATTERN2", selectionOptions2, 'u', "--test-pattern2");
+
+            MemoryHandler memory;
 
             OptionsStub options;
 
@@ -165,14 +169,14 @@ namespace execHelper { namespace plugins { namespace test {
 
                 THEN("All actions defined on the command line should be executed") {
                     ExecutorStub::TaskQueue executedTasks = options.m_executor.getExecutedTasks();
-                    const Memory::Memories memories = Memory::getExecutions();
+                    const Memory::Memories memories = memory.getExecutions();
                     REQUIRE(memories.size() == commandLineOptions1.size());
                     for(size_t i = 0; i < commandLineOptions1.size(); ++i) {
                         REQUIRE(memories[i].command == commandlineCommand1);
                     }
                 }
                 THEN("They should be called with the appropriate values") {
-                    const Memory::Memories memories = Memory::getExecutions();
+                    const Memory::Memories memories = memory.getExecutions();
                     for(size_t i = 0; i < memories.size(); ++i) {
                         for(size_t j = 0; j < i; ++j) {
                             // Note: tasks should point to different objects, but since
@@ -185,21 +189,20 @@ namespace execHelper { namespace plugins { namespace test {
                         }
                     }
                 }
-                Memory::reset();
             }
             WHEN("We apply the selector with command 2") {
                 REQUIRE(plugin.apply(commandlineCommand2, task, options) == true);
 
                 THEN("All actions defined on the command line should be executed") {
                     ExecutorStub::TaskQueue executedTasks = options.m_executor.getExecutedTasks();
-                    const Memory::Memories memories = Memory::getExecutions();
+                    const Memory::Memories memories = memory.getExecutions();
                     REQUIRE(memories.size() == commandLineOptions2.size());
                     for(size_t i = 0; i < commandLineOptions2.size(); ++i) {
                         REQUIRE(memories[i].command == commandlineCommand2);
                     }
                 }
                 THEN("They should be called with the appropriate values") {
-                    const Memory::Memories memories = Memory::getExecutions();
+                    const Memory::Memories memories = memory.getExecutions();
                     for(size_t i = 0; i < memories.size(); ++i) {
                         for(size_t j = 0; j < i; ++j) {
                             // Note: tasks should point to different objects, but since
@@ -212,7 +215,6 @@ namespace execHelper { namespace plugins { namespace test {
                         }
                     }
                 }
-                Memory::reset();
             }
         }
     }
@@ -222,6 +224,7 @@ namespace execHelper { namespace plugins { namespace test {
             Pattern testPattern("TESTPATTERN", selectionOptions, 't', "--test-pattern");
             const string command("selector-command");
 
+            MemoryHandler memory;
             OptionsStub options;
 
             setupBasicOptions(options, {testPattern});
@@ -236,10 +239,9 @@ namespace execHelper { namespace plugins { namespace test {
                     REQUIRE(returnCode == false);
                 }
                 THEN("All default actions should be executed") {
-                    const Memory::Memories memories = Memory::getExecutions();
+                    const Memory::Memories memories = memory.getExecutions();
                     REQUIRE(memories.size() == 0U);
                 }
-                Memory::reset();
             }
         }
     }

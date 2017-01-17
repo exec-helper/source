@@ -14,6 +14,7 @@
 #include "plugins/clangStaticAnalyzer.h"
 #include "plugins/selector.h"
 #include "plugins/memory.h"
+#include "plugins/valgrind.h"
 
 #include "optionsStub.h"
 #include "executorStub.h"
@@ -28,6 +29,7 @@ using execHelper::core::Task;
 using execHelper::core::Pattern;
 
 using execHelper::plugins::Plugin;
+using execHelper::plugins::ExecutePlugin;
 using execHelper::plugins::CommandLineCommand;
 using execHelper::plugins::Scons;
 using execHelper::plugins::Make;
@@ -36,7 +38,8 @@ using execHelper::plugins::Cppcheck;
 using execHelper::plugins::ClangStaticAnalyzer;
 using execHelper::plugins::Selector;
 using execHelper::plugins::Memory;
-using execHelper::plugins::ExecutePlugin;
+using execHelper::plugins::Valgrind;
+using execHelper::plugins::MemoryHandler;
 
 using execHelper::test::OptionsStub;
 using execHelper::core::test::ExecutorStub;
@@ -93,6 +96,8 @@ namespace execHelper { namespace plugins { namespace test {
             ExecutePlugin plugin(selectionOptions);
             Task task;
 
+            MemoryHandler memory;
+
             WHEN("We apply the executor") {
                 bool returnCode = plugin.apply(command, task, options);
 
@@ -100,14 +105,14 @@ namespace execHelper { namespace plugins { namespace test {
                     REQUIRE(returnCode == true);
                 }
                 THEN("All default actions should be executed") {
-                    const Memory::Memories memories = Memory::getExecutions();
+                    const Memory::Memories memories = memory.getExecutions();
                     REQUIRE(memories.size() == selectionOptions.size());
                     for(size_t i = 0; i < selectionOptions.size(); ++i) {
                         REQUIRE(memories[i].command == command);
                     }
                 }
                 THEN("They should be called with the appropriate values") {
-                    const Memory::Memories memories = Memory::getExecutions();
+                    const Memory::Memories memories = memory.getExecutions();
                     for(size_t i = 0; i < memories.size(); ++i) {
                         for(size_t j = 0; j < i; ++j) {
                             // Note: tasks should point to different objects, but since
@@ -120,7 +125,6 @@ namespace execHelper { namespace plugins { namespace test {
                         }
                     }
                 }
-                Memory::reset();
             }
         }
     }
@@ -141,12 +145,13 @@ namespace execHelper { namespace plugins { namespace test {
             }
         }
         GIVEN("A plugin that fails to execute") {
-            Memory::setReturnCode(false);
-
             ExecutePlugin plugin({"memory", "memory"});
 
             Task task;
             OptionsStub options;
+
+            MemoryHandler memory;
+            memory.setReturnCode(false);
 
             WHEN("We execute the plugin") {
                 bool returnCode = plugin.apply("test", task, options);
@@ -155,9 +160,8 @@ namespace execHelper { namespace plugins { namespace test {
                     REQUIRE(returnCode == false);
                 }
                 THEN("It should have stopped executing after the failure") {
-                    REQUIRE(Memory::getExecutions().size() == 1U);
+                    REQUIRE(memory.getExecutions().size() == 1U);
                 }
-                Memory::reset();
             }
         }
     }
@@ -175,6 +179,7 @@ namespace execHelper { namespace plugins { namespace test {
                    REQUIRE(checkGetPlugin<ClangStaticAnalyzer>("clang-static-analyzer")); 
                    REQUIRE(checkGetPlugin<Selector>("selector")); 
                    REQUIRE(checkGetPlugin<Memory>("memory")); 
+                   REQUIRE(checkGetPlugin<Valgrind>("valgrind")); 
                 }
             }
             WHEN("We try to get a non-existing plugin") {

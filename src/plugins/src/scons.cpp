@@ -31,12 +31,7 @@ namespace execHelper { namespace plugins {
 
         task.append(SCONS_COMMAND);
 
-        const SettingsNode patternSettings = getContainingSettings(command, rootSettings, getPatternsKey()); 
-        PatternKeys patterns; 
-        if(patternSettings.contains(getPatternsKey())) {
-            patterns = patternSettings[getPatternsKey()].toStringCollection();
-        }
-        for(const auto& combination : options.makePatternPermutator(patterns)) {
+        for(const auto& combination : makePatternPermutator(command, rootSettings, options)) {
             Task newTask = task;
 
             if(getMultiThreaded(command, rootSettings, options)) {

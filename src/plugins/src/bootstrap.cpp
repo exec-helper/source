@@ -25,12 +25,7 @@ namespace execHelper { namespace plugins {
         const SettingsNode& rootSettings = options.getSettings(bootstrapKey);  
         const SettingsNode patternSettings = getContainingSettings(command, rootSettings, getPatternsKey()); 
 
-        PatternKeys patterns; 
-        if(patternSettings.contains(getPatternsKey())) {
-            patterns = patternSettings[getPatternsKey()].toStringCollection();
-        }
-
-        for(const auto& combination : options.makePatternPermutator(patterns)) {
+        for(const auto& combination : makePatternPermutator(command, rootSettings, options)) {
             Task bootstrapTask = task;
             TaskCollection buildDir = getBuildDir(command, rootSettings, combination);
             for(const auto& argument : buildDir) {

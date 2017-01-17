@@ -14,6 +14,7 @@
 #include "plugins/clangStaticAnalyzer.h"
 #include "plugins/selector.h"
 #include "plugins/memory.h"
+#include "plugins/valgrind.h"
 
 using std::string;
 using std::vector;
@@ -81,6 +82,8 @@ namespace execHelper { namespace plugins {
             return make_unique<Selector>();
         } else if(pluginName == "memory") {
             return make_unique<Memory>();
+        } else if(pluginName == "valgrind") {
+            return make_unique<Valgrind>();
         }
         return unique_ptr<Plugin>();
     }

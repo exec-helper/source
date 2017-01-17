@@ -3,6 +3,8 @@
 
 #include <string>
 
+#include <boost/optional/optional.hpp>
+
 #include "config/settingsNode.h"
 #include "core/options.h"
 #include "core/task.h"
@@ -25,6 +27,9 @@ namespace execHelper {
         core::TaskCollection getCommandLine(const core::Command& command, const config::SettingsNode& settings, const core::PatternCombinations& patternCombinations = core::PatternCombinations()) noexcept;
 
         void replacePatternCombinations(core::TaskCollection& commandArguments, const core::PatternCombinations& patternCombinations) noexcept;
+        boost::optional<std::string> getConfigurationSetting(const std::string& command, const config::SettingsNode& rootSettings, const std::string& configKey, const std::string& prepend = std::string()) noexcept;
+        boost::optional<core::TaskCollection> getConfigurationSettings(const std::string& command, const config::SettingsNode& rootSettings, const std::string& configKey) noexcept;
+        core::PatternPermutator makePatternPermutator(const core::Command& command, const config::SettingsNode& rootSettings, const core::Options& options) noexcept;
     }
 }
 

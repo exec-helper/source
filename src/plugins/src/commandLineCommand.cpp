@@ -25,12 +25,7 @@ namespace execHelper { namespace plugins {
         const SettingsNode settings = getContainingSettings(command, rootSettings, commandLineKey); 
         const TaskCollection tasks = settings[commandLineKey].toStringCollection();
 
-        const SettingsNode patternSettings = getContainingSettings(command, rootSettings, getPatternsKey()); 
-        PatternKeys patterns; 
-        if(patternSettings.contains(getPatternsKey())) {
-            patterns = patternSettings[getPatternsKey()].toStringCollection();
-        }
-        for(const auto& combination : options.makePatternPermutator(patterns)) {
+        for(const auto& combination : makePatternPermutator(command, rootSettings, options)) {
             TaskCollection combinationTask = tasks;
             replacePatternCombinations(combinationTask, combination);
 
