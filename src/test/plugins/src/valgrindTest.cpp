@@ -171,7 +171,7 @@ namespace execHelper { namespace plugins { namespace test {
         }
     }
 
-    SCENARIO("Test the command-line config parameter", "[plugins][valgrind]") {
+    SCENARIO("Test the command-line config parameter of the valgrind plugin", "[plugins][valgrind]") {
         GIVEN("A valid configuration with the command-line config parameter") {
             const string command("valgrind-command");
             const string runCommand("run-command");
@@ -249,22 +249,6 @@ namespace execHelper { namespace plugins { namespace test {
                         REQUIRE(memories[i].command == command);
                         REQUIRE(memories[i].task == actualTasks[i]);
                     }
-                }
-            }
-
-            WHEN("We call the plugin without a proper tool name") {
-                bool returnCode = plugin.apply(command, task, options);
-
-                THEN("It should succeed") {
-                    REQUIRE(returnCode == true);
-                }
-                THEN("The task should not contain the associated parameter") {
-                    Task actualTask;
-                    actualTask.append("valgrind");
-
-                    const Memory::Memories& memories = memory.getExecutions();
-                    REQUIRE(memories.size() == 1U);
-                    REQUIRE(memories[0].task == actualTask);
                 }
             }
         }
