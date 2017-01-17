@@ -15,6 +15,7 @@
 #include "plugins/selector.h"
 #include "plugins/memory.h"
 #include "plugins/valgrind.h"
+#include "plugins/pmd.h"
 
 using std::string;
 using std::vector;
@@ -84,6 +85,8 @@ namespace execHelper { namespace plugins {
             return make_unique<Memory>();
         } else if(pluginName == "valgrind") {
             return make_unique<Valgrind>();
+        } else if(pluginName == "pmd") {
+            return make_unique<Pmd>();
         }
         return unique_ptr<Plugin>();
     }

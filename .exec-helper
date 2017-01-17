@@ -113,3 +113,14 @@ valgrind:
         tool: memcheck
         command-line:
            - --leak-check=full 
+
+pmd:
+    exec: 3rdparty/pmd/pmd-bin-5.5.2/bin/run.sh
+    tool:
+        - cpd
+    language: cpp
+    files: 
+        - src
+    minimum-tokens: 100
+    command-line:
+        - " "

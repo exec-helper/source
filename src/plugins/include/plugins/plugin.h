@@ -21,7 +21,7 @@ namespace execHelper {
                 Plugin() {}
         };
 
-        void registerTask(const core::Task& task, const core::Options& options) noexcept;
+        bool registerTask(const core::Task& task, const core::Options& options) noexcept;
     }
 }
 
