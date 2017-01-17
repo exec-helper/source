@@ -58,36 +58,36 @@ namespace execHelper { namespace plugins { namespace test {
             Task task;
 
             WHEN("We add the tool config parameter") {
-                addSettings(rootSettings[valgrindConfigKey], "tool", "memcheck");
-
-                bool returnCode = plugin.apply(command, task, options);
-
-                THEN("It should fail") {
-                    REQUIRE(returnCode == false);
+                THEN("As a general command") {
+                    addSettings(rootSettings[valgrindConfigKey], "tool", "memcheck");
                 }
+                THEN("As a specific command") {
+                    addSettings(rootSettings[valgrindConfigKey][command], "tool", "memcheck");
+                }
+
+                REQUIRE(plugin.apply(command, task, options) == false);
             }
 
             WHEN("We add the run-command config parameter") {
                 const string runCommand("run-command");
-                addSettings(rootSettings[valgrindConfigKey], command, runCommand);
-                addSettings(rootSettings[valgrindConfigKey][command], runCommand, "memory");
+
+                THEN("As a general parameter") {
+                    addSettings(rootSettings[valgrindConfigKey], runCommand, "memory");
+                }
+                THEN("As a specific parameter") {
+                    addSettings(rootSettings[valgrindConfigKey][command], runCommand, "memory");
+                }
 
                 MemoryHandler memory;
 
-                bool returnCode = plugin.apply(command, task, options);
+                REQUIRE(plugin.apply(command, task, options) == true);
 
-                THEN("It should succeed") {
-                    REQUIRE(returnCode == true);
-                }
-                THEN("The run-command should be called") {
-                    Task actualTask;
-                    actualTask.append("valgrind");
-
-                    const Memory::Memories& memories = memory.getExecutions();
-                    REQUIRE(memories.size() == 1U);
-                    REQUIRE(memories[0].command == command);
-                    REQUIRE(memories[0].task == actualTask);
-                }
+                Task actualTask;
+                actualTask.append("valgrind");
+                const Memory::Memories& memories = memory.getExecutions();
+                REQUIRE(memories.size() == 1U);
+                REQUIRE(memories[0].command == command);
+                REQUIRE(memories[0].task == actualTask);
             }
         }
     }
@@ -134,39 +134,39 @@ namespace execHelper { namespace plugins { namespace test {
             MemoryHandler memory;
 
             WHEN("We call the plugin with a proper tool name") {
-                addSettings(rootSettings[valgrindConfigKey], "tool", toolName);
-
-                bool returnCode = plugin.apply(command, task, options);
-
-                THEN("It should succeed") {
-                    REQUIRE(returnCode == true); 
+                THEN("As a general command") {
+                    addSettings(rootSettings[valgrindConfigKey], "tool", toolName);
                 }
-                THEN("The task should contain the associated parameter") {
-                    Task actualTask;
-                    actualTask.append("valgrind");
-                    actualTask.append("--tool=" + toolName);
-
-                    const Memory::Memories& memories = memory.getExecutions();
-                    REQUIRE(memories.size() == 1U);
-                    REQUIRE(memories[0].command == command);
-                    REQUIRE(memories[0].task == actualTask);
+                THEN("As a specific command") {
+                    addSettings(rootSettings[valgrindConfigKey][command], "tool", toolName);
                 }
+
+                REQUIRE(plugin.apply(command, task, options) == true);
+
+                Task actualTask;
+                actualTask.append("valgrind");
+                actualTask.append("--tool=" + toolName);
+                const Memory::Memories& memories = memory.getExecutions();
+                REQUIRE(memories.size() == 1U);
+                REQUIRE(memories[0].command == command);
+                REQUIRE(memories[0].task == actualTask);
             }
 
             WHEN("We call the plugin without a proper tool name") {
-                bool returnCode = plugin.apply(command, task, options);
-
-                THEN("It should succeed") {
-                    REQUIRE(returnCode == true);
+                THEN("As a general command") {
+                    addSettings(rootSettings, valgrindConfigKey, "tool");
                 }
-                THEN("The task should not contain the associated parameter") {
-                    Task actualTask;
-                    actualTask.append("valgrind");
-
-                    const Memory::Memories& memories = memory.getExecutions();
-                    REQUIRE(memories.size() == 1U);
-                    REQUIRE(memories[0].task == actualTask);
+                THEN("As a specific command") {
+                    addSettings(rootSettings[valgrindConfigKey], command, "tool");
                 }
+
+                REQUIRE(plugin.apply(command, task, options) == true);
+
+                Task actualTask;
+                actualTask.append("valgrind");
+                const Memory::Memories& memories = memory.getExecutions();
+                REQUIRE(memories.size() == 1U);
+                REQUIRE(memories[0].task == actualTask);
             }
         }
     }
@@ -189,66 +189,72 @@ namespace execHelper { namespace plugins { namespace test {
 
             WHEN("We call the plugin with a proper command-line setting") {
                 const vector<string> commandLine({"arg1", "--arg2"});
-                addSettings(rootSettings[valgrindConfigKey], "command-line", commandLine);
 
-                bool returnCode = plugin.apply(command, task, options);
-
-                THEN("It should succeed") {
-                    REQUIRE(returnCode == true); 
+                THEN("As a general command") {
+                    addSettings(rootSettings[valgrindConfigKey], "command-line", commandLine);
                 }
-                THEN("The task should contain the associated parameter") {
-                    Task actualTask;
-                    actualTask.append("valgrind");
-                    for(const auto& line : commandLine) {
-                        actualTask.append(line);
-                    }
 
-                    const Memory::Memories& memories = memory.getExecutions();
-                    REQUIRE(memories.size() == 1U);
-                    REQUIRE(memories[0].command == command);
-                    REQUIRE(memories[0].task == actualTask);
+                THEN("As a specific command") {
+                    addSettings(rootSettings[valgrindConfigKey], "command-line", commandLine);
                 }
+
+                REQUIRE(plugin.apply(command, task, options));
+
+                Task actualTask;
+                actualTask.append("valgrind");
+                for(const auto& line : commandLine) {
+                    actualTask.append(line);
+                }
+                const Memory::Memories& memories = memory.getExecutions();
+                REQUIRE(memories.size() == 1U);
+                REQUIRE(memories[0].command == command);
+                REQUIRE(memories[0].task == actualTask);
             }
 
             WHEN("We call the plugin with a proper command-line setting") {
                 Pattern pattern1("PATTERN1", {"pattern1"}, 'p', "--pattern1");
                 Pattern pattern2("PATTERN2", {"pattern2a", "pattern2b"}, 'q', "--pattern2");
                 Patterns patterns({pattern1, pattern2});
-                // Add the keys to the patterns config value
-                for(const auto& pattern : patterns) {
-                    addSettings(rootSettings[valgrindConfigKey], "patterns", pattern.getKey());
-                }
                 // Add the pattern to the options
                 for(const auto& pattern : patterns) {
                     options.m_patternsHandler->addPattern(pattern);
                 }
 
                 const vector<string> commandLine({"{" + pattern1.getKey() + "}", "--{" + pattern2.getKey() + "}"});
-                addSettings(rootSettings[valgrindConfigKey], "command-line", commandLine);
 
-                bool returnCode = plugin.apply(command, task, options);
-
-                THEN("It should succeed") {
-                    REQUIRE(returnCode == true); 
+                THEN("As a general command") {
+                    // Add the keys to the patterns config value
+                    for(const auto& pattern : patterns) {
+                        addSettings(rootSettings[valgrindConfigKey], "patterns", pattern.getKey());
+                    }
+                    addSettings(rootSettings[valgrindConfigKey], "command-line", commandLine);
                 }
-                THEN("The task should contain the associated parameter") {
-                    vector<Task> actualTasks;
-                    for(const auto& pattern1Values : pattern1.getDefaultValues()) {
-                        for(const auto& pattern2Values : pattern2.getDefaultValues()) {
-                            Task actualTask;
-                            actualTask.append("valgrind");
-                            actualTask.append(pattern1Values);
-                            actualTask.append("--" + pattern2Values);
-                            actualTasks.emplace_back(actualTask);
-                        }
+                THEN("As a specific command") {
+                    // Add the keys to the patterns config value
+                    for(const auto& pattern : patterns) {
+                        addSettings(rootSettings[valgrindConfigKey][command], "patterns", pattern.getKey());
                     }
+                    addSettings(rootSettings[valgrindConfigKey][command], "command-line", commandLine);
+                }
 
-                    const Memory::Memories& memories = memory.getExecutions();
-                    REQUIRE(memories.size() == actualTasks.size());
-                    for(size_t i = 0; i < actualTasks.size(); ++i) {
-                        REQUIRE(memories[i].command == command);
-                        REQUIRE(memories[i].task == actualTasks[i]);
+                REQUIRE(plugin.apply(command, task, options) == true);
+
+                vector<Task> actualTasks;
+                for(const auto& pattern1Values : pattern1.getDefaultValues()) {
+                    for(const auto& pattern2Values : pattern2.getDefaultValues()) {
+                        Task actualTask;
+                        actualTask.append("valgrind");
+                        actualTask.append(pattern1Values);
+                        actualTask.append("--" + pattern2Values);
+                        actualTasks.emplace_back(actualTask);
                     }
+                }
+
+                const Memory::Memories& memories = memory.getExecutions();
+                REQUIRE(memories.size() == actualTasks.size());
+                for(size_t i = 0; i < actualTasks.size(); ++i) {
+                    REQUIRE(memories[i].command == command);
+                    REQUIRE(memories[i].task == actualTasks[i]);
                 }
             }
         }
