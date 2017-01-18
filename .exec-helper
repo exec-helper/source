@@ -35,6 +35,7 @@ patterns:
             - cppcheck
             - clang-static-analyzer
             - valgrind
+            - pmd
         short-option: a
         long-option: analyze
 
