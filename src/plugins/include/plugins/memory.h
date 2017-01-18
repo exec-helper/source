@@ -44,10 +44,12 @@ namespace execHelper {
 
         class MemoryHandler : public Memory {
             public:
+                typedef Memory::Memories Memories;
+
                 MemoryHandler();
                 ~MemoryHandler();
 
-                const Memories& getExecutions() noexcept;
+                const Memories& getExecutions() const noexcept;
                 void reset() noexcept;
                 void setReturnCode(bool returnCode) noexcept;
         };

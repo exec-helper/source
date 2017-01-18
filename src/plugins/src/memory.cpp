@@ -36,7 +36,7 @@ namespace execHelper { namespace plugins {
         Memory::reset(); 
     }
 
-    const Memory::Memories& MemoryHandler::getExecutions() noexcept {
+    const Memory::Memories& MemoryHandler::getExecutions() const noexcept {
         return Memory::getExecutions();
     }
 

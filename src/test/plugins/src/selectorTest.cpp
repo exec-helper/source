@@ -38,6 +38,20 @@ namespace {
             options.m_patternsHandler->addPattern(pattern);
         }
     }
+
+    void checkMemories(const MemoryHandler& memory) {
+        const MemoryHandler::Memories memories = memory.getExecutions();
+        for(size_t i = 0; i < memories.size(); ++i) {
+            for(size_t j = 0; j < i; ++j) {
+                // Note: tasks should point to different objects, but since
+                // the previous task is destroyed before the next one is constructed,
+                // it may happen that they point to the same chunk of memory.
+                REQUIRE(memories[i].command == memories[j].command);
+                REQUIRE(memories[i].task == memories[j].task);
+                REQUIRE(memories[i].options == memories[j].options);
+            }
+        }
+    }
 }
 
 namespace execHelper { namespace plugins { namespace test {
@@ -92,18 +106,7 @@ namespace execHelper { namespace plugins { namespace test {
                     }
                 }
                 THEN("They should be called with the appropriate values") {
-                    const Memory::Memories memories = memory.getExecutions();
-                    for(size_t i = 0; i < memories.size(); ++i) {
-                        for(size_t j = 0; j < i; ++j) {
-                            // Note: tasks should point to different objects, but since
-                            // the previous task is destroyed before the next one is constructed,
-                            // it may happen that they point to the same chunk of memory.
-                            // So this can not be checked
-                            REQUIRE(memories[i].command == memories[j].command);
-                            REQUIRE(memories[i].task == memories[j].task);
-                            REQUIRE(memories[i].options == memories[j].options);
-                        }
-                    }
+                    checkMemories(memory);
                 }
             }
             WHEN("We apply the selector to command 2") {
@@ -120,18 +123,7 @@ namespace execHelper { namespace plugins { namespace test {
                     }
                 }
                 THEN("They should be called with the appropriate values") {
-                    const Memory::Memories memories = memory.getExecutions();
-                    for(size_t i = 0; i < memories.size(); ++i) {
-                        for(size_t j = 0; j < i; ++j) {
-                            // Note: tasks should point to different objects, but since
-                            // the previous task is destroyed before the next one is constructed,
-                            // it may happen that they point to the same chunk of memory.
-                            // So this can not be checked
-                            REQUIRE(memories[i].command == memories[j].command);
-                            REQUIRE(memories[i].task == memories[j].task);
-                            REQUIRE(memories[i].options == memories[j].options);
-                        }
-                    }
+                    checkMemories(memory);
                 }
             }
         }
@@ -176,18 +168,7 @@ namespace execHelper { namespace plugins { namespace test {
                     }
                 }
                 THEN("They should be called with the appropriate values") {
-                    const Memory::Memories memories = memory.getExecutions();
-                    for(size_t i = 0; i < memories.size(); ++i) {
-                        for(size_t j = 0; j < i; ++j) {
-                            // Note: tasks should point to different objects, but since
-                            // the previous task is destroyed before the next one is constructed,
-                            // it may happen that they point to the same chunk of memory.
-                            // So this can not be checked
-                            REQUIRE(memories[i].command == memories[j].command);
-                            REQUIRE(memories[i].task == memories[j].task);
-                            REQUIRE(memories[i].options == memories[j].options);
-                        }
-                    }
+                    checkMemories(memory);
                 }
             }
             WHEN("We apply the selector with command 2") {
@@ -202,18 +183,7 @@ namespace execHelper { namespace plugins { namespace test {
                     }
                 }
                 THEN("They should be called with the appropriate values") {
-                    const Memory::Memories memories = memory.getExecutions();
-                    for(size_t i = 0; i < memories.size(); ++i) {
-                        for(size_t j = 0; j < i; ++j) {
-                            // Note: tasks should point to different objects, but since
-                            // the previous task is destroyed before the next one is constructed,
-                            // it may happen that they point to the same chunk of memory.
-                            // So this can not be checked
-                            REQUIRE(memories[i].command == memories[j].command);
-                            REQUIRE(memories[i].task == memories[j].task);
-                            REQUIRE(memories[i].options == memories[j].options);
-                        }
-                    }
+                    checkMemories(memory);
                 }
             }
         }

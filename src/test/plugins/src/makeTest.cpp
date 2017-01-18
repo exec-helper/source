@@ -95,12 +95,34 @@ namespace execHelper { namespace plugins { namespace test {
 
         Make plugin;
 
-        GIVEN("A make plugin object and the single-threaded option") {
-            addSettings(options.m_settings["make"], "single-threaded", "yes");
-
+        GIVEN("A make plugin object and several single-threaded option values") {
             WHEN("We build the plugin") {
-                Task task;
-                REQUIRE(plugin.apply("build", task, options) == true);
+                Task actualTaskBase({"make"});
+                THEN("As a general command") {
+                    AND_WHEN("If we set the single-threaded option") {
+                        addSettings(options.m_settings["make"], "single-threaded", "yes");
+                    }
+                    AND_WHEN("If we set the multi-threaded option") {
+                        addSettings(options.m_settings["make"], "single-threaded", "no");
+                        actualTaskBase.append(TaskCollection{"--jobs", "8"});
+                    }
+
+                    Task task;
+                    REQUIRE(plugin.apply("build", task, options) == true);
+                }
+                THEN("As a specific command") {
+                    AND_WHEN("If we set the single-threaded option") {
+                        addSettings(options.m_settings["make"], "single-threaded", "yes");
+                    }
+                    AND_WHEN("If we set the multi-threaded option") {
+                        addSettings(options.m_settings["make"], "single-threaded", "no");
+                        actualTaskBase.append(TaskCollection{"--jobs", "8"});
+                    }
+                    actualTaskBase.append("clean");
+
+                    Task task;
+                    REQUIRE(plugin.apply("clean", task, options) == true);
+                }
 
                 ExecutorStub::TaskQueue expectedQueue;
                 for(const auto& pattern : compilerUtil.makePatternPermutator()) {
@@ -108,83 +130,12 @@ namespace execHelper { namespace plugins { namespace test {
                         string targetName = target.at(targetUtil.target.getKey());
                         string runTargetName = target.at(targetUtil.runTarget.getKey());
 
-                        Task expectedTask;
-                        expectedTask.append(TaskCollection({"make", targetName + runTargetName}));
+                        Task expectedTask = actualTaskBase;
+                        expectedTask.append(targetName + runTargetName);
                         expectedQueue.push_back(expectedTask);
                     }
                 }
-
-                THEN("We should get the expected tasks") {
-                    REQUIRE(expectedQueue == options.m_executor.getExecutedTasks());
-                }
-            }
-
-            WHEN("We clean the plugin") {
-                Task task;
-                REQUIRE(plugin.apply("clean", task, options) == true);
-
-                ExecutorStub::TaskQueue expectedQueue;
-
-                for(const auto& pattern : compilerUtil.makePatternPermutator()) {
-                    for(const auto& target : targetUtil.makePatternPermutator()) {
-                        string targetName = target.at(targetUtil.target.getKey());
-                        string runTargetName = target.at(targetUtil.runTarget.getKey());
-
-                        Task expectedTask;
-                        expectedTask.append(TaskCollection({"make", "clean", targetName + runTargetName}));
-                        expectedQueue.push_back(expectedTask);
-                    }
-                }
-
-                THEN("We should get the expected tasks") {
-                    REQUIRE(expectedQueue == options.m_executor.getExecutedTasks());
-                }
-            }
-        }
-
-        GIVEN("A make plugin object and the multi-threaded option") {
-            addSettings(options.m_settings["make"], "single-threaded", "no");
-
-            WHEN("We build the plugin") {
-                Task task;
-                REQUIRE(plugin.apply("build", task, options) == true);
-
-                ExecutorStub::TaskQueue expectedQueue;
-                for(const auto& pattern : compilerUtil.makePatternPermutator()) {
-                    for(const auto& target : targetUtil.makePatternPermutator()) {
-                        string targetName = target.at(targetUtil.target.getKey());
-                        string runTargetName = target.at(targetUtil.runTarget.getKey());
-
-                        Task expectedTask;
-                        expectedTask.append(TaskCollection({"make", "--jobs", "8", targetName + runTargetName}));
-                        expectedQueue.push_back(expectedTask);
-                    }
-                }
-
-                THEN("We should get the expected tasks") {
-                    REQUIRE(expectedQueue == options.m_executor.getExecutedTasks());
-                }
-            }
-
-            WHEN("We clean the plugin") {
-                Task task;
-                REQUIRE(plugin.apply("clean", task, options) == true);
-
-                ExecutorStub::TaskQueue expectedQueue;
-                for(const auto& pattern : compilerUtil.makePatternPermutator()) {
-                    for(const auto& target : targetUtil.makePatternPermutator()) {
-                        string targetName = target.at(targetUtil.target.getKey());
-                        string runTargetName = target.at(targetUtil.runTarget.getKey());
-
-                        Task expectedTask;
-                        expectedTask.append(TaskCollection({"make", "--jobs", "8", "clean", targetName + runTargetName}));
-                        expectedQueue.push_back(expectedTask);
-                    }
-                }
-
-                THEN("We should get the expected tasks") {
-                    REQUIRE(expectedQueue == options.m_executor.getExecutedTasks());
-                }
+                REQUIRE(expectedQueue == options.m_executor.getExecutedTasks());
             }
         }
     }
