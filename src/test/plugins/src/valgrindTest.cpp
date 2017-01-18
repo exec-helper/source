@@ -23,6 +23,9 @@ using execHelper::plugins::MemoryHandler;
 using execHelper::test::OptionsStub;
 using execHelper::test::utils::addSettings;
 using execHelper::test::utils::Patterns;
+using execHelper::test::utils::PATTERN1;
+using execHelper::test::utils::PATTERN2;
+using execHelper::test::utils::PATTERNS;
 
 namespace {
     const string valgrindConfigKey("valgrind");
@@ -212,26 +215,23 @@ namespace execHelper { namespace plugins { namespace test {
             }
 
             WHEN("We call the plugin with a proper command-line setting") {
-                Pattern pattern1("PATTERN1", {"pattern1"}, 'p', "--pattern1");
-                Pattern pattern2("PATTERN2", {"pattern2a", "pattern2b"}, 'q', "--pattern2");
-                Patterns patterns({pattern1, pattern2});
                 // Add the pattern to the options
-                for(const auto& pattern : patterns) {
+                for(const auto& pattern : PATTERNS) {
                     options.m_patternsHandler->addPattern(pattern);
                 }
 
-                const vector<string> commandLine({"{" + pattern1.getKey() + "}", "--{" + pattern2.getKey() + "}"});
+                const vector<string> commandLine({"{" + PATTERN1.getKey() + "}", "--{" + PATTERN2.getKey() + "}"});
 
                 THEN("As a general command") {
-                    // Add the keys to the patterns config value
-                    for(const auto& pattern : patterns) {
+                    // Add the keys to the PATTERNS config value
+                    for(const auto& pattern : PATTERNS) {
                         addSettings(rootSettings[valgrindConfigKey], "patterns", pattern.getKey());
                     }
                     addSettings(rootSettings[valgrindConfigKey], "command-line", commandLine);
                 }
                 THEN("As a specific command") {
                     // Add the keys to the patterns config value
-                    for(const auto& pattern : patterns) {
+                    for(const auto& pattern : PATTERNS) {
                         addSettings(rootSettings[valgrindConfigKey][command], "patterns", pattern.getKey());
                     }
                     addSettings(rootSettings[valgrindConfigKey][command], "command-line", commandLine);
@@ -240,12 +240,12 @@ namespace execHelper { namespace plugins { namespace test {
                 REQUIRE(plugin.apply(command, task, options) == true);
 
                 vector<Task> actualTasks;
-                for(const auto& pattern1Values : pattern1.getDefaultValues()) {
-                    for(const auto& pattern2Values : pattern2.getDefaultValues()) {
+                for(const auto& PATTERN1Values : PATTERN1.getDefaultValues()) {
+                    for(const auto& PATTERN2Values : PATTERN2.getDefaultValues()) {
                         Task actualTask;
                         actualTask.append("valgrind");
-                        actualTask.append(pattern1Values);
-                        actualTask.append("--" + pattern2Values);
+                        actualTask.append(PATTERN1Values);
+                        actualTask.append("--" + PATTERN2Values);
                         actualTasks.emplace_back(actualTask);
                     }
                 }

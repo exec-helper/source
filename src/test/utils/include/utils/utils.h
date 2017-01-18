@@ -85,6 +85,10 @@ namespace execHelper {
             typedef std::vector<core::Pattern> Patterns;
             core::PatternKeys getAllPatternKeys(const std::initializer_list<std::reference_wrapper<const PatternUtil>>& patterns) noexcept;
             Patterns getAllPatterns(const std::initializer_list<std::reference_wrapper<const PatternUtil>>& patterns) noexcept;
+
+            const core::Pattern PATTERN1("PATTERN1", {"pattern1"}, 'p', "--pattern1");
+            const core::Pattern PATTERN2("PATTERN2", {"pattern2a", "pattern2b"}, 'q', "--pattern2");
+            const Patterns PATTERNS({PATTERN1, PATTERN2});
         }
     }
 }

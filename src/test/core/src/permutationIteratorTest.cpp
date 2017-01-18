@@ -90,30 +90,38 @@ namespace {
 
     };
 
+    vector<PermuteObjectElement> getOrderedCombinations(const PermuteObject& permute) {
+        vector<PermuteObjectElement> orderedCombinations;
+        for(const auto& object1 : permute.getCollection1()) {
+            for(const auto& object2 : permute.getCollection2()) {
+                PermuteObjectElement combination(object1, object2);
+                orderedCombinations.push_back(combination);
+            }
+        }
+        return orderedCombinations;
+    }
+
+    template<typename T>
+    inline void testForeach(T& permute, const vector<PermuteObjectElement>& orderedCombinations) {
+        size_t orderedCombinationsIndex = 0U;
+        for(auto combination : permute) {
+            REQUIRE(orderedCombinationsIndex < orderedCombinations.size());
+            REQUIRE(combination == orderedCombinations[orderedCombinationsIndex]);
+            ++orderedCombinationsIndex;
+        }
+        REQUIRE(orderedCombinationsIndex == orderedCombinations.size());
+    }
 }
 
 namespace execHelper { namespace core { namespace test {
     SCENARIO("Test the permutation iterators when looping over the entire collection", "[permutationiterator]") {
         GIVEN("Some non-const collections to iterate over using permutations of its content and the ordered combinations") {
             PermuteObject permute({"object1", "object2"}, {1, 2});
-
-            vector<PermuteObjectElement> orderedCombinations;
-            for(const auto& object1 : permute.getCollection1()) {
-                for(const auto& object2 : permute.getCollection2()) {
-                    PermuteObjectElement combination(object1, object2);
-                    orderedCombinations.push_back(combination);
-                }
-            }
+            const vector<PermuteObjectElement> orderedCombinations = getOrderedCombinations(permute);
 
             WHEN("We iterate over them entirely") {
                 THEN("We should be able to do so using a foreach loop") {
-                    size_t orderedCombinationsIndex = 0U;
-                    for(auto combination : permute) {
-                        REQUIRE(orderedCombinationsIndex < orderedCombinations.size());
-                        REQUIRE(combination == orderedCombinations[orderedCombinationsIndex]);
-                        ++orderedCombinationsIndex;
-                    }
-                    REQUIRE(orderedCombinationsIndex == orderedCombinations.size());
+                    testForeach(permute, orderedCombinations);
                 }
                 THEN("We should be able to do so using iterators") {
                     size_t orderedCombinationsIndex = 0U;
@@ -129,14 +137,7 @@ namespace execHelper { namespace core { namespace test {
 
         GIVEN("Some const collections to iterate over using permutations of its content and the ordered combinations") {
             const PermuteObject permute({"object1", "object2"}, {1, 2});
-
-            vector<PermuteObjectElement> orderedCombinations;
-            for(const auto& object1 : permute.getCollection1()) {
-                for(const auto& object2 : permute.getCollection2()) {
-                    PermuteObjectElement combination(object1, object2);
-                    orderedCombinations.push_back(combination);
-                }
-            }
+            const vector<PermuteObjectElement> orderedCombinations = getOrderedCombinations(permute);
 
             WHEN("We iterate over them entirely") {
                 THEN("We should be able to do so using a foreach loop") {

@@ -63,7 +63,12 @@ namespace execHelper { namespace plugins {
             Task newTask = task;
             newTask.append(getCommandLine(command, rootSettings, combination)); 
 
-            if(! registerTask(newTask, options)) {
+            TaskCollection newTaskCollection = newTask.getTask();
+            replacePatternCombinations(newTaskCollection, combination);
+            Task replacedTask;
+            replacedTask.append(std::move(newTaskCollection));
+
+            if(! registerTask(replacedTask, options)) {
                 return false;
             }
         }

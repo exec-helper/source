@@ -103,6 +103,15 @@ clang-static-analyzer:
         - git submodule update --init
         - build/gcc/release/bin/exec-helper analyze --analyze clang-static-analyzer --compiler clang --mode debug
 
+code-duplication-pmd-cpd:
+    stage: test
+    dependencies:
+        - build:gcc
+    script:
+        - apt-get install --yes -qq default-jre unzip wget
+        - pushd 3rdparty && wget "https://downloads.sourceforge.net/project/pmd/pmd/5.5.2/pmd-bin-5.5.2.zip" && unzip pmg-bin-5.5.2.zip && popd
+        - build/gcc/release/bin/exec-helper analyze --analyze pmd
+
 coverage:
     stage: test
     dependencies:

@@ -115,12 +115,14 @@ valgrind:
            - --leak-check=full 
 
 pmd:
+    patterns:
+        - MODULE
     exec: 3rdparty/pmd/pmd-bin-5.5.2/bin/run.sh
     tool:
         - cpd
     language: cpp
     files: 
-        - src
+        - src/{MODULE}
     minimum-tokens: 100
     command-line:
         - " "
