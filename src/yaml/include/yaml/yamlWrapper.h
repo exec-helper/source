@@ -5,6 +5,7 @@
 #include <iostream>
 
 #include <yaml-cpp/yaml.h>
+#include <yaml-cpp/node/node.h>
 
 #include "config/settingsNode.h"
 
