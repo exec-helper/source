@@ -34,7 +34,23 @@ namespace execHelper { namespace config {
     }
 
     bool SettingsNode::operator==(const SettingsNode& other) const noexcept {
-        return m_key == other.m_key && m_values == other.m_values;
+        if(m_key != other.m_key) {
+            return false;
+        }
+
+        // Note: the order of the values may differ
+        if(m_values.size() != other.m_values.size()) {
+            return false;
+        }
+        for(const auto& value : m_values) {
+            if(! other.contains(value.m_key)) {
+                return false;
+            }
+            if(value != other[value.m_key]) {
+                return false;
+            }
+        }
+        return true;
     }
 
     bool SettingsNode::operator!=(const SettingsNode& other) const noexcept {

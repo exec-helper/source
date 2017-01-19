@@ -108,26 +108,21 @@ namespace execHelper { namespace core {
 
                 WHEN("We request the root settings") {
                     const SettingsNode& rootSettings = options.getSettings();
-                    const SettingsNode& constRootSettings = constOptions.getSettings();
 
                     THEN("We should get the root settings") {
                         REQUIRE(settings == rootSettings);
-                        REQUIRE(settings == constRootSettings);
                     }
                 }
                 WHEN("We request existing settings") {
                     THEN("We should get the ground truth settings") {
                         for(const auto& key : keys) {
                             REQUIRE(options.getSettings(key) == settings[key]);
-                            REQUIRE(constOptions.getSettings(key) == settings[key]);
                         }
                     }
                 }
                 WHEN("We request non-existing settings") {
                     THEN("We should get the ground truth settings") {
-                        // Currently it returns the root settings in this case
                         REQUIRE(options.getSettings("non-existing-key") == settings);
-                        REQUIRE(constOptions.getSettings("non-existing-key") == settings);
                     }
                 }
             }
