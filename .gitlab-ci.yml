@@ -1,7 +1,7 @@
 image: ubuntu:yakkety
 
 before_script:
-    - apt-get update -qq && apt-get install --yes -qq libboost-program-options1.61.0 yaml-cpp
+    - apt-get update -qq && apt-get install --yes -qq libboost-program-options1.61.0 libyaml-cpp0.5v5
 
 stages:
     - build
