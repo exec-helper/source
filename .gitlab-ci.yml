@@ -109,7 +109,8 @@ code-duplication-pmd-cpd:
         - build:gcc
     script:
         - apt-get install --yes -qq default-jre unzip wget
-        - pushd 3rdparty && wget "https://downloads.sourceforge.net/project/pmd/pmd/5.5.2/pmd-bin-5.5.2.zip" && unzip pmd-bin-5.5.2.zip; popd
+        - mkdir -p 3rdparty/pmd
+        - pushd 3rdparty/pmd && wget "https://downloads.sourceforge.net/project/pmd/pmd/5.5.2/pmd-bin-5.5.2.zip" && unzip pmd-bin-5.5.2.zip; popd
         - build/gcc/release/bin/exec-helper analyze --analyze pmd
 
 coverage:
