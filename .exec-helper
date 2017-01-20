@@ -124,6 +124,7 @@ pmd:
     language: cpp
     files: 
         - src/{MODULE}
+        - src/test/{MODULE}
     minimum-tokens: 100
     command-line:
         - " "

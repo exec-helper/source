@@ -25,6 +25,7 @@ using execHelper::test::OptionsStub;
 using execHelper::test::utils::addSettings;
 using execHelper::test::utils::TargetUtil;
 using execHelper::test::utils::CompilerUtil;
+using execHelper::test::utils::CompilerUtilNames;
 using execHelper::test::utils::Patterns;
 
 namespace {
@@ -235,17 +236,14 @@ namespace execHelper { namespace plugins { namespace test {
 
                 ExecutorStub::TaskQueue expectedQueue;
                 for(const auto& pattern : compilerUtil.makePatternPermutator()) {
-                    string compilerName = pattern.at(compilerUtil.compiler.getKey());
-                    string modeName = pattern.at(compilerUtil.mode.getKey());
-                    string architectureName = pattern.at(compilerUtil.architecture.getKey());
-                    string distributionName = pattern.at(compilerUtil.distribution.getKey());
+                    CompilerUtilNames compilerNames = compilerUtil.toNames(pattern);
 
                     for(const auto& target : targetUtil.makePatternPermutator()) {
                         string targetName = target.at(targetUtil.target.getKey());
                         string runTargetName = target.at(targetUtil.runTarget.getKey());
 
                         Task expectedTask;
-                        expectedTask.append(TaskCollection({"make", "--jobs", "8", "--directory=build/" + distributionName + "/" + architectureName + "/{HELLO}/" + compilerName + "/hello" + modeName + "world", targetName + runTargetName}));
+                        expectedTask.append(TaskCollection({"make", "--jobs", "8", "--directory=build/" + compilerNames.distribution + "/" + compilerNames.architecture + "/{HELLO}/" + compilerNames.compiler + "/hello" + compilerNames.mode + "world", targetName + runTargetName}));
                         expectedQueue.push_back(expectedTask);
                     }
                 }
