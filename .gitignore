@@ -96,4 +96,4 @@ output/*
 # Test files
 test_coverage/
 test*.exec-helper
-libexechelper_test.info
+lcov-plugin.info

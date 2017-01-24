@@ -24,9 +24,12 @@ namespace execHelper {
     namespace plugins {
         const std::string& getPatternsKey() noexcept;
         const config::SettingsNode& getContainingSettings(const std::string& command, const config::SettingsNode& rootSettings, const std::string& key) noexcept;
-        core::TaskCollection getCommandLine(const core::Command& command, const config::SettingsNode& settings, const core::PatternCombinations& patternCombinations = core::PatternCombinations()) noexcept;
+        core::TaskCollection getCommandLine(const core::Command& command, const config::SettingsNode& settings) noexcept;
+        core::TaskCollection getCommandLine(const core::Command& command, const config::SettingsNode& settings, const core::PatternCombinations& patternCombinations) noexcept;
 
         void replacePatternCombinations(core::TaskCollection& commandArguments, const core::PatternCombinations& patternCombinations) noexcept;
+        core::Task replacePatternCombinations(const core::Task& task, const core::PatternCombinations& patternCombinations) noexcept;
+
         boost::optional<std::string> getConfigurationSetting(const std::string& command, const config::SettingsNode& rootSettings, const std::string& configKey, const std::string& prepend = std::string()) noexcept;
         boost::optional<core::TaskCollection> getConfigurationSettings(const std::string& command, const config::SettingsNode& rootSettings, const std::string& configKey) noexcept;
         core::PatternPermutator makePatternPermutator(const core::Command& command, const config::SettingsNode& rootSettings, const core::Options& options) noexcept;

@@ -36,6 +36,7 @@ patterns:
             - clang-static-analyzer
             - valgrind
             - pmd
+            - lcov
         short-option: a
         long-option: analyze
 
@@ -127,3 +128,20 @@ pmd:
     minimum-tokens: 100
     command-line:
         - " "
+
+lcov:
+    run-command: run-test
+    base-directory: .
+    directory: .
+    zero-counters: yes
+    excludes:
+        - /usr*
+        - 3rdparty/*
+        - test/*
+    command-line:
+        - --quiet
+    gen-html: yes
+    gen-html-output: test_coverage
+    gen-html-command-line:
+        - --num-spaces
+        - 4

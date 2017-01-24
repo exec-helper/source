@@ -22,6 +22,7 @@ using std::map;
 
 using execHelper::config::SettingsNode;
 using execHelper::core::Command;
+using execHelper::core::Task;
 using execHelper::core::TaskCollection;
 using execHelper::core::PatternCombinations;
 using execHelper::core::PatternsHandler;
@@ -36,6 +37,18 @@ namespace execHelper { namespace plugins {
     const string& getPatternsKey() noexcept {
         static const string patternsKey("patterns");
         return patternsKey;
+    }
+
+    Task replacePatternCombinations(const Task& task, const PatternCombinations& patternCombinations) noexcept {
+        Task replacedTask;
+        for(const auto& part : task.getTask()) {
+            auto argument = part;
+            for(const auto& pattern : patternCombinations) {
+                argument = replacePatterns(part, pattern.first, pattern.second);
+            }
+            replacedTask.append(part);
+        }
+        return task;
     }
 
     void replacePatternCombinations(TaskCollection& commandArguments, const PatternCombinations& patternCombinations) noexcept {
@@ -53,13 +66,18 @@ namespace execHelper { namespace plugins {
         return rootSettings;
     }
 
-    TaskCollection getCommandLine(const Command& command, const SettingsNode& rootSettings, const PatternCombinations& patternCombinations) noexcept {
+    TaskCollection getCommandLine(const Command& command, const SettingsNode& rootSettings) noexcept {
         static const string commandLineKey("command-line");
         const SettingsNode settings = getContainingSettings(command, rootSettings, commandLineKey); 
         if(! settings.contains(commandLineKey)) {
             return TaskCollection();
         }
         TaskCollection commandArguments = settings[commandLineKey].toStringCollection();
+        return commandArguments;
+    }
+
+    TaskCollection getCommandLine(const Command& command, const SettingsNode& rootSettings, const PatternCombinations& patternCombinations) noexcept {
+        TaskCollection commandArguments = getCommandLine(command, rootSettings);
         replacePatternCombinations(commandArguments, patternCombinations);
         return commandArguments;
     }

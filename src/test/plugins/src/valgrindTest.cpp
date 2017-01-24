@@ -1,5 +1,6 @@
 #include <catch.hpp>
 
+#include <string>
 #include <vector>
 
 #include "core/task.h"
@@ -49,7 +50,7 @@ namespace execHelper { namespace plugins { namespace test {
         }
     }
 
-    SCENARIO("Test the mandatory options of the valgrind plugin", "[plugins][valgrind]") {
+    SCENARIO("Test the mandatory settings of the valgrind plugin", "[plugins][valgrind]") {
         GIVEN("The respective configuration and the plugin") {
             const string command("valgrind-command");
 
