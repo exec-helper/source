@@ -37,7 +37,6 @@ namespace {
 
 namespace execHelper { namespace plugins {
     bool Lcov::apply(const Command& command, Task& task, const Options& options) const noexcept {
-        const string infoFile("lcov-plugin.info");
         const string lcovConfigKey("lcov");
 
         const SettingsNode& rootSettings = options.getSettings(lcovConfigKey);
@@ -50,6 +49,7 @@ namespace execHelper { namespace plugins {
         }
         const string runCommand = runCommandValue.get();
 
+        const string infoFile = ConfigValue<string>::get("info-file", "lcov-plugin.info", command, rootSettings);
         const string baseDirectory = ConfigValue<string>::get("base-directory", ".", command, rootSettings);
         const string directory = ConfigValue<string>::get("directory", ".", command, rootSettings);
         const TaskCollection commandLine = ConfigValue<TaskCollection>::get("command-line", {}, command, rootSettings);
@@ -89,11 +89,12 @@ namespace execHelper { namespace plugins {
 
     inline bool Lcov::generateGenHtmlTask(const Command& command, const SettingsNode& rootSettings, const string& infoFile, Task& task) noexcept {
         const string genHtmlOutput = ConfigValue<string>::get("gen-html-output", ".", command, rootSettings);
+        const string genHtmlTitle = ConfigValue<string>::get("gen-html-title", "Hello", command, rootSettings);
         const TaskCollection genHtmlCommandLine = ConfigValue<TaskCollection>::get("gen-html-command-line", {}, command, rootSettings);
 
         const string genHtmlValue = ConfigValue<string>::get("gen-html", "no", command, rootSettings);
         if(genHtmlValue == "yes") {
-            task.append(TaskCollection({"genhtml", "--output-directory", genHtmlOutput, "--title", "hello", infoFile}));
+            task.append(TaskCollection({"genhtml", "--output-directory", genHtmlOutput, "--title", genHtmlTitle, infoFile}));
             task.append(genHtmlCommandLine);
             return true;
         }
