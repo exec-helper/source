@@ -109,12 +109,12 @@ namespace execHelper { namespace core {
                 WHEN("We add the entire string as one single command parameter") {
                     task.append(actualCommand);
 
-                    THEN("We should find it back as a single command parameter") {
+                    THEN("We should find it the empty string back as a single command parameter") {
                         TaskCollection resultTask = task.getTask();
                         REQUIRE(resultTask.size() == 1U);
                         REQUIRE(resultTask.front() == actualCommand); 
                     }
-                    THEN("We should get the accumulated string") {
+                    THEN("We should get the empty string") {
                         REQUIRE(task.toString() == actualCommand); 
                     }
                 }
@@ -122,10 +122,10 @@ namespace execHelper { namespace core {
                 WHEN("We add each command as a collection to the task") {
                     task.append(actualCommandCollection);
 
-                    THEN("We should be able to find back all commands in order") {
+                    THEN("We should be able to find back the empty string in a collection") {
                         REQUIRE(task.getTask() == actualCommandCollection); 
                     }
-                    THEN("We should get the accumulated string") {
+                    THEN("We should get the empty string") {
                         REQUIRE(task.toString() == actualCommand); 
                     }
                 }

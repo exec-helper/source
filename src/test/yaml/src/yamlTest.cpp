@@ -81,7 +81,7 @@ namespace execHelper { namespace yaml { namespace test {
             WHEN("We pass the config to the yaml wrapper") {
                 Yaml yaml(file);
 
-                THEN("We should find all combinations in order") {
+                THEN("We should find all values") {
                     REQUIRE(yaml.getValueCollection({"commands"}) == correctCommands);
                     REQUIRE(yaml.getValueCollection({"init"}) == correctInit);
                     REQUIRE(yaml.getValueCollection({"build"}) == correctBuild);
@@ -95,30 +95,6 @@ namespace execHelper { namespace yaml { namespace test {
                     REQUIRE(yaml.getValue({"pmd", "auto-install"}) == correctPmdAutoInstall);
                     REQUIRE(yaml.getValue({"shellRunner", "command-line"}) == correctRunCommandLine);
                 }
-            }
-        }
-    }
-
-    SCENARIO("Yaml wrapper tree test", "[yaml][yamlwrapper]") {
-        GIVEN("A yaml config string to parse") {
-            YamlFile file;
-            file.file = basename(__FILE__) + "/../test.yaml";
-
-            vector<string> correctCommands = {"init", "build", "run", "analyze"};
-            vector<string> correctInit = {"git-submodules", "configure"};
-            vector<string> correctBuild = {"scons", "make"};
-            vector<string> correctRun = {"shellRunner"};
-            vector<string> correctAnalyze = {"cppcheck", "clang-static-analyzer", "pmd", "simian"};
-            vector<string> correctSubmodules = {"3rdparty/Catch", "3rdparty/benchmark"};
-            vector<string> correctSconsPatterns = {"COMPILER", "MODE"};
-            string correctSconsBuildDir("build/{COMPILER}/{MODE}");
-            string correctSconsSingleThreaded("yes");
-            string correctSconsCommandLine("compiler={COMPILER} mode={MODE}");
-            string correctPmdAutoInstall("yes");
-            string correctRunCommandLine("echo \"hello\"");
-
-            WHEN("We pass the config to the yaml wrapper") {
-                Yaml yaml(file);
 
                 THEN("We should find them all in the subtree") {
                     SettingsNode settings;
@@ -151,20 +127,20 @@ namespace execHelper { namespace yaml { namespace test {
 
                 THEN("We should not be able to get any value") {
                     REQUIRE(yaml.getValue({"commands"}).empty() == true);
-                    REQUIRE(yaml.getValue({"commands", "command1"}).empty() == true);
+                    REQUIRE(yaml.getValue({"commands", "some-command"}).empty() == true);
                 }
                 THEN("We should not be able to get any value collection") {
                     REQUIRE(yaml.getValueCollection({"commands"}).empty() == true);
-                    REQUIRE(yaml.getValueCollection({"commands", "command1"}).empty() == true);
+                    REQUIRE(yaml.getValueCollection({"commands", "some-command"}).empty() == true);
                 }
-                THEN("We should not be able to get a tree and should give the strong guarantee") {
+                THEN("We should not be able to get a tree and should give the strong exception guarantee") {
                     string settingsKey("blaat");
                     SettingsNode settings;
                     settings.m_key = settingsKey;
                     REQUIRE(yaml.getTree({"commands"}, settings) == false);
-                    REQUIRE(yaml.getTree({"commands", "command1"}, settings) == false);
+                    REQUIRE(yaml.getTree({"commands", "some-command"}, settings) == false);
 
-                    // Check the strong guarantee
+                    // Check the strong exception guarantee
                     REQUIRE(settings.m_key == settingsKey);
                     REQUIRE(settings.m_values.empty() == true);
                 }
@@ -189,14 +165,14 @@ namespace execHelper { namespace yaml { namespace test {
                     REQUIRE(yaml.getValueCollection({"commands"}).empty() == true);
                     REQUIRE(yaml.getValueCollection({"commands", "command1"}).empty() == true);
                 }
-                THEN("We should not be able to get a tree and should give the strong guarantee") {
+                THEN("We should not be able to get a tree and should give the strong exception guarantee") {
                     string settingsKey("blaat");
                     SettingsNode settings;
                     settings.m_key = settingsKey;
                     REQUIRE(yaml.getTree({"commands"}, settings) == false);
                     REQUIRE(yaml.getTree({"commands", "command1"}, settings) == false);
 
-                    // Check the strong guarantee
+                    // Check the strong exception guarantee
                     REQUIRE(settings.m_key == settingsKey);
                     REQUIRE(settings.m_values.empty() == true);
                 }

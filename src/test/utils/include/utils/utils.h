@@ -1,6 +1,9 @@
 #ifndef __TEST_UTILS_H__
 #define __TEST_UTILS_H__
 
+#define THEN_WHEN(x)
+#define THEN_CHECK(x)
+
 #include <string>
 #include <memory>
 #include <vector>
@@ -58,6 +61,11 @@ namespace execHelper {
                 virtual core::PatternPermutator makePatternPermutator(const std::vector<core::Pattern>& patterns) const noexcept = 0;
             };
 
+            struct TargetUtilNames {
+                std::string target;
+                std::string runTarget;
+            };
+
             struct TargetUtil : public PatternUtil {
                 core::Pattern target;
                 core::Pattern runTarget;
@@ -67,6 +75,15 @@ namespace execHelper {
                 virtual std::vector<core::Pattern> getPatterns() const noexcept override;
                 virtual core::PatternPermutator makePatternPermutator() const noexcept override;
                 virtual core::PatternPermutator makePatternPermutator(const std::vector<core::Pattern>& patterns) const noexcept override;
+
+                TargetUtilNames toNames(const std::map<core::PatternKey, core::PatternValue>& pattern) const noexcept;
+            };
+
+            struct CompilerUtilNames {
+                std::string compiler;
+                std::string mode;
+                std::string architecture;
+                std::string distribution;
             };
 
             struct CompilerUtil : public PatternUtil {
@@ -80,6 +97,8 @@ namespace execHelper {
                 virtual std::vector<core::Pattern> getPatterns() const noexcept override;
                 virtual core::PatternPermutator makePatternPermutator() const noexcept override;
                 virtual core::PatternPermutator makePatternPermutator(const std::vector<core::Pattern>& patterns) const noexcept override;
+                
+                CompilerUtilNames toNames(const std::map<core::PatternKey, core::PatternValue>& pattern) const noexcept;
             };
 
             typedef std::vector<core::Pattern> Patterns;

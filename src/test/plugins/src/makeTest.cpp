@@ -4,6 +4,7 @@
 
 #include <catch.hpp>
 
+#include "plugins/pluginUtils.h"
 #include "plugins/make.h"
 
 #include "executorStub.h"
@@ -20,11 +21,14 @@ using execHelper::core::Task;
 using execHelper::core::TaskCollection;
 using execHelper::core::CommandCollection;
 using execHelper::core::Pattern;
+using execHelper::plugins::replacePatternCombinations;
 
 using execHelper::test::OptionsStub;
 using execHelper::test::utils::addSettings;
 using execHelper::test::utils::TargetUtil;
+using execHelper::test::utils::TargetUtilNames;
 using execHelper::test::utils::CompilerUtil;
+using execHelper::test::utils::CompilerUtilNames;
 using execHelper::test::utils::Patterns;
 
 namespace {
@@ -89,7 +93,7 @@ namespace execHelper { namespace plugins { namespace test {
         }
         setupBasicOptions(options, patterns);
         addSettings(options.m_settings["make"], "patterns", patternNames);
-            addSettings(options.m_settings["make"], "command-line", {"{" + targetUtil.target.getKey() + "}{" + targetUtil.runTarget.getKey() + "}"});
+        addSettings(options.m_settings["make"], "command-line", {"{" + targetUtil.target.getKey() + "}{" + targetUtil.runTarget.getKey() + "}"});
         addSettings(options.m_settings["make"], "clean", "command-line");
         addSettings(options.m_settings["make"]["clean"], "command-line", {"clean", "{" + targetUtil.target.getKey() + "}{" + targetUtil.runTarget.getKey() + "}"});
 
@@ -127,11 +131,10 @@ namespace execHelper { namespace plugins { namespace test {
                 ExecutorStub::TaskQueue expectedQueue;
                 for(const auto& pattern : compilerUtil.makePatternPermutator()) {
                     for(const auto& target : targetUtil.makePatternPermutator()) {
-                        string targetName = target.at(targetUtil.target.getKey());
-                        string runTargetName = target.at(targetUtil.runTarget.getKey());
+                        const TargetUtilNames targetNames = targetUtil.toNames(target);
 
                         Task expectedTask = actualTaskBase;
-                        expectedTask.append(targetName + runTargetName);
+                        expectedTask.append(targetNames.target + targetNames.runTarget);
                         expectedQueue.push_back(expectedTask);
                     }
                 }
@@ -169,11 +172,10 @@ namespace execHelper { namespace plugins { namespace test {
 
                 ExecutorStub::TaskQueue expectedQueue;
                 for(const auto& target : targetUtil.makePatternPermutator()) {
-                    string targetName = target.at(targetUtil.target.getKey());
-                    string runTargetName = target.at(targetUtil.runTarget.getKey());
+                    const TargetUtilNames targetNames = targetUtil.toNames(target);
 
                     Task expectedTask;
-                    expectedTask.append(TaskCollection({"make", "--jobs", "8", "V=1", "--jobs", "4", targetName + runTargetName}));
+                    expectedTask.append(TaskCollection({"make", "--jobs", "8", "V=1", "--jobs", "4", targetNames.target + targetNames.runTarget}));
                     expectedQueue.push_back(expectedTask);
                 }
 
@@ -188,11 +190,10 @@ namespace execHelper { namespace plugins { namespace test {
 
                 ExecutorStub::TaskQueue expectedQueue;
                 for(const auto& target : targetUtil.makePatternPermutator()) {
-                    string targetName = target.at(targetUtil.target.getKey());
-                    string runTargetName = target.at(targetUtil.runTarget.getKey());
+                    const TargetUtilNames targetNames = targetUtil.toNames(target);
 
                     Task expectedTask;
-                    expectedTask.append(TaskCollection({"make", "--jobs", "8", "clean", "V=1", "--jobs", "4", targetName + runTargetName}));
+                    expectedTask.append(TaskCollection({"make", "--jobs", "8", "clean", "V=1", "--jobs", "4", targetNames.target + targetNames.runTarget}));
                     expectedQueue.push_back(expectedTask);
                 }
 
@@ -205,6 +206,9 @@ namespace execHelper { namespace plugins { namespace test {
 
     SCENARIO("Testing the build-dir make settings", "[plugins][make]") {
         GIVEN("A make plugin object and the default options") {
+            const string command1("command1");
+            const string command2("command2");
+
             TargetUtil targetUtil;
             CompilerUtil compilerUtil;
             OptionsStub options;
@@ -218,65 +222,67 @@ namespace execHelper { namespace plugins { namespace test {
                 patterns.push_back(pattern);
                 patternNames.push_back(pattern.getKey());
             }
+
+            const string buildDir1("{" + compilerUtil.distribution.getKey() + "}/{" + compilerUtil.architecture.getKey() + "}/{HELLO}/{" + compilerUtil.compiler.getKey() + "}/hello{" + compilerUtil.mode.getKey() + " }world"); 
+            const string buildDir2("clean/{" + compilerUtil.distribution.getKey() + "}/{" + compilerUtil.architecture.getKey() + "}/{HELLO}/{" + compilerUtil.compiler.getKey() + "}/hello{" + compilerUtil.mode.getKey() + "}world"); 
+            const string target1({"{" + targetUtil.target.getKey() + "}{" + targetUtil.runTarget.getKey() + "}"});
+            const string target2({"clean/{" + targetUtil.target.getKey() + "}{" + targetUtil.runTarget.getKey() + "}"});
+
             setupBasicOptions(options, patterns);
+            addSettings(options.m_settings, "commands", {command1, command2});
+            addSettings(options.m_settings, command1, {"make"});
+            addSettings(options.m_settings, command2, {"make"});
             addSettings(options.m_settings["make"], "patterns", patternNames);
-            addSettings(options.m_settings["make"], "command-line", {"{" + targetUtil.target.getKey() + "}{" + targetUtil.runTarget.getKey() + "}"});
-            addSettings(options.m_settings["make"], "clean", "command-line");
-            addSettings(options.m_settings["make"]["clean"], "command-line", {"clean", "{" + targetUtil.target.getKey() + "}{" + targetUtil.runTarget.getKey() + "}"});
-            addSettings(options.m_settings["make"], "patterns", {"DISTRIBUTION", "ARCHITECTURE", "COMPILER", "MODE"});
-            addSettings(options.m_settings["make"], "build-dir", "build/{DISTRIBUTION}/{ARCHITECTURE}/{HELLO}/{COMPILER}/hello{MODE}world");
-            addSettings(options.m_settings["make"]["clean"], "build-dir", "clean/{DISTRIBUTION}/{ARCHITECTURE}/{HELLO}/{COMPILER}/hello{MODE}world");
+            addSettings(options.m_settings["make"], "command-line", {target1});
+            addSettings(options.m_settings["make"], command2, "command-line");
+            addSettings(options.m_settings["make"][command2], "command-line", {command2, target1});
+            addSettings(options.m_settings["make"], "build-dir", buildDir1);
+            addSettings(options.m_settings["make"][command2], "build-dir", buildDir2);
 
             Make plugin;
+            Task task;
 
-            WHEN("We build the plugin") {
-                Task task;
-                REQUIRE(plugin.apply("build", task, options) == true);
+            WHEN("We create the expected output") {
+                bool returnCode = false;
+                
+                TaskCollection expectedTaskCollection({"make", "--jobs", "8"});
 
-                ExecutorStub::TaskQueue expectedQueue;
-                for(const auto& pattern : compilerUtil.makePatternPermutator()) {
-                    string compilerName = pattern.at(compilerUtil.compiler.getKey());
-                    string modeName = pattern.at(compilerUtil.mode.getKey());
-                    string architectureName = pattern.at(compilerUtil.architecture.getKey());
-                    string distributionName = pattern.at(compilerUtil.distribution.getKey());
+                AND_WHEN("We call the first command") {
+                    returnCode = plugin.apply(command1, task, options);
 
-                    for(const auto& target : targetUtil.makePatternPermutator()) {
-                        string targetName = target.at(targetUtil.target.getKey());
-                        string runTargetName = target.at(targetUtil.runTarget.getKey());
+                    expectedTaskCollection.push_back("--directory=" + buildDir1);
+                    expectedTaskCollection.push_back(target1);
+                }
+                AND_WHEN("We call the second command") {
+                    returnCode = plugin.apply(command2, task, options);
 
-                        Task expectedTask;
-                        expectedTask.append(TaskCollection({"make", "--jobs", "8", "--directory=build/" + distributionName + "/" + architectureName + "/{HELLO}/" + compilerName + "/hello" + modeName + "world", targetName + runTargetName}));
-                        expectedQueue.push_back(expectedTask);
+                    expectedTaskCollection.push_back("--directory=" + buildDir2);
+                    expectedTaskCollection.push_back(command2);
+                    expectedTaskCollection.push_back(target1);
+                }
+
+                THEN_CHECK("The call should succeed") {
+                    REQUIRE(returnCode == true);
+                }
+
+                THEN_CHECK("We get the expected tasks") {
+                    ExecutorStub::TaskQueue expectedQueue;
+                    for(const auto& pattern : compilerUtil.makePatternPermutator()) {
+                        CompilerUtilNames compilerNames = compilerUtil.toNames(pattern);
+
+                        for(const auto& targetCombination : targetUtil.makePatternPermutator()) {
+                            TargetUtilNames targetNames = targetUtil.toNames(targetCombination);
+
+                            TaskCollection replacedTaskCollection = expectedTaskCollection;
+
+                            replacePatternCombinations(replacedTaskCollection, pattern);
+                            replacePatternCombinations(replacedTaskCollection, targetCombination);
+
+                            Task expectedTask;
+                            expectedTask.append(replacedTaskCollection);
+                            expectedQueue.push_back(expectedTask);
+                        }
                     }
-                }
-
-                THEN("We should get the expected tasks") {
-                    REQUIRE(expectedQueue == options.m_executor.getExecutedTasks());
-                }
-            }
-
-            WHEN("We clean the plugin") {
-                Task task;
-                REQUIRE(plugin.apply("clean", task, options) == true);
-
-                ExecutorStub::TaskQueue expectedQueue;
-                for(const auto& pattern : compilerUtil.makePatternPermutator()) {
-                    string compilerName = pattern.at(compilerUtil.compiler.getKey());
-                    string modeName = pattern.at(compilerUtil.mode.getKey());
-                    string architectureName = pattern.at(compilerUtil.architecture.getKey());
-                    string distributionName = pattern.at(compilerUtil.distribution.getKey());
-
-                    for(const auto& target : targetUtil.makePatternPermutator()) {
-                        string targetName = target.at(targetUtil.target.getKey());
-                        string runTargetName = target.at(targetUtil.runTarget.getKey());
-
-                        Task expectedTask;
-                        expectedTask.append(TaskCollection({"make", "--jobs", "8", "--directory=clean/" + distributionName + "/" + architectureName + "/{HELLO}/" + compilerName + "/hello" + modeName + "world", "clean", targetName + runTargetName}));
-                        expectedQueue.push_back(expectedTask);
-                    }
-                }
-
-                THEN("We should get the expected tasks") {
                     REQUIRE(expectedQueue == options.m_executor.getExecutedTasks());
                 }
             }

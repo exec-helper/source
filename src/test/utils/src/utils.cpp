@@ -178,6 +178,13 @@ namespace execHelper { namespace test { namespace utils {
         return patternValuesMatrix;
     }
 
+    TargetUtilNames TargetUtil::toNames(const std::map<PatternKey, PatternValue>& pattern) const noexcept {
+        TargetUtilNames names;
+        names.target = pattern.at(target.getKey());
+        names.runTarget = pattern.at(runTarget.getKey());
+        return names;
+    }
+
     CompilerUtil::CompilerUtil() :
         compiler("COMPILER", {"compiler1", "compiler2"}, 'c', "compiler"),
         mode("MODE", {"mode1", "mode2"}, 'm', "mode"),
@@ -205,6 +212,15 @@ namespace execHelper { namespace test { namespace utils {
             patternValuesMatrix.emplace(make_pair(pattern.getKey(), pattern.getDefaultValues()));
         }
         return patternValuesMatrix;
+    }
+
+    CompilerUtilNames CompilerUtil::toNames(const std::map<PatternKey, PatternValue>& pattern) const noexcept {
+        CompilerUtilNames names;
+        names.compiler = pattern.at(compiler.getKey());
+        names.mode = pattern.at(mode.getKey());
+        names.architecture = pattern.at(architecture.getKey());
+        names.distribution = pattern.at(distribution.getKey());
+        return names;
     }
 
     PatternKeys getAllPatternKeys(const std::initializer_list<reference_wrapper<const PatternUtil>>& patterns) noexcept {

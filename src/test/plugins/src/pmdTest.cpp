@@ -1,6 +1,4 @@
 #include <catch.hpp>
-#define THEN_WHEN(x)
-#define THEN_CHECK(x)
 
 #include <vector>
 
