@@ -31,7 +31,9 @@ using execHelper::core::PatternKeys;
 using execHelper::test::utils::addSettings;
 using execHelper::test::OptionsStub;
 using execHelper::test::utils::TargetUtil;
+using execHelper::test::utils::TargetUtilNames;
 using execHelper::test::utils::CompilerUtil;
+using execHelper::test::utils::CompilerUtilNames;
 using execHelper::test::utils::getAllPatterns;
 using execHelper::test::utils::getAllPatternKeys;
 using execHelper::test::utils::Patterns;
@@ -211,16 +213,13 @@ namespace execHelper { namespace plugins { namespace test {
                 THEN("We should get the expected task") {
                     ExecutorStub::TaskQueue expectedQueue;
                     for(const auto& pattern : compilerUtil.makePatternPermutator()) {
-                        string compilerName = pattern.at(compilerUtil.compiler.getKey());
-                        string modeName = pattern.at(compilerUtil.mode.getKey());
-                        string architectureName = pattern.at(compilerUtil.architecture.getKey());
-                        string distributionName = pattern.at(compilerUtil.distribution.getKey());
+                        const CompilerUtilNames compilerNames = compilerUtil.toNames(pattern);
 
                         for(const auto& target : targetUtil.makePatternPermutator()) {
-                            string targetName = target.at(targetUtil.target.getKey());
-                            string runTargetName = target.at(targetUtil.runTarget.getKey());
+                            const TargetUtilNames targetNames = targetUtil.toNames(target);
+
                             Task expectedTask;
-                            expectedTask.append(TaskCollection({"scons", "--jobs", "8", "compiler=" + compilerName, "mode=" + modeName, architectureName, "hello" + distributionName + "world", targetName + runTargetName}));
+                            expectedTask.append(TaskCollection({"scons", "--jobs", "8", "compiler=" + compilerNames.compiler, "mode=" + compilerNames.mode, compilerNames.architecture, "hello" + compilerNames.distribution + "world", targetNames.target + targetNames.runTarget}));
                             expectedQueue.push_back(expectedTask);
                         }
                     }
@@ -235,17 +234,13 @@ namespace execHelper { namespace plugins { namespace test {
                 THEN("We should get the expected task") {
                     ExecutorStub::TaskQueue expectedQueue;
                     for(const auto& pattern : compilerUtil.makePatternPermutator()) {
-                        string compilerName = pattern.at(compilerUtil.compiler.getKey());
-                        string modeName = pattern.at(compilerUtil.mode.getKey());
-                        string architectureName = pattern.at(compilerUtil.architecture.getKey());
-                        string distributionName = pattern.at(compilerUtil.distribution.getKey());
+                        const CompilerUtilNames compilerNames = compilerUtil.toNames(pattern);
 
                         for(const auto& target : targetUtil.makePatternPermutator()) {
-                            string targetName = target.at(targetUtil.target.getKey());
-                            string runTargetName = target.at(targetUtil.runTarget.getKey());
+                            const TargetUtilNames targetNames = targetUtil.toNames(target);
  
                             Task expectedTask;
-                            expectedTask.append(TaskCollection({"scons", "--jobs", "8", "--clean", "compiler=" + compilerName, "mode=" + modeName, architectureName, "hello" + distributionName + "world", targetName + runTargetName}));
+                            expectedTask.append(TaskCollection({"scons", "--jobs", "8", "--clean", "compiler=" + compilerNames.compiler, "mode=" + compilerNames.mode, compilerNames.architecture, "hello" + compilerNames.distribution + "world", targetNames.target + targetNames.runTarget}));
                             expectedQueue.push_back(expectedTask);
                         }
                     }

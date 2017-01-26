@@ -1,6 +1,9 @@
 #ifndef __TEST_UTILS_H__
 #define __TEST_UTILS_H__
 
+#define THEN_WHEN(x)
+#define THEN_CHECK(x)
+
 #include <string>
 #include <memory>
 #include <vector>
