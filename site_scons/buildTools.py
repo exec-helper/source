@@ -73,7 +73,8 @@ def addLibPathUsageRequirement(env, dependency):
 def createUnittest(env, name, sources, includes, libs, libs_path, dependencies):
     env_unittest = env.Clone()
 
-    env_unittest['CPPPATH'].append(env['ROOT_DIR'] + '/3rdparty/Catch/include')
+    # env_unittest['CPPPATH'].append(env['ROOT_DIR'] + '/3rdparty/Catch/include')
+    env_unittest['CPPPATH'].append(env['INCLUDE_UNITTEST'])
 
     if libs is not None:
         libs_unittest = copy.deepcopy(libs)

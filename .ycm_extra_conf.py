@@ -63,7 +63,8 @@ flags = [
     '-Isrc/commander/include',
     '-Isrc/commander/include/commander',
     '-Isrc/applications',
-    '-Isrc/catch'
+    '-Isrc/catch',
+    '-Isrc/catch/include'
 ]
 
 

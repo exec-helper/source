@@ -1,12 +1,4 @@
-#include <catch.hpp>
-#define THEN_WHEN(x)
-#define THEN_CHECK(x)
-
-#define MAKE_COMBINATIONS       unsigned int NUMBER_OF_COMBINATIONS = 0; \
-                                const unsigned int CURRENT_COUNT = __COUNTER__; \
-                                for(unsigned int i = 0U; (i < (1U << NUMBER_OF_COMBINATIONS) || i == 0U); ++i)
-#define COMBINATION    if(i == 0) { ++NUMBER_OF_COMBINATIONS;} \
-                       if(i & (1 << (__COUNTER__ - CURRENT_COUNT - 1U)))
+#include "unittest/catch.h"
 
 #include <string>
 #include <vector>
@@ -79,16 +71,6 @@ namespace execHelper { namespace plugins { namespace test {
                     addSettings(rootSettings[lcovConfigKey][command], "run-command", "memory");
                     expectedTasks.emplace_back(Task({"lcov", "--base-directory", ".", "--directory", ".", "--capture", "--output", "lcov-plugin.info"}));
                 }    
-
-                AND_WHEN("We add a command line") {
-                    const TaskCollection commandLine({"--option1", "--option2"});
-                    addSettings(rootSettings[lcovConfigKey][command], "run-command", "memory");
-                    addSettings(rootSettings[lcovConfigKey], "command-line", commandLine);
-
-                    Task expectedTask({"lcov", "--base-directory", ".", "--directory", ".", "--capture", "--output", "lcov-plugin.info"});
-                    expectedTask.append(commandLine);
-                    expectedTasks.emplace_back(expectedTask);
-                }
 
                 THEN_WHEN("We apply the plugin") {
                     bool returnCode = plugin.apply(command, task, options);
@@ -185,21 +167,6 @@ namespace execHelper { namespace plugins { namespace test {
                     expectedTasks.emplace_back(Task({"lcov", "--base-directory", ".", "--directory", ".", "--capture", "--output", "lcov-plugin.info"}));
                 }
 
-                AND_WHEN("We add a command line") {
-                    const TaskCollection commandLine({"--option1", "--option2"});
-                    addSettings(rootSettings[lcovConfigKey], "zero-counters", "yes");
-                    addSettings(rootSettings[lcovConfigKey], "command-line", commandLine);
-
-                    Task expectedTask({"lcov", "--base-directory", ".", "--directory", ".", "--zerocounters"});
-                    expectedTask.append(commandLine);
-                    expectedTasks.emplace_back(expectedTask);
-                    
-                    Task captureTask({"lcov", "--base-directory", ".", "--directory", ".", "--capture", "--output", "lcov-plugin.info"});
-                    captureTask.append(commandLine);
-                    expectedTasks.emplace_back(captureTask);
-                }
-
-
                 THEN_WHEN("We apply the plugin") {
                     bool returnCode = plugin.apply(command, task, options);
 
@@ -265,19 +232,6 @@ namespace execHelper { namespace plugins { namespace test {
                     expectedTasks.emplace_back(Task({"lcov", "--base-directory", ".", "--directory", ".", "--capture", "--output", "lcov-plugin.info"}));
                 }
 
-                AND_WHEN("We add a command line") {
-                    const TaskCollection commandLine({"--option1", "--option2"});
-                    addSettings(rootSettings[lcovConfigKey], "excludes", {"exclude1", "exclude2", "exclude3"});
-                    addSettings(rootSettings[lcovConfigKey], "command-line", commandLine);
-                    Task captureTask({"lcov", "--base-directory", ".", "--directory", ".", "--capture", "--output", "lcov-plugin.info"});
-                    captureTask.append(commandLine);
-                    expectedTasks.emplace_back(captureTask);
-
-                    Task expectedTask({"lcov", "--remove", "lcov-plugin.info", "\"exclude1\"", "\"exclude2\"", "\"exclude3\"", "--output-file", "lcov-plugin.info"});
-                    expectedTask.append(commandLine);
-                    expectedTasks.emplace_back(expectedTask);
-                }
-
                 THEN_WHEN("We apply the plugin") {
                     bool returnCode = plugin.apply(command, task, options);
 
@@ -323,12 +277,12 @@ namespace execHelper { namespace plugins { namespace test {
 
                 AND_WHEN("We add it as a generic setting") {
                     addSettings(rootSettings[lcovConfigKey], "gen-html", "yes");
-                    expectedTasks.emplace_back(Task({"genhtml", "--output-directory", ".", "--title", "hello", "lcov-plugin.info"}));
+                    expectedTasks.emplace_back(Task({"genhtml", "--output-directory", ".", "--title", "Hello", "lcov-plugin.info"}));
                 }
 
                 AND_WHEN("We add it as a specific setting") {
                     addSettings(rootSettings[lcovConfigKey][command], "gen-html", "yes");
-                    expectedTasks.emplace_back(Task({"genhtml", "--output-directory", ".", "--title", "hello", "lcov-plugin.info"}));
+                    expectedTasks.emplace_back(Task({"genhtml", "--output-directory", ".", "--title", "Hello", "lcov-plugin.info"}));
                 }
 
                 AND_WHEN("We add it as a generic setting") {
@@ -337,19 +291,6 @@ namespace execHelper { namespace plugins { namespace test {
 
                 AND_WHEN("We add it as a specific setting") {
                     addSettings(rootSettings[lcovConfigKey][command], "gen-html", "no");
-                }
-
-                AND_WHEN("We add all the gen-html related settings") {
-                    const string genHtmlOutputDir("output-dir");
-                    const TaskCollection getHtmlCommandLine({"--option1", "--option2"});
-
-                    addSettings(rootSettings[lcovConfigKey], "gen-html", "yes");
-                    addSettings(rootSettings[lcovConfigKey], "gen-html-output", genHtmlOutputDir);
-                    addSettings(rootSettings[lcovConfigKey], "gen-html-command-line", getHtmlCommandLine);
-
-                    Task genHtmlTask({"genhtml", "--output-directory", genHtmlOutputDir, "--title", "hello", "lcov-plugin.info"});
-                    genHtmlTask.append(getHtmlCommandLine);
-                    expectedTasks.emplace_back(genHtmlTask);
                 }
 
                 THEN_WHEN("We apply the plugin") {
@@ -386,7 +327,7 @@ namespace execHelper { namespace plugins { namespace test {
                     OptionsStub options;
                     SettingsNode& rootSettings = options.m_settings;
                     addSettings(rootSettings, lcovConfigKey, command);
-                    addSettings(rootSettings[lcovConfigKey], "run-command", "memory");
+                    addSettings(rootSettings[lcovConfigKey][command], "run-command", "memory");
 
                     Lcov plugin;
                     Task task;

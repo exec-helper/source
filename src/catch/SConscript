@@ -9,7 +9,8 @@ env['LIB_UNITTEST'] = [
 ]
 
 env['INCLUDE_UNITTEST'] = [
-    '3rdparty/Catch/include'
+    '{rootDir}/3rdparty/Catch/include'.format(rootDir = env['ROOT_DIR']),
+    '{rootDir}/catch/include'.format(rootDir = env['BUILD_DIR'])
 ]
 
 env_catch = env.Clone()
