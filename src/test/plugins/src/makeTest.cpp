@@ -267,16 +267,12 @@ namespace execHelper { namespace plugins { namespace test {
 
                 THEN_CHECK("We get the expected tasks") {
                     ExecutorStub::TaskQueue expectedQueue;
-                    for(const auto& pattern : compilerUtil.makePatternPermutator()) {
-                        CompilerUtilNames compilerNames = compilerUtil.toNames(pattern);
-
-                        for(const auto& targetCombination : targetUtil.makePatternPermutator()) {
-                            TargetUtilNames targetNames = targetUtil.toNames(targetCombination);
-
+                    for(const auto& compiler : compilerUtil.makePatternPermutator()) {
+                        for(const auto& target : targetUtil.makePatternPermutator()) {
                             TaskCollection replacedTaskCollection = expectedTaskCollection;
 
-                            replacePatternCombinations(replacedTaskCollection, pattern);
-                            replacePatternCombinations(replacedTaskCollection, targetCombination);
+                            replacePatternCombinations(replacedTaskCollection, compiler);
+                            replacePatternCombinations(replacedTaskCollection, target);
 
                             Task expectedTask;
                             expectedTask.append(replacedTaskCollection);

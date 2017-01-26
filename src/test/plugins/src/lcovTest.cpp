@@ -15,6 +15,7 @@ using std::vector;
 using std::string;
 
 using execHelper::config::SettingsNode;
+using execHelper::core::Command;
 using execHelper::core::Task;
 using execHelper::core::TaskCollection;
 using execHelper::core::Pattern;
@@ -27,6 +28,14 @@ using execHelper::core::test::ExecutorStub;
 
 namespace {
     const string lcovConfigKey("lcov");
+
+    void checkMemories(const MemoryHandler& memory, const Command& command) {
+        const MemoryHandler::Memories memories = memory.getExecutions();
+        REQUIRE(memories.size() == 1U);
+        for(const auto& memoryElement : memories) {
+            REQUIRE(memoryElement.command == command);
+        }
+    }
 }
 
 namespace execHelper { namespace plugins { namespace test {
@@ -80,17 +89,11 @@ namespace execHelper { namespace plugins { namespace test {
                     }
 
                     THEN_CHECK("It called the right commands") {
-                        const ExecutorStub::TaskQueue executedTasks = options.m_executor.getExecutedTasks(); 
-
-                        REQUIRE(expectedTasks == executedTasks);
+                        REQUIRE(expectedTasks == options.m_executor.getExecutedTasks());
                     }
 
                     THEN_CHECK("It should have called the appropriate plugin") {
-                        const Memory::Memories memories = memory.getExecutions();
-                        REQUIRE(memories.size() == 1U);
-                        for(const auto& memoryElement : memories) {
-                            REQUIRE(memoryElement.command == command);
-                        }
+                        checkMemories(memory, command);
                     }
                 }
             }
@@ -175,17 +178,11 @@ namespace execHelper { namespace plugins { namespace test {
                     }
 
                     THEN_CHECK("It called the right commands") {
-                        const ExecutorStub::TaskQueue executedTasks = options.m_executor.getExecutedTasks(); 
-
-                        REQUIRE(expectedTasks == executedTasks);
+                        REQUIRE(expectedTasks == options.m_executor.getExecutedTasks());
                     }
 
                     THEN_CHECK("It should have called the appropriate plugin") {
-                        const Memory::Memories memories = memory.getExecutions();
-                        REQUIRE(memories.size() == 1U);
-                        for(const auto& memoryElement : memories) {
-                            REQUIRE(memoryElement.command == command);
-                        }
+                        checkMemories(memory, command);
                     }
                 }
             }
@@ -240,17 +237,11 @@ namespace execHelper { namespace plugins { namespace test {
                     }
 
                     THEN_CHECK("It called the right commands") {
-                        const ExecutorStub::TaskQueue executedTasks = options.m_executor.getExecutedTasks(); 
-
-                        REQUIRE(expectedTasks == executedTasks);
+                        REQUIRE(expectedTasks == options.m_executor.getExecutedTasks());
                     }
 
                     THEN_CHECK("It should have called the appropriate plugin") {
-                        const Memory::Memories memories = memory.getExecutions();
-                        REQUIRE(memories.size() == 1U);
-                        for(const auto& memoryElement : memories) {
-                            REQUIRE(memoryElement.command == command);
-                        }
+                        checkMemories(memory, command);
                     }
                 }
             }
@@ -301,17 +292,11 @@ namespace execHelper { namespace plugins { namespace test {
                     }
 
                     THEN_CHECK("It called the right commands") {
-                        const ExecutorStub::TaskQueue executedTasks = options.m_executor.getExecutedTasks(); 
-
-                        REQUIRE(expectedTasks == executedTasks);
+                        REQUIRE(expectedTasks == options.m_executor.getExecutedTasks());
                     }
 
                     THEN_CHECK("It should have called the appropriate plugin") {
-                        const Memory::Memories memories = memory.getExecutions();
-                        REQUIRE(memories.size() == 1U);
-                        for(const auto& memoryElement : memories) {
-                            REQUIRE(memoryElement.command == command);
-                        }
+                        checkMemories(memory, command);
                     }
                 }
             }
@@ -403,17 +388,11 @@ namespace execHelper { namespace plugins { namespace test {
             }
 
             THEN_CHECK("It called the right commands") {
-                const ExecutorStub::TaskQueue executedTasks = options.m_executor.getExecutedTasks(); 
-
-                REQUIRE(expectedTasks == executedTasks);
+                REQUIRE(expectedTasks == options.m_executor.getExecutedTasks());
             }
 
             THEN_CHECK("It should have called the appropriate plugin") {
-                const Memory::Memories memories = memory.getExecutions();
-                REQUIRE(memories.size() == 1U);
-                for(const auto& memoryElement : memories) {
-                    REQUIRE(memoryElement.command == command);
-                }
+                checkMemories(memory, command);
             }
         }
     }

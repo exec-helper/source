@@ -2,7 +2,7 @@
 #include <string>
 #include <fstream>
 
-#include <catch.hpp>
+#include "unittest/catch.h"
 
 #include "plugins/scons.h"
 
@@ -10,6 +10,7 @@
 #include "optionsStub.h"
 #include "core/execHelperOptions.h"
 #include "core/pattern.h"
+#include "plugins/pluginUtils.h"
 
 #include "utils/utils.h"
 
@@ -27,13 +28,12 @@ using execHelper::core::TaskCollection;
 using execHelper::core::CommandCollection;
 using execHelper::core::Pattern;
 using execHelper::core::PatternKeys;
+using execHelper::plugins::replacePatternCombinations;
 
 using execHelper::test::utils::addSettings;
 using execHelper::test::OptionsStub;
 using execHelper::test::utils::TargetUtil;
-using execHelper::test::utils::TargetUtilNames;
 using execHelper::test::utils::CompilerUtil;
-using execHelper::test::utils::CompilerUtilNames;
 using execHelper::test::utils::getAllPatterns;
 using execHelper::test::utils::getAllPatternKeys;
 using execHelper::test::utils::Patterns;
@@ -51,6 +51,11 @@ namespace {
         }
     }
 
+    void initOptions(OptionsStub& options, const Patterns& patterns) {
+        for(const auto& pattern : patterns) {
+            options.m_patternsHandler->addPattern(pattern);
+        }
+    }
 }
 
 namespace execHelper { namespace plugins { namespace test {
@@ -121,131 +126,127 @@ namespace execHelper { namespace plugins { namespace test {
     }
 
     SCENARIO("Testing the single-threaded option of the scons plugin", "[plugins][scons]") {
-        OptionsStub options;
-        setupBasicOptions(options, {});
+        GIVEN("A basic setup") {
+            OptionsStub options;
+            initOptions(options, {});
 
-        Scons plugin;
+            const string command("scons-command");
 
-        GIVEN("A scons plugin object, basic settings and the single-threaded option") {
-            addSettings(options.m_settings["scons"], "single-threaded", "yes");
+            addSettings(options.m_settings, "commands", command);
+            addSettings(options.m_settings, "scons", command);
 
-            WHEN("We build the plugin wit the single threaded option") {
-                Task task;
-                REQUIRE(plugin.apply("build", task, options) == true);
+            Scons plugin;
 
-                THEN("We should get the expected task") {
-                    ExecutorStub::TaskQueue expectedQueue;
-                    Task expectedTask;
-                    expectedTask.append(TaskCollection({"scons"}));
-                    expectedQueue.push_back(expectedTask);
+            WHEN("We add various single threaded settings") {
+                Task expectedTask({"scons"});
 
-                    REQUIRE(expectedQueue == options.m_executor.getExecutedTasks());
+                AND_WHEN("We add no settings at all") {
+                    expectedTask.append(TaskCollection({"--jobs", "8"}));
                 }
-            }
-            WHEN("We clean the plugin") {
-                Task task;
-                REQUIRE(plugin.apply("clean", task, options) == true);
 
-                THEN("We should get the expected task") {
-                    ExecutorStub::TaskQueue expectedQueue;
-                    Task expectedTask;
-                    expectedTask.append(TaskCollection({"scons", "--clean"}));
-                    expectedQueue.push_back(expectedTask);
-
-                    REQUIRE(expectedQueue == options.m_executor.getExecutedTasks());
+                AND_WHEN("We add yes as a generic setting") {
+                    addSettings(options.m_settings["scons"], "single-threaded", "yes");
                 }
-            }
-        }
 
-        GIVEN("A scons plugin object, basic settings and the multi-threaded option") {
-            addSettings(options.m_settings["scons"], "single-threaded", "no");
-
-            WHEN("We build the plugin wit the single threaded option") {
-                Task task;
-                REQUIRE(plugin.apply("build", task, options) == true);
-
-                THEN("We should get the expected task") {
-                    ExecutorStub::TaskQueue expectedQueue;
-                    Task expectedTask;
-                    expectedTask.append(TaskCollection({"scons", "--jobs", "8"}));
-                    expectedQueue.push_back(expectedTask);
-
-                    REQUIRE(expectedQueue == options.m_executor.getExecutedTasks());
+                AND_WHEN("We add yes as a specific setting") {
+                    addSettings(options.m_settings["scons"][command], "single-threaded", "yes");
                 }
-            }
-            WHEN("We clean the plugin") {
-                Task task;
-                REQUIRE(plugin.apply("clean", task, options) == true);
 
-                THEN("We should get the expected task") {
-                    ExecutorStub::TaskQueue expectedQueue;
-                    Task expectedTask;
-                    expectedTask.append(TaskCollection({"scons", "--jobs", "8", "--clean"}));
-                    expectedQueue.push_back(expectedTask);
+                AND_WHEN("We add no as a generic setting") {
+                    addSettings(options.m_settings["scons"], "single-threaded", "no");
+                    expectedTask.append(TaskCollection({"--jobs", "8"}));
+                }
 
-                    REQUIRE(expectedQueue == options.m_executor.getExecutedTasks());
+                AND_WHEN("We add no as a specific setting") {
+                    addSettings(options.m_settings["scons"][command], "single-threaded", "no");
+                    expectedTask.append(TaskCollection({"--jobs", "8"}));
+                }
+
+                THEN_WHEN("We apply the plugin") {
+                    Task task;
+
+                    bool returnCode = plugin.apply(command, task, options);
+
+                    THEN_CHECK("The apply succeeded") {
+                        REQUIRE(returnCode == true);
+                    }
+
+                    THEN_CHECK("We get the expected tasks") {
+                        ExecutorStub::TaskQueue expectedQueue;
+                        expectedQueue.emplace_back(expectedTask);
+
+                        REQUIRE(expectedQueue == options.m_executor.getExecutedTasks());
+                    }
+
                 }
             }
         }
     }
 
     SCENARIO("Testing the command line option of the scons plugin", "[plugins][scons]") {
-        GIVEN("A scons plugin object, basic settings and the multi-threaded option") {
+        GIVEN("A basic setup") {
             OptionsStub options;
 
-            TargetUtil targetUtil;
-            CompilerUtil compilerUtil;
-            Patterns patterns = getAllPatterns({targetUtil, compilerUtil});
-            PatternKeys patternKeys = getAllPatternKeys({targetUtil, compilerUtil});
-            setupBasicOptions(options, patterns);
+            const string command("scons-command");
+            const TargetUtil targetUtil;
+            const CompilerUtil compilerUtil;
+            const Patterns patterns = getAllPatterns({targetUtil, compilerUtil});
+            const PatternKeys patternKeys = getAllPatternKeys({targetUtil, compilerUtil});
+            initOptions(options, patterns);
+
+            addSettings(options.m_settings, "commands", command);
+            addSettings(options.m_settings, "scons", command);
 
             vector<string> commandLine({"compiler={" + compilerUtil.compiler.getKey() + "}", "mode={" + compilerUtil.mode.getKey() + "}", "{" + compilerUtil.architecture.getKey() + "}", "hello{" + compilerUtil.distribution.getKey() + "}world", "{" + targetUtil.target.getKey() + "}{" + targetUtil.runTarget.getKey() + "}"});
-            addSettings(options.m_settings["scons"], "patterns", patternKeys);
-            addSettings(options.m_settings["scons"], "command-line", commandLine);
-            addSettings(options.m_settings["scons"]["clean"], "command-line", commandLine);
         
             Scons plugin;
 
-            WHEN("We build the plugin") {
-                Task task;
-                REQUIRE(plugin.apply("build", task, options) == true);
+            WHEN("We apply the command line configuration setting") {
+                Task expectedTask({"scons", "--jobs", "8"});
 
-                THEN("We should get the expected task") {
-                    ExecutorStub::TaskQueue expectedQueue;
-                    for(const auto& pattern : compilerUtil.makePatternPermutator()) {
-                        const CompilerUtilNames compilerNames = compilerUtil.toNames(pattern);
+                addSettings(options.m_settings["scons"], "patterns", patternKeys);
 
-                        for(const auto& target : targetUtil.makePatternPermutator()) {
-                            const TargetUtilNames targetNames = targetUtil.toNames(target);
-
-                            Task expectedTask;
-                            expectedTask.append(TaskCollection({"scons", "--jobs", "8", "compiler=" + compilerNames.compiler, "mode=" + compilerNames.mode, compilerNames.architecture, "hello" + compilerNames.distribution + "world", targetNames.target + targetNames.runTarget}));
-                            expectedQueue.push_back(expectedTask);
-                        }
-                    }
-
-                    REQUIRE(expectedQueue == options.m_executor.getExecutedTasks());
+                AND_WHEN("We pass no command line") {
+                    ;
                 }
-            }
-            WHEN("We clean the plugin") {
-                Task task;
-                REQUIRE(plugin.apply("clean", task, options) == true);
 
-                THEN("We should get the expected task") {
-                    ExecutorStub::TaskQueue expectedQueue;
-                    for(const auto& pattern : compilerUtil.makePatternPermutator()) {
-                        const CompilerUtilNames compilerNames = compilerUtil.toNames(pattern);
+                AND_WHEN("We add the command line as a generic setting") {
+                    addSettings(options.m_settings["scons"], "command-line", commandLine);
 
-                        for(const auto& target : targetUtil.makePatternPermutator()) {
-                            const TargetUtilNames targetNames = targetUtil.toNames(target);
- 
-                            Task expectedTask;
-                            expectedTask.append(TaskCollection({"scons", "--jobs", "8", "--clean", "compiler=" + compilerNames.compiler, "mode=" + compilerNames.mode, compilerNames.architecture, "hello" + compilerNames.distribution + "world", targetNames.target + targetNames.runTarget}));
-                            expectedQueue.push_back(expectedTask);
-                        }
+                    expectedTask.append(commandLine);
+                }
+
+                AND_WHEN("We add the command line as a specific setting") {
+                    addSettings(options.m_settings["scons"][command], "command-line", commandLine);
+
+                    expectedTask.append(commandLine);
+                }
+
+                THEN_WHEN("We apply the plugin") {
+                    Task task;
+                    bool returnCode = plugin.apply(command, task, options);
+
+                    THEN_CHECK("The apply succeeds") {
+                        REQUIRE(returnCode == true);
                     }
 
-                    REQUIRE(expectedQueue == options.m_executor.getExecutedTasks());
+                    THEN_CHECK("We get the expected task") {
+                        ExecutorStub::TaskQueue expectedQueue;
+                        for(const auto& compiler : compilerUtil.makePatternPermutator()) {
+                            for(const auto& target : targetUtil.makePatternPermutator()) {
+                                TaskCollection replacedTaskCollection = expectedTask.getTask();
+
+                                replacePatternCombinations(replacedTaskCollection, compiler);
+                                replacePatternCombinations(replacedTaskCollection, target);
+
+                                Task replacedExpectedTask;
+                                replacedExpectedTask.append(replacedTaskCollection);
+                                expectedQueue.push_back(replacedExpectedTask);
+                            }
+                        }
+
+                        REQUIRE(expectedQueue == options.m_executor.getExecutedTasks());
+                    }
                 }
             }
         }
