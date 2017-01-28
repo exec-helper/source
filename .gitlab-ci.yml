@@ -11,7 +11,7 @@ stages:
 build:gcc:
     stage: build
     script: 
-        - apt-get install --yes -qq scons gcc g++ libboost-program-options1.61-dev libyaml-cpp-dev git
+        - apt-get install --yes -qq scons cmake gcc g++ libboost-program-options1.61-dev libyaml-cpp-dev git
         - git submodule update --init
         - scons -j8 compiler=gcc mode=debug
         - scons -j8 compiler=gcc mode=release
@@ -23,7 +23,7 @@ build:gcc:
 build:clang:
     stage: build
     script: 
-        - apt-get install --yes -qq scons clang libboost-program-options1.61-dev libyaml-cpp-dev git
+        - apt-get install --yes -qq scons cmake clang libboost-program-options1.61-dev libyaml-cpp-dev git
         - git submodule update --init
         - scons -j8 compiler=clang mode=debug
         - scons -j8 compiler=clang mode=release
@@ -118,9 +118,8 @@ coverage:
     dependencies:
         - build:gcc
     script:
-        - apt-get install --yes lcov make
-        - export PATH=$PATH:$(pwd)/build/gcc/release/bin
-        - make coverage
+        - apt-get install --yes lcov
+        - build/gcc/release/bin/exec-helper analyze --analyze lcov --compiler gcc --mode debug
     artifacts:
         paths:
             - test_coverage/
