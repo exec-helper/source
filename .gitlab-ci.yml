@@ -2,7 +2,7 @@ image: dock0/arch
 
 before_script:
     - pacman -Sy --noconfirm
-    - pacman -S --noconfirm boost boost-libs yaml-cpp
+    - pacman -S --noconfirm boost-libs
 
 stages:
     - build
@@ -12,7 +12,7 @@ stages:
 build:gcc:
     stage: build
     script: 
-        - pacman -S --noconfirm scons gcc clang make boost boost-libs git libunistring ncurses yaml-cpp
+        - pacman -S --noconfirm scons gcc clang cmake git libunistring ncurses
         - git submodule update --init
         - scons -j8 compiler=gcc mode=debug
         - scons -j8 compiler=gcc mode=release
@@ -24,7 +24,7 @@ build:gcc:
 build:clang:
     stage: build
     script: 
-        - pacman -S --noconfirm scons gcc clang make boost boost-libs git libunistring ncurses yaml-cpp
+        - pacman -S --noconfirm scons gcc clang cmake git libunistring ncurses
         - git submodule update --init
         - scons -j8 compiler=clang mode=debug
         - scons -j8 compiler=clang mode=release
@@ -99,7 +99,7 @@ clang-static-analyzer:
     dependencies:
         - build:gcc
     script:
-        - pacman -S --noconfirm scons clang cmake git
+        - pacman -S --noconfirm scons clang cmake git libunistring ncurses
         - git submodule update --init
         - build/gcc/release/bin/exec-helper analyze --analyze clang-static-analyzer --compiler clang --mode debug
 
