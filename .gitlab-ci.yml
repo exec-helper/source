@@ -119,7 +119,7 @@ coverage:
         - build:gcc
     script:
         - pacman -S --noconfirm lcov
-        - build/gcc/release/bin/exec-helper analyze --analyze lcov --compiler gcc --mode debug
+        - build/gcc/release/bin/exec-helper analyze --analyze lcov --compiler gcc --mode debug --run-target unittest
     artifacts:
         paths:
             - test_coverage/
