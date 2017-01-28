@@ -33,7 +33,7 @@ build:clang:
         paths:
             - build/
 
-test-distribution:ubuntu-yakkety
+test-distribution:ubuntu-yakkety:
     image: ubuntu:yakkety
     stage: test
     before_script:
