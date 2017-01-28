@@ -2,7 +2,7 @@ image: dock0/arch
 
 before_script:
     - pacman -Sy --noconfirm
-    - pacman -S --noconfirm boost-libs
+    - pacman -S --noconfirm boost boost-libs
 
 stages:
     - build
@@ -12,7 +12,7 @@ stages:
 build:gcc:
     stage: build
     script: 
-        - pacman -S --noconfirm scons gcc clang cmake git libunistring ncurses
+        - pacman -S --noconfirm scons gcc clang cmake make git libunistring ncurses
         - git submodule update --init
         - scons -j8 compiler=gcc mode=debug
         - scons -j8 compiler=gcc mode=release
@@ -24,7 +24,7 @@ build:gcc:
 build:clang:
     stage: build
     script: 
-        - pacman -S --noconfirm scons gcc clang cmake git libunistring ncurses
+        - pacman -S --noconfirm scons gcc clang cmake make git libunistring ncurses
         - git submodule update --init
         - scons -j8 compiler=clang mode=debug
         - scons -j8 compiler=clang mode=release
@@ -37,7 +37,7 @@ test-distribution:ubuntu-yakkety:
     image: ubuntu:yakkety
     stage: test
     before_script:
-        - apt-get install --yes -qq scons cmake gcc g++ libboost-program-options1.61-dev libyaml-cpp-dev git
+        - apt-get install --yes -qq scons cmake make gcc g++ libboost-program-options1.61-dev libyaml-cpp-dev git
         - git submodule update --init
     script:
         - scons -j8 compiler=gcc mode=release
@@ -99,7 +99,7 @@ clang-static-analyzer:
     dependencies:
         - build:gcc
     script:
-        - pacman -S --noconfirm scons clang cmake git libunistring ncurses
+        - pacman -S --noconfirm scons clang cmake make git libunistring ncurses
         - git submodule update --init
         - build/gcc/release/bin/exec-helper analyze --analyze clang-static-analyzer --compiler clang --mode debug
 
