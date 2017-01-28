@@ -1,7 +1,8 @@
-image: ubuntu:yakkety
+image: dock0/arch
 
 before_script:
-    - apt-get update -qq && apt-get install --yes -qq libboost-program-options1.61.0 libyaml-cpp0.5v5
+    - pacman -Sy --noconfirm
+    - pacman -S --noconfirm boost boost-libs yaml-cpp
 
 stages:
     - build
@@ -11,7 +12,7 @@ stages:
 build:gcc:
     stage: build
     script: 
-        - apt-get install --yes -qq scons cmake gcc g++ libboost-program-options1.61-dev libyaml-cpp-dev git
+        - pacman -S --noconfirm scons gcc clang make boost boost-libs git libunistring ncurses yaml-cpp
         - git submodule update --init
         - scons -j8 compiler=gcc mode=debug
         - scons -j8 compiler=gcc mode=release
@@ -23,7 +24,7 @@ build:gcc:
 build:clang:
     stage: build
     script: 
-        - apt-get install --yes -qq scons cmake clang libboost-program-options1.61-dev libyaml-cpp-dev git
+        - pacman -S --noconfirm scons gcc clang make boost boost-libs git libunistring ncurses yaml-cpp
         - git submodule update --init
         - scons -j8 compiler=clang mode=debug
         - scons -j8 compiler=clang mode=release
@@ -32,12 +33,11 @@ build:clang:
         paths:
             - build/
 
-test-distribution:arch-linux:
-    image: dock0/arch
+test-distribution:ubuntu-yakkety
+    image: ubuntu:yakkety
     stage: test
     before_script:
-        - pacman -Sy --noconfirm
-        - pacman -S --noconfirm scons gcc clang make boost boost-libs git libunistring ncurses yaml-cpp
+        - apt-get install --yes -qq scons cmake gcc g++ libboost-program-options1.61-dev libyaml-cpp-dev git
         - git submodule update --init
     script:
         - scons -j8 compiler=gcc mode=release
@@ -83,7 +83,7 @@ memory-check:
     dependencies:
         - build:gcc
     script:
-        - apt-get install --yes valgrind
+        - pacman -S --noconfirm valgrind
         - build/gcc/release/bin/exec-helper analyze --analyze valgrind --compiler gcc --mode debug --run-target unittest
 
 cppcheck:
@@ -91,7 +91,7 @@ cppcheck:
     dependencies:
         - build:gcc
     script:
-        - apt-get install --yes cppcheck
+        - pacman -S --noconfirm cppcheck
         - build/gcc/release/bin/exec-helper analyze --analyze cppcheck
 
 clang-static-analyzer:
@@ -99,7 +99,7 @@ clang-static-analyzer:
     dependencies:
         - build:gcc
     script:
-        - apt-get install --yes -qq scons clang cmake libboost-program-options1.61-dev git
+        - pacman -S --noconfirm scons clang cmake git
         - git submodule update --init
         - build/gcc/release/bin/exec-helper analyze --analyze clang-static-analyzer --compiler clang --mode debug
 
@@ -108,7 +108,7 @@ code-duplication-pmd-cpd:
     dependencies:
         - build:gcc
     script:
-        - apt-get install --yes -qq default-jre unzip wget
+        - pacman -S --noconfirm java-environment unzip wget
         - mkdir -p 3rdparty/pmd
         - pushd 3rdparty/pmd && wget "https://downloads.sourceforge.net/project/pmd/pmd/5.5.2/pmd-bin-5.5.2.zip" && unzip pmd-bin-5.5.2.zip; popd
         - build/gcc/release/bin/exec-helper analyze --analyze pmd
@@ -118,7 +118,7 @@ coverage:
     dependencies:
         - build:gcc
     script:
-        - apt-get install --yes lcov
+        - pacman -S --noconfirm lcov
         - build/gcc/release/bin/exec-helper analyze --analyze lcov --compiler gcc --mode debug
     artifacts:
         paths:
