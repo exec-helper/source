@@ -120,7 +120,7 @@ coverage:
         - build:gcc
     script:
         - pacman -S --noconfirm --needed base-devel curl
-        - curl -L -O https://aur.archlinux.org/cgit/aur.git/snapshot/lcov.tar.gz && untar lcov.tar.gz && cd lcov && makepkg -sri --noconfirm lcov
+        - curl -L -O https://aur.archlinux.org/cgit/aur.git/snapshot/lcov.tar.gz && tar -xvf lcov.tar.gz && cd lcov && makepkg -sri --noconfirm lcov
         - build/gcc/release/bin/exec-helper analyze --analyze lcov --compiler gcc --mode debug --run-target unittest
     artifacts:
         paths:
