@@ -2,7 +2,7 @@ image: dock0/arch
 
 before_script:
     - pacman -Sy --noconfirm
-    - pacman -S --noconfirm boost boost-libs
+    - pacman -S --noconfirm --needed boost boost-libs
 
 stages:
     - build
@@ -12,7 +12,7 @@ stages:
 build:gcc:
     stage: build
     script: 
-        - pacman -S --noconfirm scons gcc clang cmake make git libunistring ncurses
+        - pacman -S --noconfirm --needed scons gcc clang cmake make git libunistring ncurses
         - git submodule update --init
         - scons -j8 compiler=gcc mode=debug
         - scons -j8 compiler=gcc mode=release
@@ -24,7 +24,7 @@ build:gcc:
 build:clang:
     stage: build
     script: 
-        - pacman -S --noconfirm scons gcc clang cmake make git libunistring ncurses
+        - pacman -S --noconfirm --needed scons gcc clang cmake make git libunistring ncurses
         - git submodule update --init
         - scons -j8 compiler=clang mode=debug
         - scons -j8 compiler=clang mode=release
@@ -37,7 +37,8 @@ test-distribution:ubuntu-yakkety:
     image: ubuntu:yakkety
     stage: test
     before_script:
-        - apt-get install --yes -qq scons cmake make gcc g++ libboost-program-options1.61-dev libyaml-cpp-dev git
+        - apt-get update
+        - apt-get install --yes scons cmake make gcc g++ libboost-program-options1.61-dev libyaml-cpp-dev git
         - git submodule update --init
     script:
         - scons -j8 compiler=gcc mode=release
@@ -99,7 +100,7 @@ clang-static-analyzer:
     dependencies:
         - build:gcc
     script:
-        - pacman -S --noconfirm scons clang cmake make git libunistring ncurses
+        - pacman -S --noconfirm --needed scons clang cmake make git libunistring ncurses
         - git submodule update --init
         - build/gcc/release/bin/exec-helper analyze --analyze clang-static-analyzer --compiler clang --mode debug
 
@@ -108,7 +109,7 @@ code-duplication-pmd-cpd:
     dependencies:
         - build:gcc
     script:
-        - pacman -S --noconfirm java-environment unzip wget
+        - pacman -S --noconfirm --needed java-environment unzip wget
         - mkdir -p 3rdparty/pmd
         - pushd 3rdparty/pmd && wget "https://downloads.sourceforge.net/project/pmd/pmd/5.5.2/pmd-bin-5.5.2.zip" && unzip pmd-bin-5.5.2.zip; popd
         - build/gcc/release/bin/exec-helper analyze --analyze pmd
@@ -118,7 +119,8 @@ coverage:
     dependencies:
         - build:gcc
     script:
-        - pacman -S --noconfirm lcov
+        - pacman -S --noconfirm --needed base-devel curl
+        - curl -L -O https://aur.archlinux.org/cgit/aur.git/snapshot/lcov.tar.gz && untar lcov.tar.gz && cd lcov && makepkg -sri --noconfirm lcov
         - build/gcc/release/bin/exec-helper analyze --analyze lcov --compiler gcc --mode debug --run-target unittest
     artifacts:
         paths:
