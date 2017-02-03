@@ -107,7 +107,7 @@ command-line-command:
             - MODE
             - RUNTARGET
             - MODULE
-        command-line: build/{COMPILER}/{MODE}/bin/test/{RUNTARGET}/{MODULE}-{RUNTARGET}
+        command-line: build/{COMPILER}/{MODE}/bin/test/{RUNTARGET}/exec-helper-{MODULE}-{RUNTARGET}
 
 valgrind:
     run-command: run-test

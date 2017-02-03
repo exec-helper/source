@@ -24,11 +24,11 @@ namespace execHelper {
                 }
 
                 virtual bool parse(int /*argc*/, const char* const * /*argv*/) override {
-                    assert(false);  //  This function is currently not supported
+                    return false;  //  This function is currently not supported
                 }
 
                 virtual bool parseSettingsFile(const std::string& /*file*/) noexcept override {
-                    assert(false);  //  This function is currently not supported
+                    return false;  //  This function is currently not supported
                 }
 
                 virtual bool getVerbosity() const noexcept override {
