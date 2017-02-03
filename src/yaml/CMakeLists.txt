@@ -19,8 +19,6 @@ include_directories(
 add_library(${LIBRARY_NAME} ${SRCS})
 install(TARGETS ${LIBRARY_NAME} DESTINATION ${LIB_DIRECTORY})
 
-add_dependencies(${LIBRARY_NAME} Yaml-cpp)
-
 set(${LIBRARY_NAME}_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include ${LIBRARY_INCLUDES} PARENT_SCOPE)
 set(${LIBRARY_NAME}_LIBRARY_DIRS
         ${${PROJECT_NAME}-config_LIBRARY_DIRS} 

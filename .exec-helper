@@ -41,17 +41,34 @@ patterns:
         long-option: analyze
 
 commands:
+    - init
     - build
+    - build-only
+    - install
     - clean
+    - distclean
     - rebuild
     - analyze
     - run-test
 
+init:
+    - command-line-command
+
 build:
-    - scons
+    - build-only
+    - install
+
+build-only:
+    - make
+
+install:
+    - make
 
 clean:
-    - scons
+    - make
+
+distclean:
+    - command-line-command
 
 rebuild:
     - clean
@@ -67,22 +84,18 @@ selector:
     analyze:
         pattern: ANALYZE
 
-scons:
+make:
     patterns:
         - COMPILER
         - MODE
+    build-dir: build/{COMPILER}/{MODE}
     single-threaded: no
-    build:
-        command-line: 
-            - compiler={COMPILER}
-            - mode={MODE}
-            - verbose=no
     clean:
         command-line:
-            - --clean
-            - compiler={COMPILER}
-            - mode={MODE}
-    target: "{TARGET}"
+            - clean
+    install:
+        command-line:
+            - install
 
 cppcheck:
     patterns:
@@ -101,6 +114,16 @@ clang-static-analyzer:
     compiler: envcc
 
 command-line-command:
+    init:
+        patterns:
+            - COMPILER
+            - MODE
+        command-line: cmake -H. -Bbuild/{COMPILER}/{MODE} -DCMAKE_CXX_COMPILER={COMPILER} -DCMAKE_INSTALL_PREFIX=build/{COMPILER}/{MODE} -DCMAKE_BUILD_TYPE={MODE}
+    distclean:
+        patterns:
+            - COMPILER
+            - MODE
+        command-line: rm -rf build/{COMPILER}/{MODE}
     run-test:
         patterns:
             - COMPILER
