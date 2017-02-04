@@ -137,10 +137,8 @@ lcov:
     zero-counters: yes
     excludes:
         - /usr*
-        - 3rdparty/*
-        - test/*
-    command-line:
-        - --quiet
+        - "*/3rdparty/*"
+        - "*/test/*"
     gen-html: yes
     gen-html-output: test_coverage
     gen-html-command-line:
