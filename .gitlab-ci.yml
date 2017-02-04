@@ -39,6 +39,8 @@ test-distribution:ubuntu-yakkety:
     before_script:
         - apt-get update
         - apt-get install --yes build-essential scons cmake make gcc g++ clang libboost-program-options1.61-dev libyaml-cpp-dev git
+        - which make
+        - ls -l /usr/sbin
         - git submodule update --init
     script:
         - scons -j8 compiler=gcc mode=release
