@@ -38,7 +38,7 @@ test-distribution:ubuntu-yakkety:
     stage: test
     before_script:
         - apt-get update
-        - apt-get install --yes scons cmake make gcc g++ libboost-program-options1.61-dev libyaml-cpp-dev git
+        - apt-get install --yes scons cmake make gcc g++ clang libboost-program-options1.61-dev libyaml-cpp-dev git
         - git submodule update --init
     script:
         - scons -j8 compiler=gcc mode=release
@@ -120,7 +120,7 @@ coverage:
         - build:gcc
     script:
         - pacman -S --noconfirm --needed base-devel curl
-        - curl -L -O https://aur.archlinux.org/cgit/aur.git/snapshot/lcov.tar.gz && tar -xvf lcov.tar.gz && cd lcov && makepkg -sri --noconfirm lcov
+        - bash -x gitlab/install-aur.sh lcov
         - build/gcc/release/bin/exec-helper analyze --analyze lcov --compiler gcc --mode debug --run-target unittest
     artifacts:
         paths:
