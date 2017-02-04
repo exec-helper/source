@@ -39,6 +39,8 @@ test-distribution:ubuntu-yakkety:
     before_script:
         - apt-get update
         - apt-get install --yes build-essential scons cmake make gcc g++ clang libboost-program-options1.61-dev libyaml-cpp-dev git
+        # Workaround for issue with cmake thinking make is in the /usr/sbin directory
+        - ln -fs /usr/bin/make /usr/sbin/make
         - which make
         - ls -l /usr/sbin
         - git submodule update --init
