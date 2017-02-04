@@ -119,6 +119,7 @@ coverage:
     dependencies:
         - build:gcc
     script:
+        - git submodule update --init
         - pacman -S --noconfirm --needed base-devel curl
         - bash -x gitlab/install-aur.sh lcov
         - build/gcc/release/bin/exec-helper analyze --analyze lcov --compiler gcc --mode debug --run-target unittest
