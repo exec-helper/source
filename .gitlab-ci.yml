@@ -13,25 +13,29 @@ build:gcc:
     stage: build
     script: 
         - pacman -S --noconfirm --needed gcc cmake make git libunistring ncurses
-        - git submodule update --init
         - cmake -H. -Bbuild/g++/debug -DCMAKE_CXX_COMPILER=g++ -DCMAKE_INSTALL_PREFIX=build/g++/debug -DCMAKE_BUILD_TYPE=Debug -DUSE_SYSTEM_CATCH=OFF && make -C build/g++/debug --jobs 4 && make -C build/g++/debug install
-        - cmake -H. -Bbuild/g++/release -DCMAKE_CXX_COMPILER=g++ -DCMAKE_INSTALL_PREFIX=build/g++/release -DCMAKE_BUILD_TYPE=Release -DUSE_SYSTEM_CATCH=OFF && make -C build/g++/debug --jobs 4 && make -C build/g++/debug install
+        - cmake -H. -Bbuild/g++/release -DCMAKE_CXX_COMPILER=g++ -DCMAKE_INSTALL_PREFIX=build/g++/release -DCMAKE_BUILD_TYPE=Release -DUSE_SYSTEM_CATCH=OFF && make -C build/g++/release --jobs 4 && make -C build/g++/release install
     artifacts:
         expire_in: 1 day
         paths:
-            - build/
+            - build/g++/debug/bin
+            - build/g++/debug/lib
+            - build/g++/release/bin
+            - build/g++/release/lib
 
 build:clang:
     stage: build
     script: 
         - pacman -S --noconfirm --needed clang cmake make git libunistring ncurses
-        - git submodule update --init
         - cmake -H. -Bbuild/clang++/debug -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_INSTALL_PREFIX=build/clang++/debug -DCMAKE_BUILD_TYPE=Debug -DUSE_SYSTEM_CATCH=OFF
         - cmake -H. -Bbuild/clang++/release -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_INSTALL_PREFIX=build/clang++/release -DCMAKE_BUILD_TYPE=Release -DUSE_SYSTEM_CATCH=OFF
     artifacts:
         expire_in: 1 day
         paths:
-            - build/
+            - build/clang++/debug/bin
+            - build/clang++/debug/lib
+            - build/clang++/release/bin
+            - build/clang++/release/lib
 
 test-distribution:ubuntu-yakkety:
     image: ubuntu:yakkety
@@ -43,7 +47,6 @@ test-distribution:ubuntu-yakkety:
         - ln -fs /usr/bin/make /usr/sbin/make
         - which make
         - ls -l /usr/sbin
-        - git submodule update --init
     script:
         - cmake -H. -Bbuild/g++/release -DCMAKE_CXX_COMPILER=g++ -DCMAKE_INSTALL_PREFIX=build/g++/release -DCMAKE_BUILD_TYPE=Release -DUSE_SYSTEM_CATCH=OFF
         - cmake -H. -Bbuild/clang++/release -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_INSTALL_PREFIX=build/clang++/release -DCMAKE_BUILD_TYPE=Release -DUSE_SYSTEM_CATCH=OFF
@@ -105,7 +108,6 @@ clang-static-analyzer:
         - build:gcc
     script:
         - pacman -S --noconfirm --needed scons clang cmake make git libunistring ncurses
-        - git submodule update --init
         - build/g++/release/bin/exec-helper analyze --analyze clang-static-analyzer --compiler clang++ --mode debug
 
 code-duplication-pmd-cpd:
@@ -123,7 +125,6 @@ coverage:
     dependencies:
         - build:gcc
     script:
-        - git submodule update --init
         - pacman -S --noconfirm --needed base-devel curl
         - bash -x gitlab/install-aur.sh lcov
         - build/g++/release/bin/exec-helper analyze --analyze lcov --compiler g++ --mode debug --run-target unittest
