@@ -2,13 +2,15 @@ set(LIBRARY_NAME ${PROJECT_NAME}-catch-main)
 
 set(SRCS    catch.cpp
    )
-set(CATCH_DIR ${PROJECT_SOURCE_DIR}/3rdparty/Catch)
-set(CATCH_INCLUDE_DIRS ${CATCH_DIR}/single_include)
 
 include_directories(${CATCH_INCLUDE_DIRS})
 
 add_library(${LIBRARY_NAME} ${SRCS})
 install(TARGETS ${LIBRARY_NAME} DESTINATION ${LIB_DIRECTORY})
+
+if(NOT ${USE_SYSTEM_CATCH})
+    add_dependencies(${LIBRARY_NAME} Catch)
+endif(NOT ${USE_SYSTEM_CATCH})
 
 set(${LIBRARY_NAME}_INCLUDE_DIRS include)
 set(${LIBRARY_NAME}_LIBRARIES ${LIBRARY_NAME})

@@ -12,10 +12,10 @@ stages:
 build:gcc:
     stage: build
     script: 
-        - pacman -S --noconfirm --needed scons gcc clang cmake make git libunistring ncurses
+        - pacman -S --noconfirm --needed gcc cmake make git libunistring ncurses
         - git submodule update --init
-        - scons -j8 compiler=gcc mode=debug
-        - scons -j8 compiler=gcc mode=release
+        - cmake -H. -Bbuild/g++/debug -DCMAKE_CXX_COMPILER=g++ -DCMAKE_INSTALL_PREFIX=build/g++/debug -DCMAKE_BUILD_TYPE=Debug -DUSE_SYSTEM_CATCH=OFF
+        - cmake -H. -Bbuild/g++/release -DCMAKE_CXX_COMPILER=g++ -DCMAKE_INSTALL_PREFIX=build/g++/release -DCMAKE_BUILD_TYPE=Release -DUSE_SYSTEM_CATCH=OFF
     artifacts:
         expire_in: 1 day
         paths:
@@ -24,10 +24,10 @@ build:gcc:
 build:clang:
     stage: build
     script: 
-        - pacman -S --noconfirm --needed scons gcc clang cmake make git libunistring ncurses
+        - pacman -S --noconfirm --needed clang cmake make git libunistring ncurses
         - git submodule update --init
-        - scons -j8 compiler=clang mode=debug
-        - scons -j8 compiler=clang mode=release
+        - cmake -H. -Bbuild/clang++/debug -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_INSTALL_PREFIX=build/clang++/debug -DCMAKE_BUILD_TYPE=Debug -DUSE_SYSTEM_CATCH=OFF
+        - cmake -H. -Bbuild/clang++/release -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_INSTALL_PREFIX=build/clang++/release -DCMAKE_BUILD_TYPE=Release -DUSE_SYSTEM_CATCH=OFF
     artifacts:
         expire_in: 1 day
         paths:
@@ -38,50 +38,50 @@ test-distribution:ubuntu-yakkety:
     stage: test
     before_script:
         - apt-get update
-        - apt-get install --yes build-essential scons cmake make gcc g++ clang libboost-program-options1.61-dev libyaml-cpp-dev git
+        - apt-get install --yes build-essential cmake make gcc g++ clang libboost-program-options-dev libyaml-cpp-dev git
         # Workaround for issue with cmake thinking make is in the /usr/sbin directory
         - ln -fs /usr/bin/make /usr/sbin/make
         - which make
         - ls -l /usr/sbin
         - git submodule update --init
     script:
-        - scons -j8 compiler=gcc mode=release
-        - scons -j8 compiler=clang mode=release
+        - cmake -H. -Bbuild/g++/release -DCMAKE_CXX_COMPILER=g++ -DCMAKE_INSTALL_PREFIX=build/g++/release -DCMAKE_BUILD_TYPE=Release -DUSE_SYSTEM_CATCH=OFF
+        - cmake -H. -Bbuild/clang++/release -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_INSTALL_PREFIX=build/clang++/release -DCMAKE_BUILD_TYPE=Release -DUSE_SYSTEM_CATCH=OFF
 
 unittest-core:
     stage: test
     dependencies:
         - build:gcc
     script:
-        - build/gcc/release/bin/exec-helper run-test --module core --run-target unittest --compiler gcc --mode release
+        - build/g++/release/bin/exec-helper run-test --module core --run-target unittest --compiler g++ --mode release
 
 unittest-yaml:
     stage: test
     dependencies:
         - build:gcc
     script:
-        - build/gcc/release/bin/exec-helper run-test --module yaml --run-target unittest --compiler gcc --mode release
+        - build/g++/release/bin/exec-helper run-test --module yaml --run-target unittest --compiler g++ --mode release
 
 unittest-config:
     stage: test
     dependencies:
         - build:gcc
     script:
-        - build/gcc/release/bin/exec-helper run-test --module config --run-target unittest --compiler gcc --mode release
+        - build/g++/release/bin/exec-helper run-test --module config --run-target unittest --compiler g++ --mode release
 
 unittest-plugins:
     stage: test
     dependencies:
         - build:gcc
     script:
-        - build/gcc/release/bin/exec-helper run-test --module plugins --run-target unittest --compiler gcc --mode release
+        - build/g++/release/bin/exec-helper run-test --module plugins --run-target unittest --compiler g++ --mode release
 
 unittest-commander:
     stage: test
     dependencies:
         - build:gcc
     script:
-        - build/gcc/release/bin/exec-helper run-test --module commander --run-target unittest --compiler gcc --mode release
+        - build/g++/release/bin/exec-helper run-test --module commander --run-target unittest --compiler g++ --mode release
 
 memory-check:
     stage: test
@@ -89,7 +89,7 @@ memory-check:
         - build:gcc
     script:
         - pacman -S --noconfirm valgrind
-        - build/gcc/release/bin/exec-helper analyze --analyze valgrind --compiler gcc --mode debug --run-target unittest
+        - build/g++/release/bin/exec-helper analyze --analyze valgrind --compiler g++ --mode debug --run-target unittest
 
 cppcheck:
     stage: test
@@ -97,7 +97,7 @@ cppcheck:
         - build:gcc
     script:
         - pacman -S --noconfirm cppcheck
-        - build/gcc/release/bin/exec-helper analyze --analyze cppcheck
+        - build/g++/release/bin/exec-helper analyze --analyze cppcheck
 
 clang-static-analyzer:
     stage: test
@@ -106,7 +106,7 @@ clang-static-analyzer:
     script:
         - pacman -S --noconfirm --needed scons clang cmake make git libunistring ncurses
         - git submodule update --init
-        - build/gcc/release/bin/exec-helper analyze --analyze clang-static-analyzer --compiler clang --mode debug
+        - build/g++/release/bin/exec-helper analyze --analyze clang-static-analyzer --compiler clang++ --mode debug
 
 code-duplication-pmd-cpd:
     stage: test
@@ -116,7 +116,7 @@ code-duplication-pmd-cpd:
         - pacman -S --noconfirm --needed java-environment unzip wget
         - mkdir -p 3rdparty/pmd
         - pushd 3rdparty/pmd && wget "https://downloads.sourceforge.net/project/pmd/pmd/5.5.2/pmd-bin-5.5.2.zip" && unzip pmd-bin-5.5.2.zip; popd
-        - build/gcc/release/bin/exec-helper analyze --analyze pmd
+        - build/g++/release/bin/exec-helper analyze --analyze pmd
 
 coverage:
     stage: test
@@ -126,7 +126,7 @@ coverage:
         - git submodule update --init
         - pacman -S --noconfirm --needed base-devel curl
         - bash -x gitlab/install-aur.sh lcov
-        - build/gcc/release/bin/exec-helper analyze --analyze lcov --compiler gcc --mode debug --run-target unittest
+        - build/g++/release/bin/exec-helper analyze --analyze lcov --compiler g++ --mode debug --run-target unittest
     artifacts:
         paths:
             - test_coverage/

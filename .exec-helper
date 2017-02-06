@@ -118,7 +118,7 @@ command-line-command:
         patterns:
             - COMPILER
             - MODE
-        command-line: cmake -H. -Bbuild/{COMPILER}/{MODE} -DCMAKE_CXX_COMPILER={COMPILER} -DCMAKE_INSTALL_PREFIX=build/{COMPILER}/{MODE} -DCMAKE_BUILD_TYPE={MODE}
+        command-line: cmake -H. -Bbuild/{COMPILER}/{MODE} -DCMAKE_CXX_COMPILER={COMPILER} -DCMAKE_INSTALL_PREFIX=build/{COMPILER}/{MODE} -DCMAKE_BUILD_TYPE={MODE} -DUSE_SYSTEM_CATCH=OFF
     distclean:
         patterns:
             - COMPILER

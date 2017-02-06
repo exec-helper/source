@@ -1,28 +1,4 @@
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/modules)
 
-option(USE_SYSTEM_YAML_CPP "Use the yaml-cpp library provided by the system" ON)
-
-if(${USE_SYSTEM_YAML_CPP})
-    find_package(yaml-cpp REQUIRED)
-
-    set(YAML_INCLUDE_DIRS ${yaml-cpp_INCLUDE_DIRS} PARENT_SCOPE)
-    set(YAML_LIBRARIES ${yaml-cpp_LIBRARIES} PARENT_SCOPE)
-    set(YAML_LIBRARY_DIRS ${yaml-cpp_LIBRARY_DIRS} PARENT_SCOPE)
-
-else(${USE_SYSTEM_YAML_CPP})
-    include(ExternalProject)
-
-    set(YAML_INSTALL_DIR ${LIB_DIRECTORY}/yaml-cpp)
-
-    ExternalProject_Add(Yaml-cpp
-        PREFIX yaml-cpp
-        GIT_REPOSITORY https://github.com/jbeder/yaml-cpp.git
-        CMAKE_ARGS -DYAML_CPP_BUILD_CONTRIB=OFF -DYAML_CPP_BUILD_TOOLS=OFF -DBUILD_SHARED_LIBS=OFF -DMSVC_SHARED_RT=OFF -DMSVC_STHREADED_RT=OFF -Dgtest_force_shared_crt=OFF -DAPPLE_UNIVERSAL_BIN=OFF -DCMAKE_INSTALL_PREFIX=${YAML_INSTALL_DIR}
-        INSTALL_DIR ${YAML_INSTALL_DIR}
-        )
-
-    set(YAML_INCLUDE_DIRS ${YAML_INSTALL_DIR}/src/Yaml-cpp/include PARENT_SCOPE)
-    set(YAML_LIBRARIES yaml-cpp PARENT_SCOPE)
-    set(YAML_LIBRARY_DIRS ${YAML_INSTALL_DIR}/src/Yaml-cpp-build PARENT_SCOPE)
-
-endif(${USE_SYSTEM_YAML_CPP})
+include(yaml-cpp.CMakeLists.txt)
+include(catch.CMakeLists.txt)
