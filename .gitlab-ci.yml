@@ -14,8 +14,8 @@ build:gcc:
     script: 
         - pacman -S --noconfirm --needed gcc cmake make git libunistring ncurses
         - git submodule update --init
-        - cmake -H. -Bbuild/g++/debug -DCMAKE_CXX_COMPILER=g++ -DCMAKE_INSTALL_PREFIX=build/g++/debug -DCMAKE_BUILD_TYPE=Debug -DUSE_SYSTEM_CATCH=OFF && make -C build/g++/debug --jobs 4
-        - cmake -H. -Bbuild/g++/release -DCMAKE_CXX_COMPILER=g++ -DCMAKE_INSTALL_PREFIX=build/g++/release -DCMAKE_BUILD_TYPE=Release -DUSE_SYSTEM_CATCH=OFF && make -C build/g++/debug --jobs 4
+        - cmake -H. -Bbuild/g++/debug -DCMAKE_CXX_COMPILER=g++ -DCMAKE_INSTALL_PREFIX=build/g++/debug -DCMAKE_BUILD_TYPE=Debug -DUSE_SYSTEM_CATCH=OFF && make -C build/g++/debug --jobs 4 && make -C build/g++/debug install
+        - cmake -H. -Bbuild/g++/release -DCMAKE_CXX_COMPILER=g++ -DCMAKE_INSTALL_PREFIX=build/g++/release -DCMAKE_BUILD_TYPE=Release -DUSE_SYSTEM_CATCH=OFF && make -C build/g++/debug --jobs 4 && make -C build/g++/debug install
     artifacts:
         expire_in: 1 day
         paths:
