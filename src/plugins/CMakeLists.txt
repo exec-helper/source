@@ -16,6 +16,7 @@ set(SRCS
         src/commandLineCommand.cpp
         src/buildPlugin.cpp
         src/clangStaticAnalyzer.cpp
+        src/lcov.cpp
    )
 
 set(LIBRARY_INCLUDES

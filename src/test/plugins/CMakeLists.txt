@@ -3,7 +3,7 @@ set(EXE_NAME ${PROJECT_NAME}-plugins-unittest)
 set(SRCS
         src/buildPluginTest.cpp
         src/clangStaticAnalyzerTest.cpp
-        src/pmd.cpp
+        src/pmdTest.cpp
         src/commandLineCommandTest.cpp
         src/cppcheckTest.cpp
         src/pluginUtilsTest.cpp
@@ -13,6 +13,7 @@ set(SRCS
         src/selectorTest.cpp
         src/sconsTest.cpp
         src/makeTest.cpp
+        src/lcovTest.cpp
    )
 
 add_executable(${EXE_NAME} ${SRCS})
