@@ -107,7 +107,7 @@ clang-static-analyzer:
     dependencies:
         - build:gcc
     script:
-        - pacman -S --noconfirm --needed scons clang cmake make git libunistring ncurses
+        - pacman -S --noconfirm --needed clang cmake make git libunistring ncurses
         - build/g++/release/bin/exec-helper analyze --analyze clang-static-analyzer --mode debug --compiler '$CC'
 
 code-duplication-pmd-cpd:

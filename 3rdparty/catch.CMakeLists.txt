@@ -18,6 +18,7 @@ else(${USE_SYSTEM_CATCH})
         CONFIGURE_COMMAND ""
         BUILD_COMMAND ""
         INSTALL_COMMAND ""
+        UPDATE_COMMAND ""
         )
 
     set(CATCH_INCLUDE_DIRS ${CMAKE_CURRENT_BINARY_DIR}/catch/src/Catch/single_include/ PARENT_SCOPE)
