@@ -109,7 +109,9 @@ cppcheck:
         - all
 
 clang-static-analyzer:
-    build-command: build
+    build-command:
+        - init
+        - build
     clean-command: clean
     compiler: envcc
 

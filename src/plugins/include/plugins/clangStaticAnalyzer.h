@@ -12,7 +12,7 @@ namespace execHelper {
             public:
                 virtual bool apply(const core::Command& command, core::Task& task, const core::Options& options) const noexcept override;
             private:
-                static std::string getSystemName(const core::Command& command, const std::string& key, const config::SettingsNode& rootSettings) noexcept;
+                static core::TaskCollection getSystemName(const core::Command& command, const std::string& key, const config::SettingsNode& rootSettings) noexcept;
         };
     }
 }

@@ -56,39 +56,18 @@ namespace execHelper { namespace plugins { namespace test {
                     REQUIRE(plugin.apply("random-command", task, options) == false);
                 }
             }
-            WHEN("We add the clean-command") {
-                SettingsNode& rootSettings = options.m_settings;
-                addSettings(rootSettings, "clang-static-analyzer", "clean-command");
-                addSettings(rootSettings["clang-static-analyzer"], "clean-command", "memory");
-
-                THEN("It should fail") {
-                    REQUIRE(plugin.apply("random-command", task, options) == false);
-                }
-            }
-            WHEN("We add the build-command") {
-                SettingsNode& rootSettings = options.m_settings;
-                addSettings(rootSettings, "clang-static-analyzer", "build-command");
-                addSettings(rootSettings["clang-static-analyzer"], "build-command", "memory");
-
-                THEN("It should fail") {
-                    REQUIRE(plugin.apply("random-command", task, options) == false);
-                }
-            }
             WHEN("We add both the build and clean command with no content") {
                 SettingsNode& rootSettings = options.m_settings;
                 addSettings(rootSettings, "clang-static-analyzer", "build-command");
-                addSettings(rootSettings, "clang-static-analyzer", "clean-command");
 
-                THEN("It should succeed") {
+                THEN("It should fail") {
                     REQUIRE(plugin.apply("random-command", task, options) == false);
                 }
             }
-            WHEN("We add both the build and clean command") {
+            WHEN("We add the build command correctly") {
                 SettingsNode& rootSettings = options.m_settings;
                 addSettings(rootSettings, "clang-static-analyzer", "build-command");
-                addSettings(rootSettings, "clang-static-analyzer", "clean-command");
                 addSettings(rootSettings["clang-static-analyzer"], "build-command", "memory");
-                addSettings(rootSettings["clang-static-analyzer"], "clean-command", "memory");
 
                 THEN("It should succeed") {
                     REQUIRE(plugin.apply("random-command", task, options) == true);

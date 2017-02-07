@@ -11,7 +11,7 @@ init:
 build:
 	export CXXFLAGS="-g -O0 --coverage -fprofile-arcs -ftest-coverage" 
 	export LDFLAGS="-fprofile-arcs -ftest-coverage" 
-	make -C build/$(COMPILER)/debug --jobs $(NB_OF_CORES) VERBOSE=1
+	make -C build/$(COMPILER)/debug --jobs $(NB_OF_CORES)
 	make -C build/$(COMPILER)/debug install
 
 clean-build:
@@ -21,7 +21,7 @@ app:
 	cmake -H. -Bbuild/$(COMPILER)/release -DCMAKE_CXX_COMPILER=$(COMPILER) -DCMAKE_INSTALL_PREFIX=build/$(COMPILER)/release -DCMAKE_BUILD_TYPE=Release -DUSE_SYSTEM_CATCH=OFF
 	make -C build/$(COMPILER)/release --jobs $(NB_OF_CORES) exec-helper
 
-test:: build
+test::
 	$(foreach module,$(MODULES), exec-helper run-test --module $(module) --run-target unittest --compiler $(COMPILER) --mode debug || exit 1;)
 
 coverage: clean-coverage
