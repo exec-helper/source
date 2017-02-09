@@ -7,6 +7,7 @@ set(SRCS
         src/optionDescriptions.cpp
         src/task.cpp
         src/immediateExecutor.cpp
+        src/reportingExecutor.cpp
         src/sequentialTaskRunner.cpp
         src/patterns.cpp
         src/patternsHandler.cpp
