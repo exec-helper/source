@@ -30,6 +30,7 @@ using execHelper::yaml::YamlFile;
 namespace execHelper { namespace core {
     ExecHelperOptions::ExecHelperOptions() noexcept :
         m_verbose(false),
+        m_dryRun(false),
         m_singleThreaded(false),
         m_executor(0)
     {
@@ -38,6 +39,7 @@ namespace execHelper { namespace core {
 
     ExecHelperOptions::ExecHelperOptions(const ExecHelperOptions& other) noexcept :
         m_verbose(other.m_verbose),
+        m_dryRun(other.m_dryRun),
         m_singleThreaded(other.m_singleThreaded),
         m_settings(other.m_settings),
         m_executor(other.m_executor)
@@ -48,6 +50,7 @@ namespace execHelper { namespace core {
     bool ExecHelperOptions::operator==(const ExecHelperOptions& other) const noexcept {
         return ( 
                     m_verbose == other.m_verbose &&
+                    m_dryRun == other.m_dryRun &&
                     m_singleThreaded == other.m_singleThreaded &&
                     m_settings == other.m_settings &&
                     m_patternsHandler == other.m_patternsHandler &&
@@ -87,6 +90,10 @@ namespace execHelper { namespace core {
         m_optionsMap = m_optionsDescriptions.getOptionsMap(argc, argv);
         if(m_optionsMap.count("verbose")) {
             m_verbose = true;
+        }
+
+        if(m_optionsMap.count("dry-run")) {
+            m_dryRun = true;
         }
 
         if(m_optionsMap.count("single-threaded")) {
