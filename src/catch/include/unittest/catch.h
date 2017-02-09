@@ -8,3 +8,6 @@
                                 for(unsigned int i = 0U; (i < (1U << NUMBER_OF_COMBINATIONS) || i == 0U); ++i)
 #define COMBINATION    if(i == 0) { ++NUMBER_OF_COMBINATIONS;} \
                        if(i & (1 << (__COUNTER__ - CURRENT_COUNT - 1U)))
+
+#define COMBINATIONS(desc)    if(i == 0) { ++NUMBER_OF_COMBINATIONS;} \
+                              if(i & (1 << (__COUNTER__ - CURRENT_COUNT - 1U)))

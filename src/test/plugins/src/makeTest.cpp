@@ -2,20 +2,21 @@
 #include <string>
 #include <fstream>
 
-#include <catch.hpp>
-
+#include "config/settingsNode.h"
 #include "plugins/pluginUtils.h"
 #include "plugins/make.h"
 
+#include "utils/utils.h"
+#include "unittest/catch.h"
+
 #include "executorStub.h"
 #include "optionsStub.h"
-
-#include "utils/utils.h"
 
 using std::vector;
 using std::string;
 using std::ofstream;
 
+using execHelper::config::SettingsNode;
 using execHelper::core::test::ExecutorStub;
 using execHelper::core::Task;
 using execHelper::core::TaskCollection;
@@ -32,6 +33,8 @@ using execHelper::test::utils::CompilerUtilNames;
 using execHelper::test::utils::Patterns;
 
 namespace {
+    const string pluginConfigKey("make");
+
     void setupBasicOptions(OptionsStub& options, const Patterns& patterns) {
         addSettings(options.m_settings, "commands", {"build", "clean"});
         addSettings(options.m_settings, "build", {"make"});
@@ -44,136 +47,6 @@ namespace {
 }
 
 namespace execHelper { namespace plugins { namespace test {
-    SCENARIO("Testing the default make settings", "[plugins][make]") {
-        GIVEN("A make plugin object and the default options") {
-            TargetUtil targetUtil;
-            CompilerUtil compilerUtil;
-            OptionsStub options;
-            Patterns patterns;
-            for(const auto& pattern : targetUtil.getPatterns()) {
-                patterns.push_back(pattern);
-            }
-            for(const auto& pattern : compilerUtil.getPatterns()) {
-                patterns.push_back(pattern);
-            }
-            setupBasicOptions(options, patterns);
-
-            Make plugin;
-
-            WHEN("We use the plugin") {
-                Task task;
-                REQUIRE(plugin.apply("random-command", task, options) == true);
-
-                ExecutorStub::TaskQueue expectedQueue;
-
-                Task expectedTask;
-                expectedTask.append(TaskCollection({"make", "--jobs", "8"}));
-                expectedQueue.push_back(expectedTask);
-
-                THEN("We should get the expected tasks") {
-                    REQUIRE(expectedQueue == options.m_executor.getExecutedTasks());
-                }
-            }
-        }
-    }
-
-    SCENARIO("Testing the make multi-threaded setting", "[plugins][make]") {
-        TargetUtil targetUtil;
-        CompilerUtil compilerUtil;
-        OptionsStub options;
-        Patterns patterns;
-        vector<string> patternNames;
-        for(const auto& pattern : targetUtil.getPatterns()) {
-            patterns.push_back(pattern);
-            patternNames.push_back(pattern.getKey());
-        }
-        for(const auto& pattern : compilerUtil.getPatterns()) {
-            patterns.push_back(pattern);
-            patternNames.push_back(pattern.getKey());
-        }
-        setupBasicOptions(options, patterns);
-        addSettings(options.m_settings["make"], "patterns", patternNames);
-        addSettings(options.m_settings["make"], "command-line", {"{" + targetUtil.target.getKey() + "}{" + targetUtil.runTarget.getKey() + "}"});
-        addSettings(options.m_settings["make"], "clean", "command-line");
-        addSettings(options.m_settings["make"]["clean"], "command-line", {"clean", "{" + targetUtil.target.getKey() + "}{" + targetUtil.runTarget.getKey() + "}"});
-
-        Make plugin;
-
-        GIVEN("A make plugin object and several single-threaded option values") {
-            WHEN("We build the plugin") {
-                Task actualTaskBase({"make"});
-                THEN("As a general command") {
-                    AND_WHEN("If we set the single-threaded option") {
-                        addSettings(options.m_settings["make"], "single-threaded", "yes");
-                    }
-                    AND_WHEN("If we set the multi-threaded option") {
-                        addSettings(options.m_settings["make"], "single-threaded", "no");
-                        actualTaskBase.append(TaskCollection{"--jobs", "8"});
-                    }
-
-                    Task task;
-                    REQUIRE(plugin.apply("build", task, options) == true);
-                }
-                THEN("As a specific command") {
-                    AND_WHEN("If we set the single-threaded option") {
-                        addSettings(options.m_settings["make"], "single-threaded", "yes");
-                    }
-                    AND_WHEN("If we set the multi-threaded option") {
-                        addSettings(options.m_settings["make"], "single-threaded", "no");
-                        actualTaskBase.append(TaskCollection{"--jobs", "8"});
-                    }
-                    actualTaskBase.append("clean");
-
-                    Task task;
-                    REQUIRE(plugin.apply("clean", task, options) == true);
-                }
-
-                ExecutorStub::TaskQueue expectedQueue;
-                for(const auto& pattern : compilerUtil.makePatternPermutator()) {
-                    for(const auto& target : targetUtil.makePatternPermutator()) {
-                        const TargetUtilNames targetNames = targetUtil.toNames(target);
-
-                        Task expectedTask = actualTaskBase;
-                        expectedTask.append(targetNames.target + targetNames.runTarget);
-                        expectedQueue.push_back(expectedTask);
-                    }
-                }
-                REQUIRE(expectedQueue == options.m_executor.getExecutedTasks());
-            }
-        }
-    }
-
-    SCENARIO("Testing the make verbosity setting", "[plugins][make]") {
-        TargetUtil targetUtil;
-        CompilerUtil compilerUtil;
-        OptionsStub options;
-        Patterns patterns;
-        setupBasicOptions(options, patterns);
-
-        Make plugin;
-
-        GIVEN("A make plugin object and verbosity values") {
-            options.m_verbosity = true;
-
-            WHEN("We build the plugin") {
-                Task task;
-                bool returnCode = plugin.apply("build", task, options);
-
-                THEN("It should succeed") {
-                    REQUIRE(returnCode == true);
-                }
-                THEN("We should get the associated task") {
-                    Task actualTask({"make", "--jobs", "8", "--debug"});
-
-                    ExecutorStub::TaskQueue expectedQueue({actualTask});
-                    REQUIRE(expectedQueue == options.m_executor.getExecutedTasks());
-                }
-            }
-        }
-    }
-
-
-
     SCENARIO("Testing the command-line make settings", "[plugins][make]") {
         GIVEN("A make plugin object and the default options") {
             TargetUtil targetUtil;
@@ -312,6 +185,92 @@ namespace execHelper { namespace plugins { namespace test {
                     }
                     REQUIRE(expectedQueue == options.m_executor.getExecutedTasks());
                 }
+            }
+        }
+    }
+
+    SCENARIO("Testing the plugin configuration settings", "[plugins][make]") {
+        MAKE_COMBINATIONS("Of several settings") {
+            const string command("make-command");
+
+            OptionsStub options;
+            SettingsNode& rootSettings = options.m_settings;
+            addSettings(rootSettings, pluginConfigKey, command);
+
+            Make plugin;
+            Task task;
+
+            Task expectedTask({"make"});
+            TaskCollection jobs({"--jobs", "8"});
+            TaskCollection buildDir;
+            TaskCollection verbosity;
+            TaskCollection commandLine;
+
+            SettingsNode* settings = &rootSettings[pluginConfigKey];
+
+            COMBINATIONS("Toggle between general and specific command settings") {
+                settings = &rootSettings[pluginConfigKey][command];
+            }
+
+            COMBINATIONS("Switch off multi-threading") {
+                addSettings(*settings, "single-threaded", "yes");
+                jobs.clear();
+            }
+
+            COMBINATIONS("Switch on multi-threading") {
+                // Note: we may be overruling the option above
+                if(settings->contains("single-threaded")) {
+                    (*settings)["single-threaded"].m_values.clear();
+                    SettingsNode newNode;
+                    newNode.m_key = "no";
+                    (*settings)["single-threaded"].m_values.emplace_back(newNode);
+                } else {
+                    addSettings(*settings, "single-threaded", "no");
+                }
+                jobs = TaskCollection({"--jobs", "8"});
+            }
+
+            COMBINATIONS("Switch off the multi-threading option") {
+                options.m_singleThreaded = true;
+                jobs.clear();
+            }
+
+            COMBINATIONS("Set a build directory") {
+                const string buildDirValue = "random/build/dir";
+                addSettings(*settings, "build-dir", buildDirValue);
+                buildDir.emplace_back("--directory=" + buildDirValue);
+            }
+
+            COMBINATIONS("Switch off verbosity") {
+                options.m_verbosity = false;
+            }
+
+            COMBINATIONS("Switch on verbosity") {
+                options.m_verbosity = true;
+                verbosity.emplace_back("--debug");
+            }
+
+            COMBINATIONS("Add a command line") {
+                commandLine.emplace_back("--command-line-option");
+                commandLine.emplace_back("OPTION=value");
+                addSettings(*settings, "command-line", commandLine);
+            }
+
+            expectedTask.append(jobs);
+            expectedTask.append(buildDir);
+            expectedTask.append(verbosity);
+            expectedTask.append(commandLine);
+
+            ExecutorStub::TaskQueue expectedTasks;
+            expectedTasks.emplace_back(expectedTask);
+
+            bool returnCode = plugin.apply(command, task, options);
+            THEN_CHECK("It should succeed") {
+                REQUIRE(returnCode == true);
+            }
+
+            THEN_CHECK("It called the right commands") {
+                REQUIRE(expectedTasks == options.m_executor.getExecutedTasks());
             }
         }
     }
