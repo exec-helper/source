@@ -21,6 +21,7 @@ namespace execHelper { namespace core {
             ("command,z", value<CommandCollection>()->multitoken(), "Set commands")
             ("settings-file,s", value<string>(), "Set settings file")
             ("single-threaded,u", "Set single threaded")
+            ("dry-run,n", "Dry run exec-helper")
         ;
     }
 

@@ -16,6 +16,7 @@ namespace execHelper {
                 OptionsStub() :
                     Options(),
                     m_verbosity(false),
+                    m_dryRun(false),
                     m_singleThreaded(false),
                     m_executor(),
                     m_patternsHandler(new core::PatternsHandler())
@@ -33,6 +34,10 @@ namespace execHelper {
 
                 virtual bool getVerbosity() const noexcept override {
                     return m_verbosity;
+                }
+
+                virtual bool getDryRun() const noexcept override {
+                    return m_dryRun;
                 }
 
                 virtual bool getSingleThreaded() const noexcept override {
@@ -122,6 +127,7 @@ namespace execHelper {
                 }
 
                 bool m_verbosity;
+                bool m_dryRun;
                 bool m_singleThreaded;
                 core::CommandCollection m_commands;
                 std::map<std::string, std::vector<std::string>> m_options;

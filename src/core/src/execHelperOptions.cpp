@@ -63,6 +63,10 @@ namespace execHelper { namespace core {
         return m_verbose;
     }
 
+    bool ExecHelperOptions::getDryRun() const noexcept {
+        return m_dryRun;
+    }
+
     bool ExecHelperOptions::getSingleThreaded() const noexcept {
         return m_singleThreaded;
     }
