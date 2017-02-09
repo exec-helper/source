@@ -76,9 +76,6 @@ namespace execHelper { namespace plugins {
                 return false;
             }
 
-            Task tmpTask({"find", ".", "-name", "*.gcno"});
-            registerTask(tmpTask, options);
-
             runTask(captureTask, options, combination);
             if(exclude) {
                 runTask(excludeTask, options, combination);
