@@ -128,6 +128,7 @@ coverage:
         - pacman -S --noconfirm --needed base-devel curl
         - bash -x gitlab/install-aur.sh lcov
         - build/g++/release/bin/exec-helper analyze --analyze lcov --compiler g++ --mode debug --run-target unittest
+        - find . -name "*.gcno"
     artifacts:
         paths:
             - test_coverage/
