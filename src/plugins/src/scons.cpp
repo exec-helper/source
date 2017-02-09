@@ -37,6 +37,9 @@ namespace execHelper { namespace plugins {
             if(getMultiThreaded(command, rootSettings, options)) {
                 newTask.append(TaskCollection({"--jobs", "8"}));
             }
+            if(options.getVerbosity()) {
+                newTask.append("--debug=explain");
+            }
             newTask.append(getCommandLine(command, rootSettings, combination));
             registerTask(newTask, options);
         }

@@ -45,6 +45,10 @@ namespace execHelper { namespace plugins {
             return false;
         }
 
+        if(options.getVerbosity()) {
+            task.append("-v");
+        }
+
         ExecutePlugin executePlugin({cleanCommand, buildCommand});
         return executePlugin.apply(command, task, options);
     }

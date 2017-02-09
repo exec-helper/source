@@ -118,6 +118,35 @@ namespace execHelper { namespace plugins { namespace test {
             }
         }
     }
+
+    SCENARIO("Testing the verbosity option of the cppcheck plugin", "[plugins][cppcheck]") {
+        GIVEN("A cppcheck plugin object and a basic configuration") {
+            OptionsStub options;
+            setupBasicOptions(options);
+
+            Cppcheck plugin;
+
+            WHEN("We set the verbosity") {
+                options.m_verbosity = true;
+
+                Task task;
+                bool returnCode = plugin.apply("analyze", task, options);
+
+                THEN("It must succeed") {
+                    REQUIRE(returnCode == true);
+                }
+
+                THEN("We should get the expected task") {
+                    Task expectedTask;
+                    expectedTask.append(TaskCollection({"cppcheck", "--enable=all", "--verbose", "."}));
+                    ExecutorStub::TaskQueue expectedQueue({expectedTask});
+
+                    REQUIRE(expectedQueue == options.m_executor.getExecutedTasks());
+                }
+            }
+        }
+    }
+
     SCENARIO("Testing the enable-checks option of the cppcheck plugin", "[plugins][cppcheck]") {
         GIVEN("A cppcheck plugin object and a configuration") {
             const string actualKey("enable-checks");

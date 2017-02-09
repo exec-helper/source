@@ -27,22 +27,20 @@ namespace execHelper { namespace plugins {
         task.append(MAKE_COMMAND);
 
         for(const auto& combination : makePatternPermutator(command, rootSettings, options)) {
-            //for(const auto& target : options.getTarget()) {
-                Task newTask = task;
-                if(getMultiThreaded(command, rootSettings, options)) {
-                    newTask.append(TaskCollection({"--jobs", "8"}));
-                }
-                TaskCollection buildTarget = getBuildDir(command, rootSettings, combination);
-                if(!buildTarget.empty()) {
-                    newTask.append("--directory=" + buildTarget[0]);
-                }
-                newTask.append(getCommandLine(command, rootSettings, combination));
+            Task newTask = task;
+            if(getMultiThreaded(command, rootSettings, options)) {
+                newTask.append(TaskCollection({"--jobs", "8"}));
+            }
+            TaskCollection buildTarget = getBuildDir(command, rootSettings, combination);
+            if(!buildTarget.empty()) {
+                newTask.append("--directory=" + buildTarget[0]);
+            }
+            if(options.getVerbosity()) {
+                newTask.append("--debug");
+            }
+            newTask.append(getCommandLine(command, rootSettings, combination));
 
-                //string targetName = target.getTarget();
-                //string runTargetName = target.getRunTarget();
-                //newTask.append(getTarget(command, rootSettings, target));
-                registerTask(newTask, options);
-            //}
+            registerTask(newTask, options);
         }
         return true;
     }

@@ -175,6 +175,43 @@ namespace execHelper { namespace plugins { namespace test {
         }
     }
 
+    SCENARIO("Test the verbosity", "[plugins][valgrind]") {
+        GIVEN("A basic configuration") {
+            const string command("valgrind-command");
+            const string runCommand("run-command");
+
+            OptionsStub options;
+            SettingsNode& rootSettings = options.m_settings;
+            addSettings(rootSettings, valgrindConfigKey, command);
+            addSettings(rootSettings[valgrindConfigKey], command, runCommand);
+            addSettings(rootSettings[valgrindConfigKey][command], runCommand, "memory");
+
+            options.m_verbosity = true;
+
+            Valgrind plugin;
+            Task task;
+
+            MemoryHandler memory;
+
+            WHEN("We call the plugin with a proper tool name") {
+                bool returnCode = plugin.apply(command, task, options);
+                THEN("It should succeed") {
+                    REQUIRE(returnCode == true);
+                }
+                THEN("We should find the appropriate command") {
+                    Task actualTask;
+                    actualTask.append("valgrind");
+                    actualTask.append("--verbose");
+
+                    const Memory::Memories& memories = memory.getExecutions();
+                    REQUIRE(memories.size() == 1U);
+                    REQUIRE(memories[0].command == command);
+                    REQUIRE(memories[0].task == actualTask);
+                }
+            }
+        }
+    }
+
     SCENARIO("Test the command-line config parameter of the valgrind plugin", "[plugins][valgrind]") {
         GIVEN("A valid configuration with the command-line config parameter") {
             const string command("valgrind-command");

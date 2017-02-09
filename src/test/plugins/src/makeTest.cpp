@@ -143,6 +143,37 @@ namespace execHelper { namespace plugins { namespace test {
         }
     }
 
+    SCENARIO("Testing the make verbosity setting", "[plugins][make]") {
+        TargetUtil targetUtil;
+        CompilerUtil compilerUtil;
+        OptionsStub options;
+        Patterns patterns;
+        setupBasicOptions(options, patterns);
+
+        Make plugin;
+
+        GIVEN("A make plugin object and verbosity values") {
+            options.m_verbosity = true;
+
+            WHEN("We build the plugin") {
+                Task task;
+                bool returnCode = plugin.apply("build", task, options);
+
+                THEN("It should succeed") {
+                    REQUIRE(returnCode == true);
+                }
+                THEN("We should get the associated task") {
+                    Task actualTask({"make", "--jobs", "8", "--debug"});
+
+                    ExecutorStub::TaskQueue expectedQueue({actualTask});
+                    REQUIRE(expectedQueue == options.m_executor.getExecutedTasks());
+                }
+            }
+        }
+    }
+
+
+
     SCENARIO("Testing the command-line make settings", "[plugins][make]") {
         GIVEN("A make plugin object and the default options") {
             TargetUtil targetUtil;

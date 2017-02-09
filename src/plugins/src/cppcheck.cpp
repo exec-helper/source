@@ -34,6 +34,10 @@ namespace execHelper { namespace plugins {
         task.append(cppcheckCommand);
         task.append(getEnabledChecks(command, rootSettings));
 
+        if(options.getVerbosity()) {
+            task.append("--verbose");
+        }
+
         for(const auto& combination : makePatternPermutator(command, rootSettings, options)) {
             Task cppcheckTargetTask = task;
             cppcheckTargetTask.append(getCommandLine(command, rootSettings, combination));

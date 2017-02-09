@@ -183,6 +183,53 @@ namespace execHelper { namespace plugins { namespace test {
         }
     }
 
+    SCENARIO("Testing the verbosity option of the scons plugin", "[plugins][scons]") {
+        GIVEN("A basic setup") {
+            OptionsStub options;
+            initOptions(options, {});
+
+            const string command("scons-command");
+
+            addSettings(options.m_settings, "commands", command);
+            addSettings(options.m_settings, "scons", command);
+
+            Scons plugin;
+
+            WHEN("We change the verbosity") {
+                Task expectedTask({"scons", "--jobs", "8"});
+
+                AND_WHEN("verbosity is set to false") {
+                    options.m_verbosity = false;
+                }
+
+                AND_WHEN("verbosity is set to true") {
+                    options.m_verbosity = true;
+                    expectedTask.append("--debug=explain");
+                }
+
+                THEN_WHEN("We apply the plugin") {
+                    Task task;
+
+                    bool returnCode = plugin.apply(command, task, options);
+
+                    THEN_CHECK("The apply succeeded") {
+                        REQUIRE(returnCode == true);
+                    }
+
+                    THEN_CHECK("We get the expected tasks") {
+                        ExecutorStub::TaskQueue expectedQueue;
+                        expectedQueue.emplace_back(expectedTask);
+
+                        REQUIRE(expectedQueue == options.m_executor.getExecutedTasks());
+                    }
+
+                }
+            }
+        }
+    }
+
+
+
     SCENARIO("Testing the command line option of the scons plugin", "[plugins][scons]") {
         GIVEN("A basic setup") {
             OptionsStub options;

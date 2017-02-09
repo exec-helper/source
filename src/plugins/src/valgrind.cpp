@@ -38,6 +38,10 @@ namespace execHelper { namespace plugins {
             task.append(tool.get());
         }
 
+        if(options.getVerbosity()) {
+            task.append("--verbose");
+        }
+
         for(const auto& combination : makePatternPermutator(command, rootSettings, options)) {
             Task newTask = task;
             newTask.append(getCommandLine(command, rootSettings, combination)); 
