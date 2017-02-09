@@ -35,6 +35,7 @@ namespace execHelper {
                 virtual bool parseSettingsFile(const std::string& file) noexcept override;
 
                 virtual bool getVerbosity() const noexcept override;
+                virtual bool getDryRun() const noexcept override;
                 virtual bool getSingleThreaded() const noexcept override;
                 virtual const CommandCollection& getCommands() const noexcept override;
                 virtual const config::SettingsNode& getSettings() const noexcept override;
@@ -54,6 +55,7 @@ namespace execHelper {
 
             private:
                 bool m_verbose;
+                bool m_dryRun;
                 bool m_singleThreaded;
                 CommandCollection m_commands;
                 config::SettingsNode m_settings;

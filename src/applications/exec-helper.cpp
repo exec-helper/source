@@ -5,7 +5,9 @@
 #include "log/log.h"
 #include "core/execHelperOptions.h"
 #include "core/posixShell.h"
+#include "core/executorInterface.h"
 #include "core/immediateExecutor.h"
+#include "core/reportingExecutor.h"
 #include "commander/commander.h"
 
 using std::string;
@@ -13,7 +15,9 @@ using std::ifstream;
 using execHelper::core::ExecHelperOptions;
 using execHelper::core::PosixShell;
 using execHelper::core::Shell;
+using execHelper::core::ExecutorInterface;
 using execHelper::core::ImmediateExecutor;
+using execHelper::core::ReportingExecutor;
 using execHelper::commander::Commander;
 
 namespace {
@@ -52,8 +56,13 @@ int execHelperMain(int argc, char** argv) {
                     user_feedback_error("Error executing commands");
                     exit(EXIT_FAILURE);
                  };
-    ImmediateExecutor executor(shell, callback);
-    options.setExecutor(&executor);
+    std::unique_ptr<ExecutorInterface> executor;
+    if(options.getDryRun()) {
+        executor.reset(new ReportingExecutor());
+    } else {
+        executor.reset(new ImmediateExecutor(shell, callback));
+    }
+    options.setExecutor(executor.get());
 
     Commander commander(options);
     if(commander.run()) {
