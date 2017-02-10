@@ -44,11 +44,11 @@ namespace execHelper { namespace plugins {
         for(const auto& part : task.getTask()) {
             auto argument = part;
             for(const auto& pattern : patternCombinations) {
-                argument = replacePatterns(part, pattern.first, pattern.second);
+                argument = replacePatterns(argument, pattern.first, pattern.second);
             }
-            replacedTask.append(part);
+            replacedTask.append(argument);
         }
-        return task;
+        return replacedTask;
     }
 
     void replacePatternCombinations(TaskCollection& commandArguments, const PatternCombinations& patternCombinations) noexcept {

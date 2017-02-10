@@ -11,6 +11,8 @@
 #include "core/pattern.h"
 #include "core/options.h"
 
+#include "optionsStub.h"
+
 namespace execHelper {
     namespace config {
         struct SettingsNode;
@@ -104,6 +106,8 @@ namespace execHelper {
             typedef std::vector<core::Pattern> Patterns;
             core::PatternKeys getAllPatternKeys(const std::initializer_list<std::reference_wrapper<const PatternUtil>>& patterns) noexcept;
             Patterns getAllPatterns(const std::initializer_list<std::reference_wrapper<const PatternUtil>>& patterns) noexcept;
+
+            void addPatterns(const Patterns& patterns, OptionsStub& options) noexcept;
 
             const core::Pattern PATTERN1("PATTERN1", {"pattern1"}, 'p', "--pattern1");
             const core::Pattern PATTERN2("PATTERN2", {"pattern2a", "pattern2b"}, 'q', "--pattern2");

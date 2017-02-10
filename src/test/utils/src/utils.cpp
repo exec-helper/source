@@ -242,4 +242,10 @@ namespace execHelper { namespace test { namespace utils {
         }
         return allPatterns;
     }
+
+    void addPatterns(const Patterns& patterns, OptionsStub& options) noexcept {
+        for(const auto& pattern : patterns) {
+            options.m_patternsHandler->addPattern(pattern);
+        }
+    }
 } } }

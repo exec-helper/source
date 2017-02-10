@@ -5,7 +5,8 @@ import buildTools
 import setupTools
 
 includeUsageRequirements = [ 
-    '{rootDir}/test/utils/include'.format(rootDir = env['BUILD_DIR'])
+    '{rootDir}/test/utils/include'.format(rootDir = env['BUILD_DIR']),
+    '{rootDir}/test/stubs'.format(rootDir = env['BUILD_DIR'])
 ]
 
 includes = [
