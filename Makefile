@@ -1,37 +1,26 @@
-MODULES=core yaml config plugins commander
-COMPILER=gcc
+COMPILER=g++
 
 NB_OF_CORES:=$(shell grep -c ^processor /proc/cpuinfo)
 
-build:
-	scons compiler=$(COMPILER) --jobs $(NB_OF_CORES) mode=debug
+all: init build
+
+init:
+	cmake -H. -Bbuild/$(COMPILER)/debug -DCMAKE_CXX_COMPILER=$(COMPILER) -DCMAKE_INSTALL_PREFIX=build/$(COMPILER)/debug -DCMAKE_BUILD_TYPE=Debug -DUSE_SYSTEM_CATCH=ON
+
+build: init
+	make -C build/$(COMPILER)/debug --jobs $(NB_OF_CORES)
+	make -C build/$(COMPILER)/debug install
 
 clean-build:
-	scons --clean compiler=$(COMPILER) mode=debug --jobs $(NB_OF_CORES)
+	make -C build/$(COMPILER)/debug --jobs $(NB_OF_CORES) clean
 
-app:
-	scons compiler=$(COMPILER) --jobs $(NB_OF_CORES) mode=release exec-helper
+init-release:
+	cmake -H. -Bbuild/$(COMPILER)/release -DCMAKE_CXX_COMPILER=$(COMPILER) -DCMAKE_INSTALL_PREFIX=build/$(COMPILER)/release -DCMAKE_BUILD_TYPE=Release -DUSE_SYSTEM_CATCH=ON
 
-test:: build
-	$(foreach module,$(MODULES), exec-helper run-test --module $(module) --run-target unittest --compiler $(COMPILER) --mode debug || exit 1;)
-
-coverage: clean-coverage
-	$(foreach module,$(MODULES), exec-helper run-test --module $(module) --run-target unittest --compiler $(COMPILER) --mode debug || exit 1;)
-	lcov --base-directory . --directory . -c -o libexechelper_test.info
-	lcov --remove libexechelper_test.info "/usr*" "3rdparty/*" "test/*" -o libexechelper_test.info # remove output for external libraries
-	rm -rf test_coverage
-	genhtml -o test_coverage -t "exec-helper test coverage" --num-spaces 4 libexechelper_test.info
-
-clean-coverage:
-	lcov --base-directory . --directory . --zerocounters -q
-	rm -rf test_coverage
-
-check-memory:
-	exec-helper analyze --analyze valgrind --run-target unittest --compiler $(COMPILER) --mode debug
-
-check: build test coverage check-memory
-
-clean: clean-build clean-coverage
+app: init-release
+	make -C build/$(COMPILER)/release --jobs $(NB_OF_CORES) exec-helper
+ 
+clean: clean-build
 	rm -f *.exec-helper
 
-.PHONY: build coverage check-memory test check clean clean-build clean-coverage
+.PHONY: init build clean-build init-release app clean

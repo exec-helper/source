@@ -1,6 +1,0 @@
-files = [
-	'catch.SConscript',
-    'yaml-cpp.SConscript'
-]
-
-SConscript(files)

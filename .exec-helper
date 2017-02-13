@@ -41,17 +41,36 @@ patterns:
         long-option: analyze
 
 commands:
+    - init
     - build
+    - build-only
+    - install
     - clean
+    - distclean
     - rebuild
     - analyze
     - run-test
+    - coverage
+    - memory-check
+
+init:
+    - command-line-command
 
 build:
-    - scons
+    - build-only
+    - install
+
+build-only:
+    - make
+
+install:
+    - make
 
 clean:
-    - scons
+    - make
+
+distclean:
+    - command-line-command
 
 rebuild:
     - clean
@@ -63,26 +82,28 @@ analyze:
 run-test:
     - command-line-command
 
+coverage:
+    - command-line-command
+
+memory-check:
+    - command-line-command
+
 selector:
     analyze:
         pattern: ANALYZE
 
-scons:
+make:
     patterns:
         - COMPILER
         - MODE
+    build-dir: build/{COMPILER}/{MODE}
     single-threaded: no
-    build:
-        command-line: 
-            - compiler={COMPILER}
-            - mode={MODE}
-            - verbose=no
     clean:
         command-line:
-            - --clean
-            - compiler={COMPILER}
-            - mode={MODE}
-    target: "{TARGET}"
+            - clean
+    install:
+        command-line:
+            - install
 
 cppcheck:
     patterns:
@@ -96,18 +117,36 @@ cppcheck:
         - all
 
 clang-static-analyzer:
-    build-command: build
+    build-command:
+        - init
+        - build
     clean-command: clean
     compiler: envcc
 
 command-line-command:
+    init:
+        patterns:
+            - COMPILER
+            - MODE
+        command-line: cmake -H. -Bbuild/{COMPILER}/{MODE} -DCMAKE_CXX_COMPILER={COMPILER} -DCMAKE_INSTALL_PREFIX=build/{COMPILER}/{MODE} -DCMAKE_BUILD_TYPE={MODE} -DUSE_SYSTEM_CATCH=ON
+    distclean:
+        patterns:
+            - COMPILER
+            - MODE
+        command-line: rm -rf build/{COMPILER}/{MODE}
     run-test:
         patterns:
             - COMPILER
             - MODE
             - RUNTARGET
             - MODULE
-        command-line: build/{COMPILER}/{MODE}/bin/test/{RUNTARGET}/{MODULE}-{RUNTARGET}
+        command-line: build/{COMPILER}/{MODE}/bin/test/{RUNTARGET}/exec-helper-{MODULE}-{RUNTARGET}
+    coverage:
+        command-line:
+            - CXXFLAGS="--coverage -fprofile-arcs -ftest-coverage" LDFLAGS="-fprofile-arcs -ftest-coverage" exec-helper init build analyze --analyze lcov --compiler g++ --mode profile --run-target unittest
+    memory-check:
+        command-line:
+            - exec-helper analyze --analyze valgrind --run-target unittest --compiler g++ --mode debug
 
 valgrind:
     run-command: run-test

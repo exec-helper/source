@@ -33,13 +33,7 @@ namespace execHelper { namespace plugins {
         task.append(clangStaticAnalyzerCommand);
         task.append(getCommandLine(command, rootSettings));
 
-        string cleanCommand = getSystemName(command, "clean-command", rootSettings);
-        if(cleanCommand.empty()) {
-            user_feedback_error("Missing 'clean-command' option for the '" << command << "' command and the clang-static-analyzer plugin");
-            return false;
-        }
-
-        string buildCommand = getSystemName(command, "build-command", rootSettings);
+        TaskCollection buildCommand = getSystemName(command, "build-command", rootSettings);
         if(buildCommand.empty()) {
             user_feedback_error("Missing 'build-command' option for the '" << command << "' command and the clang-static-analyzer plugin");
             return false;
@@ -49,19 +43,15 @@ namespace execHelper { namespace plugins {
             task.append("-v");
         }
 
-        ExecutePlugin executePlugin({cleanCommand, buildCommand});
-        return executePlugin.apply(command, task, options);
+        ExecutePlugin buildExecutePlugin(buildCommand);
+        return buildExecutePlugin.apply(command, task, options);
     }
 
-    string ClangStaticAnalyzer::getSystemName(const Command& command, const string& key, const SettingsNode& rootSettings) noexcept {
+    TaskCollection ClangStaticAnalyzer::getSystemName(const Command& command, const string& key, const SettingsNode& rootSettings) noexcept {
         const SettingsNode& settings = getContainingSettings(command, rootSettings, key);
         if(!settings.contains(key)) {
-            return ""; 
+            return TaskCollection(); 
         }
-        TaskCollection systemSetting = settings[key].toStringCollection();
-        if(systemSetting.empty()) {
-            return ""; 
-        }
-        return systemSetting.back();
+        return settings[key].toStringCollection();
     }
 } }
