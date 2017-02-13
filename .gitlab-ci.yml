@@ -92,6 +92,7 @@ memory-check:
         - build:gcc
     script:
         - pacman -S --noconfirm valgrind
+        - export PATH=$PATH:build/g++/release/bin
         - build/g++/release/bin/exec-helper memory-check
 
 cppcheck:
@@ -127,6 +128,7 @@ coverage:
     script:
         - pacman -S --noconfirm --needed base-devel curl gcc cmake make git libunistring ncurses
         - bash -x gitlab/install-aur.sh lcov
+        - export PATH=$PATH:build/g++/release/bin
         - build/g++/release/bin/exec-helper coverage
     artifacts:
         paths:
