@@ -6,14 +6,14 @@ NB_OF_CORES:=$(shell grep -c ^processor /proc/cpuinfo)
 all: init build
 
 init:
-	cmake -H. -Bbuild/$(COMPILER)/debug -DCMAKE_CXX_COMPILER=$(COMPILER) -DCMAKE_INSTALL_PREFIX=build/$(COMPILER)/debug -DCMAKE_BUILD_TYPE=Debug -DUSE_SYSTEM_CATCH=OFF
+	cmake -H. -Bbuild/$(COMPILER)/debug -DCMAKE_CXX_COMPILER=$(COMPILER) -DCMAKE_INSTALL_PREFIX=build/$(COMPILER)/debug -DCMAKE_BUILD_TYPE=Debug -DUSE_SYSTEM_CATCH=ON
 
 build:
 	make -C build/$(COMPILER)/debug --jobs $(NB_OF_CORES)
 	make -C build/$(COMPILER)/debug install
 
 init-profile:
-	cmake -H. -Bbuild/$(COMPILER)/profile -DCMAKE_CXX_COMPILER=$(COMPILER) -DCMAKE_INSTALL_PREFIX=build/$(COMPILER)/profile -DCMAKE_BUILD_TYPE=Debug -DUSE_SYSTEM_CATCH=OFF
+	cmake -H. -Bbuild/$(COMPILER)/profile -DCMAKE_CXX_COMPILER=$(COMPILER) -DCMAKE_INSTALL_PREFIX=build/$(COMPILER)/profile -DCMAKE_BUILD_TYPE=Debug -DUSE_SYSTEM_CATCH=ON
 
 profile: init-profile
 	export CXXFLAGS="-g -O0 --coverage -fprofile-arcs -ftest-coverage"
@@ -24,10 +24,12 @@ profile: init-profile
 clean-build:
 	make -C build/$(COMPILER)/debug --jobs $(NB_OF_CORES) clean
 
-app:
-	cmake -H. -Bbuild/$(COMPILER)/release -DCMAKE_CXX_COMPILER=$(COMPILER) -DCMAKE_INSTALL_PREFIX=build/$(COMPILER)/release -DCMAKE_BUILD_TYPE=Release -DUSE_SYSTEM_CATCH=OFF
-	make -C build/$(COMPILER)/release --jobs $(NB_OF_CORES) exec-helper
+init-release:
+	cmake -H. -Bbuild/$(COMPILER)/release -DCMAKE_CXX_COMPILER=$(COMPILER) -DCMAKE_INSTALL_PREFIX=build/$(COMPILER)/release -DCMAKE_BUILD_TYPE=Release -DUSE_SYSTEM_CATCH=ON
 
+app: init-release
+	make -C build/$(COMPILER)/release --jobs $(NB_OF_CORES) exec-helper
+ 
 test::
 	$(foreach module,$(MODULES), exec-helper run-test --module $(module) --run-target unittest --compiler $(COMPILER) --mode profile || exit 1;)
 
