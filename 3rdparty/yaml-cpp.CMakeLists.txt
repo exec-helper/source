@@ -10,7 +10,7 @@ if(${USE_SYSTEM_YAML_CPP})
 else(${USE_SYSTEM_YAML_CPP})
     include(ExternalProject)
 
-    set(YAML_INSTALL_DIR ${LIB_DIRECTORY}/yaml-cpp)
+    set(YAML_INSTALL_DIR ${CMAKE_CURRENT_BINARY_DIR}/yaml-cpp)
 
     ExternalProject_Add(Yaml-cpp
         PREFIX yaml-cpp
@@ -20,8 +20,10 @@ else(${USE_SYSTEM_YAML_CPP})
         UPDATE_COMMAND ""
         )
 
-    set(YAML_INCLUDE_DIRS ${YAML_INSTALL_DIR}/src/Yaml-cpp/include PARENT_SCOPE)
-    set(YAML_LIBRARIES yaml-cpp PARENT_SCOPE)
-    set(YAML_LIBRARY_DIRS ${YAML_INSTALL_DIR}/src/Yaml-cpp-build PARENT_SCOPE)
+    set(YAML_INCLUDE_DIRS ${YAML_INSTALL_DIR}/include PARENT_SCOPE)
+
+    # Mimic find_library() output: it returns an absolute path to the library
+    set(YAML_LIBRARIES ${YAML_INSTALL_DIR}/lib/libyaml-cpp.a PARENT_SCOPE)
+    set(YAML_LIBRARY_DIRS ${YAML_INSTALL_DIR}/lib PARENT_SCOPE)
 
 endif(${USE_SYSTEM_YAML_CPP})
