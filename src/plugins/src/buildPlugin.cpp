@@ -39,18 +39,5 @@ namespace execHelper { namespace plugins {
         }
         return true;
     }
-
-    TaskCollection BuildPlugin::getBuildDir(const Command& command, const SettingsNode& rootSettings, const PatternCombinations patternCombinations) noexcept {
-        const string buildDirKey = getBuildDirKey();
-
-        TaskCollection result;
-        const SettingsNode settings = getContainingSettings(command, rootSettings, buildDirKey); 
-        if(! settings.contains(buildDirKey)) {
-            return result;
-        }
-        TaskCollection commandArguments = settings[buildDirKey].toStringCollection();
-        replacePatternCombinations(commandArguments, patternCombinations);
-        return commandArguments;
-    }
 } }
 

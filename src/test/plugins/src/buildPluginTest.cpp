@@ -22,24 +22,13 @@ using execHelper::test::utils::createPatternCombination;
 using execHelper::test::OptionsStub;
 
 namespace execHelper { namespace plugins { namespace test {
-    SCENARIO("Test the build dir option getter", "[plugins][buildPlugin]") {
-        GIVEN("A compiler element and a build dir configuration") {
-            string command("random-command");
-            string key("build-dir");
-            PatternCombinations combination = createPatternCombination({"COMPILER", "MODE", "ARCHITECTURE", "DISTRIBUTION"}, {"compiler1", "mode1", "architecture1", "distribution1"});
+    SCENARIO("Test build dir key getter", "[plugins][buildPlugin]") {
+        GIVEN("Nothing in particular") {
+            WHEN("We get the build dir key") {
+                const string buildDirKey = BuildPlugin::getBuildDirKey();
 
-            SettingsNode rootSettings;
-            addSettings(rootSettings, command, key);
-            addSettings(rootSettings[command], key, "build/{COMPILER}/blaat/{MODE}hello/world{ARCHITECTURE}///{TEST}///{DISTRIBUTION}");
-            addSettings(rootSettings, getPatternsKey(), {"COMPILER", "MODE", "ARCHITECTURE", "DISTRIBUTION"});
-
-            TaskCollection correctBuildDir({"build/compiler1/blaat/mode1hello/worldarchitecture1///{TEST}///distribution1"});
-
-            WHEN("We get the build dir") {
-                TaskCollection actualBuildDir = BuildPlugin::getBuildDir(command, rootSettings, combination);
-
-                THEN("They should match") {
-                    REQUIRE(actualBuildDir ==  correctBuildDir);
+                THEN("We should find the appropriate one") {
+                    REQUIRE(buildDirKey == "build-dir");
                 }
             }
         }
