@@ -10,6 +10,7 @@
 #include "core/patternsHandler.h"
 
 #include "pluginUtils.h"
+#include "configValue.h"
 
 using std::string;
 using execHelper::core::Task;
@@ -23,20 +24,24 @@ namespace execHelper { namespace plugins {
     bool Bootstrap::apply(const Command& command, Task& task, const Options& options) const noexcept {
         static string bootstrapKey("bootstrap");
         const SettingsNode& rootSettings = options.getSettings(bootstrapKey);  
-        const SettingsNode patternSettings = getContainingSettings(command, rootSettings, getPatternsKey()); 
+
+        string buildDir = ConfigValue<string>::get(getBuildDirKey(), "", command, rootSettings);
+        if(! buildDir.empty()) {
+            const string changeDirectoryCommand = ConfigValue<string>::get("change-directory-command", "cd", command, rootSettings);
+            const string chainCommandsCommand = ConfigValue<string>::get("chain-commands-command", "&&", command, rootSettings);
+
+            task.append(changeDirectoryCommand);
+            task.append(buildDir);
+            task.append(chainCommandsCommand);
+        }
+
+        task.append(getBootstrapFilename(command, rootSettings));
+
+        TaskCollection commandLine = ConfigValue<TaskCollection>::get(getCommandLineKey(), {}, command, rootSettings);
+        task.append(commandLine);
 
         for(const auto& combination : makePatternPermutator(command, rootSettings, options)) {
-            Task bootstrapTask = task;
-            TaskCollection buildDir = getBuildDir(command, rootSettings, combination);
-            for(const auto& argument : buildDir) {
-                bootstrapTask.append("cd");
-                bootstrapTask.append(argument);
-                bootstrapTask.append("&&");
-            }
-
-            string filename = getBootstrapFilename(command, rootSettings);
-            bootstrapTask.append(string("./") + filename);
-
+            Task bootstrapTask = replacePatternCombinations(task, combination);
             registerTask(bootstrapTask, options);
         }
         return true;
@@ -44,13 +49,11 @@ namespace execHelper { namespace plugins {
 
     string Bootstrap::getBootstrapFilename(const Command& command, const SettingsNode& rootSettings) noexcept {
         static string filenameKey("filename");
-        const SettingsNode& settings = getContainingSettings(command, rootSettings, filenameKey);
-        if(settings.contains(filenameKey)) {
-            TaskCollection commandArguments = settings[filenameKey].toStringCollection();
-            if(commandArguments.size() > 0U) {
-                return commandArguments[0];
-            }
+        const string filename = ConfigValue<string>::get(filenameKey, "bootstrap.sh", command, rootSettings);
+        // Check naively if filename is an absolute path
+        if(filename.compare(0, 1, "/") == 0) {
+            return filename;
         }
-        return "bootstrap.sh";
+        return "./" + filename;
     }
 } }

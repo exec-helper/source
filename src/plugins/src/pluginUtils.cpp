@@ -39,6 +39,11 @@ namespace execHelper { namespace plugins {
         return patternsKey;
     }
 
+    const string& getCommandLineKey() noexcept {
+        static const string commandLineKey("command-line");
+        return commandLineKey;
+    }
+
     Task replacePatternCombinations(const Task& task, const PatternCombinations& patternCombinations) noexcept {
         Task replacedTask;
         for(const auto& part : task.getTask()) {

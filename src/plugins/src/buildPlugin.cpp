@@ -52,25 +52,5 @@ namespace execHelper { namespace plugins {
         replacePatternCombinations(commandArguments, patternCombinations);
         return commandArguments;
     }
-
-    //TaskCollection BuildPlugin::getTarget(const Command& command, const SettingsNode& rootSettings, const TargetDescriptionElement& target) noexcept {
-        //static const string targetKey("target");
-
-        //TaskCollection result;
-        //const SettingsNode settings = getContainingSettings(command, rootSettings, targetKey); 
-        //if(! settings.contains(targetKey)) {
-            //return TaskCollection({target.getTarget() + target.getRunTarget()});
-        //}
-        //TaskCollection commandArguments = settings[targetKey].toStringCollection();
-
-        //const SettingsNode patternSettings = getContainingSettings(command, rootSettings, getPatternsKey()); 
-        //Patterns patterns = patternSettings[getPatternsKey()].toStringCollection();
-        //for(const auto& argument : commandArguments) {
-            //string replacedString(argument);
-            //replacedString = replacePatterns(replacedString, patterns, target);
-            //result.push_back(replacedString);
-        //}
-        //return result;
-    //}
 } }
 
