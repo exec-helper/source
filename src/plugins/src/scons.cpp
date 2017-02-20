@@ -8,6 +8,7 @@
 #include "core/patternsHandler.h"
 
 #include "pluginUtils.h"
+#include "configValue.h"
 
 using std::string;
 using std::map;
@@ -31,17 +32,17 @@ namespace execHelper { namespace plugins {
 
         task.append(SCONS_COMMAND);
 
-        for(const auto& combination : makePatternPermutator(command, rootSettings, options)) {
-            Task newTask = task;
+        if(getMultiThreaded(command, rootSettings, options)) {
+            task.append(TaskCollection({"--jobs", "8"}));
+        }
+        if(options.getVerbosity()) {
+            task.append("--debug=explain");
+        }
+        task.append(ConfigValue<TaskCollection>::get(getCommandLineKey(), {}, command, rootSettings));
 
-            if(getMultiThreaded(command, rootSettings, options)) {
-                newTask.append(TaskCollection({"--jobs", "8"}));
-            }
-            if(options.getVerbosity()) {
-                newTask.append("--debug=explain");
-            }
-            newTask.append(getCommandLine(command, rootSettings, combination));
-            registerTask(newTask, options);
+        for(const auto& combination : makePatternPermutator(command, rootSettings, options)) {
+            Task sconsTask = replacePatternCombinations(task, combination);
+            registerTask(sconsTask, options);
         }
         return true;
     }

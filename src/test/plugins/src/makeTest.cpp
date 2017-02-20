@@ -116,7 +116,7 @@ namespace execHelper { namespace plugins { namespace test {
             }
 
             COMBINATIONS("Add a command line") {
-                commandLine = {"{" + targetUtil.target.getKey() + "}{" + targetUtil.runTarget.getKey() + "}"};
+                commandLine = {"{" + targetUtil.target.getKey() + "}", "{" + targetUtil.runTarget.getKey() + "}"};
                 addSettings(*settings, "command-line", commandLine);
                 addSettings(rootSettings[pluginConfigKey][otherCommandKey], "command-line", "--some-command");
             }
