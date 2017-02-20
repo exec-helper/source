@@ -41,17 +41,17 @@ patterns:
         long-option: analyze
 
 commands:
-    - init
-    - build
-    - build-only
-    - install
-    - clean
-    - distclean
-    - rebuild
-    - analyze
-    - run-test
-    - coverage
-    - memory-check
+    init: Initialize the build infrastructure
+    build: Build-only + install-only
+    build-only: Build only
+    install: Install only
+    clean: Clean build
+    distclean: Distclean build
+    rebuild: Clean + build
+    analyze: Run the specified analysis tool(s)
+    run-test: Run the specified tests
+    coverage: Run the coverage analysis tools using a specific setup (for convenience)
+    memory-check: Run the memory check analysis tool for a specific setup (for convenience)
 
 init:
     - command-line-command

@@ -1,6 +1,8 @@
 #include "execHelperOptions.h"
 
 #include <iostream>
+#include <iomanip>
+#include <sstream>
 #include <string>
 #include <assert.h>
 
@@ -14,6 +16,8 @@
 using std::cout;
 using std::endl;
 using std::string;
+using std::stringstream;
+using std::setw;
 using std::vector;
 using std::shared_ptr;
 using std::make_shared;
@@ -184,6 +188,16 @@ namespace execHelper { namespace core {
 
     void ExecHelperOptions::printHelp() const noexcept {
         user_feedback(m_optionsDescriptions.getOptionDescriptions());
+        user_feedback("Configured commands:");
+        for(const auto& command : m_settings["commands"].m_values) {
+            stringstream commandStream;
+            commandStream << "  " << std::left << setw(20) << command.m_key;
+            if(command.m_values.size() > 0) {
+                // Add an extra whitespace in case the key is longer than the minimum width that was set
+                commandStream << " " << command.toStringCollection().back();
+            }
+            user_feedback(commandStream.str());
+        }
     }
 
     bool ExecHelperOptions::contains(const std::string& longOptions) const noexcept {
