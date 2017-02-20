@@ -8,6 +8,7 @@
 #include "core/patternsHandler.h"
 
 #include "pluginUtils.h"
+#include "configValue.h"
 
 using std::string;
 using execHelper::core::Task;
@@ -26,21 +27,21 @@ namespace execHelper { namespace plugins {
         const SettingsNode& rootSettings = options.getSettings({"make"});  
         task.append(MAKE_COMMAND);
 
-        for(const auto& combination : makePatternPermutator(command, rootSettings, options)) {
-            Task newTask = task;
-            if(getMultiThreaded(command, rootSettings, options)) {
-                newTask.append(TaskCollection({"--jobs", "8"}));
-            }
-            TaskCollection buildTarget = getBuildDir(command, rootSettings, combination);
-            if(!buildTarget.empty()) {
-                newTask.append("--directory=" + buildTarget[0]);
-            }
-            if(options.getVerbosity()) {
-                newTask.append("--debug");
-            }
-            newTask.append(getCommandLine(command, rootSettings, combination));
+        if(getMultiThreaded(command, rootSettings, options)) {
+            task.append(TaskCollection({"--jobs", "8"}));
+        }
+        string buildDir = ConfigValue<string>::get(getBuildDirKey(), "", command, rootSettings);
+        if(!buildDir.empty()) {
+            task.append("--directory=" + buildDir);
+        }
+        if(options.getVerbosity()) {
+            task.append("--debug");
+        }
+        task.append(ConfigValue<TaskCollection>::get(getCommandLineKey(), {}, command, rootSettings));
 
-            registerTask(newTask, options);
+        for(const auto& combination : makePatternPermutator(command, rootSettings, options)) {
+            Task makeTask = replacePatternCombinations(task, combination);
+            registerTask(makeTask, options);
         }
         return true;
     }

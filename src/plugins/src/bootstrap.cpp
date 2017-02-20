@@ -36,9 +36,7 @@ namespace execHelper { namespace plugins {
         }
 
         task.append(getBootstrapFilename(command, rootSettings));
-
-        TaskCollection commandLine = ConfigValue<TaskCollection>::get(getCommandLineKey(), {}, command, rootSettings);
-        task.append(commandLine);
+        task.append(ConfigValue<TaskCollection>::get(getCommandLineKey(), {}, command, rootSettings));
 
         for(const auto& combination : makePatternPermutator(command, rootSettings, options)) {
             Task bootstrapTask = replacePatternCombinations(task, combination);
