@@ -12,7 +12,6 @@
 #include "executorStub.h"
 #include "optionsStub.h"
 
-
 using std::vector;
 using std::string;
 
@@ -32,10 +31,8 @@ using execHelper::test::utils::Patterns;
 using execHelper::test::utils::addPatterns;
 
 namespace {
-    namespace {
-        const string PLUGIN_CONFIG_KEY("scons");
-        const string PLUGIN_COMMAND("scons");
-    }
+    const string PLUGIN_CONFIG_KEY("scons");
+    const string PLUGIN_COMMAND("scons");
 }
 
 namespace execHelper { namespace plugins { namespace test {

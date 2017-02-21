@@ -31,6 +31,8 @@ namespace execHelper { namespace plugins {
         static string clangStaticAnalyzerKey("clang-static-analyzer");
         const SettingsNode& rootSettings = options.getSettings(clangStaticAnalyzerKey);  
         task.append(clangStaticAnalyzerCommand);
+
+        // Note: we leave replacing the values in the command line to the build-command plugin
         task.append(getCommandLine(command, rootSettings));
 
         TaskCollection buildCommand = getSystemName(command, "build-command", rootSettings);
