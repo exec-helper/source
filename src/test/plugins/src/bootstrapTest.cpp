@@ -136,14 +136,7 @@ namespace execHelper { namespace plugins { namespace test {
             expectedTask.append(verbosity);
             expectedTask.append(commandLine);
 
-            ExecutorStub::TaskQueue expectedTasks;
-            for(const auto& compiler : compilerUtil.makePatternPermutator()) {
-                for(const auto& target : targetUtil.makePatternPermutator()) {
-                    Task replacedExpectedTask = replacePatternCombinations(expectedTask, compiler);
-                    replacedExpectedTask = replacePatternCombinations(replacedExpectedTask, target);
-                    expectedTasks.emplace_back(replacedExpectedTask);
-                }
-            }
+            ExecutorStub::TaskQueue expectedTasks = getExpectedTasks(expectedTask, compilerUtil, targetUtil);
 
             bool returnCode = plugin.apply(command, task, options);
             THEN_CHECK("It should succeed") {

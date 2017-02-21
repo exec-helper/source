@@ -7,6 +7,7 @@
 #include "config/settingsNode.h"
 #include "core/pattern.h"
 #include "core/options.h"
+#include "plugins/pluginUtils.h"
 
 using std::map;
 using std::vector;
@@ -19,6 +20,7 @@ using std::ofstream;
 
 using execHelper::config::SettingsNode;
 using execHelper::core::Options;
+using execHelper::core::Task;
 using execHelper::core::PatternCombinations;
 using execHelper::core::Pattern;
 using execHelper::core::PatternKey;
@@ -26,6 +28,9 @@ using execHelper::core::PatternValue;
 using execHelper::core::PatternKeys;
 using execHelper::core::PatternValues;
 using execHelper::core::PatternPermutator;
+using execHelper::plugins::replacePatternCombinations;
+
+using execHelper::core::test::ExecutorStub;
 
 namespace {
     const string YAML_CONFIG_KEY_DELIMITER(": ");
@@ -247,5 +252,17 @@ namespace execHelper { namespace test { namespace utils {
         for(const auto& pattern : patterns) {
             options.m_patternsHandler->addPattern(pattern);
         }
+    }
+
+    ExecutorStub::TaskQueue getExpectedTasks(const Task& expectedTask, const CompilerUtil& compilerUtil, const TargetUtil& targetUtil) noexcept {
+        ExecutorStub::TaskQueue expectedTasks;
+        for(const auto& compiler : compilerUtil.makePatternPermutator()) {
+            for(const auto& target : targetUtil.makePatternPermutator()) {
+                Task replacedExpectedTask = replacePatternCombinations(expectedTask, compiler);
+                replacedExpectedTask = replacePatternCombinations(replacedExpectedTask, target);
+                expectedTasks.emplace_back(replacedExpectedTask);
+            }
+        }
+        return expectedTasks;
     }
 } } }

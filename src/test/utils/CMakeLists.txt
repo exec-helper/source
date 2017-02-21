@@ -7,6 +7,7 @@ set(SRCS
 set(LIBRARY_INCLUDES
         ${CMAKE_CURRENT_SOURCE_DIR}/../stubs
         ${${PROJECT_NAME}-core_INCLUDE_DIRS}
+        ${${PROJECT_NAME}-plugins_INCLUDE_DIRS}
     )
 
 include_directories(
@@ -21,10 +22,12 @@ set(${LIBRARY_NAME}_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include ${LIBRARY_I
 
 set(${LIBRARY_NAME}_LIBRARY_DIRS 
         ${${PROJECT_NAME}-core_LIBRARY_DIRS}
+        ${${PROJECT_NAME}-plugins_LIBRARY_DIRS}
     PARENT_SCOPE)
 
 set(${LIBRARY_NAME}_LIBRARIES ${LIBRARY_NAME} 
         ${${PROJECT_NAME}-core_LIBRARIES}
+        ${${PROJECT_NAME}-plugins_LIBRARIES}
     PARENT_SCOPE)
 
 install(TARGETS ${EXE_NAME} DESTINATION ${UNITTEST_BIN_DIR})

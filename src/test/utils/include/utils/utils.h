@@ -12,6 +12,7 @@
 #include "core/options.h"
 
 #include "optionsStub.h"
+#include "executorStub.h"
 
 namespace execHelper {
     namespace config {
@@ -112,6 +113,8 @@ namespace execHelper {
             const core::Pattern PATTERN1("PATTERN1", {"pattern1"}, 'p', "--pattern1");
             const core::Pattern PATTERN2("PATTERN2", {"pattern2a", "pattern2b"}, 'q', "--pattern2");
             const Patterns PATTERNS({PATTERN1, PATTERN2});
+
+            core::test::ExecutorStub::TaskQueue getExpectedTasks(const core::Task& expectedTask, const CompilerUtil& compilerUtil, const TargetUtil& targetUtil) noexcept;
         }
     }
 }
