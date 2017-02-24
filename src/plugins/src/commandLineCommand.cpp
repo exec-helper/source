@@ -2,11 +2,13 @@
 
 #include <string>
 
+#include "log/log.h"
 #include "config/settingsNode.h"
 #include "core/task.h"
 #include "core/patterns.h"
 
 #include "pluginUtils.h"
+#include "configValue.h"
 
 using std::string;
 
@@ -22,18 +24,20 @@ namespace execHelper { namespace plugins {
         static string commandLineKey("command-line");
 
         const SettingsNode& rootSettings = options.getSettings(commandLineCommandKey);
-        const SettingsNode settings = getContainingSettings(command, rootSettings, commandLineKey); 
-        const TaskCollection tasks = settings[commandLineKey].toStringCollection();
+        boost::optional<TaskCollection> commandLineValues = ConfigValue<TaskCollection>::getSetting(getCommandLineKey(), command, rootSettings);
+        if(commandLineValues == boost::none) {
+            user_feedback_error("Could not find the '" << getCommandLineKey() << "' setting for command '" << command << "' in the '" << commandLineCommandKey << "' settings");
+            return false;
+        }
+        if(commandLineValues.get().empty()) {
+            user_feedback_error("The '" << getCommandLineKey() << "' setting for command '" << command << "' in the '" << commandLineCommandKey << "' settings is empty");
+            return false;
+        }
+        task.append(commandLineValues.get());
 
         for(const auto& combination : makePatternPermutator(command, rootSettings, options)) {
-            TaskCollection combinationTask = tasks;
-            replacePatternCombinations(combinationTask, combination);
-
-            for(const auto& commandLine : combinationTask) {
-                Task forkedTask = task;
-                forkedTask.append(commandLine);
-                registerTask(forkedTask, options);
-            }
+            Task commandLineTask = replacePatternCombinations(task, combination);
+            registerTask(commandLineTask, options);
         }
         return true;
     }

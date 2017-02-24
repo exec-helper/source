@@ -45,7 +45,7 @@ namespace execHelper {
                         return boost::none;
                     }
                     config::SettingsNode::SettingsCollection collection = settings[configKey].toStringCollection();
-                        return detail::ConfigValueImpl<T, isContainer<T>::value>::getValue(collection);
+                    return detail::ConfigValueImpl<T, isContainer<T>::value>::getValue(collection);
                 }
 
                 static T get(const std::string& configKey, const T& defaultValue, const core::Command& command, const config::SettingsNode& rootSettings) noexcept {

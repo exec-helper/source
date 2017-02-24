@@ -1,58 +1,132 @@
-#include <fstream>
 #include <string>
 #include <vector>
+#include <algorithm>
 
-#include <catch.hpp>
+#include "unittest/catch.h"
 
+#include "config/settingsNode.h"
 #include "core/task.h"
 #include "core/execHelperOptions.h"
-#include "executorStub.h"
-
 #include "plugins/commandLineCommand.h"
 
-using std::ofstream;
+#include "utils/utils.h"
+
+#include "executorStub.h"
+#include "optionsStub.h"
+
 using std::string;
-using std::endl;
-using std::vector;
+
+using execHelper::config::SettingsNode;
 using execHelper::core::Task;
-using execHelper::core::ExecHelperOptions;
+using execHelper::core::TaskCollection;
+
+using execHelper::test::utils::TargetUtil;
+using execHelper::test::utils::CompilerUtil;
 using execHelper::core::test::ExecutorStub;
+using execHelper::test::OptionsStub;
+using execHelper::test::utils::addSettings;
+using execHelper::test::utils::addPatterns;
+
+namespace {
+    const string PLUGIN_CONFIG_KEY("command-line-command");
+}
 
 namespace execHelper { namespace plugins { namespace test {
-    SCENARIO("Testing the command line command plugin", "[plugins][commandlinecommand]") {
-        GIVEN("A configuration file and tasks we want to execute") {
-            string commandLineToExecute1("echo Hello");
-            string commandLineToExecute2("echo world!!!");
+    SCENARIO("Testing the configuration settings of the command-line-command plugin", "[plugins][commandLineCommand]") {
+        MAKE_COMBINATIONS("Of several settings") {
+            const string command("some-command-line-command");
 
-            Task actualTask1;
-            actualTask1.append(commandLineToExecute1);
-            Task actualTask2;
-            actualTask2.append(commandLineToExecute2);
+            OptionsStub options;
 
-            string filename("test.exec-helper");
-            ofstream configFile;
-            configFile.open(filename);
-            configFile << "command-line-command:" << endl 
-                       <<"    command-line:" << endl
-                       << "        - " << commandLineToExecute1 << endl
-                       << "        - " << commandLineToExecute2 << endl;
+            TargetUtil targetUtil;
+            addPatterns(targetUtil.getPatterns(), options);
 
-            configFile.close();
-            
+            CompilerUtil compilerUtil;
+            addPatterns(compilerUtil.getPatterns(), options);
+
+            SettingsNode& rootSettings = options.m_settings;
+            addSettings(rootSettings, PLUGIN_CONFIG_KEY, command);
+            addSettings(rootSettings[PLUGIN_CONFIG_KEY], "patterns", targetUtil.getKeys());
+            addSettings(rootSettings[PLUGIN_CONFIG_KEY], "patterns", compilerUtil.getKeys());
+
+            TaskCollection commandLine({"command1"});
+            addSettings(rootSettings[PLUGIN_CONFIG_KEY], "command-line", commandLine);
+
+            // Add the settings of an other command to make sure we take the expected ones
+            const string otherCommandKey("other-command");
+            addSettings(rootSettings, PLUGIN_CONFIG_KEY, otherCommandKey);
+
+            CommandLineCommand plugin;
+            Task task;
+            Task expectedTask;
+
+            SettingsNode* settings = &(rootSettings[PLUGIN_CONFIG_KEY]);
+
+            COMBINATIONS("Toggle between general and specific command settings") {
+                settings = &rootSettings[PLUGIN_CONFIG_KEY][command];
+
+                commandLine.clear();
+                commandLine.emplace_back("command2");
+                addSettings(*settings, "command-line", commandLine);
+            }
+
+            COMBINATIONS("Set the command line") {
+                TaskCollection commandLineValue({"{" + compilerUtil.compiler.getKey() + "}/{" + compilerUtil.mode.getKey() + "}", "{" + targetUtil.target.getKey() + "}/{" + targetUtil.runTarget.getKey() + "}"});
+                addSettings(*settings, "command-line", commandLineValue);
+                commandLine.insert(commandLine.end(), commandLineValue.begin(), commandLineValue.end());
+            }
+
+            expectedTask.append(commandLine);
+
+            ExecutorStub::TaskQueue expectedTasks = getExpectedTasks(expectedTask, compilerUtil, targetUtil);
+
+            bool returnCode = plugin.apply(command, task, options);
+            THEN_CHECK("It should succeed") {
+                REQUIRE(returnCode == true);
+            }
+
+            THEN_CHECK("It called the right commands") {
+                REQUIRE(expectedTasks == options.m_executor.getExecutedTasks());
+            }
+        }
+    }
+
+    SCENARIO("Testing erroneous configuration conditions", "[plugins][commandLineCommand]") {
+        GIVEN("A basic setup") {
+            const string command("some-command-line-command");
+
+            OptionsStub options;
+
+            SettingsNode& rootSettings = options.m_settings;
+            addSettings(rootSettings, PLUGIN_CONFIG_KEY, command);
+
+            Task task;
             CommandLineCommand plugin;
 
-            WHEN("We apply the task to the command line command plugin") {
-                Task task;
-                ExecHelperOptions options;
-                options.parseSettingsFile(filename);
+            WHEN("We add no parameter and apply") {
+                bool return_code = plugin.apply(command, task, options);
 
-                ExecutorStub executor;
-                options.setExecutor(&executor);
+                THEN("The call should not succeed") {
+                    REQUIRE(return_code == false);
+                }
+            }
 
-                plugin.apply("random-command", task, options); 
+            WHEN("We add no parameter and apply") {
+                addSettings(rootSettings, PLUGIN_CONFIG_KEY, "command-line");
+                bool return_code = plugin.apply(command, task, options);
 
-                THEN("We should get the specifics of the Debug mode object") {
-                    REQUIRE(executor.getExecutedTasks() == vector<Task>({actualTask1, actualTask2})); 
+                THEN("The call should not succeed") {
+                    REQUIRE(return_code == false);
+                }
+            }
+
+            WHEN("We add no parameter and apply") {
+                addSettings(rootSettings[PLUGIN_CONFIG_KEY], "command-line", "random-value");
+                addSettings(rootSettings[PLUGIN_CONFIG_KEY], command, "command-line");
+                bool return_code = plugin.apply(command, task, options);
+
+                THEN("The call should not succeed") {
+                    REQUIRE(return_code == false);
                 }
             }
         }
