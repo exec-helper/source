@@ -6,7 +6,6 @@
 
 #include "config/settingsNode.h"
 #include "core/task.h"
-#include "core/execHelperOptions.h"
 #include "plugins/commandLineCommand.h"
 
 #include "utils/utils.h"
@@ -91,7 +90,7 @@ namespace execHelper { namespace plugins { namespace test {
         }
     }
 
-    SCENARIO("Testing erroneous configuration conditions", "[plugins][commandLineCommand]") {
+    SCENARIO("Testing erroneous configuration conditions for the commandLineCommand plugin", "[plugins][commandLineCommand]") {
         GIVEN("A basic setup") {
             const string command("some-command-line-command");
 

@@ -18,7 +18,7 @@ namespace execHelper { namespace plugins {
         static const string commandKey("commands");
         const SettingsNode rootSettings = options.getSettings(commandKey);
         if(! rootSettings.contains(command)) {
-            user_feedback("Error: undefined command");
+            user_feedback_error("Error: undefined command");
             return false;
         }        
         ExecutePlugin executePlugin({command});

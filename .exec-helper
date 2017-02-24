@@ -140,7 +140,7 @@ command-line-command:
             - MODE
             - RUNTARGET
             - MODULE
-        command-line: build/{COMPILER}/{MODE}/bin/test/{RUNTARGET}/exec-helper-{MODULE}-{RUNTARGET}
+        command-line: build/{COMPILER}/{MODE}/bin/test/{RUNTARGET}/exec-helper-{MODULE}-{RUNTARGET} "[commandPlugin]"
     coverage:
         command-line:
             - CXXFLAGS="--coverage -fprofile-arcs -ftest-coverage" LDFLAGS="-fprofile-arcs -ftest-coverage" exec-helper init build analyze --analyze lcov --compiler g++ --mode profile --run-target unittest

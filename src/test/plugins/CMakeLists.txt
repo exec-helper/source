@@ -5,6 +5,7 @@ set(SRCS
         src/clangStaticAnalyzerTest.cpp
         src/pmdTest.cpp
         src/commandLineCommandTest.cpp
+        src/commandPluginTest.cpp
         src/cppcheckTest.cpp
         src/pluginUtilsTest.cpp
         src/bootstrapTest.cpp
