@@ -5,6 +5,3 @@ add_subdirectory(core)
 add_subdirectory(plugins)
 add_subdirectory(commander)
 add_subdirectory(applications)
-
-add_subdirectory(catch)
-add_subdirectory(test)

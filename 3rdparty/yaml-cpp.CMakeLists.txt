@@ -3,9 +3,9 @@ option(USE_SYSTEM_YAML_CPP "Use the yaml-cpp library provided by the system" ON)
 if(${USE_SYSTEM_YAML_CPP})
     find_package(yaml-cpp REQUIRED)
 
-    set(YAML_INCLUDE_DIRS ${yaml-cpp_INCLUDE_DIRS} PARENT_SCOPE)
-    set(YAML_LIBRARIES ${yaml-cpp_LIBRARIES} PARENT_SCOPE)
-    set(YAML_LIBRARY_DIRS ${yaml-cpp_LIBRARY_DIRS} PARENT_SCOPE)
+    set(YAML_INCLUDE_DIRS ${yaml-cpp_INCLUDE_DIRS} CACHE INTERNAL YAML_INCLUDE_DIRS)
+    set(YAML_LIBRARIES ${yaml-cpp_LIBRARIES} CACHE INTERNAL YAML_LIBRARIES)
+    set(YAML_LIBRARY_DIRS ${yaml-cpp_LIBRARY_DIRS} CACHE INTERNAL YAML_LIBRARY_DIRS)
 
 else(${USE_SYSTEM_YAML_CPP})
     include(ExternalProject)
@@ -20,10 +20,10 @@ else(${USE_SYSTEM_YAML_CPP})
         UPDATE_COMMAND ""
         )
 
-    set(YAML_INCLUDE_DIRS ${YAML_INSTALL_DIR}/include PARENT_SCOPE)
+    set(YAML_INCLUDE_DIRS ${YAML_INSTALL_DIR}/include CACHE INTERNAL YAML_INCLUDE_DIRS)
 
     # Mimic find_library() output: it returns an absolute path to the library
-    set(YAML_LIBRARIES ${YAML_INSTALL_DIR}/lib/libyaml-cpp.a PARENT_SCOPE)
-    set(YAML_LIBRARY_DIRS ${YAML_INSTALL_DIR}/lib PARENT_SCOPE)
+    set(YAML_LIBRARIES ${YAML_INSTALL_DIR}/lib/libyaml-cpp.a CACHE INTERNAL YAML_LIBRARIES)
+    set(YAML_LIBRARY_DIRS ${YAML_INSTALL_DIR}/lib CACHE INTERNAL YAML_LIBRARY_DIRS)
 
 endif(${USE_SYSTEM_YAML_CPP})
