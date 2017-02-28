@@ -118,7 +118,7 @@ code-duplication-pmd-cpd:
     script:
         - pacman -S --noconfirm --needed java-environment unzip wget
         - mkdir -p 3rdparty/pmd
-        - pushd 3rdparty/pmd && wget --no-check-certificate "https://downloads.sourceforge.net/project/pmd/pmd/5.5.2/pmd-bin-5.5.2.zip" && unzip pmd-bin-5.5.2.zip; popd
+        - pushd 3rdparty/pmd && wget --no-check-certificate "https://downloads.sourceforge.net/project/pmd/pmd/5.5.4/pmd-bin-5.5.4.zip" && unzip pmd-bin-5.5.4.zip; popd
         - build/g++/release/bin/exec-helper analyze --analyze pmd
 
 coverage:
