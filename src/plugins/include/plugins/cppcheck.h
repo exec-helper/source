@@ -20,8 +20,8 @@ namespace execHelper {
             public:
                 virtual bool apply(const core::Command& command, core::Task& task, const core::Options& options) const noexcept override;
             private:
-                static core::TaskCollection getSourceDir(const core::Command& command, const config::SettingsNode& rootSettings, const core::PatternCombinations& patternCombinations) noexcept;
-                static core::TaskCollection getEnabledChecks(const core::Command& command, const config::SettingsNode& rootSettings) noexcept;
+                static std::string getSourceDir(const core::Command& command, const config::SettingsNode& rootSettings) noexcept;
+                static std::string getEnabledChecks(const core::Command& command, const config::SettingsNode& rootSettings) noexcept;
         };
     }
 }

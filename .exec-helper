@@ -128,7 +128,9 @@ command-line-command:
         patterns:
             - COMPILER
             - MODE
-        command-line: cmake -H. -Bbuild/{COMPILER}/{MODE} -DCMAKE_CXX_COMPILER={COMPILER} -DCMAKE_INSTALL_PREFIX=build/{COMPILER}/{MODE} -DCMAKE_BUILD_TYPE={MODE} -DUSE_SYSTEM_CATCH=OFF
+        command-line:
+            - ln -fs build/g++/release/compile_commands.json &&
+            - cmake -H. -Bbuild/{COMPILER}/{MODE} -DCMAKE_CXX_COMPILER={COMPILER} -DCMAKE_INSTALL_PREFIX=build/{COMPILER}/{MODE} -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_BUILD_TYPE={MODE} -DUSE_SYSTEM_CATCH=OFF
     distclean:
         patterns:
             - COMPILER
@@ -140,7 +142,7 @@ command-line-command:
             - MODE
             - RUNTARGET
             - MODULE
-        command-line: build/{COMPILER}/{MODE}/bin/test/{RUNTARGET}/exec-helper-{MODULE}-{RUNTARGET} "[commandPlugin]"
+        command-line: build/{COMPILER}/{MODE}/bin/test/{RUNTARGET}/exec-helper-{MODULE}-{RUNTARGET}
     coverage:
         command-line:
             - CXXFLAGS="--coverage -fprofile-arcs -ftest-coverage" LDFLAGS="-fprofile-arcs -ftest-coverage" exec-helper init build analyze --analyze lcov --compiler g++ --mode profile --run-target unittest

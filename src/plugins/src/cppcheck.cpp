@@ -10,6 +10,7 @@
 #include "core/options.h"
 
 #include "pluginUtils.h"
+#include "configValue.h"
 
 using std::string;
 using std::vector;
@@ -38,60 +39,37 @@ namespace execHelper { namespace plugins {
             task.append("--verbose");
         }
 
+        task.append(getCommandLine(command, rootSettings));
+        task.append(getSourceDir(command, rootSettings));
+
         for(const auto& combination : makePatternPermutator(command, rootSettings, options)) {
-            Task cppcheckTargetTask = task;
-            cppcheckTargetTask.append(getCommandLine(command, rootSettings, combination));
-            cppcheckTargetTask.append(getSourceDir(command, rootSettings, combination));
-            registerTask(cppcheckTargetTask, options);
+            Task cppcheckTask = replacePatternCombinations(task, combination);
+            registerTask(cppcheckTask, options);
         }
         return true;
     }
 
-    TaskCollection Cppcheck::getSourceDir(const Command& command, const SettingsNode& rootSettings, const PatternCombinations& patternCombinations) noexcept {
-        static const string sourceDirKey("src-dir");
+    string Cppcheck::getSourceDir(const Command& command, const SettingsNode& rootSettings) noexcept {
         static const string targetDirKey("target-path");
 
-        string sourceDir;
-        const SettingsNode sourceSettings = getContainingSettings(command, rootSettings, sourceDirKey); 
-        if(! sourceSettings.contains(sourceDirKey)) {
-            sourceDir += ".";
-        } else {
-            TaskCollection sourceDirSettings = sourceSettings[sourceDirKey].toStringCollection();
-            sourceDir += sourceDirSettings.back();
-        }
+        string sourceDir = ConfigValue<string>::get("src-dir", ".", command, rootSettings);
+        string targetPath = ConfigValue<string>::get("target-path", "", command, rootSettings);
+
         const SettingsNode targetSettings = getContainingSettings(command, rootSettings, targetDirKey); 
-        if(targetSettings.contains(targetDirKey)) {
-            sourceDir += "/" + targetSettings[targetDirKey].toStringCollection().back();
+        if(targetPath.empty()) {
+            return sourceDir;
         }
-        TaskCollection sourceDirCollection({sourceDir});
-        replacePatternCombinations(sourceDirCollection, patternCombinations);
-        return sourceDirCollection;
+        return sourceDir + "/" + targetPath;
     }
 
-    TaskCollection Cppcheck::getEnabledChecks(const Command& command, const SettingsNode& rootSettings) noexcept {
-        static const string enabledChecksKey("enable-checks");
-        string enabledChecksOption("--enable=");
+    string Cppcheck::getEnabledChecks(const Command& command, const SettingsNode& rootSettings) noexcept {
+        TaskCollection enabledChecks = ConfigValue<TaskCollection>::get("enable-checks", {"all"}, command, rootSettings);
+        string result("--enable=");
 
-        TaskCollection result;
-        const SettingsNode settings = getContainingSettings(command, rootSettings, enabledChecksKey); 
-        if(! settings.contains(enabledChecksKey)) {
-            enabledChecksOption += "all";
-            result.push_back(enabledChecksOption);
-            return result;
+        for(size_t i = 0; i < enabledChecks.size() - 1; ++i) {
+            result += enabledChecks[i] + ',';
         }
-
-        vector<string> enabledChecks = settings[enabledChecksKey].toStringCollection();
-        if(enabledChecks.empty()) {
-            enabledChecksOption += "all";
-            result.push_back(enabledChecksOption);
-            return result;
-        }
-
-        enabledChecksOption += enabledChecks[0];
-        for(size_t i = 1; i < enabledChecks.size(); ++i) {
-            enabledChecksOption +=  "," + enabledChecks[i];
-        }
-        result.push_back(enabledChecksOption);
+        result += enabledChecks.back();
         return result;
     }
 } }
