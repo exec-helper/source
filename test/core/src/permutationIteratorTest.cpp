@@ -106,7 +106,7 @@ namespace {
         size_t orderedCombinationsIndex = 0U;
         for(auto combination : permute) {
             REQUIRE(orderedCombinationsIndex < orderedCombinations.size());
-            REQUIRE(combination == orderedCombinations[orderedCombinationsIndex]);
+            REQUIRE((combination == orderedCombinations[orderedCombinationsIndex]));
             ++orderedCombinationsIndex;
         }
         REQUIRE(orderedCombinationsIndex == orderedCombinations.size());
