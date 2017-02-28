@@ -72,7 +72,6 @@ namespace execHelper { namespace plugins { namespace test {
                     const Memory::Memories memories = memory.getExecutions();
                     REQUIRE(memories.size() == 1U);
                     REQUIRE(memories[0].command == command);
-                    //REQUIRE(memories[0].taskAddress == &task);
                     REQUIRE(memories[0].task == task);
                     REQUIRE(memories[0].options == &options);
                 }
