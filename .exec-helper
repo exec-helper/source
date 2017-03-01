@@ -41,6 +41,7 @@ patterns:
         long-option: analyze
 
 commands:
+    setup: Setup the repository for building
     init: Initialize the build infrastructure
     build: Build-only + install-only
     build-only: Build only
@@ -52,6 +53,9 @@ commands:
     run-test: Run the specified tests
     coverage: Run the coverage analysis tools using a specific setup (for convenience)
     memory-check: Run the memory check analysis tool for a specific setup (for convenience)
+
+setup:
+    - command-line-command
 
 init:
     - command-line-command
@@ -124,12 +128,17 @@ clang-static-analyzer:
     compiler: envcc
 
 command-line-command:
+    setup:
+        patterns:
+            - COMPILER
+            - MODE
+        command-line:
+            - ln -fs build/{COMPILER}/{MODE}/compile_commands.json
     init:
         patterns:
             - COMPILER
             - MODE
         command-line:
-            - ln -fs build/g++/release/compile_commands.json &&
             - cmake -H. -Bbuild/{COMPILER}/{MODE} -DCMAKE_CXX_COMPILER={COMPILER} -DCMAKE_INSTALL_PREFIX=build/{COMPILER}/{MODE} -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_BUILD_TYPE={MODE} -DUSE_SYSTEM_CATCH=OFF
     distclean:
         patterns:
@@ -160,7 +169,7 @@ valgrind:
 pmd:
     patterns:
         - MODULE
-    exec: 3rdparty/pmd/pmd-bin-5.5.2/bin/run.sh
+    exec: 3rdparty/pmd/pmd-bin-5.5.4/bin/run.sh
     tool:
         - cpd
     language: cpp

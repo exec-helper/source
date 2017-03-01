@@ -94,6 +94,16 @@ memory-check:
         - pacman -S --noconfirm valgrind
         - export PATH=$PATH:build/g++/release/bin
         - build/g++/release/bin/exec-helper memory-check
+        - build/g++/release/bin/exec-helper analyze --analyze valgrind --run-target unittest --compiler g++ --mode debug --module core yaml config commander
+
+memory-check-plugins:
+    stage: test
+    dependencies:
+        - build:gcc
+    script:
+        - pacman -S --noconfirm valgrind
+        - export PATH=$PATH:build/g++/release/bin
+        - build/g++/release/bin/exec-helper analyze --analyze valgrind --run-target unittest --compiler g++ --mode debug --module commander
 
 cppcheck:
     stage: test
