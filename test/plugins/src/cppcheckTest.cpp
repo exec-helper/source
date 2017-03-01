@@ -62,8 +62,8 @@ namespace execHelper { namespace plugins { namespace test {
             Task task;
 
             Task expectedTask({PLUGIN_COMMAND});
-            std::string enabledChecks({"--enable=all"});
-            std::string srcDir({"."});
+            std::string enabledChecks("--enable=all");
+            std::string srcDir(".");
             TaskCollection verbosity;
             TaskCollection commandLine;
 
