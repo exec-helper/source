@@ -11,7 +11,7 @@ stages:
 
 build:gcc:
     stage: build
-    script: 
+    script:
         - pacman -S --noconfirm --needed gcc cmake make git libunistring ncurses
         - cmake -H. -Bbuild/g++/debug -DCMAKE_CXX_COMPILER=g++ -DCMAKE_INSTALL_PREFIX=build/g++/debug -DCMAKE_BUILD_TYPE=Debug -DUSE_SYSTEM_CATCH=OFF && make -C build/g++/debug --jobs 4 && make -C build/g++/debug install
         - cmake -H. -Bbuild/g++/release -DCMAKE_CXX_COMPILER=g++ -DCMAKE_INSTALL_PREFIX=build/g++/release -DCMAKE_BUILD_TYPE=Release -DUSE_SYSTEM_CATCH=OFF && make -C build/g++/release --jobs 4 && make -C build/g++/release install
@@ -20,6 +20,17 @@ build:gcc:
         paths:
             - build/g++/debug/bin
             - build/g++/debug/lib
+            - build/g++/release/bin
+            - build/g++/release/lib
+
+build:gcc:limited-optimization:
+    stage: build
+    script:
+        - pacman -S --noconfirm --needed gcc cmake make git libunistring ncurses
+        - cmake -H. -Bbuild/g++/release -DCMAKE_CXX_COMPILER=g++ -DCMAKE_INSTALL_PREFIX=build/g++/release -DCMAKE_BUILD_TYPE=Release -DUSE_SYSTEM_CATCH=OFF -DLIMITED_OPTIMIZATION=ON && make -C build/g++/release --jobs 4 && make -C build/g++/release install
+    artifacts:
+        expire_in: 1 day
+        paths:
             - build/g++/release/bin
             - build/g++/release/lib
 
@@ -89,20 +100,18 @@ unittest-commander:
 memory-check:
     stage: test
     dependencies:
-        - build:gcc
+        - build:gcc:limited-optimization
     script:
         - pacman -S --noconfirm valgrind
-        - export PATH=$PATH:build/g++/release/bin
-        - build/g++/release/bin/exec-helper analyze --analyze valgrind --run-target unittest --compiler g++ --mode debug --module core yaml config commander
+        - build/g++/release/bin/exec-helper analyze --analyze valgrind --run-target unittest --compiler g++ --mode release --module core yaml config commander
 
 memory-check-plugins:
     stage: test
     dependencies:
-        - build:gcc
+        - build:gcc:limited-optimization
     script:
         - pacman -S --noconfirm valgrind
-        - export PATH=$PATH:build/g++/release/bin
-        - build/g++/release/bin/exec-helper analyze --analyze valgrind --run-target unittest --compiler g++ --mode debug --module plugins
+        - build/g++/release/bin/exec-helper analyze --analyze valgrind --run-target unittest --compiler g++ --mode release --module plugins
 
 cppcheck:
     stage: test
