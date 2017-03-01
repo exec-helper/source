@@ -1,8 +1,8 @@
 patterns:
     COMPILER:
         default-values:
-            - gcc
-            - clang
+            - g++
+            - clang++
         short-option: c
         long-option: compiler
     MODE:
