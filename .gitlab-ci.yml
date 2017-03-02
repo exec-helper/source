@@ -132,7 +132,7 @@ clang-static-analyzer:
 clang-tidy:
     stage: test
     script:
-        - pacman -S --noconfirm --needed clang-tools-extra
+        - pacman -S --noconfirm --needed make clang-tools-extra
         - make clang-tidy
 
 code-duplication-pmd-cpd:
