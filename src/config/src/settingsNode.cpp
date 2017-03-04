@@ -20,7 +20,12 @@ namespace execHelper { namespace config {
     }
 
     bool SettingsNode::contains(const SettingsKey& findKey) const noexcept {
-        return this->operator[](findKey) != *this;
+        for(const SettingsNode& value : m_values) {
+            if(findKey == value.m_key) {
+                return true;
+            }
+        }
+        return false;
     }
 
     SettingsNode::SettingsCollection SettingsNode::toStringCollection() const noexcept {
@@ -58,9 +63,9 @@ namespace execHelper { namespace config {
     }
 
     std::ostream& operator<<( std::ostream& os, const SettingsNode& settings) noexcept {
-        os << settings.m_key << ": ";
+        os << settings.m_key << ": " << std::endl;
         for(const auto& value : settings.m_values) {
-            os << "{" << value << "};";
+            os << "{" << value << "};" << std::endl;
         }
         return os;
     }

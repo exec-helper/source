@@ -55,7 +55,6 @@ namespace execHelper { namespace plugins {
         string sourceDir = ConfigValue<string>::get("src-dir", ".", command, rootSettings);
         string targetPath = ConfigValue<string>::get("target-path", "", command, rootSettings);
 
-        const SettingsNode targetSettings = getContainingSettings(command, rootSettings, targetDirKey); 
         if(targetPath.empty()) {
             return sourceDir;
         }

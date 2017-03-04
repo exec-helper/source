@@ -22,7 +22,7 @@ namespace execHelper {
             template<typename T, bool isCollection>
             class ConfigValueImpl {
                 public:
-                    static T getValue(config::SettingsNode::SettingsCollection& collection) noexcept {
+                    static boost::optional<T> getValue(config::SettingsNode::SettingsCollection& collection) noexcept {
                         return collection;
                     }
             };
@@ -30,7 +30,10 @@ namespace execHelper {
             template<typename T>
             class ConfigValueImpl<T, false> {
                 public:
-                    static T getValue(config::SettingsNode::SettingsCollection& collection) noexcept {
+                    static boost::optional<T> getValue(config::SettingsNode::SettingsCollection& collection) noexcept {
+                        if(collection.empty()) {
+                            return boost::none;
+                        }
                         return collection.back();
                     }
             };
@@ -39,17 +42,21 @@ namespace execHelper {
         template<typename T>
         class ConfigValue {
             public:
-                static boost::optional<T> getSetting(const std::string& configKey, const core::Command& command, const config::SettingsNode& rootSettings) noexcept {
-                    const config::SettingsNode& settings = getContainingSettings(command, rootSettings, configKey);
-                    if(!settings.contains(configKey)) {
+                static boost::optional<T> getSetting(const std::string& key, const config::SettingsNode& rootSettings, const std::vector<std::string> configKeys) noexcept {
+                    boost::optional<const config::SettingsNode&> settings = getContainingSettings(key, rootSettings, configKeys);
+                    if(settings == boost::none) {
                         return boost::none;
                     }
-                    config::SettingsNode::SettingsCollection collection = settings[configKey].toStringCollection();
+                    config::SettingsNode::SettingsCollection collection = settings.get()[key].toStringCollection();
                     return detail::ConfigValueImpl<T, isContainer<T>::value>::getValue(collection);
                 }
 
                 static T get(const std::string& configKey, const T& defaultValue, const core::Command& command, const config::SettingsNode& rootSettings) noexcept {
-                    auto optionalValue = getSetting(configKey, command, rootSettings);
+                    return get(configKey, defaultValue, rootSettings, {command});
+                }
+
+                static T get(const std::string& configKey, const T& defaultValue, const config::SettingsNode& rootSettings, std::vector<std::string> configKeys) noexcept {
+                    auto optionalValue = getSetting(configKey, rootSettings, configKeys);
                     if(optionalValue == boost::none) {
                         return defaultValue;
                     }

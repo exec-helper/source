@@ -3,6 +3,7 @@ set(EXE_NAME ${PROJECT_NAME}-plugins-unittest)
 set(SRCS
         src/buildPluginTest.cpp
         src/clangStaticAnalyzerTest.cpp
+        src/clangTidyTest.cpp
         src/pmdTest.cpp
         src/commandLineCommandTest.cpp
         src/commandPluginTest.cpp

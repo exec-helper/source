@@ -3,6 +3,8 @@
 #include <fstream>
 
 #include <catch.hpp>
+#include <boost/optional/optional.hpp>
+#include <boost/optional/optional_io.hpp>
 
 #include "config/settingsNode.h"
 #include "core/task.h"
@@ -42,10 +44,11 @@ namespace execHelper { namespace plugins { namespace test {
             addSettings(rootSettings, key, "random-value");
 
             WHEN("We request the containing settings") {
-                const SettingsNode actualSettings = getContainingSettings(command, rootSettings, key);
+                boost::optional<const SettingsNode&> actualSettings = getContainingSettings(key, rootSettings, {command});
 
                 THEN("We should get the root settings") {
-                    REQUIRE(actualSettings == rootSettings);
+                    REQUIRE(actualSettings != boost::none);
+                    REQUIRE(actualSettings.get() == rootSettings);
                 }
             }
         }
@@ -57,10 +60,11 @@ namespace execHelper { namespace plugins { namespace test {
             addSettings(rootSettings, key, "random-value");
 
             WHEN("We request the containing settings") {
-                const SettingsNode actualSettings = getContainingSettings(command, rootSettings, keyNotInConfig);
+                boost::optional<const SettingsNode&> actualSettings = getContainingSettings(key, rootSettings, {command});
 
                 THEN("We should get the root settings") {
-                    REQUIRE(actualSettings == rootSettings);
+                    REQUIRE(actualSettings != boost::none);
+                    REQUIRE(actualSettings.get() == rootSettings);
                 }
             }
         }
@@ -73,10 +77,11 @@ namespace execHelper { namespace plugins { namespace test {
             addSettings(rootSettings[command], key, "random-value");
 
             WHEN("We request the containing settings") {
-                const SettingsNode actualSettings = getContainingSettings(command, rootSettings, key);
+                boost::optional<const SettingsNode&> actualSettings = getContainingSettings(key, rootSettings, {command});
 
                 THEN("We should get the command settings") {
-                    REQUIRE(actualSettings == rootSettings[command]);
+                    REQUIRE(actualSettings != boost::none);
+                    REQUIRE(actualSettings.get() == rootSettings[command]);
                 }
             }
         }

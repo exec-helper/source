@@ -42,7 +42,7 @@ namespace execHelper { namespace plugins {
         const SettingsNode& rootSettings = options.getSettings(lcovConfigKey);
 
         static string runCommandConfigKey("run-command");
-        boost::optional<string> runCommandValue = ConfigValue<string>::getSetting(runCommandConfigKey, command, rootSettings);
+        boost::optional<string> runCommandValue = ConfigValue<string>::getSetting(runCommandConfigKey, rootSettings, {command});
         if(runCommandValue == boost::none) {
             user_feedback_error("Could not find the '" << runCommandConfigKey << "' setting for command '" << command << "' in the '" << lcovConfigKey << "' settings");
             return false;

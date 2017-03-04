@@ -86,8 +86,8 @@ namespace execHelper { namespace plugins { namespace test {
             OptionsStub options;
 
             setupBasicOptions(options, {testPattern1, testPattern2});
-            addSettings(options.m_settings["selector"][command1], "pattern", testPattern1.getKey());
-            addSettings(options.m_settings["selector"], "pattern", testPattern2.getKey());
+            addSettings(options.m_settings["selector"][command1], "patterns", testPattern1.getKey());
+            addSettings(options.m_settings["selector"], "patterns", testPattern2.getKey());
 
             Selector plugin;
             Task task;
@@ -147,8 +147,8 @@ namespace execHelper { namespace plugins { namespace test {
             OptionsStub options;
 
             setupBasicOptions(options, {testPattern1, testPattern2});
-            addSettings(options.m_settings["selector"][commandlineCommand1], "pattern", testPattern1.getKey());
-            addSettings(options.m_settings["selector"], "pattern", testPattern2.getKey());
+            addSettings(options.m_settings["selector"][commandlineCommand1], "patterns", testPattern1.getKey());
+            addSettings(options.m_settings["selector"], "patterns", testPattern2.getKey());
 
             options.m_options.insert(make_pair(testPattern1.getLongOption(), commandLineOptions1));
             options.m_options.insert(make_pair(testPattern2.getLongOption(), commandLineOptions2));

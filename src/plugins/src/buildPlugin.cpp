@@ -6,7 +6,7 @@
 #include "core/patterns.h"
 #include "core/options.h"
 
-#include "pluginUtils.h"
+#include "configValue.h"
 
 using std::string;
 
@@ -30,14 +30,8 @@ namespace execHelper { namespace plugins {
             return false;
         }
 
-        const SettingsNode settings = getContainingSettings(command, rootSettings, singleThreadedKey); 
-        if(settings.contains(singleThreadedKey)) {
-            TaskCollection commandArguments = settings[singleThreadedKey].toStringCollection();
-            if(commandArguments.size() > 0 && commandArguments[0] == "yes") {
-                return false;
-            }
-        }
-        return true;
+        const string singleThreaded = ConfigValue<string>::get("single-threaded", "no", command, rootSettings);
+        return singleThreaded != "yes";
     }
 } }
 

@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <map>
+#include <utility>
 
 #include "log/log.h"
 #include "config/settingsNode.h"
@@ -14,11 +15,14 @@
 #include "cppcheck.h"
 #include "clangStaticAnalyzer.h"
 
+#include "configValue.h"
+
 using std::string;
 using std::shared_ptr;
 using std::make_shared;
 using std::vector;
 using std::map;
+using std::pair;
 
 using execHelper::config::SettingsNode;
 using execHelper::core::Command;
@@ -64,21 +68,30 @@ namespace execHelper { namespace plugins {
         }
     }
 
-    const SettingsNode& getContainingSettings(const Command& command, const SettingsNode& rootSettings, const string& key) noexcept {
-        if(rootSettings.contains(command) && rootSettings[command].contains(key)) {
-            return rootSettings[command]; 
+    boost::optional<const SettingsNode&> getContainingSettings(const string& key, const SettingsNode& rootSettings, const vector<string>& configKeys) noexcept {
+        for(size_t i = 0; i < configKeys.size(); ++i) {
+            const SettingsNode* settings = &rootSettings;
+            for(size_t j = 0; j < configKeys.size() - i; ++j) {
+                if(settings->contains(configKeys[j])) {
+                    settings = &((*settings)[configKeys[j]]); 
+                }
+                else
+                {
+                    break;
+                }
+            }
+            if(settings->contains(key)) {
+                return *settings;
+            }
         }
-        return rootSettings;
+        if(rootSettings.contains(key)) {
+            return rootSettings;
+        }
+        return boost::none;
     }
 
     TaskCollection getCommandLine(const Command& command, const SettingsNode& rootSettings) noexcept {
-        static const string commandLineKey("command-line");
-        const SettingsNode settings = getContainingSettings(command, rootSettings, commandLineKey); 
-        if(! settings.contains(commandLineKey)) {
-            return TaskCollection();
-        }
-        TaskCollection commandArguments = settings[commandLineKey].toStringCollection();
-        return commandArguments;
+        return ConfigValue<TaskCollection>::get("command-line", {}, command, rootSettings);
     }
 
     TaskCollection getCommandLine(const Command& command, const SettingsNode& rootSettings, const PatternCombinations& patternCombinations) noexcept {
@@ -99,11 +112,7 @@ namespace execHelper { namespace plugins {
     }
 
     boost::optional<TaskCollection> getConfigurationSettings(const string& command, const SettingsNode& rootSettings, const string& configKey) noexcept {
-        const SettingsNode& settings = getContainingSettings(command, rootSettings, configKey);
-        if(!settings.contains(configKey)) {
-            return boost::none;
-        }
-        return settings[configKey].toStringCollection();
+        return ConfigValue<TaskCollection>::getSetting(configKey, rootSettings, {command});
     }
 
     PatternPermutator makePatternPermutator(const Command& command, const SettingsNode& rootSettings, const Options& options) noexcept {

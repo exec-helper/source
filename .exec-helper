@@ -37,6 +37,7 @@ patterns:
             - valgrind
             - pmd
             - lcov
+            - clang-tidy
         short-option: a
         long-option: analyze
 
@@ -151,7 +152,7 @@ command-line-command:
             - MODE
             - RUNTARGET
             - MODULE
-        command-line: build/{COMPILER}/{MODE}/bin/test/{RUNTARGET}/exec-helper-{MODULE}-{RUNTARGET}
+        command-line: build/{COMPILER}/{MODE}/bin/test/{RUNTARGET}/exec-helper-{MODULE}-{RUNTARGET} "[clang-tidy]"
     coverage:
         command-line:
             - CXXFLAGS="--coverage -fprofile-arcs -ftest-coverage" LDFLAGS="-fprofile-arcs -ftest-coverage" exec-helper init build analyze --analyze lcov --compiler g++ --mode profile --run-target unittest
@@ -194,3 +195,16 @@ lcov:
     gen-html-command-line:
         - --num-spaces
         - 4
+
+clang-tidy:
+    analyze:
+        patterns:
+            - MODULE
+        sources:
+            src/{MODULE}/src/*.cpp:
+                checks: "boost-*"
+                command-line: 
+                    - test
+                    - test2
+            test/{MODULE}/src/*.cpp:
+                checks: "clang-analyzer-*"

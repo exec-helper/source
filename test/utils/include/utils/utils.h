@@ -114,7 +114,10 @@ namespace execHelper {
             const core::Pattern PATTERN2("PATTERN2", {"pattern2a", "pattern2b"}, 'q', "--pattern2");
             const Patterns PATTERNS({PATTERN1, PATTERN2});
 
+            core::test::ExecutorStub::TaskQueue getExpectedTasks(const core::Task& expectedTask, const TargetUtil& targetUtil) noexcept;
             core::test::ExecutorStub::TaskQueue getExpectedTasks(const core::Task& expectedTask, const CompilerUtil& compilerUtil, const TargetUtil& targetUtil) noexcept;
+
+            std::string toString(const config::SettingsNode& settings, unsigned int nbOfTabs = 0) noexcept;
         }
     }
 }

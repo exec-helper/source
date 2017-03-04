@@ -17,6 +17,7 @@
 #include "valgrind.h"
 #include "pmd.h"
 #include "lcov.h"
+#include "clangTidy.h"
 
 using std::string;
 using std::vector;
@@ -90,6 +91,8 @@ namespace execHelper { namespace plugins {
             return make_unique<Pmd>();
         } else if(pluginName == "lcov") {
             return make_unique<Lcov>();
+        } else if(pluginName == "clang-tidy") {
+            return make_unique<ClangTidy>();
         }
         return unique_ptr<Plugin>();
     }

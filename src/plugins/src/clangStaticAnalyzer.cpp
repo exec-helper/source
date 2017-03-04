@@ -9,7 +9,7 @@
 #include "core/patterns.h"
 #include "core/execHelperOptions.h"
 
-#include "pluginUtils.h"
+#include "configValue.h"
 #include "executePlugin.h"
 
 using std::string;
@@ -50,10 +50,6 @@ namespace execHelper { namespace plugins {
     }
 
     TaskCollection ClangStaticAnalyzer::getSystemName(const Command& command, const string& key, const SettingsNode& rootSettings) noexcept {
-        const SettingsNode& settings = getContainingSettings(command, rootSettings, key);
-        if(!settings.contains(key)) {
-            return TaskCollection(); 
-        }
-        return settings[key].toStringCollection();
+        return ConfigValue<TaskCollection>::get(key, {}, command, rootSettings);
     }
 } }

@@ -254,6 +254,15 @@ namespace execHelper { namespace test { namespace utils {
         }
     }
 
+    ExecutorStub::TaskQueue getExpectedTasks(const Task& expectedTask, const TargetUtil& targetUtil) noexcept {
+        ExecutorStub::TaskQueue expectedTasks;
+        for(const auto& target : targetUtil.makePatternPermutator()) {
+            Task replacedExpectedTask = replacePatternCombinations(expectedTask, target);
+            expectedTasks.emplace_back(replacedExpectedTask);
+        }
+        return expectedTasks;
+    }
+
     ExecutorStub::TaskQueue getExpectedTasks(const Task& expectedTask, const CompilerUtil& compilerUtil, const TargetUtil& targetUtil) noexcept {
         ExecutorStub::TaskQueue expectedTasks;
         for(const auto& compiler : compilerUtil.makePatternPermutator()) {
@@ -264,5 +273,26 @@ namespace execHelper { namespace test { namespace utils {
             }
         }
         return expectedTasks;
+    }
+
+    string toString(const SettingsNode& settings, unsigned int nbOfTabs) noexcept {
+        string prefix; 
+        for(unsigned int i = 0; i < nbOfTabs; ++i) {
+            prefix += "  ";
+        }
+
+        string result;
+        result += prefix + settings.m_key;
+        if(settings.m_values.empty()) {
+            result += "\n";
+           return result;
+        } else {
+           result += ": {\n";
+        }
+        for(const auto& value : settings.m_values) {
+            result += toString(value, nbOfTabs + 1);
+        }
+        result += prefix + "}\n";
+        return result;
     }
 } } }
