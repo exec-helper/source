@@ -24,7 +24,7 @@ namespace execHelper { namespace plugins {
         static string commandLineKey("command-line");
 
         const SettingsNode& rootSettings = options.getSettings(commandLineCommandKey);
-        boost::optional<TaskCollection> commandLineValues = ConfigValue<TaskCollection>::getSetting(getCommandLineKey(), rootSettings, {command});
+        boost::optional<TaskCollection> commandLineValues = ConfigValue<TaskCollection>::getSetting(getCommandLineKey(), rootSettings, command);
         if(commandLineValues == boost::none) {
             user_feedback_error("Could not find the '" << getCommandLineKey() << "' setting for command '" << command << "' in the '" << commandLineCommandKey << "' settings");
             return false;

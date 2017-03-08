@@ -24,7 +24,7 @@ namespace execHelper { namespace plugins {
             return false;
         }
         const SettingsNode& rootSettings = options.getSettings({"selector"});
-        boost::optional<TaskCollection> patternSettings = ConfigValue<TaskCollection>::getSetting(getPatternsKey(), rootSettings, {command});
+        boost::optional<TaskCollection> patternSettings = ConfigValue<TaskCollection>::getSetting(getPatternsKey(), rootSettings, command);
         if(patternSettings == boost::none) {
             user_feedback_error("Missing the '" << getPatternsKey() << "' keyword in the configuration of " << selectorKey << "[" << command << "] settings");
             return false;

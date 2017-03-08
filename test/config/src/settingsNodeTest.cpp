@@ -1,6 +1,7 @@
-#include <catch.hpp>
 #include <vector>
 #include <string>
+
+#include <catch.hpp>
 
 #include "config/settingsNode.h"
 
@@ -35,9 +36,9 @@ namespace execHelper { namespace core { namespace test {
 
             WHEN("We apply the array subscript operator") {
                 THEN("Only these keys should exist") {
-                    REQUIRE(rootNode.contains("wrong-key") == false);
-                    REQUIRE(rootNode.contains(level1aNodeKey) == true);
-                    REQUIRE(rootNode.contains(level1bNodeKey) == true);
+                    REQUIRE_FALSE(rootNode.contains("wrong-key"));
+                    REQUIRE(rootNode.contains(level1aNodeKey));
+                    REQUIRE(rootNode.contains(level1bNodeKey));
                 }
                 THEN("We should find the same values") {
                     REQUIRE(rootNode["wrong-key"] == rootNode);

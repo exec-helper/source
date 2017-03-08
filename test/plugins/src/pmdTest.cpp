@@ -24,6 +24,7 @@ using execHelper::test::utils::Patterns;
 using execHelper::test::utils::PATTERN1;
 using execHelper::test::utils::PATTERN2;
 using execHelper::test::utils::PATTERNS;
+using execHelper::test::utils::toString;
 using execHelper::core::test::ExecutorStub;
 
 namespace {
@@ -149,7 +150,7 @@ namespace execHelper { namespace plugins { namespace test {
                 REQUIRE(plugin.apply(command, task, options) == true);
 
                 ExecutorStub::TaskQueue actualTasks;
-                Task actualTask({"pmd.sh", "cpd", "--language", ""});
+                Task actualTask({"pmd.sh", "cpd"});
                 actualTasks.emplace_back(actualTask);
                 REQUIRE(actualTasks == options.m_executor.getExecutedTasks());
             }
@@ -209,7 +210,7 @@ namespace execHelper { namespace plugins { namespace test {
                 REQUIRE(plugin.apply(command, task, options) == true);
 
                 ExecutorStub::TaskQueue actualTasks;
-                Task actualTask({"pmd.sh", "cpd", "--minimum-tokens", ""});
+                Task actualTask({"pmd.sh", "cpd"});
                 actualTasks.emplace_back(actualTask);
                 REQUIRE(actualTasks == options.m_executor.getExecutedTasks());
             }

@@ -42,25 +42,33 @@ namespace execHelper {
         template<typename T>
         class ConfigValue {
             public:
-                static boost::optional<T> getSetting(const std::string& key, const config::SettingsNode& rootSettings, const std::vector<std::string> configKeys) noexcept {
-                    boost::optional<const config::SettingsNode&> settings = getContainingSettings(key, rootSettings, configKeys);
-                    if(settings == boost::none) {
-                        return boost::none;
+                typedef std::initializer_list<std::vector<std::string>> OrderedConfigKeys;
+
+                static boost::optional<T> getSetting(const std::string& key, const config::SettingsNode& rootSettings, const OrderedConfigKeys& orderedConfigKeys) noexcept {
+                    for(auto& configKeys : orderedConfigKeys) {
+                        boost::optional<const config::SettingsNode&> settings = getContainingSettings(key, rootSettings, configKeys);
+                        if(settings != boost::none) {
+                            config::SettingsNode::SettingsCollection collection = settings.get().toStringCollection();
+                            return detail::ConfigValueImpl<T, isContainer<T>::value>::getValue(collection);
+                        }
                     }
-                    config::SettingsNode::SettingsCollection collection = settings.get()[key].toStringCollection();
-                    return detail::ConfigValueImpl<T, isContainer<T>::value>::getValue(collection);
+                    return boost::none;
+                }
+
+                static boost::optional<T> getSetting(const std::string& key, const config::SettingsNode& rootSettings, const core::Command& command) noexcept {
+                    return getSetting(key, rootSettings, {{command}, {}});
                 }
 
                 static T get(const std::string& configKey, const T& defaultValue, const core::Command& command, const config::SettingsNode& rootSettings) noexcept {
-                    return get(configKey, defaultValue, rootSettings, {command});
+                    return get(configKey, defaultValue, rootSettings, {{command}, {}});
                 }
 
-                static T get(const std::string& configKey, const T& defaultValue, const config::SettingsNode& rootSettings, std::vector<std::string> configKeys) noexcept {
-                    auto optionalValue = getSetting(configKey, rootSettings, configKeys);
-                    if(optionalValue == boost::none) {
-                        return defaultValue;
+                static T get(const std::string& configKey, const T& defaultValue, const config::SettingsNode& rootSettings, const OrderedConfigKeys& orderedConfigKeys) noexcept {
+                    auto configValue = getSetting(configKey, rootSettings, orderedConfigKeys);
+                    if(configValue != boost::none) {
+                        return configValue.get();
                     }
-                    return optionalValue.get();
+                    return defaultValue;
                 }
         };
     }

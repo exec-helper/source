@@ -95,7 +95,7 @@ memory-check:
 
 selector:
     analyze:
-        pattern: ANALYZE
+        patterns: ANALYZE
 
 make:
     patterns:
@@ -152,7 +152,7 @@ command-line-command:
             - MODE
             - RUNTARGET
             - MODULE
-        command-line: build/{COMPILER}/{MODE}/bin/test/{RUNTARGET}/exec-helper-{MODULE}-{RUNTARGET} "[clang-tidy]"
+        command-line: build/{COMPILER}/{MODE}/bin/test/{RUNTARGET}/exec-helper-{MODULE}-{RUNTARGET}
     coverage:
         command-line:
             - CXXFLAGS="--coverage -fprofile-arcs -ftest-coverage" LDFLAGS="-fprofile-arcs -ftest-coverage" exec-helper init build analyze --analyze lcov --compiler g++ --mode profile --run-target unittest
@@ -202,9 +202,13 @@ clang-tidy:
             - MODULE
         sources:
             src/{MODULE}/src/*.cpp:
-                checks: "boost-*"
-                command-line: 
-                    - test
-                    - test2
+                checks: 
+                    - "*"
+                    - "-google-readability-namespace-comments"
+                    - "-llvm-namespace-comment"
             test/{MODULE}/src/*.cpp:
-                checks: "clang-analyzer-*"
+                checks:
+                    - "*"
+                    - "-google-readability-namespace-comments"
+                    - "-llvm-namespace-comment"
+                    - "-clang-analyzer-alpha.deadcode.UnreachableCode"

@@ -69,23 +69,16 @@ namespace execHelper { namespace plugins {
     }
 
     boost::optional<const SettingsNode&> getContainingSettings(const string& key, const SettingsNode& rootSettings, const vector<string>& configKeys) noexcept {
-        for(size_t i = 0; i < configKeys.size(); ++i) {
-            const SettingsNode* settings = &rootSettings;
-            for(size_t j = 0; j < configKeys.size() - i; ++j) {
-                if(settings->contains(configKeys[j])) {
-                    settings = &((*settings)[configKeys[j]]); 
-                }
-                else
-                {
-                    break;
-                }
-            }
-            if(settings->contains(key)) {
-                return *settings;
+        const SettingsNode* settings = &rootSettings;
+        for(const auto& configKey : configKeys) {
+            if(! settings->contains(configKey)) {
+                return boost::none;
+            } else {
+                settings = &((*settings)[configKey]);
             }
         }
-        if(rootSettings.contains(key)) {
-            return rootSettings;
+        if(settings->contains(key)) {
+            return (*settings)[key];
         }
         return boost::none;
     }
@@ -112,7 +105,7 @@ namespace execHelper { namespace plugins {
     }
 
     boost::optional<TaskCollection> getConfigurationSettings(const string& command, const SettingsNode& rootSettings, const string& configKey) noexcept {
-        return ConfigValue<TaskCollection>::getSetting(configKey, rootSettings, {command});
+        return ConfigValue<TaskCollection>::getSetting(configKey, rootSettings, {{command}, {}});
     }
 
     PatternPermutator makePatternPermutator(const Command& command, const SettingsNode& rootSettings, const Options& options) noexcept {

@@ -36,20 +36,20 @@ namespace execHelper { namespace plugins {
 
         for(const auto& source : sources) {
             Task sourceTask = task;
-            TaskCollection checksCollection = ConfigValue<TaskCollection>::get("checks", {}, rootSettings, {command, "sources", source});
-            if(checksCollection.size() == 0) {
-                checksCollection = ConfigValue<TaskCollection>::get("checks", {}, rootSettings, {"sources", source});
-            }
 
+            const ConfigValue<TaskCollection>::OrderedConfigKeys configKeys = {
+                                                    {command, "sources", source}, 
+                                                    {command},
+                                                    {"sources", source},
+                                                    {}
+                                                };
+
+            TaskCollection checksCollection = ConfigValue<TaskCollection>::get("checks", {}, rootSettings, configKeys);
             if(checksCollection.size() > 0) {
                 sourceTask.append(getChecks(checksCollection));
             }
 
-            TaskCollection commandLine = ConfigValue<TaskCollection>::get(getCommandLineKey(), {}, rootSettings, {command, "sources", source});
-            if(commandLine.size() == 0) {
-                commandLine = ConfigValue<TaskCollection>::get(getCommandLineKey(), {}, rootSettings, {"sources", source});
-            }
-
+            TaskCollection commandLine = ConfigValue<TaskCollection>::get("command-line", {}, rootSettings, configKeys);
             sourceTask.append(commandLine);
             sourceTask.append(source);
 

@@ -1,4 +1,6 @@
 #include <string>
+#include <map>
+#include <vector>
 
 #include "config/settingsNode.h"
 
@@ -11,6 +13,8 @@
 #include "optionsStub.h"
 
 using std::string;
+using std::vector;
+using std::map;
 
 using execHelper::config::SettingsNode;
 using execHelper::core::Task;
@@ -27,16 +31,36 @@ using execHelper::core::test::ExecutorStub;
 namespace {
     const string PLUGIN_CONFIG_KEY("clang-tidy");
     const string PLUGIN_COMMAND(PLUGIN_CONFIG_KEY);
+
+    TaskCollection toChecks(const TaskCollection& taskCollection) noexcept {
+        if(taskCollection.empty()) {
+            return TaskCollection();
+        }
+        string result="-checks=";
+        for(size_t i = 0; i < taskCollection.size() - 1; ++i) {
+            result += taskCollection[i] + ",";
+        }
+        result += taskCollection.back();
+        return TaskCollection({result});
+    }
 }
 
 namespace execHelper { namespace plugins { namespace test {
     SCENARIO("Testing the configuration settings of the clang-tidy plugin", "[plugins][clang-tidy]") {
+        const string command("clang-tidy-command");
+        const string otherCommandKey("other-command");
+
+        const TargetUtil targetUtil;
+
+        const string sourceKey1("source1/{" + targetUtil.target.getKey() + "}");
+        const string sourceKey2("source2");
+        const string sourceKey3("source3/{" + targetUtil.runTarget.getKey() + "}");
+        const vector<string> sourceKeys({sourceKey1, sourceKey2, sourceKey3});
+
         MAKE_COMBINATIONS("Of several settings") {
-            const string command("clang-tidy-command");
 
             OptionsStub options;
 
-            TargetUtil targetUtil;
             addPatterns(targetUtil.getPatterns(), options);
 
             SettingsNode& rootSettings = options.m_settings;
@@ -44,7 +68,6 @@ namespace execHelper { namespace plugins { namespace test {
             addSettings(rootSettings[PLUGIN_CONFIG_KEY], "patterns", targetUtil.getKeys());
 
             // Add the settings of an other command to make sure we take the expected ones
-            const string otherCommandKey("other-command");
             addSettings(rootSettings, PLUGIN_CONFIG_KEY, otherCommandKey);
 
             ClangTidy plugin;
@@ -52,8 +75,10 @@ namespace execHelper { namespace plugins { namespace test {
 
             Task expectedTask({PLUGIN_COMMAND});
             TaskCollection commandLine;
+            map<string, TaskCollection> sourceSpecificCommandLine;
             TaskCollection sources;
             TaskCollection checks;
+            map<string, TaskCollection> sourceSpecificChecks;
 
             SettingsNode* settings = &(rootSettings[PLUGIN_CONFIG_KEY]);
 
@@ -62,9 +87,7 @@ namespace execHelper { namespace plugins { namespace test {
             }
 
             COMBINATIONS("Add sources") {
-                sources.emplace_back("source1/{" + targetUtil.target.getKey() + "}");
-                sources.emplace_back("source2");
-                sources.emplace_back("source3/{" + targetUtil.runTarget.getKey() + "}");
+                sources = sourceKeys;
                 addSettings(*settings, "sources", sources);
                 addSettings(rootSettings[PLUGIN_CONFIG_KEY][otherCommandKey], "sources", {"source4", "source5"});
             }
@@ -78,13 +101,21 @@ namespace execHelper { namespace plugins { namespace test {
             COMBINATIONS("Add command line to source") {
                 if(settings->contains("sources")) {
                     if((*settings)["sources"].contains("source2")) {
-                        commandLine.clear(); 
-                        commandLine = {"{" + targetUtil.target.getKey() + "}", "{" + targetUtil.runTarget.getKey() + "}"};
+                        const map<string, TaskCollection> commandLineValues = {
+                            {sourceKey1, {"{" + targetUtil.target.getKey() + "}"}}, 
+                            {sourceKey2, {"{" + targetUtil.runTarget.getKey() + "}"}}, 
+                            {sourceKey3, {"{" + targetUtil.target.getKey() + "}", "{" + targetUtil.runTarget.getKey() + "}"}}
+                        };
 
-                        addSettings((*settings)["sources"]["source1/{" + targetUtil.target.getKey() + "}"], "command-line", commandLine);
-                        addSettings((*settings)["sources"]["source2"], "command-line", commandLine);
-                        addSettings((*settings)["sources"]["source3/{" + targetUtil.runTarget.getKey() + "}"], "command-line", commandLine);
+                        addSettings((*settings)["sources"][sourceKey1], "command-line", commandLineValues.at(sourceKey1));
+                        addSettings((*settings)["sources"][sourceKey2], "command-line", commandLineValues.at(sourceKey2));
+                        addSettings((*settings)["sources"][sourceKey3], "command-line", commandLineValues.at(sourceKey3));
+                        addSettings(rootSettings[PLUGIN_CONFIG_KEY], "command-line", "--some-command");
                         addSettings(rootSettings[PLUGIN_CONFIG_KEY][otherCommandKey], "command-line", "--some-command");
+
+                        sourceSpecificCommandLine[sourceKey1] = commandLineValues.at(sourceKey1);
+                        sourceSpecificCommandLine[sourceKey2] = commandLineValues.at(sourceKey2);
+                        sourceSpecificCommandLine[sourceKey3] = commandLineValues.at(sourceKey3);
                     }
                 }
             }
@@ -99,14 +130,21 @@ namespace execHelper { namespace plugins { namespace test {
             COMBINATIONS("Add checks to source") {
                 if(settings->contains("sources")) {
                     if((*settings)["sources"].contains("source2")) {
-                        checks.clear();
+                        const map<string, TaskCollection> checkValues = {
+                            {sourceKey1, {"check1", "check2-{" + targetUtil.target.getKey() + "}"}}, 
+                            {sourceKey2, {"check3", "check4-{" + targetUtil.runTarget.getKey() + "}"}}, 
+                            {sourceKey3, {"check5", "check6-{" + targetUtil.target.getKey() + "}"}}
+                        };
 
-                        TaskCollection checkValue = {"check1", "check2-{" + targetUtil.target.getKey() + "}"};
-                        addSettings((*settings)["sources"]["source1/{" + targetUtil.target.getKey() + "}"], "checks", checkValue);
-                        addSettings((*settings)["sources"]["source2"], "checks", checkValue);
-                        addSettings((*settings)["sources"]["source3/{" + targetUtil.runTarget.getKey() + "}"], "checks", checkValue);
-                        addSettings(rootSettings[PLUGIN_CONFIG_KEY][otherCommandKey], "checks", {"check3"});
-                        checks.emplace_back("-checks=check1,check2-{" + targetUtil.target.getKey() + "}");
+                        addSettings((*settings)["sources"][sourceKey1], "checks", checkValues.at(sourceKey1));
+                        addSettings((*settings)["sources"][sourceKey2], "checks", checkValues.at(sourceKey2));
+                        addSettings((*settings)["sources"][sourceKey3], "checks", checkValues.at(sourceKey3));
+                        addSettings(rootSettings[PLUGIN_CONFIG_KEY], "checks", {"check7"});
+                        addSettings(rootSettings[PLUGIN_CONFIG_KEY][otherCommandKey], "checks", {"check7"});
+
+                        sourceSpecificChecks[sourceKey1] = toChecks(checkValues.at(sourceKey1));
+                        sourceSpecificChecks[sourceKey2] = toChecks(checkValues.at(sourceKey2));
+                        sourceSpecificChecks[sourceKey3] = toChecks(checkValues.at(sourceKey3));
                     }
                 }
             }
@@ -114,14 +152,20 @@ namespace execHelper { namespace plugins { namespace test {
             ExecutorStub::TaskQueue expectedTasks;
             for(const auto& source : sources) {
                 Task sourceTask = expectedTask;
-                sourceTask.append(checks);
-                sourceTask.append(commandLine);
+                if(sourceSpecificChecks.count(source) > 0) {
+                    sourceTask.append(sourceSpecificChecks[source]);
+                } else {
+                    sourceTask.append(checks);
+                }
+
+                if(sourceSpecificCommandLine.count(source) > 0) {
+                    sourceTask.append(sourceSpecificCommandLine[source]);
+                } else {
+                    sourceTask.append(commandLine);
+                }
                 sourceTask.append(source);
                 const ExecutorStub::TaskQueue sourceTasks = getExpectedTasks(sourceTask, targetUtil);
                 expectedTasks.insert(expectedTasks.end(), sourceTasks.begin(), sourceTasks.end());
-            }
-
-            if(! sources.empty()) { 
             }
 
             bool returnCode = plugin.apply(command, task, options);

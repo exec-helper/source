@@ -6,8 +6,12 @@ namespace execHelper { namespace config {
     }
 
     SettingsNode& SettingsNode::operator[](const SettingsKey& requestedKey) noexcept {
-        const SettingsNode& node = *this;
-        return const_cast<SettingsNode&>(node[requestedKey]);
+        for(SettingsNode& value : m_values) {
+            if(requestedKey == value.m_key) {
+                return value;
+            }
+        }
+        return *this;
     }
 
     const SettingsNode& SettingsNode::operator[](const SettingsKey& requestedKey) const noexcept {
