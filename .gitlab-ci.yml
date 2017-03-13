@@ -121,6 +121,33 @@ cppcheck:
         - pacman -S --noconfirm cppcheck
         - build/g++/release/bin/exec-helper analyze --analyze cppcheck
 
+clang-tidy-core:
+    stage: test
+    dependencies:
+        - build:gcc
+    script:
+        - pacman -S --needed --noconfirm cppcheck gcc cmake make
+        - build/g++/release/bin/exec-helper setup init -c g++ -m release
+        - build/g++/release/bin/exec-helper analyze --analyze clang-tidy --module core
+
+clang-tidy-plugin:
+    stage: test
+    dependencies:
+        - build:gcc
+    script:
+        - pacman -S --needed --noconfirm cppcheck gcc cmake make
+        - build/g++/release/bin/exec-helper setup init -c g++ -m release
+        - build/g++/release/bin/exec-helper analyze --analyze clang-tidy --module plugins
+
+clang-tidy-rest:
+    stage: test
+    dependencies:
+        - build:gcc
+    script:
+        - pacman -S --needed --noconfirm cppcheck gcc cmake make
+        - build/g++/release/bin/exec-helper setup init -c g++ -m release
+        - build/g++/release/bin/exec-helper analyze --analyze clang-tidy --module yaml commander config
+
 clang-static-analyzer:
     stage: test
     dependencies:

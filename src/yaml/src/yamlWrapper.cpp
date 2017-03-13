@@ -1,17 +1,13 @@
 #include "yamlWrapper.h"
 
 #include <iostream>
-#include <vector>
-#include <memory>
 
 #include <yaml-cpp/yaml.h>
 
 #include "log/log.h"
 
 using std::string;
-using std::vector;
 using std::initializer_list;
-using std::unique_ptr;
 
 using execHelper::config::SettingsNode;
 

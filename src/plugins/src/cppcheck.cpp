@@ -5,15 +5,14 @@
 
 #include "log/log.h"
 #include "config/settingsNode.h"
-#include "core/task.h"
-#include "core/patterns.h"
 #include "core/options.h"
+#include "core/patterns.h"
+#include "core/task.h"
 
 #include "pluginUtils.h"
 #include "configValue.h"
 
 using std::string;
-using std::vector;
 
 using execHelper::core::Task;
 using execHelper::core::Options;

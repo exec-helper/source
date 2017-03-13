@@ -1,8 +1,6 @@
 #include "patternsHandler.h"
 
-#include <assert.h>
-
-using std::map;
+#include <cassert>
 
 using execHelper::core::Pattern;
 

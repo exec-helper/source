@@ -11,7 +11,7 @@ namespace execHelper {
     namespace plugins {
         class ExecutePlugin : public Plugin {
             public:
-                ExecutePlugin(const std::vector<std::string>& commands) noexcept;
+                ExecutePlugin(std::vector<std::string> commands) noexcept;
                 virtual bool apply(const core::Command& command, core::Task& task, const core::Options& options) const noexcept override;
 
                 static std::unique_ptr<Plugin> getPlugin(const std::string& pluginName) noexcept;

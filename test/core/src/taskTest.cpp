@@ -67,7 +67,7 @@ namespace execHelper { namespace core {
 
             GIVEN("A task and an empty line of commands") {
                 Task task;
-                string actualCommand = "";
+                string actualCommand;
 
                 // Convert the string command to a collection of separate commands
                 istringstream iss(actualCommand);
@@ -100,7 +100,7 @@ namespace execHelper { namespace core {
 
             GIVEN("A task and an empty line of commands") {
                 Task task;
-                string actualCommand = "";
+                string actualCommand;
 
                 // Convert the string command to a collection of separate commands
                 istringstream iss(actualCommand);
@@ -141,7 +141,7 @@ namespace execHelper { namespace core {
 
                 WHEN("We move each command separately to the task") {
                     for(const auto& command : moveCommandCollection) {
-                        task.append(move(command));
+                        task.append(command);
                     }
 
                     THEN("We should be able to find back all commands in order") {

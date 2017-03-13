@@ -40,7 +40,7 @@ namespace execHelper { namespace plugins { namespace test {
                 bool return_code = plugin.apply(command, task, options);
 
                 THEN("It should fail") {
-                    REQUIRE(return_code == false);
+                    REQUIRE_FALSE(return_code);
                 }
             }
         }
@@ -65,7 +65,7 @@ namespace execHelper { namespace plugins { namespace test {
                 bool return_code = plugin.apply(command, task, options);
 
                 THEN("The call should succeed") {
-                    REQUIRE(return_code == true);
+                    REQUIRE(return_code);
                 }
 
                 THEN("All default actions should be executed") {
@@ -84,7 +84,7 @@ namespace execHelper { namespace plugins { namespace test {
                 bool return_code = plugin.apply(command, task, options);
 
                 THEN("The call should succeed") {
-                    REQUIRE(return_code == true);
+                    REQUIRE(return_code);
                 }
 
                 THEN("All default actions should be executed") {

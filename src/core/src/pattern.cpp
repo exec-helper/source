@@ -1,24 +1,25 @@
 #include "pattern.h"
 
 #include <regex>
+#include <utility>
 
 #include "options.h"
 
+using std::move;
 using std::string;
 using std::regex;
-using std::regex_replace;
 
 namespace {
-    const string PATTERN_PREFIX("\\{");
-    const string PATTERN_POSTFIX("\\}");
+    const string PATTERN_PREFIX("{");
+    const string PATTERN_POSTFIX("}");
 }
 
 namespace execHelper { namespace core {
-    Pattern::Pattern(const PatternKey& patternKey, const PatternValues& defaultValues, char shortOption, const std::string& longOption) noexcept :
-        m_key(patternKey),
-        m_defaultValues(defaultValues),
+    Pattern::Pattern(PatternKey patternKey, PatternValues defaultValues, char shortOption, std::string longOption) noexcept :
+        m_key(move(patternKey)),
+        m_defaultValues(move(defaultValues)),
         m_shortOption(shortOption),
-        m_longOption(longOption)
+        m_longOption(move(longOption))
     {
         ;
     }

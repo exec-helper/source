@@ -1,35 +1,31 @@
 #include "pluginUtils.h"
 
-#include <vector>
 #include <map>
 #include <utility>
+#include <vector>
 
 #include "log/log.h"
 #include "config/settingsNode.h"
 #include "core/patterns.h"
 
-#include "commandLineCommand.h"
-#include "scons.h"
-#include "make.h"
 #include "bootstrap.h"
-#include "cppcheck.h"
 #include "clangStaticAnalyzer.h"
+#include "cppcheck.h"
+#include "commandLineCommand.h"
+#include "make.h"
+#include "scons.h"
 
 #include "configValue.h"
 
 using std::string;
-using std::shared_ptr;
-using std::make_shared;
 using std::vector;
 using std::map;
-using std::pair;
 
 using execHelper::config::SettingsNode;
 using execHelper::core::Command;
 using execHelper::core::Task;
 using execHelper::core::TaskCollection;
 using execHelper::core::PatternCombinations;
-using execHelper::core::PatternsHandler;
 using execHelper::core::replacePatterns;
 using execHelper::core::PatternPermutator;
 using execHelper::core::PatternKeys;
@@ -73,9 +69,8 @@ namespace execHelper { namespace plugins {
         for(const auto& configKey : configKeys) {
             if(! settings->contains(configKey)) {
                 return boost::none;
-            } else {
-                settings = &((*settings)[configKey]);
             }
+            settings = &((*settings)[configKey]);
         }
         if(settings->contains(key)) {
             return (*settings)[key];

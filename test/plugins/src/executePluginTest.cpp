@@ -5,19 +5,20 @@
 #include "core/options.h"
 #include "core/task.h"
 #include "core/pattern.h"
-#include "plugins/executePlugin.h"
-#include "plugins/commandLineCommand.h"
-#include "plugins/scons.h"
-#include "plugins/make.h"
+
 #include "plugins/bootstrap.h"
-#include "plugins/cppcheck.h"
 #include "plugins/clangStaticAnalyzer.h"
+#include "plugins/clangTidy.h"
+#include "plugins/cppcheck.h"
+#include "plugins/commandLineCommand.h"
+#include "plugins/executePlugin.h"
+#include "plugins/make.h"
+#include "plugins/scons.h"
 #include "plugins/selector.h"
 #include "plugins/memory.h"
 #include "plugins/valgrind.h"
 
 #include "optionsStub.h"
-#include "executorStub.h"
 
 #include "utils/utils.h"
 
@@ -26,7 +27,6 @@ using std::string;
 using std::unique_ptr;
 
 using execHelper::core::Task;
-using execHelper::core::Pattern;
 
 using execHelper::plugins::Plugin;
 using execHelper::plugins::ExecutePlugin;
@@ -42,19 +42,17 @@ using execHelper::plugins::Valgrind;
 using execHelper::plugins::MemoryHandler;
 
 using execHelper::test::OptionsStub;
-using execHelper::core::test::ExecutorStub;
 using execHelper::test::utils::Patterns;
 using execHelper::test::utils::addSettings;
-using execHelper::test::utils::appendVectors;
 
 namespace {
-    void setupBasicOptions(OptionsStub& options, const Patterns& patterns) {
-        addSettings(options.m_settings, "commands", {"execute-command"});
-        addSettings(options.m_settings, "execute-command", {"execute-plugin"});
-        addSettings(options.m_settings, "execute-plugin", {"execute-command"});
+    void setupBasicOptions(OptionsStub* options, const Patterns& patterns) {
+        addSettings(options->m_settings, "commands", {"execute-command"});
+        addSettings(options->m_settings, "execute-command", {"execute-plugin"});
+        addSettings(options->m_settings, "execute-plugin", {"execute-command"});
 
         for(const auto& pattern : patterns) {
-            options.m_patternsHandler->addPattern(pattern);
+            options->m_patternsHandler->addPattern(pattern);
         }
     }
 
@@ -62,7 +60,7 @@ namespace {
     bool checkGetPlugin(const string& pluginName) {
         unique_ptr<Plugin> plugin = ExecutePlugin::getPlugin(pluginName);
         T* derived = dynamic_cast<T*>(plugin.get());  // derived will be a nullptr if the cast fails
-        return (derived > static_cast<T*>(0));
+        return (derived != nullptr);
     }
 }
 
@@ -78,7 +76,7 @@ namespace execHelper { namespace plugins { namespace test {
                 bool success = plugin.apply("random-command", task, options);
 
                 THEN("It should succeed") {
-                    REQUIRE(success == true);
+                    REQUIRE(success);
                 }
             }
         }
@@ -91,7 +89,7 @@ namespace execHelper { namespace plugins { namespace test {
 
             OptionsStub options;
 
-            setupBasicOptions(options, {});
+            setupBasicOptions(&options, {});
 
             ExecutePlugin plugin(selectionOptions);
             Task task;
@@ -102,7 +100,7 @@ namespace execHelper { namespace plugins { namespace test {
                 bool returnCode = plugin.apply(command, task, options);
 
                 THEN("It should return that it succeeded") {
-                    REQUIRE(returnCode == true);
+                    REQUIRE(returnCode);
                 }
                 THEN("All default actions should be executed") {
                     const Memory::Memories memories = memory.getExecutions();
@@ -136,7 +134,7 @@ namespace execHelper { namespace plugins { namespace test {
                 bool returnCode = plugin.apply("test", task, options);
 
                 THEN("It should not succeed") {
-                    REQUIRE(returnCode == false);
+                    REQUIRE_FALSE(returnCode);
                 }
             }
         }
@@ -153,7 +151,7 @@ namespace execHelper { namespace plugins { namespace test {
                 bool returnCode = plugin.apply("test", task, options);
 
                 THEN("It should not succeed") {
-                    REQUIRE(returnCode == false);
+                    REQUIRE_FALSE(returnCode);
                 }
                 THEN("It should have stopped executing after the failure") {
                     REQUIRE(memory.getExecutions().size() == 1U);
@@ -173,6 +171,7 @@ namespace execHelper { namespace plugins { namespace test {
                    REQUIRE(checkGetPlugin<Bootstrap>("bootstrap")); 
                    REQUIRE(checkGetPlugin<Cppcheck>("cppcheck")); 
                    REQUIRE(checkGetPlugin<ClangStaticAnalyzer>("clang-static-analyzer")); 
+                   REQUIRE(checkGetPlugin<ClangTidy>("clang-tidy")); 
                    REQUIRE(checkGetPlugin<Selector>("selector")); 
                    REQUIRE(checkGetPlugin<Memory>("memory")); 
                    REQUIRE(checkGetPlugin<Valgrind>("valgrind")); 

@@ -116,7 +116,7 @@ namespace execHelper { namespace plugins { namespace test {
                 TaskCollection actualTaskCollection = getCommandLine(command, rootSettings, combination);
 
                 THEN("We should get an empty response") {
-                    REQUIRE(actualTaskCollection.empty() == true);
+                    REQUIRE(actualTaskCollection.empty());
                 }
             }
         }
@@ -132,7 +132,7 @@ namespace execHelper { namespace plugins { namespace test {
                 TaskCollection actualTaskCollection = getCommandLine(command, rootSettings, combination);
 
                 THEN("We should get an empty response") {
-                    REQUIRE(actualTaskCollection.empty() == true);
+                    REQUIRE(actualTaskCollection.empty());
                 }
             }
         }

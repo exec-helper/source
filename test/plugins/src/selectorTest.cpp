@@ -1,4 +1,5 @@
-#include <tuple>
+#include <string>
+#include <vector>
 
 #include <catch.hpp>
 
@@ -15,7 +16,6 @@
 
 using std::vector;
 using std::string;
-using std::get;
 
 using execHelper::core::Task;
 using execHelper::core::Pattern;
@@ -26,16 +26,15 @@ using execHelper::test::OptionsStub;
 using execHelper::core::test::ExecutorStub;
 using execHelper::test::utils::Patterns;
 using execHelper::test::utils::addSettings;
-using execHelper::test::utils::appendVectors;
 
 namespace {
-    void setupBasicOptions(OptionsStub& options, const Patterns& patterns) {
-        addSettings(options.m_settings, "commands", {"selector-command"});
-        addSettings(options.m_settings, "selector-command", {"selector"});
-        addSettings(options.m_settings, "selector", {"selector-command"});
+    void setupBasicOptions(OptionsStub* options, const Patterns& patterns) {
+        addSettings(options->m_settings, "commands", {"selector-command"});
+        addSettings(options->m_settings, "selector-command", {"selector"});
+        addSettings(options->m_settings, "selector", {"selector-command"});
 
         for(const auto& pattern : patterns) {
-            options.m_patternsHandler->addPattern(pattern);
+            options->m_patternsHandler->addPattern(pattern);
         }
     }
 
@@ -66,7 +65,7 @@ namespace execHelper { namespace plugins { namespace test {
                 bool success = plugin.apply("random-command", task, options);
 
                 THEN("It should not succeed") {
-                    REQUIRE(success == false);
+                    REQUIRE_FALSE(success);
                 }
             }
         }
@@ -85,9 +84,9 @@ namespace execHelper { namespace plugins { namespace test {
 
             OptionsStub options;
 
-            setupBasicOptions(options, {testPattern1, testPattern2});
-            addSettings(options.m_settings["selector"][command1], "patterns", testPattern1.getKey());
-            addSettings(options.m_settings["selector"], "patterns", testPattern2.getKey());
+            setupBasicOptions(&options, {testPattern1, testPattern2});
+            addSettings(options.m_settings["selector"][command1], "pattern", testPattern1.getKey());
+            addSettings(options.m_settings["selector"], "pattern", testPattern2.getKey());
 
             Selector plugin;
             Task task;
@@ -96,7 +95,7 @@ namespace execHelper { namespace plugins { namespace test {
                 bool returnCode = plugin.apply(command1, task, options);
 
                 THEN("It should return that it succeeded") {
-                    REQUIRE(returnCode == true);
+                    REQUIRE(returnCode);
                 }
                 THEN("All default actions should be executed") {
                     const Memory::Memories memories = memory.getExecutions();
@@ -113,7 +112,7 @@ namespace execHelper { namespace plugins { namespace test {
                 bool returnCode = plugin.apply(command2, task, options);
 
                 THEN("It should return that it succeeded") {
-                    REQUIRE(returnCode == true);
+                    REQUIRE(returnCode);
                 }
                 THEN("All default actions should be executed") {
                     const Memory::Memories memories = memory.getExecutions();
@@ -146,9 +145,9 @@ namespace execHelper { namespace plugins { namespace test {
 
             OptionsStub options;
 
-            setupBasicOptions(options, {testPattern1, testPattern2});
-            addSettings(options.m_settings["selector"][commandlineCommand1], "patterns", testPattern1.getKey());
-            addSettings(options.m_settings["selector"], "patterns", testPattern2.getKey());
+            setupBasicOptions(&options, {testPattern1, testPattern2});
+            addSettings(options.m_settings["selector"][commandlineCommand1], "pattern", testPattern1.getKey());
+            addSettings(options.m_settings["selector"], "pattern", testPattern2.getKey());
 
             options.m_options.insert(make_pair(testPattern1.getLongOption(), commandLineOptions1));
             options.m_options.insert(make_pair(testPattern2.getLongOption(), commandLineOptions2));
@@ -157,7 +156,7 @@ namespace execHelper { namespace plugins { namespace test {
             Task task;
 
             WHEN("We apply the selector with command 1") {
-                REQUIRE(plugin.apply(commandlineCommand1, task, options) == true);
+                REQUIRE(plugin.apply(commandlineCommand1, task, options));
 
                 THEN("All actions defined on the command line should be executed") {
                     ExecutorStub::TaskQueue executedTasks = options.m_executor.getExecutedTasks();
@@ -172,7 +171,7 @@ namespace execHelper { namespace plugins { namespace test {
                 }
             }
             WHEN("We apply the selector with command 2") {
-                REQUIRE(plugin.apply(commandlineCommand2, task, options) == true);
+                REQUIRE(plugin.apply(commandlineCommand2, task, options));
 
                 THEN("All actions defined on the command line should be executed") {
                     ExecutorStub::TaskQueue executedTasks = options.m_executor.getExecutedTasks();
@@ -197,7 +196,7 @@ namespace execHelper { namespace plugins { namespace test {
             MemoryHandler memory;
             OptionsStub options;
 
-            setupBasicOptions(options, {testPattern});
+            setupBasicOptions(&options, {testPattern});
 
             Selector plugin;
             Task task;
@@ -206,11 +205,11 @@ namespace execHelper { namespace plugins { namespace test {
                 bool returnCode = plugin.apply(command, task, options);
 
                 THEN("It should return that it succeeded") {
-                    REQUIRE(returnCode == false);
+                    REQUIRE_FALSE(returnCode);
                 }
                 THEN("All default actions should be executed") {
                     const Memory::Memories memories = memory.getExecutions();
-                    REQUIRE(memories.size() == 0U);
+                    REQUIRE(memories.empty());
                 }
             }
         }

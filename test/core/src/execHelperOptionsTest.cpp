@@ -1,9 +1,9 @@
-#include <vector>
-#include <map>
-#include <string>
-#include <memory>
 #include <fstream>
 #include <iostream>
+#include <map>
+#include <memory>
+#include <string>
+#include <vector>
 
 #include <catch.hpp>
 
@@ -11,6 +11,7 @@
 
 #include "core/execHelperOptions.h"
 #include "core/patternsHandler.h"
+
 #include "executorStub.h"
 #include "utils/utils.h"
 
@@ -19,13 +20,11 @@
 using std::string;
 using std::vector;
 using std::map;
-using std::unique_ptr;
 using std::ofstream;
 
 using execHelper::config::SettingsNode;
 using execHelper::core::PatternsHandler;
 
-using execHelper::test::OptionsStub;
 using execHelper::test::utils::MainVariables;
 using execHelper::test::utils::appendVectors;
 using execHelper::test::utils::convertToConfig;
@@ -44,7 +43,7 @@ namespace execHelper { namespace core {
                     THEN("The parsing should succeed") {
                         ExecHelperOptions options; 
                         REQUIRE(options.parse(mainVariables.argc, mainVariables.argv.get()));
-                        REQUIRE(options.containsHelp() == true);
+                        REQUIRE(options.containsHelp());
                         options.printHelp();
                     }
                 }
@@ -167,8 +166,8 @@ namespace execHelper { namespace core {
                     options.parse(mainVariables.argc, mainVariables.argv.get());
 
                     THEN("It should be parsed properly") {
-                        REQUIRE(options.getVerbosity() == true);
-                        REQUIRE(options.getSingleThreaded() == true);
+                        REQUIRE(options.getVerbosity());
+                        REQUIRE(options.getSingleThreaded());
                         REQUIRE(options.getCommands() == actualCommands);
                     }
                 }
@@ -218,15 +217,15 @@ namespace execHelper { namespace core {
                     options.parse(mainVariables.argc, mainVariables.argv.get());
 
                     THEN("It should be parsed properly") {
-                        REQUIRE(options.getVerbosity() == true);
-                        REQUIRE(options.getSingleThreaded() == true);
+                        REQUIRE(options.getVerbosity());
+                        REQUIRE(options.getSingleThreaded());
                     }
                     THEN("The patterns should contain the right values") {
                         const PatternsHandler& handler = options.getPatternsHandler();
-                        REQUIRE(handler.contains(pattern1Key) == true);
-                        REQUIRE(handler.contains(pattern2Key) == true);
-                        REQUIRE(handler.contains(pattern3Key) == true);
-                        REQUIRE(handler.contains(pattern4Key) == true);
+                        REQUIRE(handler.contains(pattern1Key));
+                        REQUIRE(handler.contains(pattern2Key));
+                        REQUIRE(handler.contains(pattern3Key));
+                        REQUIRE(handler.contains(pattern4Key));
                         REQUIRE(options.getValues(handler.getPattern(pattern1Key)) == pattern1Value);
                         REQUIRE(options.getValues(handler.getPattern(pattern2Key)) == pattern2Value);
                         REQUIRE(options.getValues(handler.getPattern(pattern3Key)) == pattern3Value);
@@ -250,8 +249,8 @@ namespace execHelper { namespace core {
                     options.parse(mainVariables.argc, mainVariables.argv.get());
 
                     THEN("It should be parsed accordingly") {
-                        REQUIRE(options.getVerbosity() == true);
-                        REQUIRE(options.getSingleThreaded() == true);
+                        REQUIRE(options.getVerbosity());
+                        REQUIRE(options.getSingleThreaded());
                         REQUIRE(options.getCommands() == actualCommands);
                     }
                 }
@@ -426,7 +425,7 @@ namespace execHelper { namespace core {
 
                     THEN("It should contain the patterns") {
                         for(const auto& pattern : patterns) {
-                            REQUIRE(handler.contains(pattern.getKey()) == true);
+                            REQUIRE(handler.contains(pattern.getKey()));
                         }
                     }
                     THEN("We should find the patterns") {
@@ -435,7 +434,7 @@ namespace execHelper { namespace core {
                         }
                     }
                     THEN("We should not find non existing keys") {
-                        REQUIRE(handler.contains("non-existing-pattern-key") == false);
+                        REQUIRE_FALSE(handler.contains("non-existing-pattern-key"));
                     }
                 }
             }

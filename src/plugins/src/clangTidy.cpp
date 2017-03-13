@@ -30,7 +30,7 @@ namespace execHelper { namespace plugins {
 
         TaskCollection sources = ConfigValue<TaskCollection>::get("sources", {}, command, rootSettings);
 
-        if(sources.size() == 0) {
+        if(sources.empty()) {
             user_feedback("Warning: no sources defined in the clang-tidy configuration");
         }
 
@@ -45,7 +45,7 @@ namespace execHelper { namespace plugins {
                                                 };
 
             TaskCollection checksCollection = ConfigValue<TaskCollection>::get("checks", {}, rootSettings, configKeys);
-            if(checksCollection.size() > 0) {
+            if(!checksCollection.empty()) {
                 sourceTask.append(getChecks(checksCollection));
             }
 
@@ -62,7 +62,7 @@ namespace execHelper { namespace plugins {
     }
 
     string ClangTidy::getChecks(const TaskCollection& checksCollection) noexcept {
-        if(checksCollection.size() == 0) {
+        if(checksCollection.empty()) {
             return "";
         }
         string result("-checks=");

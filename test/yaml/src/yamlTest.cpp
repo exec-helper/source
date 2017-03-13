@@ -32,7 +32,7 @@ namespace {
         return config;
     }
 
-    string convertToConfig(string key, string value) {
+    string convertToConfig(const string& key, const string& value) {
         return string(key + YAML_CONFIG_KEY_DELIMITER + value);
     }
 }
@@ -76,7 +76,7 @@ namespace execHelper { namespace yaml { namespace test {
             string correctSconsSingleThreaded("yes");
             string correctSconsCommandLine("compiler={COMPILER} mode={MODE}");
             string correctPmdAutoInstall("yes");
-            string correctRunCommandLine("echo \"hello\"");
+            string correctRunCommandLine(R"(echo "hello")");
 
             WHEN("We pass the config to the yaml wrapper") {
                 Yaml yaml(file);
@@ -126,23 +126,23 @@ namespace execHelper { namespace yaml { namespace test {
                 Yaml yaml(file);
 
                 THEN("We should not be able to get any value") {
-                    REQUIRE(yaml.getValue({"commands"}).empty() == true);
-                    REQUIRE(yaml.getValue({"commands", "some-command"}).empty() == true);
+                    REQUIRE(yaml.getValue({"commands"}).empty());
+                    REQUIRE(yaml.getValue({"commands", "some-command"}).empty());
                 }
                 THEN("We should not be able to get any value collection") {
-                    REQUIRE(yaml.getValueCollection({"commands"}).empty() == true);
-                    REQUIRE(yaml.getValueCollection({"commands", "some-command"}).empty() == true);
+                    REQUIRE(yaml.getValueCollection({"commands"}).empty());
+                    REQUIRE(yaml.getValueCollection({"commands", "some-command"}).empty());
                 }
                 THEN("We should not be able to get a tree and should give the strong exception guarantee") {
                     string settingsKey("blaat");
                     SettingsNode settings;
                     settings.m_key = settingsKey;
-                    REQUIRE(yaml.getTree({"commands"}, settings) == false);
-                    REQUIRE(yaml.getTree({"commands", "some-command"}, settings) == false);
+                    REQUIRE_FALSE(yaml.getTree({"commands"}, settings));
+                    REQUIRE_FALSE(yaml.getTree({"commands", "some-command"}, settings));
 
                     // Check the strong exception guarantee
                     REQUIRE(settings.m_key == settingsKey);
-                    REQUIRE(settings.m_values.empty() == true);
+                    REQUIRE(settings.m_values.empty());
                 }
             }
         }
@@ -158,23 +158,23 @@ namespace execHelper { namespace yaml { namespace test {
 
                 Yaml yaml(configStream.str());
                 THEN("We should not be able to get any value") {
-                    REQUIRE(yaml.getValue({"commands"}).empty() == true);
-                    REQUIRE(yaml.getValue({"commands", "command1"}).empty() == true);
+                    REQUIRE(yaml.getValue({"commands"}).empty());
+                    REQUIRE(yaml.getValue({"commands", "command1"}).empty());
                 }
                 THEN("We should not be able to get any value collection") {
-                    REQUIRE(yaml.getValueCollection({"commands"}).empty() == true);
-                    REQUIRE(yaml.getValueCollection({"commands", "command1"}).empty() == true);
+                    REQUIRE(yaml.getValueCollection({"commands"}).empty());
+                    REQUIRE(yaml.getValueCollection({"commands", "command1"}).empty());
                 }
                 THEN("We should not be able to get a tree and should give the strong exception guarantee") {
                     string settingsKey("blaat");
                     SettingsNode settings;
                     settings.m_key = settingsKey;
-                    REQUIRE(yaml.getTree({"commands"}, settings) == false);
-                    REQUIRE(yaml.getTree({"commands", "command1"}, settings) == false);
+                    REQUIRE_FALSE(yaml.getTree({"commands"}, settings));
+                    REQUIRE_FALSE(yaml.getTree({"commands", "command1"}, settings));
 
                     // Check the strong exception guarantee
                     REQUIRE(settings.m_key == settingsKey);
-                    REQUIRE(settings.m_values.empty() == true);
+                    REQUIRE(settings.m_values.empty());
                 }
             }
         }
@@ -195,23 +195,23 @@ namespace execHelper { namespace yaml { namespace test {
                 Yaml yaml(yamlConfig);
 
                 THEN("We should not be able to get invalid values") {
-                    REQUIRE(yaml.getValue({"invalid-key"}).empty() == true);
-                    REQUIRE(yaml.getValue({"invalid-key", "invalid-subkey"}).empty() == true);
+                    REQUIRE(yaml.getValue({"invalid-key"}).empty());
+                    REQUIRE(yaml.getValue({"invalid-key", "invalid-subkey"}).empty());
                 }
                 THEN("We should not be able to get invalid values collections") {
-                    REQUIRE(yaml.getValueCollection({"invalid-key"}).empty() == true);
-                    REQUIRE(yaml.getValueCollection({"invalid-key", "invalid-subkey"}).empty() == true);
+                    REQUIRE(yaml.getValueCollection({"invalid-key"}).empty());
+                    REQUIRE(yaml.getValueCollection({"invalid-key", "invalid-subkey"}).empty());
                 }
                 THEN("We should not be able to get invalid trees and the settings node is unaltered") {
                     string settingsKey("some-key");
                     SettingsNode settings;
                     settings.m_key = settingsKey;
 
-                    REQUIRE(yaml.getTree({"invalid-key"}, settings) == false);
-                    REQUIRE(yaml.getTree({"invalid-key", "invalid-subkey"}, settings) == false);
+                    REQUIRE_FALSE(yaml.getTree({"invalid-key"}, settings));
+                    REQUIRE_FALSE(yaml.getTree({"invalid-key", "invalid-subkey"}, settings));
 
                     REQUIRE(settings.m_key == settingsKey);
-                    REQUIRE(settings.m_values.empty() == true);
+                    REQUIRE(settings.m_values.empty());
                 }
             }
         }

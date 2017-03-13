@@ -13,6 +13,7 @@ set(SRCS
         src/patternsHandler.cpp
         src/execHelperOptions.cpp
         src/posixShell.cpp
+        src/argv.cpp
    )
 
 set(LIBRARY_INCLUDES

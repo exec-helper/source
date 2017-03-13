@@ -12,8 +12,9 @@ using execHelper::core::Task;
 using execHelper::plugins::CommandPlugin;
 
 namespace execHelper { namespace commander {
-    Commander::Commander(const Options& options) :
-        m_options(options)
+    Commander::Commander(const Options& options, core::EnvironmentCollection&& env) :
+        m_options(options),
+        m_env(env)
     {
         ;
     }

@@ -1,21 +1,20 @@
-#include <catch.hpp>
-
 #include <vector>
 
-#include "core/task.h"
+#include <catch.hpp>
+
 #include "core/pattern.h"
+#include "core/task.h"
 #include "plugins/pmd.h"
 
 #include "utils/utils.h"
-#include "optionsStub.h"
 #include "executorStub.h"
+#include "optionsStub.h"
 
 using std::vector;
 using std::string;
 
 using execHelper::config::SettingsNode;
 using execHelper::core::Task;
-using execHelper::core::Pattern;
 using execHelper::plugins::Pmd;
 
 using execHelper::test::OptionsStub;
@@ -24,7 +23,6 @@ using execHelper::test::utils::Patterns;
 using execHelper::test::utils::PATTERN1;
 using execHelper::test::utils::PATTERN2;
 using execHelper::test::utils::PATTERNS;
-using execHelper::test::utils::toString;
 using execHelper::core::test::ExecutorStub;
 
 namespace {
@@ -43,7 +41,7 @@ namespace execHelper { namespace plugins { namespace test {
                 bool returnCode = plugin.apply("random-command", task, options);
 
                 THEN("The call should fail") {
-                    REQUIRE(returnCode == false);
+                    REQUIRE_FALSE(returnCode);
                 }
             }
         }
@@ -72,7 +70,7 @@ namespace execHelper { namespace plugins { namespace test {
                     bool returnCode = plugin.apply(command, task, options);
 
                     THEN_CHECK("That the apply succeeds") {
-                        REQUIRE(returnCode == false);
+                        REQUIRE_FALSE(returnCode);
                     }
                 }
             }
@@ -84,7 +82,7 @@ namespace execHelper { namespace plugins { namespace test {
                 THEN("As a specific parameter") {
                     addSettings(rootSettings[pmdConfigKey][command], "exec", "pmd.sh");
                 }
-                REQUIRE(plugin.apply(command, task, options) == false);
+                REQUIRE_FALSE(plugin.apply(command, task, options));
             }
 
             WHEN("We add all mandatory config parameters and apply command ") {
@@ -97,7 +95,7 @@ namespace execHelper { namespace plugins { namespace test {
                     addSettings(rootSettings[pmdConfigKey][command], "exec", "pmd.sh");
                 }
 
-                REQUIRE(plugin.apply(command, task, options) == true);
+                REQUIRE(plugin.apply(command, task, options));
 
                 ExecutorStub::TaskQueue actualTasks;
                 Task actualTask({"pmd.sh", "tool"});
@@ -131,7 +129,7 @@ namespace execHelper { namespace plugins { namespace test {
                     addSettings(rootSettings[pmdConfigKey][command], languageConfigKey, languageValue);
                 }
 
-                REQUIRE(plugin.apply(command, task, options) == true);
+                REQUIRE(plugin.apply(command, task, options));
 
                 ExecutorStub::TaskQueue actualTasks;
                 Task actualTask({"pmd.sh", "cpd", "--language", languageValue});
@@ -147,7 +145,7 @@ namespace execHelper { namespace plugins { namespace test {
                     addSettings(rootSettings[pmdConfigKey], command, languageConfigKey);
                 }
 
-                REQUIRE(plugin.apply(command, task, options) == true);
+                REQUIRE(plugin.apply(command, task, options));
 
                 ExecutorStub::TaskQueue actualTasks;
                 Task actualTask({"pmd.sh", "cpd"});
@@ -185,7 +183,7 @@ namespace execHelper { namespace plugins { namespace test {
                     addSettings(rootSettings[pmdConfigKey], filesConfigKey, filesValue);
                 }
 
-                REQUIRE(plugin.apply(command, task, options) == true);
+                REQUIRE(plugin.apply(command, task, options));
 
                 ExecutorStub::TaskQueue actualTasks;
                 Task actualTask({"pmd.sh", "cpd", "--minimum-tokens", minimumTokensValue});
@@ -207,7 +205,7 @@ namespace execHelper { namespace plugins { namespace test {
                     addSettings(rootSettings[pmdConfigKey], command, filesConfigKey);
                 }
 
-                REQUIRE(plugin.apply(command, task, options) == true);
+                REQUIRE(plugin.apply(command, task, options));
 
                 ExecutorStub::TaskQueue actualTasks;
                 Task actualTask({"pmd.sh", "cpd"});
@@ -241,7 +239,7 @@ namespace execHelper { namespace plugins { namespace test {
                     addSettings(rootSettings[pmdConfigKey][command], "command-line", commandLine);
                 }
 
-                REQUIRE(plugin.apply(command, task, options) == true);
+                REQUIRE(plugin.apply(command, task, options));
 
                 ExecutorStub::TaskQueue actualTasks;
                 Task actualTask({"pmd.sh", "tool1", "arg1", "--arg2"});
@@ -272,7 +270,7 @@ namespace execHelper { namespace plugins { namespace test {
                     addSettings(rootSettings[pmdConfigKey][command], "command-line", commandLine);
                 }
 
-                REQUIRE(plugin.apply(command, task, options) == true);
+                REQUIRE(plugin.apply(command, task, options));
 
                 vector<Task> actualTasks;
                 for(const auto& PATTERN1Values : PATTERN1.getDefaultValues()) {

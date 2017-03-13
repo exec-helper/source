@@ -28,7 +28,7 @@ namespace execHelper { namespace core {
 
                     THEN("It should contain the pattern") {
                         for(const auto& pattern : patterns) {
-                            REQUIRE(handler.contains(pattern.getKey()) == true);
+                            REQUIRE(handler.contains(pattern.getKey()));
                         }
                     }
 
@@ -41,7 +41,7 @@ namespace execHelper { namespace core {
                     THEN("It should not contain other patterns") {
                         const Pattern notAddedPattern("not-added-pattern", {}, 'n', "non-added");
 
-                        REQUIRE(handler.contains(notAddedPattern.getKey()) == false);
+                        REQUIRE_FALSE(handler.contains(notAddedPattern.getKey()));
                     }
                 }
             }

@@ -81,7 +81,7 @@ namespace execHelper { namespace plugins { namespace test {
 
             bool returnCode = plugin.apply(command, task, options);
             THEN_CHECK("It should succeed") {
-                REQUIRE(returnCode == true);
+                REQUIRE(returnCode);
             }
 
             THEN_CHECK("It called the right commands") {
@@ -106,7 +106,7 @@ namespace execHelper { namespace plugins { namespace test {
                 bool return_code = plugin.apply(command, task, options);
 
                 THEN("The call should not succeed") {
-                    REQUIRE(return_code == false);
+                    REQUIRE_FALSE(return_code);
                 }
             }
 
@@ -115,7 +115,7 @@ namespace execHelper { namespace plugins { namespace test {
                 bool return_code = plugin.apply(command, task, options);
 
                 THEN("The call should not succeed") {
-                    REQUIRE(return_code == false);
+                    REQUIRE_FALSE(return_code);
                 }
             }
 
@@ -125,7 +125,7 @@ namespace execHelper { namespace plugins { namespace test {
                 bool return_code = plugin.apply(command, task, options);
 
                 THEN("The call should not succeed") {
-                    REQUIRE(return_code == false);
+                    REQUIRE_FALSE(return_code);
                 }
             }
         }

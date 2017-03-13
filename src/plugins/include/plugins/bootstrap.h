@@ -20,7 +20,7 @@ namespace execHelper {
                 virtual bool apply(const core::Command& command, core::Task& task, const core::Options& options) const noexcept override;
 
             private:
-                static std::string getBootstrapFilename(const core::Command& command, const config::SettingsNode& settings) noexcept;
+                static std::string getBootstrapFilename(const core::Command& command, const config::SettingsNode& rootSettings) noexcept;
         };
     }
 }

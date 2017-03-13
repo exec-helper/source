@@ -14,7 +14,6 @@ using execHelper::config::SettingsNode;
 using execHelper::core::Options;
 using execHelper::core::TaskCollection;
 using execHelper::core::Command;
-using execHelper::core::replacePatterns;
 using execHelper::core::PatternCombinations;
 
 namespace execHelper { namespace plugins {

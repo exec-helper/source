@@ -1,7 +1,5 @@
 #include "memory.h"
 
-using std::make_tuple;
-
 namespace execHelper { namespace plugins {
     Memory::Memories Memory::m_executions;
     bool Memory::m_returnCode = true;

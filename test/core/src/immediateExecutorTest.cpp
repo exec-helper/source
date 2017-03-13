@@ -11,7 +11,7 @@ using execHelper::core::ImmediateExecutor;
 using execHelper::core::Shell;
 
 namespace {
-    ImmediateExecutor::Callback IGNORE_CALLBACK = [](Shell::ShellReturnCode) {};
+    ImmediateExecutor::Callback IGNORE_CALLBACK = [](Shell::ShellReturnCode /* returnCode */) {};
 }
 
 namespace execHelper { namespace core {
@@ -30,9 +30,9 @@ namespace execHelper { namespace core {
                 ImmediateExecutor executor(shell, IGNORE_CALLBACK);
 
                 WHEN("We schedule each task and run the executor") {
-                    REQUIRE(executor.execute(task1) == true);
-                    REQUIRE(executor.execute(task2) == true);
-                    REQUIRE(executor.execute(task3) == true);
+                    REQUIRE(executor.execute(task1));
+                    REQUIRE(executor.execute(task2));
+                    REQUIRE(executor.execute(task3));
 
                     THEN("We should get the same tasks again") {
                         ShellStub::TaskQueue executedTasks = shell.getExecutedTasks();
@@ -57,7 +57,7 @@ namespace execHelper { namespace core {
                     bool returnCode = executor.execute(task1);
 
                     THEN("The call should fail") {
-                        REQUIRE(returnCode == false);
+                        REQUIRE_FALSE(returnCode);
                     }
                     THEN("We should receive the failed return code") {
                         REQUIRE(realReturnCode == actualReturnCode);

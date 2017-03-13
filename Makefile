@@ -20,10 +20,6 @@ init-release:
 app: init-release
 	make -C build/$(COMPILER)/release --jobs $(NB_OF_CORES) exec-helper
 
-clang-tidy:
-	clang-tidy src/*/src/*.cpp
-	clang-tidy test/*/src/*.cpp
- 
 clean: clean-build
 	rm -f *.exec-helper
 

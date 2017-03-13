@@ -1,5 +1,7 @@
 #include "unittest/catch.h"
 
+#include <string>
+
 #include "core/pattern.h"
 #include "plugins/pluginUtils.h"
 #include "plugins/clangStaticAnalyzer.h"
@@ -10,23 +12,16 @@
 #include "executorStub.h"
 #include "optionsStub.h"
 
-using std::vector;
 using std::string;
 
 using execHelper::config::SettingsNode;
-using execHelper::core::ExecutorInterface;
-using execHelper::core::test::ExecutorStub;
 using execHelper::core::Task;
 using execHelper::core::TaskCollection;
-using execHelper::core::Pattern;
 
 using execHelper::test::utils::addSettings;
 using execHelper::test::OptionsStub;
 using execHelper::test::utils::TargetUtil;
 using execHelper::test::utils::CompilerUtil;
-using execHelper::test::utils::getAllPatterns;
-using execHelper::test::utils::getAllPatternKeys;
-using execHelper::test::utils::Patterns;
 using execHelper::test::utils::addPatterns;
 
 namespace {
@@ -92,7 +87,7 @@ namespace execHelper { namespace plugins { namespace test {
 
             bool returnCode = plugin.apply(command, task, options);
             THEN_CHECK("It should succeed") {
-                REQUIRE(returnCode == true);
+                REQUIRE(returnCode);
             }
 
             THEN_CHECK("It called the right commands") {
@@ -120,7 +115,7 @@ namespace execHelper { namespace plugins { namespace test {
                 bool returnCode = plugin.apply(command, task, options);
 
                 THEN("It should fail") {
-                    REQUIRE(returnCode == false);
+                    REQUIRE_FALSE(returnCode);
                 }
             }
 
@@ -129,7 +124,7 @@ namespace execHelper { namespace plugins { namespace test {
 
                 bool returnCode = plugin.apply(command, task, options);
                 THEN("It should fail") {
-                    REQUIRE(returnCode == false);
+                    REQUIRE_FALSE(returnCode);
                 }
             }
 
@@ -138,7 +133,7 @@ namespace execHelper { namespace plugins { namespace test {
 
                 bool returnCode = plugin.apply(command, task, options);
                 THEN("It should fail") {
-                    REQUIRE(returnCode == false);
+                    REQUIRE_FALSE(returnCode);
                 }
             }
         }

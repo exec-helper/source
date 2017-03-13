@@ -1,9 +1,9 @@
 #include "task.h"
 
-#include <utility>
-#include <numeric>
 #include <algorithm>
+#include <numeric>
 #include <ostream>
+#include <utility>
 
 using std::string;
 using std::vector;
@@ -14,27 +14,29 @@ using std::initializer_list;
 using std::ostream;
 
 namespace {
-    inline string implodeVector(const vector<string>& toImplode, string delimiter = string(" ")) {
+    inline string implodeVector(const vector<string>& toImplode, const string& delimiter = string(" ")) {
         string result;
         return accumulate(toImplode.begin(), toImplode.end(), string(),
                 [&delimiter](std::string& a, const std::string& b) {
 					if(a.empty()) {
                         return string(b);
-					} else {
-                        return string(a + delimiter + b);
-                    }
+					}
+                    return string(a + delimiter + b);
 				});
     }
 }
 
 namespace execHelper { namespace core {
 
-    Task::Task() {
+    Task::Task(EnvironmentCollection env) noexcept :
+        m_env(std::move(env))
+    {
         ;
     }
 
-    Task::Task(const initializer_list<string>& subtasks) :
-        m_task(subtasks)
+    Task::Task(const initializer_list<string>& subtasks, EnvironmentCollection env) noexcept :
+        m_task(subtasks),
+        m_env(std::move(env))
     {
         ;
     }
@@ -52,7 +54,7 @@ namespace execHelper { namespace core {
         return true;
     }
 
-    bool Task::append(const string&& taskPart) noexcept {
+    bool Task::append(string&& taskPart) noexcept {
         m_task.push_back(move(taskPart));
         return true;
     }
@@ -63,7 +65,7 @@ namespace execHelper { namespace core {
         return true;
     }
 
-    bool Task::append(const TaskCollection&& taskPart) noexcept {
+    bool Task::append(TaskCollection&& taskPart) noexcept {
         m_task.reserve(m_task.size() + taskPart.size());
         move(taskPart.begin(), taskPart.end(), back_inserter(m_task));
         return true;

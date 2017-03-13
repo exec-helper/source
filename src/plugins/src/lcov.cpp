@@ -1,7 +1,6 @@
 #include "lcov.h"
 
 #include <string>
-#include <vector>
 
 #include "log/log.h"
 #include "config/settingsNode.h"
@@ -12,7 +11,6 @@
 #include "executePlugin.h"
 
 using std::string;
-using std::vector;
 
 using execHelper::config::SettingsNode;
 using execHelper::core::Options;

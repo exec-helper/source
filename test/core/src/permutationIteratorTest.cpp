@@ -15,10 +15,10 @@ using execHelper::core::PermutationIterator;
 namespace {
     class PermuteObjectElement {
         public:
-            typedef string Object1;
-            typedef uint8_t Object2;
-            PermuteObjectElement(const Object1 object1, const Object2 object2) :
-                m_object1(object1),
+            using Object1 = string;
+            using Object2 = uint8_t;
+            PermuteObjectElement(Object1 object1, Object2 object2) :
+                m_object1(std::move(object1)),
                 m_object2(object2)
             {
                 ;
@@ -39,15 +39,15 @@ namespace {
 
     class PermuteObject {
         public:
-            typedef vector<PermuteObjectElement::Object1> Collection1;
-            typedef deque<PermuteObjectElement::Object2> Collection2;
+            using Collection1 = vector<PermuteObjectElement::Object1>;
+            using Collection2 =  deque<PermuteObjectElement::Object2>;
 
-            typedef PermutationIterator<PermuteObjectElement, Collection1, Collection2> iterator;
-            typedef PermutationIterator<const PermuteObjectElement, const Collection1, const Collection2> const_iterator;
+            using iterator = PermutationIterator<PermuteObjectElement, Collection1, Collection2>;
+            using const_iterator = PermutationIterator<const PermuteObjectElement, const Collection1, const Collection2>;
 
-            PermuteObject(const Collection1& collection1, const Collection2& collection2) noexcept :
-                m_collection1(collection1),
-                m_collection2(collection2)
+            PermuteObject(Collection1 collection1, Collection2 collection2) noexcept :
+                m_collection1(std::move(collection1)),
+                m_collection2(std::move(collection2))
             {
                 ;
             }

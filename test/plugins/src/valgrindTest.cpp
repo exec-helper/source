@@ -16,7 +16,6 @@ using std::string;
 
 using execHelper::config::SettingsNode;
 using execHelper::core::Task;
-using execHelper::core::Pattern;
 using execHelper::plugins::Valgrind;
 using execHelper::plugins::Memory;
 using execHelper::plugins::MemoryHandler;
@@ -44,7 +43,7 @@ namespace execHelper { namespace plugins { namespace test {
                 bool returnCode = plugin.apply("random-command", task, options);
 
                 THEN("The call should fail") {
-                    REQUIRE(returnCode == false);
+                    REQUIRE_FALSE(returnCode);
                 }
             }
         }
@@ -69,7 +68,7 @@ namespace execHelper { namespace plugins { namespace test {
                     addSettings(rootSettings[valgrindConfigKey][command], "tool", "memcheck");
                 }
 
-                REQUIRE(plugin.apply(command, task, options) == false);
+                REQUIRE_FALSE(plugin.apply(command, task, options));
             }
 
             WHEN("We add the run-command config parameter") {
@@ -84,7 +83,7 @@ namespace execHelper { namespace plugins { namespace test {
 
                 MemoryHandler memory;
 
-                REQUIRE(plugin.apply(command, task, options) == true);
+                REQUIRE(plugin.apply(command, task, options));
 
                 Task actualTask;
                 actualTask.append("valgrind");
@@ -114,7 +113,7 @@ namespace execHelper { namespace plugins { namespace test {
                 bool returnCode = plugin.apply(command, task, options);
 
                 THEN("It should fail") {
-                    REQUIRE(returnCode == false);
+                    REQUIRE_FALSE(returnCode);
                 }
             }
         }
@@ -145,7 +144,7 @@ namespace execHelper { namespace plugins { namespace test {
                     addSettings(rootSettings[valgrindConfigKey][command], "tool", toolName);
                 }
 
-                REQUIRE(plugin.apply(command, task, options) == true);
+                REQUIRE(plugin.apply(command, task, options));
 
                 Task actualTask;
                 actualTask.append("valgrind");
@@ -164,7 +163,7 @@ namespace execHelper { namespace plugins { namespace test {
                     addSettings(rootSettings[valgrindConfigKey], command, "tool");
                 }
 
-                REQUIRE(plugin.apply(command, task, options) == true);
+                REQUIRE(plugin.apply(command, task, options));
 
                 Task actualTask;
                 actualTask.append("valgrind");
@@ -196,7 +195,7 @@ namespace execHelper { namespace plugins { namespace test {
             WHEN("We call the plugin with a proper tool name") {
                 bool returnCode = plugin.apply(command, task, options);
                 THEN("It should succeed") {
-                    REQUIRE(returnCode == true);
+                    REQUIRE(returnCode);
                 }
                 THEN("We should find the appropriate command") {
                     Task actualTask;
@@ -275,7 +274,7 @@ namespace execHelper { namespace plugins { namespace test {
                     addSettings(rootSettings[valgrindConfigKey][command], "command-line", commandLine);
                 }
 
-                REQUIRE(plugin.apply(command, task, options) == true);
+                REQUIRE(plugin.apply(command, task, options));
 
                 vector<Task> actualTasks;
                 for(const auto& PATTERN1Values : PATTERN1.getDefaultValues()) {
@@ -320,7 +319,7 @@ namespace execHelper { namespace plugins { namespace test {
                 bool returnCode = plugin.apply(command, task, options);
 
                 THEN("It should succeed") {
-                    REQUIRE(returnCode == false);
+                    REQUIRE_FALSE(returnCode);
                 }
                 THEN("The run-command should be called") {
                     const Memory::Memories& memories = memory.getExecutions();

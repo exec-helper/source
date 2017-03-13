@@ -1,7 +1,8 @@
-#include <catch.hpp>
-#include <vector>
 #include <string>
 #include <tuple>
+#include <vector>
+
+#include <catch.hpp>
 
 #include "plugins/memory.h"
 #include "commander/commander.h"
@@ -13,10 +14,8 @@
 
 using std::vector;
 using std::string;
-using std::get;
 
 using execHelper::core::Command;
-using execHelper::core::Task;
 using execHelper::plugins::Memory;
 using execHelper::plugins::MemoryHandler;
 
@@ -42,7 +41,7 @@ namespace execHelper { namespace commander { namespace test {
             Commander commander(options);
 
             WHEN("We apply the configuration and run the commander") {
-                REQUIRE(commander.run() == true);
+                REQUIRE(commander.run());
 
                 THEN("We should get the tasks executed") {
                     const Memory::Memories& memories = memory.getExecutions();
@@ -73,7 +72,7 @@ namespace execHelper { namespace commander { namespace test {
 
             WHEN("We apply the configuration and run the commander") {
                 THEN("It should fail") {
-                    REQUIRE(commander.run() == false);
+                    REQUIRE_FALSE(commander.run());
                 }
             }
         }

@@ -1,4 +1,3 @@
-#include <vector>
 #include <string>
 
 #include <catch.hpp>
@@ -11,14 +10,12 @@
 
 #include "optionsStub.h"
 
-using std::vector;
 using std::string;
 
 using execHelper::config::SettingsNode;
 using execHelper::core::TaskCollection;
 using execHelper::core::PatternCombinations;
 using execHelper::test::utils::addSettings;
-using execHelper::test::utils::createPatternCombination;
 using execHelper::test::OptionsStub;
 
 namespace execHelper { namespace plugins { namespace test {

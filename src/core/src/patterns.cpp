@@ -2,13 +2,15 @@
 
 #include <regex>
 
+#include "log/log.h"
+
 using std::string;
 using std::regex;
 using std::regex_replace;
 
 namespace {
-    const string PATTERN_PREFIX("\\{");
-    const string PATTERN_POSTFIX("\\}");
+    const string PATTERN_PREFIX(R"(\{)");
+    const string PATTERN_POSTFIX(R"(\})");
 }
 
 namespace execHelper { namespace core {

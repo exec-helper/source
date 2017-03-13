@@ -95,7 +95,7 @@ memory-check:
 
 selector:
     analyze:
-        patterns: ANALYZE
+        pattern: ANALYZE
 
 make:
     patterns:
@@ -112,8 +112,9 @@ make:
 
 cppcheck:
     patterns:
+        - MODULE
         - TARGET
-    src-dir: src
+    src-dir: src/{MODULE}
     target-path: "{TARGET}"
     command-line:
         - --std=c++11
@@ -206,9 +207,17 @@ clang-tidy:
                     - "*"
                     - "-google-readability-namespace-comments"
                     - "-llvm-namespace-comment"
+                    - "-cppcoreguidelines-pro-bounds-pointer-arithmetic"
+                    - "-clang-analyzer-alpha.deadcode.UnreachableCode"
+                    - "-clang-analyzer-alpha.core.CastToStruct"
+                    - "-modernize-make-unique"
             test/{MODULE}/src/*.cpp:
                 checks:
                     - "*"
                     - "-google-readability-namespace-comments"
                     - "-llvm-namespace-comment"
                     - "-clang-analyzer-alpha.deadcode.UnreachableCode"
+                    - "-performance-unnecessary-copy-initialization"
+                    - "-modernize-loop-convert"
+        command-line:
+            - "-warnings-as-errors=*"

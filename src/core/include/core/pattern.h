@@ -13,7 +13,7 @@ namespace execHelper {
 
         class Pattern {
             public:
-                Pattern(const PatternKey& patternKey, const PatternValues& defaultValue, char shortOption, const std::string& longOption) noexcept;
+                Pattern(PatternKey patternKey, PatternValues defaultValues, char shortOption, std::string longOption) noexcept;
 
                 bool operator==(const Pattern& other) const noexcept;
                 bool operator!=(const Pattern& other) const noexcept;

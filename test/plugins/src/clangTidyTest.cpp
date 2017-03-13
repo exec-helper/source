@@ -23,14 +23,12 @@ using execHelper::core::TaskCollection;
 using execHelper::test::OptionsStub;
 using execHelper::test::utils::addPatterns;
 using execHelper::test::utils::TargetUtil;
-using execHelper::test::utils::CompilerUtil;
 using execHelper::test::utils::addSettings;
-using execHelper::test::utils::toString;
 using execHelper::core::test::ExecutorStub;
 
 namespace {
     const string PLUGIN_CONFIG_KEY("clang-tidy");
-    const string PLUGIN_COMMAND(PLUGIN_CONFIG_KEY);
+    const string PLUGIN_COMMAND("clang-tidy");
 
     TaskCollection toChecks(const TaskCollection& taskCollection) noexcept {
         if(taskCollection.empty()) {
@@ -170,7 +168,7 @@ namespace execHelper { namespace plugins { namespace test {
 
             bool returnCode = plugin.apply(command, task, options);
             THEN_CHECK("It should succeed") {
-                REQUIRE(returnCode == true);
+                REQUIRE(returnCode);
             }
 
             THEN_CHECK("It called the right commands") {

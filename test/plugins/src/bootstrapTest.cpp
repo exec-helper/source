@@ -11,26 +11,20 @@
 #include "executorStub.h"
 #include "optionsStub.h"
 
-using std::vector;
 using std::string;
 using std::ofstream;
 
 using execHelper::core::Task;
 using execHelper::core::TaskCollection;
 using execHelper::core::CommandCollection;
-using execHelper::core::Pattern;
-using execHelper::core::PatternsHandler;
 
 using execHelper::config::SettingsNode;
-using execHelper::plugins::replacePatternCombinations;
 
 using execHelper::test::OptionsStub;
 using execHelper::core::test::ExecutorStub;
 using execHelper::test::utils::addSettings;
 using execHelper::test::utils::TargetUtil;
-using execHelper::test::utils::TargetUtilNames;
 using execHelper::test::utils::CompilerUtil;
-using execHelper::test::utils::CompilerUtilNames;
 using execHelper::test::utils::Patterns;
 using execHelper::test::utils::addPatterns;
 
@@ -140,7 +134,7 @@ namespace execHelper { namespace plugins { namespace test {
 
             bool returnCode = plugin.apply(command, task, options);
             THEN_CHECK("It should succeed") {
-                REQUIRE(returnCode == true);
+                REQUIRE(returnCode);
             }
 
             THEN_CHECK("It called the right commands") {

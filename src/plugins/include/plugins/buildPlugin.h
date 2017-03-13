@@ -22,7 +22,7 @@ namespace execHelper {
         class BuildPlugin : public Plugin {
             public:
                 static const std::string& getBuildDirKey() noexcept;
-                static bool getMultiThreaded(const core::Command& command, const config::SettingsNode& settings, const core::Options& options) noexcept;
+                static bool getMultiThreaded(const core::Command& command, const config::SettingsNode& rootSettings, const core::Options& options) noexcept;
 
             protected:
                 BuildPlugin() {}

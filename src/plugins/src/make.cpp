@@ -3,12 +3,12 @@
 #include <string>
 
 #include "config/settingsNode.h"
-#include "core/task.h"
 #include "core/patterns.h"
 #include "core/patternsHandler.h"
+#include "core/task.h"
 
-#include "pluginUtils.h"
 #include "configValue.h"
+#include "pluginUtils.h"
 
 using std::string;
 using execHelper::core::Task;

@@ -1,24 +1,20 @@
 #include "unittest/catch.h"
 
 #include <string>
-#include <vector>
 
 #include "core/task.h"
-#include "core/pattern.h"
 #include "plugins/lcov.h"
 #include "plugins/memory.h"
 
 #include "utils/utils.h"
 #include "optionsStub.h"
 
-using std::vector;
 using std::string;
 
 using execHelper::config::SettingsNode;
 using execHelper::core::Command;
 using execHelper::core::Task;
 using execHelper::core::TaskCollection;
-using execHelper::core::Pattern;
 using execHelper::plugins::Lcov;
 using execHelper::plugins::MemoryHandler;
 
@@ -50,7 +46,7 @@ namespace execHelper { namespace plugins { namespace test {
                 bool returnCode = plugin.apply("random-command", task, options);
 
                 THEN("The call should fail") {
-                    REQUIRE(returnCode == false);
+                    REQUIRE_FALSE(returnCode);
                 }
             }
         }
@@ -85,7 +81,7 @@ namespace execHelper { namespace plugins { namespace test {
                     bool returnCode = plugin.apply(command, task, options);
 
                     THEN_CHECK("It should succeed") {
-                        REQUIRE(returnCode == true);
+                        REQUIRE(returnCode);
                     }
 
                     THEN_CHECK("It called the right commands") {
@@ -125,7 +121,7 @@ namespace execHelper { namespace plugins { namespace test {
                     bool returnCode = plugin.apply(command, task, options);
 
                     THEN_CHECK("It should succeed") {
-                        REQUIRE(returnCode == false);
+                        REQUIRE_FALSE(returnCode);
                     }
                 }
             }
@@ -174,7 +170,7 @@ namespace execHelper { namespace plugins { namespace test {
                     bool returnCode = plugin.apply(command, task, options);
 
                     THEN_CHECK("It should succeed") {
-                        REQUIRE(returnCode == true);
+                        REQUIRE(returnCode);
                     }
 
                     THEN_CHECK("It called the right commands") {
@@ -209,19 +205,19 @@ namespace execHelper { namespace plugins { namespace test {
                 AND_WHEN("We add it as a generic setting") {
                     addSettings(rootSettings[lcovConfigKey], "excludes", {"exclude1"});
                     expectedTasks.emplace_back(Task({"lcov", "--base-directory", ".", "--directory", ".", "--capture", "--output", "lcov-plugin.info"}));
-                    expectedTasks.emplace_back(Task({"lcov", "--remove", "lcov-plugin.info", "\"exclude1\"", "--output-file", "lcov-plugin.info"}));
+                    expectedTasks.emplace_back(Task({"lcov", "--remove", "lcov-plugin.info", R"("exclude1")", "--output-file", "lcov-plugin.info"}));
                 }
 
                 AND_WHEN("We add it as a specific setting") {
                     addSettings(rootSettings[lcovConfigKey][command], "excludes", {"exclude1"});
                     expectedTasks.emplace_back(Task({"lcov", "--base-directory", ".", "--directory", ".", "--capture", "--output", "lcov-plugin.info"}));
-                    expectedTasks.emplace_back(Task({"lcov", "--remove", "lcov-plugin.info", "\"exclude1\"", "--output-file", "lcov-plugin.info"}));
+                    expectedTasks.emplace_back(Task({"lcov", "--remove", "lcov-plugin.info", R"("exclude1")", "--output-file", "lcov-plugin.info"}));
                 }
 
                 AND_WHEN("We use multiple excludes") {
                     addSettings(rootSettings[lcovConfigKey], "excludes", {"exclude1", "exclude2", "exclude3"});
                     expectedTasks.emplace_back(Task({"lcov", "--base-directory", ".", "--directory", ".", "--capture", "--output", "lcov-plugin.info"}));
-                    expectedTasks.emplace_back(Task({"lcov", "--remove", "lcov-plugin.info", "\"exclude1\"", "\"exclude2\"", "\"exclude3\"", "--output-file", "lcov-plugin.info"}));
+                    expectedTasks.emplace_back(Task({"lcov", "--remove", "lcov-plugin.info", R"("exclude1")", R"("exclude2")", R"("exclude3")", "--output-file", "lcov-plugin.info"}));
                 }
 
                 AND_WHEN("We use no excludes") {
@@ -233,7 +229,7 @@ namespace execHelper { namespace plugins { namespace test {
                     bool returnCode = plugin.apply(command, task, options);
 
                     THEN_CHECK("It should succeed") {
-                        REQUIRE(returnCode == true);
+                        REQUIRE(returnCode);
                     }
 
                     THEN_CHECK("It called the right commands") {
@@ -288,7 +284,7 @@ namespace execHelper { namespace plugins { namespace test {
                     bool returnCode = plugin.apply(command, task, options);
 
                     THEN_CHECK("It should succeed") {
-                        REQUIRE(returnCode == true);
+                        REQUIRE(returnCode);
                     }
 
                     THEN_CHECK("It called the right commands") {
@@ -355,7 +351,7 @@ namespace execHelper { namespace plugins { namespace test {
 
             COMBINATION {
                 addSettings(settings, "excludes", {"exclude1"});
-                expectedTasks.emplace_back(Task({"lcov", "--remove", infoFile, "\"exclude1\"", "--output-file", infoFile}));
+                expectedTasks.emplace_back(Task({"lcov", "--remove", infoFile, R"("exclude1")", "--output-file", infoFile}));
             }
 
             COMBINATION {
@@ -384,7 +380,7 @@ namespace execHelper { namespace plugins { namespace test {
             bool returnCode = plugin.apply(command, task, options);
 
             THEN_CHECK("It should succeed") {
-                REQUIRE(returnCode == true);
+                REQUIRE(returnCode);
             }
 
             THEN_CHECK("It called the right commands") {

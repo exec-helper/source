@@ -25,8 +25,8 @@ namespace execHelper {
         const std::string& getPatternsKey() noexcept;
         const std::string& getCommandLineKey() noexcept;
         boost::optional<const config::SettingsNode&> getContainingSettings(const std::string& key, const config::SettingsNode& rootSettings, const std::vector<std::string>& configKeys) noexcept;
-        core::TaskCollection getCommandLine(const core::Command& command, const config::SettingsNode& settings) noexcept;
-        core::TaskCollection getCommandLine(const core::Command& command, const config::SettingsNode& settings, const core::PatternCombinations& patternCombinations) noexcept;
+        core::TaskCollection getCommandLine(const core::Command& command, const config::SettingsNode& rootSettings) noexcept;
+        core::TaskCollection getCommandLine(const core::Command& command, const config::SettingsNode& rootSettings, const core::PatternCombinations& patternCombinations) noexcept;
 
         void replacePatternCombinations(core::TaskCollection& commandArguments, const core::PatternCombinations& patternCombinations) noexcept;
         core::Task replacePatternCombinations(const core::Task& task, const core::PatternCombinations& patternCombinations) noexcept;

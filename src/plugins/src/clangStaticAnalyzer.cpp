@@ -1,26 +1,23 @@
 #include "clangStaticAnalyzer.h"
 
 #include <string>
-#include <vector>
 
 #include "log/log.h"
 #include "config/settingsNode.h"
-#include "core/task.h"
-#include "core/patterns.h"
 #include "core/execHelperOptions.h"
+#include "core/patterns.h"
+#include "core/task.h"
 
 #include "configValue.h"
 #include "executePlugin.h"
 
 using std::string;
-using std::vector;
 
 using execHelper::core::Task;
 using execHelper::core::Options;
 using execHelper::core::TaskCollection;
 using execHelper::core::Command;
 using execHelper::config::SettingsNode;
-using execHelper::plugins::getContainingSettings;
 
 namespace {
     const string clangStaticAnalyzerCommand("scan-build");

@@ -5,26 +5,25 @@
 #include "core/options.h"
 #include "core/task.h"
 
-#include "plugin.h"
-#include "commandLineCommand.h"
-#include "scons.h"
-#include "make.h"
 #include "bootstrap.h"
-#include "cppcheck.h"
 #include "clangStaticAnalyzer.h"
-#include "selector.h"
-#include "memory.h"
-#include "valgrind.h"
-#include "pmd.h"
-#include "lcov.h"
 #include "clangTidy.h"
+#include "cppcheck.h"
+#include "commandLineCommand.h"
+#include "lcov.h"
+#include "make.h"
+#include "memory.h"
+#include "plugin.h"
+#include "pmd.h"
+#include "scons.h"
+#include "selector.h"
+#include "valgrind.h"
 
 using std::string;
 using std::vector;
 using std::unique_ptr;
 using std::forward;
 
-using execHelper::config::SettingsNode;
 using execHelper::core::Command;
 using execHelper::core::Task;
 using execHelper::core::Options;
@@ -34,13 +33,13 @@ namespace {
     template<typename T, typename... Args>
     std::unique_ptr<T> make_unique(Args&&... args)
     {
-            return unique_ptr<T>(new T(forward<Args>(args)...));
+        return unique_ptr<T>(new T(forward<Args>(args)...));
     }
 }
 
 namespace execHelper { namespace plugins {
-    ExecutePlugin::ExecutePlugin(const vector<string>& commands) noexcept :
-        m_commands(commands)
+    ExecutePlugin::ExecutePlugin(vector<string> commands) noexcept :
+        m_commands(std::move(commands))
     {
         ;
     }
@@ -71,27 +70,38 @@ namespace execHelper { namespace plugins {
     unique_ptr<Plugin> ExecutePlugin::getPlugin(const string& pluginName) noexcept {
         if(pluginName == "command-line-command") {
             return make_unique<CommandLineCommand>();
-        } else if(pluginName == "scons") {
+        }
+        if(pluginName == "scons") {
             return make_unique<Scons>(); 
-        } else if(pluginName == "make") {
+        }
+        if(pluginName == "make") {
             return make_unique<Make>(); 
-        } else if(pluginName == "bootstrap") {
+        }
+        if(pluginName == "bootstrap") {
             return make_unique<Bootstrap>(); 
-        } else if(pluginName == "cppcheck") {
+        }
+        if(pluginName == "cppcheck") {
             return make_unique<Cppcheck>();
-        } else if(pluginName == "clang-static-analyzer") {
+        }
+        if(pluginName == "clang-static-analyzer") {
             return make_unique<ClangStaticAnalyzer>();
-        } else if(pluginName == "selector") {
+        }
+        if(pluginName == "selector") {
             return make_unique<Selector>();
-        } else if(pluginName == "memory") {
+        }
+        if(pluginName == "memory") {
             return make_unique<Memory>();
-        } else if(pluginName == "valgrind") {
+        }
+        if(pluginName == "valgrind") {
             return make_unique<Valgrind>();
-        } else if(pluginName == "pmd") {
+        }
+        if(pluginName == "pmd") {
             return make_unique<Pmd>();
-        } else if(pluginName == "lcov") {
+        }
+        if(pluginName == "lcov") {
             return make_unique<Lcov>();
-        } else if(pluginName == "clang-tidy") {
+        }
+        if(pluginName == "clang-tidy") {
             return make_unique<ClangTidy>();
         }
         return unique_ptr<Plugin>();

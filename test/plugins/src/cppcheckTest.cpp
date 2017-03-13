@@ -1,4 +1,3 @@
-#include <vector>
 #include <string>
 #include <fstream>
 
@@ -13,7 +12,6 @@
 #include "executorStub.h"
 #include "optionsStub.h"
 
-using std::vector;
 using std::string;
 using std::ofstream;
 
@@ -22,7 +20,6 @@ using execHelper::core::test::ExecutorStub;
 using execHelper::core::Task;
 using execHelper::core::TaskCollection;
 using execHelper::core::CommandCollection;
-using execHelper::core::Pattern;
 
 using execHelper::test::utils::addSettings;
 using execHelper::test::OptionsStub;
@@ -33,7 +30,7 @@ using execHelper::test::utils::CompilerUtil;
 
 namespace {
     const string PLUGIN_CONFIG_KEY("cppcheck");
-    const string PLUGIN_COMMAND(PLUGIN_CONFIG_KEY);
+    const string PLUGIN_COMMAND("cppcheck");
 }
 
 namespace execHelper { namespace plugins { namespace test {
@@ -117,7 +114,7 @@ namespace execHelper { namespace plugins { namespace test {
 
             bool returnCode = plugin.apply(command, task, options);
             THEN_CHECK("It should succeed") {
-                REQUIRE(returnCode == true);
+                REQUIRE(returnCode);
             }
 
             THEN_CHECK("It called the right commands") {

@@ -30,9 +30,9 @@ namespace execHelper { namespace core {
             }
 
             GIVEN("Empty pattern properties") {
-                const string key("");
+                const string key;
                 const PatternValues values({});
-                const string longOption("");
+                const string longOption;
                 const char shortOption = '\0';
 
                 WHEN("We create the pattern") {

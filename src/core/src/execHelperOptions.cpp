@@ -1,10 +1,10 @@
 #include "execHelperOptions.h"
 
-#include <iostream>
+#include <cassert>
 #include <iomanip>
+#include <iostream>
 #include <sstream>
 #include <string>
-#include <assert.h>
 
 #include "log/log.h"
 #include "yaml/yaml.h"
@@ -19,8 +19,6 @@ using std::string;
 using std::stringstream;
 using std::setw;
 using std::vector;
-using std::shared_ptr;
-using std::make_shared;
 
 using boost::program_options::variables_map;
 
@@ -36,7 +34,7 @@ namespace execHelper { namespace core {
         m_verbose(false),
         m_dryRun(false),
         m_singleThreaded(false),
-        m_executor(0)
+        m_executor(nullptr)
     {
         ;
     }
@@ -84,7 +82,7 @@ namespace execHelper { namespace core {
 
     string ExecHelperOptions::getSettingsFile(int argc, const char* const * argv) const noexcept {
         variables_map optionsMap = m_optionsDescriptions.getOptionsMap(argc, argv, true);
-        if(optionsMap.count("settings-file")) {
+        if(optionsMap.count("settings-file") > 0) {
             return optionsMap["settings-file"].as<string>();
         }
         return ".exec-helper";
@@ -92,19 +90,19 @@ namespace execHelper { namespace core {
 
     bool ExecHelperOptions::parse(int argc, const char* const * argv) {
         m_optionsMap = m_optionsDescriptions.getOptionsMap(argc, argv);
-        if(m_optionsMap.count("verbose")) {
+        if(m_optionsMap.count("verbose") > 0) {
             m_verbose = true;
         }
 
-        if(m_optionsMap.count("dry-run")) {
+        if(m_optionsMap.count("dry-run") > 0) {
             m_dryRun = true;
         }
 
-        if(m_optionsMap.count("single-threaded")) {
+        if(m_optionsMap.count("single-threaded") > 0) {
             m_singleThreaded = true;
         }
 
-        if(m_optionsMap.count("command")) {
+        if(m_optionsMap.count("command") > 0) {
             m_commands.clear();
             m_commands = m_optionsMap["command"].as<CommandCollection>();
         }
@@ -135,7 +133,7 @@ namespace execHelper { namespace core {
                     shortOptionString = pattern[shortOptionKey].m_values.back().m_key;
                 }
                 char shortOption = '\0';
-                if(shortOptionString.size() > 0) {
+                if(! shortOptionString.empty()) {
                     shortOption = shortOptionString.at(0);
                 }
 
@@ -192,7 +190,7 @@ namespace execHelper { namespace core {
         for(const auto& command : m_settings["commands"].m_values) {
             stringstream commandStream;
             commandStream << "  " << std::left << setw(20) << command.m_key;
-            if(command.m_values.size() > 0) {
+            if(! command.m_values.empty()) {
                 // Add an extra whitespace in case the key is longer than the minimum width that was set
                 commandStream << " " << command.toStringCollection().back();
             }
@@ -213,7 +211,7 @@ namespace execHelper { namespace core {
     }
 
     PatternValues ExecHelperOptions::getValues(const Pattern& pattern) const noexcept {
-        string longOption = pattern.getLongOption();
+        const string& longOption = pattern.getLongOption();
         if(contains(longOption)) {
             return getLongOption(longOption);
         }

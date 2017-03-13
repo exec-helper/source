@@ -1,26 +1,23 @@
 #include "scons.h"
 
-#include <string>
 #include <map>
+#include <string>
 
 #include "config/settingsNode.h"
 #include "core/patterns.h"
 #include "core/patternsHandler.h"
 
-#include "pluginUtils.h"
 #include "configValue.h"
+#include "pluginUtils.h"
 
 using std::string;
-using std::map;
 
 using execHelper::config::SettingsNode;
 using execHelper::core::Command;
 using execHelper::core::Task;
 using execHelper::core::Options;
 using execHelper::core::TaskCollection;
-using execHelper::core::Pattern;
 using execHelper::core::PatternKeys;
-using execHelper::core::PatternsHandler;
 
 namespace {
     const string SCONS_COMMAND("scons");
