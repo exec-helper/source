@@ -14,6 +14,7 @@
 #include "optionsStub.h"
 
 using std::string;
+using std::vector;
 
 using execHelper::config::SettingsNode;
 using execHelper::core::Task;
@@ -48,44 +49,46 @@ namespace execHelper { namespace plugins { namespace test {
             addSettings(rootSettings[PLUGIN_CONFIG_KEY], "patterns", targetUtil.getKeys());
             addSettings(rootSettings[PLUGIN_CONFIG_KEY], "patterns", compilerUtil.getKeys());
 
-            TaskCollection commandLine({"command1"});
-            addSettings(rootSettings[PLUGIN_CONFIG_KEY], "command-line", commandLine);
+            vector<TaskCollection> commandLines({{"command1", "{" + compilerUtil.compiler.getKey() + "}/{" + compilerUtil.mode.getKey() + "}", "{" + targetUtil.target.getKey() + "}/{" + targetUtil.runTarget.getKey() + "}"}});
 
             // Add the settings of an other command to make sure we take the expected ones
             const string otherCommandKey("other-command");
             addSettings(rootSettings, PLUGIN_CONFIG_KEY, otherCommandKey);
 
             CommandLineCommand plugin;
-            Task task;
             Task expectedTask;
 
             SettingsNode* settings = &(rootSettings[PLUGIN_CONFIG_KEY]);
 
             COMBINATIONS("Toggle between general and specific command settings") {
                 settings = &rootSettings[PLUGIN_CONFIG_KEY][command];
+            }
+            addSettings(*settings, "command-line", commandLines.front());
 
-                commandLine.clear();
-                commandLine.emplace_back("command2");
-                addSettings(*settings, "command-line", commandLine);
+            COMBINATIONS("Set a multiple command lines") {
+                (*settings)["command-line"].m_values.clear();
+
+                addSettings((*settings)["command-line"], "command1", commandLines[0]);
+                commandLines.emplace_back(TaskCollection({"command2", "{" + targetUtil.target.getKey() + "}/{" + targetUtil.runTarget.getKey() + "}", "{" + compilerUtil.compiler.getKey() + "}/{" + compilerUtil.mode.getKey() + "}"}));
+                addSettings((*settings)["command-line"], "command2", commandLines[1]);
             }
 
-            COMBINATIONS("Set the command line") {
-                TaskCollection commandLineValue({"{" + compilerUtil.compiler.getKey() + "}/{" + compilerUtil.mode.getKey() + "}", "{" + targetUtil.target.getKey() + "}/{" + targetUtil.runTarget.getKey() + "}"});
-                addSettings(*settings, "command-line", commandLineValue);
-                commandLine.insert(commandLine.end(), commandLineValue.begin(), commandLineValue.end());
+            ExecutorStub::TaskQueue expectedTasks;
+            for(const auto& commandLine : commandLines) {
+                Task newTask = expectedTask;
+                newTask.append(commandLine);
+                expectedTasks.emplace_back(newTask);
             }
+            ExecutorStub::TaskQueue replacedExpectedTasks = getExpectedTasks(expectedTasks, compilerUtil, targetUtil);
 
-            expectedTask.append(commandLine);
-
-            ExecutorStub::TaskQueue expectedTasks = getExpectedTasks(expectedTask, compilerUtil, targetUtil);
-
+            Task task;
             bool returnCode = plugin.apply(command, task, options);
             THEN_CHECK("It should succeed") {
                 REQUIRE(returnCode);
             }
 
             THEN_CHECK("It called the right commands") {
-                REQUIRE(expectedTasks == options.m_executor.getExecutedTasks());
+                REQUIRE(replacedExpectedTasks == options.m_executor.getExecutedTasks());
             }
         }
     }

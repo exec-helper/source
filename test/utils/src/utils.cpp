@@ -275,6 +275,20 @@ namespace execHelper { namespace test { namespace utils {
         return expectedTasks;
     }
 
+    ExecutorStub::TaskQueue getExpectedTasks(const core::test::ExecutorStub::TaskQueue& expectedTask, const CompilerUtil& compilerUtil, const TargetUtil& targetUtil) noexcept {
+        ExecutorStub::TaskQueue expectedTasks;
+        for(const auto& compiler : compilerUtil.makePatternPermutator()) {
+            for(const auto& target : targetUtil.makePatternPermutator()) {
+                for(auto task : expectedTask) {
+                    task = replacePatternCombinations(task, compiler);
+                    task = replacePatternCombinations(task, target);
+                    expectedTasks.emplace_back(task);
+                }
+            }
+        }
+        return expectedTasks;
+    }
+
     string toString(const SettingsNode& settings, unsigned int nbOfTabs) noexcept {
         string prefix; 
         for(unsigned int i = 0; i < nbOfTabs; ++i) {

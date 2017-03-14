@@ -116,6 +116,7 @@ namespace execHelper {
 
             core::test::ExecutorStub::TaskQueue getExpectedTasks(const core::Task& expectedTask, const TargetUtil& targetUtil) noexcept;
             core::test::ExecutorStub::TaskQueue getExpectedTasks(const core::Task& expectedTask, const CompilerUtil& compilerUtil, const TargetUtil& targetUtil) noexcept;
+            core::test::ExecutorStub::TaskQueue getExpectedTasks(const core::test::ExecutorStub::TaskQueue& expectedTask, const CompilerUtil& compilerUtil, const TargetUtil& targetUtil) noexcept;
 
             std::string toString(const config::SettingsNode& settings, unsigned int nbOfTabs = 0) noexcept;
         }
