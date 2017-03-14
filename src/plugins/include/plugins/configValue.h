@@ -71,6 +71,38 @@ namespace execHelper {
                     return defaultValue;
                 }
         };
+
+        template<>
+        class ConfigValue<const config::SettingsNode&> {
+            public:
+                typedef std::initializer_list<std::vector<std::string>> OrderedConfigKeys;
+
+                static boost::optional<const config::SettingsNode&> getSetting(const std::string& key, const config::SettingsNode& rootSettings, const OrderedConfigKeys& orderedConfigKeys) noexcept {
+                    for(auto& configKeys : orderedConfigKeys) {
+                        boost::optional<const config::SettingsNode&> settings = getContainingSettings(key, rootSettings, configKeys);
+                        if(settings != boost::none) {
+                            return settings;
+                        }
+                    }
+                    return boost::none;
+                }
+
+                static boost::optional<const config::SettingsNode&> getSetting(const std::string& key, const config::SettingsNode& rootSettings, const core::Command& command) noexcept {
+                    return getSetting(key, rootSettings, {{command}, {}});
+                }
+
+                static const config::SettingsNode& get(const std::string& configKey, const config::SettingsNode& defaultValue, const core::Command& command, const config::SettingsNode& rootSettings) noexcept {
+                    return get(configKey, defaultValue, rootSettings, {{command}, {}});
+                }
+
+                static const config::SettingsNode& get(const std::string& configKey, const config::SettingsNode& defaultValue, const config::SettingsNode& rootSettings, const OrderedConfigKeys& orderedConfigKeys) noexcept {
+                    auto configValue = getSetting(configKey, rootSettings, orderedConfigKeys);
+                    if(configValue != boost::none) {
+                        return configValue.get();
+                    }
+                    return defaultValue;
+                }
+        };
     }
 }
 
