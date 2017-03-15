@@ -26,6 +26,8 @@ using execHelper::test::utils::TargetUtil;
 using execHelper::test::utils::addSettings;
 using execHelper::core::test::ExecutorStub;
 
+using execHelper::test::utils::toString;
+
 namespace {
     const string PLUGIN_CONFIG_KEY("clang-tidy");
     const string PLUGIN_COMMAND("clang-tidy");
@@ -35,6 +37,18 @@ namespace {
             return TaskCollection();
         }
         string result="-checks=";
+        for(size_t i = 0; i < taskCollection.size() - 1; ++i) {
+            result += taskCollection[i] + ",";
+        }
+        result += taskCollection.back();
+        return TaskCollection({result});
+    }
+
+    TaskCollection toWarningAsError(const TaskCollection& taskCollection) noexcept {
+        if(taskCollection.empty()) {
+            return TaskCollection();
+        }
+        string result="-warning-as-error=";
         for(size_t i = 0; i < taskCollection.size() - 1; ++i) {
             result += taskCollection[i] + ",";
         }
@@ -77,6 +91,8 @@ namespace execHelper { namespace plugins { namespace test {
             TaskCollection sources;
             TaskCollection checks;
             map<string, TaskCollection> sourceSpecificChecks;
+            TaskCollection warningAsError;
+            map<string, TaskCollection> sourceSpecificWarningAsError;
 
             SettingsNode* settings = &(rootSettings[PLUGIN_CONFIG_KEY]);
 
@@ -147,6 +163,60 @@ namespace execHelper { namespace plugins { namespace test {
                 }
             }
 
+            COMBINATIONS("Add warning as error") {
+                TaskCollection warningAsErrorValue = {"warningAsError1", "warningAsError2", "warningAsError3"};
+                addSettings(rootSettings[PLUGIN_CONFIG_KEY], "warning-as-error", warningAsErrorValue);
+                addSettings(rootSettings[otherCommandKey], "warning-as-error", {"warningAsError4"});
+                warningAsError.emplace_back("-warning-as-error=warningAsError1,warningAsError2,warningAsError3");
+            }
+
+            COMBINATIONS("Add warning as error to source") {
+                if(settings->contains("sources")) {
+                    if((*settings)["sources"].contains("source2")) {
+                        const map<string, TaskCollection> warningAsErrorValues = {
+                            {sourceKey1, {"warningAsError1", "warningAsError2-{" + targetUtil.target.getKey() + "}"}}, 
+                            {sourceKey2, {"warningAsError3", "warningAsError4-{" + targetUtil.runTarget.getKey() + "}"}}, 
+                            {sourceKey3, {"warningAsError5", "warningAsError6-{" + targetUtil.target.getKey() + "}"}}
+                        };
+
+                        addSettings((*settings)["sources"][sourceKey1], "warning-as-error", warningAsErrorValues.at(sourceKey1));
+                        addSettings((*settings)["sources"][sourceKey2], "warning-as-error", warningAsErrorValues.at(sourceKey2));
+                        addSettings((*settings)["sources"][sourceKey3], "warning-as-error", warningAsErrorValues.at(sourceKey3));
+                        addSettings(rootSettings[PLUGIN_CONFIG_KEY], "warning-as-error", {"warning-as-error"});
+                        addSettings(rootSettings[PLUGIN_CONFIG_KEY][otherCommandKey], "warning-as-error", {"warning-as-error"});
+
+                        sourceSpecificWarningAsError[sourceKey1] = toWarningAsError(warningAsErrorValues.at(sourceKey1));
+                        sourceSpecificWarningAsError[sourceKey2] = toWarningAsError(warningAsErrorValues.at(sourceKey2));
+                        sourceSpecificWarningAsError[sourceKey3] = toWarningAsError(warningAsErrorValues.at(sourceKey3));
+                    }
+                }
+            }
+
+            COMBINATIONS("Add all checks as warning as error") {
+                (*settings)[PLUGIN_CONFIG_KEY]["warning-as-error"].m_values.clear();
+                addSettings((*settings)[PLUGIN_CONFIG_KEY], "warning-as-error", "all");
+                addSettings(rootSettings[otherCommandKey], "warning-as-error", {"warningAsError4"});
+
+                static const string toReplace("-checks=");
+                if(!sourceSpecificChecks.empty()) {
+                    sourceSpecificWarningAsError = sourceSpecificChecks;
+                    for(auto& entry : sourceSpecificWarningAsError) {
+                        for(auto& parameter : entry.second) {
+                            size_t pos = parameter.find(toReplace);
+                            parameter.replace(pos, toReplace.size(), "-warning-as-error=");
+                        }
+                    }
+                } else {
+                    warningAsError = checks;
+                    for(auto& parameter : warningAsError) {
+                        size_t pos = parameter.find(toReplace);
+                        parameter.replace(pos, toReplace.size(), "-warning-as-error=");
+                    }
+                }
+            }
+
+            std::cout << toString(rootSettings) << std::endl;
+
             ExecutorStub::TaskQueue expectedTasks;
             for(const auto& source : sources) {
                 Task sourceTask = expectedTask;
@@ -154,6 +224,11 @@ namespace execHelper { namespace plugins { namespace test {
                     sourceTask.append(sourceSpecificChecks[source]);
                 } else {
                     sourceTask.append(checks);
+                }
+                if(sourceSpecificWarningAsError.count(source) > 0) {
+                    sourceTask.append(sourceSpecificWarningAsError[source]);
+                } else {
+                    sourceTask.append(warningAsError);
                 }
 
                 if(sourceSpecificCommandLine.count(source) > 0) {
@@ -166,13 +241,15 @@ namespace execHelper { namespace plugins { namespace test {
                 expectedTasks.insert(expectedTasks.end(), sourceTasks.begin(), sourceTasks.end());
             }
 
-            bool returnCode = plugin.apply(command, task, options);
-            THEN_CHECK("It should succeed") {
-                REQUIRE(returnCode);
-            }
+            if(!sources.empty()) {
+                bool returnCode = plugin.apply(command, task, options);
+                THEN_CHECK("It should succeed") {
+                    REQUIRE(returnCode);
+                }
 
-            THEN_CHECK("It called the right commands") {
-                REQUIRE(expectedTasks == options.m_executor.getExecutedTasks());
+                THEN_CHECK("It called the right commands") {
+                    REQUIRE(expectedTasks == options.m_executor.getExecutedTasks());
+                }
             }
         }
     }

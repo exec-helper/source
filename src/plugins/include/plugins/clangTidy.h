@@ -14,6 +14,8 @@ namespace execHelper {
 
             private:
                 static std::string getChecks(const core::TaskCollection& checksCollection) noexcept;
+                static std::string getWarningAsError(const core::TaskCollection& warningAsErrorCollection, const core::TaskCollection& checksCollection) noexcept;
+                static std::string listChecks(const core::TaskCollection& checks) noexcept;
         };
     }
 }

@@ -49,6 +49,14 @@ namespace execHelper { namespace plugins {
                 sourceTask.append(getChecks(checksCollection));
             }
 
+            TaskCollection warningAsErrorCollection = ConfigValue<TaskCollection>::get("warning-as-error", {}, rootSettings, configKeys);
+            if(!warningAsErrorCollection.empty()) {
+                string warningAsError = getWarningAsError(warningAsErrorCollection, checksCollection);
+                if(!warningAsError.empty()) {
+                    sourceTask.append(warningAsError);
+                }
+            }
+
             TaskCollection commandLine = ConfigValue<TaskCollection>::get("command-line", {}, rootSettings, configKeys);
             sourceTask.append(commandLine);
             sourceTask.append(source);
@@ -66,10 +74,36 @@ namespace execHelper { namespace plugins {
             return "";
         }
         string result("-checks=");
-        for(size_t i = 0; i < checksCollection.size() - 1; ++i) {
-            result += checksCollection[i] + ",";
+        result += listChecks(checksCollection);
+        return result;
+    }
+
+    string ClangTidy::getWarningAsError(const TaskCollection& warningAsErrorCollection, const TaskCollection& checksCollection) noexcept {
+        // Check if we are in the special case where we inherit the values from checksCollection
+        string result("-warning-as-error=");
+        if(warningAsErrorCollection.size() == 1U && warningAsErrorCollection.front() == "all") {
+            if(checksCollection.empty()) {
+                return "";
+            }
+            result += listChecks(checksCollection);
+        } else {
+            if(warningAsErrorCollection.empty()) {
+                return "";
+            }
+            result += listChecks(warningAsErrorCollection);
         }
-        result += checksCollection.back();
+        return result;
+    }
+
+    string ClangTidy::listChecks(const TaskCollection& checks) noexcept {
+        string result;
+        if(checks.size() == 0) {
+            return result;
+        }
+        for(size_t i = 0; i < checks.size() - 1; ++i) {
+            result += checks[i] + ",";
+        }
+        result += checks.back();
         return result;
     }
 } }
