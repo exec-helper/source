@@ -149,7 +149,6 @@ clang-tidy-rest:
         - pacman -S --needed --noconfirm cppcheck gcc cmake make clang-tools-extra
         - build/g++/release/bin/exec-helper setup init -c g++ -m release
         - make -C build/g++/release Catch
-        - make -C build/g++/release Yaml-cpp
         - build/g++/release/bin/exec-helper analyze --analyze clang-tidy --module yaml commander config
 
 clang-static-analyzer:
