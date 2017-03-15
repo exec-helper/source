@@ -127,7 +127,6 @@ clang-static-analyzer:
         - init
         - build
     clean-command: clean
-    compiler: envcc
 
 command-line-command:
     setup:
