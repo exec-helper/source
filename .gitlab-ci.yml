@@ -128,6 +128,7 @@ clang-tidy-core:
     script:
         - pacman -S --needed --noconfirm cppcheck gcc cmake make clang-tools-extra
         - build/g++/release/bin/exec-helper setup init -c g++ -m release
+        - make -C build/g++/release Catch
         - build/g++/release/bin/exec-helper analyze --analyze clang-tidy --module core
 
 clang-tidy-plugin:
@@ -137,6 +138,7 @@ clang-tidy-plugin:
     script:
         - pacman -S --needed --noconfirm cppcheck gcc cmake make clang-tools-extra
         - build/g++/release/bin/exec-helper setup init -c g++ -m release
+        - make -C build/g++/release Catch
         - build/g++/release/bin/exec-helper analyze --analyze clang-tidy --module plugins
 
 clang-tidy-rest:
@@ -146,6 +148,8 @@ clang-tidy-rest:
     script:
         - pacman -S --needed --noconfirm cppcheck gcc cmake make clang-tools-extra
         - build/g++/release/bin/exec-helper setup init -c g++ -m release
+        - make -C build/g++/release Catch
+        - make -C build/g++/release Yaml-cpp
         - build/g++/release/bin/exec-helper analyze --analyze clang-tidy --module yaml commander config
 
 clang-static-analyzer:
