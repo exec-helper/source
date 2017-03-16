@@ -2,16 +2,18 @@
 
 #include <algorithm>
 #include <numeric>
+#include <iostream>
 #include <ostream>
 #include <utility>
 
+using std::accumulate;
+using std::back_inserter;
+using std::endl;
+using std::initializer_list;
+using std::move;
+using std::ostream;
 using std::string;
 using std::vector;
-using std::accumulate;
-using std::move;
-using std::back_inserter;
-using std::initializer_list;
-using std::ostream;
 
 namespace {
     inline string implodeVector(const vector<string>& toImplode, const string& delimiter = string(" ")) {
@@ -49,6 +51,10 @@ namespace execHelper { namespace core {
         return implodeVector(m_task);
     }
 
+    const EnvironmentCollection& Task::getEnvironment() const noexcept {
+        return m_env;
+    }
+
     bool Task::append(const string& taskPart) noexcept {
         m_task.push_back(taskPart);
         return true;
@@ -71,22 +77,42 @@ namespace execHelper { namespace core {
         return true;
     }
 
+    bool Task::setEnvironment(const EnvironmentCollection& env) noexcept {
+        m_env = env;
+        return true;
+    }
+
+    bool Task::appendToEnvironment(std::pair<std::string, std::string>&& newValue) noexcept {
+        m_env.emplace(newValue);
+        return true;
+    }
+
     bool Task::operator==(const Task& other) const noexcept {
-        return m_task == other.m_task;
+        return (m_task == other.m_task && m_env == other.m_env);
     }
 
     bool Task::operator!=(const Task& other) const noexcept {
         return !(*this == other);
     }
 
-    std::ostream& operator<<( std::ostream& os, const Task& task ) noexcept {
+    ostream& operator<<(ostream& os, const Task& task) noexcept {
         TaskCollection subtasks = task.getTask();
-        os << std::string( "Task(") << subtasks.size() << ") : {";
+        EnvironmentCollection environment = task.getEnvironment();
+        os << string("Task {");
 
-        for(const auto& subTask : subtasks) {
-            os << std::string(" ") << subTask;
+        os << string("Environment(") << environment.size() << "): {";
+        for(const auto& envVar : environment) {
+            os << string(" ") << envVar.first << ": " << envVar.second << "; ";
         }
-        os << std::string(" }");
+        os << string("} ");
+
+        os << string("Command(") << subtasks.size() << "): {";
+        for(const auto& subTask : subtasks) {
+            os << string(" ") << subTask;
+        }
+        os << string(" }");
+        os << string(" }");
+        os << endl;
         return os;
     }
 } }

@@ -17,14 +17,16 @@
 
 #include "configValue.h"
 
+using std::map;
+using std::pair;
 using std::string;
 using std::vector;
-using std::map;
 
 using execHelper::config::SettingsNode;
 using execHelper::core::Command;
 using execHelper::core::Task;
 using execHelper::core::TaskCollection;
+using execHelper::core::EnvironmentCollection;
 using execHelper::core::PatternCombinations;
 using execHelper::core::replacePatterns;
 using execHelper::core::PatternPermutator;
@@ -46,8 +48,14 @@ namespace execHelper { namespace plugins {
 
     Task replacePatternCombinations(const Task& task, const PatternCombinations& patternCombinations) noexcept {
         Task replacedTask;
-        for(const auto& part : task.getTask()) {
-            auto argument = part;
+        for(pair<std::string, std::string> environment : task.getEnvironment()) {
+            for(const auto& pattern : patternCombinations) {
+                environment.first = replacePatterns(environment.first, pattern.first, pattern.second);
+                environment.second = replacePatterns(environment.second, pattern.first, pattern.second);
+            }
+            replacedTask.appendToEnvironment(std::move(environment));
+        }
+        for(auto argument : task.getTask()) {
             for(const auto& pattern : patternCombinations) {
                 argument = replacePatterns(argument, pattern.first, pattern.second);
             }
@@ -67,7 +75,7 @@ namespace execHelper { namespace plugins {
     boost::optional<const SettingsNode&> getContainingSettings(const string& key, const SettingsNode& rootSettings, const vector<string>& configKeys) noexcept {
         const SettingsNode* settings = &rootSettings;
         for(const auto& configKey : configKeys) {
-            if(! settings->contains(configKey)) {
+            if(!configKey.empty() && !settings->contains(configKey)) {
                 return boost::none;
             }
             settings = &((*settings)[configKey]);

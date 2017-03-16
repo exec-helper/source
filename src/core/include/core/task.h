@@ -14,6 +14,8 @@ namespace execHelper {
             public:
                 const TaskCollection& getTask() const noexcept;
                 std::string toString() const;
+
+                const EnvironmentCollection& getEnvironment() const noexcept;
                 
                 Task(EnvironmentCollection env = EnvironmentCollection()) noexcept;
                 Task(const std::initializer_list<std::string>& subtasks, EnvironmentCollection env = EnvironmentCollection()) noexcept;
@@ -22,6 +24,9 @@ namespace execHelper {
                 bool append(std::string&& taskPart) noexcept;
                 bool append(const TaskCollection& taskPart) noexcept;
                 bool append(TaskCollection&& taskPart) noexcept;
+
+                bool setEnvironment(const EnvironmentCollection& env) noexcept;
+                bool appendToEnvironment(std::pair<std::string, std::string>&& newValue) noexcept;
 
                 bool operator==(const Task& other) const noexcept;
                 bool operator!=(const Task& other) const noexcept;

@@ -18,6 +18,7 @@ using execHelper::config::SettingsNode;
 using execHelper::core::Task;
 using execHelper::core::Options;
 using execHelper::core::TaskCollection;
+using execHelper::core::EnvironmentCollection;
 using execHelper::core::PatternKeys;
 
 namespace execHelper { namespace plugins {
@@ -49,6 +50,18 @@ namespace execHelper { namespace plugins {
                 TaskCollection newTaskCollection = ConfigValue<TaskCollection>::get(commandLine.m_key, {}, commandLineSettings, {{}});
                 newTask.append(newTaskCollection);
                 tasks.emplace_back(newTask);
+            }
+        }
+
+        EnvironmentCollection environment;
+        boost::optional<const SettingsNode&> environmentSettings = ConfigValue<const SettingsNode&>::getSetting("environment", rootSettings, {{command}, {}});
+        if(environmentSettings != boost::none) {
+            for(const auto& setting : environmentSettings.get().m_values) {
+                if(!setting.m_values.empty()) {
+                    for(auto& subtask : tasks) {
+                        subtask.appendToEnvironment(make_pair(setting.m_key, setting.m_values.back().m_key));
+                    }
+                }
             }
         }
 
