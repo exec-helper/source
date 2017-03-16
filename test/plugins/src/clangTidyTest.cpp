@@ -70,7 +70,7 @@ namespace execHelper { namespace plugins { namespace test {
         const vector<string> sourceKeys({sourceKey1, sourceKey2, sourceKey3});
 
         MAKE_COMBINATIONS("Of several settings") {
-
+            std::cout << make_combinations_index << std::endl;
             OptionsStub options;
 
             addPatterns(targetUtil.getPatterns(), options);
@@ -94,11 +94,12 @@ namespace execHelper { namespace plugins { namespace test {
             TaskCollection warningAsError;
             map<string, TaskCollection> sourceSpecificWarningAsError;
 
-            SettingsNode* settings = &(rootSettings[PLUGIN_CONFIG_KEY]);
+            SettingsNode* tmpSettings = &(rootSettings[PLUGIN_CONFIG_KEY]);
 
             COMBINATIONS("Toggle between general and specific command settings") {
-                settings = &rootSettings[PLUGIN_CONFIG_KEY][command];
+                tmpSettings = &(rootSettings[PLUGIN_CONFIG_KEY][command]);
             }
+            SettingsNode* const settings = tmpSettings;
 
             COMBINATIONS("Add sources") {
                 sources = sourceKeys;
@@ -114,7 +115,7 @@ namespace execHelper { namespace plugins { namespace test {
 
             COMBINATIONS("Add command line to source") {
                 if(settings->contains("sources")) {
-                    if((*settings)["sources"].contains("source2")) {
+                    if((*settings)["sources"].contains(sourceKey2)) {
                         const map<string, TaskCollection> commandLineValues = {
                             {sourceKey1, {"{" + targetUtil.target.getKey() + "}"}}, 
                             {sourceKey2, {"{" + targetUtil.runTarget.getKey() + "}"}}, 
@@ -136,14 +137,14 @@ namespace execHelper { namespace plugins { namespace test {
 
             COMBINATIONS("Add checks") {
                 TaskCollection checkValue = {"check1", "check2-{" + targetUtil.target.getKey() + "}"};
-                addSettings(rootSettings[PLUGIN_CONFIG_KEY], "checks", checkValue);
-                addSettings(rootSettings[otherCommandKey], "checks", {"check3"});
+                addSettings(*settings, "checks", checkValue);
+                addSettings(rootSettings[PLUGIN_CONFIG_KEY][otherCommandKey], "checks", {"check3"});
                 checks.emplace_back("-checks=check1,check2-{" + targetUtil.target.getKey() + "}");
             }
 
             COMBINATIONS("Add checks to source") {
                 if(settings->contains("sources")) {
-                    if((*settings)["sources"].contains("source2")) {
+                    if((*settings)["sources"].contains(sourceKey2)) {
                         const map<string, TaskCollection> checkValues = {
                             {sourceKey1, {"check1", "check2-{" + targetUtil.target.getKey() + "}"}}, 
                             {sourceKey2, {"check3", "check4-{" + targetUtil.runTarget.getKey() + "}"}}, 
@@ -164,15 +165,15 @@ namespace execHelper { namespace plugins { namespace test {
             }
 
             COMBINATIONS("Add warning as error") {
-                TaskCollection warningAsErrorValue = {"warningAsError1", "warningAsError2", "warningAsError3"};
-                addSettings(rootSettings[PLUGIN_CONFIG_KEY], "warning-as-error", warningAsErrorValue);
-                addSettings(rootSettings[otherCommandKey], "warning-as-error", {"warningAsError4"});
+                const TaskCollection warningAsErrorValue = {"warningAsError1", "warningAsError2", "warningAsError3"};
+                addSettings(*settings, "warning-as-error", warningAsErrorValue);
+                addSettings(rootSettings[PLUGIN_CONFIG_KEY][otherCommandKey], "warning-as-error", {"warningAsError4"});
                 warningAsError.emplace_back("-warning-as-error=warningAsError1,warningAsError2,warningAsError3");
             }
 
             COMBINATIONS("Add warning as error to source") {
                 if(settings->contains("sources")) {
-                    if((*settings)["sources"].contains("source2")) {
+                    if((*settings)["sources"].contains(sourceKey2)) {
                         const map<string, TaskCollection> warningAsErrorValues = {
                             {sourceKey1, {"warningAsError1", "warningAsError2-{" + targetUtil.target.getKey() + "}"}}, 
                             {sourceKey2, {"warningAsError3", "warningAsError4-{" + targetUtil.runTarget.getKey() + "}"}}, 
@@ -195,7 +196,7 @@ namespace execHelper { namespace plugins { namespace test {
             COMBINATIONS("Add all checks as warning as error") {
                 (*settings)[PLUGIN_CONFIG_KEY]["warning-as-error"].m_values.clear();
                 addSettings((*settings)[PLUGIN_CONFIG_KEY], "warning-as-error", "all");
-                addSettings(rootSettings[otherCommandKey], "warning-as-error", {"warningAsError4"});
+                addSettings(rootSettings[PLUGIN_CONFIG_KEY][otherCommandKey], "warning-as-error", {"warningAsError4"});
 
                 static const string toReplace("-checks=");
                 if(!sourceSpecificChecks.empty()) {
