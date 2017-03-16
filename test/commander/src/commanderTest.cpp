@@ -16,6 +16,7 @@ using std::vector;
 using std::string;
 
 using execHelper::core::Command;
+using execHelper::core::EnvironmentCollection;
 using execHelper::plugins::Memory;
 using execHelper::plugins::MemoryHandler;
 
@@ -73,6 +74,57 @@ namespace execHelper { namespace commander { namespace test {
             WHEN("We apply the configuration and run the commander") {
                 THEN("It should fail") {
                     REQUIRE_FALSE(commander.run());
+                }
+            }
+        }
+    }
+
+    SCENARIO("Test setting the environment") {
+        GIVEN("Basic options") {
+            const string command1("command1");
+            vector<string> commands({command1});
+
+            OptionsStub options;
+            addSettings(options.m_settings, "commands", commands);
+            addSettings(options.m_settings, command1, {"memory"});
+
+            options.m_commands = commands;
+
+            MemoryHandler memory;
+
+            WHEN("We define an empty environment and run the commander") {
+                const EnvironmentCollection environment;
+                EnvironmentCollection commanderEnvironment = environment;
+                Commander commander(options, std::move(commanderEnvironment));
+                bool returnCode = commander.run();
+
+                THEN("It must succeed") {
+                    REQUIRE(returnCode);
+                }
+
+                THEN("We must find the same environment") {
+                    const Memory::Memories& memories = memory.getExecutions();
+                    REQUIRE(memories.size() == 1U);
+                    REQUIRE(memories[0].command == command1);
+                    REQUIRE(memories[0].task.getEnvironment() == environment);
+                }
+            }
+
+            WHEN("We define an environment and run the commander") {
+                const EnvironmentCollection environment = {{"VAR1", "value1"}, {"VAR2", "value2"}};
+                EnvironmentCollection commanderEnvironment = environment;
+                Commander commander(options, std::move(commanderEnvironment));
+                bool returnCode = commander.run();
+
+                THEN("It must succeed") {
+                    REQUIRE(returnCode);
+                }
+
+                THEN("We must find the same environment") {
+                    const Memory::Memories& memories = memory.getExecutions();
+                    REQUIRE(memories.size() == 1U);
+                    REQUIRE(memories[0].command == command1);
+                    REQUIRE(memories[0].task.getEnvironment() == environment);
                 }
             }
         }
