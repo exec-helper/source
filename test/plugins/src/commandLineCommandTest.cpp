@@ -15,10 +15,12 @@
 
 using std::string;
 using std::vector;
+using std::make_pair;
 
 using execHelper::config::SettingsNode;
 using execHelper::core::Task;
 using execHelper::core::TaskCollection;
+using execHelper::core::EnvironmentCollection;
 
 using execHelper::test::utils::TargetUtil;
 using execHelper::test::utils::CompilerUtil;
@@ -26,6 +28,7 @@ using execHelper::core::test::ExecutorStub;
 using execHelper::test::OptionsStub;
 using execHelper::test::utils::addSettings;
 using execHelper::test::utils::addPatterns;
+using execHelper::test::utils::toString;
 
 namespace {
     const string PLUGIN_CONFIG_KEY("command-line-command");
@@ -50,6 +53,7 @@ namespace execHelper { namespace plugins { namespace test {
             addSettings(rootSettings[PLUGIN_CONFIG_KEY], "patterns", compilerUtil.getKeys());
 
             vector<TaskCollection> commandLines({{"command1", "{" + compilerUtil.compiler.getKey() + "}/{" + compilerUtil.mode.getKey() + "}", "{" + targetUtil.target.getKey() + "}/{" + targetUtil.runTarget.getKey() + "}"}});
+            EnvironmentCollection environment;
 
             // Add the settings of an other command to make sure we take the expected ones
             const string otherCommandKey("other-command");
@@ -71,6 +75,17 @@ namespace execHelper { namespace plugins { namespace test {
                 addSettings((*settings)["command-line"], "command1", commandLines[0]);
                 commandLines.emplace_back(TaskCollection({"command2", "{" + targetUtil.target.getKey() + "}/{" + targetUtil.runTarget.getKey() + "}", "{" + compilerUtil.compiler.getKey() + "}/{" + compilerUtil.mode.getKey() + "}"}));
                 addSettings((*settings)["command-line"], "command2", commandLines[1]);
+            }
+
+            COMBINATIONS("Set environment") {
+                environment.emplace(make_pair("VAR1", "environmentValue{" + compilerUtil.compiler.getKey() + "}"));
+                environment.emplace(make_pair("VAR{" + compilerUtil.compiler.getKey() + "}", "environmentValue2"));
+
+                addSettings(*settings, "environment");
+                for(const auto& envVar : environment) {
+                    addSettings((*settings)["environment"], envVar.first, envVar.second);
+                    expectedTask.appendToEnvironment(envVar);
+                }
             }
 
             ExecutorStub::TaskQueue expectedTasks;

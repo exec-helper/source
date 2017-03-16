@@ -106,6 +106,10 @@ namespace execHelper { namespace test { namespace utils {
         return file.substr(0,found);
     }
 
+    void addSettings(config::SettingsNode& settings, const std::string& value) noexcept {
+        addSettings(settings, value, {});
+    }
+
     void addSettings(SettingsNode& settings, const string& key, const string& value) noexcept {
         addSettings(settings, key, {value});
     }
@@ -296,17 +300,16 @@ namespace execHelper { namespace test { namespace utils {
         }
 
         string result;
-        result += prefix + settings.m_key;
+        result += prefix + "- " + settings.m_key;
         if(settings.m_values.empty()) {
             result += "\n";
            return result;
         } else {
-           result += ": {\n";
+           result += ":\n";
         }
         for(const auto& value : settings.m_values) {
             result += toString(value, nbOfTabs + 1);
         }
-        result += prefix + "}\n";
         return result;
     }
 } } }

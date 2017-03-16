@@ -10,8 +10,6 @@ namespace execHelper {
     namespace core {
         class Argv {
             public:
-                typedef std::vector<char*> Argv_t;
-
                 Argv(const TaskCollection& task) noexcept;
                 Argv(const Argv& other) noexcept;
                 ~Argv() noexcept;
@@ -23,6 +21,8 @@ namespace execHelper {
                 char** getArgv() noexcept;
 
             private:
+                typedef std::vector<char*> Argv_t;
+
                 void deepCopy(const Argv& other) noexcept;
 
                 Argv_t m_argv;
