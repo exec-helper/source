@@ -166,9 +166,10 @@ command-line-command:
             - MODULE
         command-line: build/{COMPILER}/{MODE}/bin/test/{RUNTARGET}/exec-helper-{MODULE}-{RUNTARGET}
     coverage:
+        environment:
+            CXXFLAGS: --coverage -fprofile-arcs -ftest-coverage
+            LDFLAGS: -fprofile-arcs -ftest-coverage
         command-line:
-            - CXXFLAGS="--coverage -fprofile-arcs -ftest-coverage"
-            - LDFLAGS="-fprofile-arcs -ftest-coverage"
             - exec-helper
             - init
             - build

@@ -1,7 +1,7 @@
 #include "envp.h"
 
+#include <cstring>
 #include <string>
-#include <string.h>
 
 using std::string;
 

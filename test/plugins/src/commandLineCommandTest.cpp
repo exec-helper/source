@@ -28,7 +28,6 @@ using execHelper::core::test::ExecutorStub;
 using execHelper::test::OptionsStub;
 using execHelper::test::utils::addSettings;
 using execHelper::test::utils::addPatterns;
-using execHelper::test::utils::toString;
 
 namespace {
     const string PLUGIN_CONFIG_KEY("command-line-command");
