@@ -24,7 +24,7 @@ namespace execHelper { namespace core { namespace test {
 
             WHEN("We apply it on a task to show the file") {
                 Task task;
-                task.append("/usr/bin/cat");
+                task.append("$(which cat)");
                 task.append(filename);
 
                 THEN("The call should succeed") {
@@ -44,7 +44,7 @@ namespace execHelper { namespace core { namespace test {
             file << fileContent << endl;
             file.close();
 
-            EnvironmentCollection env = {{"PATH", "/usr/bin"}};
+            EnvironmentCollection env = {{"PATH", "/bin:/usr/bin"}};
 
             PosixShell shell;
 
@@ -79,7 +79,7 @@ namespace execHelper { namespace core { namespace test {
 
             WHEN("We apply it on a task to show the file") {
                 Task task;
-                task.append("/usr/bin/cat");
+                task.append("$(which cat)");
                 task.append("*.exec-helper");
 
                 THEN("The call should succeed") {
@@ -105,7 +105,7 @@ namespace execHelper { namespace core { namespace test {
 
             WHEN("We use a command with variable expansion") {
                 Task task(env);
-                task.append("/usr/bin/cat");
+                task.append("$(which cat)");
                 task.append("$PWD/" + filename);
 
                 THEN("The call should succeed") {
@@ -116,7 +116,7 @@ namespace execHelper { namespace core { namespace test {
 
             WHEN("We use a command with variable expansion") {
                 Task task(env);
-                task.append("/usr/bin/cat");
+                task.append("$(which cat)");
                 task.append("${PWD}/" + filename);
 
                 THEN("The call should succeed") {
@@ -127,7 +127,7 @@ namespace execHelper { namespace core { namespace test {
 
             WHEN("We use a command with command expansion") {
                 Task task;
-                task.append("/usr/bin/cat");
+                task.append("$(which cat)");
                 task.append("$(pwd)/" + filename);
 
                 THEN("The call should succeed") {
@@ -145,7 +145,7 @@ namespace execHelper { namespace core { namespace test {
 
             WHEN("We apply it on a task to show the file") {
                 Task task;
-                task.append("/usr/bin/cat");
+                task.append("$(which cat)");
                 task.append(filename);
 
                 THEN("The call should not succeed") {

@@ -2,7 +2,7 @@ COMPILER=$(CXX)
 
 NB_OF_CORES:=$(shell grep -c ^processor /proc/cpuinfo)
 
-all: init build
+all: release
 
 init:
 	cmake -H. -Bbuild/$(COMPILER)/debug -DCMAKE_CXX_COMPILER=$(COMPILER) -DCMAKE_INSTALL_PREFIX=build/$(COMPILER)/debug -DCMAKE_BUILD_TYPE=Debug -DUSE_SYSTEM_CATCH=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
