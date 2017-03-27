@@ -21,7 +21,6 @@ using execHelper::plugins::Memory;
 using execHelper::plugins::MemoryHandler;
 
 using execHelper::test::OptionsStub;
-using execHelper::test::utils::copyAndAppend;
 using execHelper::test::utils::Patterns;
 using execHelper::test::utils::PATTERN1;
 using execHelper::test::utils::PATTERN2;

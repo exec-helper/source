@@ -420,16 +420,16 @@ namespace execHelper { namespace core { namespace test {
                 }
             }
             WHEN("We move the settings") {
-                SettingsNode copy(std::move(settings));
+                SettingsNode move(std::move(settings));
 
                 THEN("We should find back the values") {
-                    REQUIRE(copy.key() == rootKey);
-                    REQUIRE(copy.get(key1) != boost::none);
-                    REQUIRE(copy.get(key1).get() == value1);
-                    REQUIRE(copy.get(key2) != boost::none);
-                    REQUIRE(copy.get(key2).get() == value2);
-                    REQUIRE(copy.get(key3) != boost::none);
-                    REQUIRE(copy.get(key3).get() == value3);
+                    REQUIRE(move.key() == rootKey);
+                    REQUIRE(move.get(key1) != boost::none);
+                    REQUIRE(move.get(key1).get() == value1);
+                    REQUIRE(move.get(key2) != boost::none);
+                    REQUIRE(move.get(key2).get() == value2);
+                    REQUIRE(move.get(key3) != boost::none);
+                    REQUIRE(move.get(key3).get() == value3);
                 }
             }
         }

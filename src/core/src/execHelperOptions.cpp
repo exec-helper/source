@@ -135,9 +135,8 @@ namespace execHelper { namespace core {
                     if(shortOptionStrings.empty()) {
                         user_feedback_error("The value for the short option of " << pattern << " is empty");
                         return false;
-                    } else {
-                        shortOptionString = shortOptionStrings.back();
                     }
+                    shortOptionString = shortOptionStrings.back();
                 }
                 char shortOption = '\0';
                 if(! shortOptionString.empty()) {
@@ -151,9 +150,8 @@ namespace execHelper { namespace core {
                     if(longOptionStrings.empty()) {
                         user_feedback_error("The value for the long option of " << pattern << " is empty");
                         return false;
-                    } else {
-                        longOption = longOptionStrings.back();
                     }
+                    longOption = longOptionStrings.back();
                 }
 
                 m_patternsHandler.addPattern(Pattern(pattern, defaultValues, shortOption, longOption));

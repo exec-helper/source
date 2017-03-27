@@ -8,7 +8,6 @@
 #include "log/log.h"
 
 using std::string;
-using std::vector;
 using std::initializer_list;
 
 using execHelper::config::SettingsNode;

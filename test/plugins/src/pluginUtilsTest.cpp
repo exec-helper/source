@@ -19,7 +19,6 @@ using execHelper::config::SettingsNode;
 using execHelper::core::TaskCollection;
 using execHelper::core::PatternCombinations;
 using execHelper::test::utils::createPatternCombination;
-using execHelper::test::utils::copyAndAppend;
 
 namespace execHelper { namespace plugins { namespace test {
     SCENARIO("Test the patterns key", "[plugins][pluginUtils]") {
