@@ -19,7 +19,7 @@ using execHelper::plugins::Lcov;
 using execHelper::plugins::MemoryHandler;
 
 using execHelper::test::OptionsStub;
-using execHelper::test::utils::addSettings;
+using execHelper::test::utils::copyAndAppend;
 using execHelper::core::test::ExecutorStub;
 
 namespace {
@@ -58,7 +58,6 @@ namespace execHelper { namespace plugins { namespace test {
 
             OptionsStub options;
             SettingsNode& rootSettings = options.m_settings;
-            addSettings(rootSettings, lcovConfigKey, command);
 
             Lcov plugin;
             Task task;
@@ -68,12 +67,12 @@ namespace execHelper { namespace plugins { namespace test {
                 ExecutorStub::TaskQueue expectedTasks;
 
                 AND_WHEN("We add it as a general command") {
-                    addSettings(rootSettings[lcovConfigKey], "run-command", "memory");
+                    rootSettings.add({lcovConfigKey, "run-command"}, "memory");
                     expectedTasks.emplace_back(Task({"lcov", "--base-directory", ".", "--directory", ".", "--capture", "--output", "lcov-plugin.info"}));
                 }    
 
                 AND_WHEN("We add it as a specific command") {
-                    addSettings(rootSettings[lcovConfigKey][command], "run-command", "memory");
+                    rootSettings.add({lcovConfigKey, command, "run-command"}, "memory");
                     expectedTasks.emplace_back(Task({"lcov", "--base-directory", ".", "--directory", ".", "--capture", "--output", "lcov-plugin.info"}));
                 }    
 
@@ -102,7 +101,6 @@ namespace execHelper { namespace plugins { namespace test {
 
             OptionsStub options;
             SettingsNode& rootSettings = options.m_settings;
-            addSettings(rootSettings, lcovConfigKey, command);
 
             Lcov plugin;
             Task task;
@@ -113,7 +111,7 @@ namespace execHelper { namespace plugins { namespace test {
                 ExecutorStub::TaskQueue expectedTasks;
 
                 AND_WHEN("We add it as a general command") {
-                    addSettings(rootSettings[lcovConfigKey], "run-command", "memory");
+                    rootSettings.add({lcovConfigKey, "run-command"}, "memory");
                     expectedTasks.emplace_back(Task({"lcov", "--base-directory", ".", "--directory", ".", "--capture", "--output", "lcov-plugin.info"}));
                 }    
 
@@ -134,8 +132,7 @@ namespace execHelper { namespace plugins { namespace test {
 
             OptionsStub options;
             SettingsNode& rootSettings = options.m_settings;
-            addSettings(rootSettings, lcovConfigKey, command);
-            addSettings(rootSettings[lcovConfigKey], "run-command", "memory");
+            rootSettings.add({lcovConfigKey, "run-command"}, "memory");
 
             Lcov plugin;
             Task task;
@@ -145,24 +142,24 @@ namespace execHelper { namespace plugins { namespace test {
             WHEN("We activate or deactivate the zero counters setting") {
                 ExecutorStub::TaskQueue expectedTasks;
                 AND_WHEN("We add it as a generic setting") {
-                    addSettings(rootSettings[lcovConfigKey], "zero-counters", "yes");
+                    rootSettings.add({lcovConfigKey, "zero-counters"}, "yes");
                     expectedTasks.emplace_back(Task({"lcov", "--base-directory", ".", "--directory", ".", "--zerocounters"}));
                     expectedTasks.emplace_back(Task({"lcov", "--base-directory", ".", "--directory", ".", "--capture", "--output", "lcov-plugin.info"}));
                 }
 
                 AND_WHEN("We add it as a specific setting") {
-                    addSettings(rootSettings[lcovConfigKey][command], "zero-counters", "yes");
+                    rootSettings.add({lcovConfigKey, command, "zero-counters"}, "yes");
                     expectedTasks.emplace_back(Task({"lcov", "--base-directory", ".", "--directory", ".", "--zerocounters"}));
                     expectedTasks.emplace_back(Task({"lcov", "--base-directory", ".", "--directory", ".", "--capture", "--output", "lcov-plugin.info"}));
                 }
 
                 AND_WHEN("We add it as a generic setting") {
-                    addSettings(rootSettings[lcovConfigKey], "zero-counters", "no");
+                    rootSettings.add({lcovConfigKey, "zero-counters"}, "no");
                     expectedTasks.emplace_back(Task({"lcov", "--base-directory", ".", "--directory", ".", "--capture", "--output", "lcov-plugin.info"}));
                 }
 
                 AND_WHEN("We add it as a specific setting") {
-                    addSettings(rootSettings[lcovConfigKey][command], "zero-counters", "no");
+                    rootSettings.add({lcovConfigKey, command, "zero-counters"}, "no");
                     expectedTasks.emplace_back(Task({"lcov", "--base-directory", ".", "--directory", ".", "--capture", "--output", "lcov-plugin.info"}));
                 }
 
@@ -191,8 +188,7 @@ namespace execHelper { namespace plugins { namespace test {
 
             OptionsStub options;
             SettingsNode& rootSettings = options.m_settings;
-            addSettings(rootSettings, lcovConfigKey, command);
-            addSettings(rootSettings[lcovConfigKey], "run-command", "memory");
+            rootSettings.add({lcovConfigKey, "run-command"}, "memory");
 
             Lcov plugin;
             Task task;
@@ -203,25 +199,25 @@ namespace execHelper { namespace plugins { namespace test {
                 ExecutorStub::TaskQueue expectedTasks;
 
                 AND_WHEN("We add it as a generic setting") {
-                    addSettings(rootSettings[lcovConfigKey], "excludes", {"exclude1"});
+                    rootSettings.add({lcovConfigKey, "excludes"}, "exclude1");
                     expectedTasks.emplace_back(Task({"lcov", "--base-directory", ".", "--directory", ".", "--capture", "--output", "lcov-plugin.info"}));
                     expectedTasks.emplace_back(Task({"lcov", "--remove", "lcov-plugin.info", R"("exclude1")", "--output-file", "lcov-plugin.info"}));
                 }
 
                 AND_WHEN("We add it as a specific setting") {
-                    addSettings(rootSettings[lcovConfigKey][command], "excludes", {"exclude1"});
+                    rootSettings.add({lcovConfigKey, command, "excludes"}, "exclude1");
                     expectedTasks.emplace_back(Task({"lcov", "--base-directory", ".", "--directory", ".", "--capture", "--output", "lcov-plugin.info"}));
                     expectedTasks.emplace_back(Task({"lcov", "--remove", "lcov-plugin.info", R"("exclude1")", "--output-file", "lcov-plugin.info"}));
                 }
 
                 AND_WHEN("We use multiple excludes") {
-                    addSettings(rootSettings[lcovConfigKey], "excludes", {"exclude1", "exclude2", "exclude3"});
+                    rootSettings.add({lcovConfigKey, "excludes"}, {"exclude1", "exclude2", "exclude3"});
                     expectedTasks.emplace_back(Task({"lcov", "--base-directory", ".", "--directory", ".", "--capture", "--output", "lcov-plugin.info"}));
                     expectedTasks.emplace_back(Task({"lcov", "--remove", "lcov-plugin.info", R"("exclude1")", R"("exclude2")", R"("exclude3")", "--output-file", "lcov-plugin.info"}));
                 }
 
                 AND_WHEN("We use no excludes") {
-                    addSettings(rootSettings[lcovConfigKey], "excludes", {});
+                    rootSettings.add({lcovConfigKey}, "excludes");
                     expectedTasks.emplace_back(Task({"lcov", "--base-directory", ".", "--directory", ".", "--capture", "--output", "lcov-plugin.info"}));
                 }
 
@@ -250,8 +246,7 @@ namespace execHelper { namespace plugins { namespace test {
 
             OptionsStub options;
             SettingsNode& rootSettings = options.m_settings;
-            addSettings(rootSettings, lcovConfigKey, command);
-            addSettings(rootSettings[lcovConfigKey], "run-command", "memory");
+            rootSettings.add({lcovConfigKey, "run-command"}, "memory");
 
             Lcov plugin;
             Task task;
@@ -263,21 +258,21 @@ namespace execHelper { namespace plugins { namespace test {
                 expectedTasks.emplace_back(Task({"lcov", "--base-directory", ".", "--directory", ".", "--capture", "--output", "lcov-plugin.info"}));
 
                 AND_WHEN("We add it as a generic setting") {
-                    addSettings(rootSettings[lcovConfigKey], "gen-html", "yes");
+                    rootSettings.add({lcovConfigKey, "gen-html"}, "yes");
                     expectedTasks.emplace_back(Task({"genhtml", "--output-directory", ".", "--title", "Hello", "lcov-plugin.info"}));
                 }
 
                 AND_WHEN("We add it as a specific setting") {
-                    addSettings(rootSettings[lcovConfigKey][command], "gen-html", "yes");
+                    rootSettings.add({lcovConfigKey, command, "gen-html"}, "yes");
                     expectedTasks.emplace_back(Task({"genhtml", "--output-directory", ".", "--title", "Hello", "lcov-plugin.info"}));
                 }
 
                 AND_WHEN("We add it as a generic setting") {
-                    addSettings(rootSettings[lcovConfigKey], "gen-html", "no");
+                    rootSettings.add({lcovConfigKey, "gen-html"}, "no");
                 }
 
                 AND_WHEN("We add it as a specific setting") {
-                    addSettings(rootSettings[lcovConfigKey][command], "gen-html", "no");
+                    rootSettings.add({lcovConfigKey, command, "gen-html"}, "no");
                 }
 
                 THEN_WHEN("We apply the plugin") {
@@ -305,8 +300,7 @@ namespace execHelper { namespace plugins { namespace test {
 
             OptionsStub options;
             SettingsNode& rootSettings = options.m_settings;
-            addSettings(rootSettings, lcovConfigKey, command);
-            addSettings(rootSettings[lcovConfigKey][command], "run-command", "memory");
+            rootSettings.add({lcovConfigKey, "run-command"}, "memory");
 
             Lcov plugin;
             Task task;
@@ -321,57 +315,57 @@ namespace execHelper { namespace plugins { namespace test {
             TaskCollection genHtmlCommandLine;
             string genHtmlTitle("Hello");
 
-            SettingsNode& settings = rootSettings[lcovConfigKey];
+            SettingsNode::SettingsKeys baseSettingsKeys = {lcovConfigKey};
 
             COMBINATION {
-                settings = rootSettings[lcovConfigKey][command];
+                baseSettingsKeys.push_back(command);
             }
 
             COMBINATION {
                 baseDirectory = "base-dir";
-                addSettings(settings, "base-directory", baseDirectory);
+                rootSettings.add(copyAndAppend(baseSettingsKeys, "base-directory"), baseDirectory);
             }
 
             COMBINATION {
                 directory = "dir";
-                addSettings(settings, "directory", directory);
+                rootSettings.add(copyAndAppend(baseSettingsKeys, "directory"), directory);
             }
             
             COMBINATION {
                 infoFile = "infoFile.info"; 
-                addSettings(settings, "info-file", infoFile);
+                rootSettings.add(copyAndAppend(baseSettingsKeys, "info-file"), infoFile);
             }
 
             COMBINATION {
-                addSettings(settings, "zero-counters", "yes");
+                rootSettings.add(copyAndAppend(baseSettingsKeys, "zero-counters"), "yes");
                 expectedTasks.emplace_back(Task({"lcov", "--base-directory", baseDirectory, "--directory", directory, "--zerocounters"}));
             }
 
             expectedTasks.emplace_back(Task({"lcov", "--base-directory", baseDirectory, "--directory", directory, "--capture", "--output", infoFile}));
 
             COMBINATION {
-                addSettings(settings, "excludes", {"exclude1"});
+                rootSettings.add(copyAndAppend(baseSettingsKeys, "excludes"), "exclude1");
                 expectedTasks.emplace_back(Task({"lcov", "--remove", infoFile, R"("exclude1")", "--output-file", infoFile}));
             }
 
             COMBINATION {
                 genHtmlOutputDir = "output-dir";
-                addSettings(settings, "gen-html-output", genHtmlOutputDir);
+                rootSettings.add(copyAndAppend(baseSettingsKeys, "gen-html-output"), genHtmlOutputDir);
             }
 
             COMBINATION {
                 const TaskCollection genHtmlCommandLineValue({"--option1", "--option2"});
-                addSettings(settings, "gen-html-command-line", genHtmlCommandLineValue);
+                rootSettings.add(copyAndAppend(baseSettingsKeys, "gen-html-command-line"), genHtmlCommandLineValue);
                 genHtmlCommandLine = genHtmlCommandLineValue;
             }
 
             COMBINATION {
                genHtmlTitle = "random-title"; 
-               addSettings(settings, "gen-html-title", genHtmlTitle);
+               rootSettings.add(copyAndAppend(baseSettingsKeys, "gen-html-title"), genHtmlTitle);
             }
 
             COMBINATION {
-                addSettings(settings, "gen-html", "yes");
+               rootSettings.add(copyAndAppend(baseSettingsKeys, "gen-html"), "yes");
                 Task expectedTask({"genhtml", "--output-directory", genHtmlOutputDir, "--title", genHtmlTitle, infoFile});
                 expectedTask.append(genHtmlCommandLine);
                 expectedTasks.emplace_back(expectedTask);

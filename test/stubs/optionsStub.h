@@ -18,6 +18,7 @@ namespace execHelper {
                     m_verbosity(false),
                     m_dryRun(false),
                     m_singleThreaded(false),
+                    m_settings("OptionsStub"),
                     m_executor(),
                     m_patternsHandler(new core::PatternsHandler())
                 {
@@ -63,7 +64,7 @@ namespace execHelper {
                     if(m_settings.contains(key)) {
                         return m_settings[key];
                     }
-                    return m_settings[key];
+                    return m_settings;
                 }
 
                 virtual bool containsHelp() const noexcept override {

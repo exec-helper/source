@@ -36,7 +36,7 @@ namespace {
     const string YAML_CONFIG_KEY_DELIMITER(": ");
     const string YAML_CONFIG_DELIMITER("\n");
     const string YAML_CONFIG_NESTED_CHARACTER("    ");
-    const string YAML_CONFIG_OPTION_CHARACTER(YAML_CONFIG_NESTED_CHARACTER + "- ");
+    const string YAML_CONFIG_OPTION_CHARACTER("- ");
 
     const string rootPatternKey("patterns");
 }
@@ -51,23 +51,48 @@ namespace execHelper { namespace test { namespace utils {
         }
     }
 
-    string convertToConfig(const string& key, const vector<string>& values, const string& prepend) {
+   string convertToConfig(const initializer_list<string>& keys, const string& value, const string& prepend) noexcept {
+        return convertToConfig(vector<string>(keys), {value}, prepend);
+   }
+
+   string convertToConfig(const initializer_list<string>& keys, const initializer_list<string>& values, const string& prepend) noexcept {
+        return convertToConfig(vector<string>(keys), values, prepend);
+   }
+
+   string convertToConfig(const initializer_list<string>& keys, const vector<string>& values, const string& prepend ) noexcept {
+        return convertToConfig(vector<string>(keys), vector<string>(values), prepend);
+   }
+
+   string convertToConfig(const vector<string>& keys, const initializer_list<string>& values, const string& prepend) noexcept {
+        return convertToConfig(keys, vector<string>(values), prepend);
+   }
+
+   string convertToConfig(const vector<string>& keys, const vector<string>& values, const string& prepend) noexcept {
         string config;
-        config += prepend + key + YAML_CONFIG_KEY_DELIMITER + YAML_CONFIG_DELIMITER;
+
+        string nestedCharacters;
+        for(const auto& key : keys) {
+            config += prepend + nestedCharacters + key + YAML_CONFIG_KEY_DELIMITER + YAML_CONFIG_DELIMITER;
+            nestedCharacters += YAML_CONFIG_NESTED_CHARACTER;
+        }
         for(const auto& value : values) {
-            config += prepend + YAML_CONFIG_OPTION_CHARACTER + value + YAML_CONFIG_DELIMITER;
+            config += prepend + nestedCharacters + YAML_CONFIG_OPTION_CHARACTER + value + YAML_CONFIG_DELIMITER;
         }
         config += YAML_CONFIG_DELIMITER;
         return config;
     }
 
-    string convertToConfig(const SettingsNode& settings, const vector<Pattern>& patterns, const string& prepend) noexcept {
+    string convertToConfig(const string& key, const vector<string>& values, const string& prepend) {
+        return convertToConfig(vector<string>({key}), values, prepend);
+    }
+
+    string convertToConfig(const Patterns& patterns) noexcept {
         stringstream stream;   
-        const string nestedCharacter(prepend);
-        if(patterns.size() > 0) { 
+
+        if(!patterns.empty()) { 
             stream << rootPatternKey << YAML_CONFIG_KEY_DELIMITER << YAML_CONFIG_DELIMITER;
             for(auto& pattern : patterns) {
-                string patternNestedCharacter = nestedCharacter + YAML_CONFIG_NESTED_CHARACTER;
+                string patternNestedCharacter = YAML_CONFIG_NESTED_CHARACTER;
                 stream << patternNestedCharacter << pattern.getKey() << YAML_CONFIG_KEY_DELIMITER << YAML_CONFIG_DELIMITER;
                 
                 patternNestedCharacter += YAML_CONFIG_NESTED_CHARACTER;
@@ -76,24 +101,36 @@ namespace execHelper { namespace test { namespace utils {
                 stream << convertToConfig("default-values", pattern.getDefaultValues(), patternNestedCharacter);
             }
         }
-        if(settings.m_values.size() == 0 && !settings.m_key.empty()) {
-            stream << prepend << YAML_CONFIG_OPTION_CHARACTER << settings.m_key;
+        return stream.str();
+    }
+
+    string convertToConfig(const SettingsNode& settings, const string& prepend) noexcept {
+        stringstream stream;   
+        const string nestedCharacter(prepend);
+
+        if(settings.values().empty()) {
+            stream << prepend << YAML_CONFIG_OPTION_CHARACTER << settings.key() << YAML_CONFIG_DELIMITER;
+        } else if (settings.values().size() == 1 && settings[settings.values().back()].values().empty()) {
+            stream << prepend << settings.key() << YAML_CONFIG_KEY_DELIMITER << settings.values().back() << YAML_CONFIG_DELIMITER;
         } else {
             string valueNestedCharacter = nestedCharacter;
-            if(!settings.m_key.empty()) {
-                stream << nestedCharacter << settings.m_key << YAML_CONFIG_KEY_DELIMITER << YAML_CONFIG_DELIMITER;
-                valueNestedCharacter += YAML_CONFIG_NESTED_CHARACTER;
+            stream << nestedCharacter << settings.key() << YAML_CONFIG_KEY_DELIMITER << YAML_CONFIG_DELIMITER;
+            valueNestedCharacter += YAML_CONFIG_NESTED_CHARACTER;
+            for(const auto& key : settings.values()) {
+                stream << convertToConfig(settings[key], valueNestedCharacter);
             }
-            for(const auto& value : settings.m_values) {
-                stream << convertToConfig(value, {}, valueNestedCharacter) << YAML_CONFIG_DELIMITER;
-            }
-            stream << YAML_CONFIG_DELIMITER;
         }
         return stream.str();
     }
 
+    string convertToConfig(const SettingsNode& settings, const Patterns& patterns, const string& prepend) noexcept {
+        string result = convertToConfig(patterns);
+        result += convertToConfig(settings, prepend);
+        return result;
+    }
+
     string convertToConfig(string key, string value, const string& prepend) {
-        return prepend + key + YAML_CONFIG_KEY_DELIMITER + value + YAML_CONFIG_DELIMITER + YAML_CONFIG_DELIMITER;
+        return prepend + key + YAML_CONFIG_KEY_DELIMITER + value + YAML_CONFIG_DELIMITER;
     }
 
     string convertToConfig(const string& key, const std::initializer_list<string>& values, const string& prepend) {
@@ -106,42 +143,28 @@ namespace execHelper { namespace test { namespace utils {
         return file.substr(0,found);
     }
 
-    void addSettings(config::SettingsNode& settings, const std::string& value) noexcept {
-        addSettings(settings, value, {});
-    }
-
-    void addSettings(SettingsNode& settings, const string& key, const string& value) noexcept {
+    void addSettings(SettingsNode& settings, const SettingsNode::SettingsKey& key, const SettingsNode::SettingsValue& value) noexcept {
         addSettings(settings, key, {value});
     }
 
-    void addSettings(SettingsNode& settings, const string& key, const std::initializer_list<string>& values) noexcept {
-        addSettings(settings, key, vector<string>(values));
+    void addSettings(SettingsNode& settings, const SettingsNode::SettingsKey& key, const SettingsNode::SettingsValues& values) noexcept {
+        settings.add({key}, values);
     }
 
-    void addSettings(SettingsNode& settings, const string& key, const std::vector<string>& values) noexcept {
-        SettingsNode& settingsToWriteTo = getSetting(settings, key);
-        for(const auto& value : values) {
-            SettingsNode valueSetting;
-            valueSetting.m_key = value;
-            settingsToWriteTo.m_values.emplace_back(valueSetting);
-        }
+    void addSettings(SettingsNode& settings, const SettingsNode::SettingsKey& key, const std::initializer_list<string>& values) noexcept {
+        addSettings(settings, key, SettingsNode::SettingsValues(values));
     }
 
     void writeSettingsFile(const string& filename, const SettingsNode& settings, const vector<Pattern>& patterns) noexcept {
         ofstream file;
         file.open(filename, std::ios::out | std::ios::trunc);
-        file << convertToConfig(settings, patterns);
-        file.close();
-    }
-
-    SettingsNode& getSetting(SettingsNode& settings, const string& key) noexcept {
-        if(settings.contains(key)) {
-            return settings[key];
+        if(! patterns.empty()) {
+            file << convertToConfig(patterns) << std::endl;
         }
-
-        settings.m_values.emplace_back(SettingsNode());
-        settings.m_values.back().m_key = key;
-        return settings.m_values.back();
+        for(const auto& keys : settings.values()) {
+            file << convertToConfig(settings[keys]) << std::endl;
+        }
+        file.close();
     }
 
     PatternCombinations createPatternCombination(const initializer_list<PatternKey>& keys, const initializer_list<PatternValue>& values) noexcept {
@@ -300,15 +323,15 @@ namespace execHelper { namespace test { namespace utils {
         }
 
         string result;
-        result += prefix + "- " + settings.m_key;
-        if(settings.m_values.empty()) {
+        result += prefix + "- " + settings.key();
+        if(settings.values().empty()) {
             result += "\n";
            return result;
         } else {
            result += ":\n";
         }
-        for(const auto& value : settings.m_values) {
-            result += toString(value, nbOfTabs + 1);
+        for(const auto& value : settings.values()) {
+            result += toString(settings[value], nbOfTabs + 1);
         }
         return result;
     }

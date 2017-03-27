@@ -26,7 +26,8 @@ using execHelper::test::utils::TargetUtil;
 using execHelper::test::utils::CompilerUtil;
 using execHelper::core::test::ExecutorStub;
 using execHelper::test::OptionsStub;
-using execHelper::test::utils::addSettings;
+using execHelper::test::utils::copyAndAppend;
+using execHelper::test::utils::combineVectors;
 using execHelper::test::utils::addPatterns;
 
 namespace {
@@ -47,48 +48,50 @@ namespace execHelper { namespace plugins { namespace test {
             addPatterns(compilerUtil.getPatterns(), options);
 
             SettingsNode& rootSettings = options.m_settings;
-            addSettings(rootSettings, PLUGIN_CONFIG_KEY, command);
-            addSettings(rootSettings[PLUGIN_CONFIG_KEY], "patterns", targetUtil.getKeys());
-            addSettings(rootSettings[PLUGIN_CONFIG_KEY], "patterns", compilerUtil.getKeys());
+            rootSettings.add({PLUGIN_CONFIG_KEY, "patterns"}, targetUtil.getKeys());
+            rootSettings.add({PLUGIN_CONFIG_KEY, "patterns"}, compilerUtil.getKeys());
 
-            vector<TaskCollection> commandLines({{"command1", "{" + compilerUtil.compiler.getKey() + "}/{" + compilerUtil.mode.getKey() + "}", "{" + targetUtil.target.getKey() + "}/{" + targetUtil.runTarget.getKey() + "}"}});
+            const string commandKey("command1");
+            const TaskCollection command1({"command1"});
+            const TaskCollection command2({"{" + compilerUtil.compiler.getKey() + "}/{" + compilerUtil.mode.getKey() + "}", "{" + targetUtil.target.getKey() + "}/{" + targetUtil.runTarget.getKey() + "}"});
+           const vector<TaskCollection> commandLines({command1, command2});
             EnvironmentCollection environment;
 
             // Add the settings of an other command to make sure we take the expected ones
             const string otherCommandKey("other-command");
-            addSettings(rootSettings, PLUGIN_CONFIG_KEY, otherCommandKey);
 
             CommandLineCommand plugin;
             Task expectedTask;
+            std::vector<TaskCollection> commandLine;
 
-            SettingsNode* settings = &(rootSettings[PLUGIN_CONFIG_KEY]);
+            SettingsNode::SettingsKeys baseSettingsKeys = {PLUGIN_CONFIG_KEY};
+            SettingsNode::SettingsKeys otherBaseSettingsKeys = {PLUGIN_CONFIG_KEY, otherCommandKey};
 
             COMBINATIONS("Toggle between general and specific command settings") {
-                settings = &rootSettings[PLUGIN_CONFIG_KEY][command];
+                baseSettingsKeys.push_back(command);
             }
-            addSettings(*settings, "command-line", commandLines.front());
+            rootSettings.add(copyAndAppend(baseSettingsKeys, "command-line"), command1);
+            commandLine.push_back(command1);
 
             COMBINATIONS("Set a multiple command lines") {
-                (*settings)["command-line"].m_values.clear();
-
-                addSettings((*settings)["command-line"], "command1", commandLines[0]);
-                commandLines.emplace_back(TaskCollection({"command2", "{" + targetUtil.target.getKey() + "}/{" + targetUtil.runTarget.getKey() + "}", "{" + compilerUtil.compiler.getKey() + "}/{" + compilerUtil.mode.getKey() + "}"}));
-                addSettings((*settings)["command-line"], "command2", commandLines[1]);
+                rootSettings.clear(copyAndAppend(baseSettingsKeys, "command-line"));
+                rootSettings.add(combineVectors(baseSettingsKeys, {"command-line", "commandA"}), command1);
+                rootSettings.add(combineVectors(baseSettingsKeys, {"command-line", "commandB"}), command2);
+                commandLine.push_back(command2);
             }
 
             COMBINATIONS("Set environment") {
                 environment.emplace(make_pair("VAR1", "environmentValue{" + compilerUtil.compiler.getKey() + "}"));
                 environment.emplace(make_pair("VAR{" + compilerUtil.compiler.getKey() + "}", "environmentValue2"));
 
-                addSettings(*settings, "environment");
                 for(const auto& envVar : environment) {
-                    addSettings((*settings)["environment"], envVar.first, envVar.second);
+                    rootSettings.add(combineVectors(baseSettingsKeys, {"environment", envVar.first}), envVar.second);
                     expectedTask.appendToEnvironment(envVar);
                 }
             }
 
             ExecutorStub::TaskQueue expectedTasks;
-            for(const auto& commandLine : commandLines) {
+            for(const auto& commandLine : commandLine) {
                 Task newTask = expectedTask;
                 newTask.append(commandLine);
                 expectedTasks.emplace_back(newTask);
@@ -114,7 +117,7 @@ namespace execHelper { namespace plugins { namespace test {
             OptionsStub options;
 
             SettingsNode& rootSettings = options.m_settings;
-            addSettings(rootSettings, PLUGIN_CONFIG_KEY, command);
+            rootSettings.add({PLUGIN_CONFIG_KEY}, command);
 
             Task task;
             CommandLineCommand plugin;
@@ -128,7 +131,7 @@ namespace execHelper { namespace plugins { namespace test {
             }
 
             WHEN("We add no parameter and apply") {
-                addSettings(rootSettings, PLUGIN_CONFIG_KEY, "command-line");
+                rootSettings.add({PLUGIN_CONFIG_KEY}, "command-line");
                 bool return_code = plugin.apply(command, task, options);
 
                 THEN("The call should not succeed") {
@@ -136,9 +139,9 @@ namespace execHelper { namespace plugins { namespace test {
                 }
             }
 
-            WHEN("We add no parameter and apply") {
-                addSettings(rootSettings[PLUGIN_CONFIG_KEY], "command-line", "random-value");
-                addSettings(rootSettings[PLUGIN_CONFIG_KEY], command, "command-line");
+            WHEN("We add an other filled in command-line and no parameter for the right one and apply") {
+                rootSettings.add({PLUGIN_CONFIG_KEY, "command-line"}, "random-value");
+                rootSettings.add({PLUGIN_CONFIG_KEY, command}, "command-line");
                 bool return_code = plugin.apply(command, task, options);
 
                 THEN("The call should not succeed") {

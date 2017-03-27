@@ -33,33 +33,39 @@ namespace execHelper { namespace plugins {
             return false;
         }
         const SettingsNode& commandLineSettings = commandLineSettingsOpt.get();
-        if(commandLineSettings.m_values.empty()) {
+        if(commandLineSettings.values().empty()) {
             user_feedback_error("The '" << getCommandLineKey() << "' setting for command '" << command << "' in the '" << commandLineCommandKey << "' settings is empty");
             return false;
         }
 
         vector<Task> tasks;
-        if(commandLineSettings.m_values.front().m_values.empty()) {
+        auto commandLineValues = commandLineSettings.values();
+        if(commandLineValues.empty()) {
+            return true;
+        }
+        if(commandLineSettings[commandLineValues.front()].values().empty()) {
             // It is a list of commands that is together one command
             Task newTask = task;
             newTask.append(getCommandLine(command, rootSettings));
             tasks.emplace_back(newTask);
         } else {
-            for(const auto& commandLine : commandLineSettings.m_values) {
+            for(const auto& commandLine : commandLineValues) {
                 Task newTask = task;
-                TaskCollection newTaskCollection = ConfigValue<TaskCollection>::get(commandLine.m_key, {}, commandLineSettings, {{}});
+                TaskCollection newTaskCollection = ConfigValue<TaskCollection>::get(commandLine, {}, commandLineSettings, {{}});
                 newTask.append(newTaskCollection);
                 tasks.emplace_back(newTask);
             }
         }
 
         EnvironmentCollection environment;
-        boost::optional<const SettingsNode&> environmentSettings = ConfigValue<const SettingsNode&>::getSetting("environment", rootSettings, {{command}, {}});
-        if(environmentSettings != boost::none) {
-            for(const auto& setting : environmentSettings.get().m_values) {
-                if(!setting.m_values.empty()) {
+        boost::optional<const SettingsNode&> environmentSettingsOpt = ConfigValue<const SettingsNode&>::getSetting("environment", rootSettings, {{command}, {}});
+        if(environmentSettingsOpt != boost::none) {
+            const SettingsNode& environmentSettings = environmentSettingsOpt.get();
+            for(const auto& setting : environmentSettings.values()) {
+                auto environmentSettingValues = environmentSettings[setting].values();
+                if(!environmentSettingValues.empty()) {
                     for(auto& subtask : tasks) {
-                        subtask.appendToEnvironment(make_pair(setting.m_key, setting.m_values.back().m_key));
+                        subtask.appendToEnvironment(make_pair(setting, environmentSettings[setting].values().back()));
                     }
                 }
             }

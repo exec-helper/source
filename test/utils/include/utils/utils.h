@@ -25,9 +25,25 @@ namespace execHelper {
 namespace execHelper {
     namespace test {
         namespace utils {
+            typedef std::vector<core::Pattern> Patterns;
+
             template<typename T>
             void appendVectors(T& appendTo, const T& appendFrom) {
                 appendTo.insert(std::end(appendTo), std::begin(appendFrom), std::end(appendFrom));
+            }
+
+            template<typename T>
+            T combineVectors(const T& append1, const T& append2) {
+                T result = append1;
+                appendVectors(result, append2);
+                return result;
+            }
+
+            template<typename T, typename U>
+            T copyAndAppend(const T& append1, U&& newElement) {
+                T result = append1;
+                result.emplace_back(newElement);
+                return result;
             }
 
             struct MainVariables {
@@ -37,17 +53,25 @@ namespace execHelper {
                 MainVariables(const std::vector<std::string>& arguments);
             };
 
-            std::string convertToConfig(const config::SettingsNode& rootSettings, const std::vector<core::Pattern>& patterns = {}, const std::string& prepend = std::string()) noexcept;
-            std::string convertToConfig(const std::string& key, const std::vector<std::string>& values, const std::string& prepend = std::string());
+            std::string convertToConfig(const Patterns& patterns) noexcept;
+            std::string convertToConfig(const config::SettingsNode& rootSettings, const std::string& prepend = std::string()) noexcept;
+            std::string convertToConfig(const config::SettingsNode& settings, const Patterns& patterns, const std::string& prepend = std::string()) noexcept;
+
             std::string convertToConfig(std::string key, std::string value, const std::string& prepend = std::string());
             std::string convertToConfig(const std::string& key, const std::initializer_list<std::string>& values, const std::string& prepend = std::string());
+            std::string convertToConfig(const std::string& key, const std::vector<std::string>& values, const std::string& prepend = std::string());
+
+            std::string convertToConfig(const std::initializer_list<std::string>& keys, const std::string& value, const std::string& prepend = std::string()) noexcept;
+            std::string convertToConfig(const std::initializer_list<std::string>& keys, const std::initializer_list<std::string>& values, const std::string& prepend = std::string()) noexcept;
+            std::string convertToConfig(const std::initializer_list<std::string>& keys, const std::vector<std::string>& values, const std::string& prepend = std::string()) noexcept;
+            std::string convertToConfig(const std::vector<std::string>& keys, const std::initializer_list<std::string>& values, const std::string& prepend = std::string()) noexcept;
+            std::string convertToConfig(const std::vector<std::string>& keys, const std::vector<std::string>& values, const std::string& prepend = std::string()) noexcept;
             std::string basename(const std::string& file);
 
-            config::SettingsNode& getSetting(config::SettingsNode& settings, const std::string& key) noexcept;
-            void addSettings(config::SettingsNode& settings, const std::string& value) noexcept;
-            void addSettings(config::SettingsNode& settings, const std::string& key, const std::string& value) noexcept;
-            void addSettings(config::SettingsNode& settings, const std::string& key, const std::initializer_list<std::string>& values) noexcept;
-            void addSettings(config::SettingsNode& settings, const std::string& key, const std::vector<std::string>& values) noexcept;
+            void addSettings(config::SettingsNode& settings, const config::SettingsNode::SettingsKey& key, const config::SettingsNode::SettingsValue& value) noexcept;
+            void addSettings(config::SettingsNode& settings, const config::SettingsNode::SettingsKey& key, const std::initializer_list<std::string>& values) noexcept;
+            void addSettings(config::SettingsNode& settings, const config::SettingsNode::SettingsKey& key, const config::SettingsNode::SettingsValues& values) noexcept;
+            void addSettings(config::SettingsNode& settings, const config::SettingsNode::SettingsKeys& key, const config::SettingsNode::SettingsValues& values) noexcept;
             void writeSettingsFile(const std::string& filename, const config::SettingsNode& settings, const std::vector<core::Pattern>& patterns) noexcept;
 
             core::PatternCombinations createPatternCombination(const std::initializer_list<core::PatternKey>& keys, const std::initializer_list<core::PatternValue>& values) noexcept;
@@ -104,7 +128,6 @@ namespace execHelper {
                 CompilerUtilNames toNames(const std::map<core::PatternKey, core::PatternValue>& pattern) const noexcept;
             };
 
-            typedef std::vector<core::Pattern> Patterns;
             core::PatternKeys getAllPatternKeys(const std::initializer_list<std::reference_wrapper<const PatternUtil>>& patterns) noexcept;
             Patterns getAllPatterns(const std::initializer_list<std::reference_wrapper<const PatternUtil>>& patterns) noexcept;
 

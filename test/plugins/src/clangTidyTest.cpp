@@ -23,7 +23,8 @@ using execHelper::core::TaskCollection;
 using execHelper::test::OptionsStub;
 using execHelper::test::utils::addPatterns;
 using execHelper::test::utils::TargetUtil;
-using execHelper::test::utils::addSettings;
+using execHelper::test::utils::copyAndAppend;
+using execHelper::test::utils::combineVectors;
 using execHelper::core::test::ExecutorStub;
 
 namespace {
@@ -62,11 +63,7 @@ namespace execHelper { namespace plugins { namespace test {
             addPatterns(targetUtil.getPatterns(), options);
 
             SettingsNode& rootSettings = options.m_settings;
-            addSettings(rootSettings, PLUGIN_CONFIG_KEY, command);
-            addSettings(rootSettings[PLUGIN_CONFIG_KEY], "patterns", targetUtil.getKeys());
-
-            // Add the settings of an other command to make sure we take the expected ones
-            addSettings(rootSettings, PLUGIN_CONFIG_KEY, otherCommandKey);
+            rootSettings.add({PLUGIN_CONFIG_KEY, "patterns"}, targetUtil.getKeys());
 
             ClangTidy plugin;
             Task task;
@@ -78,72 +75,63 @@ namespace execHelper { namespace plugins { namespace test {
             TaskCollection checks;
             map<string, TaskCollection> sourceSpecificChecks;
 
-            SettingsNode* settings = &(rootSettings[PLUGIN_CONFIG_KEY]);
+            SettingsNode::SettingsKeys baseSettingsKeys = {PLUGIN_CONFIG_KEY};
+            SettingsNode::SettingsKeys otherBaseSettingsKeys = {PLUGIN_CONFIG_KEY, otherCommandKey};
 
             COMBINATIONS("Toggle between general and specific command settings") {
-                settings = &rootSettings[PLUGIN_CONFIG_KEY][command];
+                baseSettingsKeys.push_back(command);
             }
 
             COMBINATIONS("Add sources") {
                 sources = sourceKeys;
-                addSettings(*settings, "sources", sources);
-                addSettings(rootSettings[PLUGIN_CONFIG_KEY][otherCommandKey], "sources", {"source4", "source5"});
+                rootSettings.add(copyAndAppend(baseSettingsKeys, "sources"), sources);
+                rootSettings.add(copyAndAppend(otherBaseSettingsKeys, "sources"), {"source4", "source5"});
             }
 
             COMBINATIONS("Add a command line") {
                 commandLine = {"{" + targetUtil.target.getKey() + "}", "{" + targetUtil.runTarget.getKey() + "}"};
-                addSettings(*settings, "command-line", commandLine);
-                addSettings(rootSettings[PLUGIN_CONFIG_KEY][otherCommandKey], "command-line", "--some-command");
+                rootSettings.add(copyAndAppend(baseSettingsKeys, "command-line"), commandLine);
+                rootSettings.add(copyAndAppend(otherBaseSettingsKeys, "command-line"), "--some-command");
             }
 
             COMBINATIONS("Add command line to source") {
-                if(settings->contains("sources")) {
-                    if((*settings)["sources"].contains("source2")) {
-                        const map<string, TaskCollection> commandLineValues = {
-                            {sourceKey1, {"{" + targetUtil.target.getKey() + "}"}}, 
-                            {sourceKey2, {"{" + targetUtil.runTarget.getKey() + "}"}}, 
-                            {sourceKey3, {"{" + targetUtil.target.getKey() + "}", "{" + targetUtil.runTarget.getKey() + "}"}}
-                        };
+                if(rootSettings.contains(combineVectors(baseSettingsKeys, {"sources", "source2"}))) {
+                    const map<string, TaskCollection> commandLineValues = {
+                        {sourceKey1, {"{" + targetUtil.target.getKey() + "}"}}, 
+                        {sourceKey2, {"{" + targetUtil.runTarget.getKey() + "}"}}, 
+                        {sourceKey3, {"{" + targetUtil.target.getKey() + "}", "{" + targetUtil.runTarget.getKey() + "}"}}
+                    };
 
-                        addSettings((*settings)["sources"][sourceKey1], "command-line", commandLineValues.at(sourceKey1));
-                        addSettings((*settings)["sources"][sourceKey2], "command-line", commandLineValues.at(sourceKey2));
-                        addSettings((*settings)["sources"][sourceKey3], "command-line", commandLineValues.at(sourceKey3));
-                        addSettings(rootSettings[PLUGIN_CONFIG_KEY], "command-line", "--some-command");
-                        addSettings(rootSettings[PLUGIN_CONFIG_KEY][otherCommandKey], "command-line", "--some-command");
-
-                        sourceSpecificCommandLine[sourceKey1] = commandLineValues.at(sourceKey1);
-                        sourceSpecificCommandLine[sourceKey2] = commandLineValues.at(sourceKey2);
-                        sourceSpecificCommandLine[sourceKey3] = commandLineValues.at(sourceKey3);
+                    for(const auto& sourceKey : sourceKeys) {
+                        rootSettings.add(combineVectors(baseSettingsKeys, {"sources", sourceKey, "command-line"}), commandLineValues.at(sourceKey));
+                        sourceSpecificCommandLine[sourceKey] = commandLineValues.at(sourceKey);
                     }
+                    rootSettings.add(copyAndAppend(otherBaseSettingsKeys, "command-line"), "--some-command");
+                    rootSettings.add({PLUGIN_CONFIG_KEY, "command-line"}, "--some-command");
                 }
             }
 
             COMBINATIONS("Add checks") {
                 TaskCollection checkValue = {"check1", "check2-{" + targetUtil.target.getKey() + "}"};
-                addSettings(rootSettings[PLUGIN_CONFIG_KEY], "checks", checkValue);
-                addSettings(rootSettings[otherCommandKey], "checks", {"check3"});
+                rootSettings.add(copyAndAppend(baseSettingsKeys, "checks"), checkValue);
+                rootSettings.add(copyAndAppend(otherBaseSettingsKeys, "checks"), "check3");
                 checks.emplace_back("-checks=check1,check2-{" + targetUtil.target.getKey() + "}");
             }
 
             COMBINATIONS("Add checks to source") {
-                if(settings->contains("sources")) {
-                    if((*settings)["sources"].contains("source2")) {
-                        const map<string, TaskCollection> checkValues = {
-                            {sourceKey1, {"check1", "check2-{" + targetUtil.target.getKey() + "}"}}, 
-                            {sourceKey2, {"check3", "check4-{" + targetUtil.runTarget.getKey() + "}"}}, 
-                            {sourceKey3, {"check5", "check6-{" + targetUtil.target.getKey() + "}"}}
-                        };
+                if(rootSettings.contains(combineVectors(baseSettingsKeys, {"sources", "source2"}))) {
+                    const map<string, TaskCollection> checkValues = {
+                        {sourceKey1, {"check1", "check2-{" + targetUtil.target.getKey() + "}"}}, 
+                        {sourceKey2, {"check3", "check4-{" + targetUtil.runTarget.getKey() + "}"}}, 
+                        {sourceKey3, {"check5", "check6-{" + targetUtil.target.getKey() + "}"}}
+                    };
 
-                        addSettings((*settings)["sources"][sourceKey1], "checks", checkValues.at(sourceKey1));
-                        addSettings((*settings)["sources"][sourceKey2], "checks", checkValues.at(sourceKey2));
-                        addSettings((*settings)["sources"][sourceKey3], "checks", checkValues.at(sourceKey3));
-                        addSettings(rootSettings[PLUGIN_CONFIG_KEY], "checks", {"check7"});
-                        addSettings(rootSettings[PLUGIN_CONFIG_KEY][otherCommandKey], "checks", {"check7"});
-
-                        sourceSpecificChecks[sourceKey1] = toChecks(checkValues.at(sourceKey1));
-                        sourceSpecificChecks[sourceKey2] = toChecks(checkValues.at(sourceKey2));
-                        sourceSpecificChecks[sourceKey3] = toChecks(checkValues.at(sourceKey3));
+                    for(const auto& sourceKey : sourceKeys) {
+                        rootSettings.add(combineVectors(baseSettingsKeys, {"sources", sourceKey, "checks"}), checkValues.at(sourceKey));
+                        sourceSpecificChecks[sourceKey] = toChecks(checkValues.at(sourceKey));
                     }
+                    rootSettings.add({PLUGIN_CONFIG_KEY, "checks"}, "check7");
+                    rootSettings.add(copyAndAppend(otherBaseSettingsKeys, "checks"), "check8");
                 }
             }
 

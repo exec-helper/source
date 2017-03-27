@@ -35,7 +35,7 @@ namespace execHelper {
                 static bool getTree(const YAML::Node& rootNode, config::SettingsNode& settings) noexcept;
 
             private:
-                static void getSubTree(const YAML::Node& node, config::SettingsNode& yamlNode);
+                static void getSubTree(const YAML::Node& node, config::SettingsNode& yamlNode, const config::SettingsNode::SettingsKeys& keys) noexcept;
 
                 const YAML::Node m_node;
         };

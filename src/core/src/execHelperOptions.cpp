@@ -34,6 +34,7 @@ namespace execHelper { namespace core {
         m_verbose(false),
         m_dryRun(false),
         m_singleThreaded(false),
+        m_settings("ExecHelperRoot"),
         m_executor(nullptr)
     {
         ;
@@ -121,16 +122,22 @@ namespace execHelper { namespace core {
 
         static const string patternsKey("patterns");
         if(m_settings.contains(patternsKey)) {
-            for(const auto& pattern : m_settings[patternsKey].m_values) {
-                PatternKey key = pattern.m_key;
+            for(const auto& pattern : m_settings[patternsKey].values()) {
+                const SettingsNode& patternSettings = m_settings[patternsKey][pattern];
                 PatternValues defaultValues;
-                for(const auto& defaultValue : pattern["default-values"].toStringCollection()) {
+                for(const auto& defaultValue : patternSettings["default-values"].values()) {
                     defaultValues.push_back(defaultValue);
                 }
                 static const string shortOptionKey("short-option");
                 string shortOptionString;
-                if(pattern.contains(shortOptionKey)) {
-                    shortOptionString = pattern[shortOptionKey].m_values.back().m_key;
+                if(patternSettings.contains(shortOptionKey)) {
+                    SettingsNode::SettingsKeys shortOptionStrings = patternSettings[shortOptionKey].values();
+                    if(shortOptionStrings.empty()) {
+                        user_feedback_error("The value for the short option of " << pattern << " is empty");
+                        return false;
+                    } else {
+                        shortOptionString = shortOptionStrings.back();
+                    }
                 }
                 char shortOption = '\0';
                 if(! shortOptionString.empty()) {
@@ -139,13 +146,19 @@ namespace execHelper { namespace core {
 
                 static const string longOptionKey("long-option");
                 string longOption;
-                if(pattern.contains(longOptionKey)) {
-                    longOption = pattern[longOptionKey].m_values.back().m_key;
+                if(patternSettings.contains(longOptionKey)) {
+                    SettingsNode::SettingsKeys longOptionStrings = patternSettings[longOptionKey].values();
+                    if(longOptionStrings.empty()) {
+                        user_feedback_error("The value for the long option of " << pattern << " is empty");
+                        return false;
+                    } else {
+                        longOption = longOptionStrings.back();
+                    }
                 }
 
-                m_patternsHandler.addPattern(Pattern(key, defaultValues, shortOption, longOption));
+                m_patternsHandler.addPattern(Pattern(pattern, defaultValues, shortOption, longOption));
                 string option = longOption + "," + shortOptionString;
-                string explanation = string("Values for pattern '") + key + "'";
+                string explanation = string("Values for pattern '") + pattern + "'";
                 m_optionsDescriptions.addOption<PatternValues>(option, explanation, true);
             }
         }
@@ -186,15 +199,18 @@ namespace execHelper { namespace core {
 
     void ExecHelperOptions::printHelp() const noexcept {
         user_feedback(m_optionsDescriptions.getOptionDescriptions());
-        user_feedback("Configured commands:");
-        for(const auto& command : m_settings["commands"].m_values) {
-            stringstream commandStream;
-            commandStream << "  " << std::left << setw(20) << command.m_key;
-            if(! command.m_values.empty()) {
-                // Add an extra whitespace in case the key is longer than the minimum width that was set
-                commandStream << " " << command.toStringCollection().back();
+        if(m_settings.contains("commands")) {
+            user_feedback("Configured commands:");
+            for(const auto& command : m_settings["commands"].values()) {
+                stringstream commandStream;
+                commandStream << "  " << std::left << setw(20) << command;
+                SettingsNode::SettingsValues commmandDescription = m_settings["commands"].get({command}, {});
+                if(! commmandDescription.empty()) {
+                    // Add an extra whitespace in case the key is longer than the minimum width that was set
+                    commandStream << " " << commmandDescription.back();
+                }
+                user_feedback(commandStream.str());
             }
-            user_feedback(commandStream.str());
         }
     }
 

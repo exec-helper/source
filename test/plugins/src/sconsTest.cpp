@@ -19,7 +19,7 @@ using execHelper::core::TaskCollection;
 
 using execHelper::core::test::ExecutorStub;
 using execHelper::test::OptionsStub;
-using execHelper::test::utils::addSettings;
+using execHelper::test::utils::copyAndAppend;
 using execHelper::test::utils::TargetUtil;
 using execHelper::test::utils::CompilerUtil;
 using execHelper::test::utils::Patterns;
@@ -44,13 +44,11 @@ namespace execHelper { namespace plugins { namespace test {
             addPatterns(compilerUtil.getPatterns(), options);
 
             SettingsNode& rootSettings = options.m_settings;
-            addSettings(rootSettings, PLUGIN_CONFIG_KEY, command);
-            addSettings(rootSettings[PLUGIN_CONFIG_KEY], "patterns", targetUtil.getKeys());
-            addSettings(rootSettings[PLUGIN_CONFIG_KEY], "patterns", compilerUtil.getKeys());
+            rootSettings.add({PLUGIN_CONFIG_KEY, "patterns"}, targetUtil.getKeys());
+            rootSettings.add({PLUGIN_CONFIG_KEY, "patterns"}, compilerUtil.getKeys());
 
             // Add the settings of an other command to make sure we take the expected ones
             const string otherCommandKey("other-command");
-            addSettings(rootSettings, PLUGIN_CONFIG_KEY, otherCommandKey);
 
             Scons plugin;
             Task task;
@@ -60,29 +58,23 @@ namespace execHelper { namespace plugins { namespace test {
             TaskCollection verbosity;
             TaskCollection commandLine;
 
-            SettingsNode* settings = &(rootSettings[PLUGIN_CONFIG_KEY]);
+            SettingsNode::SettingsKeys baseSettingsKeys = {PLUGIN_CONFIG_KEY};
+            SettingsNode::SettingsKeys otherBaseSettingsKeys = {PLUGIN_CONFIG_KEY, otherCommandKey};
 
             COMBINATIONS("Toggle between general and specific command settings") {
-                settings = &rootSettings[PLUGIN_CONFIG_KEY][command];
+                baseSettingsKeys.push_back(command);
             }
 
             COMBINATIONS("Switch off multi-threading") {
-                addSettings(*settings, "single-threaded", "yes");
-                addSettings(rootSettings[PLUGIN_CONFIG_KEY][otherCommandKey], "single-threaded", "no");
+                rootSettings.add(copyAndAppend(baseSettingsKeys, "single-threaded"), "yes");
+                rootSettings.add(copyAndAppend(otherBaseSettingsKeys, "single-threaded"), "no");
                 jobs.clear();
             }
 
             COMBINATIONS("Switch on multi-threading") {
                 // Note: we may be overruling the option above
-                if(settings->contains("single-threaded")) {
-                    (*settings)["single-threaded"].m_values.clear();
-                    SettingsNode newNode;
-                    newNode.m_key = "no";
-                    (*settings)["single-threaded"].m_values.emplace_back(newNode);
-                } else {
-                    addSettings(*settings, "single-threaded", "no");
-                    addSettings(rootSettings[PLUGIN_CONFIG_KEY][otherCommandKey], "single-threaded", "yes");
-                }
+                rootSettings.add(copyAndAppend(baseSettingsKeys, "single-threaded"), "no");     // Last value counts
+                rootSettings.add(copyAndAppend(otherBaseSettingsKeys, "single-threaded"), "yes");
                 jobs = TaskCollection({"--jobs", "8"});
             }
 
@@ -102,8 +94,9 @@ namespace execHelper { namespace plugins { namespace test {
 
             COMBINATIONS("Add a command line") {
                 commandLine = {"{" + targetUtil.target.getKey() + "}{" + targetUtil.runTarget.getKey() + "}", "blaat/{HELLO}/{" + compilerUtil.compiler.getKey() + "}"};
-                addSettings(*settings, "command-line", commandLine);
-                addSettings(rootSettings[PLUGIN_CONFIG_KEY][otherCommandKey], "command-line", "--some-command");
+
+                rootSettings.add(copyAndAppend(baseSettingsKeys, "command-line"), commandLine);
+                rootSettings.add(copyAndAppend(otherBaseSettingsKeys, "command-line"), "--some-command");
             }
 
             expectedTask.append(jobs);

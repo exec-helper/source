@@ -18,8 +18,8 @@ using std::string;
 using execHelper::config::SettingsNode;
 using execHelper::core::TaskCollection;
 using execHelper::core::PatternCombinations;
-using execHelper::test::utils::addSettings;
 using execHelper::test::utils::createPatternCombination;
+using execHelper::test::utils::copyAndAppend;
 
 namespace execHelper { namespace plugins { namespace test {
     SCENARIO("Test the patterns key", "[plugins][pluginUtils]") {
@@ -38,10 +38,10 @@ namespace execHelper { namespace plugins { namespace test {
 
     SCENARIO("Test the containing settings", "[plugins][pluginUtils]") {
         GIVEN("A key, a random command and a setting that is in the root settings tree") {
-            string command("random-command");
-            string key("random-key");
-            SettingsNode rootSettings;
-            addSettings(rootSettings, key, "random-value");
+            const string command("random-command");
+            const string key("random-key");
+            SettingsNode rootSettings("pluginUtilsTest");
+            rootSettings.add({key}, "random-value");
 
             WHEN("We request the containing settings") {
                 boost::optional<const SettingsNode&> actualSettings = getContainingSettings(key, rootSettings, {});
@@ -61,11 +61,11 @@ namespace execHelper { namespace plugins { namespace test {
             }
         }
         GIVEN("A settings config and a key that is not in the settings config") {
-            string command("random-command");
-            string key("random-key");
-            string keyNotInConfig("other-random-key");
-            SettingsNode rootSettings;
-            addSettings(rootSettings, key, "random-value");
+            const string command("random-command");
+            const string key("random-key");
+            const string keyNotInConfig("other-random-key");
+            SettingsNode rootSettings("pluginUtilsTest");
+            rootSettings.add({key}, "random-value");
 
             WHEN("We request the containing settings") {
                 boost::optional<const SettingsNode&> actualSettings = getContainingSettings(key, rootSettings, {command});
@@ -77,11 +77,10 @@ namespace execHelper { namespace plugins { namespace test {
         }
 
         GIVEN("A key, a random command and a setting that is in the command settings tree") {
-            string command("random-command");
-            string key("random-key");
-            SettingsNode rootSettings;
-            addSettings(rootSettings, command, key);
-            addSettings(rootSettings[command], key, "random-value");
+            const string command("random-command");
+            const string key("random-key");
+            SettingsNode rootSettings("pluginUtilsTest");
+            rootSettings.add({command, key}, "random-value");
 
             WHEN("We request the command settings") {
                 boost::optional<const SettingsNode&> actualSettings = getContainingSettings(key, rootSettings, {command});
@@ -104,11 +103,10 @@ namespace execHelper { namespace plugins { namespace test {
 
     SCENARIO("Test the command line option getter", "[plugins][pluginUtils]") {
         GIVEN("A settings configuration that does not contain a command line setting") {
-            string command("random-command");
-            string key("random-key");
-            SettingsNode rootSettings;
-            addSettings(rootSettings, command, key);
-            addSettings(rootSettings[command], key, "random-value");
+            const string command("random-command");
+            const string key("random-key");
+            SettingsNode rootSettings("pluginUtilsTest");
+            rootSettings.add({command, key}, "random-value");
 
             PatternCombinations combination = createPatternCombination({"COMPILER", "MODE", "ARCHITECTURE", "DISTRIBUTION"}, {"compiler", "mode", "architecture", "distribution"});
 
@@ -121,10 +119,10 @@ namespace execHelper { namespace plugins { namespace test {
             }
         }
         GIVEN("A settings configuration that does contains an empty command line setting") {
-            string command("random-command");
-            string key("command-line");
-            SettingsNode rootSettings;
-            addSettings(rootSettings, command, key);
+            const string command("random-command");
+            const string key("command-line");
+            SettingsNode rootSettings("pluginUtilsTest");
+            rootSettings.add({command}, key);
 
             PatternCombinations combination = createPatternCombination({"COMPILER", "MODE", "ARCHITECTURE", "DISTRIBUTION"}, {"compiler", "mode", "architecture", "distribution"});
 
@@ -137,12 +135,11 @@ namespace execHelper { namespace plugins { namespace test {
             }
         }
         GIVEN("A settings configuration that does contains a command line setting") {
-            string command("random-command");
-            string key("command-line");
-            string value("random-command-line");
-            SettingsNode rootSettings;
-            addSettings(rootSettings, command, key);
-            addSettings(rootSettings[command], key, value);
+            const string command("random-command");
+            const string key("command-line");
+            const string value("random-command-line");
+            SettingsNode rootSettings("pluginUtilsTest");
+            rootSettings.add({command, key}, value);
 
             PatternCombinations combination = createPatternCombination({"COMPILER", "MODE", "ARCHITECTURE", "DISTRIBUTION"}, {"compiler", "mode", "architecture", "distribution"});
 
@@ -156,19 +153,16 @@ namespace execHelper { namespace plugins { namespace test {
             }
         }
         GIVEN("A settings configuration with a command that contains a specific command line setting and an other command that does not") {
-            string command("random-command");
-            string innerCommand1("inner-random-command1");
-            string innerCommand2("inner-random-command2");
-            string key("command-line");
-            string value1("random-command-line1");
-            string value2("random-command-line2");
-            SettingsNode rootSettings;
-            rootSettings.m_key = command;
-            addSettings(rootSettings, innerCommand1, key);
-            addSettings(rootSettings[innerCommand1], key, value1);
-            addSettings(rootSettings, command, innerCommand2);
-            addSettings(rootSettings, innerCommand2, "inner-command-command");
-            addSettings(rootSettings, key, value2);
+            const string command("random-command");
+            const string innerCommand1("inner-random-command1");
+            const string innerCommand2("inner-random-command2");
+            const string key("command-line");
+            const string value1("random-command-line1");
+            const string value2("random-command-line2");
+            SettingsNode rootSettings(command);
+            rootSettings.add({innerCommand1, key}, value1);
+            rootSettings.add({command, innerCommand2}, "inner-command-command");
+            rootSettings.add({key}, value2);
 
             PatternCombinations combination = createPatternCombination({"COMPILER", "MODE", "ARCHITECTURE", "DISTRIBUTION"}, {"compiler", "mode", "architecture", "distribution"});
 
@@ -198,23 +192,20 @@ namespace execHelper { namespace plugins { namespace test {
             }
         }
         GIVEN("A settings configuration with a command that contains a specific command line setting and an other command that does not and a command-line with patterns") {
-            string command("random-command");
-            string innerCommand1("inner-random-command1");
-            string innerCommand2("inner-random-command2");
-            string key("command-line");
-            vector<string> value1({"build/{COMPILER}", "mode={MODE}", "hello"});
-            vector<string> value2({"other-build/{DISTRIBUTION}-2", "architecture={ARCHITECTURE}", "random-command-line2"});
+            const string command("random-command");
+            const string innerCommand1("inner-random-command1");
+            const string innerCommand2("inner-random-command2");
+            const string key("command-line");
+            const vector<string> value1({"build/{COMPILER}", "mode={MODE}", "hello"});
+            const vector<string> value2({"other-build/{DISTRIBUTION}-2", "architecture={ARCHITECTURE}", "random-command-line2"});
+            const vector<string> patterns({"COMPILER", "MODE", "ARCHITECTURE", "DISTRIBUTION"});
 
-            vector<string> patterns({"COMPILER", "MODE", "ARCHITECTURE", "DISTRIBUTION"});
-
-            SettingsNode rootSettings;
-            rootSettings.m_key = command;
-            addSettings(rootSettings, innerCommand1, key);
-            addSettings(rootSettings[innerCommand1], key, value1);
-            addSettings(rootSettings, command, innerCommand2);
-            addSettings(rootSettings, innerCommand2, "inner-command-command");
-            addSettings(rootSettings, key, value2);
-            addSettings(rootSettings, "patterns", patterns);
+            SettingsNode rootSettings(command);
+            rootSettings.add({innerCommand1, key}, value1);
+            rootSettings.add({command}, innerCommand2);
+            rootSettings.add({innerCommand2}, "inner-command-command");
+            rootSettings.add({key}, value2);
+            rootSettings.add({"patterns"}, patterns);
 
             PatternCombinations combination = createPatternCombination({"COMPILER", "MODE", "ARCHITECTURE", "DISTRIBUTION"}, {"compiler", "mode", "architecture", "distribution"});
 

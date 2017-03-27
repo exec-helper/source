@@ -17,21 +17,22 @@
 using std::vector;
 using std::string;
 
+using execHelper::config::SettingsNode;
 using execHelper::core::Task;
 using execHelper::core::Pattern;
-
 using execHelper::plugins::MemoryHandler;
 
 using execHelper::test::OptionsStub;
 using execHelper::core::test::ExecutorStub;
 using execHelper::test::utils::Patterns;
-using execHelper::test::utils::addSettings;
+using execHelper::test::utils::copyAndAppend;
+using execHelper::test::utils::combineVectors;
 
 namespace {
     void setupBasicOptions(OptionsStub* options, const Patterns& patterns) {
-        addSettings(options->m_settings, "commands", {"selector-command"});
-        addSettings(options->m_settings, "selector-command", {"selector"});
-        addSettings(options->m_settings, "selector", {"selector-command"});
+        SettingsNode& rootSettings = options->m_settings;
+        rootSettings.add({"command", "selector-command"}, "selector");
+        rootSettings.add({"command", "selector"}, "selector-command");
 
         for(const auto& pattern : patterns) {
             options->m_patternsHandler->addPattern(pattern);
@@ -83,10 +84,12 @@ namespace execHelper { namespace plugins { namespace test {
             MemoryHandler memory;
 
             OptionsStub options;
+            SettingsNode& rootSettings = options.m_settings;
+            SettingsNode::SettingsKeys baseSettingsKeys = {"selector"};
 
             setupBasicOptions(&options, {testPattern1, testPattern2});
-            addSettings(options.m_settings["selector"][command1], "pattern", testPattern1.getKey());
-            addSettings(options.m_settings["selector"], "pattern", testPattern2.getKey());
+            rootSettings.add(combineVectors(baseSettingsKeys, {command1, "pattern"}), testPattern1.getKey());
+            rootSettings.add(copyAndAppend(baseSettingsKeys, "pattern"), testPattern2.getKey());
 
             Selector plugin;
             Task task;
@@ -144,10 +147,12 @@ namespace execHelper { namespace plugins { namespace test {
             MemoryHandler memory;
 
             OptionsStub options;
+            SettingsNode& rootSettings = options.m_settings;
+            SettingsNode::SettingsKeys baseSettingsKeys = {"selector"};
 
             setupBasicOptions(&options, {testPattern1, testPattern2});
-            addSettings(options.m_settings["selector"][commandlineCommand1], "pattern", testPattern1.getKey());
-            addSettings(options.m_settings["selector"], "pattern", testPattern2.getKey());
+            rootSettings.add(combineVectors(baseSettingsKeys, {commandlineCommand1, "pattern"}), testPattern1.getKey());
+            rootSettings.add(copyAndAppend(baseSettingsKeys, "pattern"), testPattern2.getKey());
 
             options.m_options.insert(make_pair(testPattern1.getLongOption(), commandLineOptions1));
             options.m_options.insert(make_pair(testPattern2.getLongOption(), commandLineOptions2));

@@ -22,7 +22,7 @@ using execHelper::config::SettingsNode;
 
 using execHelper::test::OptionsStub;
 using execHelper::core::test::ExecutorStub;
-using execHelper::test::utils::addSettings;
+using execHelper::test::utils::copyAndAppend;
 using execHelper::test::utils::TargetUtil;
 using execHelper::test::utils::CompilerUtil;
 using execHelper::test::utils::Patterns;
@@ -46,13 +46,11 @@ namespace execHelper { namespace plugins { namespace test {
             addPatterns(compilerUtil.getPatterns(), options);
 
             SettingsNode& rootSettings = options.m_settings;
-            addSettings(rootSettings, pluginConfigKey, command);
-            addSettings(rootSettings[pluginConfigKey], "patterns", targetUtil.getKeys());
-            addSettings(rootSettings[pluginConfigKey], "patterns", compilerUtil.getKeys());
+            rootSettings.add({pluginConfigKey, "patterns"}, targetUtil.getKeys());
+            rootSettings.add({pluginConfigKey, "patterns"}, compilerUtil.getKeys());
 
             // Add the settings of an other command to make sure we take the expected ones
             const string otherCommandKey("other-command");
-            addSettings(rootSettings, pluginConfigKey, otherCommandKey);
 
             Bootstrap plugin;
             Task task;
@@ -66,23 +64,24 @@ namespace execHelper { namespace plugins { namespace test {
             TaskCollection verbosity;
             TaskCollection commandLine;
 
-            SettingsNode* settings = &(rootSettings[pluginConfigKey]);
+            SettingsNode::SettingsKeys baseSettingsKeys = {pluginConfigKey};
+            SettingsNode::SettingsKeys otherBaseSettingsKeys = {pluginConfigKey, otherCommandKey};
 
             COMBINATIONS("Toggle between general and specific command settings") {
-                settings = &rootSettings[pluginConfigKey][command];
+                baseSettingsKeys.push_back(command);
             }
 
             COMBINATIONS("Set a build directory") {
                 const string buildDirValue("{" + compilerUtil.distribution.getKey() + "}/{" + compilerUtil.architecture.getKey() + "}/{HELLO}/{" + compilerUtil.compiler.getKey() + "}/hello{" + compilerUtil.mode.getKey() + " }world"); 
-                addSettings(*settings, "build-dir", buildDirValue);
-                addSettings(rootSettings[pluginConfigKey][otherCommandKey], "build-dir", "some/build/dir");
+                rootSettings.add(copyAndAppend(baseSettingsKeys, "build-dir"), buildDirValue);
+                rootSettings.add(copyAndAppend(otherBaseSettingsKeys, "build-dir"), "some/build/dir");
                 buildDir.emplace_back(buildDirValue);
             }
 
             COMBINATIONS("Set a different file name") {
                 const string filename = "other-filename.sh";
-                addSettings(*settings, "filename", filename);
-                addSettings(rootSettings[pluginConfigKey][otherCommandKey], "filename", "other-file.sh");
+                rootSettings.add(copyAndAppend(baseSettingsKeys, "filename"), filename);
+                rootSettings.add(copyAndAppend(otherBaseSettingsKeys, "filename"), "other-file.sh");
 
                 runCommand.clear();
                 runCommand.emplace_back("./" + filename);
@@ -90,8 +89,8 @@ namespace execHelper { namespace plugins { namespace test {
 
             COMBINATIONS("Set a different absolute file name") {
                 const string filename = "/other/absolute/filename.sh";
-                addSettings(*settings, "filename", filename);
-                addSettings(rootSettings[pluginConfigKey][otherCommandKey], "filename", "other-file.sh");
+                rootSettings.add(copyAndAppend(baseSettingsKeys, "filename"), filename);
+                rootSettings.add(copyAndAppend(otherBaseSettingsKeys, "filename"), "other-file.sh");
 
                 runCommand.clear();
                 runCommand.emplace_back(filename);
@@ -99,14 +98,14 @@ namespace execHelper { namespace plugins { namespace test {
 
             COMBINATIONS("Add a command line") {
                 commandLine = {"{" + targetUtil.target.getKey() + "}{" + targetUtil.runTarget.getKey() + "}"};
-                addSettings(*settings, "command-line", commandLine);
-                addSettings(rootSettings[pluginConfigKey][otherCommandKey], "command-line", "--some-command");
+                rootSettings.add(copyAndAppend(baseSettingsKeys, "command-line"), commandLine);
+                rootSettings.add(copyAndAppend(otherBaseSettingsKeys, "command-line"), "--some-command");
             }
 
             COMBINATIONS("Custom change directory command") {
                 const string changeDirectoryCommandValue = "cd{" + compilerUtil.distribution.getKey() + "}";
-                addSettings(*settings, "change-directory-command", changeDirectoryCommandValue);
-                addSettings(rootSettings[pluginConfigKey][otherCommandKey], "change-directory-command", "cdcd");
+                rootSettings.add(copyAndAppend(baseSettingsKeys, "change-directory-command"), changeDirectoryCommandValue);
+                rootSettings.add(copyAndAppend(otherBaseSettingsKeys, "change-directory-command"), "cdcd");
 
                 changeDirectoryCommand.clear();
                 changeDirectoryCommand.push_back(changeDirectoryCommandValue);
@@ -114,8 +113,8 @@ namespace execHelper { namespace plugins { namespace test {
 
             COMBINATIONS("Custom chain commands command") {
                 const string chainCommandsCommandValue = "&&{" + compilerUtil.architecture.getKey() + "}";
-                addSettings(*settings, "chain-commands-command", chainCommandsCommandValue);
-                addSettings(rootSettings[pluginConfigKey][otherCommandKey], "chain-commands-command", "&&&&");
+                rootSettings.add(copyAndAppend(baseSettingsKeys, "chain-commands-command"), chainCommandsCommandValue);
+                rootSettings.add(copyAndAppend(otherBaseSettingsKeys, "chain-commands-command"), "&&&&");
 
                 chainCommandsCommand.clear();
                 chainCommandsCommand.push_back(chainCommandsCommandValue);
