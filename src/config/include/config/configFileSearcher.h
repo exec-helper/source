@@ -16,7 +16,7 @@ namespace execHelper {
                 boost::optional<std::string> find(const std::string& filename) noexcept;
 
             private:
-                bool fileExist(std::string path) noexcept;
+                bool fileExist(const std::string& path) noexcept;
 
                 const SearchPaths m_searchPaths;
         };

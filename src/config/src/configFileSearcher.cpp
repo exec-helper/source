@@ -23,7 +23,7 @@ namespace execHelper {
             return boost::none;
         }
 
-        bool ConfigFileSearcher::fileExist(string path) noexcept {
+        bool ConfigFileSearcher::fileExist(const string& path) noexcept {
             ifstream infile(path);
             return infile.good();
         }
