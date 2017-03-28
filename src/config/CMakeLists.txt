@@ -1,6 +1,7 @@
 set(LIBRARY_NAME ${PROJECT_NAME}-config)
 
 set(SRCS    src/settingsNode.cpp
+            src/configFileSearcher.cpp
    )
 
 include_directories(include/config)

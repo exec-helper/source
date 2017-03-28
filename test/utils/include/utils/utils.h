@@ -16,9 +16,7 @@
 
 namespace execHelper {
     namespace config {
-        struct SettingsNode;
-    }
-    namespace core {
+        class SettingsNode;
     }
 }
 
