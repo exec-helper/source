@@ -83,13 +83,13 @@ namespace execHelper { namespace plugins { namespace test {
                 jobs.clear();
             }
 
-            COMBINATIONS("Switch on verbosity") {
-                options.m_verbosity = true;
-                verbosity.emplace_back("--debug=explain");
-            }
-
             COMBINATIONS("Switch off verbosity") {
                 options.m_verbosity = false;
+            }
+
+            COMBINATIONS("Switch on verbosity") {
+                verbosity.emplace_back("--debug=explain");
+                options.m_verbosity = true;
             }
 
             COMBINATIONS("Add a command line") {
