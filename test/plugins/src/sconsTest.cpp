@@ -65,12 +65,6 @@ namespace execHelper { namespace plugins { namespace test {
                 baseSettingsKeys.push_back(command);
             }
 
-            COMBINATIONS("Switch off multi-threading") {
-                rootSettings.add(copyAndAppend(baseSettingsKeys, "single-threaded"), "yes");
-                rootSettings.add(copyAndAppend(otherBaseSettingsKeys, "single-threaded"), "no");
-                jobs.clear();
-            }
-
             COMBINATIONS("Switch on multi-threading") {
                 // Note: we may be overruling the option above
                 rootSettings.add(copyAndAppend(baseSettingsKeys, "single-threaded"), "no");     // Last value counts
@@ -78,18 +72,24 @@ namespace execHelper { namespace plugins { namespace test {
                 jobs = TaskCollection({"--jobs", "8"});
             }
 
+            COMBINATIONS("Switch off multi-threading") {
+                rootSettings.add(copyAndAppend(baseSettingsKeys, "single-threaded"), "yes");
+                rootSettings.add(copyAndAppend(otherBaseSettingsKeys, "single-threaded"), "no");
+                jobs.clear();
+            }
+
             COMBINATIONS("Switch off the multi-threading option") {
                 options.m_singleThreaded = true;
                 jobs.clear();
             }
 
-            COMBINATIONS("Switch off verbosity") {
-                options.m_verbosity = false;
-            }
-
             COMBINATIONS("Switch on verbosity") {
                 options.m_verbosity = true;
                 verbosity.emplace_back("--debug=explain");
+            }
+
+            COMBINATIONS("Switch off verbosity") {
+                options.m_verbosity = false;
             }
 
             COMBINATIONS("Add a command line") {

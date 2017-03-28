@@ -18,11 +18,9 @@ using std::stringstream;
 using std::endl;
 
 using execHelper::config::SettingsNode;
-using execHelper::core::Pattern;
 using execHelper::test::utils::basename;
 using execHelper::test::utils::convertToConfig;
 using execHelper::test::utils::writeSettingsFile;
-using execHelper::test::utils::toString;
 
 namespace execHelper { namespace yaml { namespace test {
     SCENARIO("Yaml wrapper test", "[yaml][yamlwrapper]") {
