@@ -49,7 +49,7 @@ namespace execHelper { namespace plugins {
                 sourceTask.append(getChecks(checksCollection));
             }
 
-            TaskCollection warningAsErrorCollection = ConfigValue<TaskCollection>::get("warning-as-error", {}, rootSettings, configKeys);
+            TaskCollection warningAsErrorCollection = ConfigValue<TaskCollection>::get("warnings-as-errors", {}, rootSettings, configKeys);
             if(!warningAsErrorCollection.empty()) {
                 string warningAsError = getWarningAsError(warningAsErrorCollection, checksCollection);
                 if(!warningAsError.empty()) {
@@ -80,7 +80,7 @@ namespace execHelper { namespace plugins {
 
     string ClangTidy::getWarningAsError(const TaskCollection& warningAsErrorCollection, const TaskCollection& checksCollection) noexcept {
         // Check if we are in the special case where we inherit the values from checksCollection
-        string result("-warning-as-error=");
+        string result("-warnings-as-errors=");
         if(warningAsErrorCollection.size() == 1U && warningAsErrorCollection.front() == "all") {
             if(checksCollection.empty()) {
                 return "";
@@ -97,7 +97,7 @@ namespace execHelper { namespace plugins {
 
     string ClangTidy::listChecks(const TaskCollection& checks) noexcept {
         string result;
-        if(checks.size() == 0) {
+        if(checks.empty()) {
             return result;
         }
         for(size_t i = 0; i < checks.size() - 1; ++i) {

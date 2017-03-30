@@ -18,7 +18,6 @@ using execHelper::core::Task;
 using execHelper::plugins::Pmd;
 
 using execHelper::test::OptionsStub;
-using execHelper::test::utils::addSettings;
 using execHelper::test::utils::Patterns;
 using execHelper::test::utils::PATTERN1;
 using execHelper::test::utils::PATTERN2;
@@ -47,23 +46,22 @@ namespace execHelper { namespace plugins { namespace test {
         }
     }
 
-    SCENARIO("Test the mandatory options of the pmd plugin", "[plugins][valgrind]") {
+    SCENARIO("Test the mandatory options of the pmd plugin", "[plugins][pmd]") {
         GIVEN("The respective configuration and the plugin") {
             const string command("pmd-command");
 
             OptionsStub options;
             SettingsNode& rootSettings = options.m_settings;
-            addSettings(rootSettings, pmdConfigKey, command);
 
             Pmd plugin;
             Task task;
 
             WHEN("We add the tool config parameter") {
                 AND_WHEN("We use a general parameter") {
-                    addSettings(rootSettings[pmdConfigKey], "tool", "tool");
+                    rootSettings.add({pmdConfigKey, "tool"}, "tool");
                 }
                 AND_WHEN("We use a specific parameter") {
-                    addSettings(rootSettings[pmdConfigKey][command], "tool", "tool");
+                    rootSettings.add({pmdConfigKey, command, "tool"}, "tool");
                 }
 
                 THEN_WHEN("We apply the plugin") {
@@ -77,22 +75,22 @@ namespace execHelper { namespace plugins { namespace test {
 
             WHEN("We add the exec config parameter") {
                 THEN("As a general parameter") {
-                    addSettings(rootSettings[pmdConfigKey], "exec", "pmd.sh");
+                    rootSettings.add({pmdConfigKey, "exec"}, "pmd.sh");
                 }
                 THEN("As a specific parameter") {
-                    addSettings(rootSettings[pmdConfigKey][command], "exec", "pmd.sh");
+                    rootSettings.add({pmdConfigKey, command, "exec"}, "pmd.sh");
                 }
                 REQUIRE_FALSE(plugin.apply(command, task, options));
             }
 
             WHEN("We add all mandatory config parameters and apply command ") {
                 THEN("As a general command") {
-                    addSettings(rootSettings[pmdConfigKey], "tool", "tool");
-                    addSettings(rootSettings[pmdConfigKey], "exec", "pmd.sh");
+                    rootSettings.add({pmdConfigKey, "tool"}, "tool");
+                    rootSettings.add({pmdConfigKey, "exec"}, "pmd.sh");
                 }
                 THEN("As a specific command") {
-                    addSettings(rootSettings[pmdConfigKey][command], "tool", "tool");
-                    addSettings(rootSettings[pmdConfigKey][command], "exec", "pmd.sh");
+                    rootSettings.add({pmdConfigKey, command, "tool"}, "tool");
+                    rootSettings.add({pmdConfigKey, command, "exec"}, "pmd.sh");
                 }
 
                 REQUIRE(plugin.apply(command, task, options));
@@ -105,16 +103,17 @@ namespace execHelper { namespace plugins { namespace test {
         }
     }
 
-    SCENARIO("Test the language config options", "[plugins][valgrind]") {
+    SCENARIO("Test the language config options", "[plugins][pmd]") {
         GIVEN("The respective configuration and the plugin") {
             const string command("pmd-command");
             const string languageConfigKey("language");
 
             OptionsStub options;
             SettingsNode& rootSettings = options.m_settings;
-            addSettings(rootSettings, pmdConfigKey, command);
-            addSettings(rootSettings[pmdConfigKey], "tool", "cpd");
-            addSettings(rootSettings[pmdConfigKey], "exec", "pmd.sh");
+            const string binary("pmd.sh");
+            const string tool("tool1");
+            rootSettings.add({pmdConfigKey, "tool"}, tool);
+            rootSettings.add({pmdConfigKey, "exec"}, binary);
 
             Pmd plugin;
             Task task;
@@ -123,39 +122,39 @@ namespace execHelper { namespace plugins { namespace test {
                 const string languageValue("language1");
 
                 THEN("As a general command") {
-                    addSettings(rootSettings[pmdConfigKey], languageConfigKey, languageValue);
+                    rootSettings.add({pmdConfigKey, languageConfigKey}, languageValue);
                 }
                 THEN("As a specific command") {
-                    addSettings(rootSettings[pmdConfigKey][command], languageConfigKey, languageValue);
+                    rootSettings.add({pmdConfigKey, command, languageConfigKey}, languageValue);
                 }
 
                 REQUIRE(plugin.apply(command, task, options));
 
                 ExecutorStub::TaskQueue actualTasks;
-                Task actualTask({"pmd.sh", "cpd", "--language", languageValue});
+                Task actualTask({"pmd.sh", tool, "--language", languageValue});
                 actualTasks.emplace_back(actualTask);
                 REQUIRE(actualTasks == options.m_executor.getExecutedTasks());
             }
 
             WHEN("We do not define the language for the general commands and run the plugin") {
                 THEN("As a general command") {
-                    addSettings(rootSettings, pmdConfigKey, languageConfigKey);
+                    rootSettings.add({pmdConfigKey}, languageConfigKey);
                 }
                 THEN("As a specific command") {
-                    addSettings(rootSettings[pmdConfigKey], command, languageConfigKey);
+                    rootSettings.add({pmdConfigKey, command}, languageConfigKey);
                 }
 
                 REQUIRE(plugin.apply(command, task, options));
 
                 ExecutorStub::TaskQueue actualTasks;
-                Task actualTask({"pmd.sh", "cpd"});
+                Task actualTask({binary, tool});
                 actualTasks.emplace_back(actualTask);
                 REQUIRE(actualTasks == options.m_executor.getExecutedTasks());
             }
         }
     }
 
-    SCENARIO("Test the cpd tool config options", "[plugins][valgrind]") {
+    SCENARIO("Test the cpd tool config options", "[plugins][pmd]") {
         GIVEN("The respective configuration and the plugin") {
             const string command("pmd-command");
             const string minimumTokensConfigKey("minimum-tokens");
@@ -163,9 +162,10 @@ namespace execHelper { namespace plugins { namespace test {
 
             OptionsStub options;
             SettingsNode& rootSettings = options.m_settings;
-            addSettings(rootSettings, pmdConfigKey, command);
-            addSettings(rootSettings[pmdConfigKey], "tool", "cpd");
-            addSettings(rootSettings[pmdConfigKey], "exec", "pmd.sh");
+            const string tool("cpd");
+            const string binary("pmd.sh");
+            rootSettings.add({pmdConfigKey, "tool"}, tool);
+            rootSettings.add({pmdConfigKey, "exec"}, binary);
 
             const string minimumTokensValue("minimum-tokens-value");
             const vector<string> filesValue({"file-value1", "file-value2"});
@@ -175,18 +175,18 @@ namespace execHelper { namespace plugins { namespace test {
 
             WHEN("We define the minimum tokens and files config settings and run the plugin") {
                 THEN("As a general command") {
-                    addSettings(rootSettings[pmdConfigKey][command], minimumTokensConfigKey, minimumTokensValue);
-                    addSettings(rootSettings[pmdConfigKey][command], filesConfigKey, filesValue);
+                    rootSettings.add({pmdConfigKey, minimumTokensConfigKey}, minimumTokensValue);
+                    rootSettings.add({pmdConfigKey, filesConfigKey}, filesValue);
                 }
                 THEN("As a specific command") {
-                    addSettings(rootSettings[pmdConfigKey], minimumTokensConfigKey, minimumTokensValue);
-                    addSettings(rootSettings[pmdConfigKey], filesConfigKey, filesValue);
+                    rootSettings.add({pmdConfigKey, command, minimumTokensConfigKey}, minimumTokensValue);
+                    rootSettings.add({pmdConfigKey, command, filesConfigKey}, filesValue);
                 }
 
                 REQUIRE(plugin.apply(command, task, options));
 
                 ExecutorStub::TaskQueue actualTasks;
-                Task actualTask({"pmd.sh", "cpd", "--minimum-tokens", minimumTokensValue});
+                Task actualTask({binary, tool, "--minimum-tokens", minimumTokensValue});
                 for(const auto& fileValue : filesValue) {
                     actualTask.append("--files");
                     actualTask.append(fileValue);
@@ -197,18 +197,18 @@ namespace execHelper { namespace plugins { namespace test {
 
             WHEN("We do not define the minimum tokens config settings and run the plugin") {
                 THEN("As a general command") {
-                    addSettings(rootSettings, pmdConfigKey, minimumTokensConfigKey);
-                    addSettings(rootSettings, pmdConfigKey, filesConfigKey);
+                    rootSettings.add({pmdConfigKey}, minimumTokensConfigKey);
+                    rootSettings.add({pmdConfigKey}, filesConfigKey);
                 }
                 THEN("As a specific command") {
-                    addSettings(rootSettings[pmdConfigKey], command, minimumTokensConfigKey);
-                    addSettings(rootSettings[pmdConfigKey], command, filesConfigKey);
+                    rootSettings.add({pmdConfigKey, command}, minimumTokensConfigKey);
+                    rootSettings.add({pmdConfigKey, command}, filesConfigKey);
                 }
 
                 REQUIRE(plugin.apply(command, task, options));
 
                 ExecutorStub::TaskQueue actualTasks;
-                Task actualTask({"pmd.sh", "cpd"});
+                Task actualTask({binary, tool});
                 actualTasks.emplace_back(actualTask);
                 REQUIRE(actualTasks == options.m_executor.getExecutedTasks());
             }
@@ -222,9 +222,10 @@ namespace execHelper { namespace plugins { namespace test {
 
             OptionsStub options;
             SettingsNode& rootSettings = options.m_settings;
-            addSettings(rootSettings, pmdConfigKey, command);
-            addSettings(rootSettings[pmdConfigKey], "tool", "tool1");
-            addSettings(rootSettings[pmdConfigKey], "exec", "pmd.sh");
+            const string tool("tool1");
+            const string binary("pmd.sh");
+            rootSettings.add({pmdConfigKey, "tool"}, tool);
+            rootSettings.add({pmdConfigKey, "exec"}, binary);
 
             Pmd plugin;
             Task task;
@@ -233,16 +234,17 @@ namespace execHelper { namespace plugins { namespace test {
                 const vector<string> commandLine({"arg1", "--arg2"});
 
                 THEN("As a general command") {
-                    addSettings(rootSettings[pmdConfigKey], "command-line", commandLine);
+                    rootSettings.add({pmdConfigKey, "command-line"}, commandLine);
                 }
                 THEN("As a specific command") {
-                    addSettings(rootSettings[pmdConfigKey][command], "command-line", commandLine);
+                    rootSettings.add({pmdConfigKey, command, "command-line"}, commandLine);
                 }
 
                 REQUIRE(plugin.apply(command, task, options));
 
                 ExecutorStub::TaskQueue actualTasks;
-                Task actualTask({"pmd.sh", "tool1", "arg1", "--arg2"});
+                Task actualTask({binary, tool});
+                actualTask.append(commandLine); 
                 actualTasks.emplace_back(actualTask);
                 REQUIRE(actualTasks == options.m_executor.getExecutedTasks());
             }
@@ -258,16 +260,16 @@ namespace execHelper { namespace plugins { namespace test {
                 THEN("As a general command") {
                     // Add the keys to the patterns config value
                     for(const auto& pattern : PATTERNS) {
-                        addSettings(rootSettings[pmdConfigKey], "patterns", pattern.getKey());
+                        rootSettings.add({pmdConfigKey, "patterns"}, pattern.getKey());
                     }
-                    addSettings(rootSettings[pmdConfigKey], "command-line", commandLine);
+                    rootSettings.add({pmdConfigKey, "command-line"}, commandLine);
                 }
                 THEN("As a specific command") {
                     // Add the keys to the patterns config value
                     for(const auto& pattern : PATTERNS) {
-                        addSettings(rootSettings[pmdConfigKey][command], "patterns", pattern.getKey());
+                        rootSettings.add({pmdConfigKey, command, "patterns"}, pattern.getKey());
                     }
-                    addSettings(rootSettings[pmdConfigKey][command], "command-line", commandLine);
+                    rootSettings.add({pmdConfigKey, command, "command-line"}, commandLine);
                 }
 
                 REQUIRE(plugin.apply(command, task, options));
@@ -275,7 +277,7 @@ namespace execHelper { namespace plugins { namespace test {
                 vector<Task> actualTasks;
                 for(const auto& PATTERN1Values : PATTERN1.getDefaultValues()) {
                     for(const auto& PATTERN2Values : PATTERN2.getDefaultValues()) {
-                        Task actualTask({"pmd.sh", "tool1"});
+                        Task actualTask({binary, tool});
                         actualTask.append(PATTERN1Values);
                         actualTask.append("--" + PATTERN2Values);
                         actualTasks.emplace_back(actualTask);

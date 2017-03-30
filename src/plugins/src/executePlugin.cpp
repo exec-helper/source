@@ -53,7 +53,7 @@ namespace execHelper { namespace plugins {
                 // Check if it exists as an other target in the settings
                 if(options.getSettings().contains(pluginName)) {
                     // Then use executeplugin as the plugin 
-                    plugin = make_unique<ExecutePlugin>(options.getSettings(pluginName).toStringCollection());
+                    plugin = make_unique<ExecutePlugin>(options.getSettings(pluginName).values());
                     commandToPass = pluginName;
                 } else {
                     user_feedback_error("Could not find a command or plugin called '" << pluginName << "'");

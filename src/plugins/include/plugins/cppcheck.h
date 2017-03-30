@@ -7,7 +7,7 @@
 
 namespace execHelper {
     namespace config {
-        struct SettingsNode;
+        class SettingsNode;
     }
     namespace core {
         class TargetDescriptionElement;

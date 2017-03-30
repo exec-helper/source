@@ -1,42 +1,43 @@
-commands:       # The 'commands' target is predefined
+commands: 
     - init
     - build
     - run
     - analyze
 
-init:           # The other commands are based on the content of 'commands'
+init: 
     - git-submodules
     - configure
 
-build:
+build: 
     - scons
     - make
 
-run:
+run: 
     - shellRunner
+    - command-line
 
-analyze:
+analyze: 
     - cppcheck
     - clang-static-analyzer
     - pmd
     - simian
 
-git-submodules:             # Settings of submodules can be defined completely independent of its use
-    submodules:
+git-submodules: 
+    submodules: 
         - 3rdparty/Catch
         - 3rdparty/benchmark
 
-scons:
-    patterns:
+scons: 
+    patterns: 
         - COMPILER
         - MODE
     build-dir: build/{COMPILER}/{MODE}
     single-threaded: yes
     command-line: compiler={COMPILER} mode={MODE}
 
-pmd:
+pmd: 
     auto-install: yes
 
-shellRunner:
-    command-line: echo "hello"
+command-line: 
+    run: command-line
 

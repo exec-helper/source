@@ -23,14 +23,16 @@ using execHelper::core::TaskCollection;
 using execHelper::test::OptionsStub;
 using execHelper::test::utils::addPatterns;
 using execHelper::test::utils::TargetUtil;
-using execHelper::test::utils::addSettings;
+using execHelper::test::utils::copyAndAppend;
+using execHelper::test::utils::combineVectors;
 using execHelper::core::test::ExecutorStub;
-
-using execHelper::test::utils::toString;
 
 namespace {
     const string PLUGIN_CONFIG_KEY("clang-tidy");
     const string PLUGIN_COMMAND("clang-tidy");
+    const string SOURCES_KEY("sources");
+    const string WARNING_AS_ERROR_KEY("warnings-as-errors");
+    const string WARNING_AS_ERROR_INHERIT_KEY("all");
 
     TaskCollection toChecks(const TaskCollection& taskCollection) noexcept {
         if(taskCollection.empty()) {
@@ -48,12 +50,34 @@ namespace {
         if(taskCollection.empty()) {
             return TaskCollection();
         }
-        string result="-warning-as-error=";
+        string result="-warnings-as-errors=";
         for(size_t i = 0; i < taskCollection.size() - 1; ++i) {
             result += taskCollection[i] + ",";
         }
         result += taskCollection.back();
         return TaskCollection({result});
+    }
+
+    inline void inheritChecks(const TaskCollection& sourceKeys, TaskCollection* warningAsError, map<string, TaskCollection>* sourceSpecificWarningAsError, const TaskCollection& checks, const map<string, TaskCollection>& sourceSpecificChecks) {
+        static const string toReplace("-checks=");
+        if(!sourceSpecificChecks.empty()) {
+            *sourceSpecificWarningAsError = sourceSpecificChecks;
+            for(auto& entry : *sourceSpecificWarningAsError) {
+                for(auto& parameter : entry.second) {
+                    size_t pos = parameter.find(toReplace);
+                    parameter.replace(pos, toReplace.size(), "-warnings-as-errors=");
+                }
+            }
+        } else {
+            *warningAsError = checks;
+            for(auto& parameter : *warningAsError) {
+                size_t pos = parameter.find(toReplace);
+                parameter.replace(pos, toReplace.size(), "-warnings-as-errors=");
+            }
+            for(const auto& sourceKey : sourceKeys) {
+                (*sourceSpecificWarningAsError)[sourceKey] = *warningAsError;
+            }
+        }
     }
 }
 
@@ -70,17 +94,12 @@ namespace execHelper { namespace plugins { namespace test {
         const vector<string> sourceKeys({sourceKey1, sourceKey2, sourceKey3});
 
         MAKE_COMBINATIONS("Of several settings") {
-            std::cout << make_combinations_index << std::endl;
             OptionsStub options;
 
             addPatterns(targetUtil.getPatterns(), options);
 
             SettingsNode& rootSettings = options.m_settings;
-            addSettings(rootSettings, PLUGIN_CONFIG_KEY, command);
-            addSettings(rootSettings[PLUGIN_CONFIG_KEY], "patterns", targetUtil.getKeys());
-
-            // Add the settings of an other command to make sure we take the expected ones
-            addSettings(rootSettings, PLUGIN_CONFIG_KEY, otherCommandKey);
+            rootSettings.add({PLUGIN_CONFIG_KEY, "patterns"}, targetUtil.getKeys());
 
             ClangTidy plugin;
             Task task;
@@ -94,129 +113,111 @@ namespace execHelper { namespace plugins { namespace test {
             TaskCollection warningAsError;
             map<string, TaskCollection> sourceSpecificWarningAsError;
 
-            SettingsNode* tmpSettings = &(rootSettings[PLUGIN_CONFIG_KEY]);
+            SettingsNode::SettingsKeys baseSettingsKeys = {PLUGIN_CONFIG_KEY};
+            SettingsNode::SettingsKeys otherBaseSettingsKeys = {PLUGIN_CONFIG_KEY, otherCommandKey};
 
             COMBINATIONS("Toggle between general and specific command settings") {
-                tmpSettings = &(rootSettings[PLUGIN_CONFIG_KEY][command]);
+                baseSettingsKeys.push_back(command);
             }
-            SettingsNode* const settings = tmpSettings;
 
             COMBINATIONS("Add sources") {
                 sources = sourceKeys;
-                addSettings(*settings, "sources", sources);
-                addSettings(rootSettings[PLUGIN_CONFIG_KEY][otherCommandKey], "sources", {"source4", "source5"});
+                rootSettings.add(copyAndAppend(baseSettingsKeys, SOURCES_KEY), sources);
+                rootSettings.add(copyAndAppend(otherBaseSettingsKeys, SOURCES_KEY), {"source4", "source5"});
             }
 
             COMBINATIONS("Add a command line") {
                 commandLine = {"{" + targetUtil.target.getKey() + "}", "{" + targetUtil.runTarget.getKey() + "}"};
-                addSettings(*settings, "command-line", commandLine);
-                addSettings(rootSettings[PLUGIN_CONFIG_KEY][otherCommandKey], "command-line", "--some-command");
+                rootSettings.add(copyAndAppend(baseSettingsKeys, "command-line"), commandLine);
+                rootSettings.add(copyAndAppend(otherBaseSettingsKeys, "command-line"), "--some-command");
             }
 
             COMBINATIONS("Add command line to source") {
-                if(settings->contains("sources")) {
-                    if((*settings)["sources"].contains(sourceKey2)) {
-                        const map<string, TaskCollection> commandLineValues = {
-                            {sourceKey1, {"{" + targetUtil.target.getKey() + "}"}}, 
-                            {sourceKey2, {"{" + targetUtil.runTarget.getKey() + "}"}}, 
-                            {sourceKey3, {"{" + targetUtil.target.getKey() + "}", "{" + targetUtil.runTarget.getKey() + "}"}}
-                        };
+                if(rootSettings.contains(combineVectors(baseSettingsKeys, {SOURCES_KEY, "source2"}))) {
+                    const map<string, TaskCollection> commandLineValues = {
+                        {sourceKey1, {"{" + targetUtil.target.getKey() + "}"}}, 
+                        {sourceKey2, {"{" + targetUtil.runTarget.getKey() + "}"}}, 
+                        {sourceKey3, {"{" + targetUtil.target.getKey() + "}", "{" + targetUtil.runTarget.getKey() + "}"}}
+                    };
 
-                        addSettings((*settings)["sources"][sourceKey1], "command-line", commandLineValues.at(sourceKey1));
-                        addSettings((*settings)["sources"][sourceKey2], "command-line", commandLineValues.at(sourceKey2));
-                        addSettings((*settings)["sources"][sourceKey3], "command-line", commandLineValues.at(sourceKey3));
-                        addSettings(rootSettings[PLUGIN_CONFIG_KEY], "command-line", "--some-command");
-                        addSettings(rootSettings[PLUGIN_CONFIG_KEY][otherCommandKey], "command-line", "--some-command");
-
-                        sourceSpecificCommandLine[sourceKey1] = commandLineValues.at(sourceKey1);
-                        sourceSpecificCommandLine[sourceKey2] = commandLineValues.at(sourceKey2);
-                        sourceSpecificCommandLine[sourceKey3] = commandLineValues.at(sourceKey3);
+                    for(const auto& sourceKey : sourceKeys) {
+                        rootSettings.add(combineVectors(baseSettingsKeys, {SOURCES_KEY, sourceKey, "command-line"}), commandLineValues.at(sourceKey));
+                        sourceSpecificCommandLine[sourceKey] = commandLineValues.at(sourceKey);
                     }
+                    rootSettings.add(copyAndAppend(otherBaseSettingsKeys, "command-line"), "--some-command");
+                    rootSettings.add({PLUGIN_CONFIG_KEY, "command-line"}, "--some-command");
                 }
             }
 
             COMBINATIONS("Add checks") {
                 TaskCollection checkValue = {"check1", "check2-{" + targetUtil.target.getKey() + "}"};
-                addSettings(*settings, "checks", checkValue);
-                addSettings(rootSettings[PLUGIN_CONFIG_KEY][otherCommandKey], "checks", {"check3"});
+                rootSettings.add(copyAndAppend(baseSettingsKeys, "checks"), checkValue);
+                rootSettings.add(copyAndAppend(otherBaseSettingsKeys, "checks"), "check3");
                 checks.emplace_back("-checks=check1,check2-{" + targetUtil.target.getKey() + "}");
             }
 
             COMBINATIONS("Add checks to source") {
-                if(settings->contains("sources")) {
-                    if((*settings)["sources"].contains(sourceKey2)) {
-                        const map<string, TaskCollection> checkValues = {
-                            {sourceKey1, {"check1", "check2-{" + targetUtil.target.getKey() + "}"}}, 
-                            {sourceKey2, {"check3", "check4-{" + targetUtil.runTarget.getKey() + "}"}}, 
-                            {sourceKey3, {"check5", "check6-{" + targetUtil.target.getKey() + "}"}}
-                        };
+                if(rootSettings.contains(combineVectors(baseSettingsKeys, {SOURCES_KEY, "source2"}))) {
+                    const map<string, TaskCollection> checkValues = {
+                        {sourceKey1, {"check1", "check2-{" + targetUtil.target.getKey() + "}"}}, 
+                        {sourceKey2, {"check3", "check4-{" + targetUtil.runTarget.getKey() + "}"}}, 
+                        {sourceKey3, {"check5", "check6-{" + targetUtil.target.getKey() + "}"}}
+                    };
 
-                        addSettings((*settings)["sources"][sourceKey1], "checks", checkValues.at(sourceKey1));
-                        addSettings((*settings)["sources"][sourceKey2], "checks", checkValues.at(sourceKey2));
-                        addSettings((*settings)["sources"][sourceKey3], "checks", checkValues.at(sourceKey3));
-                        addSettings(rootSettings[PLUGIN_CONFIG_KEY], "checks", {"check7"});
-                        addSettings(rootSettings[PLUGIN_CONFIG_KEY][otherCommandKey], "checks", {"check7"});
-
-                        sourceSpecificChecks[sourceKey1] = toChecks(checkValues.at(sourceKey1));
-                        sourceSpecificChecks[sourceKey2] = toChecks(checkValues.at(sourceKey2));
-                        sourceSpecificChecks[sourceKey3] = toChecks(checkValues.at(sourceKey3));
+                    for(const auto& sourceKey : sourceKeys) {
+                        rootSettings.add(combineVectors(baseSettingsKeys, {SOURCES_KEY, sourceKey, "checks"}), checkValues.at(sourceKey));
+                        sourceSpecificChecks[sourceKey] = toChecks(checkValues.at(sourceKey));
                     }
+                    rootSettings.add({PLUGIN_CONFIG_KEY, "checks"}, "check7");
+                    rootSettings.add(copyAndAppend(otherBaseSettingsKeys, "checks"), "check8");
                 }
             }
 
             COMBINATIONS("Add warning as error") {
                 const TaskCollection warningAsErrorValue = {"warningAsError1", "warningAsError2", "warningAsError3"};
-                addSettings(*settings, "warning-as-error", warningAsErrorValue);
-                addSettings(rootSettings[PLUGIN_CONFIG_KEY][otherCommandKey], "warning-as-error", {"warningAsError4"});
-                warningAsError.emplace_back("-warning-as-error=warningAsError1,warningAsError2,warningAsError3");
+                rootSettings.add(copyAndAppend(baseSettingsKeys, WARNING_AS_ERROR_KEY), warningAsErrorValue);
+                rootSettings.add(copyAndAppend(otherBaseSettingsKeys, WARNING_AS_ERROR_KEY), {"warningAsError4"});
+                warningAsError.emplace_back("-warnings-as-errors=warningAsError1,warningAsError2,warningAsError3");
             }
 
             COMBINATIONS("Add warning as error to source") {
-                if(settings->contains("sources")) {
-                    if((*settings)["sources"].contains(sourceKey2)) {
-                        const map<string, TaskCollection> warningAsErrorValues = {
-                            {sourceKey1, {"warningAsError1", "warningAsError2-{" + targetUtil.target.getKey() + "}"}}, 
-                            {sourceKey2, {"warningAsError3", "warningAsError4-{" + targetUtil.runTarget.getKey() + "}"}}, 
-                            {sourceKey3, {"warningAsError5", "warningAsError6-{" + targetUtil.target.getKey() + "}"}}
-                        };
+                const map<string, TaskCollection> warningAsErrorValues = {
+                    {sourceKey1, {"warningAsError1", "warningAsError2-{" + targetUtil.target.getKey() + "}"}}, 
+                    {sourceKey2, {"warningAsError3", "warningAsError4-{" + targetUtil.runTarget.getKey() + "}"}}, 
+                    {sourceKey3, {"warningAsError5", "warningAsError6-{" + targetUtil.target.getKey() + "}"}}
+                };
 
-                        addSettings((*settings)["sources"][sourceKey1], "warning-as-error", warningAsErrorValues.at(sourceKey1));
-                        addSettings((*settings)["sources"][sourceKey2], "warning-as-error", warningAsErrorValues.at(sourceKey2));
-                        addSettings((*settings)["sources"][sourceKey3], "warning-as-error", warningAsErrorValues.at(sourceKey3));
-                        addSettings(rootSettings[PLUGIN_CONFIG_KEY], "warning-as-error", {"warning-as-error"});
-                        addSettings(rootSettings[PLUGIN_CONFIG_KEY][otherCommandKey], "warning-as-error", {"warning-as-error"});
-
-                        sourceSpecificWarningAsError[sourceKey1] = toWarningAsError(warningAsErrorValues.at(sourceKey1));
-                        sourceSpecificWarningAsError[sourceKey2] = toWarningAsError(warningAsErrorValues.at(sourceKey2));
-                        sourceSpecificWarningAsError[sourceKey3] = toWarningAsError(warningAsErrorValues.at(sourceKey3));
-                    }
+                for(const auto& sourceKey : sourceKeys) {
+                    rootSettings.add(combineVectors(baseSettingsKeys, {SOURCES_KEY, sourceKey, WARNING_AS_ERROR_KEY}), warningAsErrorValues.at(sourceKey));
+                    sourceSpecificWarningAsError[sourceKey] = toWarningAsError(warningAsErrorValues.at(sourceKey));
                 }
+                rootSettings.add({PLUGIN_CONFIG_KEY, WARNING_AS_ERROR_KEY}, {"warning-as-errorA"});
+                rootSettings.add({PLUGIN_CONFIG_KEY, otherCommandKey, WARNING_AS_ERROR_KEY}, {"warning-as-errorB"});
             }
 
-            COMBINATIONS("Add all checks as warning as error") {
-                (*settings)[PLUGIN_CONFIG_KEY]["warning-as-error"].m_values.clear();
-                addSettings((*settings)[PLUGIN_CONFIG_KEY], "warning-as-error", "all");
-                addSettings(rootSettings[PLUGIN_CONFIG_KEY][otherCommandKey], "warning-as-error", {"warningAsError4"});
-
-                static const string toReplace("-checks=");
-                if(!sourceSpecificChecks.empty()) {
-                    sourceSpecificWarningAsError = sourceSpecificChecks;
-                    for(auto& entry : sourceSpecificWarningAsError) {
-                        for(auto& parameter : entry.second) {
-                            size_t pos = parameter.find(toReplace);
-                            parameter.replace(pos, toReplace.size(), "-warning-as-error=");
-                        }
-                    }
-                } else {
-                    warningAsError = checks;
-                    for(auto& parameter : warningAsError) {
-                        size_t pos = parameter.find(toReplace);
-                        parameter.replace(pos, toReplace.size(), "-warning-as-error=");
-                    }
+            COMBINATIONS("Add general all checks") {
+                rootSettings.clear(copyAndAppend(baseSettingsKeys, WARNING_AS_ERROR_KEY));
+                for(const auto& sourceKey : sourceKeys) {
+                    rootSettings.clear(combineVectors(baseSettingsKeys, {SOURCES_KEY, sourceKey, WARNING_AS_ERROR_KEY}));
+                    sourceSpecificWarningAsError[sourceKey].clear();
                 }
+
+                rootSettings.add(copyAndAppend(baseSettingsKeys, WARNING_AS_ERROR_KEY), WARNING_AS_ERROR_INHERIT_KEY);
+
+                inheritChecks(sourceKeys, &warningAsError, &sourceSpecificWarningAsError, checks, sourceSpecificChecks);
             }
 
-            std::cout << toString(rootSettings) << std::endl;
+            COMBINATIONS("Add all checks as source specific warning as error") {
+                for(const auto& sourceKey : sourceKeys) {
+                    rootSettings.clear(combineVectors(baseSettingsKeys, {SOURCES_KEY, sourceKey, WARNING_AS_ERROR_KEY}));
+                    sourceSpecificWarningAsError[sourceKey].clear();
+
+                    rootSettings.add(combineVectors(baseSettingsKeys, {SOURCES_KEY, sourceKey, WARNING_AS_ERROR_KEY}), WARNING_AS_ERROR_INHERIT_KEY);
+                    rootSettings.add(combineVectors(otherBaseSettingsKeys, {SOURCES_KEY, sourceKey, WARNING_AS_ERROR_KEY}), {"warning-as-errorA"});
+                }
+
+                inheritChecks(sourceKeys, &warningAsError, &sourceSpecificWarningAsError, checks, sourceSpecificChecks);
+            }
 
             ExecutorStub::TaskQueue expectedTasks;
             for(const auto& source : sources) {

@@ -18,11 +18,11 @@ using execHelper::config::SettingsNode;
 using execHelper::core::Task;
 using execHelper::core::TaskCollection;
 
-using execHelper::test::utils::addSettings;
 using execHelper::test::OptionsStub;
 using execHelper::test::utils::TargetUtil;
 using execHelper::test::utils::CompilerUtil;
 using execHelper::test::utils::addPatterns;
+using execHelper::test::utils::copyAndAppend;
 
 namespace {
     const string PLUGIN_CONFIG_KEY("clang-static-analyzer");
@@ -43,16 +43,15 @@ namespace execHelper { namespace plugins { namespace test {
             addPatterns(compilerUtil.getPatterns(), options);
 
             SettingsNode& rootSettings = options.m_settings;
-            addSettings(rootSettings, PLUGIN_CONFIG_KEY, command);
-            addSettings(rootSettings[PLUGIN_CONFIG_KEY], "patterns", targetUtil.getKeys());
-            addSettings(rootSettings[PLUGIN_CONFIG_KEY], "patterns", compilerUtil.getKeys());
-            addSettings(rootSettings[PLUGIN_CONFIG_KEY], "build-command", "memory");
+            rootSettings.add({PLUGIN_CONFIG_KEY}, command);
+            rootSettings.add({PLUGIN_CONFIG_KEY, "patterns"}, targetUtil.getKeys());
+            rootSettings.add({PLUGIN_CONFIG_KEY, "patterns"}, compilerUtil.getKeys());
+            rootSettings.add({PLUGIN_CONFIG_KEY, "build-command"}, "memory");
 
             MemoryHandler memory;
 
             // Add the settings of an other command to make sure we take the expected ones
             const string otherCommandKey("other-command");
-            addSettings(rootSettings, PLUGIN_CONFIG_KEY, otherCommandKey);
 
             ClangStaticAnalyzer plugin;
             Task task;
@@ -61,16 +60,17 @@ namespace execHelper { namespace plugins { namespace test {
             TaskCollection verbosity;
             TaskCollection commandLine;
 
-            SettingsNode* settings = &(rootSettings[PLUGIN_CONFIG_KEY]);
+            SettingsNode::SettingsKeys baseSettingsKeys = {PLUGIN_CONFIG_KEY};
+            SettingsNode::SettingsKeys otherBaseSettingsKeys = {PLUGIN_CONFIG_KEY, otherCommandKey};
 
             COMBINATIONS("Toggle between general and specific command settings") {
-                settings = &rootSettings[PLUGIN_CONFIG_KEY][command];
+                baseSettingsKeys.push_back(command);
             }
 
             COMBINATIONS("Add a command line") {
                 commandLine = {"{" + targetUtil.target.getKey() + "}{" + targetUtil.runTarget.getKey() + "}", "blaat/{HELLO}/{" + compilerUtil.compiler.getKey() + "}"};
-                addSettings(*settings, "command-line", commandLine);
-                addSettings(rootSettings[PLUGIN_CONFIG_KEY][otherCommandKey], "command-line", "--some-command");
+                rootSettings.add(copyAndAppend(baseSettingsKeys, "command-line"), commandLine);
+                rootSettings.add(copyAndAppend(otherBaseSettingsKeys, "command-line"), "--some-command");
             }
 
             COMBINATIONS("Switch off verbosity") {
@@ -106,7 +106,7 @@ namespace execHelper { namespace plugins { namespace test {
             OptionsStub options;
 
             SettingsNode& rootSettings = options.m_settings;
-            addSettings(rootSettings, PLUGIN_CONFIG_KEY, command);
+            rootSettings.add({PLUGIN_CONFIG_KEY}, command);
 
             ClangStaticAnalyzer plugin;
             Task task;
@@ -120,7 +120,7 @@ namespace execHelper { namespace plugins { namespace test {
             }
 
             WHEN("We add the build-command as a generic config key without a value") {
-                addSettings(rootSettings, PLUGIN_CONFIG_KEY, "build-command");
+                rootSettings.add({PLUGIN_CONFIG_KEY}, "build-command");
 
                 bool returnCode = plugin.apply(command, task, options);
                 THEN("It should fail") {
@@ -129,7 +129,7 @@ namespace execHelper { namespace plugins { namespace test {
             }
 
             WHEN("We add the build-command as a specific config key without a value") {
-                addSettings(rootSettings[PLUGIN_CONFIG_KEY], command, "build-command");
+                rootSettings.add({PLUGIN_CONFIG_KEY, command}, "build-command");
 
                 bool returnCode = plugin.apply(command, task, options);
                 THEN("It should fail") {

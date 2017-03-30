@@ -89,11 +89,11 @@ namespace execHelper { namespace core {
 
                 const vector<string> keys = {testValueKey1, testValueKey2, testValueKey3};
 
-                SettingsNode settings;
-                addSettings(settings, testValueKey1, actualValue1);
-                addSettings(settings, testValueKey2, actualValue2);
-                addSettings(settings, testValueKey3, testValueKey3a);
-                addSettings(settings[testValueKey3], testValueKey3a, testValue3);
+                // Explicitly add the root key, since we can not know it
+                SettingsNode settings("ExecHelperRoot");
+                settings.add({testValueKey1}, actualValue1);
+                settings.add({testValueKey2}, actualValue2);
+                settings.add({testValueKey3, testValueKey3a}, testValue3);
 
                 writeSettingsFile(settingsFile, settings, {});
 
@@ -101,9 +101,6 @@ namespace execHelper { namespace core {
                 options.parseSettingsFile(settingsFile);
 
                 const ExecHelperOptions constOptions = options;
-
-                // Explicitly add the default root key, since we can not know it
-                settings.m_key = "<root>";
 
                 WHEN("We request the root settings") {
                     const SettingsNode& rootSettings = options.getSettings();
@@ -192,7 +189,7 @@ namespace execHelper { namespace core {
                 const Pattern pattern4(pattern4Key, {"pattern4A", "pattern4B"}, 'd', "patternD");
                 const vector<Pattern> patterns = {pattern1, pattern2, pattern3, pattern4};
 
-                SettingsNode settings;
+                SettingsNode settings("ExecHelperTest");
                 writeSettingsFile(settingsFile, settings, patterns);
                 
                 vector<string> arguments;
@@ -338,8 +335,8 @@ namespace execHelper { namespace core {
                     REQUIRE(options.parseSettingsFile(settingsFile));
 
                     THEN("We should get the settings found") {
-                        REQUIRE(options.getSettings(commandsKey).toStringCollection() == commandsValues);
-                        REQUIRE(options.getSettings(command1Key).toStringCollection() == command1Values);
+                        REQUIRE(options.getSettings(commandsKey).values() == commandsValues);
+                        REQUIRE(options.getSettings(command1Key).values() == command1Values);
                     }
                 }
             }
@@ -362,7 +359,7 @@ namespace execHelper { namespace core {
 
                 const vector<Pattern> patterns = {pattern1, pattern2, pattern3, pattern4};
 
-                SettingsNode settings;
+                SettingsNode settings("ExecHelperTest");
                 addSettings(settings, commandKey, commandValues);
                 addSettings(settings, command1Key, command1Values);
                 writeSettingsFile(settingsFile, settings, patterns);
@@ -380,8 +377,8 @@ namespace execHelper { namespace core {
                         }
                     }
                     THEN("We should get the chosen default settings for their respective settings") {
-                        REQUIRE(options.getSettings(commandKey).toStringCollection() == commandValues);
-                        REQUIRE(options.getSettings(command1Key).toStringCollection() == command1Values);
+                        REQUIRE(options.getSettings(commandKey).values() == commandValues);
+                        REQUIRE(options.getSettings(command1Key).values() == command1Values);
                         for(const auto& pattern : patterns) {
                             REQUIRE(handler.getPattern(pattern.getKey()) == pattern);
                         }
@@ -415,7 +412,7 @@ namespace execHelper { namespace core {
 
                 const vector<Pattern> patterns = {pattern1, pattern2, pattern3, pattern4};
 
-                writeSettingsFile(settingsFile, SettingsNode(), patterns);
+                writeSettingsFile(settingsFile, SettingsNode("ExecHelperTest"), patterns);
 
                 ExecHelperOptions options;
                 options.parseSettingsFile(settingsFile);
@@ -455,7 +452,7 @@ namespace execHelper { namespace core {
                 const vector<string> pattern2Value = {"pattern2A", "pattern2B"};
                 const vector<string> pattern3Value = {""};
 
-                writeSettingsFile(settingsFile, SettingsNode(), patterns);
+                writeSettingsFile(settingsFile, SettingsNode("ExecHelperTest"), patterns);
 
                 vector<string> arguments;
                 arguments.emplace_back("UNITTEST");

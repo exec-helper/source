@@ -14,6 +14,7 @@ set(SRCS
         src/execHelperOptions.cpp
         src/posixShell.cpp
         src/argv.cpp
+        src/envp.cpp
    )
 
 set(LIBRARY_INCLUDES

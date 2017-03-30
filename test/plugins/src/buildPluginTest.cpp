@@ -35,7 +35,7 @@ namespace execHelper { namespace plugins { namespace test {
         string command("random-command");
         string key("single-threaded");
 
-        SettingsNode rootSettings;
+        SettingsNode rootSettings("BuildPluginTest");
         OptionsStub options;
 
         GIVEN("A default configuration setting") {
@@ -62,8 +62,7 @@ namespace execHelper { namespace plugins { namespace test {
             }
         }
         GIVEN("A default configuration setting with the multi-threaded setting set") {
-            addSettings(rootSettings, command, key);
-            addSettings(rootSettings[command], key, "no");
+            rootSettings.add({command, key}, "no");
             bool correctResult = true;
 
             WHEN("We request the multi threaded settings") {
@@ -75,8 +74,7 @@ namespace execHelper { namespace plugins { namespace test {
             }
         }
         GIVEN("A default configuration setting with the single-threaded setting set") {
-            addSettings(rootSettings, command, key);
-            addSettings(rootSettings[command], key, "yes");
+            rootSettings.add({command, key}, "yes");
             bool correctResult = false;
 
             WHEN("We request the multi threaded settings") {
@@ -89,10 +87,8 @@ namespace execHelper { namespace plugins { namespace test {
         }
         GIVEN("A default configuration setting with the single-threaded setting set on different levels") {
             string subCommand("sub-command");
-            addSettings(rootSettings, command, key);
-            addSettings(rootSettings[command], key, "no");
-            addSettings(rootSettings[command], subCommand, key);
-            addSettings(rootSettings[command][subCommand], key, "yes");
+            rootSettings.add({command, key}, "no");
+            rootSettings.add({command, subCommand, key}, "yes");
             bool correctResult = true;
             bool correctSubResult = false;
 
@@ -107,8 +103,7 @@ namespace execHelper { namespace plugins { namespace test {
             }
         }
         GIVEN("A default configuration setting with the single-threaded option set") {
-            addSettings(rootSettings, command, key);
-            addSettings(rootSettings[command], key, "no");
+            rootSettings.add({command, key}, "no");
             bool correctResult = false;
 
             options.m_singleThreaded = true;

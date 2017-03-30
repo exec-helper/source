@@ -22,7 +22,7 @@ namespace execHelper {
             template<typename T, bool isCollection>
             class ConfigValueImpl {
                 public:
-                    static boost::optional<T> getValue(config::SettingsNode::SettingsCollection& collection) noexcept {
+                    static boost::optional<T> getValue(config::SettingsNode::SettingsValues& collection) noexcept {
                         return collection;
                     }
             };
@@ -30,7 +30,7 @@ namespace execHelper {
             template<typename T>
             class ConfigValueImpl<T, false> {
                 public:
-                    static boost::optional<T> getValue(config::SettingsNode::SettingsCollection& collection) noexcept {
+                    static boost::optional<T> getValue(config::SettingsNode::SettingsValues& collection) noexcept {
                         if(collection.empty()) {
                             return boost::none;
                         }
@@ -46,10 +46,11 @@ namespace execHelper {
 
                 static boost::optional<T> getSetting(const std::string& key, const config::SettingsNode& rootSettings, const OrderedConfigKeys& orderedConfigKeys) noexcept {
                     for(auto& configKeys : orderedConfigKeys) {
-                        boost::optional<const config::SettingsNode&> settings = getContainingSettings(key, rootSettings, configKeys);
-                        if(settings != boost::none) {
-                            config::SettingsNode::SettingsCollection collection = settings.get().toStringCollection();
-                            return detail::ConfigValueImpl<T, isContainer<T>::value>::getValue(collection);
+                        config::SettingsNode::SettingsKeys keys = configKeys;
+                        keys.push_back(key);
+                        boost::optional<config::SettingsNode::SettingsValues> values = rootSettings.get(keys);
+                        if(values != boost::none) {
+                            return detail::ConfigValueImpl<T, isContainer<T>::value>::getValue(values.get());
                         }
                     }
                     return boost::none;
@@ -78,10 +79,16 @@ namespace execHelper {
                 typedef std::initializer_list<std::vector<std::string>> OrderedConfigKeys;
 
                 static boost::optional<const config::SettingsNode&> getSetting(const std::string& key, const config::SettingsNode& rootSettings, const OrderedConfigKeys& orderedConfigKeys) noexcept {
-                    for(auto& configKeys : orderedConfigKeys) {
-                        boost::optional<const config::SettingsNode&> settings = getContainingSettings(key, rootSettings, configKeys);
-                        if(settings != boost::none) {
-                            return settings;
+                    for(const auto& configKeys : orderedConfigKeys) {
+                        config::SettingsNode::SettingsKeys keys = configKeys;
+                        keys.push_back(key);
+                        if(rootSettings.contains(keys)) {
+                            const config::SettingsNode* settings = &rootSettings;
+                            // We know that the whole key chain exists, so we do not need to check for this
+                            for(const auto& configKey : configKeys) {
+                                settings = &(*settings)[configKey];
+                            }
+                            return (*settings)[key];
                         }
                     }
                     return boost::none;

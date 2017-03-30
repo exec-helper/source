@@ -21,7 +21,7 @@ using execHelper::core::TaskCollection;
 using execHelper::core::CommandCollection;
 
 using execHelper::test::OptionsStub;
-using execHelper::test::utils::addSettings;
+using execHelper::test::utils::copyAndAppend;
 using execHelper::test::utils::TargetUtil;
 using execHelper::test::utils::CompilerUtil;
 using execHelper::test::utils::Patterns;
@@ -46,13 +46,11 @@ namespace execHelper { namespace plugins { namespace test {
             addPatterns(compilerUtil.getPatterns(), options);
 
             SettingsNode& rootSettings = options.m_settings;
-            addSettings(rootSettings, pluginConfigKey, command);
-            addSettings(rootSettings[pluginConfigKey], "patterns", targetUtil.getKeys());
-            addSettings(rootSettings[pluginConfigKey], "patterns", compilerUtil.getKeys());
+            rootSettings.add({pluginConfigKey, "patterns"}, targetUtil.getKeys());
+            rootSettings.add({pluginConfigKey, "patterns"}, compilerUtil.getKeys());
 
             // Add the settings of an other command to make sure we take the expected ones
             const string otherCommandKey("other-command");
-            addSettings(rootSettings, pluginConfigKey, otherCommandKey);
 
             Make plugin;
             Task task;
@@ -63,29 +61,22 @@ namespace execHelper { namespace plugins { namespace test {
             TaskCollection verbosity;
             TaskCollection commandLine;
 
-            SettingsNode* settings = &(rootSettings[pluginConfigKey]);
+            SettingsNode::SettingsKeys baseSettingsKeys = {pluginConfigKey};
+            SettingsNode::SettingsKeys otherBaseSettingsKeys = {pluginConfigKey, otherCommandKey};
 
             COMBINATIONS("Toggle between general and specific command settings") {
-                settings = &rootSettings[pluginConfigKey][command];
+                baseSettingsKeys.push_back(command);
             }
 
             COMBINATIONS("Switch off multi-threading") {
-                addSettings(*settings, "single-threaded", "yes");
-                addSettings(rootSettings[pluginConfigKey][otherCommandKey], "single-threaded", "no");
+                rootSettings.add(copyAndAppend(baseSettingsKeys, "single-threaded"), "yes");
+                rootSettings.add(copyAndAppend(otherBaseSettingsKeys, "single-threaded"), "no");
                 jobs.clear();
             }
 
             COMBINATIONS("Switch on multi-threading") {
-                // Note: we may be overruling the option above
-                if(settings->contains("single-threaded")) {
-                    (*settings)["single-threaded"].m_values.clear();
-                    SettingsNode newNode;
-                    newNode.m_key = "no";
-                    (*settings)["single-threaded"].m_values.emplace_back(newNode);
-                } else {
-                    addSettings(*settings, "single-threaded", "no");
-                    addSettings(rootSettings[pluginConfigKey][otherCommandKey], "single-threaded", "yes");
-                }
+                rootSettings.add(copyAndAppend(baseSettingsKeys, "single-threaded"), "no");     // Last one counts
+                rootSettings.add(copyAndAppend(otherBaseSettingsKeys, "single-threaded"), "yes");
                 jobs = TaskCollection({"--jobs", "8"});
             }
 
@@ -96,8 +87,8 @@ namespace execHelper { namespace plugins { namespace test {
 
             COMBINATIONS("Set a build directory") {
                 const string buildDirValue("{" + compilerUtil.distribution.getKey() + "}/{" + compilerUtil.architecture.getKey() + "}/{HELLO}/{" + compilerUtil.compiler.getKey() + "}/hello{" + compilerUtil.mode.getKey() + " }world"); 
-                addSettings(*settings, "build-dir", buildDirValue);
-                addSettings(rootSettings[pluginConfigKey][otherCommandKey], "build-dir", "some/build/dir");
+                rootSettings.add(copyAndAppend(baseSettingsKeys, "build-dir"), buildDirValue);
+                rootSettings.add(copyAndAppend(otherBaseSettingsKeys, "build-dir"), "some/build/dir");
                 buildDir.emplace_back("--directory=" + buildDirValue);
             }
 
@@ -112,8 +103,8 @@ namespace execHelper { namespace plugins { namespace test {
 
             COMBINATIONS("Add a command line") {
                 commandLine = {"{" + targetUtil.target.getKey() + "}", "{" + targetUtil.runTarget.getKey() + "}"};
-                addSettings(*settings, "command-line", commandLine);
-                addSettings(rootSettings[pluginConfigKey][otherCommandKey], "command-line", "--some-command");
+                rootSettings.add(copyAndAppend(baseSettingsKeys, "command-line"), commandLine);
+                rootSettings.add(copyAndAppend(otherBaseSettingsKeys, "command-line"), "--some-command");
             }
 
             expectedTask.append(jobs);

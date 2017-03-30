@@ -1,7 +1,8 @@
-#include <string>
-#include <vector>
+#include <fstream>
 #include <iostream>
 #include <sstream>
+#include <string>
+#include <vector>
 
 #include <catch.hpp>
 
@@ -10,6 +11,7 @@
 
 #include "utils/utils.h"
 
+using std::ofstream;
 using std::string;
 using std::vector;
 using std::stringstream;
@@ -17,25 +19,8 @@ using std::endl;
 
 using execHelper::config::SettingsNode;
 using execHelper::test::utils::basename;
-
-namespace {
-    const string YAML_CONFIG_KEY_DELIMITER(": ");
-    const string YAML_CONFIG_DELIMITER("\n");
-    const string YAML_CONFIG_OPTION_CHARACTER("    - ");
-
-    string convertToConfig(const string& key, const vector<string>& values) {
-        string config(key + YAML_CONFIG_KEY_DELIMITER);
-        for(const auto& value : values) {
-            config += YAML_CONFIG_DELIMITER + YAML_CONFIG_OPTION_CHARACTER + value;
-        }
-        config += YAML_CONFIG_DELIMITER;
-        return config;
-    }
-
-    string convertToConfig(const string& key, const string& value) {
-        return string(key + YAML_CONFIG_KEY_DELIMITER + value);
-    }
-}
+using execHelper::test::utils::convertToConfig;
+using execHelper::test::utils::writeSettingsFile;
 
 namespace execHelper { namespace yaml { namespace test {
     SCENARIO("Yaml wrapper test", "[yaml][yamlwrapper]") {
@@ -46,7 +31,8 @@ namespace execHelper { namespace yaml { namespace test {
             const string key2("command2");
             const string values2("command2-option");
 
-            string yamlConfig = convertToConfig(key, values);
+            string yamlConfig;
+            yamlConfig += convertToConfig(key, values);
             yamlConfig += convertToConfig(key2, values2);
 
             WHEN("We pass the config to the yaml wrapper") {
@@ -68,7 +54,7 @@ namespace execHelper { namespace yaml { namespace test {
             vector<string> correctCommands = {"init", "build", "run", "analyze"};
             vector<string> correctInit = {"git-submodules", "configure"};
             vector<string> correctBuild = {"scons", "make"};
-            vector<string> correctRun = {"shellRunner"};
+            vector<string> correctRun = {"shellRunner", "command-line"};
             vector<string> correctAnalyze = {"cppcheck", "clang-static-analyzer", "pmd", "simian"};
             vector<string> correctSubmodules = {"3rdparty/Catch", "3rdparty/benchmark"};
             vector<string> correctSconsPatterns = {"COMPILER", "MODE"};
@@ -76,7 +62,23 @@ namespace execHelper { namespace yaml { namespace test {
             string correctSconsSingleThreaded("yes");
             string correctSconsCommandLine("compiler={COMPILER} mode={MODE}");
             string correctPmdAutoInstall("yes");
-            string correctRunCommandLine(R"(echo "hello")");
+            string correctRunCommandLine("command-line");
+
+            SettingsNode correctSettings("YamlTest");
+            correctSettings.add({"commands"}, correctCommands);
+            correctSettings.add({"init"}, correctInit);
+            correctSettings.add({"build"}, correctBuild);
+            correctSettings.add({"run"}, correctRun);
+            correctSettings.add({"analyze"}, correctAnalyze);
+            correctSettings.add({"git-submodules", "submodules"}, correctSubmodules);
+            correctSettings.add({"scons", "patterns"}, correctSconsPatterns);
+            correctSettings.add({"scons", "build-dir"}, correctSconsBuildDir);
+            correctSettings.add({"scons", "single-threaded"}, correctSconsSingleThreaded);
+            correctSettings.add({"scons", "command-line"}, correctSconsCommandLine);
+            correctSettings.add({"pmd", "auto-install"}, correctPmdAutoInstall);
+            correctSettings.add({"command-line", "run"}, correctRunCommandLine);
+
+            writeSettingsFile(file.file, correctSettings, {});
 
             WHEN("We pass the config to the yaml wrapper") {
                 Yaml yaml(file);
@@ -93,25 +95,26 @@ namespace execHelper { namespace yaml { namespace test {
                     REQUIRE(yaml.getValue({"scons", "single-threaded"}) == correctSconsSingleThreaded);
                     REQUIRE(yaml.getValue({"scons", "command-line"}) == correctSconsCommandLine);
                     REQUIRE(yaml.getValue({"pmd", "auto-install"}) == correctPmdAutoInstall);
-                    REQUIRE(yaml.getValue({"shellRunner", "command-line"}) == correctRunCommandLine);
+                    REQUIRE(yaml.getValue({"command-line", "run"}) == correctRunCommandLine);
                 }
 
                 THEN("We should find them all in the subtree") {
-                    SettingsNode settings;
+                    SettingsNode settings(correctSettings.key());
                     yaml.getTree({}, settings);
-                    REQUIRE(settings["commands"].toStringCollection() == correctCommands);
-                    REQUIRE(settings["init"].toStringCollection() == correctInit);
-                    REQUIRE(settings["build"].toStringCollection() == correctBuild);
-                    REQUIRE(settings["run"].toStringCollection() == correctRun);
-                    REQUIRE(settings["analyze"].toStringCollection() == correctAnalyze);
-                    REQUIRE(settings["git-submodules"]["submodules"].toStringCollection() == correctSubmodules);
-                    REQUIRE(settings["scons"]["patterns"].toStringCollection() == correctSconsPatterns);
-
-                    REQUIRE(settings["scons"]["build-dir"].toStringCollection()[0] == correctSconsBuildDir);
-                    REQUIRE(settings["scons"]["single-threaded"].toStringCollection()[0] == correctSconsSingleThreaded);
-                    REQUIRE(settings["scons"]["command-line"].toStringCollection()[0] == correctSconsCommandLine);
-                    REQUIRE(settings["pmd"]["auto-install"].toStringCollection()[0] == correctPmdAutoInstall);
-                    REQUIRE(settings["shellRunner"]["command-line"].toStringCollection()[0] == correctRunCommandLine);
+                    REQUIRE(settings.key() == correctSettings.key());
+                    REQUIRE(settings["commands"].values() == correctCommands);
+                    REQUIRE(settings["init"].values() == correctInit);
+                    REQUIRE(settings["build"].values() == correctBuild);
+                    REQUIRE(settings["run"].values() == correctRun);
+                    REQUIRE(settings["analyze"].values() == correctAnalyze);
+                    REQUIRE(settings["git-submodules"]["submodules"].values() == correctSubmodules);
+                    REQUIRE(settings["scons"]["patterns"].values() == correctSconsPatterns);
+                    REQUIRE(settings["scons"]["build-dir"].values()[0] == correctSconsBuildDir);
+                    REQUIRE(settings["scons"]["single-threaded"].values()[0] == correctSconsSingleThreaded);
+                    REQUIRE(settings["scons"]["command-line"].values()[0] == correctSconsCommandLine);
+                    REQUIRE(settings["pmd"]["auto-install"].values()[0] == correctPmdAutoInstall);
+                    REQUIRE(settings["command-line"]["run"].values()[0] == correctRunCommandLine);
+                    REQUIRE(settings == correctSettings);
                 }
             }
         }
@@ -135,14 +138,13 @@ namespace execHelper { namespace yaml { namespace test {
                 }
                 THEN("We should not be able to get a tree and should give the strong exception guarantee") {
                     string settingsKey("blaat");
-                    SettingsNode settings;
-                    settings.m_key = settingsKey;
+                    SettingsNode settings(settingsKey);
                     REQUIRE_FALSE(yaml.getTree({"commands"}, settings));
                     REQUIRE_FALSE(yaml.getTree({"commands", "some-command"}, settings));
 
                     // Check the strong exception guarantee
-                    REQUIRE(settings.m_key == settingsKey);
-                    REQUIRE(settings.m_values.empty());
+                    REQUIRE(settings.key() == settingsKey);
+                    REQUIRE(settings.values().empty());
                 }
             }
         }
@@ -167,14 +169,13 @@ namespace execHelper { namespace yaml { namespace test {
                 }
                 THEN("We should not be able to get a tree and should give the strong exception guarantee") {
                     string settingsKey("blaat");
-                    SettingsNode settings;
-                    settings.m_key = settingsKey;
+                    SettingsNode settings(settingsKey);
                     REQUIRE_FALSE(yaml.getTree({"commands"}, settings));
                     REQUIRE_FALSE(yaml.getTree({"commands", "command1"}, settings));
 
                     // Check the strong exception guarantee
-                    REQUIRE(settings.m_key == settingsKey);
-                    REQUIRE(settings.m_values.empty());
+                    REQUIRE(settings.key() == settingsKey);
+                    REQUIRE(settings.values().empty());
                 }
             }
         }
@@ -204,14 +205,13 @@ namespace execHelper { namespace yaml { namespace test {
                 }
                 THEN("We should not be able to get invalid trees and the settings node is unaltered") {
                     string settingsKey("some-key");
-                    SettingsNode settings;
-                    settings.m_key = settingsKey;
+                    SettingsNode settings(settingsKey);
 
                     REQUIRE_FALSE(yaml.getTree({"invalid-key"}, settings));
                     REQUIRE_FALSE(yaml.getTree({"invalid-key", "invalid-subkey"}, settings));
 
-                    REQUIRE(settings.m_key == settingsKey);
-                    REQUIRE(settings.m_values.empty());
+                    REQUIRE(settings.key() == settingsKey);
+                    REQUIRE(settings.values().empty());
                 }
             }
         }

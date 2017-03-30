@@ -21,7 +21,6 @@ using execHelper::plugins::Memory;
 using execHelper::plugins::MemoryHandler;
 
 using execHelper::test::OptionsStub;
-using execHelper::test::utils::addSettings;
 using execHelper::test::utils::Patterns;
 using execHelper::test::utils::PATTERN1;
 using execHelper::test::utils::PATTERN2;
@@ -55,17 +54,16 @@ namespace execHelper { namespace plugins { namespace test {
 
             OptionsStub options;
             SettingsNode& rootSettings = options.m_settings;
-            addSettings(rootSettings, valgrindConfigKey, command);
 
             Valgrind plugin;
             Task task;
 
             WHEN("We add the tool config parameter") {
                 THEN("As a general command") {
-                    addSettings(rootSettings[valgrindConfigKey], "tool", "memcheck");
+                    rootSettings.add({valgrindConfigKey, "tool"}, "memcheck");
                 }
                 THEN("As a specific command") {
-                    addSettings(rootSettings[valgrindConfigKey][command], "tool", "memcheck");
+                    rootSettings.add({valgrindConfigKey, command, "tool"}, "memcheck");
                 }
 
                 REQUIRE_FALSE(plugin.apply(command, task, options));
@@ -75,10 +73,10 @@ namespace execHelper { namespace plugins { namespace test {
                 const string runCommand("run-command");
 
                 THEN("As a general parameter") {
-                    addSettings(rootSettings[valgrindConfigKey], runCommand, "memory");
+                    rootSettings.add({valgrindConfigKey, runCommand}, "memory");
                 }
                 THEN("As a specific parameter") {
-                    addSettings(rootSettings[valgrindConfigKey][command], runCommand, "memory");
+                    rootSettings.add({valgrindConfigKey, command, runCommand}, "memory");
                 }
 
                 MemoryHandler memory;
@@ -101,14 +99,13 @@ namespace execHelper { namespace plugins { namespace test {
 
             OptionsStub options;
             SettingsNode& rootSettings = options.m_settings;
-            addSettings(rootSettings, valgrindConfigKey, command);
 
             Valgrind plugin;
             Task task;
 
             WHEN("We add the run-command config parameter without a value") {
                 const string runCommand("run-command");
-                addSettings(rootSettings[valgrindConfigKey], command, runCommand);
+                rootSettings.add({valgrindConfigKey, command}, runCommand);
 
                 bool returnCode = plugin.apply(command, task, options);
 
@@ -127,9 +124,7 @@ namespace execHelper { namespace plugins { namespace test {
 
             OptionsStub options;
             SettingsNode& rootSettings = options.m_settings;
-            addSettings(rootSettings, valgrindConfigKey, command);
-            addSettings(rootSettings[valgrindConfigKey], command, runCommand);
-            addSettings(rootSettings[valgrindConfigKey][command], runCommand, "memory");
+            rootSettings.add({valgrindConfigKey, command, runCommand}, "memory");
 
             Valgrind plugin;
             Task task;
@@ -138,10 +133,10 @@ namespace execHelper { namespace plugins { namespace test {
 
             WHEN("We call the plugin with a proper tool name") {
                 THEN("As a general command") {
-                    addSettings(rootSettings[valgrindConfigKey], "tool", toolName);
+                    rootSettings.add({valgrindConfigKey, "tool"}, toolName);
                 }
                 THEN("As a specific command") {
-                    addSettings(rootSettings[valgrindConfigKey][command], "tool", toolName);
+                    rootSettings.add({valgrindConfigKey, command, "tool"}, toolName);
                 }
 
                 REQUIRE(plugin.apply(command, task, options));
@@ -157,10 +152,10 @@ namespace execHelper { namespace plugins { namespace test {
 
             WHEN("We call the plugin without a proper tool name") {
                 THEN("As a general command") {
-                    addSettings(rootSettings, valgrindConfigKey, "tool");
+                    rootSettings.add({valgrindConfigKey}, "tool");
                 }
                 THEN("As a specific command") {
-                    addSettings(rootSettings[valgrindConfigKey], command, "tool");
+                    rootSettings.add({valgrindConfigKey, command}, "tool");
                 }
 
                 REQUIRE(plugin.apply(command, task, options));
@@ -181,9 +176,7 @@ namespace execHelper { namespace plugins { namespace test {
 
             OptionsStub options;
             SettingsNode& rootSettings = options.m_settings;
-            addSettings(rootSettings, valgrindConfigKey, command);
-            addSettings(rootSettings[valgrindConfigKey], command, runCommand);
-            addSettings(rootSettings[valgrindConfigKey][command], runCommand, "memory");
+            rootSettings.add({valgrindConfigKey, command, runCommand}, "memory");
 
             options.m_verbosity = true;
 
@@ -218,9 +211,7 @@ namespace execHelper { namespace plugins { namespace test {
 
             OptionsStub options;
             SettingsNode& rootSettings = options.m_settings;
-            addSettings(rootSettings, valgrindConfigKey, command);
-            addSettings(rootSettings[valgrindConfigKey], command, runCommand);
-            addSettings(rootSettings[valgrindConfigKey][command], runCommand, "memory");
+            rootSettings.add({valgrindConfigKey, command, runCommand}, "memory");
 
             Valgrind plugin;
             Task task;
@@ -231,11 +222,11 @@ namespace execHelper { namespace plugins { namespace test {
                 const vector<string> commandLine({"arg1", "--arg2"});
 
                 THEN("As a general command") {
-                    addSettings(rootSettings[valgrindConfigKey], "command-line", commandLine);
+                    rootSettings.add({valgrindConfigKey, "command-line"}, commandLine);
                 }
 
                 THEN("As a specific command") {
-                    addSettings(rootSettings[valgrindConfigKey], "command-line", commandLine);
+                    rootSettings.add({valgrindConfigKey, command, "command-line"}, commandLine);
                 }
 
                 REQUIRE(plugin.apply(command, task, options));
@@ -262,16 +253,16 @@ namespace execHelper { namespace plugins { namespace test {
                 THEN("As a general command") {
                     // Add the keys to the PATTERNS config value
                     for(const auto& pattern : PATTERNS) {
-                        addSettings(rootSettings[valgrindConfigKey], "patterns", pattern.getKey());
+                        rootSettings.add({valgrindConfigKey, "patterns"}, pattern.getKey());
                     }
-                    addSettings(rootSettings[valgrindConfigKey], "command-line", commandLine);
+                    rootSettings.add({valgrindConfigKey, "command-line"}, commandLine);
                 }
                 THEN("As a specific command") {
                     // Add the keys to the patterns config value
                     for(const auto& pattern : PATTERNS) {
-                        addSettings(rootSettings[valgrindConfigKey][command], "patterns", pattern.getKey());
+                        rootSettings.add({valgrindConfigKey, command, "patterns"}, pattern.getKey());
                     }
-                    addSettings(rootSettings[valgrindConfigKey][command], "command-line", commandLine);
+                    rootSettings.add({valgrindConfigKey, command, "command-line"}, commandLine);
                 }
 
                 REQUIRE(plugin.apply(command, task, options));
@@ -304,10 +295,8 @@ namespace execHelper { namespace plugins { namespace test {
 
             OptionsStub options;
             SettingsNode& rootSettings = options.m_settings;
-            addSettings(rootSettings, valgrindConfigKey, command);
-            addSettings(rootSettings[valgrindConfigKey], command, runCommand);
-            addSettings(rootSettings[valgrindConfigKey][command], runCommand, "memory");
-            addSettings(rootSettings[valgrindConfigKey], "tool", "memcheck");
+            rootSettings.add({valgrindConfigKey, command, runCommand}, "memory");
+            rootSettings.add({valgrindConfigKey, "tool"}, "memcheck");
 
             Valgrind plugin;
             Task task;

@@ -1,10 +1,11 @@
 #include <cstdlib>
 #include <string>
-#include <fstream>
 
 #include <boost/algorithm/string.hpp>
+#include <boost/optional/optional.hpp>
 
 #include "log/log.h"
+#include "config/configFileSearcher.h"
 #include "core/execHelperOptions.h"
 #include "core/posixShell.h"
 #include "core/executorInterface.h"
@@ -15,7 +16,7 @@
 
 using std::string;
 using std::make_pair;
-using std::ifstream;
+using execHelper::config::ConfigFileSearcher;
 using execHelper::core::ExecHelperOptions;
 using execHelper::core::PosixShell;
 using execHelper::core::Shell;
@@ -26,11 +27,6 @@ using execHelper::core::EnvironmentCollection;
 using execHelper::commander::Commander;
 
 namespace {
-    bool fileExist(string filename) {
-        ifstream infile(filename);
-        return infile.good();
-    }
-
     inline EnvironmentCollection toEnvCollection(char** envp) {
         static const string DELIMITER("=");
         EnvironmentCollection result;
@@ -49,26 +45,43 @@ namespace {
         }
         return result;
     }
+
+    inline ConfigFileSearcher::SearchPaths getSearchPaths(const EnvironmentCollection& env) {
+        ConfigFileSearcher::SearchPaths searchPaths({"."});
+        const string HOME_DIR_KEY("HOME");
+        if(env.count(HOME_DIR_KEY) > 0) {
+            searchPaths.push_back(env.at(HOME_DIR_KEY));
+        }
+        return searchPaths;
+    }
 }
 
 int execHelperMain(int argc, char** argv, char** envp) {
     ExecHelperOptions options;
-    string settingsFile = options.getSettingsFile(argc, argv);
-    if(! fileExist(settingsFile)) {
+    string settingsFileName = options.getSettingsFile(argc, argv);
+
+    EnvironmentCollection env = toEnvCollection(envp);
+
+    ConfigFileSearcher configFileSearcher(getSearchPaths(env));
+    boost::optional<string> settingsFile = configFileSearcher.find(settingsFileName);
+    if(settingsFile == boost::none) {
         user_feedback("Could not find a settings file");
         options.printHelp();
         return EXIT_FAILURE;
     }
-    if(! options.parseSettingsFile(settingsFile)) {
-        user_feedback("Could not parse settings file '" << settingsFile << "'");
+
+    if(! options.parseSettingsFile(settingsFile.get())) {
+        user_feedback("Could not parse settings file '" << settingsFile.get() << "'");
         options.printHelp();
         return EXIT_FAILURE;
     }
+
     if(! options.parse(argc, argv)) {
         user_feedback("Invalid option");
         options.printHelp();
         return EXIT_FAILURE;
     }
+
     if(options.containsHelp()) {
         options.printHelp();
         return EXIT_SUCCESS;
@@ -88,7 +101,7 @@ int execHelperMain(int argc, char** argv, char** envp) {
     }
     options.setExecutor(executor.get());
 
-    Commander commander(options, toEnvCollection(envp));
+    Commander commander(options, std::move(env));
     if(commander.run()) {
         return EXIT_SUCCESS;
     } else {

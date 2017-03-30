@@ -38,8 +38,8 @@ build:clang:
     stage: build
     script: 
         - pacman -S --noconfirm --needed clang cmake make git libunistring ncurses
-        - cmake -H. -Bbuild/clang++/debug -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_INSTALL_PREFIX=build/clang++/debug -DCMAKE_BUILD_TYPE=Debug -DUSE_SYSTEM_CATCH=OFF
-        - cmake -H. -Bbuild/clang++/release -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_INSTALL_PREFIX=build/clang++/release -DCMAKE_BUILD_TYPE=Release -DUSE_SYSTEM_CATCH=OFF
+        - cmake -H. -Bbuild/clang++/debug -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_INSTALL_PREFIX=build/clang++/debug -DCMAKE_BUILD_TYPE=Debug -DUSE_SYSTEM_CATCH=OFF && make -C build/clang++/debug --jobs 4 && make -C build/clang++/debug install
+        - cmake -H. -Bbuild/clang++/release -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_INSTALL_PREFIX=build/clang++/release -DCMAKE_BUILD_TYPE=Release -DUSE_SYSTEM_CATCH=OFF && make -C build/clang++/release --jobs 4 && make -C build/clang++/release install
     artifacts:
         expire_in: 1 day
         paths:
@@ -66,36 +66,41 @@ unittest-core:
     stage: test
     dependencies:
         - build:gcc
+        - build:clang
     script:
-        - build/g++/release/bin/exec-helper run-test --module core --run-target unittest --compiler g++ --mode release
+        - build/g++/release/bin/exec-helper run-test --module core --run-target unittest --compiler g++ clang++ --mode release
 
 unittest-yaml:
     stage: test
     dependencies:
         - build:gcc
+        - build:clang
     script:
-        - build/g++/release/bin/exec-helper run-test --module yaml --run-target unittest --compiler g++ --mode release
+        - build/g++/release/bin/exec-helper run-test --module yaml --run-target unittest --compiler g++ clang++ --mode release
 
 unittest-config:
     stage: test
     dependencies:
         - build:gcc
+        - build:clang
     script:
-        - build/g++/release/bin/exec-helper run-test --module config --run-target unittest --compiler g++ --mode release
+        - build/g++/release/bin/exec-helper run-test --module config --run-target unittest --compiler g++ clang++ --mode release
 
 unittest-plugins:
     stage: test
     dependencies:
         - build:gcc
+        - build:clang
     script:
-        - build/g++/release/bin/exec-helper run-test --module plugins --run-target unittest --compiler g++ --mode release
+        - build/g++/release/bin/exec-helper run-test --module plugins --run-target unittest --compiler g++ clang++ --mode release
 
 unittest-commander:
     stage: test
     dependencies:
         - build:gcc
+        - build:clang
     script:
-        - build/g++/release/bin/exec-helper run-test --module commander --run-target unittest --compiler g++ --mode release
+        - build/g++/release/bin/exec-helper run-test --module commander --run-target unittest --compiler g++ clang++ --mode release
 
 memory-check:
     stage: test

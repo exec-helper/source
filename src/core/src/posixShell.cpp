@@ -12,6 +12,7 @@
 #include "log/log.h"
 
 #include "argv.h"
+#include "envp.h"
 #include "task.h"
 
 using std::string;
@@ -43,9 +44,10 @@ namespace execHelper { namespace core {
 
         TaskCollection taskCollection = shellExpand(task.getTask());
         Argv argv(taskCollection);
+        Envp envp(task.getEnvironment());
 
         // A full copy of m_env is not required, since it is used in a separate process
-        if ((returnCode = execvp(argv[0], argv.getArgv())) == -1) {
+        if ((returnCode = execvpe(argv[0], argv.getArgv(), envp.getEnvp())) == -1) {
             LOG("Could not execvpe command: " << strerror(errno) << " (" << errno << ")"); 
         }
         // execvp only returns if something goes wrong

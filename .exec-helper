@@ -164,11 +164,13 @@ command-line-command:
             - MODE
             - RUNTARGET
             - MODULE
-        command-line: build/{COMPILER}/{MODE}/bin/test/{RUNTARGET}/exec-helper-{MODULE}-{RUNTARGET}
-    coverage:
         command-line:
-            - CXXFLAGS="--coverage -fprofile-arcs -ftest-coverage"
-            - LDFLAGS="-fprofile-arcs -ftest-coverage"
+            - build/{COMPILER}/{MODE}/bin/test/{RUNTARGET}/exec-helper-{MODULE}-{RUNTARGET}
+    coverage:
+        environment:
+            CXXFLAGS: --coverage -fprofile-arcs -ftest-coverage
+            LDFLAGS: -fprofile-arcs -ftest-coverage
+        command-line:
             - exec-helper
             - init
             - build
@@ -238,19 +240,20 @@ clang-tidy:
             src/{MODULE}/src/*.cpp:
                 checks: 
                     - "*"
-                    - "-google-readability-namespace-comments"
-                    - "-llvm-namespace-comment"
-                    - "-cppcoreguidelines-pro-bounds-pointer-arithmetic"
-                    - "-clang-analyzer-alpha.deadcode.UnreachableCode"
-                    - "-clang-analyzer-alpha.core.CastToStruct"
-                    - "-modernize-make-unique"
+                    - -google-readability-namespace-comments
+                    - -llvm-namespace-comment
+                    - -cppcoreguidelines-pro-bounds-pointer-arithmetic
+                    - -clang-analyzer-alpha.deadcode.UnreachableCode
+                    - -clang-analyzer-alpha.core.CastToStruct
+                    - -modernize-make-unique
             test/{MODULE}/src/*.cpp:
                 checks:
                     - "*"
-                    - "-google-readability-namespace-comments"
-                    - "-llvm-namespace-comment"
-                    - "-clang-analyzer-alpha.deadcode.UnreachableCode"
-                    - "-performance-unnecessary-copy-initialization"
-                    - "-modernize-loop-convert"
-        command-line:
-            - "-warnings-as-errors=*"
+                    - -google-readability-namespace-comments
+                    - -llvm-namespace-comment
+                    - -clang-analyzer-alpha.deadcode.UnreachableCode
+                    - -performance-unnecessary-copy-initialization
+                    - -modernize-loop-convert
+                    - -google-readability-function-size
+                    - -readability-function-size
+        warnings-as-errors: all

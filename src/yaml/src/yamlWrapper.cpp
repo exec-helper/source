@@ -1,6 +1,7 @@
 #include "yamlWrapper.h"
 
 #include <iostream>
+#include <vector>
 
 #include <yaml-cpp/yaml.h>
 
@@ -39,27 +40,29 @@ namespace execHelper { namespace yaml {
 
     bool YamlWrapper::getTree(const YAML::Node& rootNode, SettingsNode& settings) noexcept {
         YAML::Node node = Clone(rootNode);
-        settings.m_key = "<root>";
-        getSubTree(node, settings);
+        getSubTree(node, settings, {});
         return true;
     }
 
-    void YamlWrapper::getSubTree(const YAML::Node& node, SettingsNode& yamlNode) {
+    void YamlWrapper::getSubTree(const YAML::Node& node, SettingsNode& yamlNode, const SettingsNode::SettingsKeys& keys) noexcept {
         for(const auto& element : node) {
-            yamlNode.m_values.emplace_back(SettingsNode()); 
-            yamlNode.m_values.back().m_key = element.first.as<string>();
+			SettingsNode::SettingsValue key = element.first.as<string>();
+			yamlNode.add(keys, key);
+
+			SettingsNode::SettingsKeys newKeys = keys;
+			newKeys.push_back(key);
             if(element.second.IsMap()) {
-                YamlWrapper::getSubTree(element.second, yamlNode.m_values.back());
+                YamlWrapper::getSubTree(element.second, yamlNode, newKeys);
             } else {
                 if(element.second.size() == 0) {
-                    yamlNode.m_values.back().m_values.emplace_back(SettingsNode());
-                    yamlNode.m_values.back().m_values.back().m_key = element.second.as<string>();
+					SettingsNode::SettingsValue value = element.second.as<string>();
+					yamlNode.add(newKeys, value);
                 }
                 for(const auto& el : element.second) {
-                    yamlNode.m_values.back().m_values.emplace_back(SettingsNode());
-                    yamlNode.m_values.back().m_values.back().m_key = el.as<string>();
+					SettingsNode::SettingsValue value = el.as<string>();
+					yamlNode.add(newKeys, value);
                 }
             }
-        }
+		}
     }
 } }

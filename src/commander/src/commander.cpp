@@ -23,6 +23,7 @@ namespace execHelper { namespace commander {
         for(const auto& command : m_options.getCommands()) {
             CommandPlugin plugin;
             Task task;
+            task.setEnvironment(m_env);
             if(! plugin.apply(command, task, m_options)) {
                 return false;
             }

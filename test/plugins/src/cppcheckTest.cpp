@@ -21,12 +21,12 @@ using execHelper::core::Task;
 using execHelper::core::TaskCollection;
 using execHelper::core::CommandCollection;
 
-using execHelper::test::utils::addSettings;
 using execHelper::test::OptionsStub;
 using execHelper::test::utils::Patterns;
 using execHelper::test::utils::addPatterns;
 using execHelper::test::utils::TargetUtil;
 using execHelper::test::utils::CompilerUtil;
+using execHelper::test::utils::copyAndAppend;
 
 namespace {
     const string PLUGIN_CONFIG_KEY("cppcheck");
@@ -47,13 +47,11 @@ namespace execHelper { namespace plugins { namespace test {
             addPatterns(compilerUtil.getPatterns(), options);
 
             SettingsNode& rootSettings = options.m_settings;
-            addSettings(rootSettings, PLUGIN_CONFIG_KEY, command);
-            addSettings(rootSettings[PLUGIN_CONFIG_KEY], "patterns", targetUtil.getKeys());
-            addSettings(rootSettings[PLUGIN_CONFIG_KEY], "patterns", compilerUtil.getKeys());
+            rootSettings.add({PLUGIN_CONFIG_KEY, "patterns"}, targetUtil.getKeys());
+            rootSettings.add({PLUGIN_CONFIG_KEY, "patterns"}, compilerUtil.getKeys());
 
             // Add the settings of an other command to make sure we take the expected ones
             const string otherCommandKey("other-command");
-            addSettings(rootSettings, PLUGIN_CONFIG_KEY, otherCommandKey);
 
             Cppcheck plugin;
             Task task;
@@ -64,15 +62,16 @@ namespace execHelper { namespace plugins { namespace test {
             TaskCollection verbosity;
             TaskCollection commandLine;
 
-            SettingsNode* settings = &(rootSettings[PLUGIN_CONFIG_KEY]);
+            SettingsNode::SettingsKeys baseSettingsKeys = {PLUGIN_CONFIG_KEY};
+            SettingsNode::SettingsKeys otherBaseSettingsKeys = {PLUGIN_CONFIG_KEY, otherCommandKey};
 
             COMBINATIONS("Toggle between general and specific command settings") {
-                settings = &rootSettings[PLUGIN_CONFIG_KEY][command];
+                baseSettingsKeys.push_back(command);
             }
 
             COMBINATIONS("Change the enabled checks") {
                 TaskCollection enabledChecksValue = {"warning", "style", "performance"}; 
-                addSettings(*settings, "enable-checks", enabledChecksValue);
+                rootSettings.add(copyAndAppend(baseSettingsKeys, "enable-checks"), enabledChecksValue);
                 enabledChecks.clear();
                 enabledChecks = "--enable=warning,style,performance";
             }
@@ -80,14 +79,15 @@ namespace execHelper { namespace plugins { namespace test {
             COMBINATIONS("Change the source dir") {
                 srcDir.clear();
                 srcDir = "{" + targetUtil.target.getKey() + "}/{HELLO}/{" + targetUtil.runTarget.getKey() + "}";
-                addSettings(*settings, "src-dir", "{" + targetUtil.target.getKey() + "}/{HELLO}/{" + targetUtil.runTarget.getKey() + "}");
-                addSettings(rootSettings[PLUGIN_CONFIG_KEY][otherCommandKey], "src-dir", "{" + targetUtil.target.getKey() + "}/{HELLO}/{" + targetUtil.runTarget.getKey() + "}");
+                rootSettings.add(copyAndAppend(baseSettingsKeys, "src-dir"), srcDir);
+                rootSettings.add(copyAndAppend(otherBaseSettingsKeys, "src-dir"), "other-src-dir");
             }
 
             COMBINATIONS("Change the target dir") {
-                srcDir += "/{" + targetUtil.runTarget.getKey() + "}/{HELLO}";
-                addSettings(*settings, "target-path", "{" + targetUtil.runTarget.getKey() + "}/{HELLO}");
-                addSettings(rootSettings[PLUGIN_CONFIG_KEY][otherCommandKey], "target-path", "{" + targetUtil.runTarget.getKey() + "}/{HELLO}");
+                const string target("{" + targetUtil.runTarget.getKey() + "}/{HELLO}");
+                srcDir +=  "/" + target;
+                rootSettings.add(copyAndAppend(baseSettingsKeys, "target-path"), target);
+                rootSettings.add(copyAndAppend(otherBaseSettingsKeys, "target-path"), "other-target");
             }
 
             COMBINATIONS("Switch off verbosity") {
@@ -101,8 +101,8 @@ namespace execHelper { namespace plugins { namespace test {
 
             COMBINATIONS("Add a command line") {
                 commandLine = {"{" + targetUtil.target.getKey() + "}", "{" + targetUtil.runTarget.getKey() + "}"};
-                addSettings(*settings, "command-line", commandLine);
-                addSettings(rootSettings[PLUGIN_CONFIG_KEY][otherCommandKey], "command-line", "--some-command");
+                rootSettings.add(copyAndAppend(baseSettingsKeys, "command-line"), commandLine);
+                rootSettings.add(copyAndAppend(otherBaseSettingsKeys, "command-line"), "--other-command");
             }
 
             expectedTask.append(enabledChecks);
