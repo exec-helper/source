@@ -60,16 +60,15 @@ namespace execHelper { namespace plugins {
             task.append({"--language", language.get()});
         }
 
+        if(options.getVerbosity()) {
+            task.append("-verbose");
+        }
+
+        task.append(ConfigValue<TaskCollection>::get(getCommandLineKey(), {}, command, rootSettings));
+
         for(const auto& combination : makePatternPermutator(command, rootSettings, options)) {
-            Task newTask = task;
-            newTask.append(getCommandLine(command, rootSettings, combination)); 
-
-            TaskCollection newTaskCollection = newTask.getTask();
-            replacePatternCombinations(newTaskCollection, combination);
-            Task replacedTask;
-            replacedTask.append(std::move(newTaskCollection));
-
-            if(! registerTask(replacedTask, options)) {
+            Task makeTask = replacePatternCombinations(task, combination);
+            if(! registerTask(makeTask, options)) {
                 return false;
             }
         }

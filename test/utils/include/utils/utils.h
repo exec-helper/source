@@ -134,6 +134,7 @@ namespace execHelper {
             const core::Pattern PATTERN1("PATTERN1", {"pattern1"}, 'p', "--pattern1");
             const core::Pattern PATTERN2("PATTERN2", {"pattern2a", "pattern2b"}, 'q', "--pattern2");
             const Patterns PATTERNS({PATTERN1, PATTERN2});
+            const core::PatternKeys PATTERN_KEYS({PATTERN1.getKey(), PATTERN2.getKey()});
 
             core::test::ExecutorStub::TaskQueue getExpectedTasks(const core::Task& expectedTask, const TargetUtil& targetUtil) noexcept;
             core::test::ExecutorStub::TaskQueue getExpectedTasks(const core::Task& expectedTask, const CompilerUtil& compilerUtil, const TargetUtil& targetUtil) noexcept;

@@ -41,7 +41,9 @@ namespace execHelper { namespace plugins {
 
         for(const auto& combination : makePatternPermutator(command, rootSettings, options)) {
             Task makeTask = replacePatternCombinations(task, combination);
-            registerTask(makeTask, options);
+            if(! registerTask(makeTask, options)) {
+                return false;
+            }
         }
         return true;
     }
