@@ -18,7 +18,6 @@ using std::string;
 using execHelper::config::SettingsNode;
 using execHelper::core::Task;
 using execHelper::core::TaskCollection;
-using execHelper::core::Pattern;
 using execHelper::plugins::Pmd;
 
 using execHelper::test::OptionsStub;
@@ -28,7 +27,6 @@ using execHelper::test::utils::PATTERN2;
 using execHelper::test::utils::PATTERNS;
 using execHelper::test::utils::PATTERN_KEYS;
 using execHelper::test::utils::copyAndAppend;
-using execHelper::test::utils::createPatternCombination;
 using execHelper::core::test::ExecutorStub;
 
 namespace {
@@ -192,7 +190,7 @@ namespace execHelper { namespace plugins { namespace test {
 
             COMBINATIONS("Add a language") {
                 const string languageValue("language1");
-                language.push_back("--language");
+                language.emplace_back("--language");
                 language.push_back(languageValue);
                 rootSettings.add(copyAndAppend(baseSettingsKeys, LANGUAGE_CONFIG_KEY), languageValue);
                 rootSettings.add(copyAndAppend(otherBaseSettingsKeys, LANGUAGE_CONFIG_KEY), "other-language");
