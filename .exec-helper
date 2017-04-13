@@ -54,7 +54,7 @@ commands:
     run-test: Run the specified tests
     coverage: Run the coverage analysis tools using a specific setup (for convenience)
     memory-check: Run the memory check analysis tool for a specific setup (for convenience)
-    doc: Generate the documentation
+    docs: Generate the documentation
 
 setup:
     - command-line-command
@@ -94,7 +94,7 @@ coverage:
 memory-check:
     - command-line-command
 
-doc:
+docs:
     - command-line-command
 
 selector:
@@ -199,7 +199,7 @@ command-line-command:
             - g++
             - --mode
             - debug
-    doc:
+    docs:
         command-line:
             - doxygen
             - Doxyfile

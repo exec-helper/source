@@ -1,0 +1,17 @@
+/**
+ * \page exec-helper, eh
+ * - Or How To Get Coffee In Peace
+ *
+ * \section SYNOPSIS
+ * exec-helper <commands> [options]
+ *
+ * \section COPYRIGHT
+ * Exec-helper is Copyright (C) 2016-2017 under the Apache License Version 2.0
+ *
+ * \section DESCRIPTION
+ * Exec-helper is a meta-wrapper for shell commands, optimizing the slowest link in almost every existing workflow: you. It enables the user to optimize this in three major ways:
+ *   -# It minimizes the amount of typing while eliminating redudancies
+ *   -# It chains multiple commands
+ *   -# It saves you from having to memorize and search for the right invocations
+ * These optimizations enable users to do what they like to do the most: hang around the coffee machine with a peace of mind.
+ */
