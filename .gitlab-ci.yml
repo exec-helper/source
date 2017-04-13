@@ -187,14 +187,25 @@ coverage:
         paths:
             - test_coverage/
 
+docs:
+    stage: test
+    script:
+        - pacman -S --noconfirm doxygen
+        - build/g++/release/bin/exec-helper docs
+    artifacts:
+        paths:
+            - docs/
+
 pages:
     stage: deploy
     dependencies:
         - coverage
+        - docs
     script:
         - mkdir public
         - mv pages/index.html public/
         - mv test_coverage/ public/coverage
+        - mv docs public/docs
     artifacts:
         paths:
             - public
