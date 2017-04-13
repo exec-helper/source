@@ -1,5 +1,7 @@
 set(EXE_NAME ${PROJECT_NAME}-core-unittest)
 
+find_package(Boost REQUIRED)
+
 set(SRCS
         src/patternTest.cpp
         src/permutationIteratorTest.cpp
@@ -17,6 +19,7 @@ include_directories(${EXE_NAME}
         ${${PROJECT_NAME}-core_INCLUDE_DIRS}
         ${${PROJECT_NAME}-test-utils_INCLUDE_DIRS}
         ${UNITTEST_INCLUDE_DIRS} 
+        ${Boost_INCLUDE_DIR}
     )
 
 target_link_libraries(${EXE_NAME}

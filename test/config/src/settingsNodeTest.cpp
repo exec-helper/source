@@ -13,8 +13,8 @@ namespace std {
     }
 }
 
-#include <catch.hpp>
 #include <boost/optional/optional_io.hpp>
+#include <catch.hpp>
 
 #include "config/settingsNode.h"
 

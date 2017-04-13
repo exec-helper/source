@@ -2,6 +2,8 @@
 #include <sstream>
 #include <vector>
 
+#include <boost/algorithm/string.hpp>
+
 #include <catch.hpp>
 
 #include "utils/utils.h"
@@ -10,9 +12,9 @@
 using std::string;
 using std::istringstream;
 using std::stringstream;
-using std::istream_iterator;
 using std::vector;
 using std::move;
+using boost::split;
 
 using execHelper::test::utils::appendVectors;
 
@@ -24,8 +26,8 @@ namespace execHelper { namespace core {
                 string actualCommand = "command1 command2 command3";
 
                 // Convert the string command to a collection of separate commands
-                istringstream iss(actualCommand);
-                TaskCollection actualCommandCollection{istream_iterator<string>{iss}, istream_iterator<string>{}};
+                TaskCollection actualCommandCollection;
+                split(actualCommandCollection, actualCommand, boost::is_any_of(" "));
 
                 WHEN("We add each command separately to the task") {
                     for(const auto& command : actualCommandCollection) {
@@ -70,8 +72,8 @@ namespace execHelper { namespace core {
                 string actualCommand;
 
                 // Convert the string command to a collection of separate commands
-                istringstream iss(actualCommand);
-                TaskCollection actualCommandCollection{istream_iterator<string>{iss}, istream_iterator<string>{}};
+                TaskCollection actualCommandCollection;
+                split(actualCommandCollection, actualCommand, boost::is_any_of(" "));
 
                 WHEN("We add the entire string as one single command parameter") {
                     task.append(actualCommand);
@@ -103,8 +105,8 @@ namespace execHelper { namespace core {
                 string actualCommand;
 
                 // Convert the string command to a collection of separate commands
-                istringstream iss(actualCommand);
-                TaskCollection actualCommandCollection{istream_iterator<string>{iss}, istream_iterator<string>{}};
+                TaskCollection actualCommandCollection;
+                split(actualCommandCollection, actualCommand, boost::is_any_of(" "));
 
                 WHEN("We add the entire string as one single command parameter") {
                     task.append(actualCommand);
@@ -135,8 +137,8 @@ namespace execHelper { namespace core {
                 string actualCommand = "command1 command2 command3";
 
                 // Convert the string command to a collection of separate commands
-                istringstream iss(actualCommand);
-                TaskCollection actualCommandCollection{istream_iterator<string>{iss}, istream_iterator<string>{}};
+                TaskCollection actualCommandCollection;
+                split(actualCommandCollection, actualCommand, boost::is_any_of(" "));
                 TaskCollection moveCommandCollection = actualCommandCollection;
 
                 WHEN("We move each command separately to the task") {

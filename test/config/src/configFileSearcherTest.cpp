@@ -1,5 +1,5 @@
-#include <fstream>
 #include <experimental/filesystem>
+#include <fstream>
 
 #include <boost/optional/optional.hpp>
 #include <boost/optional/optional_io.hpp>
@@ -37,14 +37,18 @@ namespace test {
                 for(auto it = searchPaths.rbegin(); it != searchPaths.rend(); ++it) {
                     const string correctFilePath = *it;
                     ofstream file;
-                    file.open(correctFilePath + "/" + settingsFile, std::ios::out | std::ios::trunc);
+                    string filename(correctFilePath);
+                    filename += "/";
+                    filename += settingsFile;
+
+                    file.open(filename, std::ios::out | std::ios::trunc);
                     file << "test.exec-helper" << std::endl;
                     file.close();
 
                     THEN("It should find it") {
                         boost::optional<std::string> result = configFileSearcher.find(settingsFile);
                         REQUIRE(result != boost::none);
-                        REQUIRE(result.get() == correctFilePath + "/" + settingsFile);
+                        REQUIRE(result.get() == filename);
                     }
                 }
 
