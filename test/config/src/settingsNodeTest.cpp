@@ -18,15 +18,12 @@ namespace std {
 
 #include "config/settingsNode.h"
 
-#include "utils/utils.h"
-
 using std::string;
 using std::to_string;
 using std::ostream;
 using std::initializer_list;
 
 using execHelper::config::SettingsNode;
-using execHelper::test::utils::toString;
 
 namespace execHelper { namespace core { namespace test {
     SCENARIO("Basic addition and getting of values", "[config][settingsNode]") {
