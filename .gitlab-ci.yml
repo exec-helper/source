@@ -7,6 +7,7 @@ before_script:
 stages:
     - build
     - test
+    - analyze
     - deploy
 
 build:gcc:
@@ -103,7 +104,7 @@ unittest-commander:
         - build/g++/release/bin/exec-helper run-test --module commander --run-target unittest --compiler g++ clang++ --mode release
 
 memory-check:
-    stage: test
+    stage: analyze
     dependencies:
         - build:gcc:limited-optimization
     script:
@@ -111,7 +112,7 @@ memory-check:
         - build/g++/release/bin/exec-helper analyze --analyze valgrind --run-target unittest --compiler g++ --mode release --module core yaml config commander
 
 memory-check-plugins:
-    stage: test
+    stage: analyze
     dependencies:
         - build:gcc:limited-optimization
     script:
@@ -119,7 +120,7 @@ memory-check-plugins:
         - build/g++/release/bin/exec-helper analyze --analyze valgrind --run-target unittest --compiler g++ --mode release --module plugins
 
 cppcheck:
-    stage: test
+    stage: analyze
     dependencies:
         - build:gcc
     script:
@@ -127,7 +128,7 @@ cppcheck:
         - build/g++/release/bin/exec-helper analyze --analyze cppcheck
 
 clang-tidy-core:
-    stage: test
+    stage: analyze
     dependencies:
         - build:gcc
     script:
@@ -137,7 +138,7 @@ clang-tidy-core:
         - build/g++/release/bin/exec-helper analyze --analyze clang-tidy --module core
 
 clang-tidy-plugin:
-    stage: test
+    stage: analyze
     dependencies:
         - build:gcc
     script:
@@ -147,7 +148,7 @@ clang-tidy-plugin:
         - build/g++/release/bin/exec-helper analyze --analyze clang-tidy --module plugins
 
 clang-tidy-rest:
-    stage: test
+    stage: analyze
     dependencies:
         - build:gcc
     script:
@@ -157,7 +158,7 @@ clang-tidy-rest:
         - build/g++/release/bin/exec-helper analyze --analyze clang-tidy --module yaml commander config
 
 clang-static-analyzer:
-    stage: test
+    stage: analyze
     dependencies:
         - build:gcc
     script:
@@ -165,7 +166,7 @@ clang-static-analyzer:
         - build/g++/release/bin/exec-helper analyze --analyze clang-static-analyzer --mode debug --compiler ''
 
 undefined-behaviour:
-    stage: test
+    stage: analyze
     dependencies:
         - build:gcc
     script:
@@ -175,7 +176,7 @@ undefined-behaviour:
 
 
 code-duplication-pmd-cpd:
-    stage: test
+    stage: analyze
     dependencies:
         - build:gcc
     script:
@@ -185,7 +186,7 @@ code-duplication-pmd-cpd:
         - build/g++/release/bin/exec-helper analyze --analyze pmd
 
 coverage:
-    stage: test
+    stage: analyze
     dependencies:
         - build:gcc
     script:
@@ -198,7 +199,7 @@ coverage:
             - test_coverage/
 
 docs:
-    stage: test
+    stage: analyze
     script:
         - pacman -S --noconfirm doxygen
         - build/g++/release/bin/exec-helper docs
