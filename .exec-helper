@@ -209,8 +209,6 @@ command-line-command:
             - undefined-behaviour
             - --run-target
             - unittest
-            - -e
-            - config
     memory-check:
         command-line:
             - exec-helper

@@ -13,7 +13,6 @@
 
 #include "utils/utils.h"
 
-using std::pair;
 using std::make_pair;
 using std::string;
 using std::vector;
