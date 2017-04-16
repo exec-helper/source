@@ -117,8 +117,6 @@ make:
     install:
         command-line:
             - install
-    command-line:
-        - VERBOSE=1
 
 cppcheck:
     patterns:
