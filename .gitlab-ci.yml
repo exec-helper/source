@@ -170,6 +170,7 @@ undefined-behaviour:
         - build:gcc
     script:
         - pacman -S --noconfirm --needed clang cmake make git libunistring ncurses
+        - export PATH=$PATH:build/g++/release/bin
         - build/g++/release/bin/exec-helper undefined-behaviour
 
 

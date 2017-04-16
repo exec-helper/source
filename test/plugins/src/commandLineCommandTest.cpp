@@ -16,7 +16,6 @@
 
 using std::string;
 using std::vector;
-using std::make_pair;
 
 using execHelper::config::SettingsNode;
 using execHelper::core::Task;
