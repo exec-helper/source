@@ -21,7 +21,6 @@ namespace std {
 using std::string;
 using std::to_string;
 using std::ostream;
-using std::initializer_list;
 
 using execHelper::config::SettingsNode;
 
