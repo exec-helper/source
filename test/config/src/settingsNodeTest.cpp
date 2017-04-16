@@ -18,12 +18,15 @@ namespace std {
 
 #include "config/settingsNode.h"
 
+#include "utils/utils.h"
+
 using std::string;
 using std::to_string;
 using std::ostream;
 using std::initializer_list;
 
 using execHelper::config::SettingsNode;
+using execHelper::test::utils::toString;
 
 namespace execHelper { namespace core { namespace test {
     SCENARIO("Basic addition and getting of values", "[config][settingsNode]") {
@@ -34,11 +37,11 @@ namespace execHelper { namespace core { namespace test {
             const SettingsNode::SettingsValue testValue2("test-value2");
             const SettingsNode::SettingsValues testValue3({"test-value3a", "test-value3b"});
             const SettingsNode::SettingsKeys rootKeys({testValue1, testKey2});
-            const initializer_list<string> testValue4({"test-value4a", "test-value4b"});
+            const std::vector<string> testValue4({"test-value4a", "test-value4b", "test-value4c"}); // Note: due to the lifetime of an initializer_list in c++ 11, we can not use an initializer_list object here.
             const SettingsNode::SettingsKey testKey5("test-key5");
             const SettingsNode::SettingsValues testValue5({"test-value5a", "test-value5b"});
             const SettingsNode::SettingsKey testKey6("test-key6");
-            const initializer_list<string> testValue6({"test-value6a", "test-value6b"});
+            const std::vector<string> testValue6({"test-value6a", "test-value6b"}); // Note: due to the lifetime of an initializer_list in c++ 11, we can not use an initializer_list object here.
 
             SettingsNode settings(rootKey);
 
@@ -54,9 +57,9 @@ namespace execHelper { namespace core { namespace test {
                 REQUIRE(settings.add(testValue1));
                 REQUIRE(settings.add({testKey2}, testValue2));
                 REQUIRE(settings.add(testValue3));
-                REQUIRE(settings.add(testValue4));
+                REQUIRE(settings.add({"test-value4a", "test-value4b", "test-value4c"}));
                 REQUIRE(settings.add({testKey5}, testValue5));
-                REQUIRE(settings.add({testKey6}, testValue6));
+                REQUIRE(settings.add({testKey6}, {"test-value6a", "test-value6b"}));
 
                 THEN("The settings should contain them") {
                     REQUIRE(settings.contains(testValue1));
