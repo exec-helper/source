@@ -1,8 +1,9 @@
-#include <vector>
-#include <string>
 #include <fstream>
+#include <string>
+#include <utility>
+#include <vector>
 
-#include <catch.hpp>
+#include "unittest/catch.h"
 #include <boost/optional/optional.hpp>
 #include <boost/optional/optional_io.hpp>
 
@@ -12,13 +13,18 @@
 
 #include "utils/utils.h"
 
-using std::vector;
+using std::pair;
+using std::make_pair;
 using std::string;
+using std::vector;
 
 using execHelper::config::SettingsNode;
 using execHelper::core::TaskCollection;
 using execHelper::core::PatternCombinations;
+using execHelper::core::EnvironmentCollection;
+using execHelper::core::EnvironmentValue;
 using execHelper::test::utils::createPatternCombination;
+using execHelper::test::utils::combineVectors;
 
 namespace execHelper { namespace plugins { namespace test {
     SCENARIO("Test the patterns key", "[plugins][pluginUtils]") {
@@ -234,6 +240,60 @@ namespace execHelper { namespace plugins { namespace test {
                     TaskCollection correctTaskCollection({replacedValue2});
                     REQUIRE(actualTaskCollection == correctTaskCollection);
                 }
+            }
+        }
+    }
+
+    SCENARIO("Test the environment key", "[plugins][pluginUtils]") {
+        GIVEN("The correct environment key") {
+            string correctEnvironmentKey("environment");
+
+            WHEN("We get the environment key") {
+                string actualEnvironmentKey = getEnvironmentKey();
+
+                THEN("They should match") {
+                    REQUIRE(actualEnvironmentKey == correctEnvironmentKey); 
+                }
+            }
+        }
+    }
+
+    SCENARIO("Test getting the environment", "[plugins][pluginUtils]") {
+        MAKE_COMBINATIONS("Of several environment settings") {
+            const string command("environment-command");
+            const string environmentKey(getEnvironmentKey());
+
+            SettingsNode rootSettings("plugin-key");
+            const string otherCommandKey("other-command");
+
+            SettingsNode::SettingsKeys baseSettingsKeys = {};
+            SettingsNode::SettingsKeys otherBaseSettingsKeys = {otherCommandKey};
+            const EnvironmentValue ENVIRONMENT_VALUE1 = make_pair("ENVIRONMENT_KEY1", "ENVIRONMENT_VALUE1");
+            const EnvironmentValue ENVIRONMENT_VALUE2 = make_pair("ENVIRONMENT_KEY2", "ENVIRONMENT_VALUE2");
+            const EnvironmentCollection ENVIRONMENT_VALUES({ENVIRONMENT_VALUE1, ENVIRONMENT_VALUE2});
+
+            EnvironmentCollection actualEnvironment;
+
+            COMBINATIONS("Switch between specific and general key") {
+                baseSettingsKeys.push_back(command);
+            }
+
+            COMBINATIONS("Add one environment variable") {
+                rootSettings.add(combineVectors(baseSettingsKeys, {environmentKey, ENVIRONMENT_VALUE1.first}), ENVIRONMENT_VALUE1.second);
+                actualEnvironment.insert(ENVIRONMENT_VALUE1);
+            }
+
+            COMBINATIONS("Add environment variables") {
+                for(const auto& environmentValue : ENVIRONMENT_VALUES) {
+                    rootSettings.add(combineVectors(baseSettingsKeys, {environmentKey, environmentValue.first}), environmentValue.second);
+                    actualEnvironment.insert(environmentValue);
+                }
+            }
+
+            EnvironmentCollection returnedEnvironmentCollection = getEnvironment(command, rootSettings);
+
+            THEN_CHECK("The returned environment collection is as expected") {
+                REQUIRE(returnedEnvironmentCollection == actualEnvironment);
             }
         }
     }

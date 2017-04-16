@@ -9,6 +9,7 @@
 #include "plugins/commandLineCommand.h"
 
 #include "utils/utils.h"
+#include "utils/combinationHelpers.h"
 
 #include "executorStub.h"
 #include "optionsStub.h"
@@ -20,7 +21,6 @@ using std::make_pair;
 using execHelper::config::SettingsNode;
 using execHelper::core::Task;
 using execHelper::core::TaskCollection;
-using execHelper::core::EnvironmentCollection;
 
 using execHelper::test::utils::TargetUtil;
 using execHelper::test::utils::CompilerUtil;
@@ -29,6 +29,8 @@ using execHelper::test::OptionsStub;
 using execHelper::test::utils::copyAndAppend;
 using execHelper::test::utils::combineVectors;
 using execHelper::test::utils::addPatterns;
+
+using execHelper::test::combinationHelpers::setEnvironment;
 
 namespace {
     const string PLUGIN_CONFIG_KEY("command-line-command");
@@ -55,7 +57,6 @@ namespace execHelper { namespace plugins { namespace test {
             const TaskCollection command1({"command1"});
             const TaskCollection command2({"{" + compilerUtil.compiler.getKey() + "}/{" + compilerUtil.mode.getKey() + "}", "{" + targetUtil.target.getKey() + "}/{" + targetUtil.runTarget.getKey() + "}"});
            const vector<TaskCollection> commandLines({command1, command2});
-            EnvironmentCollection environment;
 
             // Add the settings of an other command to make sure we take the expected ones
             const string otherCommandKey("other-command");
@@ -81,13 +82,7 @@ namespace execHelper { namespace plugins { namespace test {
             }
 
             COMBINATIONS("Set environment") {
-                environment.emplace(make_pair("VAR1", "environmentValue{" + compilerUtil.compiler.getKey() + "}"));
-                environment.emplace(make_pair("VAR{" + compilerUtil.compiler.getKey() + "}", "environmentValue2"));
-
-                for(const auto& envVar : environment) {
-                    rootSettings.add(combineVectors(baseSettingsKeys, {"environment", envVar.first}), envVar.second);
-                    expectedTask.appendToEnvironment(envVar);
-                }
+                setEnvironment(baseSettingsKeys, &expectedTask, &rootSettings, {{"VAR1", "environmentValue{" + compilerUtil.compiler.getKey() + "}"}, {"VAR{" + compilerUtil.compiler.getKey() + "}", "environmentValue2"}});
             }
 
             ExecutorStub::TaskQueue expectedTasks;

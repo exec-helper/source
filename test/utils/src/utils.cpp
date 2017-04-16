@@ -9,14 +9,15 @@
 #include "core/options.h"
 #include "plugins/pluginUtils.h"
 
-using std::map;
-using std::vector;
-using std::string;
-using std::endl;
-using std::stringstream;
 using std::initializer_list;
-using std::reference_wrapper;
+using std::endl;
+using std::map;
 using std::ofstream;
+using std::pair;
+using std::reference_wrapper;
+using std::string;
+using std::stringstream;
+using std::vector;
 
 using execHelper::config::SettingsNode;
 using execHelper::core::Options;
@@ -29,6 +30,10 @@ using execHelper::core::PatternKeys;
 using execHelper::core::PatternValues;
 using execHelper::core::PatternPermutator;
 using execHelper::plugins::replacePatternCombinations;
+
+using execHelper::core::EnvironmentCollection;
+using execHelper::core::EnvironmentValue;
+using execHelper::plugins::getEnvironmentKey;
 
 using execHelper::core::test::ExecutorStub;
 

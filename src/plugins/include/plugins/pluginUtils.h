@@ -24,9 +24,12 @@ namespace execHelper {
     namespace plugins {
         const std::string& getPatternsKey() noexcept;
         const std::string& getCommandLineKey() noexcept;
+        const std::string& getEnvironmentKey() noexcept;
+
         boost::optional<const config::SettingsNode&> getContainingSettings(const std::string& key, const config::SettingsNode& rootSettings, const std::vector<std::string>& configKeys) noexcept;
         core::TaskCollection getCommandLine(const core::Command& command, const config::SettingsNode& rootSettings) noexcept;
         core::TaskCollection getCommandLine(const core::Command& command, const config::SettingsNode& rootSettings, const core::PatternCombinations& patternCombinations) noexcept;
+        core::EnvironmentCollection getEnvironment(const core::Command& command, const config::SettingsNode& rootSettings) noexcept;
 
         void replacePatternCombinations(core::TaskCollection& commandArguments, const core::PatternCombinations& patternCombinations) noexcept;
         core::Task replacePatternCombinations(const core::Task& task, const core::PatternCombinations& patternCombinations) noexcept;

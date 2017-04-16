@@ -96,6 +96,28 @@ namespace execHelper { namespace plugins {
         return commandArguments;
     }
 
+    const std::string& getEnvironmentKey() noexcept {
+        static const string environmentKey("environment");
+        return environmentKey;
+    }
+
+    core::EnvironmentCollection getEnvironment(const core::Command& command, const config::SettingsNode& rootSettings) noexcept {
+        EnvironmentCollection result;
+        boost::optional<const SettingsNode&> environmentSettingsOpt = ConfigValue<const SettingsNode&>::getSetting(getEnvironmentKey(), rootSettings, {{command}, {}});
+        if(environmentSettingsOpt == boost::none) {
+            return result;
+        }
+
+        const SettingsNode& environmentSettings = environmentSettingsOpt.get();
+        for(const auto& setting : environmentSettings.values()) {
+            auto environmentSettingValues = environmentSettings[setting].values();
+            if(!environmentSettingValues.empty()) {
+                result.emplace(make_pair(setting, environmentSettings[setting].values().back()));
+            }
+        }
+        return result;
+    }
+
     boost::optional<string> getConfigurationSetting(const string& command, const SettingsNode& rootSettings, const string& configKey, const string& prepend) noexcept {
         boost::optional<TaskCollection> collection = getConfigurationSettings(command, rootSettings, configKey);
         if(collection == boost::none) {

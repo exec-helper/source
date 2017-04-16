@@ -38,6 +38,8 @@ namespace execHelper { namespace plugins {
             return false;
         }
 
+        task.appendToEnvironment(getEnvironment(command, rootSettings));
+
         vector<Task> tasks;
         auto commandLineValues = commandLineSettings.values();
         if(commandLineValues.empty()) {
@@ -54,20 +56,6 @@ namespace execHelper { namespace plugins {
                 TaskCollection newTaskCollection = ConfigValue<TaskCollection>::get(commandLine, {}, commandLineSettings, {{}});
                 newTask.append(newTaskCollection);
                 tasks.emplace_back(newTask);
-            }
-        }
-
-        EnvironmentCollection environment;
-        boost::optional<const SettingsNode&> environmentSettingsOpt = ConfigValue<const SettingsNode&>::getSetting("environment", rootSettings, {{command}, {}});
-        if(environmentSettingsOpt != boost::none) {
-            const SettingsNode& environmentSettings = environmentSettingsOpt.get();
-            for(const auto& setting : environmentSettings.values()) {
-                auto environmentSettingValues = environmentSettings[setting].values();
-                if(!environmentSettingValues.empty()) {
-                    for(auto& subtask : tasks) {
-                        subtask.appendToEnvironment(make_pair(setting, environmentSettings[setting].values().back()));
-                    }
-                }
             }
         }
 

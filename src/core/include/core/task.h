@@ -9,6 +9,7 @@ namespace execHelper {
     namespace core {
         typedef std::vector<std::string> TaskCollection;
         typedef std::map<std::string, std::string> EnvironmentCollection;
+        typedef std::pair<std::string, std::string> EnvironmentValue;
 
         class Task {
             public:
@@ -26,7 +27,8 @@ namespace execHelper {
                 bool append(TaskCollection&& taskPart) noexcept;
 
                 bool setEnvironment(const EnvironmentCollection& env) noexcept;
-                bool appendToEnvironment(std::pair<std::string, std::string>&& newValue) noexcept;
+                bool appendToEnvironment(EnvironmentValue&& newValue) noexcept;
+                bool appendToEnvironment(EnvironmentCollection&& newValues) noexcept;
 
                 bool operator==(const Task& other) const noexcept;
                 bool operator!=(const Task& other) const noexcept;

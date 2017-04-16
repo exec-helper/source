@@ -6,6 +6,7 @@
 #include "plugins/make.h"
 
 #include "utils/utils.h"
+#include "utils/combinationHelpers.h"
 #include "unittest/catch.h"
 
 #include "executorStub.h"
@@ -19,6 +20,7 @@ using execHelper::core::test::ExecutorStub;
 using execHelper::core::Task;
 using execHelper::core::TaskCollection;
 using execHelper::core::CommandCollection;
+using execHelper::core::EnvironmentCollection;
 
 using execHelper::test::OptionsStub;
 using execHelper::test::utils::copyAndAppend;
@@ -27,6 +29,7 @@ using execHelper::test::utils::CompilerUtil;
 using execHelper::test::utils::Patterns;
 using execHelper::test::utils::addPatterns;
 using execHelper::test::utils::getExpectedTasks;
+using execHelper::test::combinationHelpers::setEnvironment;
 
 namespace {
     const string pluginConfigKey("make");
@@ -105,6 +108,10 @@ namespace execHelper { namespace plugins { namespace test {
                 commandLine = {"{" + targetUtil.target.getKey() + "}", "{" + targetUtil.runTarget.getKey() + "}"};
                 rootSettings.add(copyAndAppend(baseSettingsKeys, "command-line"), commandLine);
                 rootSettings.add(copyAndAppend(otherBaseSettingsKeys, "command-line"), "--some-command");
+            }
+
+            COMBINATIONS("Set environment") {
+                setEnvironment(baseSettingsKeys, &expectedTask, &rootSettings, {{"VAR1", "environmentValue{" + compilerUtil.compiler.getKey() + "}"}, {"VAR{" + compilerUtil.compiler.getKey() + "}", "environmentValue2"}});
             }
 
             expectedTask.append(jobs);

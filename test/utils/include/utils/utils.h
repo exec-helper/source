@@ -4,6 +4,7 @@
 #define THEN_WHEN(x)
 #define THEN_CHECK(x)
 
+#include <initializer_list>
 #include <string>
 #include <memory>
 #include <vector>

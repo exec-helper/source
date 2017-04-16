@@ -38,6 +38,7 @@ namespace execHelper { namespace plugins {
             task.append("--debug");
         }
         task.append(ConfigValue<TaskCollection>::get(getCommandLineKey(), {}, command, rootSettings));
+        task.appendToEnvironment(getEnvironment(command, rootSettings));
 
         for(const auto& combination : makePatternPermutator(command, rootSettings, options)) {
             Task makeTask = replacePatternCombinations(task, combination);

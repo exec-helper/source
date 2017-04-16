@@ -82,8 +82,15 @@ namespace execHelper { namespace core {
         return true;
     }
 
-    bool Task::appendToEnvironment(std::pair<std::string, std::string>&& newValue) noexcept {
+    bool Task::appendToEnvironment(EnvironmentValue&& newValue) noexcept {
         m_env.emplace(newValue);
+        return true;
+    }
+
+    bool Task::appendToEnvironment(EnvironmentCollection&& newValues) noexcept {
+        for(auto&& value : newValues) {
+            appendToEnvironment(value);
+        }
         return true;
     }
 

@@ -2,6 +2,7 @@ set(LIBRARY_NAME ${PROJECT_NAME}-test-utils)
 
 set(SRCS
         src/utils.cpp
+        src/combinationHelpers.cpp
    )
 
 message(STATUS "core include dirs = " ${${PROJECT_NAME}-core_INCLUDE_DIRS})

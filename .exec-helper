@@ -54,6 +54,7 @@ commands:
     run-test: Run the specified tests
     coverage: Run the coverage analysis tools using a specific setup (for convenience)
     memory-check: Run the memory check analysis tool for a specific setup (for convenience)
+    undefined-behaviour: Check for undefined behaviour using UBSan
     docs: Generate the documentation
 
 setup:
@@ -101,6 +102,9 @@ selector:
     analyze:
         pattern: ANALYZE
 
+undefined-behaviour:
+    - command-line-command
+
 make:
     patterns:
         - COMPILER
@@ -113,6 +117,8 @@ make:
     install:
         command-line:
             - install
+    command-line:
+        - VERBOSE=1
 
 cppcheck:
     patterns:
@@ -184,9 +190,27 @@ command-line-command:
             - --compiler
             - g++
             - --mode
-            - profile
+            - coverage
             - --run-target
             - unittest
+    undefined-behaviour:
+        environment:
+            CXXFLAGS: -g -fsanitize=undefined -fno-omit-frame-pointer -fno-sanitize-recover=undefined
+            LDFLAGS: -g -fsanitize=undefined -fno-omit-frame-pointer -fno-sanitize-recover=undefined
+            UBSAN_OPTIONS: print_stacktrace=1
+        command-line:
+            - exec-helper
+            - init
+            - build
+            - run-test
+            - --compiler
+            - g++
+            - --mode
+            - undefined-behaviour
+            - --run-target
+            - unittest
+            - -e
+            - config
     memory-check:
         command-line:
             - exec-helper
