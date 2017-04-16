@@ -51,7 +51,7 @@ build:clang:
 
 test-distribution:ubuntu-yakkety:
     image: ubuntu:yakkety
-    stage: test
+    stage: analyze
     before_script:
         - apt-get update
         - apt-get install --yes build-essential cmake make gcc g++ clang libboost-program-options-dev libyaml-cpp-dev git
