@@ -10,7 +10,8 @@
 namespace execHelper {
     namespace config {
         /**
-         * \class A class containing a configuration hierarchy
+         * \class SettingsNode
+         * \brief A class containing a configuration hierarchy
          */
         class SettingsNode {
             public:

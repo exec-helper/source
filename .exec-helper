@@ -56,6 +56,7 @@ commands:
     memory-check: Run the memory check analysis tool for a specific setup (for convenience)
     undefined-behaviour: Check for undefined behaviour using UBSan
     docs: Generate the documentation
+    docs-man1: Generate the man1 documentation
 
 setup:
     - command-line-command
@@ -96,6 +97,10 @@ memory-check:
     - command-line-command
 
 docs:
+    - docs-man1
+    - command-line-command
+
+docs-man1:
     - command-line-command
 
 selector:
@@ -219,6 +224,10 @@ command-line-command:
             - g++
             - --mode
             - debug
+    docs-man1:
+        command-line:
+            - doxygen
+            - Doxyfile-man1
     docs:
         command-line:
             - doxygen

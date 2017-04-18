@@ -89,9 +89,9 @@ int execHelperMain(int argc, char** argv, char** envp) {
 
     PosixShell shell;
     execHelper::core::ImmediateExecutor::Callback callback = 
-                 [](Shell::ShellReturnCode /*returnCode*/) { 
+                 [](Shell::ShellReturnCode returnCode) { 
                     user_feedback_error("Error executing commands");
-                    exit(EXIT_FAILURE);
+                    exit(returnCode);
                  };
     std::unique_ptr<ExecutorInterface> executor;
     if(options.getDryRun()) {
