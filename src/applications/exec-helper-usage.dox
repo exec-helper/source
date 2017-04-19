@@ -18,22 +18,22 @@
  * \section options OPTIONS
  * Mandatory arguments to long options are mandatory for short options too. Arguments to options can be specified by appending the option with '=ARG' or ' ARG'. This manual will further use the '=ARG' notation. Multiple arguments can be specified, if appropriate and without the need to repeat the option, by using spaces in between the arguments.
  *
- * \par -h, --help
+ * \par -h, -\-help
  * Display a usage message on standard output and exit successfully.
  *
- * \par -v, --verbose
+ * \par -v, -\-verbose
  * Enable the verbose flag for the command if available.
  *
- * \par -z, --command=COMMAND
+ * \par -z, -\-command=COMMAND
  * Execute one or more configured COMMANDs. This is an alias for the \em \<commands\> mandatory option above.
  *
- * \par -s, --settings-file[=FILE]
+ * \par -s, -\-settings-file[=FILE]
  * Use FILE as the settings file for the exec-helper configuration. By default exec-helper searches for a \em \.exec-helper file in the current directory and the \em $HOME directory of the caller.
  *
- * \par -u, --single-threaded
+ * \par -u, -\-single-threaded
  * Enable the single-threaded flag for the command if available.
  *
- * \par -n, --dry-run
+ * \par -n, -\-dry-run
  * Print the commands that would be executed, but  do not execute them.
  *
  * \section configured-options CONFIGURED OPTIONS
