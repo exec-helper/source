@@ -226,12 +226,22 @@ command-line-command:
             - debug
     docs-man1:
         command-line:
-            - doxygen
-            - Doxyfile-man1
+            create-build-dir:
+                - mkdir
+                - -p
+                - build
+            build-documentation:
+                - doxygen
+                - docs/man1/Doxyfile
     docs:
         command-line:
-            - doxygen
-            - Doxyfile
+            create-build-dir:
+                - mkdir
+                - -p
+                - build
+            build-documentation:
+                - doxygen
+                - docs/Doxyfile
 
 valgrind:
     run-command: run-test
