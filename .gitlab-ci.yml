@@ -205,7 +205,7 @@ docs:
         - build/g++/release/bin/exec-helper docs
     artifacts:
         paths:
-            - docs/
+            - build/docs/
 
 pages:
     stage: deploy
