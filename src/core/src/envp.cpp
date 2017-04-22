@@ -5,14 +5,11 @@
 
 using std::string;
 
-namespace {
-    const string DELIMITER("=");
-}
-
 namespace execHelper {
     namespace core {
         Envp::Envp(const EnvironmentCollection& env) noexcept
         {
+            static const string DELIMITER("=");
             m_envp.reserve(env.size() + 1);
             for(const auto& envVar : env) {
                 auto newVar = new char[envVar.first.size() + DELIMITER.size() + envVar.second.size() + 1U];

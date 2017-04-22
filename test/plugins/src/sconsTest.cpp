@@ -1,11 +1,10 @@
-#include <string>
 #include <fstream>
-
-#include "unittest/catch.h"
+#include <string>
 
 #include "core/pattern.h"
-#include "plugins/scons.h"
 #include "plugins/pluginUtils.h"
+#include "plugins/scons.h"
+#include "unittest/catch.h"
 #include "utils/utils.h"
 
 #include "executorStub.h"

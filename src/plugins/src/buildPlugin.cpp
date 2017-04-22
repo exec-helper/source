@@ -3,8 +3,8 @@
 #include <string>
 
 #include "config/settingsNode.h"
-#include "core/patterns.h"
 #include "core/options.h"
+#include "core/patterns.h"
 
 #include "configValue.h"
 

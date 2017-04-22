@@ -1,6 +1,6 @@
-#include <vector>
 #include <deque>
 #include <string>
+#include <vector>
 
 #include <catch.hpp>
 

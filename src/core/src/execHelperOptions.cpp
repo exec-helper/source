@@ -6,9 +6,10 @@
 #include <sstream>
 #include <string>
 
+#include "config/settingsNode.h"
 #include "log/log.h"
 #include "yaml/yaml.h"
-#include "config/settingsNode.h"
+
 #include "executorInterface.h"
 #include "pattern.h"
 #include "patternsHandler.h"
@@ -155,7 +156,8 @@ namespace execHelper { namespace core {
                 }
 
                 m_patternsHandler.addPattern(Pattern(pattern, defaultValues, shortOption, longOption));
-                string option = longOption + "," + shortOptionString;
+                string option(longOption);
+                option.append(",").append(shortOptionString);
                 string explanation = string("Values for pattern '") + pattern + "'";
                 m_optionsDescriptions.addOption<PatternValues>(option, explanation, true);
             }

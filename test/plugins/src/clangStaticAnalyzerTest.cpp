@@ -3,10 +3,9 @@
 #include <string>
 
 #include "core/pattern.h"
-#include "plugins/pluginUtils.h"
 #include "plugins/clangStaticAnalyzer.h"
 #include "plugins/memory.h"
-
+#include "plugins/pluginUtils.h"
 #include "utils/utils.h"
 
 #include "executorStub.h"

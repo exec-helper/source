@@ -18,12 +18,10 @@ using execHelper::core::TaskCollection;
 using execHelper::core::PatternKeys;
 using execHelper::config::SettingsNode;
 
-namespace {
-    const string MAKE_COMMAND("make");
-}
-
 namespace execHelper { namespace plugins {
     bool Make::apply(const Command& command, Task& task, const Options& options) const noexcept {
+        static const string MAKE_COMMAND("make");
+
         const SettingsNode& rootSettings = options.getSettings({"make"});  
         task.append(MAKE_COMMAND);
 

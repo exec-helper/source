@@ -23,8 +23,7 @@ namespace execHelper { namespace plugins {
         m_returnCode = returnCode;
     }
 
-    MemoryHandler::MemoryHandler() :
-        Memory()
+    MemoryHandler::MemoryHandler()
     {
         // Reset the memory here too, just to be sure
         Memory::reset(); 

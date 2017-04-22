@@ -2,13 +2,13 @@
 
 #include <string>
 
-#include "log/log.h"
 #include "config/settingsNode.h"
 #include "core/task.h"
+#include "log/log.h"
 
-#include "pluginUtils.h"
 #include "configValue.h"
 #include "executePlugin.h"
+#include "pluginUtils.h"
 
 using std::string;
 
@@ -23,9 +23,9 @@ using execHelper::plugins::replacePatternCombinations;
 using execHelper::plugins::registerTask;
 
 namespace {
-    const string lcovBinary("lcov");
-    const string baseDirectoryOption("--base-directory");
-    const string directoryOption("--directory");
+    const char* lcovBinary("lcov");
+    const char* baseDirectoryOption("--base-directory");
+    const char* directoryOption("--directory");
 
     void runTask(const Task& task, const Options& options, const PatternCombinations& combination) {
         replacePatternCombinations(task, combination);
@@ -35,7 +35,7 @@ namespace {
 
 namespace execHelper { namespace plugins {
     bool Lcov::apply(const Command& command, Task& task, const Options& options) const noexcept {
-        const string lcovConfigKey("lcov");
+        static const string lcovConfigKey("lcov");
 
         const SettingsNode& rootSettings = options.getSettings(lcovConfigKey);
 
@@ -113,7 +113,8 @@ namespace execHelper { namespace plugins {
     inline TaskCollection Lcov::getExcludes(const Command& command, const SettingsNode& rootSettings) noexcept {
         TaskCollection excludes = ConfigValue<TaskCollection>::get("excludes", {}, command, rootSettings);
         for(auto& exclude : excludes) {
-            exclude = '"' + exclude + '"';
+            exclude.insert(0, R"(")");
+            exclude.append(R"(")");
         }
         return excludes;
     }

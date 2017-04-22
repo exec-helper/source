@@ -4,14 +4,14 @@
 #include <utility>
 #include <vector>
 
-#include "log/log.h"
 #include "config/settingsNode.h"
 #include "core/patterns.h"
+#include "log/log.h"
 
 #include "bootstrap.h"
 #include "clangStaticAnalyzer.h"
-#include "cppcheck.h"
 #include "commandLineCommand.h"
+#include "cppcheck.h"
 #include "make.h"
 #include "scons.h"
 

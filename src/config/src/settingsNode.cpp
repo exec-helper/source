@@ -1,7 +1,7 @@
 #include "settingsNode.h"
 
-#include <ostream>
 #include <iostream>
+#include <ostream>
 
 using std::string;
 using std::initializer_list;

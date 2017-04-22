@@ -3,14 +3,14 @@
 #include <string>
 #include <vector>
 
-#include "log/log.h"
 #include "config/settingsNode.h"
 #include "core/options.h"
 #include "core/patterns.h"
 #include "core/task.h"
+#include "log/log.h"
 
-#include "pluginUtils.h"
 #include "configValue.h"
+#include "pluginUtils.h"
 
 using std::string;
 
@@ -23,13 +23,10 @@ using execHelper::core::Options;
 using execHelper::core::PatternCombinations;
 using execHelper::config::SettingsNode;
 
-namespace {
-    const string cppcheckCommand("cppcheck");
-}
-
 namespace execHelper { namespace plugins {
     bool Cppcheck::apply(const Command& command, Task& task, const Options& options) const noexcept {
-        static string cppcheckKey("cppcheck");
+        static const string cppcheckCommand("cppcheck");
+        static const string cppcheckKey("cppcheck");
         const SettingsNode& rootSettings = options.getSettings(cppcheckKey);  
         task.append(cppcheckCommand);
         task.append(getEnabledChecks(command, rootSettings));

@@ -1,15 +1,15 @@
 #include "executePlugin.h"
 
-#include "log/log.h"
 #include "config/settingsNode.h"
 #include "core/options.h"
 #include "core/task.h"
+#include "log/log.h"
 
 #include "bootstrap.h"
 #include "clangStaticAnalyzer.h"
 #include "clangTidy.h"
-#include "cppcheck.h"
 #include "commandLineCommand.h"
+#include "cppcheck.h"
 #include "lcov.h"
 #include "make.h"
 #include "memory.h"

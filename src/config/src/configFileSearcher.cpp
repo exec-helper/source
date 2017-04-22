@@ -14,9 +14,10 @@ namespace execHelper {
         }
 
         boost::optional<std::string> ConfigFileSearcher::find(const std::string& filename) noexcept {
-            for(const auto& searchPath : m_searchPaths) {
-                const string path = searchPath + "/" + filename;
-                if(fileExist(searchPath + "/" + filename)) {
+            for(const std::string& searchPath : m_searchPaths) {
+                string path(searchPath);
+                path.append("/").append(filename);
+                if(fileExist(path)) {
                     return path;
                 }
             }

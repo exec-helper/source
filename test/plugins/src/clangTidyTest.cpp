@@ -1,13 +1,11 @@
-#include <string>
 #include <map>
+#include <string>
 #include <vector>
 
 #include "config/settingsNode.h"
-
+#include "plugins/clangTidy.h"
 #include "unittest/catch.h"
 #include "utils/utils.h"
-
-#include "plugins/clangTidy.h"
 
 #include "executorStub.h"
 #include "optionsStub.h"

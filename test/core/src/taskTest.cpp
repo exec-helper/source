@@ -1,13 +1,13 @@
-#include <string>
 #include <sstream>
+#include <string>
 #include <vector>
 
 #include <boost/algorithm/string.hpp>
 
 #include <catch.hpp>
 
-#include "utils/utils.h"
 #include "core/task.h"
+#include "utils/utils.h"
 
 using std::string;
 using std::istringstream;

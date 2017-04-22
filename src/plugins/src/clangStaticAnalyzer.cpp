@@ -2,11 +2,11 @@
 
 #include <string>
 
-#include "log/log.h"
 #include "config/settingsNode.h"
 #include "core/execHelperOptions.h"
 #include "core/patterns.h"
 #include "core/task.h"
+#include "log/log.h"
 
 #include "configValue.h"
 #include "executePlugin.h"
@@ -19,13 +19,11 @@ using execHelper::core::TaskCollection;
 using execHelper::core::Command;
 using execHelper::config::SettingsNode;
 
-namespace {
-    const string clangStaticAnalyzerCommand("scan-build");
-}
-
 namespace execHelper { namespace plugins {
     bool ClangStaticAnalyzer::apply(const Command& command, Task& task, const Options& options) const noexcept {
-        static string clangStaticAnalyzerKey("clang-static-analyzer");
+        static const string clangStaticAnalyzerCommand("scan-build");
+        static const string clangStaticAnalyzerKey("clang-static-analyzer");
+
         const SettingsNode& rootSettings = options.getSettings(clangStaticAnalyzerKey);  
         task.append(clangStaticAnalyzerCommand);
 

@@ -2,13 +2,13 @@
 
 #include <string>
 
-#include "log/log.h"
 #include "config/settingsNode.h"
-#include "core/task.h"
 #include "core/patterns.h"
+#include "core/task.h"
+#include "log/log.h"
 
-#include "pluginUtils.h"
 #include "executePlugin.h"
+#include "pluginUtils.h"
 
 using std::string;
 

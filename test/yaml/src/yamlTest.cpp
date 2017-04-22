@@ -6,8 +6,8 @@
 
 #include <catch.hpp>
 
-#include "yaml/yaml.h"
 #include "config/settingsNode.h"
+#include "yaml/yaml.h"
 
 #include "utils/utils.h"
 

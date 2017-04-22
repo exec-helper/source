@@ -4,8 +4,8 @@
 
 #include "config/settingsNode.h"
 #include "core/task.h"
-#include "plugins/pluginUtils.h"
 #include "plugins/buildPlugin.h"
+#include "plugins/pluginUtils.h"
 #include "utils/utils.h"
 
 #include "optionsStub.h"

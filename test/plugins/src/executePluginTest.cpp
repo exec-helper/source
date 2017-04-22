@@ -3,19 +3,19 @@
 #include <catch.hpp>
 
 #include "core/options.h"
-#include "core/task.h"
 #include "core/pattern.h"
+#include "core/task.h"
 
 #include "plugins/bootstrap.h"
 #include "plugins/clangStaticAnalyzer.h"
 #include "plugins/clangTidy.h"
-#include "plugins/cppcheck.h"
 #include "plugins/commandLineCommand.h"
+#include "plugins/cppcheck.h"
 #include "plugins/executePlugin.h"
 #include "plugins/make.h"
+#include "plugins/memory.h"
 #include "plugins/scons.h"
 #include "plugins/selector.h"
-#include "plugins/memory.h"
 #include "plugins/valgrind.h"
 
 #include "optionsStub.h"
@@ -59,7 +59,7 @@ namespace {
     template<typename T>
     bool checkGetPlugin(const string& pluginName) {
         unique_ptr<Plugin> plugin = ExecutePlugin::getPlugin(pluginName);
-        T* derived = dynamic_cast<T*>(plugin.get());  // derived will be a nullptr if the cast fails
+        auto* derived = dynamic_cast<T*>(plugin.get());  // derived will be a nullptr if the cast fails
         return (derived != nullptr);
     }
 }

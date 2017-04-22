@@ -1,8 +1,8 @@
 #include "task.h"
 
 #include <algorithm>
-#include <numeric>
 #include <iostream>
+#include <numeric>
 #include <ostream>
 #include <utility>
 

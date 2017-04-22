@@ -3,12 +3,12 @@
 #include <string>
 #include <vector>
 
-#include "core/task.h"
 #include "core/pattern.h"
-#include "plugins/valgrind.h"
+#include "core/task.h"
 #include "plugins/memory.h"
-
+#include "plugins/valgrind.h"
 #include "utils/utils.h"
+
 #include "optionsStub.h"
 
 using std::vector;

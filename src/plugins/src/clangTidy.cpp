@@ -14,19 +14,20 @@ using execHelper::core::Task;
 using execHelper::core::TaskCollection;
 
 namespace {
-    const string cppcheckCommand("clang-tidy");
 }
 
 
 namespace execHelper { namespace plugins {
     bool ClangTidy::apply(const Command& command, Task& task, const Options& options) const noexcept {
-        static string CLANG_TIDY_KEY("clang-tidy");
+        static const string CLANG_TIDY_COMMAND("clang-tidy");
+        static const string CLANG_TIDY_KEY("clang-tidy");
+
         if(!options.getSettings().contains(CLANG_TIDY_KEY)) {
             user_feedback_error("Could not find the '" << CLANG_TIDY_KEY << "' key in the configuration");
             return false;
         }
         const SettingsNode& rootSettings = options.getSettings(CLANG_TIDY_KEY);  
-        task.append(cppcheckCommand);
+        task.append(CLANG_TIDY_COMMAND);
 
         TaskCollection sources = ConfigValue<TaskCollection>::get("sources", {}, command, rootSettings);
 

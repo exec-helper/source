@@ -19,12 +19,10 @@ using execHelper::core::Options;
 using execHelper::core::TaskCollection;
 using execHelper::core::PatternKeys;
 
-namespace {
-    const string SCONS_COMMAND("scons");
-}
-
 namespace execHelper { namespace plugins {
     bool Scons::apply(const Command& command, Task& task, const Options& options) const noexcept {
+        static const string SCONS_COMMAND("scons");
+
         const SettingsNode& rootSettings = options.getSettings({"scons"});
 
         task.append(SCONS_COMMAND);

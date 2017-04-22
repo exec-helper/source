@@ -1,10 +1,10 @@
 #include "commandPlugin.h"
 
-#include "log/log.h"
 #include "config/settingsNode.h"
+#include "log/log.h"
 
-#include "pluginUtils.h"
 #include "executePlugin.h"
+#include "pluginUtils.h"
 
 using std::string;
 

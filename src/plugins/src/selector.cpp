@@ -2,9 +2,9 @@
 
 #include <vector>
 
-#include "log/log.h"
 #include "config/settingsNode.h"
 #include "core/pattern.h"
+#include "log/log.h"
 
 #include "configValue.h"
 #include "executePlugin.h"

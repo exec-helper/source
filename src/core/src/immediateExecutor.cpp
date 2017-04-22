@@ -9,7 +9,6 @@
 
 namespace execHelper { namespace core {
     ImmediateExecutor::ImmediateExecutor(Shell& shell, Callback& callback) noexcept :
-        ExecutorInterface(),
         m_shell(shell),
         m_callback(callback)
     {

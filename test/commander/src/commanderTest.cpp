@@ -4,9 +4,8 @@
 
 #include <catch.hpp>
 
-#include "plugins/memory.h"
 #include "commander/commander.h"
-
+#include "plugins/memory.h"
 #include "utils/utils.h"
 
 #include "executorStub.h"

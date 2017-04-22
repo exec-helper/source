@@ -4,15 +4,14 @@
 #include <catch.hpp>
 
 #include "core/options.h"
-#include "core/task.h"
 #include "core/pattern.h"
-#include "plugins/selector.h"
+#include "core/task.h"
 #include "plugins/memory.h"
-
-#include "optionsStub.h"
-#include "executorStub.h"
-
+#include "plugins/selector.h"
 #include "utils/utils.h"
+
+#include "executorStub.h"
+#include "optionsStub.h"
 
 using std::vector;
 using std::string;

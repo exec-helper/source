@@ -1,12 +1,12 @@
-#include <vector>
-#include <string>
 #include <fstream>
+#include <string>
+#include <vector>
 
+#include "core/execHelperOptions.h"
 #include "plugins/bootstrap.h"
 #include "plugins/pluginUtils.h"
-#include "core/execHelperOptions.h"
-#include "utils/utils.h"
 #include "unittest/catch.h"
+#include "utils/utils.h"
 
 #include "executorStub.h"
 #include "optionsStub.h"

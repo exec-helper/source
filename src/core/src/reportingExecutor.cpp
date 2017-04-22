@@ -8,8 +8,7 @@
 #include "task.h"
 
 namespace execHelper { namespace core {
-    ReportingExecutor::ReportingExecutor() noexcept :
-        ExecutorInterface()
+    ReportingExecutor::ReportingExecutor() noexcept
     {
         ;
     }

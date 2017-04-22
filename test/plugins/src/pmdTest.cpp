@@ -1,14 +1,13 @@
 #include <vector>
 
-#include "unittest/catch.h"
 
 #include "core/pattern.h"
 #include "core/task.h"
-
 #include "plugins/pluginUtils.h"
 #include "plugins/pmd.h"
-
+#include "unittest/catch.h"
 #include "utils/utils.h"
+
 #include "executorStub.h"
 #include "optionsStub.h"
 

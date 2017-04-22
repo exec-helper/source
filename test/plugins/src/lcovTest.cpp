@@ -5,8 +5,8 @@
 #include "core/task.h"
 #include "plugins/lcov.h"
 #include "plugins/memory.h"
-
 #include "utils/utils.h"
+
 #include "optionsStub.h"
 
 using std::string;

@@ -293,6 +293,7 @@ clang-tidy:
                     - -clang-analyzer-alpha.deadcode.UnreachableCode
                     - -clang-analyzer-alpha.core.CastToStruct
                     - -modernize-make-unique
+                    - -readability-redundant-declaration        # Static member variable definitions give false positives when enabled
             test/{MODULE}/src/*.cpp:
                 checks:
                     - "*"
@@ -303,4 +304,5 @@ clang-tidy:
                     - -modernize-loop-convert
                     - -google-readability-function-size
                     - -readability-function-size
+                    - -cert-err58-cpp
         warnings-as-errors: all

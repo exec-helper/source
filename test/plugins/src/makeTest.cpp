@@ -1,13 +1,12 @@
-#include <string>
 #include <fstream>
+#include <string>
 
 #include "config/settingsNode.h"
-#include "plugins/pluginUtils.h"
 #include "plugins/make.h"
-
-#include "utils/utils.h"
-#include "utils/combinationHelpers.h"
+#include "plugins/pluginUtils.h"
 #include "unittest/catch.h"
+#include "utils/combinationHelpers.h"
+#include "utils/utils.h"
 
 #include "executorStub.h"
 #include "optionsStub.h"

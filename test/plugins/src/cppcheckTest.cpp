@@ -1,11 +1,10 @@
-#include <string>
 #include <fstream>
+#include <string>
 
 #include "config/settingsNode.h"
 #include "core/execHelperOptions.h"
 #include "core/pattern.h"
 #include "plugins/cppcheck.h"
-
 #include "unittest/catch.h"
 #include "utils/utils.h"
 

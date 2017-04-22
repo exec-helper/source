@@ -1,15 +1,13 @@
+#include <algorithm>
 #include <string>
 #include <vector>
-#include <algorithm>
-
-#include "unittest/catch.h"
 
 #include "config/settingsNode.h"
 #include "core/task.h"
 #include "plugins/commandLineCommand.h"
-
-#include "utils/utils.h"
+#include "unittest/catch.h"
 #include "utils/combinationHelpers.h"
+#include "utils/utils.h"
 
 #include "executorStub.h"
 #include "optionsStub.h"

@@ -9,11 +9,6 @@ using std::move;
 using std::string;
 using std::regex;
 
-namespace {
-    const string PATTERN_PREFIX("{");
-    const string PATTERN_POSTFIX("}");
-}
-
 namespace execHelper { namespace core {
     Pattern::Pattern(PatternKey patternKey, PatternValues defaultValues, char shortOption, std::string longOption) noexcept :
         m_key(move(patternKey)),
