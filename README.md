@@ -13,9 +13,10 @@ Exec-helper is a meta-wrapper for executing repeatable tasks.
 - A C++ 11 compatible compiler
 
 ## Quick install
-Use:
+```sh
 $ make
-$ make install
+# make install
+```
 
 Note: uses system GCC for compiling.
 
