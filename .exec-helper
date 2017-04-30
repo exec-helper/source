@@ -40,6 +40,12 @@ patterns:
             - clang-tidy
         short-option: a
         long-option: analyze
+    MANTYPE:
+        default-values:
+            - man1
+            - man3
+        short-option: n
+        long-option: man
 
 commands:
     setup: Setup the repository for building
@@ -55,8 +61,9 @@ commands:
     coverage: Run the coverage analysis tools using a specific setup (for convenience)
     memory-check: Run the memory check analysis tool for a specific setup (for convenience)
     undefined-behaviour: Check for undefined behaviour using UBSan
-    docs: Generate the documentation
-    docs-man1: Generate the man1 documentation
+    docs: Docs-html + docs-man
+    docs-man: Generate the man-page documentation
+    docs-html: Generate the HTML documentation
 
 setup:
     - command-line-command
@@ -97,10 +104,13 @@ memory-check:
     - command-line-command
 
 docs:
-    - docs-man1
+    - docs-html
+    - docs-man
+
+docs-html:
     - command-line-command
 
-docs-man1:
+docs-man:
     - command-line-command
 
 selector:
@@ -224,7 +234,7 @@ command-line-command:
             - g++
             - --mode
             - debug
-    docs-man1:
+    docs-html:
         command-line:
             create-build-dir:
                 - mkdir
@@ -232,8 +242,10 @@ command-line-command:
                 - build
             build-documentation:
                 - doxygen
-                - docs/man1/Doxyfile
-    docs:
+                - docs/html/Doxyfile
+    docs-man:
+        patterns:
+            - MANTYPE
         command-line:
             create-build-dir:
                 - mkdir
@@ -241,7 +253,7 @@ command-line-command:
                 - build
             build-documentation:
                 - doxygen
-                - docs/Doxyfile
+                - docs/{MANTYPE}/Doxyfile
 
 valgrind:
     run-command: run-test

@@ -98,4 +98,3 @@ test_coverage/
 test*.exec-helper
 lcov-plugin.info
 compile_commands.json
-docs/*
