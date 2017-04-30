@@ -45,7 +45,8 @@
  * \section see-also SEE ALSO
  * See \ref exec-helper-config (5) for information about the configuration file.
  *
- * See \ref exec-helper-plugins (5) for the available plugins and their configuration.
+ * See \ref exec-helper-plugins (5) for the available plugins and their configuration options.
+ *
  * \section copyright COPYRIGHT
  * Exec-helper is Copyright &copy; 2016-2017 under the GNU General Public License v3.0.
  *

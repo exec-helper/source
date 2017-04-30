@@ -2,6 +2,9 @@
  * \mainpage Exec-helper
  * Or How To Get Coffee In Peace
  *
- * \section Usage
- * see \ref exec-helper "Exec Helper Usage"
+ * \section usage Usage
+ * see \ref exec-helper "Exec Helper"
+ *
+ * \section configuration-files Configuration files
+ * see \ref exec-helper-config "Exec Helper Config"
  */ 
