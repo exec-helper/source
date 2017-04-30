@@ -18,7 +18,7 @@ $ make
 # make install
 ```
 
-Note: uses system GCC for compiling.
+Note: uses system GCC for compiling. Check the 'less quick install'-section for using other compilers.
 
 ## Less quick install
 Check the [documentation](http://bverhagen.gitlab.io/exec-helper/docs/html/index.html).
