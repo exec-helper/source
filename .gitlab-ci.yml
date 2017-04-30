@@ -216,7 +216,7 @@ pages:
         - mkdir public
         - mv pages/index.html public/
         - mv test_coverage/ public/coverage
-        - mv docs public/docs
+        - mv build/docs public/docs
     artifacts:
         paths:
             - public
