@@ -30,6 +30,7 @@ install(TARGETS ${EXE_NAME}
        )
 
 # Create eh symlink if supported by the OS
-install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_INSTALL_PREFIX}/${BIN_DIRECTORY}/${EXE_NAME} ${CMAKE_INSTALL_PREFIX}/${BIN_DIRECTORY}/eh)"
+install(CODE "MESSAGE(\"-- Linking ${CMAKE_INSTALL_PREFIX}/${BIN_DIRECTORY}/eh -> ${CMAKE_INSTALL_PREFIX}/${BIN_DIRECTORY}/${EXE_NAME}\") 
+              execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_INSTALL_PREFIX}/${BIN_DIRECTORY}/${EXE_NAME} ${CMAKE_INSTALL_PREFIX}/${BIN_DIRECTORY}/eh)"
         COMPONENT runtime
        )
