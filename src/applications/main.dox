@@ -3,8 +3,11 @@
  * Or How To Get Coffee In Peace
  *
  * \section usage Usage
- * see \ref exec-helper "Exec Helper"
+ * see \ref exec-helper "Exec Helper" for usage information.
  *
  * \section configuration-files Configuration files
- * see \ref exec-helper-config "Exec Helper Config"
+ * See \ref exec-helper-config "Exec Helper Config" for information on the configuration file format.
+ *
+ * \section plugins Plugins
+ * See \ref exec-helper-plugins "Exec Helper Plugins" for a list of all available plugins.
  */ 
