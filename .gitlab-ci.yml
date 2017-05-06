@@ -212,7 +212,7 @@ examples:
     dependencies:
         - build:gcc
     script:
-        - build/gcc/release/bin/exec-helper --settings-file src/plugins/examples/command-line-command.example example
+        - build/g++/release/bin/exec-helper --settings-file src/plugins/examples/command-line-command.example example
 
 pages:
     stage: deploy
