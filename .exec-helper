@@ -30,6 +30,11 @@ patterns:
             - commander
         short-option: e
         long-option: module
+    COMPONENT:
+        default-values:
+            - ""
+        short-option: f
+        long-option: component
     ANALYZE:
         default-values:
             - cppcheck
@@ -51,7 +56,7 @@ patterns:
 commands:
     setup: Setup the repository for building
     init: Initialize the build infrastructure
-    build: Build-only + install-only
+    build: Build-only + install
     build-only: Build only
     install: Install only
     clean: Clean build
@@ -80,7 +85,7 @@ build-only:
     - make
 
 install:
-    - make
+    - command-line-command
 
 clean:
     - make
@@ -130,9 +135,6 @@ make:
     clean:
         command-line:
             - clean
-    install:
-        command-line:
-            - install
 
 cppcheck:
     patterns:
@@ -182,6 +184,16 @@ command-line-command:
             - rm
             - -rf
             - build/{COMPILER}/{MODE}
+    install:
+        patterns:
+            - COMPILER
+            - MODE
+            - COMPONENT
+        command-line:
+            - cmake
+            - -DCOMPONENT={COMPONENT}
+            - -P
+            - build/{COMPILER}/{MODE}/cmake_install.cmake
     run-test:
         patterns:
             - COMPILER
