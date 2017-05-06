@@ -207,6 +207,13 @@ docs:
         paths:
             - build/docs/
 
+examples:
+    stage: analyze
+    dependencies:
+        - build:gcc
+    script:
+        - build/gcc/release/bin/exec-helper --settings-file src/plugins/examples/command-line-command.example example
+
 pages:
     stage: deploy
     dependencies:

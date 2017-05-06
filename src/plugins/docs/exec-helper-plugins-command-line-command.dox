@@ -29,23 +29,14 @@
  * See \ref exec-helper-config (5) for information about the configuration file format.
  *
  * \section example EXAMPLE
- * Usage: save the example below to a exec-helper configuration file and execute <em>eh example</em> in the same directory.
- *
+ * Usage: save the example below to a exec-helper configuration file and execute
  * \code
- * commands:
- *      example: run the command-line example
- *
- * example:
- *      - command-line-command
- *
- * command-line-command:
- *      example:
- *          environment:
- *              EXAMPLE_ENVIRONMENT: hello world!
- *          command-line:
- *              - echo
- *              - ${EXAMPLE_ENVIRONMENT}
+ *     $ eh example
  * \endcode
+ *
+ * in the same directory.
+ *
+ * \include command-line-command.example
  *
  * \section copyright COPYRIGHT
  * Exec-helper is Copyright &copy; 2016-2017 under the GNU General Public License v3.0.

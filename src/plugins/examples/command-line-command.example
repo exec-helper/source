@@ -1,0 +1,24 @@
+commands:
+    example: run the command-line example
+
+patterns:
+    EXAMPLE_PATTERN:
+        default-values: 
+            - world!
+
+example:
+    - command-line-command
+
+command-line-command:
+    example:
+        environment:
+            EXAMPLE_ENVIRONMENT: hello
+        patterns:
+            - EXAMPLE_PATTERN
+        command-line:
+            hello:
+                - echo
+                - $EXAMPLE_ENVIRONMENT
+            world:
+                - echo
+                - "{EXAMPLE_PATTERN}"
