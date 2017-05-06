@@ -1,0 +1,55 @@
+/**
+ * \page exec-helper-plugins-command-line-command
+ * \brief The command-line-commands plugin
+ *
+ * \section description DESCRIPTION
+ * The command-line-command is used for executing arbitrary command lines. This plugin can be used for constructing the command line for commands that do not have a corresponding plugin available.
+ *
+ * \section mandatory-settings MANDATORY SETTINGS
+ * The configuration of the command-line-command must contain the following settings:
+ * \par command-line
+ * The command-line to execute. There are two different usages:
+ * - <em>No identification key</em>: Set one command line as a list of separate arguments. This form is only usable if only one line needs to be executed.
+ * - <em>With identification key</em>: Make a map with arbitrary keys, where each associated value is one command line, described as a list of separate arguments. This form is usable if one or more lines need to be executed. Multiple commands are executed in the order the identification keys are defined.
+ * 
+ * Note: see the documentation of \ref wordexp (3) for the limitations on what characters are not allowed in the command-line command.
+ *
+ * \section optional-settings OPTIONAL SETTINGS
+ * The configuration of the command-line-command may contain the following settings:
+ *
+ * \par patterns
+ * A list of \em patterns to apply on the command line. See \ref exec-helper-patterns (5).
+ *
+ * \par env
+ * A list of <em> environment variables</em> that should be set before the commands are executed. See \ref exec-helper-env (5).
+ * 
+ * \section see-also SEE ALSO
+ * See \ref exec-helper (1) for information about the usage of exec-helper.
+ *
+ * See \ref exec-helper-config (5) for information about the configuration file format.
+ *
+ * \section example EXAMPLE
+ * Usage: save the example below to a exec-helper configuration file and execute <em>eh example</em> in the same directory.
+ *
+ * \code
+ * commands:
+ *      example: run the command-line example
+ *
+ * example:
+ *      - command-line-command
+ *
+ * command-line-command:
+ *      example:
+ *          environment:
+ *              EXAMPLE_ENVIRONMENT: hello world!
+ *          command-line:
+ *              - echo
+ *              - ${EXAMPLE_ENVIRONMENT}
+ * \endcode
+ *
+ * \section copyright COPYRIGHT
+ * Exec-helper is Copyright &copy; 2016-2017 under the GNU General Public License v3.0.
+ *
+ * \section author AUTHOR
+ * Written by B. Verhagen
+ */
