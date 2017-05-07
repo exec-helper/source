@@ -20,8 +20,9 @@ using std::numeric_limits;
 
 namespace {
     const execHelper::core::PosixShell::ShellReturnCode POSIX_SUCCESS = 0U;
-
 }
+
+extern char** environ;
 
 namespace execHelper { namespace core {
     PosixShell::ShellReturnCode PosixShell::execute(const Task& task) noexcept {
@@ -42,7 +43,7 @@ namespace execHelper { namespace core {
     void PosixShell::childProcessExecute(const Task& task) const noexcept {
         int returnCode;
 
-        TaskCollection taskCollection = shellExpand(task.getTask());
+        TaskCollection taskCollection = shellExpand(task);
         Argv argv(taskCollection);
         Envp envp(task.getEnvironment());
 
@@ -78,13 +79,20 @@ namespace execHelper { namespace core {
         return status;
     }
 
-    inline TaskCollection PosixShell::shellExpand(const TaskCollection& task) noexcept {
+    inline TaskCollection PosixShell::shellExpand(const Task& task) noexcept {
         return wordExpand(task);
     }
 
-    inline TaskCollection PosixShell::wordExpand(const TaskCollection& task) noexcept {
+    inline TaskCollection PosixShell::wordExpand(const Task& task) noexcept {
+        // Cache envp pointer
+        char** cached_environ = environ;
+
+        // Set global environment, since this is where wordexp will look for substitutions
+        Envp envp = Envp(task.getEnvironment());
+        environ = envp.getEnvp();
+
         TaskCollection result;
-        for(const auto& taskItem : task) {
+        for(const auto& taskItem : task.getTask()) {
             wordexp_t p{};
             size_t returnCode = wordexp(taskItem.c_str(), &p, WRDE_SHOWERR | WRDE_UNDEF);
             if(returnCode == 0) {
@@ -112,6 +120,7 @@ namespace execHelper { namespace core {
             }
             wordfree(&p);
         }
+        environ = cached_environ;
         return result;
     }
 } }

@@ -17,8 +17,8 @@ namespace execHelper {
                 void childProcessExecute(const Task& task) const noexcept;
                 ShellReturnCode waitForChild(pid_t pid) const noexcept;
 
-                static TaskCollection shellExpand(const TaskCollection& task) noexcept;
-                static TaskCollection wordExpand(const TaskCollection& task) noexcept;
+                static TaskCollection shellExpand(const Task& task) noexcept;
+                static TaskCollection wordExpand(const Task& task) noexcept;
         };
     }
 }
