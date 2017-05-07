@@ -1,24 +1,24 @@
-commands:
+commands:                       # Define the commands that can be run
     example: run the command-line example
 
-patterns:
-    EXAMPLE_PATTERN:
-        default-values: 
+patterns:                       # Define the patterns that can be used
+    EXAMPLE_PATTERN:            # Define the EXAMPLE_PATTERN.
+        default-values:         # Only define the default value
             - world!
 
 example:
-    - command-line-command
+    - command-line-command      # Use the command-line-command plugin when running the 'example' command
 
-command-line-command:
-    example:
-        environment:
+command-line-command:           # Command-line-command configuration settings
+    example:                    # Settings specific to the 'example' command
+        environment:            # Define the environment
             EXAMPLE_ENVIRONMENT: hello
-        patterns:
+        patterns:               # Define the patterns that are used
             - EXAMPLE_PATTERN
-        command-line:
-            hello:
-                - echo
-                - $EXAMPLE_ENVIRONMENT
-            world:
-                - echo
+        command-line:           # Define 2 command lines
+            hello:              # Command line 1 is associated with the 'hello' identification key
+                - echo          # Execute echo ${EXAMPLE_ENVIRONMENT}
+                - ${EXAMPLE_ENVIRONMENT}
+            world:              # Command line 2 is associated with the 'world' identification key
+                - echo          # Execute echo <value of EXAMPLE_PATTERN pattern>
                 - "{EXAMPLE_PATTERN}"
