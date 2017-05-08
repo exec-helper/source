@@ -10,7 +10,6 @@
 
 using std::ofstream;
 using std::string;
-using std::endl;
 using std::remove;
 
 using execHelper::test::utils::fileExists;
@@ -101,7 +100,6 @@ namespace execHelper { namespace core { namespace test {
                 PosixShell::ShellReturnCode returnCode = shell.execute(task);
 
                 THEN("The call should succeed") {
-                    PosixShell::ShellReturnCode returnCode = shell.execute(task);
                     REQUIRE(shell.isExecutedSuccessfully(returnCode));
                 }
 
@@ -118,7 +116,6 @@ namespace execHelper { namespace core { namespace test {
                 PosixShell::ShellReturnCode returnCode = shell.execute(task);
 
                 THEN("The call should succeed") {
-                    PosixShell::ShellReturnCode returnCode = shell.execute(task);
                     REQUIRE(shell.isExecutedSuccessfully(returnCode));
                 }
 
