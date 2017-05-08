@@ -142,6 +142,7 @@ namespace execHelper {
             core::test::ExecutorStub::TaskQueue getExpectedTasks(const core::test::ExecutorStub::TaskQueue& expectedTask, const CompilerUtil& compilerUtil, const TargetUtil& targetUtil) noexcept;
 
             std::string toString(const config::SettingsNode& settings, unsigned int nbOfTabs = 0) noexcept;
+            bool fileExists(const std::string& path) noexcept;
         }
     }
 }

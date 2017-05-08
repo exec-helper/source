@@ -10,6 +10,7 @@
 #include "plugins/pluginUtils.h"
 
 using std::initializer_list;
+using std::ifstream;
 using std::endl;
 using std::map;
 using std::ofstream;
@@ -339,5 +340,10 @@ namespace execHelper { namespace test { namespace utils {
             result += toString(settings[value], nbOfTabs + 1);
         }
         return result;
+    }
+
+    bool fileExists(const string& path) noexcept {
+        ifstream infile(path);
+        return infile.good();
     }
 } } }
