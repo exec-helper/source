@@ -45,24 +45,28 @@ namespace execHelper { namespace yaml {
     }
 
     void YamlWrapper::getSubTree(const YAML::Node& node, SettingsNode& yamlNode, const SettingsNode::SettingsKeys& keys) noexcept {
-        for(const auto& element : node) {
-			SettingsNode::SettingsValue key = element.first.as<string>();
-			yamlNode.add(keys, key);
+        switch(node.Type()) {
+            case YAML::NodeType::Null:
+            case YAML::NodeType::Undefined:
+                break;
+            case YAML::NodeType::Scalar:
+                yamlNode.add(keys, node.as<string>());
+                break;
+            case YAML::NodeType::Map:
+                for(const auto& element : node) {
+                    SettingsNode::SettingsValue key = element.first.as<string>();
+                    yamlNode.add(keys, key);
 
-			SettingsNode::SettingsKeys newKeys = keys;
-			newKeys.push_back(key);
-            if(element.second.IsMap()) {
-                YamlWrapper::getSubTree(element.second, yamlNode, newKeys);
-            } else {
-                if(element.second.size() == 0) {
-					SettingsNode::SettingsValue value = element.second.as<string>();
-					yamlNode.add(newKeys, value);
+                    SettingsNode::SettingsKeys newKeys = keys;
+                    newKeys.push_back(key);
+                    YamlWrapper::getSubTree(element.second, yamlNode, newKeys);
                 }
-                for(const auto& el : element.second) {
-					SettingsNode::SettingsValue value = el.as<string>();
-					yamlNode.add(newKeys, value);
+                break;
+            case YAML::NodeType::Sequence:
+                for(const auto& element : node) {
+                    YamlWrapper::getSubTree(element, yamlNode, keys);
                 }
-            }
-		}
+                break;
+        }
     }
 } }

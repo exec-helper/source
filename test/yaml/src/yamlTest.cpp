@@ -1,5 +1,6 @@
 #include <fstream>
 #include <iostream>
+#include <map>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -12,6 +13,8 @@
 #include "utils/utils.h"
 
 using std::ofstream;
+using std::map;
+using std::pair;
 using std::string;
 using std::vector;
 using std::stringstream;
@@ -115,6 +118,70 @@ namespace execHelper { namespace yaml { namespace test {
                     REQUIRE(settings["pmd"]["auto-install"].values()[0] == correctPmdAutoInstall);
                     REQUIRE(settings["command-line"]["run"].values()[0] == correctRunCommandLine);
                     REQUIRE(settings == correctSettings);
+                }
+            }
+        }
+    }
+
+    SCENARIO("Test the parsing of a two dimensional array using lists", "[yaml][yamlwrapper]") {
+        GIVEN("A two dimensional array") {
+            const string rootKey("root-key");
+            const vector<pair<string, vector<string>>> actualArray = {{"key1", {"value1a", "value1b"}}, {"key2", {"value2a", "value2b"}}, {"key3", {"value3a", "value3b", "value3c"}}, {"key4", {"value4"}}};
+
+            string yamlConfig;
+
+            WHEN("Write it as a list of arrays and parse the tree") {
+                yamlConfig += rootKey + ":\n";
+                for(const auto& firstDimension : actualArray) {
+                    yamlConfig += "    - " + firstDimension.first + ": [";
+                    for(const auto& secondDimension : firstDimension.second) {
+                        yamlConfig += " " + secondDimension;
+                        if(secondDimension != firstDimension.second.back()) {
+                            yamlConfig += ",";
+                        }
+                    }
+                    yamlConfig += "]\n";
+                }
+
+
+                Yaml yaml(yamlConfig);
+                SettingsNode settings(rootKey);
+
+                bool returnCode = yaml.getTree({rootKey}, settings);
+
+                THEN("It should succeed") {
+                    REQUIRE(returnCode);
+                }
+
+                THEN("We should get the same values") {
+                    for(const auto& firstDimension : actualArray) {
+                        REQUIRE(settings.get({firstDimension.first}, {"blaat"}) == firstDimension.second);
+                    }
+                }
+            }
+
+            WHEN("Write it as a list of a list and parse the tree") {
+                yamlConfig += rootKey + ":\n";
+                for(const auto& firstDimension : actualArray) {
+                    yamlConfig += "  - " + firstDimension.first + ":\n";
+                    for(const auto& secondDimension : firstDimension.second) {
+                        yamlConfig += "    - " + secondDimension + "\n";
+                    }
+                }
+
+                Yaml yaml(yamlConfig);
+                SettingsNode settings(rootKey);
+
+                bool returnCode = yaml.getTree({rootKey}, settings);
+
+                THEN("It should succeed") {
+                    REQUIRE(returnCode);
+                }
+
+                THEN("We should get the same values") {
+                    for(const auto& firstDimension : actualArray) {
+                        REQUIRE(settings.get({firstDimension.first}, {"blaat"}) == firstDimension.second);
+                    }
                 }
             }
         }

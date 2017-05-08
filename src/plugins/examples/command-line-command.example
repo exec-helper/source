@@ -16,9 +16,7 @@ command-line-command:           # Command-line-command configuration settings
         patterns:               # Define the patterns that are used
             - EXAMPLE_PATTERN
         command-line:           # Define 2 command lines
-            hello:              # Command line 1 is associated with the 'hello' identification key
-                - echo          # Execute echo ${EXAMPLE_ENVIRONMENT}
-                - ${EXAMPLE_ENVIRONMENT}
-            world:              # Command line 2 is associated with the 'world' identification key
-                - echo          # Execute echo <value of EXAMPLE_PATTERN pattern>
+            - hello: [echo, "${EXAMPLE_ENVIRONMENT}"]
+            - world:            # The same as [echo, "{EXAMPLE_PATTERN}"]
+                - echo
                 - "{EXAMPLE_PATTERN}"
