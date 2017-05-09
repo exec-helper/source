@@ -13,7 +13,7 @@ init-release:
 	cmake -H. -Bbuild/$(COMPILER)/release -DCMAKE_CXX_COMPILER=$(COMPILER) -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -DUSE_SYSTEM_CATCH=OFF -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 
 release: init-release
-	make -C build/$(COMPILER)/release exec-helper
+	make -C build/$(COMPILER)/release --jobs $(NB_OF_CORES) exec-helper
 
 install: release
 	cmake -DCOMPONENT=runtime -P build/$(COMPILER)/release/cmake_install.cmake

@@ -1,8 +1,8 @@
 #include <fstream>
 #include <iostream>
-#include <map>
 #include <sstream>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <catch.hpp>
@@ -13,7 +13,6 @@
 #include "utils/utils.h"
 
 using std::ofstream;
-using std::map;
 using std::pair;
 using std::string;
 using std::vector;
