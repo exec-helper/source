@@ -213,6 +213,7 @@ examples:
         - build:gcc
     script:
         - build/g++/release/bin/exec-helper --settings-file src/plugins/examples/command-line-command.example example
+        - build/g++/release/bin/exec-helper --settings-file src/config/example/exec-helper-config.example build clean rebuild
 
 pages:
     stage: deploy

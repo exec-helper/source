@@ -1,0 +1,50 @@
+commands:                       # The mandatory commands key
+    build: Build the project    # A map of command keys with their explanation
+    clean: Clean the project
+    rebuild: Build + clean
+
+patterns:                       # Declare the patterns for this configuration file
+    COMPILER:                   # Declare the COMPILER pattern
+        default-values:         # Default values to use for the pattern
+            - g++
+            - clang++
+        short-option: c         # Declare values for this pattern by using the -c [VALUES] option when calling exec-helper
+        long-option: compiler   # Declare values for this pattern by using the --compiler [VALUES] option when calling exec-helper
+    MODE:                       # Declare the MODE pattern
+        default-values:
+            - debug
+            - release
+        short-option: m
+        long-option: mode
+
+# Define the commands listed under 'commands'
+build:
+    - command-line-command      # Use the command-line-command plugin when using the 'build' command
+
+clean:
+    - command-line-command      # Use the command-line-command plugin when using the 'clean' command
+
+rebuild:
+    - clean                     # Call the 'clean' command when calling the 'rebuild' command
+    - build                     # Call the 'build' command when calling the 'rebuild' command
+
+command-line-command:           # Configure the command-line-command
+    patterns:                   # Define the default patterns to use
+        - COMPILER
+        - MODE
+    command-line:               # Configure the execution when the specific command is not listed
+        - echo
+        - building
+        - using
+        - "{COMPILER}"          # This value will be replaced by the COMPILER pattern value
+        - in
+        - "{MODE}"              # This value will be replaced by the MODE pattern value
+        - mode
+    clean:                      # Configure the execution of the build command
+        patterns:               # Overwrite the parent patterns
+            - MODE
+        command-line:
+            - echo
+            - cleaning
+            - mode
+            - "{MODE}"          # This value will be replaced by the MODE pattern value
