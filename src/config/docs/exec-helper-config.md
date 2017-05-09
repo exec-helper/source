@@ -38,9 +38,9 @@ The long option on the command line associated with this pattern
 \include exec-helper-config.example
 
 # SEE ALSO
-See @ref exec-helper(1) for information about the usage of exec-helper
+See [exec-helper](@ref exec-helper)(1) for information about the usage of exec-helper
 
-See @ref exec-helper-plugins(5) for the available plugins and their configuration options.
+See [exec-helper-plugins](@ref exec-helper-plugins)(5) for the available plugins and their configuration options.
 
 # COPYRIGHT
 Exec-helper is Copyright &copy; 2016-2017 under the GNU General Public License v3.0.

@@ -13,7 +13,7 @@ See [exec-helper](@ref exec-helper)(1) for information about the usage of exec-h
 
 See [exec-helper-config](@ref exec-helper-config)(5) for information about the configuration file format.
 
-See [exec-helper-plugins](@ref exec-helper-config)(5) for information about the configuration file format.
+See [exec-helper-plugins](@ref exec-helper-plugins)(5) for information about the configuration file format.
 
 # COPYRIGHT
  Exec-helper is Copyright &copy; 2016-2017 under the GNU General Public License v3.0.
