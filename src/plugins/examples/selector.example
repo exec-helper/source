@@ -1,0 +1,33 @@
+# Usage:
+#   'exec-helper --settings-file <this file> example' will execute both the example1 and example2 target.
+# Adding the --example <example-value> will only execute the given <example-value>. E.g.:
+#   'exec-helper --settings-file <this file> example --example example1' will execute the example1 target only.
+
+commands:
+    example: An example for using the selector plugin
+
+patterns:
+    SELECTOR:                       # Define the pattern to select on.
+        default-values:
+            - example1
+            - example2
+        short-option: e
+        long-option: --example
+
+example:                            # Use the selector for the example command
+    - selector
+
+selector:
+    pattern: SELECTOR               # Tell the selector plugin to use the SELECTOR pattern for deciding which paths to trigger
+
+example1:                           # Define the 'example1' path
+    - command-line-command
+
+example2:                           # Define the 'example2' path
+    - command-line-command
+
+command-line-command:
+    example1:
+        command-line: [ echo, example1]
+    example2:
+        command-line: [ echo, example2]
