@@ -13,7 +13,7 @@ bootstrap:                      # Bootstrap configuration settings
     example:                    # Settings specific to the 'example' command
         patterns:               # Define the patterns that are used
             - EXAMPLE_PATTERN
-        filename: bootstrap-mock.sh     # Set the name of the bootstrap script
+        filename: src/bootstrap-mock.sh     # Set the name of the bootstrap script
         command-line:           # Define 2 additional command line flags
             - "hello"
             - "{EXAMPLE_PATTERN}"

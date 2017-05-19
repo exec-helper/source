@@ -1,5 +1,7 @@
 commands:                       # Define the commands that can be run
-    example: run the command-line example
+    example: Run the scons example
+    clean: Clean all built files
+    run: Run the built binaries
 
 patterns:                       # Define the patterns that can be used
     SCONS_TARGET:            # Define the EXAMPLE_PATTERN.
@@ -8,8 +10,15 @@ patterns:                       # Define the patterns that can be used
             - world
 
 example:
+    - clean
     - scons                     # Use the command-line-command plugin when running the 'example' command
-    - command-line-command      # Execute the programs built with scons
+    - run
+
+clean:
+    - command-line-command
+
+run:
+    - command-line-command
 
 scons:
     patterns:                   # The patterns that are used by the make plugins
@@ -20,8 +29,9 @@ scons:
             - "{SCONS_TARGET}"  # Define the make target to execute
 
 command-line-command:
-    example:
+    clean:
+        command-line: [rm, -rf, build]
+    run:
         patterns:
             - SCONS_TARGET
-        command-line:
-            - ./{SCONS_TARGET}
+        command-line: ["build/{SCONS_TARGET}"]

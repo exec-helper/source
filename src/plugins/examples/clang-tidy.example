@@ -14,7 +14,7 @@ clang-tidy:
     patterns:
         - TARGET
     sources:
-        - "{TARGET}.cpp"
+        - "src/{TARGET}.cpp"
     checks:
         - "*"
         - "cppcoreguidelines-*"

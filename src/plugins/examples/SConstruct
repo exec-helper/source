@@ -1,9 +1,6 @@
 env = Environment()
+Export('env')
 
-hello = env.Program('hello.cpp')
-env.Alias('hello', hello)
-
-world = env.Program('world.cpp')
-env.Alias('world', world)
+SConscript('src/SConscript', variant_dir='build', duplicate=0)
 
 Default(None)
