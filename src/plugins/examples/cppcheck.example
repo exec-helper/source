@@ -1,0 +1,28 @@
+commands:                       # Define the commands that can be run
+    example: Run the cppcheck example
+
+patterns:                       # Define the patterns that can be used
+    TARGET:                     # Define targets to check
+        default-values:         # Only define the default value
+            - hello
+            - world
+
+example:
+    - cppcheck                  # Use the cppcheck plugin when running the 'example' command
+
+cppcheck:                       # Cppcheck configuration for the 'example' command
+    example:
+        patterns:               # Define the patterns to use
+            - TARGET
+        src-dir:                # Define the source dir to look in
+            - src
+        target-path:            # The target path to look in
+            - "{TARGET}.cpp"
+        enable-checks:          # The list of additional checks to enable
+            - warning
+            - style
+            - performance
+            - portability
+            - information
+        command-line:           # Set additional arguments
+            - --error-exitcode=255
