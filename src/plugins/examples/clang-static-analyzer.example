@@ -21,6 +21,9 @@ clean:
 
 clang-static-analyzer:          # Configure clang-static-analyzer
     build-command: build        # Execute the 'build' command for building and analyzing the project
+    command-line:               # Add additional arguments to the clang-static-analyzer invocation
+        - -enable-checker
+        - alpha.clone.CloneChecker
 
 make:
     build:
