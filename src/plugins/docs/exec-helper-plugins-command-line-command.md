@@ -3,7 +3,7 @@ The command-line-command plugin  {#exec-helper-plugins-command-line-command}
 \brief An overview of the command-line-command plugin configuration settings
 
 # DESCRIPTION
-The command-line-command is used for executing arbitrary command lines. This plugin can be used for constructing the command line for commands that do not have a corresponding plugin available.
+The command-line-command plugin is used for executing arbitrary command lines. This plugin can be used for constructing the command line for commands that do not have a corresponding plugin available.
 
 # MANDATORY SETTINGS
 The configuration of the command-line-command must contain the following settings:
@@ -42,7 +42,7 @@ See [exec-helper-config](@ref exec-helper-config)(5) for information about the c
 See [exec-helper-plugins](@ref exec-helper-plugins)(5) for information about the configuration file format.
 
 # COPYRIGHT
- Exec-helper is Copyright &copy; 2016-2017 under the GNU General Public License v3.0.
+Exec-helper is Copyright &copy; 2016-2017 under the GNU General Public License v3.0.
 
 # AUTHOR
 Written by B. Verhagen

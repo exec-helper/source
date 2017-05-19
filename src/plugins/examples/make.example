@@ -1,0 +1,22 @@
+commands:                       # Define the commands that can be run
+    example: run the command-line example
+
+patterns:                       # Define the patterns that can be used
+    MAKE_TARGET:            # Define the EXAMPLE_PATTERN.
+        default-values:         # Only define the default value
+            - hello
+            - world
+
+example:
+    - make                      # Use the command-line-command plugin when running the 'example' command
+
+make:
+    patterns:                   # The patterns that are used by the make plugins
+        - MAKE_TARGET
+    environment:                        # Define additional environment variables
+        WORLD: "world!"
+    example:                    # Specific settings for the 'example' command
+        build-dir: $(pwd)       # Set the build dir
+        command-line:           # Define additional command line arguments
+            - --quiet           # An example argument passed to make
+            - "{MAKE_TARGET}"   # Define the make target to execute
