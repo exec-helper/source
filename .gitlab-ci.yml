@@ -212,10 +212,11 @@ examples:
     dependencies:
         - build:gcc
     script:
-        - build/g++/release/bin/exec-helper --settings-file src/plugins/examples/command-line-command.example example
-        - build/g++/release/bin/exec-helper --settings-file src/config/examples/exec-helper-config.example build clean rebuild
-        - build/g++/release/bin/exec-helper --settings-file src/plugins/examples/selector.example example
-
+        - export PATH=$PATH:$(pwd)/build/g++/release/bin
+        - exec-helper --settings-file src/config/examples/exec-helper-config.example build clean rebuild
+        - exec-helper --settings-file src/plugins/examples/command-line-command.example example
+        - exec-helper --settings-file src/plugins/examples/selector.example example
+        - cd src/plugins/examples && exec-helper --settings-file selector.example example
 
 pages:
     stage: deploy

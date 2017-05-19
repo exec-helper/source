@@ -1,0 +1,19 @@
+commands:                       # Define the commands that can be run
+    example: run the bootstrap example
+
+patterns:                       # Define the patterns that can be used
+    EXAMPLE_PATTERN:            # Define the EXAMPLE_PATTERN.
+        default-values:         # Only define the default value
+            - world!
+
+example:
+    - bootstrap                 # Use the command-line-command plugin when running the 'example' command
+
+bootstrap:                      # Bootstrap configuration settings
+    example:                    # Settings specific to the 'example' command
+        patterns:               # Define the patterns that are used
+            - EXAMPLE_PATTERN
+        filename: bootstrap-mock.sh     # Set the name of the bootstrap script
+        command-line:           # Define 2 additional command line flags
+            - "hello"
+            - "{EXAMPLE_PATTERN}"
