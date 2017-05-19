@@ -3,3 +3,5 @@ hello:
 
 world:
 	@echo $(WORLD)
+
+.PHONY: hello world
