@@ -21,7 +21,7 @@ A list of _environment variables_ that should be set before the commands are exe
 The path to the Makefile. This is either an absolute path are a path relative to the location of this file. Default: \em . (the current working directory).
 
 ## command-line
-Additional command line parameters to pass to the bootstrap script as a list of separate arguments. By default no additional arguments are added.
+Additional command line parameters to pass to make as a list of separate arguments. By default no additional arguments are added.
 
 # EXAMPLE
 ## Configuration
