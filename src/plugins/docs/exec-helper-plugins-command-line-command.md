@@ -29,7 +29,7 @@ A list of _environment variables_ that should be set before the commands are exe
 \include command-line-command.example
 
 ## Usage
-Save the example to a exec-helper configuration file and execute in the same directory:
+Save the example to an exec-helper configuration file and execute in the same directory:
 \code{.sh}
 eh example
 \endcode
