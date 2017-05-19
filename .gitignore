@@ -5,6 +5,7 @@ __pycache__/
 
 # C extensions
 *.so
+*.o
 
 # Distribution / packaging
 .Python
@@ -98,3 +99,7 @@ test_coverage/
 test*.exec-helper
 lcov-plugin.info
 compile_commands.json
+
+# Example files
+hello
+world

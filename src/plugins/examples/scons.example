@@ -1,0 +1,27 @@
+commands:                       # Define the commands that can be run
+    example: run the command-line example
+
+patterns:                       # Define the patterns that can be used
+    SCONS_TARGET:            # Define the EXAMPLE_PATTERN.
+        default-values:         # Only define the default value
+            - hello
+            - world
+
+example:
+    - scons                     # Use the command-line-command plugin when running the 'example' command
+    - command-line-command      # Execute the programs built with scons
+
+scons:
+    patterns:                   # The patterns that are used by the make plugins
+        - SCONS_TARGET
+    example:                    # Specific settings for the 'example' command
+        command-line:           # Define additional command line arguments
+            - --keep-going      # Pass additional options to scons
+            - "{SCONS_TARGET}"  # Define the make target to execute
+
+command-line-command:
+    example:
+        patterns:
+            - SCONS_TARGET
+        command-line:
+            - ./{SCONS_TARGET}
