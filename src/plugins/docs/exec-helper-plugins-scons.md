@@ -22,13 +22,19 @@ Additional command line parameters to pass to the scons as a list of separate ar
 \include scons.example
 
 ## Additional files
-In order for the above example to work, the following files need to be created in the same directory as well:
+In order for the above example to work, the following file hierarchy needs to be created in the directory:
 
-_hello.cpp:_
+_src/hello.cpp:_
 \include hello.cpp
 
-_world.cpp:_
+_src/world.cpp:_
 \include world.cpp
+
+_SConstruct:_
+\include SConstruct
+
+_SConscript:_
+\include SConscript
 
 ## Usage
 Save the example to an exec-helper configuration file and execute in the same directory:

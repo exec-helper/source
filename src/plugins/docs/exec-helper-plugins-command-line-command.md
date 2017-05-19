@@ -19,7 +19,7 @@ Note: see the documentation of [wordexp](@ref wordexp)(3) for the limitations on
 The configuration of the command-line-command plugin may contain the following settings:
  
 ## patterns
-A list of \em patterns to apply on the command line. See [exec-helper-patterns](@ref exec-helper-patterns)(5).
+A list of _patterns_ to apply on the command line. See [exec-helper-patterns](@ref exec-helper-patterns)(5).
  
 ## env
 A list of _environment variables_ that should be set before the commands are executed. See [exec-helper-env](@ref exec-helper-env)(5).

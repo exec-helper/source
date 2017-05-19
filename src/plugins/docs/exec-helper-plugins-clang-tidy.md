@@ -11,6 +11,9 @@ There are no mandatory settings for the clang-tidy plugin.
 # OPTIONAL SETTINGS
 The configuration of the clang-tidy plugin may contain the following settings:
 
+## patterns
+A list of _patterns_ to apply on the command line. See [exec-helper-patterns](@ref exec-helper-patterns)(5).
+
 ## sources
 A list of sources that must be checked by the clang-tidy plugin. The sources may contain wildcards.
 
@@ -33,7 +36,7 @@ Additional command line parameters to pass to clang-tidy as a list of separate a
 \include clang-tidy.example
 
 ## Additional files
-In order for the above example to work, the following files need to be created in the same directory as well:
+In order for the above example to work, the following files need to be created in the _src_ directory:
 
 _hello.cpp:_
 \include hello.cpp

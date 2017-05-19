@@ -22,15 +22,15 @@ Additional command line parameters to pass to clang-static-analyzer as a list of
 \include clang-static-analyzer.example
 
 ## Additional files
-In order for the above example to work, the following files need to be created in the same directory as well:
+In order for the above example to work, the following file hierarchy needs to be created in the directory:
 
 _Makefile_:
 \include Makefile
 
-_hello.cpp:_
+_src/hello.cpp:_
 \include hello.cpp
 
-_world.cpp:_
+_src/world.cpp:_
 \include world.cpp
 
 ## Usage
