@@ -1,7 +1,16 @@
+CXX=g++
+CXXFLAGS=-O3
+BUILD_DIR=build
+
 hello:
-	@echo "Hello"
+	mkdir -p $(BUILD_DIR)
+	$(CXX) $(CXXFLAGS) -o build/hello hello.cpp
 
 world:
-	@echo $(WORLD)
+	mkdir -p $(BUILD_DIR)
+	$(CXX) $(CXXFLAGS) -o build/world world.cpp
 
-.PHONY: hello world
+clean:
+	rm -rf $(BUILD_DIR)
+
+.PHONY: clean
