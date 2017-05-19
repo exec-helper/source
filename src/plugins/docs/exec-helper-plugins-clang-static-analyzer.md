@@ -12,7 +12,7 @@ The configuration of the clang-static-analyzer plugin must contain the follwing 
 The exec-helper build target command or plugin to execute for the analysis.
 
 # OPTIONAL SETTINGS
-The configuration of the make plugin may contain the following settings:
+The configuration of the clang-static-analyzer plugin may contain the following settings:
  
 ## command-line
 Additional command line parameters to pass to clang-static-analyzer as a list of separate arguments. By default no additional arguments are added.

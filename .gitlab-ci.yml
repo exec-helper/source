@@ -224,6 +224,7 @@ examples:
         - exec-helper --settings-file make.example example
         - exec-helper --settings-file scons.example example
         - exec-helper --settings-file clang-static-analyzer.example example
+        - exec-helper --settings-file clang-tidy.example example
 
 pages:
     stage: deploy

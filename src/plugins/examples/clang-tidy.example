@@ -1,0 +1,27 @@
+commands:                       # Define the commands that can be run
+    example: Run the make example
+
+patterns:                       # Define the patterns that can be used
+    TARGET:                     # Define targets to check
+        default-values:         # Only define the default value
+            - hello
+            - world
+
+example:
+    - clang-tidy                # Use the clang-tidy plugin when running the 'example' command
+
+clang-tidy:
+    patterns:
+        - TARGET
+    sources:
+        - "{TARGET}.cpp"
+    checks:
+        - "*"
+        - "cppcoreguidelines-*"
+        - "modernize-*"
+        - "performance-*"
+        - "readability-*"
+    command-line:
+        - -fix
+    warnings-as-errors:
+        - all
