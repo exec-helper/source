@@ -21,7 +21,7 @@ Additional command line parameters to pass to the scons as a list of separate ar
 ## Configuration
 \include scons.example
 
-## Programs
+## Additional files
 In order for the above example to work, the following files need to be created in the same directory as well:
 
 _hello.cpp:_

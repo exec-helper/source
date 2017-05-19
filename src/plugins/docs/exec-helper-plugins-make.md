@@ -27,6 +27,18 @@ Additional command line parameters to pass to make as a list of separate argumen
 ## Configuration
 \include make.example
 
+## Additional files
+In order for the above example to work, the following files need to be created in the same directory as well:
+
+_Makefile_:
+\include Makefile
+
+_hello.cpp:_
+\include hello.cpp
+
+_world.cpp:_
+\include world.cpp
+
 ## Usage
 Save the example to an exec-helper configuration file and execute in the same directory:
 \code{.sh}
