@@ -4,7 +4,7 @@ commands:                       # Define the commands that can be run
     run: Run the files that were built
 
 patterns:                       # Define the patterns that can be used
-    MAKE_TARGET:            # Define the EXAMPLE_PATTERN.
+    MAKE_TARGET:                # Define the EXAMPLE_PATTERN.
         default-values:         # Only define the default value
             - hello
             - world
@@ -21,10 +21,10 @@ run:
     - command-line-command
 
 make:
-    environment:                        # Define additional environment variables
+    environment:                # Define additional environment variables
         WORLD: "world!"
     example:                    # Specific settings for the 'example' command
-        patterns:                   # The patterns that are used by the make plugins
+        patterns:               # The patterns that are used by the make plugins
             - MAKE_TARGET
         build-dir: $(pwd)       # Set the build dir
         command-line:           # Define additional command line arguments

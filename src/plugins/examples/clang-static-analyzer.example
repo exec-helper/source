@@ -1,0 +1,33 @@
+commands:                       # Define the commands that can be run
+    example: Run the make example
+    build: Build the files
+    clean: Clean the build
+
+patterns:                       # Define the patterns that can be used
+    MAKE_TARGET:                # Define make targets for building
+        default-values:         # Only define the default value
+            - hello
+            - world
+
+example:
+    - clean
+    - clang-static-analyzer     # Use the clang-static-analyzer plugin when running the 'example' command
+
+build:
+    - make
+
+clean:
+    - make
+
+clang-static-analyzer:          # Configure clang-static-analyzer
+    build-command: build        # Execute the 'build' command for building and analyzing the project
+
+make:
+    build:
+        patterns:
+            - MAKE_TARGET
+        command-line:
+            - "{MAKE_TARGET}"
+    clean:
+        command-line:
+            - clean
