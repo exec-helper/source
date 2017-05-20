@@ -1,0 +1,57 @@
+commands:                       # Define the commands that can be run
+    example: Run the lcov example
+    build: Build the files
+    clean: Clean the build
+    run: Run the built binaries
+
+patterns:                       # Define the patterns that can be used
+    MAKE_TARGET:                # Define make targets for building
+        default-values:         # Only define the default value
+            - hello
+            - world
+
+example:
+    - build
+    - lcov                      # Use the lcov plugin when running the 'example' command
+
+build:
+    - make
+
+clean:
+    - make
+    - command-line-command
+
+run:
+    command-line-command
+
+lcov:                           # Configure lcov
+    run-command: run            # Execute the 'build' command for building, running and analyzing the project
+    info-file: build/coverage.info  # Create and use the coverage.info file in the build dir
+    base-directory: src         # Use the src directory as the base directory
+    directory: $(pwd)           # Put and use the coverage data files in the build directory
+    zero-counters: yes          # Zero the counters before executing the analysis
+    gen-html: yes               # Generate a HTML coverage report
+    gen-html-output: build/coverage # Output the HTML coverage report to build/coverage
+    gen-html-title: "LCOV-example" # Set the title of the HTML coverage report
+    excludes:                    # Set which entries to exclude from the report
+        - /usr/include/*
+
+make:
+    build:
+        patterns:
+            - MAKE_TARGET
+        command-line:
+            - "{MAKE_TARGET}"
+    clean:
+        command-line:
+            - clean
+
+command-line-command:
+    patterns:
+        - MAKE_TARGET
+    run:
+        command-line: ["build/{MAKE_TARGET}"]
+    clean:
+        command-line:    
+            remote-gcda-file: [ rm, -rf, "{MAKE_TARGET}.gcda"]
+            remote-gcno-file: [ rm, -rf, "{MAKE_TARGET}.gcno"]

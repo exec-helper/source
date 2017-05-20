@@ -212,7 +212,8 @@ examples:
     dependencies:
         - build:gcc
     script:
-        - pacman -S --noconfirm --needed gcc clang make scons clang-tools-extra cppcheck
+        - pacman -S --noconfirm --needed base-devel curl gcc clang make scons clang-tools-extra cppcheck git
+        - bash -x gitlab/install-aur.sh lcov
         - export PATH=$PATH:$(pwd)/build/g++/release/bin
         - export ROOT_DIR=$(pwd)
         - cd ${ROOT_DIR}/src/config/examples
@@ -226,6 +227,7 @@ examples:
         - exec-helper --settings-file clang-static-analyzer.example example
         - exec-helper --settings-file clang-tidy.example example
         - exec-helper --settings-file cppcheck.example example
+        - exec-helper --settings-file lcov.example example
 
 pages:
     stage: deploy
