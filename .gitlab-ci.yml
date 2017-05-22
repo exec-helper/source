@@ -214,7 +214,8 @@ examples:
     script:
         - pacman -S --noconfirm --needed base-devel curl gcc clang make scons clang-tools-extra cppcheck git
         - bash -x gitlab/install-aur.sh lcov
-        - export PATH=$PATH:$(pwd)/build/g++/release/bin
+        - pushd 3rdparty/pmd && wget --no-check-certificate "https://downloads.sourceforge.net/project/pmd/pmd/5.5.4/pmd-bin-5.5.4.zip" && unzip pmd-bin-5.5.4.zip; popd
+        - export PATH=$PATH:$(pwd)/build/g++/release/bin:$(pwd)/3rdparty/pmd/pmd-bin-5.5.4/bin
         - export ROOT_DIR=$(pwd)
         - cd ${ROOT_DIR}/src/config/examples
         - exec-helper --settings-file exec-helper-config.example build clean rebuild
@@ -228,6 +229,7 @@ examples:
         - exec-helper --settings-file clang-tidy.example example
         - exec-helper --settings-file cppcheck.example example
         - exec-helper --settings-file lcov.example example
+        - exec-helper --settings-file pmd.example example
 
 pages:
     stage: deploy

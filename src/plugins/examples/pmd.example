@@ -1,0 +1,23 @@
+commands:                       # Define the commands that can be run
+    example: Run the pmd example
+
+patterns:                       # Define the patterns that can be used
+    TARGET:                     # Define targets to check
+        default-values:         # Only define the default value
+            - hello
+            - world
+
+example:
+    - pmd                       # Use the cppcheck plugin when running the 'example' command
+
+pmd:                            # Cppcheck configuration for the 'example' command
+    example:
+        patterns:               # Define the patterns to use
+            - TARGET
+        exec: run.sh
+        tool: cpd
+        language: cpp
+        minimum-tokens: 100
+        files: src/{TARGET}.cpp
+        command-line:           # Set additional arguments
+            - --non-recursive
