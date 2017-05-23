@@ -212,7 +212,7 @@ examples:
     dependencies:
         - build:gcc
     script:
-        - pacman -S --noconfirm --needed base-devel curl gcc clang make scons clang-tools-extra cppcheck git java-environment unzip wget
+        - pacman -S --noconfirm --needed base-devel curl gcc clang make scons clang-tools-extra cppcheck git java-environment unzip wget valgrind
         - bash -x gitlab/install-aur.sh lcov
         - mkdir -p 3rdparty/pmd
         - pushd 3rdparty/pmd && wget --no-check-certificate "https://downloads.sourceforge.net/project/pmd/pmd/5.7.0/pmd-bin-5.7.0.zip" && unzip pmd-bin-5.7.0.zip; popd
@@ -231,6 +231,7 @@ examples:
         - exec-helper --settings-file cppcheck.example example
         - exec-helper --settings-file lcov.example example
         - exec-helper --settings-file pmd.example example
+        - exec-helper --settings-file valgrind.example example
 
 pages:
     stage: deploy

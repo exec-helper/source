@@ -1,0 +1,51 @@
+commands:                       # Define the commands that can be run
+    example: Run the lcov example
+    build: Build the files
+    clean: Clean the build
+    run: Run the built binaries
+
+patterns:                       # Define the patterns that can be used
+    MAKE_TARGET:                # Define make targets for building
+        default-values:         # Only define the default value
+            - hello
+            - world
+
+example:
+    - build
+    - valgrind                  # Use the valgrind plugin when running the 'example' command
+
+build:
+    - make
+
+clean:
+    - make
+    - command-line-command
+
+run:
+    command-line-command
+
+valgrind:                       # Configure the valgrind plugin
+    run-command: run            # Execute the 'build' command for building, running and analyzing the project
+    tool: memcheck              # Set the tool
+    command-line:               # Set additional arguments for valgrind
+        - --error-exitcode=255
+
+make:
+    build:
+        patterns:
+            - MAKE_TARGET
+        command-line:
+            - "{MAKE_TARGET}"
+    clean:
+        command-line:
+            - clean
+
+command-line-command:
+    patterns:
+        - MAKE_TARGET
+    run:
+        command-line: ["build/{MAKE_TARGET}"]
+    clean:
+        command-line:    
+            remote-gcda-file: [ rm, -rf, "{MAKE_TARGET}.gcda"]
+            remote-gcno-file: [ rm, -rf, "{MAKE_TARGET}.gcno"]
