@@ -217,7 +217,7 @@ valgrind:
 pmd:
     patterns:
         - MODULE
-    exec: 3rdparty/pmd/pmd-bin-5.5.4/bin/run.sh
+    exec: 3rdparty/pmd/pmd-bin-5.7.0/bin/run.sh
     tool:
         - cpd
     language: cpp
