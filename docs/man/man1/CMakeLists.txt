@@ -15,6 +15,9 @@ STRIP_PATHS(MAN1_STRIPPED ${MAN1_SOURCES})
 PREPEND(MAN1_OUTPUT_TMP ${CMAKE_CURRENT_BINARY_DIR} ${MAN1_STRIPPED})
 string (REPLACE ".md" "${MAN1_EXTENSION}" MAN1_OUTPUT_PAGES "${MAN1_OUTPUT_TMP}")
 
+# Create the gzipped output paths
+string(REPLACE "${MAN1_EXTENSION}" "${MAN1_EXTENSION}.gz" MAN1_OUTPUT_GZ "${MAN1_OUTPUT_PAGES}")
+
 configure_file(${doxyfile_in} ${doxyfile} @ONLY)
 
 add_custom_command(OUTPUT ${MAN1_OUTPUT_PAGES}
@@ -23,10 +26,18 @@ add_custom_command(OUTPUT ${MAN1_OUTPUT_PAGES}
     DEPENDS ${MAN1_SOURCES_FULL_PATH}
     VERBATIM)
 
+FOREACH(FILE ${MAN1_OUTPUT_PAGES})
+    add_custom_command(OUTPUT ${FILE}.gz
+        COMMAND /usr/bin/gzip ${FILE}
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+        DEPENDS ${FILE}
+        VERBATIM)
+ENDFOREACH(FILE)
+
 add_custom_target(docs-man1
-    SOURCES ${MAN1_OUTPUT_PAGES}
+    SOURCES ${MAN1_OUTPUT_GZ}
     COMMENT "Generating MAN1 API documentation..."
     VERBATIM)
 
-install(FILES ${MAN1_OUTPUT_PAGES} DESTINATION usr/share/man/man1 COMPONENT docs-man)
+install(FILES ${MAN1_OUTPUT_GZ} DESTINATION usr/share/man/man1 COMPONENT docs-man)
 add_dependencies(docs-man docs-man1)

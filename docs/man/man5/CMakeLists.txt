@@ -30,6 +30,9 @@ STRIP_PATHS(MAN5_STRIPPED ${MAN5_SOURCES})
 PREPEND(MAN5_OUTPUT_TMP ${CMAKE_CURRENT_BINARY_DIR} ${MAN5_STRIPPED})
 string (REPLACE ".md" "${MAN5_EXTENSION}" MAN5_OUTPUT_PAGES "${MAN5_OUTPUT_TMP}")
 
+# Create the gzipped output paths
+string(REPLACE "${MAN5_EXTENSION}" "${MAN5_EXTENSION}.gz" MAN5_OUTPUT_GZ "${MAN5_OUTPUT_PAGES}")
+
 # Set example paths for Doxygen
 set(EXAMPLE_PATH_LIST ${PROJECT_SOURCE_DIR}/src/plugins/examples ${PROJECT_SOURCE_DIR}/src/plugins/examples)
 string (REPLACE ";" " " EXAMPLE_PATH "${EXAMPLE_PATH_LIST}")    # CMAKE separates multiple values with a ';', while Doxygen uses ' '
@@ -42,11 +45,19 @@ add_custom_command(OUTPUT ${MAN5_OUTPUT_PAGES}
     DEPENDS ${MAN5_SOURCES_FULL_PATH}
     VERBATIM)
 
+FOREACH(FILE ${MAN5_OUTPUT_PAGES})
+    add_custom_command(OUTPUT ${FILE}.gz
+        COMMAND /usr/bin/gzip ${FILE}
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+        DEPENDS ${FILE}
+        VERBATIM)
+ENDFOREACH(FILE)
+
 add_custom_target(docs-man5
-    SOURCES ${MAN5_OUTPUT_PAGES}
-    COMMENT "Generating MAN1 API documentation..."
+    SOURCES ${MAN5_OUTPUT_GZ}
+    COMMENT "Generating MAN5 API documentation..."
     VERBATIM)
 
-install(FILES ${MAN5_OUTPUT_PAGES} DESTINATION usr/share/man/man5 COMPONENT docs-man)
+install(FILES ${MAN5_OUTPUT_GZ} DESTINATION usr/share/man/man5 COMPONENT docs-man)
 
 add_dependencies(docs-man docs-man5)
