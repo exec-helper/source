@@ -23,9 +23,10 @@ add_custom_command(OUTPUT ${MAN1_OUTPUT_PAGES}
     DEPENDS ${MAN1_SOURCES_FULL_PATH}
     VERBATIM)
 
-add_custom_target(docs-man1 ALL
+add_custom_target(docs-man1
     SOURCES ${MAN1_OUTPUT_PAGES}
     COMMENT "Generating MAN1 API documentation..."
     VERBATIM)
 
-install(FILES ${MAN1_OUTPUT_PAGES} DESTINATION usr/share/man/man1 COMPONENT docs)
+install(FILES ${MAN1_OUTPUT_PAGES} DESTINATION usr/share/man/man1 COMPONENT docs-man)
+add_dependencies(docs-man docs-man1)

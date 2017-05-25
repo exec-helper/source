@@ -19,10 +19,12 @@ if(BUILD_HTML_DOCUMENTATION)
         MAIN_DEPENDENCY ${doxyfile_in}
         VERBATIM)
 
-    add_custom_target(docs-html ALL
+    add_custom_target(docs-html
         SOURCES ${HTML_INDEX_FILE}
         COMMENT "Generating API HTML documentation with Doxygen"
         VERBATIM)
 
-    install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} DESTINATION usr/share/doc/exec-helper COMPONENT docs)
+    install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} DESTINATION usr/share/doc/exec-helper COMPONENT docs-html)
+
+    add_dependencies(docs docs-html)
 endif()

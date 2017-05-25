@@ -45,12 +45,12 @@ patterns:
             - clang-tidy
         short-option: a
         long-option: analyze
-    MANTYPE:
+    DOCSTYPE:
         default-values:
-            - man1
-            - man5
-        short-option: o
-        long-option: man
+            - html
+            - man
+        short-option: d
+        long-option: docs-type
 
 commands:
     setup: Setup the repository for building
@@ -66,9 +66,7 @@ commands:
     coverage: Run the coverage analysis tools using a specific setup (for convenience)
     memory-check: Run the memory check analysis tool for a specific setup (for convenience)
     undefined-behaviour: Check for undefined behaviour using UBSan
-    docs: Docs-html + docs-man
-    docs-man: Generate the man-page documentation
-    docs-html: Generate the HTML documentation
+    docs: Build + install the documentation
 
 setup:
     - command-line-command
@@ -109,14 +107,6 @@ memory-check:
     - command-line-command
 
 docs:
-    - docs-html
-    - docs-man
-
-docs-html:
-    - make
-    - command-line-command
-
-docs-man:
     - make
     - command-line-command
 
@@ -136,16 +126,13 @@ make:
     clean:
         command-line:
             - clean
-    docs-html:
-        command-line:
-            - docs-html
-    docs-man:
+    docs:
         patterns:
             - COMPILER
             - MODE
-            - MANTYPE
+            - DOCSTYPE
         command-line:
-            - docs-{MANTYPE}
+            - docs-{DOCSTYPE}
 
 cppcheck:
     patterns:
@@ -175,7 +162,7 @@ command-line-command:
         patterns:
             - COMPILER
             - MODE
-        command-line: [ cmake, -H., "-Bbuild/{COMPILER}/{MODE}/build", "-DCMAKE_CXX_COMPILER={COMPILER}", "-DCMAKE_INSTALL_PREFIX=build/{COMPILER}/{MODE}/install", -DCMAKE_EXPORT_COMPILE_COMMANDS=ON, "-DCMAKE_BUILD_TYPE={MODE}", -DUSE_SYSTEM_CATCH=OFF, -DBUILD_HTML_DOCUMENTATION=OFF, -DBUILD_MAN_DOCUMENTATION=ON]
+        command-line: [ cmake, -H., "-Bbuild/{COMPILER}/{MODE}/build", "-DCMAKE_CXX_COMPILER={COMPILER}", "-DCMAKE_INSTALL_PREFIX=build/{COMPILER}/{MODE}/install", -DCMAKE_EXPORT_COMPILE_COMMANDS=ON, "-DCMAKE_BUILD_TYPE={MODE}", -DUSE_SYSTEM_CATCH=OFF, -DBUILD_HTML_DOCUMENTATION=ON, -DBUILD_MAN_DOCUMENTATION=ON]
     distclean:
         patterns:
             - COMPILER
@@ -207,16 +194,12 @@ command-line-command:
         command-line: [ exec-helper, init, build, run-test, --compiler, g++, --mode, undefined-behaviour, --run-target, unittest]
     memory-check:
         command-line: [ exec-helper, analyze, --analyze, valgrind, --run-target, unittest, --compiler, g++, --mode, debug]
-    docs-html:
+    docs:
         patterns:
             - COMPILER
             - MODE
-        command-line: [ cmake, "-DCOMPONENT=docs", -P, "build/{COMPILER}/{MODE}/build/cmake_install.cmake"]
-    docs-man:
-        patterns:
-            - COMPILER
-            - MODE
-        command-line: [ cmake, "-DCOMPONENT=docs", -P, "build/{COMPILER}/{MODE}/build/cmake_install.cmake"]
+            - DOCSTYPE
+        command-line: [ cmake, "-DCOMPONENT=docs-{DOCSTYPE}", -P, "build/{COMPILER}/{MODE}/build/cmake_install.cmake"]
 
 valgrind:
     run-command: run-test

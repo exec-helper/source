@@ -30,6 +30,10 @@ STRIP_PATHS(MAN5_STRIPPED ${MAN5_SOURCES})
 PREPEND(MAN5_OUTPUT_TMP ${CMAKE_CURRENT_BINARY_DIR} ${MAN5_STRIPPED})
 string (REPLACE ".md" "${MAN5_EXTENSION}" MAN5_OUTPUT_PAGES "${MAN5_OUTPUT_TMP}")
 
+# Set example paths for Doxygen
+set(EXAMPLE_PATH_LIST ${PROJECT_SOURCE_DIR}/src/plugins/examples ${PROJECT_SOURCE_DIR}/src/plugins/examples)
+string (REPLACE ";" " " EXAMPLE_PATH "${EXAMPLE_PATH_LIST}")    # CMAKE separates multiple values with a ';', while Doxygen uses ' '
+
 configure_file(${doxyfile_in} ${doxyfile} @ONLY)
 
 add_custom_command(OUTPUT ${MAN5_OUTPUT_PAGES}
@@ -38,9 +42,11 @@ add_custom_command(OUTPUT ${MAN5_OUTPUT_PAGES}
     DEPENDS ${MAN5_SOURCES_FULL_PATH}
     VERBATIM)
 
-add_custom_target(docs-man5 ALL
+add_custom_target(docs-man5
     SOURCES ${MAN5_OUTPUT_PAGES}
     COMMENT "Generating MAN1 API documentation..."
     VERBATIM)
 
-install(FILES ${MAN5_OUTPUT_PAGES} DESTINATION usr/share/man/man5 COMPONENT docs)
+install(FILES ${MAN5_OUTPUT_PAGES} DESTINATION usr/share/man/man5 COMPONENT docs-man)
+
+add_dependencies(docs-man docs-man5)
