@@ -3,32 +3,35 @@
 #   make
 #   make install
 
-COMPILER=$(CXX)
-
 NB_OF_CORES:=$(shell grep -c ^processor /proc/cpuinfo)
+BUILD_DIR=build/native/release
 
-all: release
+all: binary docs
 
 init-release:
-	cmake -H. -Bbuild/$(COMPILER)/release -DCMAKE_CXX_COMPILER=$(COMPILER) -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -DUSE_SYSTEM_CATCH=OFF -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+	cmake -H. -B$(BUILD_DIR) -DCMAKE_INSTALL_PREFIX=/ -DCMAKE_BUILD_TYPE=Release -DUSE_SYSTEM_CATCH=OFF -DCMAKE_EXPORT_COMPILE_COMMANDS=OFF -DBUILD_HTML_DOCUMENTATION=ON
 
-release: init-release
-	make -C build/$(COMPILER)/release --jobs $(NB_OF_CORES) exec-helper
+binary: init-release
+	make -C $(BUILD_DIR) --jobs $(NB_OF_CORES) exec-helper
 
-install: release
-	cmake -DCOMPONENT=runtime -P build/$(COMPILER)/release/cmake_install.cmake
+docs-html:
+	make -C $(BUILD_DIR) --jobs $(NB_OF_CORES) doc-html
 
-release-all: init-release
-	make -C build/$(COMPILER)/release
+docs: init-release docs-html
 
-install-all: release-all
-	make -C build/$(COMPILER)/release install
+install-bin:
+	cmake -DCOMPONENT=runtime -P $(BUILD_DIR)/cmake_install.cmake
 
-clean-release:
-	make -C build/$(COMPILER)/release --jobs $(NB_OF_CORES) clean
+install-docs:
+	cmake -DCOMPONENT=docs -P $(BUILD_DIR)/cmake_install.cmake
 
-clean: clean-release
-	rm -f *.exec-helper
+install: install-bin install-docs
+
+clean:
+	make -C $(BUILD_DIR) --jobs $(NB_OF_CORES) clean
+
+distclean: clean
+	rm -rf $(BUILD_DIR)
 
 list:
 	@$(MAKE) -pRrq -f $(lastword $(MAKEFILE_LIST)) : 2>/dev/null | awk -v RS= -F: '/^# File/,/^# Finished Make data base/ {if ($$1 !~ "^[#.]") {print $$1}}' | sort | egrep -v -e '^[^[:alnum:]]' -e '^$@$$'

@@ -5,8 +5,6 @@ set(SRCS
         src/combinationHelpers.cpp
    )
 
-message(STATUS "core include dirs = " ${${PROJECT_NAME}-core_INCLUDE_DIRS})
-
 set(LIBRARY_INCLUDES
         ${CMAKE_CURRENT_SOURCE_DIR}/../stubs
         ${${PROJECT_NAME}-core_INCLUDE_DIRS}

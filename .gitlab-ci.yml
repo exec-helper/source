@@ -13,55 +13,50 @@ stages:
 build:gcc:
     stage: build
     script:
-        - pacman -S --noconfirm --needed gcc cmake make git libunistring ncurses
-        - cmake -H. -Bbuild/g++/debug -DCMAKE_CXX_COMPILER=g++ -DCMAKE_INSTALL_PREFIX=build/g++/debug -DCMAKE_BUILD_TYPE=Debug -DUSE_SYSTEM_CATCH=OFF && make -C build/g++/debug --jobs 4 && make -C build/g++/debug install
-        - cmake -H. -Bbuild/g++/release -DCMAKE_CXX_COMPILER=g++ -DCMAKE_INSTALL_PREFIX=build/g++/release -DCMAKE_BUILD_TYPE=Release -DUSE_SYSTEM_CATCH=OFF && make -C build/g++/release --jobs 4 && make -C build/g++/release install
+        - pacman -S --noconfirm --needed gcc cmake make git libunistring ncurses doxygen
+        - cmake -H. -Bbuild/g++/debug/build -DCMAKE_CXX_COMPILER=g++ -DCMAKE_INSTALL_PREFIX=build/g++/debug/install -DCMAKE_BUILD_TYPE=Debug -DUSE_SYSTEM_CATCH=OFF && make -C build/g++/debug/build --jobs 4 && make -C build/g++/debug/build install
+        - cmake -H. -Bbuild/g++/release/build -DCMAKE_CXX_COMPILER=g++ -DCMAKE_INSTALL_PREFIX=build/g++/release/install -DCMAKE_BUILD_TYPE=Release -DUSE_SYSTEM_CATCH=OFF && make -C build/g++/release/build --jobs 4 && make -C build/g++/release/build install
     artifacts:
         expire_in: 1 day
         paths:
-            - build/g++/debug/bin
-            - build/g++/debug/lib
-            - build/g++/release/bin
-            - build/g++/release/lib
+            - build/g++/debug/install
+            - build/g++/release/install
 
 build:gcc:limited-optimization:
     stage: build
     script:
         - pacman -S --noconfirm --needed gcc cmake make git libunistring ncurses
-        - cmake -H. -Bbuild/g++/release -DCMAKE_CXX_COMPILER=g++ -DCMAKE_INSTALL_PREFIX=build/g++/release -DCMAKE_BUILD_TYPE=Release -DUSE_SYSTEM_CATCH=OFF -DLIMITED_OPTIMIZATION=ON && make -C build/g++/release --jobs 4 && make -C build/g++/release install
+        - cmake -H. -Bbuild/g++/release/build -DCMAKE_CXX_COMPILER=g++ -DCMAKE_INSTALL_PREFIX=build/g++/release/install -DCMAKE_BUILD_TYPE=Release -DUSE_SYSTEM_CATCH=OFF -DLIMITED_OPTIMIZATION=ON && make -C build/g++/release/build --jobs 4 && make -C build/g++/release/build install
     artifacts:
         expire_in: 1 day
         paths:
-            - build/g++/release/bin
-            - build/g++/release/lib
+            - build/g++/release/install
 
 build:clang:
     stage: build
     script: 
         - pacman -S --noconfirm --needed clang cmake make git libunistring ncurses
-        - cmake -H. -Bbuild/clang++/debug -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_INSTALL_PREFIX=build/clang++/debug -DCMAKE_BUILD_TYPE=Debug -DUSE_SYSTEM_CATCH=OFF && make -C build/clang++/debug --jobs 4 && make -C build/clang++/debug install
-        - cmake -H. -Bbuild/clang++/release -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_INSTALL_PREFIX=build/clang++/release -DCMAKE_BUILD_TYPE=Release -DUSE_SYSTEM_CATCH=OFF && make -C build/clang++/release --jobs 4 && make -C build/clang++/release install
+        - cmake -H. -Bbuild/clang++/debug/build -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_INSTALL_PREFIX=build/clang++/debug/install -DCMAKE_BUILD_TYPE=Debug -DUSE_SYSTEM_CATCH=OFF && make -C build/clang++/debug/build --jobs 4 && make -C build/clang++/debug/build install
+        - cmake -H. -Bbuild/clang++/release/build -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_INSTALL_PREFIX=build/clang++/release/install -DCMAKE_BUILD_TYPE=Release -DUSE_SYSTEM_CATCH=OFF && make -C build/clang++/release --jobs 4 && make -C build/clang++/release/build install
     artifacts:
         expire_in: 1 day
         paths:
-            - build/clang++/debug/bin
-            - build/clang++/debug/lib
-            - build/clang++/release/bin
-            - build/clang++/release/lib
+            - build/clang++/debug/install
+            - build/clang++/release/install
 
 test-distribution:ubuntu-yakkety:
     image: ubuntu:yakkety
     stage: analyze
     before_script:
         - apt-get update
-        - apt-get install --yes build-essential cmake make gcc g++ clang libboost-program-options-dev libyaml-cpp-dev git
+        - apt-get install --yes build-essential cmake make gcc g++ clang libboost-program-options-dev libyaml-cpp-dev git doxygen
         # Workaround for issue with cmake thinking make is in the /usr/sbin directory
         - ln -fs /usr/bin/make /usr/sbin/make
         - which make
         - ls -l /usr/sbin
     script:
-        - cmake -H. -Bbuild/g++/release -DCMAKE_CXX_COMPILER=g++ -DCMAKE_INSTALL_PREFIX=build/g++/release -DCMAKE_BUILD_TYPE=Release -DUSE_SYSTEM_CATCH=OFF
-        - cmake -H. -Bbuild/clang++/release -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_INSTALL_PREFIX=build/clang++/release -DCMAKE_BUILD_TYPE=Release -DUSE_SYSTEM_CATCH=OFF
+        - cmake -H. -Bbuild/g++/release/build -DCMAKE_CXX_COMPILER=g++ -DCMAKE_INSTALL_PREFIX=build/g++/release/install -DCMAKE_BUILD_TYPE=Release -DUSE_SYSTEM_CATCH=OFF
+        - cmake -H. -Bbuild/clang++/release/build -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_INSTALL_PREFIX=build/clang++/release/install -DCMAKE_BUILD_TYPE=Release -DUSE_SYSTEM_CATCH=OFF
 
 unittest-core:
     stage: test
@@ -69,7 +64,7 @@ unittest-core:
         - build:gcc
         - build:clang
     script:
-        - build/g++/release/bin/exec-helper run-test --module core --run-target unittest --compiler g++ clang++ --mode release
+        - build/g++/release/install/usr/bin/exec-helper run-test --module core --run-target unittest --compiler g++ clang++ --mode release
 
 unittest-yaml:
     stage: test
@@ -77,7 +72,7 @@ unittest-yaml:
         - build:gcc
         - build:clang
     script:
-        - build/g++/release/bin/exec-helper run-test --module yaml --run-target unittest --compiler g++ clang++ --mode release
+        - build/g++/release/install/usr/bin/exec-helper run-test --module yaml --run-target unittest --compiler g++ clang++ --mode release
 
 unittest-config:
     stage: test
@@ -85,7 +80,7 @@ unittest-config:
         - build:gcc
         - build:clang
     script:
-        - build/g++/release/bin/exec-helper run-test --module config --run-target unittest --compiler g++ clang++ --mode release
+        - build/g++/release/install/usr/bin/exec-helper run-test --module config --run-target unittest --compiler g++ clang++ --mode release
 
 unittest-plugins:
     stage: test
@@ -93,7 +88,7 @@ unittest-plugins:
         - build:gcc
         - build:clang
     script:
-        - build/g++/release/bin/exec-helper run-test --module plugins --run-target unittest --compiler g++ clang++ --mode release
+        - build/g++/release/install/usr/bin/exec-helper run-test --module plugins --run-target unittest --compiler g++ clang++ --mode release
 
 unittest-commander:
     stage: test
@@ -101,7 +96,7 @@ unittest-commander:
         - build:gcc
         - build:clang
     script:
-        - build/g++/release/bin/exec-helper run-test --module commander --run-target unittest --compiler g++ clang++ --mode release
+        - build/g++/release/install/usr/bin/exec-helper run-test --module commander --run-target unittest --compiler g++ clang++ --mode release
 
 memory-check:
     stage: analyze
@@ -109,7 +104,7 @@ memory-check:
         - build:gcc:limited-optimization
     script:
         - pacman -S --noconfirm valgrind
-        - build/g++/release/bin/exec-helper analyze --analyze valgrind --run-target unittest --compiler g++ --mode release --module core yaml config commander
+        - build/g++/release/install/usr/bin/exec-helper analyze --analyze valgrind --run-target unittest --compiler g++ --mode release --module core yaml config commander
 
 memory-check-plugins:
     stage: analyze
@@ -117,7 +112,7 @@ memory-check-plugins:
         - build:gcc:limited-optimization
     script:
         - pacman -S --noconfirm valgrind
-        - build/g++/release/bin/exec-helper analyze --analyze valgrind --run-target unittest --compiler g++ --mode release --module plugins
+        - build/g++/release/install/usr/bin/exec-helper analyze --analyze valgrind --run-target unittest --compiler g++ --mode release --module plugins
 
 cppcheck:
     stage: analyze
@@ -125,7 +120,7 @@ cppcheck:
         - build:gcc
     script:
         - pacman -S --noconfirm cppcheck
-        - build/g++/release/bin/exec-helper analyze --analyze cppcheck
+        - build/g++/release/install/usr/bin/exec-helper analyze --analyze cppcheck
 
 clang-tidy-core:
     stage: analyze
@@ -133,9 +128,9 @@ clang-tidy-core:
         - build:gcc
     script:
         - pacman -S --needed --noconfirm cppcheck gcc cmake make clang-tools-extra
-        - build/g++/release/bin/exec-helper setup init -c g++ -m release
-        - make -C build/g++/release Catch
-        - build/g++/release/bin/exec-helper analyze --analyze clang-tidy --module core
+        - build/g++/release/install/usr/bin/exec-helper setup init -c g++ -m release
+        - make -C build/g++/release/build Catch
+        - build/g++/release/install/usr/bin/exec-helper analyze --analyze clang-tidy --module core
 
 clang-tidy-plugin:
     stage: analyze
@@ -143,9 +138,9 @@ clang-tidy-plugin:
         - build:gcc
     script:
         - pacman -S --needed --noconfirm cppcheck gcc cmake make clang-tools-extra
-        - build/g++/release/bin/exec-helper setup init -c g++ -m release
-        - make -C build/g++/release Catch
-        - build/g++/release/bin/exec-helper analyze --analyze clang-tidy --module plugins
+        - build/g++/release/install/usr/bin/exec-helper setup init -c g++ -m release
+        - make -C build/g++/release/build Catch
+        - build/g++/release/install/usr/bin/exec-helper analyze --analyze clang-tidy --module plugins
 
 clang-tidy-rest:
     stage: analyze
@@ -153,9 +148,9 @@ clang-tidy-rest:
         - build:gcc
     script:
         - pacman -S --needed --noconfirm cppcheck gcc cmake make clang-tools-extra
-        - build/g++/release/bin/exec-helper setup init -c g++ -m release
-        - make -C build/g++/release Catch
-        - build/g++/release/bin/exec-helper analyze --analyze clang-tidy --module yaml commander config
+        - build/g++/release/install/usr/bin/exec-helper setup init -c g++ -m release
+        - make -C build/g++/release/build Catch
+        - build/g++/release/install/usr/bin/exec-helper analyze --analyze clang-tidy --module yaml commander config
 
 clang-static-analyzer:
     stage: analyze
@@ -163,7 +158,7 @@ clang-static-analyzer:
         - build:gcc
     script:
         - pacman -S --noconfirm --needed clang cmake make git libunistring ncurses
-        - build/g++/release/bin/exec-helper analyze --analyze clang-static-analyzer --mode debug --compiler ''
+        - build/g++/release/install/usr/bin/exec-helper analyze --analyze clang-static-analyzer --mode debug --compiler ''
 
 undefined-behaviour:
     stage: analyze
@@ -171,8 +166,8 @@ undefined-behaviour:
         - build:gcc
     script:
         - pacman -S --noconfirm --needed clang cmake make git libunistring ncurses
-        - export PATH=$PATH:build/g++/release/bin
-        - build/g++/release/bin/exec-helper undefined-behaviour
+        - export PATH=$PATH:build/g++/release/install/usr/bin
+        - build/g++/release/install/usr/bin/exec-helper undefined-behaviour
 
 
 code-duplication-pmd-cpd:
@@ -183,7 +178,7 @@ code-duplication-pmd-cpd:
         - pacman -S --noconfirm --needed java-environment unzip wget
         - mkdir -p 3rdparty/pmd
         - pushd 3rdparty/pmd && wget --no-check-certificate "https://downloads.sourceforge.net/project/pmd/pmd/5.7.0/pmd-bin-5.7.0.zip" && unzip pmd-bin-5.7.0.zip; popd
-        - build/g++/release/bin/exec-helper analyze --analyze pmd
+        - build/g++/release/install/usr/bin/exec-helper analyze --analyze pmd
 
 coverage:
     stage: analyze
@@ -192,20 +187,11 @@ coverage:
     script:
         - pacman -S --noconfirm --needed base-devel curl gcc cmake make git libunistring ncurses
         - bash -x gitlab/install-aur.sh lcov
-        - export PATH=$PATH:build/g++/release/bin
-        - build/g++/release/bin/exec-helper coverage
+        - export PATH=$PATH:build/g++/release/install/usr/bin
+        - build/g++/release/install/usr/bin/exec-helper coverage
     artifacts:
         paths:
             - test_coverage/
-
-docs:
-    stage: analyze
-    script:
-        - pacman -S --noconfirm doxygen
-        - build/g++/release/bin/exec-helper docs
-    artifacts:
-        paths:
-            - build/docs/
 
 examples:
     stage: analyze
@@ -216,7 +202,7 @@ examples:
         - bash -x gitlab/install-aur.sh lcov
         - mkdir -p 3rdparty/pmd
         - pushd 3rdparty/pmd && wget --no-check-certificate "https://downloads.sourceforge.net/project/pmd/pmd/5.7.0/pmd-bin-5.7.0.zip" && unzip pmd-bin-5.7.0.zip; popd
-        - export PATH=$PATH:$(pwd)/build/g++/release/bin:$(pwd)/3rdparty/pmd/pmd-bin-5.7.0/bin
+        - export PATH=$PATH:$(pwd)/build/g++/release/install/usr/bin:$(pwd)/3rdparty/pmd/pmd-bin-5.7.0/bin
         - export ROOT_DIR=$(pwd)
         - cd ${ROOT_DIR}/src/config/examples
         - exec-helper --settings-file exec-helper-config.example build clean rebuild
@@ -237,12 +223,12 @@ pages:
     stage: deploy
     dependencies:
         - coverage
-        - docs
+        - build:gcc
     script:
         - mkdir public
         - mv pages/index.html public/
         - mv test_coverage/ public/coverage
-        - mv build/docs public/docs
+        - mv build/g++/release/install/usr/share/doc/exec-helper/doc public/docs
     artifacts:
         paths:
             - public

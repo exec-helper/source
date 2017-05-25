@@ -22,10 +22,11 @@ if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" MATCH
 endif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
 endif(LIMITED_OPTIMIZATION)
 
-set(BIN_DIRECTORY bin)
-set(LIB_DIRECTORY lib)
+set(BIN_DIRECTORY usr/bin)
+set(LIB_DIRECTORY usr/lib)
 
 add_subdirectory(3rdparty)
 add_subdirectory(src)
 
 add_subdirectory(test)
+add_subdirectory(docs)

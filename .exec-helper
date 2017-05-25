@@ -114,6 +114,7 @@ docs:
     - docs-man
 
 docs-html:
+    - make
     - command-line-command
 
 docs-man:
@@ -130,11 +131,14 @@ make:
     patterns:
         - COMPILER
         - MODE
-    build-dir: build/{COMPILER}/{MODE}
+    build-dir: build/{COMPILER}/{MODE}/build
     single-threaded: no
     clean:
         command-line:
             - clean
+    docs-html:
+        command-line:
+            - docs-html
 
 cppcheck:
     patterns:
@@ -159,12 +163,12 @@ command-line-command:
         patterns:
             - COMPILER
             - MODE
-        command-line: [ ln, -fs, "build/{COMPILER}/{MODE}/compile_commands.json"]
+        command-line: [ ln, -fs, "build/{COMPILER}/{MODE}/build/compile_commands.json"]
     init:
         patterns:
             - COMPILER
             - MODE
-        command-line: [ cmake, -H., "-Bbuild/{COMPILER}/{MODE}", "-DCMAKE_CXX_COMPILER={COMPILER}", "-DCMAKE_INSTALL_PREFIX=build/{COMPILER}/{MODE}", -DCMAKE_EXPORT_COMPILE_COMMANDS=ON, "-DCMAKE_BUILD_TYPE={MODE}", -DUSE_SYSTEM_CATCH=OFF]
+        command-line: [ cmake, -H., "-Bbuild/{COMPILER}/{MODE}/build", "-DCMAKE_CXX_COMPILER={COMPILER}", "-DCMAKE_INSTALL_PREFIX=build/{COMPILER}/{MODE}/install", -DCMAKE_EXPORT_COMPILE_COMMANDS=ON, "-DCMAKE_BUILD_TYPE={MODE}", -DUSE_SYSTEM_CATCH=OFF, -DBUILD_HTML_DOCUMENTATION=ON]
     distclean:
         patterns:
             - COMPILER
@@ -175,14 +179,14 @@ command-line-command:
             - COMPILER
             - MODE
             - COMPONENT
-        command-line: [ cmake, "-DCOMPONENT={COMPONENT}", -P, "build/{COMPILER}/{MODE}/cmake_install.cmake"]
+        command-line: [ cmake, "-DCOMPONENT={COMPONENT}", -P, "build/{COMPILER}/{MODE}/build/cmake_install.cmake"]
     run-test:
         patterns:
             - COMPILER
             - MODE
             - RUNTARGET
             - MODULE
-        command-line: build/{COMPILER}/{MODE}/bin/test/{RUNTARGET}/exec-helper-{MODULE}-{RUNTARGET}
+        command-line: build/{COMPILER}/{MODE}/install/usr/bin/test/{RUNTARGET}/exec-helper-{MODULE}-{RUNTARGET}
     coverage:
         environment:
             CXXFLAGS: --coverage -fprofile-arcs -ftest-coverage
@@ -197,9 +201,10 @@ command-line-command:
     memory-check:
         command-line: [ exec-helper, analyze, --analyze, valgrind, --run-target, unittest, --compiler, g++, --mode, debug]
     docs-html:
-        command-line:
-            - create-build-dir: [ mkdir, -p, build]
-            - build-documentation: [ doxygen, docs/html/Doxyfile]
+        patterns:
+            - COMPILER
+            - MODE
+        command-line: [ cmake, "-DCOMPONENT=docs", -P, "build/{COMPILER}/{MODE}/build/cmake_install.cmake"]
     docs-man:
         patterns:
             - MANTYPE
