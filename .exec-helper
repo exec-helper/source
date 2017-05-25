@@ -48,7 +48,6 @@ patterns:
     MANTYPE:
         default-values:
             - man1
-            - man3
             - man5
         short-option: o
         long-option: man
@@ -118,6 +117,7 @@ docs-html:
     - command-line-command
 
 docs-man:
+    - make
     - command-line-command
 
 selector:
@@ -139,6 +139,13 @@ make:
     docs-html:
         command-line:
             - docs-html
+    docs-man:
+        patterns:
+            - COMPILER
+            - MODE
+            - MANTYPE
+        command-line:
+            - docs-{MANTYPE}
 
 cppcheck:
     patterns:
@@ -168,7 +175,7 @@ command-line-command:
         patterns:
             - COMPILER
             - MODE
-        command-line: [ cmake, -H., "-Bbuild/{COMPILER}/{MODE}/build", "-DCMAKE_CXX_COMPILER={COMPILER}", "-DCMAKE_INSTALL_PREFIX=build/{COMPILER}/{MODE}/install", -DCMAKE_EXPORT_COMPILE_COMMANDS=ON, "-DCMAKE_BUILD_TYPE={MODE}", -DUSE_SYSTEM_CATCH=OFF, -DBUILD_HTML_DOCUMENTATION=ON]
+        command-line: [ cmake, -H., "-Bbuild/{COMPILER}/{MODE}/build", "-DCMAKE_CXX_COMPILER={COMPILER}", "-DCMAKE_INSTALL_PREFIX=build/{COMPILER}/{MODE}/install", -DCMAKE_EXPORT_COMPILE_COMMANDS=ON, "-DCMAKE_BUILD_TYPE={MODE}", -DUSE_SYSTEM_CATCH=OFF, -DBUILD_HTML_DOCUMENTATION=OFF, -DBUILD_MAN_DOCUMENTATION=ON]
     distclean:
         patterns:
             - COMPILER
@@ -207,10 +214,9 @@ command-line-command:
         command-line: [ cmake, "-DCOMPONENT=docs", -P, "build/{COMPILER}/{MODE}/build/cmake_install.cmake"]
     docs-man:
         patterns:
-            - MANTYPE
-        command-line:
-            - create-build-dir: [ mkdir, -p, build]
-            - build-documentation: [ doxygen, "docs/{MANTYPE}/Doxyfile"]
+            - COMPILER
+            - MODE
+        command-line: [ cmake, "-DCOMPONENT=docs", -P, "build/{COMPILER}/{MODE}/build/cmake_install.cmake"]
 
 valgrind:
     run-command: run-test

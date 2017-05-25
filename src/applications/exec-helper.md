@@ -51,4 +51,3 @@ Exec-helper is Copyright &copy; 2016-2017 under the GNU General Public License v
 
 # AUTHOR
 Written by B. Verhagen
-

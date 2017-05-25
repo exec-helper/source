@@ -16,7 +16,7 @@ if(BUILD_HTML_DOCUMENTATION)
     add_custom_command(OUTPUT ${HTML_INDEX_FILE}
         COMMAND ${DOXYGEN_EXECUTABLE} ${doxyfile}
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-        MAIN_DEPENDENCY ${doxyfile}
+        MAIN_DEPENDENCY ${doxyfile_in}
         VERBATIM)
 
     add_custom_target(docs-html ALL

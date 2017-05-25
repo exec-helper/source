@@ -1,0 +1,28 @@
+option(BUILD_MAN_DOCUMENTATION "Create and install the MAN API documentation (requires Doxygen)" ${DOXYGEN_FOUND})
+
+FUNCTION(PREPEND var prefix)
+   SET(listVar "")
+   FOREACH(FILEPATH ${ARGN})
+       LIST(APPEND listVar "${prefix}/${FILEPATH}")
+   ENDFOREACH(f)
+   SET(${var} "${listVar}" PARENT_SCOPE)
+ENDFUNCTION(PREPEND)
+
+FUNCTION(STRIP_PATHS var)
+   SET(listVar "")
+   FOREACH(FILEPATH ${ARGN})
+       get_filename_component(STRIPPED ${FILEPATH} NAME)
+      LIST(APPEND listVar ${STRIPPED})
+   ENDFOREACH(f)
+   SET(${var} "${listVar}" PARENT_SCOPE)
+ENDFUNCTION(STRIP_PATHS)
+
+if(BUILD_MAN_DOCUMENTATION)
+    find_package(Doxygen)
+    if(NOT DOXYGEN_FOUND)
+        message(FATAL_ERROR "Doxygen is required to build the documentation.")
+    endif()
+
+    add_subdirectory(man1)
+    add_subdirectory(man5)
+endif()
