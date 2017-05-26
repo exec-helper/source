@@ -28,7 +28,7 @@ add_custom_command(OUTPUT ${MAN1_OUTPUT_PAGES}
 
 FOREACH(FILE ${MAN1_OUTPUT_PAGES})
     add_custom_command(OUTPUT ${FILE}.gz
-        COMMAND ${GZIP} ${FILE}
+        COMMAND ${GZIP} --force ${FILE}
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
         DEPENDS ${FILE}
         VERBATIM)
