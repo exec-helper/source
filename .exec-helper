@@ -55,6 +55,7 @@ patterns:
 commands:
     setup: Setup the repository for building
     init: Initialize the build infrastructure
+    init-build: Initialize the build infrastructure and switches off everything that has nothing to do with building the exec-helper binary itself
     build: Build-only + install
     build-only: Build only
     install: Install only
@@ -72,6 +73,9 @@ setup:
     - command-line-command
 
 init:
+    - command-line-command
+
+init-build:
     - command-line-command
 
 build:
@@ -148,7 +152,7 @@ cppcheck:
 
 clang-static-analyzer:
     build-command:
-        - init
+        - init-build
         - build
     clean-command: clean
 
@@ -163,6 +167,11 @@ command-line-command:
             - COMPILER
             - MODE
         command-line: [ cmake, -H., "-Bbuild/{COMPILER}/{MODE}/build", "-DCMAKE_CXX_COMPILER={COMPILER}", "-DCMAKE_INSTALL_PREFIX=build/{COMPILER}/{MODE}/install", -DCMAKE_EXPORT_COMPILE_COMMANDS=ON, "-DCMAKE_BUILD_TYPE={MODE}", -DUSE_SYSTEM_CATCH=OFF, -DBUILD_HTML_DOCUMENTATION=ON, -DBUILD_MAN_DOCUMENTATION=ON]
+    init-build:
+        patterns:
+            - COMPILER
+            - MODE
+        command-line: [ cmake, -H., "-Bbuild/{COMPILER}/{MODE}/build", "-DCMAKE_CXX_COMPILER={COMPILER}", "-DCMAKE_INSTALL_PREFIX=build/{COMPILER}/{MODE}/install", -DCMAKE_EXPORT_COMPILE_COMMANDS=ON, "-DCMAKE_BUILD_TYPE={MODE}", -DUSE_SYSTEM_CATCH=OFF, -DBUILD_HTML_DOCUMENTATION=OFF, -DBUILD_MAN_DOCUMENTATION=OFF]
     distclean:
         patterns:
             - COMPILER
@@ -185,13 +194,13 @@ command-line-command:
         environment:
             CXXFLAGS: --coverage -fprofile-arcs -ftest-coverage
             LDFLAGS: -fprofile-arcs -ftest-coverage
-        command-line: [ exec-helper, init, build, analyze, --analyze, lcov, --compiler, g++, --mode, coverage, --run-target, unittest]
+        command-line: [ exec-helper, init-build, build, analyze, --analyze, lcov, --compiler, g++, --mode, coverage, --run-target, unittest]
     undefined-behaviour:
         environment:
             CXXFLAGS: -g -fsanitize=undefined -fno-omit-frame-pointer -fno-sanitize-recover=undefined
             LDFLAGS: -g -fsanitize=undefined -fno-omit-frame-pointer -fno-sanitize-recover=undefined
             UBSAN_OPTIONS: print_stacktrace=1
-        command-line: [ exec-helper, init, build, run-test, --compiler, g++, --mode, undefined-behaviour, --run-target, unittest]
+        command-line: [ exec-helper, init-build, build, run-test, --compiler, g++, --mode, undefined-behaviour, --run-target, unittest]
     memory-check:
         command-line: [ exec-helper, analyze, --analyze, valgrind, --run-target, unittest, --compiler, g++, --mode, debug]
     docs:
