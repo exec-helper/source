@@ -47,7 +47,7 @@ add_custom_command(OUTPUT ${MAN5_OUTPUT_PAGES}
 
 FOREACH(FILE ${MAN5_OUTPUT_PAGES})
     add_custom_command(OUTPUT ${FILE}.gz
-        COMMAND /usr/bin/gzip ${FILE}
+        COMMAND ${GZIP} ${FILE}
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
         DEPENDS ${FILE}
         VERBATIM)
