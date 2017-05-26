@@ -83,9 +83,9 @@ namespace execHelper { namespace plugins { namespace test {
             }
 
             ExecutorStub::TaskQueue expectedTasks;
-            for(const auto& commandLine : commandLine) {
+            for(const auto& commandLineLine : commandLine) {
                 Task newTask = expectedTask;
-                newTask.append(commandLine);
+                newTask.append(commandLineLine);
                 expectedTasks.emplace_back(newTask);
             }
             ExecutorStub::TaskQueue replacedExpectedTasks = getExpectedTasks(expectedTasks, compilerUtil, targetUtil);
