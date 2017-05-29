@@ -189,7 +189,7 @@ command-line-command:
             - MODE
             - RUNTARGET
             - MODULE
-        command-line: build/{COMPILER}/{MODE}/install/usr/bin/test/{RUNTARGET}/exec-helper-{MODULE}-{RUNTARGET}
+        command-line: build/{COMPILER}/{MODE}/install/bin/test/{RUNTARGET}/exec-helper-{MODULE}-{RUNTARGET}
     coverage:
         environment:
             CXXFLAGS: --coverage -fprofile-arcs -ftest-coverage
