@@ -1,3 +1,5 @@
+find_package(Doxygen REQUIRED)
+
 option(BUILD_MAN_DOCUMENTATION "Create and install the MAN API documentation (requires Doxygen)" ${DOXYGEN_FOUND})
 
 FUNCTION(PREPEND var prefix)
@@ -18,8 +20,6 @@ FUNCTION(STRIP_PATHS var)
 ENDFUNCTION(STRIP_PATHS)
 
 if(BUILD_MAN_DOCUMENTATION)
-    find_package(Doxygen REQUIRED)
-
     list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/modules)
     find_package(Gzip REQUIRED)
     if(NOT DOXYGEN_FOUND)

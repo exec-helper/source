@@ -14,8 +14,12 @@ build:gcc:
     stage: build
     script:
         - pacman -S --noconfirm --needed gcc cmake make git libunistring ncurses doxygen
-        - cmake -H. -Bbuild/g++/debug/build -DCMAKE_CXX_COMPILER=g++ -DCMAKE_INSTALL_PREFIX=build/g++/debug/install -DCMAKE_BUILD_TYPE=Debug -DUSE_SYSTEM_CATCH=OFF && make -C build/g++/debug/build --jobs 4 && make -C build/g++/debug/build install
-        - cmake -H. -Bbuild/g++/release/build -DCMAKE_CXX_COMPILER=g++ -DCMAKE_INSTALL_PREFIX=build/g++/release/install -DCMAKE_BUILD_TYPE=Release -DUSE_SYSTEM_CATCH=OFF && make -C build/g++/release/build --jobs 4 && make -C build/g++/release/build install
+        - cmake -H. -Bbuild/g++/debug/build -DCMAKE_CXX_COMPILER=g++ -DCMAKE_INSTALL_PREFIX=build/g++/debug/install -DCMAKE_BUILD_TYPE=Debug -DUSE_SYSTEM_CATCH=OFF
+        - make -C build/g++/debug/build --jobs 4
+        - make -C build/g++/debug/build install
+        - cmake -H. -Bbuild/g++/release/build -DCMAKE_CXX_COMPILER=g++ -DCMAKE_INSTALL_PREFIX=build/g++/release/install -DCMAKE_BUILD_TYPE=Release -DUSE_SYSTEM_CATCH=OFF
+        - make -C build/g++/release/build --jobs 4
+        - make -C build/g++/release/build install
     artifacts:
         expire_in: 1 day
         paths:
