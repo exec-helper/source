@@ -58,6 +58,6 @@ add_custom_target(docs-man5
     COMMENT "Generating MAN5 API documentation..."
     VERBATIM)
 
-install(FILES ${MAN5_OUTPUT_GZ} DESTINATION usr/share/man/man5 COMPONENT docs-man)
+install(FILES ${MAN5_OUTPUT_GZ} DESTINATION share/man/man5 COMPONENT docs-man)
 
 add_dependencies(docs-man docs-man5)

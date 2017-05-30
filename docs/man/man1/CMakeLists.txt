@@ -39,5 +39,5 @@ add_custom_target(docs-man1
     COMMENT "Generating MAN1 API documentation..."
     VERBATIM)
 
-install(FILES ${MAN1_OUTPUT_GZ} DESTINATION usr/share/man/man1 COMPONENT docs-man)
+install(FILES ${MAN1_OUTPUT_GZ} DESTINATION share/man/man1 COMPONENT docs-man)
 add_dependencies(docs-man docs-man1)

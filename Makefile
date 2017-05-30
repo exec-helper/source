@@ -26,7 +26,8 @@ install-bin:
 	cmake -DCOMPONENT=runtime -P $(BUILD_DIR)/cmake_install.cmake
 
 install-docs:
-	cmake -DCOMPONENT=docs -P $(BUILD_DIR)/cmake_install.cmake
+	cmake -DCOMPONENT=docs-man -P $(BUILD_DIR)/cmake_install.cmake
+	cmake -DCOMPONENT=docs-html -P $(BUILD_DIR)/cmake_install.cmake
 
 install: install-bin install-docs
 

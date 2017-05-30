@@ -24,7 +24,7 @@ if(BUILD_HTML_DOCUMENTATION)
         COMMENT "Generating API HTML documentation with Doxygen"
         VERBATIM)
 
-    install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} DESTINATION usr/share/doc/exec-helper COMPONENT docs-html)
+    install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} DESTINATION share/doc/exec-helper COMPONENT docs-html)
 
     add_dependencies(docs docs-html)
 endif()
