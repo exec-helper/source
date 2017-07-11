@@ -1,5 +1,6 @@
-An overview of the pmd plugin configuration settings {#exec-helper-plugins-pmd}
-====================================================
+The pmd plugin  {#exec-helper-plugins-pmd}
+==============
+\brief An overview of the pmd plugin configuration settings
 
 # DESCRIPTION
 The pmd plugin is used for executing Makefiles.

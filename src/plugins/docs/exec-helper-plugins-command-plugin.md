@@ -1,5 +1,6 @@
-An overview of the command-plugin configuration {#exec-helper-plugins-command-plugin}
-===============================================
+The command plugin  {#exec-helper-plugins-command-plugin}
+============================
+\brief An overview of the command-plugin configuration
 
 # DESCRIPTION
 The command-plugin is used for executing a command that is listed under the _commands_ key in the configuration. It is used internally as a starting point for traversing the configuration.

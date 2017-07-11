@@ -1,5 +1,6 @@
-An overview of the make plugin configuration settings {#exec-helper-plugins-make}
-=====================================================
+The make plugin  {#exec-helper-plugins-make}
+===============
+\brief An overview of the make plugin configuration settings
 
 # DESCRIPTION
 The make plugin is used for executing Makefiles.

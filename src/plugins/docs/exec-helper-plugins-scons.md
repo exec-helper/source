@@ -1,5 +1,6 @@
-An overview of the scons plugin configuration settings {#exec-helper-plugins-scons}
-======================================================
+The scons plugin  {#exec-helper-plugins-scons}
+===============
+\brief An overview of the scons plugin configuration settings
 
 # DESCRIPTION
 The scons plugin is used for executing scons.

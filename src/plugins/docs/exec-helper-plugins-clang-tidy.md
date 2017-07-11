@@ -1,5 +1,6 @@
-An overview of the clang-tidy plugin configuration settings {#exec-helper-plugins-clang-tidy}
-===========================================================
+The clang-tidy plugin  {#exec-helper-plugins-clang-tidy}
+=====================
+\brief An overview of the clang-tidy plugin configuration settings
 
 # DESCRIPTION
 The clang-tidy plugin is used for executing the clang-tidy static code analysis tool.

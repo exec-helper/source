@@ -1,5 +1,6 @@
-An overview of the selector plugin configuration settings {#exec-helper-plugins-selector}
-=========================================================
+The selector plugin  {#exec-helper-plugins-selector}
+===================
+\brief An overview of the selector plugin configuration settings
 
 # DESCRIPTION
 The selector plugin is used for selecting a configuration path based on the value(s) of a pattern.

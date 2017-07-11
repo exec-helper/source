@@ -1,5 +1,6 @@
-An overview of the valgrind plugin configuration settings {#exec-helper-plugins-valgrind}
-==========================================================
+The valgrind plugin  {#exec-helper-plugins-valgrind}
+===================
+\brief An overview of the valgrind plugin configuration settings
 
 # DESCRIPTION
 The valgrind plugin is used for executing code coverage analysis using valgrind.
