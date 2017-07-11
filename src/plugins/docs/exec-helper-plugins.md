@@ -1,6 +1,5 @@
-Plugins                 {#exec-helper-plugins}
-=======
-\brief The list of plugins for exec-helper
+A list of plugins for exec-helper               {#exec-helper-plugins}
+=================================
 
 # DESCRIPTION
 This document describes the list of plugins that can be used in the associated exec-helper binaries.

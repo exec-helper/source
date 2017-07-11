@@ -1,6 +1,5 @@
-The cppcheck plugin  {#exec-helper-plugins-cppcheck}
-=====================
-\brief An overview of the cppcheck plugin configuration settings
+An overview of the cppcheck plugin configuration settings {#exec-helper-plugins-cppcheck}
+=========================================================
 
 # DESCRIPTION
 The cppcheck plugin is used for executing the cppcheck static code analysis tool.

@@ -1,6 +1,5 @@
-The lcov plugin  {#exec-helper-plugins-lcov}
-===============
-\brief An overview of the lcov plugin configuration settings
+An overview of the lcov plugin configuration settings {#exec-helper-plugins-lcov}
+=====================================================
 
 # DESCRIPTION
 The lcov plugin is used for executing code coverage analysis using lcov.

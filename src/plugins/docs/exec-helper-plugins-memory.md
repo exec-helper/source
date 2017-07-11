@@ -1,6 +1,5 @@
-The memory plugin  {#exec-helper-plugins-memory}
-=================
-\brief An overview of the memory plugin configuration settings
+An overview of the memory plugin configuration settings {#exec-helper-plugins-memory}
+=======================================================
 
 # DESCRIPTION
 The memory plugin remembers the times and the parameters with which it was called. The plugin is mainly used for testing purposes.

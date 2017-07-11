@@ -1,6 +1,5 @@
-The command-line-command plugin  {#exec-helper-plugins-command-line-command}
-============================
-\brief An overview of the command-line-command plugin configuration settings
+An overview of the command-line-command plugin configuration settings {#exec-helper-plugins-command-line-command}
+=====================================================================
 
 # DESCRIPTION
 The command-line-command plugin is used for executing arbitrary command lines. This plugin can be used for constructing the command line for commands that do not have a corresponding plugin available.

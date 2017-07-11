@@ -1,6 +1,5 @@
-The execute plugin  {#exec-helper-plugins-execute-plugin}
-==================
-\brief An overview of the execute plugin configuration settings
+An overview of the execute plugin configuration settings {#exec-helper-plugins-execute-plugin}
+=========================================================
 
 # DESCRIPTION
 The execute plugin is used for executing specific plugins or, if no associated plugin is found, following commands defined in the configuration. This plugin is mainly used by other plugins that want to execute other commands.

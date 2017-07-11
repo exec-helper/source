@@ -1,6 +1,5 @@
-The clang-static-analyzer plugin  {#exec-helper-plugins-clang-static-analyzer}
-=========================
-\brief An overview of the clang-static-analyzer plugin configuration settings
+ An overview of the clang-static-analyzer plugin configuration settings  {#exec-helper-plugins-clang-static-analyzer}
+=======================================================================
 
 # DESCRIPTION
 The clang-static-analyzer plugin is used for executing the clang-static-analyzer static code analysis tool.

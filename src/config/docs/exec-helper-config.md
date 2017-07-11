@@ -1,6 +1,5 @@
-Config              {#exec-helper-config}
-======
-\brief Configuration file formats and conventions for exec-helper
+ Configuration file formats and conventions for exec-helper             {#exec-helper-config}
+===========================================================
 
 # DESCRIPTION
 Exec-helper configuration files are written in the YAML 1.2 specification.

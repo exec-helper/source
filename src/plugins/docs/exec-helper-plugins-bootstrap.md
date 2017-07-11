@@ -1,6 +1,5 @@
-The bootstrap plugin  {#exec-helper-plugins-bootstrap}
-====================
-\brief An overview of the bootstrap plugin configuration settings
+ An overview of the bootstrap plugin configuration settings {#exec-helper-plugins-bootstrap}
+===========================================================
 
 # DESCRIPTION
 The bootstrap is used for executing bootstrap files. This is often used in build chains.
