@@ -75,7 +75,12 @@ namespace execHelper { namespace core {
         if(m_optionsMap.count("debug") == 0) {
             return boost::none;
         }
-        auto debugLevel = m_optionsMap["debug"].as<string>();
+        string debugLevel;
+        try {
+            debugLevel = m_optionsMap["debug"].as<string>();
+        } catch(const boost::bad_any_cast&) {
+            return boost::none;
+        }
         if(debugLevel == "none") {
             return boost::none;
         }
@@ -94,7 +99,11 @@ namespace execHelper { namespace core {
     string ExecHelperOptions::getSettingsFile(int argc, const char* const * argv) const noexcept {
         variables_map optionsMap = m_optionsDescriptions.getOptionsMap(argc, argv, true);
         if(optionsMap.count("settings-file") > 0) {
-            return optionsMap["settings-file"].as<string>();
+            try {
+                return optionsMap["settings-file"].as<string>();
+            } catch(const boost::bad_any_cast&) {
+                return ".exec-helper";
+            }
         }
         return ".exec-helper";
     }
@@ -115,7 +124,11 @@ namespace execHelper { namespace core {
 
         if(m_optionsMap.count("command") > 0) {
             m_commands.clear();
-            m_commands = m_optionsMap["command"].as<CommandCollection>();
+            try {
+                m_commands = m_optionsMap["command"].as<CommandCollection>();
+            } catch(const boost::bad_any_cast&) {
+                return false;
+            }
         }
 
         return true;
@@ -226,12 +239,16 @@ namespace execHelper { namespace core {
         }
     }
 
-    bool ExecHelperOptions::contains(const std::string& longOptions) const noexcept {
+    bool ExecHelperOptions::contains(const string& longOptions) const noexcept {
         return m_optionsMap.count(longOptions) > 0;
     }
 
-    vector<string> ExecHelperOptions::getLongOption(const std::string& longOptions) const noexcept {
-        return m_optionsMap[longOptions].as<vector<string>>();
+    vector<string> ExecHelperOptions::getLongOption(const string& longOptions) const noexcept {
+        try {
+            return m_optionsMap[longOptions].as<vector<string>>();
+        } catch(const boost::bad_any_cast&) {
+            return vector<string>();
+        }
     }
 
     const PatternsHandler& ExecHelperOptions::getPatternsHandler() const noexcept {

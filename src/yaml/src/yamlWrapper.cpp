@@ -5,6 +5,8 @@
 
 #include <yaml-cpp/yaml.h>
 
+#include "log/assertions.h"
+
 #include "logger.h"
 
 using std::initializer_list;
@@ -49,7 +51,12 @@ namespace execHelper { namespace yaml {
     }
 
     void YamlWrapper::swap(const YamlWrapper& other) noexcept {
-        m_node = Clone(other.m_node);
+        try {
+            m_node = Clone(other.m_node);
+        } catch(const YAML::InvalidNode&) {
+            LOG(fatal) << "Swap failed";
+            expects(false);
+        }
     }
 
     YAML::Node YamlWrapper::getSubNode(const std::initializer_list<std::string>& keys) const {
@@ -75,34 +82,51 @@ namespace execHelper { namespace yaml {
 
     bool YamlWrapper::getTree(const YAML::Node& rootNode, SettingsNode* settings) noexcept {
         YAML::Node node = Clone(rootNode);
-        getSubTree(node, settings, {});
-        return true;
+        return getSubTree(node, settings, {});
     }
 
-    void YamlWrapper::getSubTree(const YAML::Node& node, SettingsNode* yamlNode, const SettingsNode::SettingsKeys& keys) noexcept {
+    bool YamlWrapper::getSubTree(const YAML::Node& node, SettingsNode* yamlNode, const SettingsNode::SettingsKeys& keys) noexcept {
         switch(node.Type()) {
             case YAML::NodeType::Null:
             case YAML::NodeType::Undefined:
                 break;
             case YAML::NodeType::Scalar:
-                yamlNode->add(keys, node.as<string>());
+                try {
+                    yamlNode->add(keys, node.as<string>());
+                } catch(const YAML::TypedBadConversion<string>&) {
+                    return false;
+                } catch(const YAML::InvalidNode&) {
+                    return false;
+                }
                 break;
             case YAML::NodeType::Map:
                 for(const auto& element : node) {
-                    SettingsNode::SettingsValue key = element.first.as<string>();
-                    yamlNode->add(keys, key);
+                    SettingsNode::SettingsValue key;
+                    try {
+                        key = element.first.as<string>();
+                    } catch(const YAML::TypedBadConversion<string>&) {
+                        return false;
+                    } catch(const YAML::InvalidNode&) {
+                        return false;
+                    }
 
+                    yamlNode->add(keys, key);
                     SettingsNode::SettingsKeys newKeys = keys;
                     newKeys.push_back(key);
-                    YamlWrapper::getSubTree(element.second, yamlNode, newKeys);
+                    if(! YamlWrapper::getSubTree(element.second, yamlNode, newKeys)) {
+                        return false;
+                    }
                 }
                 break;
             case YAML::NodeType::Sequence:
                 for(const auto& element : node) {
-                    YamlWrapper::getSubTree(element, yamlNode, keys);
+                    if(!YamlWrapper::getSubTree(element, yamlNode, keys)) {
+                        return false;
+                    }
                 }
                 break;
         }
+        return true;
     }
 } // namespace yaml
 } // namespace execHelper

@@ -104,8 +104,10 @@ namespace execHelper {
                  * \param[in] node  The node to parse
                  * \param[out] yamlNode  The root settings
                  * \param[in] keys  The key structure of the root settings under which to write the parsed structure
+                 * \returns True    If the subtree was successfully constructed and added
+                 *          False   Otherwise
                  */
-                static void getSubTree(const YAML::Node& node, config::SettingsNode* yamlNode, const config::SettingsNode::SettingsKeys& keys) noexcept;
+                static bool getSubTree(const YAML::Node& node, config::SettingsNode* yamlNode, const config::SettingsNode::SettingsKeys& keys) noexcept;
 
                 YAML::Node m_node;
         };

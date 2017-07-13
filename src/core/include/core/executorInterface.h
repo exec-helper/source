@@ -13,6 +13,8 @@ namespace execHelper { namespace core {
      */
     class ExecutorInterface {
         public:
+            virtual ~ExecutorInterface() = default;
+
             /**
              * Execute the given task
              *
