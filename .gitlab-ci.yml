@@ -231,6 +231,21 @@ coverage:
         paths:
             - test_coverage/
 
+coverity:
+    stage: analyze
+    dependencies:
+        - build:gcc
+    script:
+        - wget https://scan.coverity.com/download/linux64 --post-data "token=INxicvq4GqijG23xZzPNEA&project=bverhagen%2Fexec-helper" -O coverity_tool.tgz
+        - tar -C /tmp -xf coverity_tool
+        - pushd /tmp/cov-analysis-linux64-*/bin
+        - export PATH=$PATH:$(pwd)
+        - export PATH=$PATH:build/g++/release/install/bin
+        - popd
+        - rm -rf build/g++/release/build
+        - exec-helper analyze --analyze coverity
+        - curl --form token=${COVERITY_SCAN_TOKEN} --form email=barrie.verhagen@gmail.com --form file=@exec-helper.xz --form version="${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}" --form description="Analysis scan for ${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}" https://scan.coverity.com/builds?project=bverhagen%2Fexec-helper
+
 examples:
     stage: analyze
     dependencies:

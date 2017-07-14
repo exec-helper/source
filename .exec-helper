@@ -45,6 +45,7 @@ patterns:
             - pmd
             - lcov
             - clang-tidy
+            - coverity
         short-option: a
         long-option: analyze
     DOCSTYPE:
@@ -265,6 +266,17 @@ command-line-command:
             - MODE
             - DOCSTYPE
         command-line: [ cmake, "-DCOMPONENT=docs-{DOCSTYPE}", -P, "build/{COMPILER}/{MODE}/build/cmake_install.cmake"]
+    coverity:
+        patterns:
+            - COMPILER
+            - MODE
+        command-line:
+            - initialize: [ exec-helper, init, --compiler, "{COMPILER}", --mode, "{MODE}"]
+            - cov-build: [ cov-build, --dir, ., make, -j, 2, -C, "build/{COMPILER}/{MODE}/build" ]
+            - rm-previous-cov-int: [ rm, -rf, cov-int]
+            - create-cov-int: [ rsync, --recursive, ., cov-int]
+            - archive: [tar, -caf, exec-helper.xz, cov-int]
+            - upload: [ echo, exec-helper.xz is now ready to get uploaded to coverity scan]
 
     changelog:
         patterns:
@@ -315,3 +327,6 @@ clang-tidy:
             - MODULE
         sources:
             - "{SOURCE_TYPE}/{MODULE}/src/*.cpp"
+
+coverity:
+    - command-line-command
