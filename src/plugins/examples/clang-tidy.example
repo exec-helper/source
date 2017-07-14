@@ -23,5 +23,3 @@ clang-tidy:
         - "readability-*"
     command-line:
         - -fix
-    warnings-as-errors:
-        - all
