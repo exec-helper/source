@@ -272,10 +272,9 @@ command-line-command:
             - MODE
         command-line:
             - initialize: [ exec-helper, init, --compiler, "{COMPILER}", --mode, "{MODE}"]
-            - cov-build: [ cov-build, --dir, ., make, -j, 2, -C, "build/{COMPILER}/{MODE}/build" ]
-            - rm-previous-cov-int: [ rm, -rf, cov-int]
-            - create-cov-int: [ rsync, --recursive, ., cov-int]
-            - archive: [tar, -caf, exec-helper.xz, cov-int]
+            - cov-build: [ cov-build, --dir, ., exec-helper, build, --compiler, "{COMPILER}", --mode, "{MODE}" ]
+            - archive: [tar, -caf, /tmp/exec-helper.xz, cov-int]
+            - move-archive: [mv, /tmp/exec-helper.xz, exec-helper.xz]
             - upload: [ echo, exec-helper.xz is now ready to get uploaded to coverity scan]
 
     changelog:
