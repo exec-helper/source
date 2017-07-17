@@ -273,8 +273,8 @@ command-line-command:
         command-line:
             - initialize: [ exec-helper, init, --compiler, "{COMPILER}", --mode, "{MODE}"]
             - cov-build: [ cov-build, --dir, ., exec-helper, build, --compiler, "{COMPILER}", --mode, "{MODE}" ]
-            - archive: [tar, -caf, /tmp/exec-helper.xz, cov-int]
-            - move-archive: [mv, /tmp/exec-helper.xz, exec-helper.xz]
+            - archive: [tar, -caf, /tmp/exec-helper.xz, .]
+            - move-archive: [mv, /tmp/exec-helper.xz, ./]
             - upload: [ echo, exec-helper.xz is now ready to get uploaded to coverity scan]
 
     changelog:
