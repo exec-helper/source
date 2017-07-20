@@ -2,11 +2,16 @@
 # For installing exec-helper, run:
 #   make
 #   make install
+#
+# Note: if you want to change the default installation directory, then add the PREFIX variable to the first make command:
+#   make PREFIX=<installation root directory>
+
+PREFIX=/usr 		# Override this on the command line if required
 
 NB_OF_CORES:=$(shell grep -c ^processor /proc/cpuinfo)
-BUILD_DIR=build/native/release
+BUILD_DIR:=build/native/release
 
-all: binary docs
+all: binary docs changelog
 
 init:
 	cmake -H. -B$(BUILD_DIR) -DCMAKE_INSTALL_PREFIX=${PREFIX} -DCMAKE_BUILD_TYPE=Release -DUSE_SYSTEM_CATCH=OFF -DCMAKE_EXPORT_COMPILE_COMMANDS=OFF -DBUILD_HTML_DOCUMENTATION=ON -DBUILD_MAN_DOCUMENTATION=ON
@@ -20,6 +25,9 @@ docs-html:
 docs-man:
 	make -C $(BUILD_DIR) --jobs $(NB_OF_CORES) docs-man
 
+changelog: init
+	make -C $(BUILD_DIR) --jobs $(NB_OF_CORES) changelog
+
 docs: init docs-html docs-man
 
 install-bin:
@@ -29,7 +37,10 @@ install-docs:
 	cmake -DCOMPONENT=docs-man -P $(BUILD_DIR)/cmake_install.cmake
 	cmake -DCOMPONENT=docs-html -P $(BUILD_DIR)/cmake_install.cmake
 
-install: install-bin install-docs
+install-changelog:
+	cmake -DCOMPONENT=changelog -P $(BUILD_DIR)/cmake_install.cmake
+
+install: install-bin install-docs install-changelog
 
 clean:
 	make -C $(BUILD_DIR) --jobs $(NB_OF_CORES) clean

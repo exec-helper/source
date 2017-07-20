@@ -68,6 +68,7 @@ commands:
     memory-check: Run the memory check analysis tool for a specific setup (for convenience)
     undefined-behaviour: Check for undefined behaviour using UBSan
     docs: Build + install the documentation
+    changelog: Build the changelog
 
 setup:
     - command-line-command
@@ -121,6 +122,10 @@ selector:
 undefined-behaviour:
     - command-line-command
 
+changelog:
+    - make
+    - command-line-command
+
 make:
     patterns:
         - COMPILER
@@ -137,6 +142,12 @@ make:
             - DOCSTYPE
         command-line:
             - docs-{DOCSTYPE}
+    changelog:
+        patterns:
+            - COMPILER
+            - MODE
+        command-line:
+            - changelog
 
 cppcheck:
     patterns:
@@ -209,6 +220,12 @@ command-line-command:
             - MODE
             - DOCSTYPE
         command-line: [ cmake, "-DCOMPONENT=docs-{DOCSTYPE}", -P, "build/{COMPILER}/{MODE}/build/cmake_install.cmake"]
+
+    changelog:
+        patterns:
+            - COMPILER
+            - MODE
+        command-line: [ cmake, "-DCOMPONENT=changelog", -P, "build/{COMPILER}/{MODE}/build/cmake_install.cmake"]
 
 valgrind:
     run-command: run-test
