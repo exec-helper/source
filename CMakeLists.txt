@@ -30,4 +30,4 @@ add_subdirectory(src)
 
 add_subdirectory(test)
 add_subdirectory(docs)
-add_subdirectory(changelog)
+add_subdirectory(gitchangelog)
