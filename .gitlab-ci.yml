@@ -13,7 +13,8 @@ stages:
 build:gcc:
     stage: build
     script:
-        - pacman -S --noconfirm --needed gcc cmake make git libunistring ncurses doxygen
+        - pacman -S --noconfirm --needed gcc cmake make git libunistring ncurses doxygen python-pip
+        - pip install gitchangelog
         - cmake -H. -Bbuild/g++/debug/build -DCMAKE_CXX_COMPILER=g++ -DCMAKE_INSTALL_PREFIX=build/g++/debug/install -DCMAKE_BUILD_TYPE=Debug -DUSE_SYSTEM_CATCH=OFF
         - make -C build/g++/debug/build --jobs 4
         - make -C build/g++/debug/build install
@@ -29,7 +30,8 @@ build:gcc:
 build:gcc:limited-optimization:
     stage: build
     script:
-        - pacman -S --noconfirm --needed gcc cmake make git libunistring ncurses
+        - pacman -S --noconfirm --needed gcc cmake make git libunistring ncurses python-pip
+        - pip install gitchangelog
         - cmake -H. -Bbuild/g++/release/build -DCMAKE_CXX_COMPILER=g++ -DCMAKE_INSTALL_PREFIX=build/g++/release/install -DCMAKE_BUILD_TYPE=Release -DUSE_SYSTEM_CATCH=OFF -DLIMITED_OPTIMIZATION=ON && make -C build/g++/release/build --jobs 4 && make -C build/g++/release/build install
     artifacts:
         expire_in: 1 day
@@ -39,7 +41,8 @@ build:gcc:limited-optimization:
 build:clang:
     stage: build
     script: 
-        - pacman -S --noconfirm --needed clang cmake make git libunistring ncurses
+        - pacman -S --noconfirm --needed clang cmake make git libunistring ncurses python-pip
+        - pip install gitchangelog
         - cmake -H. -Bbuild/clang++/debug/build -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_INSTALL_PREFIX=build/clang++/debug/install -DCMAKE_BUILD_TYPE=Debug -DUSE_SYSTEM_CATCH=OFF && make -C build/clang++/debug/build --jobs 4 && make -C build/clang++/debug/build install
         - cmake -H. -Bbuild/clang++/release/build -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_INSTALL_PREFIX=build/clang++/release/install -DCMAKE_BUILD_TYPE=Release -DUSE_SYSTEM_CATCH=OFF && make -C build/clang++/release/build --jobs 4 && make -C build/clang++/release/build install
     artifacts:
