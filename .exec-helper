@@ -54,6 +54,7 @@ patterns:
             - man
         short-option: o
         long-option: docs-type
+<<<<<<< bf1453f908e17d391692c32092f238316b51a6f5
     SYSROOT:
         default-values:
             - "/"
@@ -64,6 +65,10 @@ patterns:
             - src
             - test
         long-option: source-type
+    COVERITY_ARCHIVE_NAME:
+        default-values:
+            - exec-helper.xz
+        long-option: coverity-archive-name
 
 commands:
     setup: Setup the repository for building
@@ -270,14 +275,14 @@ command-line-command:
         patterns:
             - COMPILER
             - MODE
+            - COVERITY_ARCHIVE_NAME
         command-line:
             - create-symlink: [ ln, -s, ., cov-int]
             - initialize: [ exec-helper, init, --compiler, "{COMPILER}", --mode, "{MODE}"]
-            - cov-build: [ cov-build, --dir, ., exec-helper, build, --compiler, "{COMPILER}", --mode, "{MODE}" ]
-            - archive: [tar, -caf, /tmp/exec-helper.xz, cov-int]
-            - move-archive: [mv, /tmp/exec-helper.xz, ./]
+            - cov-build: [ cov-build, --dir, ., exec-helper, build-only, --compiler, "{COMPILER}", --mode, "{MODE}" ]
+            - archive: [tar, --create, --auto-compress, --dereference, --file, "{COVERITY_ARCHIVE_NAME}", "cov-int/build/{COMPILER}/{MODE}/build", cov-int/emit, cov-int/build-*, cov-int/BUILD.metrics.xml, cov-int/src, cov-int/test]
             - remove-symlink: [ unlink, cov-int]
-            - upload: [ echo, exec-helper.xz is now ready to get uploaded to coverity scan]
+            - upload: [ echo, "{COVERITY_ARCHIVE_NAME} is now ready to get uploaded to coverity scan"]
 
     changelog:
         patterns:
