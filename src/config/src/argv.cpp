@@ -5,11 +5,28 @@
 #include <gsl/span>
 #include <gsl/string_span>
 
+#include "log/assertions.h"
+
+using std::string;
+using std::vector;
+
 using gsl::czstring;
 using gsl::span;
 
-namespace execHelper { namespace core {
-    Argv::Argv(const TaskCollection& task) noexcept {
+namespace execHelper { namespace config {
+    Argv::Argv(int argc, const char* const * const argv) noexcept {
+        span<const czstring<>> spanArgv(argv, argc);
+        m_argv.reserve(argc + 1U);
+        for(const auto& arg : spanArgv) {
+            const auto argLength = strnlen(arg, 256U) + 1U;
+            auto newArg = new char[argLength];
+            strncpy(newArg, arg, argLength);
+            m_argv.emplace_back(newArg);
+        }
+        m_argv.emplace_back(nullptr);
+    }
+
+    Argv::Argv(const vector<string>& task) noexcept {
         m_argv.reserve(task.size() + 1);
 
         for(const auto& arg : task) {
@@ -30,18 +47,21 @@ namespace execHelper { namespace core {
     }
 
     Argv::~Argv() noexcept {
-        for(char* arg : m_argv) {
-            delete[] arg;
-        }
+        clear();
     }
 
     void Argv::deepCopy(const Argv& other) noexcept {
+        clear();
         for(const auto& otherElement : other.m_argv) {
-            size_t length = strlen(otherElement);
+            if(otherElement == nullptr) {
+                break;
+            }
+            size_t length = strlen(otherElement) + 1U;
             auto* newArg = new char[length];
             strncpy(newArg, otherElement, length);
             m_argv.emplace_back(newArg);
         }
+        m_argv.emplace_back(nullptr);
     }
 
     Argv& Argv::operator=(const Argv& other) noexcept {
@@ -55,16 +75,16 @@ namespace execHelper { namespace core {
         return *this;
     }
 
-    bool Argv::operator==(const Argv& other) noexcept {
+    bool Argv::operator==(const Argv& other) const noexcept {
         return m_argv == other.m_argv;
     }
 
-    bool Argv::operator!=(const Argv& other) noexcept {
+    bool Argv::operator!=(const Argv& other) const noexcept {
         return !(*this == other);
     }
 
     char* Argv::operator[](size_t index) const noexcept {
-        if(index >= m_argv.size()) {
+        if(index >= m_argv.size() - 1U) {       // Accessing the last nullptr element is considered an error
             return nullptr; 
         }
         return m_argv[index];
@@ -72,6 +92,13 @@ namespace execHelper { namespace core {
 
     void Argv::swap(Argv& other) noexcept {
         m_argv.swap(other.m_argv);
+    }
+
+    void Argv::clear() noexcept {
+        for(const auto& arg : m_argv) {
+            delete[] arg;
+        }
+        m_argv.clear();
     }
 
     size_t Argv::getArgc() const noexcept {
@@ -91,7 +118,7 @@ namespace execHelper { namespace core {
         bool firstIteration = true;
         for(const auto& arg : args) {
             if(!firstIteration) {
-                os << " ";
+                os << ", ";
             } else {
                 firstIteration = false;
             }
@@ -99,5 +126,5 @@ namespace execHelper { namespace core {
         }
         return os;
     }
-} // namespace core
+} // namespace config
 } // namespace execHelper

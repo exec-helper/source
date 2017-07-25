@@ -5,10 +5,17 @@
 #include <memory>
 #include <string>
 
+#include "config/environment.h"
 #include "config/path.h"
+#include "config/pattern.h"
 #include "core/task.h"
 
 namespace execHelper {
+    namespace config {
+        class FleetingOptionsInterface;
+        class SettingsNode;
+    }
+
     namespace core {
         class Options;
     }
@@ -28,19 +35,15 @@ namespace execHelper {
                 /**
                  * Creates a commander
                  *
-                 * \param[in] options   The command line options. ! Note: the passed options must exist until all associated commander objects are destroyed.
+                 * \param[in] fleetingOptions    The fleeting options
+                 * \param[in] settings           The settings node context to use
+                 * \param[in] patterns           The patterns context to use
                  * \param[in] workingDirectory   The working directory for the commander
                  * \param[in] env       The environment to apply the plugins in
-                 */
-                Commander(const core::Options& options, config::Path workingDirectory, core::EnvironmentCollection&& env = core::EnvironmentCollection());
-
-                /**
-                 * Run the commander
-                 *
                  * \returns True    If the command was run successfully
                  *          False   Otherwise
                  */
-                bool run() noexcept;
+                bool run(const config::FleetingOptionsInterface& fleetingOptions, config::SettingsNode&& settings, config::Patterns&& patterns, const config::Path& workingDirectory, const config::EnvironmentCollection& env) noexcept;
                 
             private:
                 /**
@@ -53,10 +56,6 @@ namespace execHelper {
                  *          False   Otherwise
                  */
                 bool executePlugin(const std::string& pluginName, const std::string& command, const core::Options& options) noexcept;
-
-                const core::Options& m_options;
-                const config::Path m_workingDirectory;
-                const core::EnvironmentCollection m_env;
         };
     }
 }

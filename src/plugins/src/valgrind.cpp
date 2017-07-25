@@ -2,52 +2,77 @@
 
 #include <string>
 
-#include "config/settingsNode.h"
+#include <gsl/string_span>
+
+#include "config/commandLineOptions.h"
+#include "config/fleetingOptionsInterface.h"
+#include "config/variablesMap.h"
 #include "core/patterns.h"
 #include "core/task.h"
+#include "log/assertions.h"
 
+#include "commandLine.h"
 #include "executePlugin.h"
 #include "logger.h"
 #include "pluginUtils.h"
+#include "verbosity.h"
 
 using std::string;
 
-using execHelper::config::SettingsNode;
+using gsl::czstring;
+
+using execHelper::config::CommandCollection;
+using execHelper::config::FleetingOptionsInterface;
+using execHelper::config::Patterns;
+using execHelper::config::VariablesMap;
 using execHelper::core::Task;
-using execHelper::core::Options;
-using execHelper::core::TaskCollection;
-using execHelper::core::PatternKeys;
+
+namespace {
+    const czstring<> PLUGIN_NAME = "valgrind";
+    using RunCommand = CommandCollection;
+    const czstring<> RUN_COMMAND_KEY = "run-command";
+    using Tool = string;
+    const czstring<> TOOL_KEY = "tool";
+} // namespace
 
 namespace execHelper { namespace plugins {
-    bool Valgrind::apply(const std::string& command, Task task, const Options& options) const noexcept {
-        static const string valgrindCommand("valgrind");
-        task.append(valgrindCommand);
+    std::string Valgrind::getPluginName() const noexcept {
+        return PLUGIN_NAME;
+    }
 
-        const SettingsNode& rootSettings = options.getSettings({"valgrind"});
+    VariablesMap Valgrind::getVariablesMap(const FleetingOptionsInterface& fleetingOptions) const noexcept {
+        VariablesMap defaults(PLUGIN_NAME);
+        defaults.add(COMMAND_LINE_KEY);
+        const auto verbosity = fleetingOptions.getVerbosity() ? "yes" : "no";
+        defaults.add(VERBOSITY_KEY, verbosity);
+        return defaults;
+    }
 
-        static const string runCommandConfigKey("run-command");
-        boost::optional<string> runCommand = getConfigurationSetting(command, rootSettings, runCommandConfigKey);
+    bool Valgrind::apply(Task task, const VariablesMap& variables, const Patterns& patterns) const noexcept {
+        task.append(PLUGIN_NAME);
+
+        auto runCommand = variables.get<RunCommand>(RUN_COMMAND_KEY);
         if(runCommand == boost::none) {
-            user_feedback_error("Could not find the '" << runCommandConfigKey << "' setting for command '" << command << "' in the '" << valgrindCommand << "' settings");
+            user_feedback_error("Could not find the '" << RUN_COMMAND_KEY << "' setting in the '" << PLUGIN_NAME << "' settings");
             return false;
         }
 
-        static const string toolConfigKey("tool");
-        boost::optional<string> tool = getConfigurationSetting(command, rootSettings, toolConfigKey, "--tool=");
-        if(tool != boost::none && !tool.get().empty()) {
-            task.append(tool.get());
+        auto tool = variables.get<Tool>(TOOL_KEY);
+        if(tool) {
+            task.append(string("--tool=").append(tool.get()));
         }
 
-        if(options.getVerbosity()) {
+        if(variables.get<Verbosity>(VERBOSITY_KEY).get()) {
             task.append("--verbose");
         }
 
-        for(const auto& combination : makePatternPermutator(command, rootSettings, options)) {
-            Task newTask = task;
-            newTask.append(getCommandLine(command, rootSettings, combination)); 
+        ensures(variables.get<CommandLineArgs>(COMMAND_LINE_KEY) != boost::none);
+        task.append(variables.get<CommandLineArgs>(COMMAND_LINE_KEY).get());
 
-            ExecutePlugin plugin({runCommand.get()});
-            if(!plugin.apply(command, newTask, options)) {
+        for(const auto& combination : makePatternPermutator(patterns)) {
+            Task newTask = replacePatternCombinations(task, combination);
+            ExecutePlugin buildExecutePlugin(runCommand.get());
+            if(! buildExecutePlugin.apply(newTask, variables, patterns)) {
                 return false;
             }
         }

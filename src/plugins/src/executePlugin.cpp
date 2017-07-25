@@ -1,8 +1,12 @@
 #include "executePlugin.h"
 
+#include <gsl/string_span>
+
+#include "config/fleetingOptionsInterface.h"
 #include "config/settingsNode.h"
-#include "core/options.h"
+#include "config/variablesMap.h"
 #include "core/task.h"
+#include "log/assertions.h"
 
 #include "bootstrap.h"
 #include "clangStaticAnalyzer.h"
@@ -14,6 +18,7 @@
 #include "make.h"
 #include "memory.h"
 #include "plugin.h"
+#include "pluginUtils.h"
 #include "pmd.h"
 #include "scons.h"
 #include "selector.h"
@@ -24,37 +29,145 @@ using std::string;
 using std::vector;
 using std::unique_ptr;
 
-using execHelper::core::Command;
-using execHelper::core::Task;
-using execHelper::core::Options;
+using gsl::czstring;
+using gsl::not_null;
 
-namespace execHelper { namespace plugins {
-    ExecutePlugin::ExecutePlugin(vector<string> commands) noexcept :
-        m_commands(std::move(commands))
-    {
-        ;
+using execHelper::config::Command;
+using execHelper::config::CommandCollection;
+using execHelper::config::FleetingOptionsInterface;
+using execHelper::config::PatternKeys;
+using execHelper::config::Patterns;
+using execHelper::config::PatternsHandler;
+using execHelper::config::SettingsKey;
+using execHelper::config::SettingsKeys;
+using execHelper::config::SettingsValues;
+using execHelper::config::SettingsNode;
+using execHelper::config::VariablesMap;
+using execHelper::core::Task;
+
+namespace {
+    const czstring<> EXECUTE_PLUGIN_KEY = "execute-plugin";
+
+    Patterns getNextPatterns(const VariablesMap& variables, const PatternsHandler& patterns) {
+        auto newPatternKeys = variables.get<PatternKeys>(execHelper::plugins::getPatternsKey(), {});
+        Patterns newPatterns;
+        for(const auto& key : newPatternKeys) {
+            if(!patterns.contains(key)) {
+                user_feedback_error("Unknown pattern key '" << key << "' is ignored.");
+                continue;
+            }
+            newPatterns.push_back(patterns.getPattern(key));
+        }
+        return newPatterns;
     }
 
-    bool ExecutePlugin::apply(const Command& command, Task task, const Options& options) const noexcept {
-        for(const auto& pluginName : m_commands) {
-            unique_ptr<Plugin> plugin = getPlugin(pluginName);
-            Command commandToPass = command;
-            if(!plugin) {
-                // Check if it exists as an other target in the settings
-                if(options.getSettings().contains(pluginName)) {
-                    // Then use executeplugin as the plugin 
-                    plugin = make_unique<ExecutePlugin>(options.getSettings(pluginName).values());
-                    commandToPass = pluginName;
-                } else {
-                    user_feedback_error("Could not find a command or plugin called '" << pluginName << "'");
-                    return false;
-                }
+} // namespace
+
+vector<gsl::not_null<const FleetingOptionsInterface*>> execHelper::plugins::ExecutePlugin::m_fleeting;
+vector<SettingsNode> execHelper::plugins::ExecutePlugin::m_settings;
+vector<PatternsHandler> execHelper::plugins::ExecutePlugin::m_patterns;
+
+namespace execHelper { namespace plugins {
+    ExecutePlugin::ExecutePlugin(const CommandCollection& commandsToExecute) noexcept :
+        m_commands(commandsToExecute),
+        m_initialCommands(commandsToExecute)
+    {
+        ensures(m_commands.size() == m_initialCommands.size());
+    }
+
+    ExecutePlugin::ExecutePlugin(const CommandCollection& commandsToExecute, const Command& initialCommand) noexcept :
+        m_commands(commandsToExecute), 
+        m_initialCommands(commandsToExecute.size(), initialCommand)
+    {
+        ensures(m_commands.size() == m_initialCommands.size());
+    }
+
+    std::string ExecutePlugin::getPluginName() const noexcept {
+        return EXECUTE_PLUGIN_KEY;
+    }
+
+    VariablesMap ExecutePlugin::getVariablesMap(const FleetingOptionsInterface& /*fleetingOptions*/) const noexcept {
+        return VariablesMap("execute-plugin");
+    }
+
+    SettingsKey ExecutePlugin::getPatternsKey() const noexcept {
+        return "no-patterns-allowed";
+    }
+
+    inline void ExecutePlugin::index(VariablesMap* variables, const SettingsNode& settings, const SettingsKeys& key) noexcept {
+        if(!settings.contains(key)) {
+            return;
+        }
+
+        expects(!key.empty());
+        variables->replace(key.back(), settings.get<SettingsValues>(key).get());
+
+        // Get current depth to the level of the given key
+        const SettingsNode* currentDepth = &settings;
+        for(const auto& subkey : key) {
+            currentDepth = &((*currentDepth)[subkey]);
+        }
+        for(const auto& depthKey : currentDepth->values()) {
+            (*variables)[depthKey] = (*currentDepth)[depthKey];
+        }
+    }
+
+    inline bool ExecutePlugin::getVariablesMap(VariablesMap* variables, const vector<SettingsKeys>& keys, const SettingsNode& rootSettings) noexcept {
+        for(const auto& key : keys) {
+            if(rootSettings.contains(key)) {
+                index(variables, rootSettings, key);
             }
-            if(!plugin || !plugin->apply(commandToPass, task, options)) {
+        }
+        return true;
+    }
+
+    bool ExecutePlugin::apply(Task task, const VariablesMap& /*variables*/, const Patterns& /*patterns*/) const noexcept {
+        if(m_commands.empty()) {
+            user_feedback_error("No commands configured to execute");
+            LOG(warning) << "No commands configured to execute";
+        }
+        auto initialCommand = m_initialCommands.begin();
+        for(auto command = m_commands.begin(); command != m_commands.end(); ++command, ++initialCommand) {
+            unique_ptr<Plugin> plugin = getNextStep(*command, *initialCommand);
+            if(! plugin) {
+                user_feedback_error("Could not find a command or plugin called '" << *command << "'");
+                return false;
+            }
+
+            expects(!m_fleeting.empty());
+            expects(!m_settings.empty());
+            VariablesMap newVariablesMap = plugin->getVariablesMap(*(m_fleeting.back()));
+            const vector<SettingsKeys> keys({{plugin->getPluginName()}, {plugin->getPluginName(), *initialCommand}});
+            getVariablesMap(&newVariablesMap, keys, m_settings.back());
+
+            expects(!m_patterns.empty());
+            auto newPatterns = getNextPatterns(newVariablesMap, m_patterns.back());
+            if(!plugin->apply(task, newVariablesMap, newPatterns)) {
+                user_feedback_error("An error occured executing the '" << *command << "' command");
                 return false;
             }
         }
         return true;
+    }
+
+    unique_ptr<Plugin> ExecutePlugin::getNextStep(const Command& command, const Command& /*originalCommand*/) noexcept {
+        unique_ptr<Plugin> plugin = getPlugin(command);
+        if(plugin) {
+            return plugin;
+        }
+
+        // else assume it is another command and use the execute plugin to execute it
+        SettingsNode& settings = m_settings.back();
+        auto commandToExecuteOpt = settings.get<CommandCollection>(command);
+        if(! commandToExecuteOpt) {
+            LOG(warning) << "Execute plugin found an empty value collection for the '" << command << "' command";
+            return unique_ptr<Plugin>();
+        }    
+        auto commandsToExecute = commandToExecuteOpt.get();
+        for(const auto& commandToExecute : commandsToExecute) {
+            LOG(trace) << command << " -> " << commandToExecute;
+        }
+        return make_unique<ExecutePlugin>(commandsToExecute, command);
     }
 
     unique_ptr<Plugin> ExecutePlugin::getPlugin(const string& pluginName) noexcept {
@@ -95,6 +208,33 @@ namespace execHelper { namespace plugins {
             return make_unique<ClangTidy>();
         }
         return unique_ptr<Plugin>();
+    }
+
+    bool ExecutePlugin::push(not_null<const config::FleetingOptionsInterface*> fleetingOptions) noexcept {
+        m_fleeting.push_back(fleetingOptions);
+        return true;
+    }
+
+    bool ExecutePlugin::push(config::SettingsNode&& settings) noexcept {
+        m_settings.emplace_back(settings);
+        return true;
+    }
+
+    bool ExecutePlugin::push(config::Patterns&& patterns) noexcept {
+        m_patterns.emplace_back(patterns);
+        return true;
+    }
+
+    void ExecutePlugin::popFleetingOptions() noexcept {
+        m_fleeting.pop_back();
+    }
+
+    void ExecutePlugin::popSettingsNode() noexcept {
+        m_settings.pop_back();
+    }
+
+    void ExecutePlugin::popPatterns() noexcept {
+        m_patterns.pop_back();
     }
 } // namespace plugins
 } // namespace execHelper

@@ -1,44 +1,59 @@
 #include "selector.h"
 
-#include <vector>
+#include <gsl/string_span>
 
-#include "config/settingsNode.h"
-#include "core/pattern.h"
+#include "config/fleetingOptionsInterface.h"
+#include "config/pattern.h"
+#include "config/variablesMap.h"
+#include "core/task.h"
 
-#include "configValue.h"
 #include "executePlugin.h"
+#include "pluginUtils.h"
 #include "logger.h"
 
 using std::string;
-using std::vector;
 
-using execHelper::config::SettingsNode;
-using execHelper::core::PatternKeys;
-using execHelper::core::PatternValues;
-using execHelper::core::TaskCollection;
+using gsl::czstring;
+
+using execHelper::config::CommandCollection;
+using execHelper::config::FleetingOptionsInterface;
+using execHelper::config::PatternKeys;
+using execHelper::config::Patterns;
+using execHelper::config::PatternsHandler;
+using execHelper::config::PatternValues;
+using execHelper::config::VariablesMap;
+using execHelper::core::Task;
+
+namespace {
+    const czstring<> PLUGIN_NAME = "selector"; 
+    const czstring<> PATTERN_KEY = "patterns";
+} // namespace
 
 namespace execHelper { namespace plugins {
-    bool Selector::apply(const core::Command& command, core::Task task, const core::Options& options) const noexcept {
-        static const string selectorKey("selector");
-        if(! options.getSettings().contains(selectorKey)) {
+    string Selector::getPluginName() const noexcept {
+        return PLUGIN_NAME;
+    }
+
+    VariablesMap Selector::getVariablesMap(const FleetingOptionsInterface& /*fleetingOptions*/) const noexcept {
+       return VariablesMap("selector");
+    }
+
+    bool Selector::apply(Task task, const VariablesMap& variables, const Patterns& patterns) const noexcept {
+        auto patternKeys = variables.get<PatternKeys>(PATTERN_KEY);
+        if(!patternKeys) {
+            user_feedback_error("Missing the '" << PATTERN_KEY << "' keyword in the configuration of the " << PLUGIN_NAME << " settings");
             return false;
         }
-        const SettingsNode& rootSettings = options.getSettings({"selector"});
-        const string patternKey("pattern");
-        boost::optional<TaskCollection> patternSettings = ConfigValue<TaskCollection>::getSetting(patternKey, rootSettings, command);
-        if(patternSettings == boost::none) {
-            user_feedback_error("Missing the '" << patternKey << "' keyword in the configuration of " << selectorKey << "[" << command << "] settings");
-            return false;
+        LOG(debug) << "Using the patterns '" << toString(patternKeys.get()) << "' for selecting";
+
+        CommandCollection commandsToExecute;
+        for(const auto& pattern : patterns) {
+            auto values = pattern.getValues();
+            commandsToExecute.insert(commandsToExecute.end(), values.begin(), values.end());
         }
-        PatternKeys patternKeysToCheck = patternSettings.get();
-        vector<string> commandsToExecute;
-        for(const auto& pattern : options.makePatternPermutator(patternKeysToCheck)) {
-            for(const auto& patternValues : pattern) {
-                commandsToExecute.push_back(patternValues.second);
-            }
-        }
+
         ExecutePlugin executePlugin(commandsToExecute);
-        return executePlugin.apply(command, task, options);
+        return executePlugin.apply(task, variables, patterns);
     }
 } // namespace plugins
 } // namespace execHelper

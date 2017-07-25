@@ -13,9 +13,8 @@ namespace execHelper { namespace core {
         ;
     }
 
-    bool ReportingExecutor::execute(const Task& task) noexcept {
+    void ReportingExecutor::execute(const Task& task) noexcept {
         user_feedback_info("Executing " << task.toString());
-        return true;
     }
 } // namespace core
 } // namespace execHelper

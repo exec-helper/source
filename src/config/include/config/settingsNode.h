@@ -7,19 +7,21 @@
 
 #include <boost/optional/optional.hpp>
 
+#include "cast.h"
+
 namespace execHelper {
     namespace config {
+        using SettingsKey = std::string; //!< The settings key type
+        using SettingsKeys = std::vector<SettingsKey>; //!< A SettingsKey collection
+
+        using SettingsValue = SettingsKey; //!< The settings value type
+        using SettingsValues = std::vector<SettingsValue>; //!< A SettingsValue collection
+
         /**
          * \brief A class containing a configuration hierarchy
          */
         class SettingsNode {
             public:
-                using SettingsKey = std::string; //!< The settings key type
-                using SettingsKeys = std::vector<SettingsKey>; //!< A SettingsKey collection
-
-                using SettingsValue = SettingsKey; //!< The settings value type
-                using SettingsValues = std::vector<SettingsValue>; //!< A SettingsValue collection
-
                 /**
                  * Create a new node with the given key
                  *
@@ -71,14 +73,22 @@ namespace execHelper {
                  * \returns ! #operator=="()"
                  */ 
                 bool operator!=(const SettingsNode& other) const noexcept;
-                
+
                 /**
-                 * Access the direct child element associated with the given key
+                 * Get the node associated with the given key. If the key does not exist, it is created
+                 *
+                 * \param[in] key   The key
+                 * \return  The node associated with the given key
+                 */
+                SettingsNode& operator[](const SettingsKey& key) noexcept;
+
+                /**
+                 * Get the node associated with the given key
                  *
                  * \pre #contains() == true
-                 * \warning Causes undefined behaviour if the precondition is not met.
-                 * \param[in] key   The child element key to return
-                 * \returns A const reference to the node with the given key
+                 * \warning This function is undefined if the precondition is not fulfilled
+                 * \param[in] key   The key
+                 * \return  The node associated with the given key
                  */
                 const SettingsNode& operator[](const SettingsKey& key) const noexcept;
 
@@ -105,33 +115,80 @@ namespace execHelper {
                  */
                 bool contains(const SettingsKey& key) const noexcept;
 
-                /**
-                 * Returns whether the given hierarchy keys path exist in the given order starting from the root of this node
-                 *
-                 * \param[in] keys    A hierarchy key path
-                 * \returns True if the ordered keys exist as a child of this node
-                 *          False otherwise
+                /*! @copydoc contains(const SettingsKey&) const
                  */
-                bool contains(const SettingsKeys& keys) const noexcept;
+                bool contains(const SettingsKeys& key) const noexcept;
 
                 /**
-                 * Get the direct values associated with the given hierarchy key path
+                 * Get the direct values associated with the given key path
                  *
-                 * \param[in] keys    A hierarchy key path
+                 * \param[in] key   A hierarchy key path
                  * \returns     The associated values if the given hierarchy key path exists
                  *              boost::none otherwise
                  */
-                boost::optional<SettingsValues> get(const SettingsKeys& keys) const noexcept;
+                template<typename T>
+                boost::optional<T> get(const SettingsKeys& key) const noexcept {
+                    if(key.empty() || !contains(key)) {
+                        return boost::none;
+                    }
+                    const SettingsNode* settings = at(key);
+                    return detail::Cast<T, SettingsValues>::cast(settings->values());
+                }
+
+                /*! @copydoc get(const SettingsKeys&) const
+                 */
+                template<typename T>
+                inline boost::optional<T> get(const SettingsKey& key) const noexcept {
+                    return get<T>(SettingsKeys({key}));
+                }
 
                 /**
-                 * Get the direct values associated with the given hierarchy key path. If the given hierarchy key path does not exist, the given default value is returned.
+                 * Get the direct values associated with the given key path or the default value
+                 *  it does not exist
                  *
-                 * \param[in] keys    A hierarchy key path
-                 * \param[in] defaultValue  The default value
-                 * \return  The associated values if the given hierarchy key path exists
-                 *          The given default value otherwise
+                 * \param[in] key    A hierarchy key path
+                 * \param[in] defaultValue  The value to return if the key does not exist
+                 * \returns     The associated values if the given hierarchy key path exists
+                 *              boost::none otherwise
                  */
-                SettingsValues get(const SettingsKeys& keys, const SettingsValues& defaultValue) const noexcept;
+                template<typename T>
+                T get(const SettingsKeys& key, const T& defaultValue) const noexcept {
+                    const auto& result = get<T>(key);
+                    if(result) {
+                        return result.get();
+                    }
+                    return defaultValue;
+                }
+
+                /*! @copydoc get(const SettingsKeys&, const T& defaultValue) const
+                 */
+                template<typename T>
+                inline T get(const SettingsKey& key, const T& defaultValue) const noexcept {
+                    return get<T>(SettingsKeys({key}), defaultValue);
+                }
+
+                /**
+                 * Replace the current values of the given key with the given values
+                 *
+                 * \param[in] key   A hierarchy key path
+                 * \param[in] values    The new values
+                 * \returns     Whether the values were successfully replaced. If false, there is
+                 *              no guarantee that the previous values are still present.
+                 */
+                template<typename T>
+                inline bool replace(const SettingsKeys& key, const T& values) noexcept {
+                    if(contains(key)) {
+                        clear(key);
+                    }
+                    return add(key, values);
+                }
+
+                /*! @copydoc replace(const SettingsKeys&, const T&)
+                 */
+                template<typename T>
+                inline bool replace(const SettingsKey& key, const T& values) noexcept {
+                    return replace(SettingsKeys({key}), values);
+                }
 
                 /**
                  * Add the given value as a direct child of this root node
@@ -143,44 +200,52 @@ namespace execHelper {
                  */
                 bool add(const SettingsValue& newValue) noexcept;
 
+                /*! @copydoc add(const SettingsValue&)
+                 */
+                bool add(const SettingsValues& newValue) noexcept;
+
+                /*! @copydoc add(const SettingsValue&)
+                 */
+                bool add(const std::initializer_list<SettingsValue>& newValue) noexcept;
+
                 /**
                  * Add the given value in the given hierarchy key path. The hierarchy key path is created if it does not exist.
                  *
                  * \warning Passing duplicate values results in undefined behaviour
-                 * \param[in] keys  A hierarchy key path
+                 * \param[in] key  A hierarchy key path
                  * \param[in] newValue  The new value to add
                  * \returns True if the value was added successfully
                  *          False otherwise
                  */
-                bool add(const SettingsKeys& keys, const SettingsValue& newValue) noexcept;
+                bool add(const SettingsKeys& key, const SettingsValue& newValue) noexcept;
 
-                /*! @copydoc add(const SettingsValues&)
+                /*! @copydoc add(const SettingsKeys&, const SettingsValue&)
                  */
-                bool add(const std::initializer_list<SettingsValue>& newValues) noexcept;
+                bool add(const SettingsKey& key, const SettingsValue& newValue) noexcept;
 
-                /*! @copydoc add(const SettingsKeys&, const SettingsValues&)
+                /*! @copydoc add(const SettingsKeys&, const SettingsValue&)
                  */
-                bool add(const SettingsKeys& keys, const std::initializer_list<SettingsValue>& newValues) noexcept;
+                bool add(const SettingsKeys& key, const std::initializer_list<SettingsValue>& newValue) noexcept;
 
-                /**
-                 * Add the given values as direct childs to this root node
-                 *
-                 * \warning Passing duplicate values results in undefined behaviour
-                 * \param[in] newValues The new values to add
-                 * \returns True if the value was added successfully
-                 *          False otherwise
+                /*! @copydoc add(const SettingsKeys&, const SettingsValue&)
                  */
-                bool add(const SettingsValues& newValues) noexcept;
+                bool add(const std::initializer_list<SettingsKey>& key, const std::initializer_list<SettingsValue>& newValue) noexcept;
 
-                /**
-                 * Add the given values at the given hierarchy key path
-                 * \warning Passing duplicate values results in undefined behaviour
-                 * \param[in] keys  The hierarchy key path
-                 * \param[in] newValues The new values to add
-                 * \returns True if the value was added successfully
-                 *          False otherwise
+                /*! @copydoc add(const SettingsKeys&, const SettingsValue&)
                  */
-                bool add(const SettingsKeys& keys, const SettingsValues& newValues) noexcept;
+                bool add(const SettingsKeys& key, const SettingsValues& newValue) noexcept;
+
+                /*! @copydoc add(const SettingsKey&, const SettingsValue&)
+                 */
+                bool add(const SettingsKey& key, const SettingsValues& newValue) noexcept;
+
+                /*! @copydoc add(const SettingsKey&, const SettingsValue&)
+                 */
+                bool add(const std::initializer_list<SettingsKey>& key, const SettingsValues& newValue) noexcept;
+
+                /*! @copydoc add(const SettingsKey&, const SettingsValue&)
+                 */
+                bool add(const std::initializer_list<SettingsKey>& key, const SettingsValue& newValue) noexcept;
 
                 /**
                  * Remove the direct child associated with the given key
@@ -217,25 +282,21 @@ namespace execHelper {
                  */
                 void deepCopy(const SettingsNode& other) noexcept;
 
-                /**
-                 * Get the node with the given key
-                 *
-                 * \pre #contains() == true
-                 * \warning This function is undefined if the precondition is not fulfilled
-                 * \param[in] key   The key
-                 * \return  A pointer to the node with the associated key
+                /*! @copydoc operator[](const SettingsKey&) const
                  */
                 SettingsNode* at(const SettingsKey& key) noexcept;
 
-                /**
-                 * Get the node with the given key
-                 *
-                 * \pre #contains() == true
-                 * \warning This function is undefined if the precondition is not fulfilled
-                 * \param[in] key   The key
-                 * \return  A pointer to the node with the associated key
+                /*! @copydoc operator[](const SettingsKey&) const
                  */
                 const SettingsNode* at(const SettingsKey& key) const noexcept;
+
+                /*! @copydoc operator[](const SettingsKey&) const
+                 */
+                SettingsNode* at(const SettingsKeys& key) noexcept;
+
+                /*! @copydoc operator[](const SettingsKey&) const
+                 */
+                const SettingsNode* at(const SettingsKeys& key) const noexcept;
 
                 SettingsKey m_key; //!< The root key associated with this node
                 std::unique_ptr<SettingsNodeCollection> m_values; //!< The value hierarchy associated with this node

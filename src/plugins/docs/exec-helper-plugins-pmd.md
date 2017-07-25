@@ -8,18 +8,19 @@ The pmd plugin is used for executing Makefiles.
 # MANDATORY SETTINGS
 The configuration of the pmd plugin must contain the following settings:
 
-## exec
-The path to the pmd-run executable. The path can either be an absolute path or a relative path from the current working directory.
-
-## tool
-The pmd tool to use. The currently supported tools are:
-  - cpd
-
 # OPTIONAL SETTINGS
 The configuration of the pmd plugin may contain the following settings:
  
 ## patterns
 A list of _patterns_ to apply on the command line. See [exec-helper-config-patterns](@ref exec-helper-config-patterns)(5).
+
+## exec
+The path to the pmd-run executable. The path can either be an absolute path or a relative path from the current working directory. Default: _pmd_.
+
+## tool
+The pmd tool to use. The currently supported tools are:
+  - cpd
+Default: _cpd_
 
 ## language
 Specify the language PMD is analyzing. Check the _-language_ option of the pmd documentation for more information. Default: no explicit language parameter is passed.

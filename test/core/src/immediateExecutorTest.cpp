@@ -4,6 +4,7 @@
 #include <catch.hpp>
 
 #include "core/immediateExecutor.h"
+#include "log/log.h"
 #include "shellStub.h"
 
 using std::static_pointer_cast;
@@ -20,6 +21,8 @@ namespace {
 namespace execHelper { namespace core {
     namespace test {
         SCENARIO("Test the execution of the immediateExecutor", "[ExecutorInterface][ImmediateExecutor]") {
+            log::init();
+
             GIVEN("Some tasks we want to execute and an executor") {
                 Task task1;
                 task1.append("task1");
@@ -33,9 +36,9 @@ namespace execHelper { namespace core {
                 ImmediateExecutor executor(static_pointer_cast<Shell>(shell), IGNORE_CALLBACK);
 
                 WHEN("We schedule each task and run the executor") {
-                    REQUIRE(executor.execute(task1));
-                    REQUIRE(executor.execute(task2));
-                    REQUIRE(executor.execute(task3));
+                    executor.execute(task1);
+                    executor.execute(task2);
+                    executor.execute(task3);
 
                     THEN("We should get the same tasks again") {
                         ShellStub::TaskQueue executedTasks = shell->getExecutedTasks();
@@ -57,11 +60,8 @@ namespace execHelper { namespace core {
                 ImmediateExecutor executor(static_pointer_cast<Shell>(shell), callback);
 
                 WHEN("We schedule the task for execution") {
-                    bool returnCode = executor.execute(task1);
+                    executor.execute(task1);
 
-                    THEN("The call should fail") {
-                        REQUIRE_FALSE(returnCode);
-                    }
                     THEN("We should receive the failed return code") {
                         REQUIRE(realReturnCode == actualReturnCode);
                     }

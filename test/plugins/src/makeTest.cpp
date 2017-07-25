@@ -1,134 +1,156 @@
 #include <string>
 
+#include <boost/filesystem.hpp>
 #include <gsl/string_span>
 
-#include "config/settingsNode.h"
+#include "config/environment.h"
+#include "config/pattern.h"
+#include "config/variablesMap.h"
+#include "plugins/commandLine.h"
 #include "plugins/make.h"
 #include "plugins/pluginUtils.h"
+#include "plugins/threadedness.h"
+#include "plugins/verbosity.h"
 #include "unittest/catch.h"
-#include "utils/combinationHelpers.h"
 #include "utils/utils.h"
 
 #include "executorStub.h"
-#include "optionsStub.h"
+#include "fleetingOptionsStub.h"
 
 using std::string;
+using std::to_string;
 
+using boost::filesystem::current_path;
 using gsl::czstring;
 
-using execHelper::config::SettingsNode;
-using execHelper::core::test::ExecutorStub;
+using execHelper::config::ENVIRONMENT_KEY;
+using execHelper::config::EnvironmentCollection;
+using execHelper::config::Path;
+using execHelper::config::Pattern;
+using execHelper::config::Patterns;
+using execHelper::config::VariablesMap;
 using execHelper::core::Task;
-using execHelper::core::TaskCollection;
-using execHelper::core::CommandCollection;
-using execHelper::core::EnvironmentCollection;
 
-using execHelper::test::OptionsStub;
-using execHelper::test::utils::copyAndAppend;
-using execHelper::test::utils::TargetUtil;
-using execHelper::test::utils::CompilerUtil;
-using execHelper::test::utils::Patterns;
-using execHelper::test::utils::addPatterns;
+using execHelper::core::test::ExecutorStub;
+using execHelper::test::FleetingOptionsStub;
 using execHelper::test::utils::getExpectedTasks;
-using execHelper::test::combinationHelpers::setEnvironment;
 
 namespace {
-    const czstring<> pluginConfigKey("make");
+    const czstring<> PLUGIN_NAME = "make";
+    const czstring<> BUILD_DIR_KEY = "build-dir";
 } // namespace
 
 namespace execHelper { namespace plugins { namespace test {
-    SCENARIO("Testing the plugin configuration settings", "[plugins][make]") {
+    SCENARIO("Obtain the plugin name of the make plugin", "[make]") {
+        GIVEN("A plugin") {
+            Make plugin;
+
+            WHEN("We request the plugin name") {
+                const string pluginName = plugin.getPluginName();
+
+                THEN("We should find the correct plugin name") {
+                    REQUIRE(pluginName == PLUGIN_NAME);
+                }
+            }
+        }
+    }
+
+    SCENARIO("Obtaining the default variables map of the make plugin", "[make]") {
+        MAKE_COMBINATIONS("The default fleeting options") {
+            FleetingOptionsStub fleetingOptions;
+            Make plugin;
+
+            VariablesMap actualVariables(plugin.getPluginName());
+            actualVariables.add(COMMAND_LINE_KEY);
+            actualVariables.add(VERBOSITY_KEY, "no");
+            actualVariables.add(JOBS_KEY, to_string(fleetingOptions.m_jobs));
+            actualVariables.add(BUILD_DIR_KEY, ".");
+            actualVariables.add(ENVIRONMENT_KEY);
+
+            COMBINATIONS("Switch off multithreading") {
+                fleetingOptions.m_jobs = 1U;
+                actualVariables.replace(JOBS_KEY, to_string(fleetingOptions.m_jobs)); }
+
+            COMBINATIONS("Switch on verbosity") {
+                fleetingOptions.m_verbose = true;
+                actualVariables.replace(VERBOSITY_KEY, "yes");
+            }
+
+            THEN_WHEN("We request the variables map") {
+                VariablesMap variables = plugin.getVariablesMap(fleetingOptions);
+
+                THEN_CHECK("We should find the same ones") {
+                    REQUIRE(variables == actualVariables);
+                }
+            }
+        }
+    }
+
+    SCENARIO("Testing the configuration settings of the make plugin", "[make]") {
         MAKE_COMBINATIONS("Of several settings") {
-            const string command("make-command");
-
-            OptionsStub options;
-
-            TargetUtil targetUtil;
-            addPatterns(targetUtil.getPatterns(), &options);
-
-            CompilerUtil compilerUtil;
-            addPatterns(compilerUtil.getPatterns(), &options);
-
-            SettingsNode& rootSettings = options.m_settings;
-            rootSettings.add({pluginConfigKey, "patterns"}, targetUtil.getKeys());
-            rootSettings.add({pluginConfigKey, "patterns"}, compilerUtil.getKeys());
-
-            // Add the settings of an other command to make sure we take the expected ones
-            const string otherCommandKey("other-command");
+            const Pattern pattern1("PATTERN1", {"value1a", "value1b"});
+            const Pattern pattern2("PATTERN2", {"value2a", "value2b"});
+            const Patterns patterns({pattern1, pattern2});
 
             Make plugin;
-            Task task;
+            VariablesMap variables = plugin.getVariablesMap(FleetingOptionsStub());
 
-            Task expectedTask({"make"});
-            TaskCollection jobs({"--jobs", "4"});
-            TaskCollection buildDir;
-            TaskCollection verbosity;
-            TaskCollection commandLine;
+            auto jobs = variables.get<Jobs>(JOBS_KEY).get();
+            Path buildDir = variables.get<Path>(BUILD_DIR_KEY).get();
+            bool verbosity = false;
+            CommandLineArgs commandLine;
+            EnvironmentCollection env;
 
-            SettingsNode::SettingsKeys baseSettingsKeys = {pluginConfigKey};
-            SettingsNode::SettingsKeys otherBaseSettingsKeys = {pluginConfigKey, otherCommandKey};
-
-            COMBINATIONS("Toggle between general and specific command settings") {
-                baseSettingsKeys.push_back(command);
-            }
+            ExecutorStub executor;
+            ExecuteCallback executeCallback = [&executor](const Task& task) { executor.execute(task);};
+            registerExecuteCallback(executeCallback);
 
             COMBINATIONS("Switch off multi-threading") {
-                rootSettings.add(copyAndAppend(baseSettingsKeys, "single-threaded"), "yes");
-                rootSettings.add(copyAndAppend(otherBaseSettingsKeys, "single-threaded"), "no");
-                jobs.clear();
-            }
-
-            COMBINATIONS("Switch on multi-threading") {
-                rootSettings.add(copyAndAppend(baseSettingsKeys, "single-threaded"), "no");     // Last one counts
-                rootSettings.add(copyAndAppend(otherBaseSettingsKeys, "single-threaded"), "yes");
-                jobs = TaskCollection({"--jobs", "4"});
-            }
-
-            COMBINATIONS("Switch off the multi-threading option") {
-                options.m_singleThreaded = true;
-                jobs.clear();
+                jobs = 1U;
+                variables.replace(JOBS_KEY, to_string(jobs));
             }
 
             COMBINATIONS("Set a build directory") {
-                const string buildDirValue("{" + compilerUtil.distribution.getKey() + "}/{" + compilerUtil.architecture.getKey() + "}/{HELLO}/{" + compilerUtil.compiler.getKey() + "}/hello{" + compilerUtil.mode.getKey() + " }world"); 
-                rootSettings.add(copyAndAppend(baseSettingsKeys, "build-dir"), buildDirValue);
-                rootSettings.add(copyAndAppend(otherBaseSettingsKeys, "build-dir"), "some/build/dir");
-                buildDir.emplace_back("--directory=" + buildDirValue);
-            }
-
-            COMBINATIONS("Switch off verbosity") {
-                options.m_verbosity = false;
+                buildDir = "{" + pattern1.getKey() + "}/{" + pattern2.getKey() + "}/{HELLO}/{" + pattern2.getKey() + "}/hello{" + pattern1.getKey() + " }world"; 
+                variables.replace(BUILD_DIR_KEY, buildDir.native());
             }
 
             COMBINATIONS("Switch on verbosity") {
-                options.m_verbosity = true;
-                verbosity.emplace_back("--debug");
+                verbosity = true;
+                variables.replace(VERBOSITY_KEY, "yes");
             }
 
             COMBINATIONS("Add a command line") {
-                commandLine = {"{" + targetUtil.target.getKey() + "}", "{" + targetUtil.runTarget.getKey() + "}"};
-                rootSettings.add(copyAndAppend(baseSettingsKeys, "command-line"), commandLine);
-                rootSettings.add(copyAndAppend(otherBaseSettingsKeys, "command-line"), "--some-command");
+                commandLine = {"{" + pattern2.getKey() + "}", "{" + pattern1.getKey() + "}"};
+                variables.replace(COMMAND_LINE_KEY, commandLine);
             }
 
             COMBINATIONS("Set environment") {
-                setEnvironment(baseSettingsKeys, &expectedTask, &rootSettings, {{"VAR1", "environmentValue{" + compilerUtil.compiler.getKey() + "}"}, {"VAR{" + compilerUtil.compiler.getKey() + "}", "environmentValue2"}});
+                env = {{"VAR1", "value1"}, {"VAR2", "value2"}};
+                for(const auto& value : env) {
+                    variables.replace({ENVIRONMENT_KEY, value.first}, value.second);
+                }
             }
 
-            expectedTask.append(jobs);
-            expectedTask.append(buildDir);
-            expectedTask.append(verbosity);
+            Task expectedTask({PLUGIN_NAME});
+            expectedTask.append({"--directory", buildDir.native()});
+            expectedTask.append({"--jobs", to_string(jobs)});
+            if(verbosity) {
+                expectedTask.append("--debug");
+            }
             expectedTask.append(commandLine);
+            expectedTask.setEnvironment(env);
 
-            ExecutorStub::TaskQueue expectedTasks = getExpectedTasks(expectedTask, compilerUtil, targetUtil);
+            ExecutorStub::TaskQueue expectedTasks = getExpectedTasks(expectedTask, patterns);
+            THEN_WHEN("We apply the plugin") {
+                bool returnCode = plugin.apply(Task(), variables, patterns);
+                THEN_CHECK("It should succeed") {
+                    REQUIRE(returnCode);
+                }
 
-            bool returnCode = plugin.apply(command, task, options);
-            THEN_CHECK("It should succeed") {
-                REQUIRE(returnCode);
-            }
-
-            THEN_CHECK("It called the right commands") {
-                REQUIRE(expectedTasks == options.m_executor.getExecutedTasks());
+                THEN_CHECK("It called the right commands") {
+                    REQUIRE(expectedTasks == executor.getExecutedTasks());
+                }
             }
         }
     }

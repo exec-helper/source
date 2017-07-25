@@ -3,6 +3,7 @@ set(LIBRARY_NAME ${PROJECT_NAME}-${MODULE_NAME})
 
 set(SRCS
         src/log.cpp
+        src/logLevel.cpp
         src/logger.cpp
    )
 

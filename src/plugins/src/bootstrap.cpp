@@ -3,56 +3,58 @@
 #include <iostream>
 #include <string>
 
-#include "config/settingsNode.h"
-#include "core/patterns.h"
-#include "core/patternsHandler.h"
+#include <gsl/string_span>
+
+#include "config/path.h"
 #include "core/task.h"
 
-#include "configValue.h"
+#include "commandLine.h"
 #include "logger.h"
 #include "pluginUtils.h"
 
 using std::string;
+
+using gsl::czstring;
+
+using execHelper::config::Command;
+using execHelper::config::FleetingOptionsInterface;
+using execHelper::config::Path;
+using execHelper::config::Patterns;
+using execHelper::config::VariablesMap;
 using execHelper::core::Task;
-using execHelper::core::Options;
-using execHelper::core::TaskCollection;
-using execHelper::core::PatternKeys;
-using execHelper::core::Command;
-using execHelper::config::SettingsNode;
+
+namespace {
+    const czstring<> PLUGIN_NAME = "bootstrap";
+    const czstring<> FILENAME_KEY = "filename";
+} // namespace
 
 namespace execHelper { namespace plugins {
-    bool Bootstrap::apply(const Command& command, Task task, const Options& options) const noexcept {
-        static string bootstrapKey("bootstrap");
-        const SettingsNode& rootSettings = options.getSettings(bootstrapKey);  
-
-        string buildDir = ConfigValue<string>::get(getBuildDirKey(), "", command, rootSettings);
-        if(! buildDir.empty()) {
-            const string changeDirectoryCommand = ConfigValue<string>::get("change-directory-command", "cd", command, rootSettings);
-            const string chainCommandsCommand = ConfigValue<string>::get("chain-commands-command", "&&", command, rootSettings);
-
-            task.append(changeDirectoryCommand);
-            task.append(buildDir);
-            task.append(chainCommandsCommand);
-        }
-
-        task.append(getBootstrapFilename(command, rootSettings));
-        task.append(ConfigValue<TaskCollection>::get(getCommandLineKey(), {}, command, rootSettings));
-
-        for(const auto& combination : makePatternPermutator(command, rootSettings, options)) {
-            Task bootstrapTask = replacePatternCombinations(task, combination);
-            registerTask(bootstrapTask, options);
-        }
-        return true;
+    string Bootstrap::getPluginName() const noexcept {
+        return PLUGIN_NAME;
     }
 
-    string Bootstrap::getBootstrapFilename(const Command& command, const SettingsNode& rootSettings) noexcept {
-        static string filenameKey("filename");
-        const string filename = ConfigValue<string>::get(filenameKey, "bootstrap.sh", command, rootSettings);
-        // Check naively if filename is an absolute path
-        if(filename.compare(0, 1, "/") == 0) {
-            return filename;
+    VariablesMap Bootstrap::getVariablesMap(const FleetingOptionsInterface& /*fleetingOptions*/) const noexcept {
+        VariablesMap defaults(PLUGIN_NAME);
+        defaults.add(getBuildDirKey(), ".");
+        defaults.add(FILENAME_KEY, "bootstrap.sh");
+        defaults.add(COMMAND_LINE_KEY);
+        return defaults;
+    }
+
+    bool Bootstrap::apply(Task task, const VariablesMap& variables, const Patterns& patterns) const noexcept {
+        auto filename = variables.get<Path>(FILENAME_KEY).get();
+        if(filename.is_relative()) {
+            filename = Path(".") / filename;
         }
-        return "./" + filename;
+        task.append(filename.native());
+        task.append(variables.get<CommandLineArgs>(COMMAND_LINE_KEY).get());
+        task.setWorkingDirectory(variables.get<Path>(getBuildDirKey()).get());
+
+        for(const auto& combination : makePatternPermutator(patterns)) {
+            Task bootstrapTask = replacePatternCombinations(task, combination);
+            registerTask(bootstrapTask);
+        }
+        return true;
     }
 } // namespace plugins
 } // namespace execHelper

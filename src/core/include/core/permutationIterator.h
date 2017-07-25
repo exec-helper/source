@@ -78,7 +78,7 @@ namespace execHelper {
                     return m_outerBeginIterator == m_outerEndIterator || m_innerIterator.hasEmptyCollection();
                 }
 
-                /*! @copydoc Argv::operator==(const Argv&)
+                /*! @copydoc config::Argv::operator==(const Argv&) const
                  */
                 bool operator==(const iterator& other) const {
                     if(atEnd()) {
@@ -88,7 +88,7 @@ namespace execHelper {
                     return (m_innerIterator == other.m_innerIterator && m_outerIterator == other.m_outerIterator);
                 }
 
-                /*! @copydoc Argv::operator!=(const Argv&)
+                /*! @copydoc config::Argv::operator!=(const Argv&) const
                  */
                 bool operator!=(const iterator& other) const {
                     return !(*this == other);

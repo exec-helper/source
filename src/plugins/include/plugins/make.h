@@ -5,22 +5,15 @@
 #include "core/task.h"
 
 namespace execHelper {
-    namespace config {
-        class SettingsNode;
-    }
-    namespace core {
-        class CompilerDescriptionElement;
-    }
-}
-
-namespace execHelper {
     namespace plugins {
         /**
          * \brief   Plugin for running make
          */
         class Make : public BuildPlugin {
             public:
-                bool apply(const core::Command& command, core::Task task, const core::Options& options) const noexcept override;
+                std::string getPluginName() const noexcept override;
+                config::VariablesMap getVariablesMap(const config::FleetingOptionsInterface& fleetingOptions) const noexcept override;
+                bool apply(core::Task task, const config::VariablesMap& variables, const config::Patterns& patterns) const noexcept override;
         };
     }
 }

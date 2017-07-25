@@ -13,7 +13,9 @@ using std::initializer_list;
 using std::string;
 
 using execHelper::config::Path;
+using execHelper::config::SettingsKeys;
 using execHelper::config::SettingsNode;
+using execHelper::config::SettingsValue;
 
 namespace execHelper { namespace yaml {
     YamlWrapper::YamlWrapper(const Path& file) :
@@ -85,7 +87,7 @@ namespace execHelper { namespace yaml {
         return getSubTree(node, settings, {});
     }
 
-    bool YamlWrapper::getSubTree(const YAML::Node& node, SettingsNode* yamlNode, const SettingsNode::SettingsKeys& keys) noexcept {
+    bool YamlWrapper::getSubTree(const YAML::Node& node, SettingsNode* yamlNode, const SettingsKeys& keys) noexcept {
         YAML::NodeType::value type = YAML::NodeType::Null;
         try {
             type = node.Type();
@@ -109,7 +111,7 @@ namespace execHelper { namespace yaml {
                 break;
             case YAML::NodeType::Map:
                 for(const auto& element : node) {
-                    SettingsNode::SettingsValue key;
+                    SettingsValue key;
                     try {
                         key = element.first.as<string>();
                     } catch(const YAML::TypedBadConversion<string>&) {
@@ -119,7 +121,7 @@ namespace execHelper { namespace yaml {
                     }
 
                     yamlNode->add(keys, key);
-                    SettingsNode::SettingsKeys newKeys = keys;
+                    SettingsKeys newKeys = keys;
                     newKeys.push_back(key);
                     if(! YamlWrapper::getSubTree(element.second, yamlNode, newKeys)) {
                         return false;

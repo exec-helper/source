@@ -10,7 +10,9 @@ namespace execHelper {
          */
         class Valgrind : public Plugin {
             public:
-                bool apply(const std::string& command, core::Task task, const core::Options& options) const noexcept override;
+                std::string getPluginName() const noexcept override;
+                config::VariablesMap getVariablesMap(const config::FleetingOptionsInterface& fleetingOptions) const noexcept override;
+                bool apply(core::Task task, const config::VariablesMap& variables, const config::Patterns& patterns) const noexcept override;
         };
     }
 }

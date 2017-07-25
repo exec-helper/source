@@ -2,23 +2,30 @@
 #define __ARGV_H__
 
 #include <cstddef>
+#include <string>
 #include <vector>
 
-#include "task.h"
-
 namespace execHelper {
-    namespace core {
+    namespace config {
         /**
          * \brief   Wraps the default arguments when calling other programs
          */
         class Argv {
             public:
                 /**
+                 * Create an Argv object using the default argc and argv input argument combo
+                 *
+                 * \param[in] argc  The number of entries present in the argv argument
+                 * \param[in] argv  An array of input arguments. Each array element is considered a separate argument.
+                 */
+                Argv(int argc, const char* const * const argv) noexcept;
+
+                /**
                  * Convert task to the argv/argc structure
                  *
                  * \param[in] task  The task to take the arguments from
                  */
-                explicit Argv(const TaskCollection& task) noexcept;
+                explicit Argv(const std::vector<std::string>& task) noexcept;
 
                 /**
                 * Copy constructor
@@ -58,7 +65,7 @@ namespace execHelper {
                  * \returns True    If the objects are considered equal
                  *          False   Otherwise
                  */
-                bool operator==(const Argv& other) noexcept;
+                bool operator==(const Argv& other) const noexcept;
 
                 /**
                  * Inequality operator
@@ -66,7 +73,7 @@ namespace execHelper {
                  * \param[in] other The other object to compare with
                  * \returns !operator==(other)
                  */
-                bool operator!=(const Argv& other) noexcept;
+                bool operator!=(const Argv& other) const noexcept;
 
                 /**
                  * Access operator
@@ -82,6 +89,11 @@ namespace execHelper {
                  * \param[in] other The other object to swap with
                  */
                 void swap(Argv& other)  noexcept;
+
+                /**
+                 * Clear all content
+                 */
+                void clear() noexcept;
 
                 /**
                  * Getter for the argc argument
@@ -123,7 +135,7 @@ namespace execHelper {
          * \returns The stream that was streamed to
          */
         std::ostream& operator<<(std::ostream& os, const Argv& argv) noexcept;
-    } // namespace core
+    } // namespace config
 } // namespace execHelper
 
 #endif  /* __ARGV_H__ */

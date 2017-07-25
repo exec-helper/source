@@ -6,6 +6,10 @@
 #include <ostream>
 #include <utility>
 
+#include <boost/filesystem/operations.hpp>
+
+#include "logger.h"
+
 using std::accumulate;
 using std::back_inserter;
 using std::endl;
@@ -15,6 +19,10 @@ using std::ostream;
 using std::string;
 using std::vector;
 
+using boost::filesystem::current_path;
+
+using execHelper::config::EnvironmentCollection;
+using execHelper::config::EnvironmentValue;
 using execHelper::config::Path;
 
 namespace {
@@ -25,16 +33,16 @@ namespace {
 					if(a.empty()) {
                         return string(b);
 					}
-                    return string(a + delimiter + b);
+                    return a.append(delimiter).append(b);
 				});
     }
 } // namespace
 
 namespace execHelper { namespace core {
 
-    Task::Task(const initializer_list<string>& subtasks, Path workingDirectory) noexcept :
+    Task::Task(const initializer_list<string>& subtasks) noexcept :
         m_task(subtasks),
-        m_workingDirectory(move(workingDirectory))
+        m_workingDirectory(current_path())
     {
         ;
     }
@@ -52,6 +60,7 @@ namespace execHelper { namespace core {
     }
 
     void Task::setWorkingDirectory(const Path& workingDirectory) noexcept {
+        LOG(trace) << "Changing working directory of task to " << workingDirectory;
         m_workingDirectory = workingDirectory;
     }
 

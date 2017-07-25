@@ -1,73 +1,88 @@
 #include "commandLineCommand.h"
 
 #include <string>
-#include <vector>
 
-#include "config/settingsNode.h"
+#include <gsl/string_span>
+
+#include "config/environment.h"
+#include "config/variablesMap.h"
 #include "core/patterns.h"
 #include "core/task.h"
 
-#include "configValue.h"
+#include "commandLine.h"
 #include "logger.h"
 #include "pluginUtils.h"
 
+using std::move;
 using std::string;
-using std::vector;
+
+using gsl::czstring;
 
 using execHelper::config::Path;
-using execHelper::config::SettingsNode;
+using execHelper::config::Command;
+using execHelper::config::ENVIRONMENT_KEY;
+using execHelper::config::EnvironmentCollection;
+using execHelper::config::FleetingOptionsInterface;
+using execHelper::config::Patterns;
+using execHelper::config::SettingsKeys;
+using execHelper::config::VariablesMap;
 using execHelper::core::Task;
-using execHelper::core::Options;
-using execHelper::core::TaskCollection;
-using execHelper::core::EnvironmentCollection;
-using execHelper::core::PatternKeys;
+using execHelper::core::Tasks;
+
+namespace {
+    const czstring<> PLUGIN_NAME = "command-line-command";
+    using WorkingDir = string;
+    const czstring<> WORKING_DIR_KEY = "working-dir";
+} // namespace
 
 namespace execHelper { namespace plugins {
-    bool CommandLineCommand::apply(const std::string& command, Task task, const Options& options) const noexcept {
-        static string commandLineCommandKey("command-line-command");
-        static string commandLineKey("command-line");
 
-        const SettingsNode& rootSettings = options.getSettings(commandLineCommandKey);
-        boost::optional<const SettingsNode&> commandLineSettingsOpt = ConfigValue<const SettingsNode&>::getSetting("command-line", rootSettings, {{command}, {}});
-        if(commandLineSettingsOpt == boost::none) {
-            user_feedback_error("Could not find the '" << getCommandLineKey() << "' setting for command '" << command << "' in the '" << commandLineCommandKey << "' settings");
+    std::string CommandLineCommand::getPluginName() const noexcept {
+        return PLUGIN_NAME; 
+    }
+
+    config::VariablesMap CommandLineCommand::getVariablesMap(const FleetingOptionsInterface& /*fleetingOptions*/) const noexcept {
+        VariablesMap defaults(PLUGIN_NAME);
+        defaults.add(COMMAND_LINE_KEY);
+        defaults.add(ENVIRONMENT_KEY);
+        return defaults;
+    }
+
+    bool CommandLineCommand::apply(Task task, const VariablesMap& variables, const Patterns& patterns) const noexcept {
+        task.appendToEnvironment(getEnvironment(variables));
+
+        auto workingDir = variables.get<WorkingDir>(WORKING_DIR_KEY);
+        if(workingDir) {
+            task.setWorkingDirectory(workingDir.get());
+        }
+
+        auto commandLine = variables.get<CommandLineArgs>(COMMAND_LINE_KEY).get();
+        if(commandLine.empty()) {
+            user_feedback_error("Could not find the '" << COMMAND_LINE_KEY << "' setting in the '" << PLUGIN_NAME << "' settings");
             return false;
         }
-        const SettingsNode& commandLineSettings = commandLineSettingsOpt.get();
-        if(commandLineSettings.values().empty()) {
-            user_feedback_error("The '" << getCommandLineKey() << "' setting for command '" << command << "' in the '" << commandLineCommandKey << "' settings is empty");
-            return false;
-        }
-        task.appendToEnvironment(getEnvironment(command, rootSettings));
 
-        boost::optional<Path> path = getWorkingDir(command, rootSettings);
-        if(path) {
-            task.setWorkingDirectory(path.get());
-        }
-
-        vector<Task> tasks;
-        auto commandLineValues = commandLineSettings.values();
-        if(commandLineValues.empty()) {
-            return true;
-        }
-        if(commandLineSettings[commandLineValues.front()].values().empty()) {
-            // It is a list of commands that is together one command
-            Task newTask = task;
-            newTask.append(getCommandLine(command, rootSettings));
-            tasks.emplace_back(newTask);
+        Tasks tasks;
+        if(variables[COMMAND_LINE_KEY][commandLine.front()].values().empty()) {
+            task.append(move(commandLine));
+            tasks.emplace_back(move(task));
         } else {
-            for(const auto& commandLine : commandLineValues) {
+            SettingsKeys keys({COMMAND_LINE_KEY});
+            for(auto commandKey : variables[COMMAND_LINE_KEY].values()) {
+                SettingsKeys tmpKey = keys; 
+                tmpKey.emplace_back(commandKey);
                 Task newTask = task;
-                TaskCollection newTaskCollection = ConfigValue<TaskCollection>::get(commandLine, {}, commandLineSettings, {{}});
-                newTask.append(newTaskCollection);
+                newTask.append(move(variables.get<CommandLineArgs>(tmpKey).get()));
                 tasks.emplace_back(newTask);
             }
         }
 
-        for(const auto& combination : makePatternPermutator(command, rootSettings, options)) {
-            for(const auto& newTask : tasks) {
-                Task commandLineTask = replacePatternCombinations(newTask, combination);
-                registerTask(commandLineTask, options);
+        for(const auto& combination : makePatternPermutator(patterns)) {
+            for(const auto& executeTask : tasks) {
+                Task newTask = replacePatternCombinations(executeTask, combination);
+                if(! registerTask(newTask)) {
+                    return false;
+                }
             }
         }
         return true;

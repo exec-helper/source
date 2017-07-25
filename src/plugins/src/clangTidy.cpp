@@ -1,100 +1,103 @@
 #include "clangTidy.h"
 
-#include "configValue.h"
+#include <gsl/string_span>
+
+#include "config/pattern.h"
+#include "config/variablesMap.h"
+#include "log/assertions.h"
+
+#include "commandLine.h"
 #include "logger.h"
 #include "pluginUtils.h"
 
 using std::string;
+using std::vector;
 
-using execHelper::config::SettingsNode;
-using execHelper::core::Options;
-using execHelper::core::Command;
+using gsl::czstring;
+
+using execHelper::config::FleetingOptionsInterface;
+using execHelper::config::Patterns;
+using execHelper::config::VariablesMap;
 using execHelper::core::Task;
 using execHelper::core::TaskCollection;
 
+namespace {
+    const czstring<> PLUGIN_NAME = "clang-tidy";
+    using Sources = vector<string>;
+    const czstring<> SOURCES_KEY = "sources";
+    const czstring<> CHECKS_KEY = "checks";
+    const czstring<> WARNING_AS_ERROR_KEY = "warning-as-errors";
+} // namespace
+
 namespace execHelper { namespace plugins {
-    bool ClangTidy::apply(const Command& command, Task task, const Options& options) const noexcept {
-        static const string CLANG_TIDY_COMMAND("clang-tidy");
-        static const string CLANG_TIDY_KEY("clang-tidy");
+    string ClangTidy::getPluginName() const noexcept {
+        return "clang-tidy";
+    }
 
-        if(!options.getSettings().contains(CLANG_TIDY_KEY)) {
-            user_feedback_error("Could not find the '" << CLANG_TIDY_KEY << "' key in the configuration");
-            return false;
+    VariablesMap ClangTidy::getVariablesMap(const FleetingOptionsInterface& /*fleetingOptions*/) const noexcept {
+        VariablesMap defaults(PLUGIN_NAME);
+        defaults.add(COMMAND_LINE_KEY);
+        defaults.add(SOURCES_KEY, "*.cpp");
+        return defaults;
+    }
+
+    bool ClangTidy::apply(Task task, const VariablesMap& variables, const Patterns& patterns) const noexcept {
+        task.append(PLUGIN_NAME);
+
+        auto checks = variables.get<Checks>(CHECKS_KEY);
+        if(checks) {
+            task.append(getChecks(checks.get()));
         }
-        const SettingsNode& rootSettings = options.getSettings(CLANG_TIDY_KEY);  
-        task.append(CLANG_TIDY_COMMAND);
 
-        TaskCollection sources = ConfigValue<TaskCollection>::get("sources", {}, command, rootSettings);
-
-        if(sources.empty()) {
-            user_feedback("Warning: no sources defined in the clang-tidy configuration");
+        auto warningAsError = variables.get<WarningAsError>(WARNING_AS_ERROR_KEY);
+        if(warningAsError) {
+            task.append(getWarningAsError(warningAsError.get(), variables.get<Checks>(CHECKS_KEY, {})));
         }
 
-        for(const auto& source : sources) {
-            Task sourceTask = task;
+        task.append(variables.get<CommandLineArgs>(COMMAND_LINE_KEY).get());
 
-            const ConfigValue<TaskCollection>::OrderedConfigKeys configKeys = {
-                                                    {command, "sources", source}, 
-                                                    {command},
-                                                    {"sources", source},
-                                                    {}
-                                                };
+        ensures(variables.get<Sources>(SOURCES_KEY) != boost::none);
+        task.append(variables.get<Sources>(SOURCES_KEY).get());
 
-            TaskCollection checksCollection = ConfigValue<TaskCollection>::get("checks", {}, rootSettings, configKeys);
-            if(!checksCollection.empty()) {
-                sourceTask.append(getChecks(checksCollection));
-            }
-
-            TaskCollection warningAsErrorCollection = ConfigValue<TaskCollection>::get("warnings-as-errors", {}, rootSettings, configKeys);
-            if(!warningAsErrorCollection.empty()) {
-                string warningAsError = getWarningAsError(warningAsErrorCollection, checksCollection);
-                if(!warningAsError.empty()) {
-                    sourceTask.append(warningAsError);
-                }
-            }
-
-            TaskCollection commandLine = ConfigValue<TaskCollection>::get("command-line", {}, rootSettings, configKeys);
-            sourceTask.append(commandLine);
-            sourceTask.append(source);
-
-            for(const auto& combination : makePatternPermutator(command, rootSettings, options)) {
-                Task clangTidyTask = replacePatternCombinations(sourceTask, combination);
-                registerTask(clangTidyTask, options);
+        for(const auto& combination : makePatternPermutator(patterns)) {
+            Task newTask = replacePatternCombinations(task, combination);
+            if(! registerTask(newTask)) {
+                return false;
             }
         }
         return true;
     }
 
-    string ClangTidy::getChecks(const TaskCollection& checksCollection) noexcept {
-        if(checksCollection.empty()) {
-            return "";
+    TaskCollection ClangTidy::getChecks(const Checks& checks) noexcept {
+        if(checks.empty()) {
+            return TaskCollection();
         }
         string result("-checks=");
-        result += listChecks(checksCollection);
-        return result;
+        result += listChecks(checks);
+        return TaskCollection({result});
     }
 
-    string ClangTidy::getWarningAsError(const TaskCollection& warningAsErrorCollection, const TaskCollection& checksCollection) noexcept {
+    TaskCollection ClangTidy::getWarningAsError(const WarningAsError& warningAsError, const Checks& checks) noexcept {
         // Check if we are in the special case where we inherit the values from checksCollection
         string result("-warnings-as-errors=");
-        if(warningAsErrorCollection.size() == 1U && warningAsErrorCollection.front() == "all") {
-            if(checksCollection.empty()) {
-                return "";
+        if(warningAsError.size() == 1U && warningAsError.front() == "all") {
+            if(checks.empty()) {
+                return TaskCollection();
             }
-            result += listChecks(checksCollection);
+            result += listChecks(checks);
         } else {
-            if(warningAsErrorCollection.empty()) {
-                return "";
+            if(warningAsError.empty()) {
+                return TaskCollection();
             }
-            result += listChecks(warningAsErrorCollection);
+            result += listChecks(warningAsError);
         }
-        return result;
+        return TaskCollection({result});
     }
 
-    string ClangTidy::listChecks(const TaskCollection& checks) noexcept {
+    string ClangTidy::listChecks(const Checks& checks) noexcept {
         string result;
         if(checks.empty()) {
-            return result;
+            return "";
         }
         for(size_t i = 0; i < checks.size() - 1; ++i) {
             result += checks[i] + ",";

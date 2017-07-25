@@ -30,8 +30,8 @@ Execute one or more configured COMMANDs. This is an alias for the \em \<commands
 \par -s, -\-settings-file[=FILE]
 Use FILE as the settings file for the exec-helper configuration. By default exec-helper searches for a \em \.exec-helper file in the current directory and the _$HOME_ directory of the caller.
 
-\par -u, -\-single-threaded
-Enable the single-threaded flag for the command if available.
+\par -j, -\-jobs[=JOBS]
+Use the specified number of JOBS for each task (if supported). Use _auto_ to let exec-helper determine an appropriate number. Use a value of _1_ for running jobs single-threaded. Default: _auto_.
 
 \par -n, -\-dry-run
 Print the commands that would be executed, but  do not execute them.

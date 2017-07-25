@@ -22,7 +22,7 @@ namespace execHelper {
             public:
                 ReportingExecutor() noexcept;
 
-                bool execute(const Task& task) noexcept override;
+                void execute(const Task& task) noexcept override;
         };
     }
 }

@@ -10,50 +10,65 @@
 #include <vector>
 
 #include <gsl/string_span>
+#include <gsl/gsl>
 
-#include "core/options.h"
-#include "core/pattern.h"
+#include "base-utils/yaml.h"
+#include "config/path.h"
+#include "config/pattern.h"
+#include "plugins/pluginUtils.h"
 
 #include "executorStub.h"
-#include "optionsStub.h"
 
 namespace execHelper {
     namespace config {
         class SettingsNode;
     } // namespace config
+
+    namespace test {
+        namespace baseUtils {
+            class ConfigFileWriter;
+        } // namespace baseUtils
+    } // namespace test
 } // namespace execHelper
+
+// Hack required for streaming boost::optional<vector<T>> types
+namespace std {
+    template<typename T>
+    std::ostream& operator<<(std::ostream& os, const std::vector<T>& stream) {
+        for(const auto& element : stream) {
+            os << element << ", ";
+        }
+        return os;
+    }
+
+    template<typename T, typename U>
+    std::ostream& operator<<(std::ostream& os, const std::pair<T,U>& stream) {
+        os << stream.first << ": " << stream.second;
+        return os;
+    }
+}
 
 namespace execHelper {
     namespace test {
         namespace utils {
-            using Patterns = std::vector<core::Pattern>;
+            using Patterns = std::vector<config::Pattern>;
+
+            using Arguments = std::vector<std::string>;
+            struct MainVariables {
+                int argc;
+                std::unique_ptr<char*[]> argv;
+
+                explicit MainVariables(const Arguments& arguments);
+            };
 
             template<typename T>
             void appendVectors(T& appendTo, const T& appendFrom) {
                 appendTo.insert(std::end(appendTo), std::begin(appendFrom), std::end(appendFrom));
             }
 
-            template<typename T>
-            T combineVectors(const T& append1, const T& append2) {
-                T result = append1;
-                appendVectors(result, append2);
-                return result;
-            }
 
-            template<typename T, typename U>
-            T copyAndAppend(const T& append1, U&& newElement) {
-                T result = append1;
-                result.emplace_back(newElement);
-                return result;
-            }
-
-            struct MainVariables {
-                int argc;
-                std::unique_ptr<char*[]> argv;
-
-                explicit MainVariables(const std::vector<std::string>& arguments);
-            };
-
+            baseUtils::YamlWriter toYaml(const config::SettingsNode& settings, const config::Patterns& patterns) noexcept;
+            void writeSettingsFile(gsl::not_null<baseUtils::ConfigFileWriter*> configFileWriter, const config::SettingsNode& settings, const config::Patterns& patterns) noexcept;
             std::string convertToConfig(const Patterns& patterns) noexcept;
             std::string convertToConfig(const config::SettingsNode& rootSettings, const std::string& prepend = std::string()) noexcept;
             std::string convertToConfig(const config::SettingsNode& settings, const Patterns& patterns, const std::string& prepend = std::string()) noexcept;
@@ -69,77 +84,14 @@ namespace execHelper {
             std::string convertToConfig(const std::vector<std::string>& keys, const std::vector<std::string>& values, const std::string& prepend = std::string()) noexcept;
             std::string basename(const std::string& file);
 
-            void addSettings(config::SettingsNode* settings, const config::SettingsNode::SettingsKey& key, const config::SettingsNode::SettingsValue& value) noexcept;
-            void addSettings(config::SettingsNode* settings, const config::SettingsNode::SettingsKey& key, const std::initializer_list<std::string>& values) noexcept;
-            void addSettings(config::SettingsNode* settings, const config::SettingsNode::SettingsKey& key, const config::SettingsNode::SettingsValues& values) noexcept;
-            void addSettings(config::SettingsNode* settings, const config::SettingsNode::SettingsKeys& key, const config::SettingsNode::SettingsValues& values) noexcept;
-            void writeSettingsFile(const std::string& filename, const config::SettingsNode& settings, const std::vector<core::Pattern>& patterns) noexcept;
+            config::PatternCombinations createPatternCombination(const std::initializer_list<config::PatternKey>& keys, const std::initializer_list<config::PatternValue>& values) noexcept;
 
-            core::PatternCombinations createPatternCombination(const std::initializer_list<core::PatternKey>& keys, const std::initializer_list<core::PatternValue>& values) noexcept;
-
-            core::PatternCombinations createPatternCombination(const core::PatternKeys& keys, const core::PatternValues& values) noexcept;
-
-            /**
-             * Interface for defining pattern utils
-             */ 
-            struct PatternUtil {
-                virtual std::vector<std::string> getKeys() const noexcept = 0;
-                virtual std::vector<core::Pattern> getPatterns() const noexcept = 0;
-                virtual core::PatternPermutator makePatternPermutator() const noexcept = 0;
-                virtual core::PatternPermutator makePatternPermutator(const std::vector<core::Pattern>& patterns) const noexcept = 0;
-            };
-
-            struct TargetUtilNames {
-                std::string target;
-                std::string runTarget;
-            };
-
-            struct TargetUtil : public PatternUtil {
-                core::Pattern target;
-                core::Pattern runTarget;
-
-                TargetUtil();
-                std::vector<std::string> getKeys() const noexcept override;
-                std::vector<core::Pattern> getPatterns() const noexcept override;
-                core::PatternPermutator makePatternPermutator() const noexcept override;
-                core::PatternPermutator makePatternPermutator(const std::vector<core::Pattern>& patterns) const noexcept override;
-
-                TargetUtilNames toNames(const std::map<core::PatternKey, core::PatternValue>& pattern) const noexcept;
-            };
-
-            struct CompilerUtilNames {
-                std::string compiler;
-                std::string mode;
-                std::string architecture;
-                std::string distribution;
-            };
-
-            struct CompilerUtil : public PatternUtil {
-                core::Pattern compiler;
-                core::Pattern mode;
-                core::Pattern architecture;
-                core::Pattern distribution;
-
-                CompilerUtil();
-                std::vector<std::string> getKeys() const noexcept override;
-                std::vector<core::Pattern> getPatterns() const noexcept override;
-                core::PatternPermutator makePatternPermutator() const noexcept override;
-                core::PatternPermutator makePatternPermutator(const std::vector<core::Pattern>& patterns) const noexcept override;
-                
-                CompilerUtilNames toNames(const std::map<core::PatternKey, core::PatternValue>& pattern) const noexcept;
-            };
-
-            core::PatternKeys getAllPatternKeys(const std::initializer_list<std::reference_wrapper<const PatternUtil>>& patterns) noexcept;
-            Patterns getAllPatterns(const std::initializer_list<std::reference_wrapper<const PatternUtil>>& patterns) noexcept;
-
-            void addPatterns(const Patterns& patterns, OptionsStub* options) noexcept;
-
-            core::test::ExecutorStub::TaskQueue getExpectedTasks(const core::Task& expectedTask, const TargetUtil& targetUtil) noexcept;
-            core::test::ExecutorStub::TaskQueue getExpectedTasks(const core::Task& expectedTask, const CompilerUtil& compilerUtil, const TargetUtil& targetUtil) noexcept;
-            core::test::ExecutorStub::TaskQueue getExpectedTasks(const core::test::ExecutorStub::TaskQueue& expectedTask, const CompilerUtil& compilerUtil, const TargetUtil& targetUtil) noexcept;
+            config::PatternCombinations createPatternCombination(const config::PatternKeys& keys, const config::PatternValues& values) noexcept;
+            plugins::PatternPermutator makePatternPermutator(const config::Patterns& patterns) noexcept;
+            core::test::ExecutorStub::TaskQueue getExpectedTasks(const core::Task& task, const config::Patterns patterns) noexcept;
+            core::test::ExecutorStub::TaskQueue getExpectedTasks(const core::test::ExecutorStub::TaskQueue& tasks, const config::Patterns patterns) noexcept;
 
             std::string toString(const config::SettingsNode& settings, unsigned int nbOfTabs = 0) noexcept;
-            bool fileExists(const std::string& path) noexcept;
         } // namespace utils
     } // namespace test
 } // namespace execHelper

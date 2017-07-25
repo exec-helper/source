@@ -2,6 +2,13 @@ set(EXE_NAME ${PROJECT_NAME}-config-unittest)
 
 set(SRCS    src/settingsNodeTest.cpp
             src/configFileSearcherTest.cpp
+            src/patternTest.cpp
+            src/patternHandlerTest.cpp
+            src/configTest.cpp
+            src/fleetingOptionsTest.cpp
+            src/commandLineOptionsTest.cpp
+            src/argvTest.cpp
+            src/envpTest.cpp
    )
 
 set(DEPENDENCIES
@@ -9,6 +16,7 @@ set(DEPENDENCIES
         boost-filesystem
         config
         unittest
+        test-utils
     )
 
 add_executable(${EXE_NAME} ${SRCS})

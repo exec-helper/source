@@ -5,15 +5,12 @@
 #include <string>
 #include <vector>
 
-#include <boost/filesystem.hpp>
-
+#include "config/environment.h"
 #include "config/path.h"
 
 namespace execHelper {
     namespace core {
         using TaskCollection = std::vector<std::string>;
-        using EnvironmentCollection = std::map<std::string, std::string>;
-        using EnvironmentValue = std::pair<std::string, std::string>;
 
         /**
          * \brief Represents a task to execute
@@ -24,9 +21,8 @@ namespace execHelper {
                  * Create a task
                  *
                  * \param[in] subtasks  The task subdivided in separate arguments
-                 * \param[in] workingDirectory  The working directory for the task
                  */
-                Task(const std::initializer_list<std::string>& subtasks = {}, config::Path workingDirectory = boost::filesystem::current_path()) noexcept;
+                explicit Task(const std::initializer_list<std::string>& subtasks = {}) noexcept;
 
                 /**
                  * Returns the task
@@ -47,7 +43,7 @@ namespace execHelper {
                  *
                  * \returns A collection of the environment
                  */
-                const EnvironmentCollection& getEnvironment() const noexcept;
+                const config::EnvironmentCollection& getEnvironment() const noexcept;
 
                 /**
                  * Sets the working directory of the task
@@ -91,11 +87,11 @@ namespace execHelper {
                  * \returns True    If the new environment was successfully set
                  *          False   Otherwise
                  */
-                bool setEnvironment(const EnvironmentCollection& env) noexcept;
+                bool setEnvironment(const config::EnvironmentCollection& env) noexcept;
 
-                /*! @copydoc setEnvironment(const EnvironmentCollection&)
+                /*! @copydoc setEnvironment(const config::EnvironmentCollection&)
                  */
-                bool setEnvironment(EnvironmentCollection&& env) noexcept;
+                bool setEnvironment(config::EnvironmentCollection&& env) noexcept;
 
                 /**
                  * Add or replace an additional value to the environment of the task.
@@ -105,11 +101,11 @@ namespace execHelper {
                  * \returns True    If the new value was successfully appended to the task
                  *          False   Otherwise
                  */
-                bool appendToEnvironment(EnvironmentValue&& newValue) noexcept;
+                bool appendToEnvironment(config::EnvironmentValue&& newValue) noexcept;
 
-                /*! @copydoc appendToEnvironment(EnvironmentValue&&)
+                /*! @copydoc appendToEnvironment(config::EnvironmentValue&&)
                  */
-                bool appendToEnvironment(EnvironmentCollection&& newValue) noexcept;
+                bool appendToEnvironment(config::EnvironmentCollection&& newValue) noexcept;
 
                 /**
                  * Checks whether other instance equals this instance of the object
@@ -130,9 +126,10 @@ namespace execHelper {
 
             private:
                 TaskCollection m_task;
-                EnvironmentCollection m_env;
+                config::EnvironmentCollection m_env;
                 config::Path m_workingDirectory;
         };
+        using Tasks = std::vector<Task>;
         
         /**
          * Adds the details of the Task object to the given stream

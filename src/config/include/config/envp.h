@@ -1,10 +1,10 @@
 #ifndef ENVP_INCLUDES
 #define ENVP_INCLUDES
 
-#include "task.h"
+#include "environment.h"
 
 namespace execHelper {
-    namespace core {
+    namespace config {
         /**
          * \brief Wrapper for the envp argument
          */
@@ -46,6 +46,11 @@ namespace execHelper {
                 size_t size() const noexcept;
 
                 /**
+                 * Clears the current content of the collection
+                 */
+                void clear() noexcept;
+
+                /**
                  * Get the envp pointer as an array of C-style strings. The array is delimited by a nullptr.
                  *
                  * \returns A pointer to an array of pointers to environment variables
@@ -70,7 +75,7 @@ namespace execHelper {
         };
 
         std::ostream& operator<<(std::ostream& os, const Envp& envp) noexcept;
-    } // namespace core
+    } // namespace config
 } // namespace execHelper
 
 #endif  /* ENVP_INCLUDES */

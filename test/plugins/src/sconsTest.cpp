@@ -2,118 +2,140 @@
 
 #include <gsl/string_span>
 
-#include "core/pattern.h"
+#include "config/path.h"
+#include "config/pattern.h"
+#include "config/variablesMap.h"
+#include "plugins/commandLine.h"
 #include "plugins/pluginUtils.h"
 #include "plugins/scons.h"
+#include "plugins/threadedness.h"
+#include "plugins/verbosity.h"
 #include "unittest/catch.h"
 #include "utils/utils.h"
 
 #include "executorStub.h"
-#include "optionsStub.h"
+#include "fleetingOptionsStub.h"
 
 using std::string;
+using std::to_string;
 
 using gsl::czstring;
 
-using execHelper::config::SettingsNode;
+using execHelper::config::Path;
+using execHelper::config::Pattern;
+using execHelper::config::Patterns;
+using execHelper::config::VariablesMap;
 using execHelper::core::Task;
 using execHelper::core::TaskCollection;
 
 using execHelper::core::test::ExecutorStub;
-using execHelper::test::OptionsStub;
-using execHelper::test::utils::copyAndAppend;
-using execHelper::test::utils::TargetUtil;
-using execHelper::test::utils::CompilerUtil;
-using execHelper::test::utils::Patterns;
-using execHelper::test::utils::addPatterns;
+using execHelper::test::FleetingOptionsStub;
+using execHelper::test::utils::getExpectedTasks;
 
 namespace {
-    const czstring<> PLUGIN_CONFIG_KEY("scons");
-    const czstring<> PLUGIN_COMMAND("scons");
+    const czstring<> PLUGIN_NAME = "scons";
+    const czstring<> BUILD_DIR_KEY = "build-dir";
 } // namespace
 
 namespace execHelper { namespace plugins { namespace test {
-    SCENARIO("Testing the configuration settings of the scons plugin", "[plugins][scons]") {
+    SCENARIO("Obtain the plugin name of the scons plugin", "[scons]") {
+        GIVEN("A plugin") {
+            Scons plugin;
+
+            WHEN("We request the plugin name") {
+                const string pluginName = plugin.getPluginName();
+
+                THEN("We should find the correct plugin name") {
+                    REQUIRE(pluginName == PLUGIN_NAME);
+                }
+            }
+        }
+    }
+
+    SCENARIO("Obtain the default variables map of the scons plugin", "[scons]") {
+        MAKE_COMBINATIONS("The default fleeting options") {
+            FleetingOptionsStub fleetingOptions;
+            Scons plugin;
+
+            VariablesMap actualVariables(plugin.getPluginName());
+            actualVariables.add(BUILD_DIR_KEY, ".");
+            actualVariables.add(COMMAND_LINE_KEY);
+            actualVariables.add(VERBOSITY_KEY, "no");
+            actualVariables.add(JOBS_KEY, to_string(fleetingOptions.getJobs()));
+
+            COMBINATIONS("Switch on verbosity") {
+                fleetingOptions.m_verbose = true;
+                actualVariables.replace(VERBOSITY_KEY, "yes");
+            }
+
+            COMBINATIONS("Switch on single threaded") {
+                fleetingOptions.m_jobs = 1U;
+                actualVariables.replace(JOBS_KEY, to_string(fleetingOptions.m_jobs));
+            }
+
+            THEN_WHEN("We request the variables map") {
+                VariablesMap variables = plugin.getVariablesMap(fleetingOptions);
+
+                THEN_CHECK("We should find the same ones") {
+                    REQUIRE(variables == actualVariables);
+                }
+            }
+        }
+    }
+
+
+    SCENARIO("Testing the configuration settings of the scons plugin", "[scons]") {
         MAKE_COMBINATIONS("Of several settings") {
-            const string command("scons-command");
-
-            OptionsStub options;
-
-            TargetUtil targetUtil;
-            addPatterns(targetUtil.getPatterns(), &options);
-
-            CompilerUtil compilerUtil;
-            addPatterns(compilerUtil.getPatterns(), &options);
-
-            SettingsNode& rootSettings = options.m_settings;
-            rootSettings.add({PLUGIN_CONFIG_KEY, "patterns"}, targetUtil.getKeys());
-            rootSettings.add({PLUGIN_CONFIG_KEY, "patterns"}, compilerUtil.getKeys());
-
-            // Add the settings of an other command to make sure we take the expected ones
-            const string otherCommandKey("other-command");
+            const Pattern pattern1("PATTERN1", {"value1a", "value1b"});
+            const Pattern pattern2("PATTERN2", {"value2a", "value2b"});
+            const Patterns patterns({pattern1, pattern2});
 
             Scons plugin;
-            Task task;
+            VariablesMap variables = plugin.getVariablesMap(FleetingOptionsStub());
 
-            Task expectedTask({PLUGIN_COMMAND});
-            TaskCollection jobs({"--jobs", "8"});
-            TaskCollection verbosity;
-            TaskCollection commandLine;
+            Path workingDir(".");
+            CommandLineArgs commandLine;
+            bool verbosity = false;
+            auto jobs = variables.get<Jobs>(JOBS_KEY).get();
 
-            SettingsNode::SettingsKeys baseSettingsKeys = {PLUGIN_CONFIG_KEY};
-            SettingsNode::SettingsKeys otherBaseSettingsKeys = {PLUGIN_CONFIG_KEY, otherCommandKey};
+            ExecutorStub executor;
+            ExecuteCallback executeCallback = [&executor](const Task& task) { executor.execute(task);};
+            registerExecuteCallback(executeCallback);
 
-            COMBINATIONS("Toggle between general and specific command settings") {
-                baseSettingsKeys.push_back(command);
-            }
-
-            COMBINATIONS("Switch on multi-threading") {
-                // Note: we may be overruling the option above
-                rootSettings.add(copyAndAppend(baseSettingsKeys, "single-threaded"), "no");     // Last value counts
-                rootSettings.add(copyAndAppend(otherBaseSettingsKeys, "single-threaded"), "yes");
-                jobs = TaskCollection({"--jobs", "8"});
-            }
-
-            COMBINATIONS("Switch off multi-threading") {
-                rootSettings.add(copyAndAppend(baseSettingsKeys, "single-threaded"), "yes");
-                rootSettings.add(copyAndAppend(otherBaseSettingsKeys, "single-threaded"), "no");
-                jobs.clear();
-            }
-
-            COMBINATIONS("Switch off the multi-threading option") {
-                options.m_singleThreaded = true;
-                jobs.clear();
-            }
-
-            COMBINATIONS("Switch off verbosity") {
-                options.m_verbosity = false;
+            COMBINATIONS("Switch off threading") {
+                jobs = 1U;
+                variables.replace(JOBS_KEY, to_string(jobs));
             }
 
             COMBINATIONS("Switch on verbosity") {
-                verbosity.emplace_back("--debug=explain");
-                options.m_verbosity = true;
+                verbosity = true;
+                variables.replace(VERBOSITY_KEY, "yes");
             }
 
             COMBINATIONS("Add a command line") {
-                commandLine = {"{" + targetUtil.target.getKey() + "}{" + targetUtil.runTarget.getKey() + "}", "blaat/{HELLO}/{" + compilerUtil.compiler.getKey() + "}"};
-
-                rootSettings.add(copyAndAppend(baseSettingsKeys, "command-line"), commandLine);
-                rootSettings.add(copyAndAppend(otherBaseSettingsKeys, "command-line"), "--some-command");
+                commandLine = {"{" + pattern1.getKey() + "}{" + pattern2.getKey() + "}", "blaat/{HELLO}/{" + pattern1.getKey() + "}"};
+                variables.replace(COMMAND_LINE_KEY, commandLine);
             }
 
-            expectedTask.append(jobs);
-            expectedTask.append(verbosity);
+            Task expectedTask({PLUGIN_NAME});
+            if(verbosity) {
+                expectedTask.append("--debug=explain");
+            }
+            expectedTask.append({"--jobs", to_string(jobs)});
             expectedTask.append(commandLine);
 
-            ExecutorStub::TaskQueue expectedTasks = getExpectedTasks(expectedTask, compilerUtil, targetUtil);
+            ExecutorStub::TaskQueue expectedTasks = getExpectedTasks(expectedTask, patterns);
 
-            bool returnCode = plugin.apply(command, task, options);
-            THEN_CHECK("It should succeed") {
-                REQUIRE(returnCode);
-            }
+            THEN_WHEN("We apply the plugin") {
+                Task task;
+                bool returnCode = plugin.apply(task, variables, patterns);
+                THEN_CHECK("It should succeed") {
+                    REQUIRE(returnCode);
+                }
 
-            THEN_CHECK("It called the right commands") {
-                REQUIRE(expectedTasks == options.m_executor.getExecutedTasks());
+                THEN_CHECK("It called the right commands") {
+                    REQUIRE(expectedTasks == executor.getExecutedTasks());
+                }
             }
         }
     }

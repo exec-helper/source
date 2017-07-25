@@ -8,9 +8,10 @@
 #include <catch.hpp>
 
 #include "config/settingsNode.h"
+#include "log/log.h"
 #include "yaml/yaml.h"
 
-#include "base-utils/tmpFile.h"
+#include "base-utils/configFileWriter.h"
 #include "utils/utils.h"
 
 using std::pair;
@@ -21,12 +22,14 @@ using std::endl;
 
 using execHelper::config::Path;
 using execHelper::config::SettingsNode;
-using execHelper::test::baseUtils::TmpFile;
+using execHelper::test::baseUtils::ConfigFileWriter;
 using execHelper::test::utils::convertToConfig;
 using execHelper::test::utils::writeSettingsFile;
 
 namespace execHelper { namespace yaml { namespace test {
     SCENARIO("Yaml wrapper test", "[yaml][yamlwrapper]") {
+        execHelper::log::init();
+
         GIVEN("A yaml config string to parse") {
             const string key("commands");
             const vector<string> values = {"command1", "command2", "command3"};
@@ -51,8 +54,6 @@ namespace execHelper { namespace yaml { namespace test {
 
     SCENARIO("Extensive Yaml file wrapper test", "[yaml][yamlwrapper]") {
         GIVEN("A yaml config file to parse and the right result") {
-            TmpFile file;
-
             vector<string> correctCommands = {"init", "build", "run", "analyze"};
             vector<string> correctInit = {"git-submodules", "configure"};
             vector<string> correctBuild = {"scons", "make"};
@@ -80,7 +81,8 @@ namespace execHelper { namespace yaml { namespace test {
             correctSettings.add({"pmd", "auto-install"}, correctPmdAutoInstall);
             correctSettings.add({"command-line", "run"}, correctRunCommandLine);
 
-            writeSettingsFile(file.getPath().native(), correctSettings, {});
+            ConfigFileWriter file;
+            writeSettingsFile(&file, correctSettings, {});
 
             WHEN("We pass the config to the yaml wrapper") {
                 Yaml yaml(file.getPath());
@@ -154,7 +156,7 @@ namespace execHelper { namespace yaml { namespace test {
 
                 THEN("We should get the same values") {
                     for(const auto& firstDimension : actualArray) {
-                        REQUIRE(settings.get({firstDimension.first}, {"blaat"}) == firstDimension.second);
+                        REQUIRE(settings.get<vector<string>>({firstDimension.first}, {"blaat"}) == firstDimension.second);
                     }
                 }
             }
@@ -179,7 +181,7 @@ namespace execHelper { namespace yaml { namespace test {
 
                 THEN("We should get the same values") {
                     for(const auto& firstDimension : actualArray) {
-                        REQUIRE(settings.get({firstDimension.first}, {"blaat"}) == firstDimension.second);
+                        REQUIRE(settings.get<vector<string>>({firstDimension.first}, {"blaat"}) == firstDimension.second);
                     }
                 }
             }
@@ -188,7 +190,7 @@ namespace execHelper { namespace yaml { namespace test {
 
     SCENARIO("Yaml does not find the supplied configuration file", "[yaml][yamlwrapper]") {
         GIVEN("A configuration file that does not exist") {
-            TmpFile file;
+            ConfigFileWriter file;
             const string expectedErrorMessage("bad file");
 
             WHEN("We pass it to yaml") {

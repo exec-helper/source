@@ -1,5 +1,5 @@
 ---
-Checks: 'clang-diagnostic-*,clang-analyzer-*,*,-llvm-header-guard,-hicpp-no-assembler,-cert-err58-cpp'
+Checks: 'clang-diagnostic-*,clang-analyzer-*,*,-llvm-header-guard,-hicpp-no-assembler,-cert-err58-cpp,-google-readability-function-size,-hicpp-function-size,-readability-function-size'
 
 WarningsAsErrors: '.*'
 HeaderFilterRegex: '^(?!gsl_).*'

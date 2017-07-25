@@ -53,7 +53,6 @@ if(BUILD_MAN_DOCUMENTATION)
     )
     set(MAN5_EXTENSION .5)
 
-    list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/modules)
     find_package(Gzip REQUIRED)
     if(NOT DOXYGEN_FOUND)
         message(FATAL_ERROR "Doxygen is required to build the documentation.")

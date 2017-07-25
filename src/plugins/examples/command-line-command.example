@@ -3,7 +3,7 @@ commands:                       # Define the commands that can be run
 
 patterns:                       # Define the patterns that can be used
     EXAMPLE_PATTERN:            # Define the EXAMPLE_PATTERN.
-        default-values:         # Only define the default value
+        default-values:         # Define the default value
             - world!
 
 example:

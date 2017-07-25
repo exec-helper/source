@@ -1,11 +1,35 @@
 #include "memory.h"
 
+#include <gsl/string_span>
+
+#include "config/fleetingOptionsInterface.h"
+#include "config/variablesMap.h"
+
+using gsl::czstring;
+
+using execHelper::config::FleetingOptionsInterface;
+using execHelper::config::Patterns;
+using execHelper::config::VariablesMap;
+using execHelper::core::Task;
+
+namespace {
+    const czstring<> PLUGIN_NAME = "memory";
+} // namespace
+
 namespace execHelper { namespace plugins {
     Memory::Memories Memory::m_executions = {}; // NOLINT(readability-redundant-declaration)
     bool Memory::m_returnCode = true;   // NOLINT(readability-redundant-declaration)
 
-    bool Memory::apply(const core::Command& command, core::Task task, const core::Options& options) const noexcept {
-        Memory_t newElement(command, &task, task, &options);
+    std::string Memory::getPluginName() const noexcept {
+       return PLUGIN_NAME; 
+    }
+
+    VariablesMap Memory::getVariablesMap(const FleetingOptionsInterface& /*fleetingOptions*/) const noexcept {
+        return VariablesMap(PLUGIN_NAME);
+    }
+
+    bool Memory::apply(Task task, const VariablesMap& variables, const Patterns& patterns) const noexcept {
+        Memory_t newElement(task, variables, patterns);
         m_executions.emplace_back(newElement);
         return m_returnCode;
     }

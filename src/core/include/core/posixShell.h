@@ -17,7 +17,9 @@ namespace execHelper {
                 bool isExecutedSuccessfully(ShellReturnCode returnCode) const noexcept override;
 
             private:
+                // cppcheck-suppress unusedPrivateFunction
                 void childProcessExecute(const Task& task) const noexcept;
+                // cppcheck-suppress unusedPrivateFunction
                 ShellReturnCode waitForChild(pid_t pid) const noexcept;
 
                 static TaskCollection shellExpand(const Task& task) noexcept;

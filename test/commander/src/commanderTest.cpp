@@ -1,58 +1,132 @@
 #include <string>
-#include <tuple>
 #include <vector>
 
 #include <boost/filesystem.hpp>
-#include <catch.hpp>
+#include <gsl/string_span>
 
 #include "commander/commander.h"
+#include "config/pattern.h"
+#include "config/settingsNode.h"
+#include "config/variablesMap.h"
+#include "log/log.h"
 #include "plugins/memory.h"
+#include "plugins/pluginUtils.h"
 #include "utils/utils.h"
+#include "unittest/catch.h"
 
 #include "executorStub.h"
-#include "optionsStub.h"
+#include "fleetingOptionsStub.h"
 
-using std::vector;
+using std::move;
 using std::string;
+using std::vector;
 
 using boost::filesystem::current_path;
+using gsl::czstring;
 
+using execHelper::config::Command;
+using execHelper::config::CommandCollection;
+using execHelper::config::EnvironmentCollection;
 using execHelper::config::Path;
-using execHelper::core::Command;
-using execHelper::core::EnvironmentCollection;
+using execHelper::config::Pattern;
+using execHelper::config::Patterns;
+using execHelper::config::SettingsNode;
+using execHelper::config::VariablesMap;
+using execHelper::core::Task;
 using execHelper::plugins::Memory;
 using execHelper::plugins::MemoryHandler;
+using execHelper::plugins::getPatternsKey;
 
-using execHelper::test::OptionsStub;
-using execHelper::test::utils::addSettings;
+using execHelper::test::FleetingOptionsStub;
+using execHelper::core::test::ExecutorStub;
+
+namespace {
+   const czstring<> COMMANDS_KEY = "commands";
+   const czstring<> MEMORY_KEY = "memory";
+} // namespace
 
 namespace execHelper { namespace commander { namespace test {
     SCENARIO("Basic test the commander", "[commander]") {
-        GIVEN("A fully configured commander and a configuration file") {
-            string command1("command1");
-            string command2("command2");
-            vector<string> commands({command1, command2});
+        execHelper::log::init();
 
-            OptionsStub options;
-            addSettings(&options.m_settings, "commands", commands);
-            addSettings(&options.m_settings, command1, {"memory"});
-            addSettings(&options.m_settings, command2, {"memory"});
+        MAKE_COMBINATIONS("Of different inputs for the commander") {
+            FleetingOptionsStub fleetingOptions;
 
-            options.m_commands = commands;
+            ExecutorStub::TaskQueue expectedTasks;
+
+            SettingsNode settings("test");
+
+            Patterns patterns;
+            EnvironmentCollection env;
+            Path workingDirectory = current_path();
 
             MemoryHandler memory;
+            Commander commander;
 
-            Commander commander(options, current_path());
+            const Command command1("command1");
+            fleetingOptions.m_commands.push_back(command1);
+            settings.add(COMMANDS_KEY, command1);
+            settings.add(command1, MEMORY_KEY);
+            
+            Task expectedTask;
+            expectedTask.setWorkingDirectory(workingDirectory);
+            expectedTasks.emplace_back(expectedTask);
 
-            WHEN("We apply the configuration and run the commander") {
-                REQUIRE(commander.run());
+            COMBINATIONS("Add multiple commands") {
+                const CommandCollection commands({"multiple-command1", "multiple-command2"});
+                for(const auto& command : commands) {
+                    fleetingOptions.m_commands.push_back(command);
+                    settings.add(COMMANDS_KEY, command);
+                    settings.add(command, MEMORY_KEY);
 
-                THEN("We should get the tasks executed") {
+                    Task expectedTask;
+                    expectedTask.setWorkingDirectory(workingDirectory);
+                    expectedTasks.emplace_back(expectedTask);
+                }
+            }
+
+            COMBINATIONS("Add patterns") {
+                patterns.emplace_back(Pattern("pattern1", {"value1a", "value1b"}));
+                patterns.emplace_back(Pattern("pattern2", {"value2a", "value2b"}));
+                patterns.emplace_back(Pattern("pattern3", {"value3a", "value3b"}));
+            }
+
+            COMBINATIONS("Change working directory") {
+                workingDirectory = "/tmp";
+
+                for(auto& expectedTask : expectedTasks) {
+                    expectedTask.setWorkingDirectory(workingDirectory);
+                }
+            }
+
+            COMBINATIONS("Set environment") {
+                env.emplace("ENV1", "VALUE1");
+                env.emplace("ENV2", "VALUE2");
+
+                for(auto& expectedTask: expectedTasks) {
+                    expectedTask.setEnvironment(env);
+                }
+            }
+
+            for(const auto& pattern : patterns) {
+                settings.add({MEMORY_KEY, getPatternsKey()}, pattern.getKey());
+            }
+
+            THEN_WHEN("We apply the configuration and run the commander") {
+                bool returnCode = commander.run(fleetingOptions, move(settings), Patterns(patterns), workingDirectory, env);
+
+                THEN_CHECK("It must succeed") {
+                    REQUIRE(returnCode);
+                }
+
+                THEN_CHECK("We should get the tasks executed") {
                     const Memory::Memories& memories = memory.getExecutions();
+                    REQUIRE(memories.size() == expectedTasks.size());
 
-                    REQUIRE(memories.size() == commands.size());
-                    for(size_t i = 0; i < memories.size(); ++i) {
-                        REQUIRE(memories[i].command == commands[i]);
+                    auto expectedTask = expectedTasks.begin();
+                    for(auto memory = memories.begin(); memory != memories.end(); ++expectedTask, ++memory) {
+                        REQUIRE(memory->task == *expectedTask);
+                        REQUIRE(memory->patterns == patterns);
                     }
                 }
             }
@@ -65,92 +139,42 @@ namespace execHelper { namespace commander { namespace test {
             string command2("command2");
             vector<string> commands({command1, command2});
 
-            OptionsStub options;
-            addSettings(&options.m_settings, "commands", commands);
-            addSettings(&options.m_settings, command1, {"memory"});
-            addSettings(&options.m_settings, command2, {"memory"});
+            FleetingOptionsStub fleetingOptions;
+            fleetingOptions.m_commands = {"command3"};
 
-            options.m_commands = {"command3"};
+            SettingsNode settings("test");
+            settings.add(COMMANDS_KEY, commands);
+            settings.add(command1, MEMORY_KEY);
+            settings.add(command2, MEMORY_KEY);
 
-            Commander commander(options, current_path());
+            Commander commander;
 
             WHEN("We apply the configuration and run the commander") {
                 THEN("It should fail") {
-                    REQUIRE_FALSE(commander.run());
+                    REQUIRE_FALSE(commander.run(fleetingOptions, move(settings), Patterns(), current_path(), EnvironmentCollection()));
                 }
             }
         }
     }
 
-    SCENARIO("Test setting the environment") {
-        GIVEN("Basic options") {
-            const string command1("command1");
-            vector<string> commands({command1});
+    SCENARIO("Test when no commands are passed", "[commander]") {
+        GIVEN("A fully configured commander and no command set") {
+            string command1("command1");
+            string command2("command2");
+            vector<string> commands({command1, command2});
 
-            OptionsStub options;
-            addSettings(&options.m_settings, "commands", commands);
-            addSettings(&options.m_settings, command1, {"memory"});
+            FleetingOptionsStub fleetingOptions;
 
-            options.m_commands = commands;
+            SettingsNode settings("test");
+            settings.add(COMMANDS_KEY, commands);
+            settings.add(command1, MEMORY_KEY);
+            settings.add(command2, MEMORY_KEY);
 
-            MemoryHandler memory;
-            EnvironmentCollection environment;
+            Commander commander;
 
-            WHEN("We define an empty environment and run the commander") {
-                ;
-            }
-
-            WHEN("We define an environment and run the commander") {
-                environment.emplace("VAR1", "value1");
-                environment.emplace("VAR2", "value2");
-            }
-
-            THEN_WHEN("We run the commander") {
-                EnvironmentCollection commanderEnvironment = environment;
-                Commander commander(options, current_path(), std::move(commanderEnvironment));
-                bool returnCode = commander.run();
-
-                THEN_CHECK("It must succeed") {
-                    REQUIRE(returnCode);
-                }
-
-                THEN_CHECK("We must find the same environment") {
-                    const Memory::Memories& memories = memory.getExecutions();
-                    REQUIRE(memories.size() == 1U);
-                    REQUIRE(memories[0].command == command1);
-                    REQUIRE(memories[0].task.getEnvironment() == environment);
-                }
-            }
-        }
-    }
-
-    SCENARIO("Test the working directory") {
-        GIVEN("A basic setup for the commander") {
-            string command("command1");
-            vector<string> commands({command});
-
-            OptionsStub options;
-            addSettings(&options.m_settings, "commands", commands);
-            addSettings(&options.m_settings, command, {"memory"});
-
-            options.m_commands = commands;
-
-            MemoryHandler memory;
-
-            WHEN("We create and run the commander with an existing working directory") {
-                Path actualWorkingDirectory("./tmp");
-
-                Commander commander(options, actualWorkingDirectory);
-                bool returnCode = commander.run();
-
-                THEN("It should succeed") {
-                    REQUIRE(returnCode);
-                }
-
-                THEN("We should find the correct working directory") {
-                    const Memory::Memories& memories = memory.getExecutions();
-                    REQUIRE(memories.size() == 1U);
-                    REQUIRE(memories[0].task.getWorkingDirectory() == actualWorkingDirectory);
+            WHEN("We apply the configuration and run the commander") {
+                THEN("It should fail") {
+                    REQUIRE_FALSE(commander.run(fleetingOptions, move(settings), Patterns(), current_path(), EnvironmentCollection()));
                 }
             }
         }

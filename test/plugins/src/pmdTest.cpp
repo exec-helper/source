@@ -2,191 +2,139 @@
 
 #include <gsl/string_span>
 
-#include "core/pattern.h"
+#include "config/pattern.h"
+#include "config/variablesMap.h"
 #include "core/task.h"
+#include "plugins/commandLine.h"
 #include "plugins/pluginUtils.h"
 #include "plugins/pmd.h"
+#include "plugins/verbosity.h"
 #include "unittest/catch.h"
 #include "utils/utils.h"
 
 #include "executorStub.h"
-#include "optionsStub.h"
+#include "fleetingOptionsStub.h"
 
 using std::vector;
 using std::string;
 
 using gsl::czstring;
 
-using execHelper::config::SettingsNode;
-using execHelper::core::Pattern;
-using execHelper::core::PatternKeys;
+using execHelper::config::Pattern;
+using execHelper::config::Patterns;
+using execHelper::config::VariablesMap;
 using execHelper::core::Task;
 using execHelper::core::TaskCollection;
+using execHelper::plugins::COMMAND_LINE_KEY;
 using execHelper::plugins::Pmd;
+using execHelper::plugins::VERBOSITY_KEY;
+using execHelper::plugins::ExecuteCallback;
+using execHelper::plugins::registerExecuteCallback;
 
-using execHelper::test::OptionsStub;
-using execHelper::test::utils::Patterns;
-using execHelper::test::utils::copyAndAppend;
+using execHelper::test::FleetingOptionsStub;
 using execHelper::core::test::ExecutorStub;
+using execHelper::test::utils::getExpectedTasks;
 
 namespace {
-    const czstring<> pmdConfigKey("pmd");
-    const czstring<> PLUGIN_CONFIG_KEY("pmd");
-    const czstring<> EXEC_CONFIG_KEY("exec");
-    const czstring<> TOOL_CONFIG_KEY("tool");
-    const czstring<> MINIMUM_TOKENS_CONFIG_KEY("minimum-tokens");
-    const czstring<> FILES_CONFIG_KEY("files");
-    const czstring<> LANGUAGE_CONFIG_KEY("language");
+    const czstring<> PLUGIN_NAME = "pmd";
+    using Exec = string;
+    const czstring<> EXEC_KEY = "exec";
+    using Tool = string;
+    const czstring<> TOOL_KEY = "tool";
+    using MinimumTokens = string;
+    const czstring<> MINIMUM_TOKENS_KEY = "minimum-tokens";
+    using Files = vector<string>;
+    const czstring<> FILES_KEY = "files";
+    using Language = string;
+    const czstring<> LANGUAGE_KEY = "language";
 } // namespace
 
 namespace execHelper { namespace plugins { namespace test {
-    SCENARIO("Test the default options of the pmd plugin", "[plugins][pmd]") {
-        GIVEN("A default configuration and the plugin") {
+    SCENARIO("Obtain the plugin name of the pmd plugin", "[pmd]") {
+        GIVEN("A plugin") {
             Pmd plugin;
 
-            Task task;
-            const OptionsStub options;
+            WHEN("We request the plugin name") {
+                const string pluginName = plugin.getPluginName();
 
-            WHEN("We call the plugin") {
-                bool returnCode = plugin.apply("random-command", task, options);
-
-                THEN("The call should fail") {
-                    REQUIRE_FALSE(returnCode);
+                THEN("We should find the correct plugin name") {
+                    REQUIRE(pluginName == PLUGIN_NAME);
                 }
             }
         }
     }
 
-    SCENARIO("Test the mandatory options of the pmd plugin", "[plugins][pmd]") {
-        GIVEN("The respective configuration and the plugin") {
-            const string command("pmd-command");
-
-            OptionsStub options;
-            SettingsNode& rootSettings = options.m_settings;
-
+    SCENARIO("Obtaining the default variables map of the pmd plugin", "[pmd]") {
+        MAKE_COMBINATIONS("The default fleeting options") {
+            FleetingOptionsStub fleetingOptions;
             Pmd plugin;
-            Task task;
 
-            WHEN("We add the tool config parameter") {
-                AND_WHEN("We use a general parameter") {
-                    rootSettings.add({pmdConfigKey, "tool"}, "tool");
-                }
-                AND_WHEN("We use a specific parameter") {
-                    rootSettings.add({pmdConfigKey, command, "tool"}, "tool");
-                }
+            VariablesMap actualVariables(plugin.getPluginName());
+            actualVariables.add(EXEC_KEY, PLUGIN_NAME);
+            actualVariables.add(TOOL_KEY, "cpd");
+            actualVariables.add(COMMAND_LINE_KEY);
+            actualVariables.add(VERBOSITY_KEY, "no");
 
-                THEN_WHEN("We apply the plugin") {
-                    bool returnCode = plugin.apply(command, task, options);
-
-                    THEN_CHECK("That the apply succeeds") {
-                        REQUIRE_FALSE(returnCode);
-                    }
-                }
+            COMBINATIONS("Switch on verbosity") {
+                fleetingOptions.m_verbose = true;
+                actualVariables.replace(VERBOSITY_KEY, "yes");
             }
 
-            WHEN("We add the exec config parameter") {
-                THEN("As a general parameter") {
-                    rootSettings.add({pmdConfigKey, "exec"}, "pmd.sh");
-                }
-                THEN("As a specific parameter") {
-                    rootSettings.add({pmdConfigKey, command, "exec"}, "pmd.sh");
-                }
-                REQUIRE_FALSE(plugin.apply(command, task, options));
-            }
+            THEN_WHEN("We request the variables map") {
+                VariablesMap variables = plugin.getVariablesMap(fleetingOptions);
 
-            WHEN("We add all mandatory config parameters and apply command ") {
-                THEN("As a general command") {
-                    rootSettings.add({pmdConfigKey, "tool"}, "tool");
-                    rootSettings.add({pmdConfigKey, "exec"}, "pmd.sh");
+                THEN_CHECK("We should find the same ones") {
+                    REQUIRE(variables == actualVariables);
                 }
-                THEN("As a specific command") {
-                    rootSettings.add({pmdConfigKey, command, "tool"}, "tool");
-                    rootSettings.add({pmdConfigKey, command, "exec"}, "pmd.sh");
-                }
-
-                REQUIRE(plugin.apply(command, task, options));
-
-                ExecutorStub::TaskQueue actualTasks;
-                Task actualTask({"pmd.sh", "tool"});
-                actualTasks.emplace_back(actualTask);
-                REQUIRE(actualTasks == options.m_executor.getExecutedTasks());
             }
         }
     }
-
-    SCENARIO("Make combinations of different configurations for the pmd plugin", "[plugins][pmd]") {
+ 
+    SCENARIO("Make combinations of different configurations for the pmd plugin", "[pmd]") {
         MAKE_COMBINATIONS("Of several settings") {
-            const string command("pmd-command");
-
-            const Pattern PATTERN1("PATTERN1", {"pattern1"}, 'p', "--pattern1");
-            const Pattern PATTERN2("PATTERN2", {"pattern2a", "pattern2b"}, 'q', "--pattern2");
-            const Patterns PATTERNS({PATTERN1, PATTERN2});
-            const PatternKeys PATTERN_KEYS({PATTERN1.getKey(), PATTERN2.getKey()});
-
-            OptionsStub options;
-            for(const auto& pattern : PATTERNS) {
-                options.m_patternsHandler->addPattern(pattern);
-            }
-
-            SettingsNode& rootSettings = options.m_settings;
-            rootSettings.add({PLUGIN_CONFIG_KEY, "patterns"}, {PATTERN1.getKey(), PATTERN2.getKey()});
-
-            // Add the settings of an other command to make sure we take the expected ones
-            const string otherCommandKey("other-command");
+            const Pattern pattern1("PATTERN1", {"value1a", "value1b"});
+            const Pattern pattern2("PATTERN2", {"value2a", "value2b"});
+            const Patterns patterns({pattern1, pattern2});
 
             Pmd plugin;
             Task task;
+
+            VariablesMap variables = plugin.getVariablesMap(FleetingOptionsStub());
 
             Task expectedTask;
-            TaskCollection exec({"pmd.sh"});
-            TaskCollection tool({"tool1"});
             TaskCollection minimumTokens;
             TaskCollection files;
             TaskCollection verbosity;
             TaskCollection language;
             TaskCollection commandLine;
 
-            SettingsNode::SettingsKeys baseSettingsKeys = {PLUGIN_CONFIG_KEY};
-            SettingsNode::SettingsKeys otherBaseSettingsKeys = {PLUGIN_CONFIG_KEY, otherCommandKey};
+            ExecutorStub executor;
+            ExecuteCallback executeCallback = [&executor](const Task& task) { executor.execute(task);};
+            registerExecuteCallback(executeCallback);
 
-            COMBINATIONS("Toggle between general and specific command settings") {
-                baseSettingsKeys.push_back(command);
+            COMBINATIONS("Switch exec") {
+                variables.replace(EXEC_KEY, "exec.sh");
             }
 
-            rootSettings.add(copyAndAppend(otherBaseSettingsKeys, EXEC_CONFIG_KEY), "other-exec");
-            rootSettings.add(copyAndAppend(otherBaseSettingsKeys, TOOL_CONFIG_KEY), "other-tool");
-
-            COMBINATIONS("Switch off verbosity") {
-                options.m_verbosity = false;
-            }
-
-            COMBINATIONS("Switch on verbosity") {
-                options.m_verbosity = true;
-                verbosity.emplace_back("-verbose");
-            }
-
-            COMBINATIONS("Switch on the cpd tool") {
-                tool.clear();
-                tool = {"cpd"};
+            COMBINATIONS("Switch the tool") {
+                variables.replace(TOOL_KEY, "tool1");
             }
 
             COMBINATIONS("Switch on minimum tokens") {
-                const string minimumTokensValue("100");
-                rootSettings.add(copyAndAppend(baseSettingsKeys, MINIMUM_TOKENS_CONFIG_KEY), minimumTokensValue);
+                variables.replace(MINIMUM_TOKENS_KEY, "100");
 
-                if(tool[0] == "cpd") {
+                if(variables.get<Tool>(TOOL_KEY) == Tool("cpd")) {
                     minimumTokens.emplace_back("--minimum-tokens");
-                    minimumTokens.emplace_back("100");
+                    minimumTokens.emplace_back(variables.get<MinimumTokens>(MINIMUM_TOKENS_KEY).get());
                 }
             }
 
             COMBINATIONS("Switch on files") {
-                const vector<string> filesValue({"file1", "file2", "file*"});
-                rootSettings.add(copyAndAppend(baseSettingsKeys, FILES_CONFIG_KEY), filesValue);
-                rootSettings.add(copyAndAppend(otherBaseSettingsKeys, FILES_CONFIG_KEY), "other-file");
+                const Files newFiles({"file1", "file2", "file*"});
+                variables.replace(FILES_KEY, newFiles);
 
-                if(tool[0] == "cpd") {
-                    for(const auto& file : filesValue) {
+                if(variables.get<Tool>(TOOL_KEY) == Tool("cpd")) {
+                    for(auto file : newFiles) {
                         files.emplace_back("--files");
                         files.emplace_back(file);
                     }
@@ -194,45 +142,39 @@ namespace execHelper { namespace plugins { namespace test {
             }
 
             COMBINATIONS("Add a language") {
-                const string languageValue("language1");
+                variables.replace(LANGUAGE_KEY, "language1");
                 language.emplace_back("--language");
-                language.push_back(languageValue);
-                rootSettings.add(copyAndAppend(baseSettingsKeys, LANGUAGE_CONFIG_KEY), languageValue);
-                rootSettings.add(copyAndAppend(otherBaseSettingsKeys, LANGUAGE_CONFIG_KEY), "other-language");
+                language.push_back(variables.get<Language>(LANGUAGE_KEY).get());
             }
 
             COMBINATIONS("Add a command line") {
-                commandLine = {"{" + PATTERN2.getKey() + "}", "{" + PATTERN2.getKey() + "}"};
-                rootSettings.add(copyAndAppend(baseSettingsKeys, "command-line"), commandLine);
-                rootSettings.add(copyAndAppend(otherBaseSettingsKeys, "command-line"), "--some-command");
+                commandLine = {"{" + pattern1.getKey() + "}", "{" + pattern2.getKey() + "}"};
+                variables.replace(COMMAND_LINE_KEY, commandLine);
             }
 
-            rootSettings.add(copyAndAppend(baseSettingsKeys, EXEC_CONFIG_KEY), exec);
-            rootSettings.add(copyAndAppend(baseSettingsKeys, TOOL_CONFIG_KEY), tool);
+            COMBINATIONS("Switch on verbosity") {
+                variables.replace(VERBOSITY_KEY, "yes");
+                verbosity.emplace_back("-verbose");
+            }
 
-            expectedTask.append(exec);
-            expectedTask.append(tool);
-            expectedTask.append(minimumTokens);
-            expectedTask.append(files);
+            expectedTask.append(variables.get<Exec>(EXEC_KEY).get());
+            expectedTask.append(variables.get<Tool>(TOOL_KEY).get());
             expectedTask.append(language);
             expectedTask.append(verbosity);
+            expectedTask.append(minimumTokens);
+            expectedTask.append(files);
             expectedTask.append(commandLine);
 
-            ExecutorStub::TaskQueue expectedTasks;
-            for(const std::map<string, string>& target : options.makePatternPermutator(PATTERN_KEYS)) {
-                Task replacedExpectedTask = replacePatternCombinations(expectedTask, target);
-                expectedTasks.emplace_back(replacedExpectedTask);
-            }
+            const ExecutorStub::TaskQueue expectedTasks = getExpectedTasks(expectedTask, patterns);
 
-            bool returnCode = plugin.apply(command, task, options);
+            bool returnCode = plugin.apply(task, variables, patterns);
             THEN_CHECK("It should succeed") {
                 REQUIRE(returnCode);
             }
 
             THEN_CHECK("It called the right commands") {
-                REQUIRE(expectedTasks == options.m_executor.getExecutedTasks());
+                REQUIRE(expectedTasks == executor.getExecutedTasks());
             }
-
         }
     }
 } // namespace test

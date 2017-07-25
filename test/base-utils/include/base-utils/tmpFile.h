@@ -8,12 +8,12 @@ namespace execHelper {
         namespace baseUtils {
             class TmpFile {
                 public:
-                    explicit TmpFile(const Path& model = "exec-helper.tmp.%%%%");
-                    TmpFile(const TmpFile& other) = default;
+                    explicit TmpFile(const std::string& model = "exec-helper.tmp.%%%%");
+                    TmpFile(const TmpFile& other) = delete;
                     TmpFile(TmpFile&& other) = default;     // NOLINT(misc-noexcept-move-constructor)
                     ~TmpFile() noexcept;
 
-                    TmpFile& operator=(const TmpFile& other) = default;
+                    TmpFile& operator=(const TmpFile& other) = delete;
                     TmpFile& operator=(TmpFile&& other) = default;  // NOLINT(misc-noexcept-move-constructor)
 
                     bool exists() const noexcept;

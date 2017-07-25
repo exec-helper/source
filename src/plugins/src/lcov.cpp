@@ -2,140 +2,205 @@
 
 #include <string>
 
-#include "config/settingsNode.h"
-#include "core/task.h"
+#include <gsl/string_span>
 
-#include "configValue.h"
+#include "config/pattern.h"
+#include "config/variablesMap.h"
+#include "core/task.h"
+#include "log/assertions.h"
+
 #include "executePlugin.h"
 #include "logger.h"
 #include "pluginUtils.h"
 
 using std::string;
 
-using execHelper::config::SettingsNode;
-using execHelper::core::Options;
-using execHelper::core::Task;
-using execHelper::core::Command;
-using execHelper::core::TaskCollection;
-using execHelper::core::PatternCombinations;
+using gsl::czstring;
 
+using execHelper::config::CommandCollection;
+using execHelper::config::FleetingOptionsInterface;
+using execHelper::config::Path;
+using execHelper::config::PatternCombinations;
+using execHelper::config::Patterns;
+using execHelper::config::VariablesMap;
+using execHelper::core::Task;
 using execHelper::plugins::replacePatternCombinations;
 using execHelper::plugins::registerTask;
 
 namespace {
-    const char* lcovBinary("lcov");
-    const char* baseDirectoryOption("--base-directory");
-    const char* directoryOption("--directory");
+    const czstring<> PLUGIN_NAME = "lcov";
+    using RunCommand = CommandCollection;
+    const czstring<> RUN_COMMAND = "run-command";
+    const czstring<> INFO_FILE_KEY = "info-file";
+    const czstring<> BASE_DIR_KEY = "base-directory";
+    const czstring<> DIR_KEY = "directory";
+    using ZeroCounters = bool;
+    const czstring<> ZERO_COUNTERS_KEY = "zero-counters";
+    using GenHtml = bool;
+    const czstring<> GEN_HTML_KEY = "gen-html";
+    using GenHtmlOutput = Path;
+    const czstring<> GEN_HTML_OUTPUT_KEY = "gen-html-output";
+    using GenHtmlTitle = string; 
+    const czstring<> GEN_HTML_TITLE_KEY = "gen-html-title";
+    using GenHtmlCommandLine = execHelper::plugins::CommandLineArgs;
+    const czstring<> GEN_HTML_COMMAND_LINE_KEY = "gen-html-command-line";
+    const czstring<> EXCLUDES_KEY = "excludes";
 
-    void runTask(const Task& task, const Options& options, const PatternCombinations& combination) {
-        replacePatternCombinations(task, combination);
-        registerTask(task, options);
+    void runTask(const Task& task, const PatternCombinations& combination) {
+        Task replacedTask = replacePatternCombinations(task, combination);
+        registerTask(replacedTask);
     }
 } // namespace
 
 namespace execHelper { namespace plugins {
-    bool Lcov::apply(const Command& command, Task task, const Options& options) const noexcept {
-        static const string lcovConfigKey("lcov");
+    string Lcov::getPluginName() const noexcept {
+        return PLUGIN_NAME;
+    }
 
-        const SettingsNode& rootSettings = options.getSettings(lcovConfigKey);
+    VariablesMap Lcov::getVariablesMap(const FleetingOptionsInterface& /*fleetingOptions*/) const noexcept {
+        VariablesMap defaults(PLUGIN_NAME);
+        defaults.add(COMMAND_LINE_KEY);
+        defaults.add(INFO_FILE_KEY, "lcov-plugin.info");
+        defaults.add(BASE_DIR_KEY, ".");
+        defaults.add(DIR_KEY, ".");
+        defaults.add(ZERO_COUNTERS_KEY, "no");
+        defaults.add(GEN_HTML_KEY, "no");
+        defaults.add(GEN_HTML_OUTPUT_KEY, ".");
+        defaults.add(GEN_HTML_TITLE_KEY, "Hello");
+        defaults.add(GEN_HTML_COMMAND_LINE_KEY);
+        defaults.add(EXCLUDES_KEY);
+        return defaults;
+    }
 
-        static string runCommandConfigKey("run-command");
-        boost::optional<string> runCommandValue = ConfigValue<string>::getSetting(runCommandConfigKey, rootSettings, command);
-        if(runCommandValue == boost::none) {
-            user_feedback_error("Could not find the '" << runCommandConfigKey << "' setting for command '" << command << "' in the '" << lcovConfigKey << "' settings");
+    bool Lcov::apply(Task task, const VariablesMap& variables, const Patterns& patterns) const noexcept {
+        auto runCommandOpt = variables.get<RunCommand>(RUN_COMMAND);
+        if(runCommandOpt == boost::none) {
+            user_feedback_error("Could not find the '" << RUN_COMMAND << "' setting in the '" << PLUGIN_NAME << "' settings");
             return false;
         }
-        const string runCommand = runCommandValue.get();
+        auto runCommands = runCommandOpt.get();
 
-        const string infoFile = ConfigValue<string>::get("info-file", "lcov-plugin.info", command, rootSettings);
-        const string baseDirectory = ConfigValue<string>::get("base-directory", ".", command, rootSettings);
-        const string directory = ConfigValue<string>::get("directory", ".", command, rootSettings);
-        const TaskCollection commandLine = ConfigValue<TaskCollection>::get("command-line", {}, command, rootSettings);
+        if(runCommands.empty()) {
+            user_feedback_error("The '" << RUN_COMMAND << "' list is empty");
+            return false; 
+        }
 
-        Task zeroCountersTask = task;
-        const bool zeroCounters = generateZeroCountersTask(command, rootSettings, baseDirectory, directory, commandLine, zeroCountersTask);
+        ensures(variables.get<InfoFile>(INFO_FILE_KEY) != boost::none);
+        auto infoFile = variables.get<InfoFile>(INFO_FILE_KEY).get();
 
-        Task genHtmlTask = task;
-        const bool genHtml = generateGenHtmlTask(command, rootSettings, infoFile, genHtmlTask);
+        ensures(variables.get<BaseDir>(BASE_DIR_KEY) != boost::none);
+        auto baseDirectory = variables.get<BaseDir>(BASE_DIR_KEY).get();
 
-        Task captureTask = task;
-        generateCaptureTask(baseDirectory, directory, infoFile, commandLine, captureTask);
+        ensures(variables.get<Dir>(DIR_KEY) != boost::none);
+        auto directory = variables.get<Dir>(DIR_KEY).get();
 
-        Task excludeTask = task;
-        bool exclude = generateExcludeTask(command, rootSettings, infoFile, commandLine, excludeTask);
+        auto commandLine = variables.get<CommandLineArgs>(COMMAND_LINE_KEY).get();
 
-        for(const auto& combination : makePatternPermutator(command, rootSettings, options)) {
+        bool zeroCounters = variables.get<ZeroCounters>(ZERO_COUNTERS_KEY).get();
+        Task zeroCountersTask;
+        if(zeroCounters) {
+            zeroCountersTask = generateZeroCountersTask(baseDirectory, directory, commandLine, task);
+        }
+
+        bool genHtml = variables.get<GenHtml>(GEN_HTML_KEY).get();
+        Task genHtmlTask;
+        if(genHtml) {
+            genHtmlTask = generateGenHtmlTask(infoFile, variables, task);
+        }
+
+        Task captureTask = generateCaptureTask(baseDirectory, directory, infoFile, commandLine, task);
+
+        auto exclude = variables.get<Excludes>(EXCLUDES_KEY).get();
+        Task excludeTask;
+        if(!exclude.empty()) {
+            excludeTask = generateExcludeTask(variables, infoFile, commandLine, task);
+        }
+
+        for(const auto& combination : makePatternPermutator(patterns)) {
             if(zeroCounters) {
-                runTask(zeroCountersTask, options, combination);
+                runTask(zeroCountersTask, combination);
             }
 
-            ExecutePlugin execute({runCommand});
-            if(! execute.apply(command, task, options)) {
+            ExecutePlugin execute(runCommands);
+            if(! execute.apply(task, variables, patterns)) {
                 return false;
             }
 
-            runTask(captureTask, options, combination);
-            if(exclude) {
-                runTask(excludeTask, options, combination);
+            runTask(captureTask, combination);
+            if(!exclude.empty()) {
+                runTask(excludeTask, combination);
             }
             if(genHtml) {
-                runTask(genHtmlTask, options, combination);
+                runTask(genHtmlTask, combination);
             }
         }
         return true;
     }
 
-    inline bool Lcov::generateGenHtmlTask(const Command& command, const SettingsNode& rootSettings, const string& infoFile, Task& task) noexcept {
-        const string genHtmlOutput = ConfigValue<string>::get("gen-html-output", ".", command, rootSettings);
-        const string genHtmlTitle = ConfigValue<string>::get("gen-html-title", "Hello", command, rootSettings);
-        const TaskCollection genHtmlCommandLine = ConfigValue<TaskCollection>::get("gen-html-command-line", {}, command, rootSettings);
+    inline Task Lcov::generateGenHtmlTask(const InfoFile& infoFile, const VariablesMap& variables, const Task& task) noexcept {
+        Task result = task;
+        result.append("genhtml");
 
-        const string genHtmlValue = ConfigValue<string>::get("gen-html", "no", command, rootSettings);
-        if(genHtmlValue == "yes") {
-            task.append(TaskCollection({"genhtml", "--output-directory", genHtmlOutput, "--title", genHtmlTitle, infoFile}));
-            task.append(genHtmlCommandLine);
-            return true;
-        }
-        return false;
+        ensures(variables.get<GenHtmlOutput>(GEN_HTML_OUTPUT_KEY) != boost::none);
+        result.append({"--output-directory", variables.get<GenHtmlOutput>(GEN_HTML_OUTPUT_KEY).get().native()});
+
+        ensures(variables.get<GenHtmlTitle>(GEN_HTML_TITLE_KEY) != boost::none);
+        result.append({"--title", variables.get<GenHtmlTitle>(GEN_HTML_TITLE_KEY).get()});
+
+        ensures(variables.get<GenHtmlCommandLine>(GEN_HTML_COMMAND_LINE_KEY) != boost::none);
+        result.append(variables.get<GenHtmlCommandLine>(GEN_HTML_COMMAND_LINE_KEY).get());
+
+        result.append(infoFile.native());
+
+        return result;
     }
 
-    inline bool Lcov::generateZeroCountersTask(const Command& command, const SettingsNode& rootSettings, const string& baseDirectory, const string& directory, const TaskCollection& commandLine, Task& task) noexcept {
-        const string zeroCountersValue = ConfigValue<string>::get("zero-counters", "no", command, rootSettings);
-        if(zeroCountersValue == "yes") {
-            task = task;
-            task.append(TaskCollection({lcovBinary, baseDirectoryOption, baseDirectory, directoryOption, directory, "--zerocounters"}));
-            task.append(commandLine);
-            return true;
-        }
-        return false;
+    inline Task Lcov::generateZeroCountersTask(const BaseDir& baseDirectory, const Dir& directory, const CommandLineArgs& commandLine, const Task& task) noexcept {
+        Task result = task;
+        result.append(PLUGIN_NAME);
+        result.append({string("--").append(BASE_DIR_KEY), baseDirectory.native()});
+        result.append({string("--").append(DIR_KEY), directory.native()});
+        result.append("--zerocounters");
+        result.append(commandLine);
+        return result;
     }
 
-    inline TaskCollection Lcov::getExcludes(const Command& command, const SettingsNode& rootSettings) noexcept {
-        TaskCollection excludes = ConfigValue<TaskCollection>::get("excludes", {}, command, rootSettings);
-        for(auto& exclude : excludes) {
+    inline Lcov::Excludes Lcov::getExcludes(const VariablesMap& variables) noexcept {
+        auto excludes = variables.get<Excludes>(EXCLUDES_KEY);
+        if(! excludes) {
+            return Excludes();
+        }
+
+        for(auto& exclude : excludes.get()) {
             exclude.insert(0, R"(")");
             exclude.append(R"(")");
         }
-        return excludes;
+        return excludes.get();
     }
 
-    inline bool Lcov::generateExcludeTask(const Command& command, const SettingsNode& rootSettings, const string& infoFile, const TaskCollection& commandLine, Task& task) noexcept {
-        const TaskCollection excludes = getExcludes(command, rootSettings);
+    inline Task Lcov::generateExcludeTask(const VariablesMap& variables, const InfoFile& infoFile, const CommandLineArgs& commandLine, const Task& task) noexcept {
+        Task result = task;
+        auto excludes = getExcludes(variables);
         if(excludes.empty()) {
-            return false;
+            return result;
         }
-
-        task.append(TaskCollection({lcovBinary}));
-        task.append(TaskCollection({"--remove", infoFile}));
-        task.append(excludes);
-        task.append(TaskCollection({"--output-file", infoFile}));
-        task.append(commandLine);
-        return true;
+        result.append(PLUGIN_NAME);
+        result.append({"--remove", infoFile.native()});
+        result.append(excludes);
+        result.append({"--output-file", infoFile.native()});
+        result.append(commandLine);
+        return result;
     }
 
-    inline void Lcov::generateCaptureTask(const string& baseDirectory, const string& directory, const string& infoFile, const TaskCollection& commandLine, Task& task) noexcept {
-        task.append(TaskCollection({lcovBinary, baseDirectoryOption, baseDirectory, directoryOption, directory, "--capture", "--output", infoFile}));
-        task.append(commandLine);
+    inline Task Lcov::generateCaptureTask(const BaseDir& baseDirectory, const Dir& directory, const InfoFile& infoFile, const CommandLineArgs& commandLine, const Task& task) noexcept {
+        Task result = task;
+        result.append(PLUGIN_NAME);
+        result.append({string("--").append(BASE_DIR_KEY), baseDirectory.native()});
+        result.append({string("--").append(DIR_KEY), directory.native()});
+        result.append("--capture");
+        result.append({"--output", infoFile.native()});
+        result.append(commandLine);
+        return result;
     }
 } // namespace plugins
 } // namespace execHelper

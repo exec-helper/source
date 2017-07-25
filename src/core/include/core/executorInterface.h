@@ -22,7 +22,7 @@ namespace execHelper { namespace core {
              * \returns True    When the task is successfully added to the executor. Note: this does not necessarily mean that the task got executed or will successfully execute.
              *          False   Otherwise
              */
-            virtual bool execute(const Task& task) noexcept = 0;
+            virtual void execute(const Task& task) noexcept = 0;
 
         protected:
             ExecutorInterface() = default;

@@ -3,9 +3,9 @@
 
 #include <string>
 
-#include "yaml.h"
-
+#include "path.h"
 #include "tmpFile.h"
+#include "yaml.h"
 
 namespace execHelper {
     namespace test {
@@ -20,8 +20,9 @@ namespace execHelper {
                     ConfigFileWriter& operator=(const ConfigFileWriter& other) = delete;
                     ConfigFileWriter& operator=(ConfigFileWriter&& other) noexcept = delete;
 
-                    std::string getFilename() noexcept;
-                    std::string getDirectory() noexcept;
+                    Path getPath() const noexcept;
+                    std::string getFilename() const noexcept;
+                    std::string getDirectory() const noexcept;
                     bool write(const YamlWriter& yaml) noexcept;
             
                 private:

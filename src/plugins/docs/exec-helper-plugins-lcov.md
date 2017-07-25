@@ -27,7 +27,7 @@ Use the coverage data files in the given directory. Check the lcov documentation
 Set this option to _yes_ to reset the coverage counters before starting the analysis. All other values are threated as _no_. Default: _no_.
 
 ## gen-html
-Set this option to _yes_ to enable HTML report generation of the coverage data.
+Set this option to _yes_ to enable HTML report generation of the coverage data. Default: _no_.
 
 ## gen-html-output
 Set the output directory of the generated HTML report. Does nothing if __gen-html__ is not enabled. Default: \em . (the current working directory).

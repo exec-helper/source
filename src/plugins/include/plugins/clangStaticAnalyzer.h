@@ -13,12 +13,9 @@ namespace execHelper {
          */
         class ClangStaticAnalyzer : public BuildPlugin {
             public:
-                bool apply(const core::Command& command, core::Task task, const core::Options& options) const noexcept override;
-            private:
-                /**
-                 * Returns the system name
-                 */
-                static core::TaskCollection getSystemName(const core::Command& command, const std::string& key, const config::SettingsNode& rootSettings) noexcept;
+                std::string getPluginName() const noexcept override;
+                config::VariablesMap getVariablesMap(const config::FleetingOptionsInterface& fleetingOptions) const noexcept override;
+                bool apply(core::Task task, const config::VariablesMap& variables, const config::Patterns& patterns) const noexcept override;
         };
     }
 }

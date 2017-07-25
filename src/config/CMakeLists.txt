@@ -4,12 +4,21 @@ set(LIBRARY_NAME ${PROJECT_NAME}-${MODULE_NAME})
 set(SRCS    src/settingsNode.cpp
             src/configFileSearcher.cpp
             src/logger.cpp
+            src/fleetingOptions.cpp
+            src/config.cpp
+            src/pattern.cpp
+            src/patternsHandler.cpp
+            src/optionDescriptions.cpp
+            src/argv.cpp
+            src/envp.cpp
+            src/cast.cpp
 )
 
 set(DEPENDENCIES
-        log
         boost-optional
         boost-filesystem
+        log
+        yaml
    )
 
 add_library(${LIBRARY_NAME} ${SRCS})

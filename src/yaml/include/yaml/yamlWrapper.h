@@ -32,24 +32,24 @@ namespace execHelper {
                  */
                 explicit YamlWrapper(const std::string& yamlConfig);
 
-                /*! @copydoc core::Argv::Argv(const Argv&)
+                /*! @copydoc config::Argv::Argv(const Argv&)
                  */
                 YamlWrapper(const YamlWrapper& other);
 
-                /*! @copydoc core::Argv::Argv(Argv&&)
+                /*! @copydoc config::Argv::Argv(Argv&&)
                  */
                 YamlWrapper(YamlWrapper&& other) noexcept;
                 ~YamlWrapper() = default;
 
-                /*! @copydoc core::Argv::operator=(const Argv&)
+                /*! @copydoc config::Argv::operator=(const Argv&)
                  */
                 YamlWrapper& operator=(const YamlWrapper& other);
 
-                /*! @copydoc core::Argv::operator=(Argv&&)
+                /*! @copydoc config::Argv::operator=(Argv&&)
                  */
                 YamlWrapper& operator=(YamlWrapper&& other) noexcept;
 
-                /*! @copydoc core::Argv::swap(Argv&)
+                /*! @copydoc config::Argv::swap(Argv&)
                  */
                 void swap(const YamlWrapper& other) noexcept;
 
@@ -107,7 +107,7 @@ namespace execHelper {
                  * \returns True    If the subtree was successfully constructed and added
                  *          False   Otherwise
                  */
-                static bool getSubTree(const YAML::Node& node, config::SettingsNode* yamlNode, const config::SettingsNode::SettingsKeys& keys) noexcept;
+                static bool getSubTree(const YAML::Node& node, config::SettingsNode* yamlNode, const config::SettingsKeys& keys) noexcept;
 
                 YAML::Node m_node;
         };

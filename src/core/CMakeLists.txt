@@ -2,17 +2,11 @@ set(MODULE_NAME core)
 set(LIBRARY_NAME ${PROJECT_NAME}-${MODULE_NAME})
 
 set(SRCS
-        src/pattern.cpp
-        src/optionDescriptions.cpp
         src/task.cpp
         src/immediateExecutor.cpp
         src/reportingExecutor.cpp
         src/patterns.cpp
-        src/patternsHandler.cpp
-        src/execHelperOptions.cpp
         src/posixShell.cpp
-        src/argv.cpp
-        src/envp.cpp
         src/logger.cpp
    )
 
@@ -23,6 +17,10 @@ set(DEPENDENCIES
         config
         yaml
    )
+
+add_definitions(
+        -DBOOST_MOVE_USE_STANDARD_LIBRARY_MOVE
+    )
 
 add_library(${LIBRARY_NAME} ${SRCS})
 target_include_directories(${LIBRARY_NAME} PRIVATE include/core)

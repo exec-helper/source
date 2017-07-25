@@ -5,15 +5,18 @@
 #include <boost/filesystem.hpp>
 #include <gsl/string_span>
 
-#include "config/settingsNode.h"
+#include "config/environment.h"
+#include "config/path.h"
+#include "config/pattern.h"
+#include "config/variablesMap.h"
 #include "core/task.h"
+#include "plugins/commandLine.h"
 #include "plugins/commandLineCommand.h"
 #include "unittest/catch.h"
-#include "utils/combinationHelpers.h"
 #include "utils/utils.h"
 
 #include "executorStub.h"
-#include "optionsStub.h"
+#include "fleetingOptionsStub.h"
 
 using std::string;
 using std::vector;
@@ -21,142 +24,150 @@ using std::vector;
 using boost::filesystem::current_path;
 using gsl::czstring;
 
-using execHelper::config::SettingsNode;
+using execHelper::config::ENVIRONMENT_KEY;
+using execHelper::config::EnvironmentValue;
+using execHelper::config::Path;
+using execHelper::config::Pattern;
+using execHelper::config::Patterns;
+using execHelper::config::SettingsKey;
+using execHelper::config::SettingsKeys;
+using execHelper::config::VariablesMap;
 using execHelper::core::Task;
 using execHelper::core::TaskCollection;
+using execHelper::plugins::COMMAND_LINE_KEY;
 
-using execHelper::test::utils::TargetUtil;
-using execHelper::test::utils::CompilerUtil;
 using execHelper::core::test::ExecutorStub;
-using execHelper::test::OptionsStub;
-using execHelper::test::utils::copyAndAppend;
-using execHelper::test::utils::combineVectors;
-using execHelper::test::utils::addPatterns;
-
-using execHelper::test::combinationHelpers::setEnvironment;
+using execHelper::test::FleetingOptionsStub;
+using execHelper::test::utils::getExpectedTasks;
 
 namespace {
-    const czstring<> PLUGIN_CONFIG_KEY("command-line-command");
+    const czstring<> PLUGIN_NAME("command-line-command");
     const czstring<> WORKING_DIR_KEY("working-dir");
-    const czstring<> CURRENT_DIR_WORKING_DIR_KEY("<working-dir>");
 } // namespace
 
 namespace execHelper { namespace plugins { namespace test {
-    SCENARIO("Testing the configuration settings of the command-line-command plugin", "[plugins][commandLineCommand]") {
+    SCENARIO("Obtain the plugin name of the command-line-command plugin", "[command-line-command]") {
+        GIVEN("A plugin") {
+            CommandLineCommand plugin;
+
+            WHEN("We request the plugin name") {
+                const string pluginName = plugin.getPluginName();
+
+                THEN("We should find the correct plugin name") {
+                    REQUIRE(pluginName == PLUGIN_NAME);
+                }
+            }
+        }
+    }
+
+    SCENARIO("Obtaining the default variables map of the command-line-command plugin", "[command-line-command]") {
+        MAKE_COMBINATIONS("The default fleeting options") {
+            FleetingOptionsStub fleetingOptions;
+            CommandLineCommand plugin;
+
+            VariablesMap actualVariables(plugin.getPluginName());
+            actualVariables.add(COMMAND_LINE_KEY);
+            actualVariables.add(ENVIRONMENT_KEY);
+
+            THEN_WHEN("We request the variables map") {
+                VariablesMap variables = plugin.getVariablesMap(fleetingOptions);
+
+                THEN_CHECK("We should find the same ones") {
+                    REQUIRE(variables == actualVariables);
+                }
+            }
+        }
+    }
+ 
+    SCENARIO("Testing the configuration settings of the command-line-command plugin", "[command-line-command]") {
         MAKE_COMBINATIONS("Of several settings") {
-            const string command("some-command-line-command");
-
-            OptionsStub options;
-
-            TargetUtil targetUtil;
-            addPatterns(targetUtil.getPatterns(), &options);
-
-            CompilerUtil compilerUtil;
-            addPatterns(compilerUtil.getPatterns(), &options);
-
-            SettingsNode& rootSettings = options.m_settings;
-            rootSettings.add({PLUGIN_CONFIG_KEY, "patterns"}, targetUtil.getKeys());
-            rootSettings.add({PLUGIN_CONFIG_KEY, "patterns"}, compilerUtil.getKeys());
+            const Pattern pattern1("PATTERN1", {"value1a", "value1b"});
+            const Pattern pattern2("PATTERN2", {"value2a", "value2b"});
+            const Pattern pattern3("PATTERN3", {"value3a"});
+            const Patterns patterns({pattern1, pattern2, pattern3});
 
             const string commandKey("command1");
-            const TaskCollection command1({"command1"});
-            const TaskCollection command2({"{" + compilerUtil.compiler.getKey() + "}/{" + compilerUtil.mode.getKey() + "}", "{" + targetUtil.target.getKey() + "}/{" + targetUtil.runTarget.getKey() + "}"});
-            const vector<TaskCollection> commandLines({command1, command2});
-
-            // Add the settings of an other command to make sure we take the expected ones
-            const string otherCommandKey("other-command");
+            const CommandLineArgs command1({"command1"});
 
             CommandLineCommand plugin;
+            VariablesMap variables = plugin.getVariablesMap(FleetingOptionsStub());
             Task expectedTask;
-            std::vector<TaskCollection> commandLine;
+            std::vector<TaskCollection> commandLines;
 
-            SettingsNode::SettingsKeys baseSettingsKeys = {PLUGIN_CONFIG_KEY};
-            SettingsNode::SettingsKeys otherBaseSettingsKeys = {PLUGIN_CONFIG_KEY, otherCommandKey};
+            variables.add(COMMAND_LINE_KEY, command1);
+            commandLines.push_back(command1);
 
-            COMBINATIONS("Toggle between general and specific command settings") {
-                baseSettingsKeys.push_back(command);
-            }
-            rootSettings.add(copyAndAppend(baseSettingsKeys, "command-line"), command1);
-            commandLine.push_back(command1);
+            ExecutorStub executor;
+            ExecuteCallback executeCallback = [&executor](const Task& task) { executor.execute(task);};
+            registerExecuteCallback(executeCallback);
 
-            COMBINATIONS("Set a multiple command lines") {
-                rootSettings.clear(copyAndAppend(baseSettingsKeys, "command-line"));
-                rootSettings.add(combineVectors(baseSettingsKeys, {"command-line", "commandA"}), command1);
-                rootSettings.add(combineVectors(baseSettingsKeys, {"command-line", "commandB"}), command2);
-                commandLine.push_back(command2);
+            COMBINATIONS("Set multiple command lines") {
+                const CommandLineArgs multipleCommand1({"multiple-commandA"});
+                const CommandLineArgs multipleCommand2({"{" + pattern1.getKey() + "}/{" + pattern2.getKey() + "}", "{" + pattern3.getKey() + "}/{" + pattern1.getKey() + "}"});
+
+                variables.clear(COMMAND_LINE_KEY);
+                variables.add(SettingsKeys({COMMAND_LINE_KEY, "multiple-commandA"}), multipleCommand1);
+                variables.add({COMMAND_LINE_KEY, "multiple-commandB"}, multipleCommand2);
+
+                commandLines.clear();
+                commandLines.push_back(multipleCommand1);
+                commandLines.push_back(multipleCommand2);
             }
 
             COMBINATIONS("Set environment") {
-                setEnvironment(baseSettingsKeys, &expectedTask, &rootSettings, {{"VAR1", "environmentValue{" + compilerUtil.compiler.getKey() + "}"}, {"VAR{" + compilerUtil.compiler.getKey() + "}", "environmentValue2"}});
+                EnvironmentValue ENV1("VAR1", "environmentValue{" + pattern1.getKey() + "}");
+                EnvironmentValue ENV2("VAR2", "environmentValue2");
+                variables.add({ENVIRONMENT_KEY, ENV1.first}, ENV1.second);
+                variables.add({ENVIRONMENT_KEY, ENV2.first}, ENV2.second);
+                expectedTask.appendToEnvironment(move(ENV1));
+                expectedTask.appendToEnvironment(move(ENV2));
             }
 
             COMBINATIONS("Set the working directory") {
-                static const string newWorkingDir("{" + compilerUtil.compiler.getKey() + "}/{" + targetUtil.target.getKey() + "}");
-                rootSettings.add(combineVectors(baseSettingsKeys, {WORKING_DIR_KEY}), {newWorkingDir});
-                expectedTask.setWorkingDirectory(newWorkingDir);
+                variables.replace(WORKING_DIR_KEY, "{" + pattern2.getKey() + "}/{" + pattern3.getKey() + "}");
+                expectedTask.setWorkingDirectory(variables.get<Path>(WORKING_DIR_KEY).get());
             }
 
             COMBINATIONS("Set the working directory to the current directory") {
-                rootSettings.clear(combineVectors(baseSettingsKeys, {WORKING_DIR_KEY}));
-                rootSettings.add(combineVectors(baseSettingsKeys, {WORKING_DIR_KEY}), {CURRENT_DIR_WORKING_DIR_KEY});
-                expectedTask.setWorkingDirectory(current_path());
+                variables.replace(WORKING_DIR_KEY, ".");
+                expectedTask.setWorkingDirectory(variables.get<Path>(WORKING_DIR_KEY).get());
             }
 
-            ExecutorStub::TaskQueue expectedTasks;
-            for(const auto& commandLineLine : commandLine) {
+            ExecutorStub::TaskQueue unreplacedTasks;
+            for(const auto& commandLine : commandLines) {
                 Task newTask = expectedTask;
-                newTask.append(commandLineLine);
-                expectedTasks.emplace_back(newTask);
+                newTask.append(commandLine);
+                unreplacedTasks.emplace_back(newTask);
             }
-            ExecutorStub::TaskQueue replacedExpectedTasks = getExpectedTasks(expectedTasks, compilerUtil, targetUtil);
+            const ExecutorStub::TaskQueue expectedTasks = getExpectedTasks(unreplacedTasks, patterns);
 
             Task task;
-            bool returnCode = plugin.apply(command, task, options);
+            bool returnCode = plugin.apply(task, variables, patterns);
             THEN_CHECK("It should succeed") {
                 REQUIRE(returnCode);
             }
 
             THEN_CHECK("It called the right commands") {
-                REQUIRE(replacedExpectedTasks == options.m_executor.getExecutedTasks());
+                REQUIRE(expectedTasks == executor.getExecutedTasks());
             }
         }
     }
 
-    SCENARIO("Testing erroneous configuration conditions for the commandLineCommand plugin", "[plugins][commandLineCommand]") {
-        GIVEN("A basic setup") {
-            const string command("some-command-line-command");
-
-            OptionsStub options;
-
-            SettingsNode& rootSettings = options.m_settings;
-            rootSettings.add({PLUGIN_CONFIG_KEY}, command);
-
+    SCENARIO("Testing erroneous configuration conditions for the commandLineCommand plugin", "[command-line-command]") {
+        MAKE_COMBINATIONS("Of erroneous setups") {
             Task task;
             CommandLineCommand plugin;
 
-            WHEN("We add no parameter and apply") {
-                bool return_code = plugin.apply(command, task, options);
+            VariablesMap variables = plugin.getVariablesMap(FleetingOptionsStub());
 
-                THEN("The call should not succeed") {
-                    REQUIRE_FALSE(return_code);
-                }
+            COMBINATIONS("Add command line key without value") {
+                variables.add(COMMAND_LINE_KEY);
             }
 
-            WHEN("We add no parameter and apply") {
-                rootSettings.add({PLUGIN_CONFIG_KEY}, "command-line");
-                bool return_code = plugin.apply(command, task, options);
+            THEN_WHEN("We add no parameter and apply") {
+                bool return_code = plugin.apply(task, variables, Patterns());
 
-                THEN("The call should not succeed") {
-                    REQUIRE_FALSE(return_code);
-                }
-            }
-
-            WHEN("We add an other filled in command-line and no parameter for the right one and apply") {
-                rootSettings.add({PLUGIN_CONFIG_KEY, "command-line"}, "random-value");
-                rootSettings.add({PLUGIN_CONFIG_KEY, command}, "command-line");
-                bool return_code = plugin.apply(command, task, options);
-
-                THEN("The call should not succeed") {
+                THEN_CHECK("The call should not succeed") {
                     REQUIRE_FALSE(return_code);
                 }
             }

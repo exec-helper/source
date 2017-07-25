@@ -17,6 +17,7 @@ namespace execHelper {
                  *
                  * \param[in] map   The map to permutate over
                  */
+                // cppcheck-suppress passedByValue
                 explicit MapPermutator(std::map<T,std::vector<U>> map) noexcept :
                     m_map(std::move(map))
                 {
@@ -84,7 +85,7 @@ namespace execHelper {
                             return *this;
                         }
 
-                        /*! @copydoc Argv::operator==(const Argv&)
+                        /*! @copydoc config::Argv::operator==(const Argv&) const
                          */
                         bool operator==(const iterator& other) const {
                             if(m_map != other.m_map) {
@@ -101,7 +102,7 @@ namespace execHelper {
                             return true;
                         }
 
-                        /*! @copydoc Argv::operator!=(const Argv&)
+                        /*! @copydoc config::Argv::operator!=(const Argv&) const
                          */
                         bool operator!=(const iterator& other) const {
                             return !(*this == other);

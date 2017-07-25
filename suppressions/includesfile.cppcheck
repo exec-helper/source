@@ -1,0 +1,17 @@
+src/core/include
+src/core/include/core
+src/config/include
+src/config/include/config
+src/plugins/include
+src/plugins/include/plugins
+src/yaml/include
+src/yaml/include/yaml
+src/log/include
+src/log/include/log
+src/commander/include
+src/commander/include/commander
+test/utils/include
+test/utils/include/utils
+test/catch/include
+test/base-utils/include
+test/base-utils/include/base-utils

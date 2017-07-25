@@ -15,11 +15,15 @@ namespace execHelper {
                 ;
             }
 
-            string ConfigFileWriter::getFilename() noexcept {
+            Path ConfigFileWriter::getPath() const noexcept {
+                return m_file.getPath();
+            }
+
+            string ConfigFileWriter::getFilename() const noexcept {
                 return m_file.getFilename();
             }
 
-            string ConfigFileWriter::getDirectory() noexcept {
+            string ConfigFileWriter::getDirectory() const noexcept {
                 return m_file.getParentDirectory();
             }
 

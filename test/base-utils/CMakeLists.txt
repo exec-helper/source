@@ -5,6 +5,7 @@ set(SRCS
         src/executionContent.cpp
         src/tmpFile.cpp
         src/configFileWriter.cpp
+        src/generateRandom.cpp
    )
 
 set(DEPENDENCIES

@@ -1,392 +1,227 @@
 #include <string>
+#include <vector>
 
+#include <boost/filesystem.hpp>
 #include <gsl/string_span>
 
+#include "config/path.h"
+#include "config/settingsNode.h"
+#include "config/variablesMap.h"
 #include "core/task.h"
+#include "plugins/executePlugin.h"
 #include "plugins/lcov.h"
 #include "plugins/memory.h"
 #include "unittest/catch.h"
 #include "utils/utils.h"
 
-#include "optionsStub.h"
+#include "fleetingOptionsStub.h"
 
 using std::string;
+using std::vector;
 
+using boost::filesystem::current_path;
 using gsl::czstring;
 
+using execHelper::config::Command;
+using execHelper::config::CommandCollection;
+using execHelper::config::Path;
+using execHelper::config::Pattern;
+using execHelper::config::Patterns;
 using execHelper::config::SettingsNode;
-using execHelper::core::Command;
+using execHelper::config::VariablesMap;
 using execHelper::core::Task;
-using execHelper::core::TaskCollection;
+using execHelper::plugins::ExecutePlugin;
 using execHelper::plugins::Lcov;
-using execHelper::plugins::MemoryHandler;
 
-using execHelper::test::OptionsStub;
-using execHelper::test::utils::copyAndAppend;
+using execHelper::test::FleetingOptionsStub;
 using execHelper::core::test::ExecutorStub;
+using execHelper::test::utils::getExpectedTasks;
 
 namespace {
-    const czstring<> lcovConfigKey("lcov");
-
-    void checkMemories(const MemoryHandler& memory, const Command& command) {
-        const MemoryHandler::Memories& memories = memory.getExecutions();
-        REQUIRE(memories.size() == 1U);
-        for(const auto& memoryElement : memories) {
-            REQUIRE(memoryElement.command == command);
-        }
-    }
+    const czstring<> PLUGIN_NAME = "lcov";
+    const czstring<> RUN_COMMAND = "run-command";
+    const czstring<> INFO_FILE_KEY = "info-file";
+    const czstring<> BASE_DIR_KEY = "base-directory";
+    const czstring<> DIR_KEY = "directory";
+    const czstring<> ZERO_COUNTERS_KEY = "zero-counters";
+    const czstring<> GEN_HTML_KEY = "gen-html";
+    const czstring<> GEN_HTML_OUTPUT_KEY = "gen-html-output";
+    const czstring<> GEN_HTML_TITLE_KEY = "gen-html-title";
+    const czstring<> GEN_HTML_COMMAND_LINE_KEY = "gen-html-command-line";
+    const czstring<> EXCLUDES_KEY = "excludes";
+    const czstring<> MEMORY_KEY = "memory";
 } // namespace
 
 namespace execHelper { namespace plugins { namespace test {
-    SCENARIO("Test the default options of the lcov plugin", "[plugins][lcov]") {
-        GIVEN("A default configuration and the plugin") {
+    SCENARIO("Obtain the plugin name of the lcov plugin", "[lcov]") {
+        GIVEN("A plugin") {
             Lcov plugin;
 
-            Task task;
-            const OptionsStub options;
+            WHEN("We request the plugin name") {
+                const string pluginName = plugin.getPluginName();
 
-            WHEN("We call the plugin") {
-                bool returnCode = plugin.apply("random-command", task, options);
-
-                THEN("The call should fail") {
-                    REQUIRE_FALSE(returnCode);
+                THEN("We should find the correct plugin name") {
+                    REQUIRE(pluginName == PLUGIN_NAME);
                 }
             }
         }
     }
 
-    SCENARIO("Test the mandatory settings of the lcov plugin", "[plugins][lcov]") {
-        GIVEN("The respective configuration and the plugin") {
-            const string command("lcov-command");
-
-            OptionsStub options;
-            SettingsNode& rootSettings = options.m_settings;
-
+    SCENARIO("Obtaining the default variables map of the lcov plugin", "[lcov]") {
+        GIVEN("The default fleeting options") {
+            FleetingOptionsStub fleetingOptions;
             Lcov plugin;
-            Task task;
 
-            WHEN("We add the run-command setting") {
-                MemoryHandler memory;
-                ExecutorStub::TaskQueue expectedTasks;
+            VariablesMap actualVariables(plugin.getPluginName());
+            actualVariables.add(COMMAND_LINE_KEY);
+            actualVariables.add(INFO_FILE_KEY, "lcov-plugin.info");
+            actualVariables.add(BASE_DIR_KEY, ".");
+            actualVariables.add(DIR_KEY, ".");
+            actualVariables.add(ZERO_COUNTERS_KEY, "no");
+            actualVariables.add(GEN_HTML_KEY, "no");
+            actualVariables.add(GEN_HTML_OUTPUT_KEY, ".");
+            actualVariables.add(GEN_HTML_TITLE_KEY, "Hello");
+            actualVariables.add(GEN_HTML_COMMAND_LINE_KEY);
+            actualVariables.add(EXCLUDES_KEY);
 
-                AND_WHEN("We add it as a general command") {
-                    rootSettings.add({lcovConfigKey, "run-command"}, "memory");
-                    expectedTasks.emplace_back(Task({"lcov", "--base-directory", ".", "--directory", ".", "--capture", "--output", "lcov-plugin.info"}));
-                }    
+            WHEN("We request the variables map") {
+                VariablesMap variables = plugin.getVariablesMap(fleetingOptions);
 
-                AND_WHEN("We add it as a specific command") {
-                    rootSettings.add({lcovConfigKey, command, "run-command"}, "memory");
-                    expectedTasks.emplace_back(Task({"lcov", "--base-directory", ".", "--directory", ".", "--capture", "--output", "lcov-plugin.info"}));
-                }    
-
-                THEN_WHEN("We apply the plugin") {
-                    bool returnCode = plugin.apply(command, task, options);
-
-                    THEN_CHECK("It should succeed") {
-                        REQUIRE(returnCode);
-                    }
-
-                    THEN_CHECK("It called the right commands") {
-                        REQUIRE(expectedTasks == options.m_executor.getExecutedTasks());
-                    }
-
-                    THEN_CHECK("It should have called the appropriate plugin") {
-                        checkMemories(memory, command);
-                    }
+                THEN("We should find the same ones") {
+                    REQUIRE(variables == actualVariables);
                 }
             }
         }
     }
 
-    SCENARIO("Test a failing run-command", "[plugins][lcov]") {
-        GIVEN("The respective configuration and the plugin") {
-            const string command("lcov-command");
-
-            OptionsStub options;
-            SettingsNode& rootSettings = options.m_settings;
-
-            Lcov plugin;
-            Task task;
-
-            WHEN("We add the run-command setting") {
-                MemoryHandler memory;
-                memory.setReturnCode(false);
-                ExecutorStub::TaskQueue expectedTasks;
-
-                AND_WHEN("We add it as a general command") {
-                    rootSettings.add({lcovConfigKey, "run-command"}, "memory");
-                    expectedTasks.emplace_back(Task({"lcov", "--base-directory", ".", "--directory", ".", "--capture", "--output", "lcov-plugin.info"}));
-                }    
-
-                THEN_WHEN("We apply the plugin") {
-                    bool returnCode = plugin.apply(command, task, options);
-
-                    THEN_CHECK("It should succeed") {
-                        REQUIRE_FALSE(returnCode);
-                    }
-                }
-            }
-        }
-    }
-
-    SCENARIO("Test the zero counters setting", "[plugins][lcov]") {
-        GIVEN("The respective configuration and the plugin") {
-            const string command("lcov-command");
-
-            OptionsStub options;
-            SettingsNode& rootSettings = options.m_settings;
-            rootSettings.add({lcovConfigKey, "run-command"}, "memory");
+    SCENARIO("Test multiple configurations of the lcov plugin", "[lcov]") {
+        MAKE_COMBINATIONS("Of several configurations") {
+            const Pattern pattern1("PATTERN1", {"value1a", "value1b"});
+            const Pattern pattern2("PATTERN2", {"value2a", "value2b"});
+            const Patterns patterns({pattern1, pattern2});
 
             Lcov plugin;
             Task task;
-            
-            MemoryHandler memory;
 
-            WHEN("We activate or deactivate the zero counters setting") {
-                ExecutorStub::TaskQueue expectedTasks;
-                AND_WHEN("We add it as a generic setting") {
-                    rootSettings.add({lcovConfigKey, "zero-counters"}, "yes");
-                    expectedTasks.emplace_back(Task({"lcov", "--base-directory", ".", "--directory", ".", "--zerocounters"}));
-                    expectedTasks.emplace_back(Task({"lcov", "--base-directory", ".", "--directory", ".", "--capture", "--output", "lcov-plugin.info"}));
-                }
+            VariablesMap variables = plugin.getVariablesMap(FleetingOptionsStub());
 
-                AND_WHEN("We add it as a specific setting") {
-                    rootSettings.add({lcovConfigKey, command, "zero-counters"}, "yes");
-                    expectedTasks.emplace_back(Task({"lcov", "--base-directory", ".", "--directory", ".", "--zerocounters"}));
-                    expectedTasks.emplace_back(Task({"lcov", "--base-directory", ".", "--directory", ".", "--capture", "--output", "lcov-plugin.info"}));
-                }
-
-                AND_WHEN("We add it as a generic setting") {
-                    rootSettings.add({lcovConfigKey, "zero-counters"}, "no");
-                    expectedTasks.emplace_back(Task({"lcov", "--base-directory", ".", "--directory", ".", "--capture", "--output", "lcov-plugin.info"}));
-                }
-
-                AND_WHEN("We add it as a specific setting") {
-                    rootSettings.add({lcovConfigKey, command, "zero-counters"}, "no");
-                    expectedTasks.emplace_back(Task({"lcov", "--base-directory", ".", "--directory", ".", "--capture", "--output", "lcov-plugin.info"}));
-                }
-
-                THEN_WHEN("We apply the plugin") {
-                    bool returnCode = plugin.apply(command, task, options);
-
-                    THEN_CHECK("It should succeed") {
-                        REQUIRE(returnCode);
-                    }
-
-                    THEN_CHECK("It called the right commands") {
-                        REQUIRE(expectedTasks == options.m_executor.getExecutedTasks());
-                    }
-
-                    THEN_CHECK("It should have called the appropriate plugin") {
-                        checkMemories(memory, command);
-                    }
-                }
-            }
-        }
-    }
-
-    SCENARIO("Test the exclude setting", "[plugins][lcov]") {
-        GIVEN("The respective configuration and the plugin") {
-            const string command("lcov-command");
-
-            OptionsStub options;
-            SettingsNode& rootSettings = options.m_settings;
-            rootSettings.add({lcovConfigKey, "run-command"}, "memory");
-
-            Lcov plugin;
-            Task task;
-            
-            MemoryHandler memory;
-
-            WHEN("We add exclude settings") {
-                ExecutorStub::TaskQueue expectedTasks;
-
-                AND_WHEN("We add it as a generic setting") {
-                    rootSettings.add({lcovConfigKey, "excludes"}, "exclude1");
-                    expectedTasks.emplace_back(Task({"lcov", "--base-directory", ".", "--directory", ".", "--capture", "--output", "lcov-plugin.info"}));
-                    expectedTasks.emplace_back(Task({"lcov", "--remove", "lcov-plugin.info", R"("exclude1")", "--output-file", "lcov-plugin.info"}));
-                }
-
-                AND_WHEN("We add it as a specific setting") {
-                    rootSettings.add({lcovConfigKey, command, "excludes"}, "exclude1");
-                    expectedTasks.emplace_back(Task({"lcov", "--base-directory", ".", "--directory", ".", "--capture", "--output", "lcov-plugin.info"}));
-                    expectedTasks.emplace_back(Task({"lcov", "--remove", "lcov-plugin.info", R"("exclude1")", "--output-file", "lcov-plugin.info"}));
-                }
-
-                AND_WHEN("We use multiple excludes") {
-                    rootSettings.add({lcovConfigKey, "excludes"}, {"exclude1", "exclude2", "exclude3"});
-                    expectedTasks.emplace_back(Task({"lcov", "--base-directory", ".", "--directory", ".", "--capture", "--output", "lcov-plugin.info"}));
-                    expectedTasks.emplace_back(Task({"lcov", "--remove", "lcov-plugin.info", R"("exclude1")", R"("exclude2")", R"("exclude3")", "--output-file", "lcov-plugin.info"}));
-                }
-
-                AND_WHEN("We use no excludes") {
-                    rootSettings.add({lcovConfigKey}, "excludes");
-                    expectedTasks.emplace_back(Task({"lcov", "--base-directory", ".", "--directory", ".", "--capture", "--output", "lcov-plugin.info"}));
-                }
-
-                THEN_WHEN("We apply the plugin") {
-                    bool returnCode = plugin.apply(command, task, options);
-
-                    THEN_CHECK("It should succeed") {
-                        REQUIRE(returnCode);
-                    }
-
-                    THEN_CHECK("It called the right commands") {
-                        REQUIRE(expectedTasks == options.m_executor.getExecutedTasks());
-                    }
-
-                    THEN_CHECK("It should have called the appropriate plugin") {
-                        checkMemories(memory, command);
-                    }
-                }
-            }
-        }
-    }
-
-    SCENARIO("Test the gen-html setting", "[plugins][lcov]") {
-        GIVEN("The respective configuration and the plugin") {
-            const string command("lcov-command");
-
-            OptionsStub options;
-            SettingsNode& rootSettings = options.m_settings;
-            rootSettings.add({lcovConfigKey, "run-command"}, "memory");
-
-            Lcov plugin;
-            Task task;
-            
-            MemoryHandler memory;
-
-            WHEN("We add gen-html settings") {
-                ExecutorStub::TaskQueue expectedTasks;
-                expectedTasks.emplace_back(Task({"lcov", "--base-directory", ".", "--directory", ".", "--capture", "--output", "lcov-plugin.info"}));
-
-                AND_WHEN("We add it as a generic setting") {
-                    rootSettings.add({lcovConfigKey, "gen-html"}, "yes");
-                    expectedTasks.emplace_back(Task({"genhtml", "--output-directory", ".", "--title", "Hello", "lcov-plugin.info"}));
-                }
-
-                AND_WHEN("We add it as a specific setting") {
-                    rootSettings.add({lcovConfigKey, command, "gen-html"}, "yes");
-                    expectedTasks.emplace_back(Task({"genhtml", "--output-directory", ".", "--title", "Hello", "lcov-plugin.info"}));
-                }
-
-                AND_WHEN("We add it as a generic setting") {
-                    rootSettings.add({lcovConfigKey, "gen-html"}, "no");
-                }
-
-                AND_WHEN("We add it as a specific setting") {
-                    rootSettings.add({lcovConfigKey, command, "gen-html"}, "no");
-                }
-
-                THEN_WHEN("We apply the plugin") {
-                    bool returnCode = plugin.apply(command, task, options);
-
-                    THEN_CHECK("It should succeed") {
-                        REQUIRE(returnCode);
-                    }
-
-                    THEN_CHECK("It called the right commands") {
-                        REQUIRE(expectedTasks == options.m_executor.getExecutedTasks());
-                    }
-
-                    THEN_CHECK("It should have called the appropriate plugin") {
-                        checkMemories(memory, command);
-                    }
-                }
-            }
-        }
-    }
-
-    SCENARIO("Test the configuration combinations") {
-        MAKE_COMBINATIONS("Of several orthogonal settings") {
-            const string command("lcov-command");
-
-            OptionsStub options;
-            SettingsNode& rootSettings = options.m_settings;
-            rootSettings.add({lcovConfigKey, "run-command"}, "memory");
-
-            Lcov plugin;
-            Task task;
-    
-            ExecutorStub::TaskQueue expectedTasks;
-            MemoryHandler memory;
-
-            string infoFile("lcov-plugin.info");
-            string baseDirectory(".");
-            string directory(".");
-            string genHtmlOutputDir(".");
-            TaskCollection genHtmlCommandLine;
+            CommandCollection runCommands({MEMORY_KEY});
+            auto infoFile = variables.get<Path>(INFO_FILE_KEY).get();
+            auto baseDir = variables.get<Path>(BASE_DIR_KEY).get();
+            auto dir = variables.get<Path>(DIR_KEY).get();
+            CommandLineArgs commandLine;
+            bool zeroCounters = false;
+            bool genHtml = false;
+            Path genHtmlOutput = variables.get<Path>(GEN_HTML_OUTPUT_KEY).get();
             string genHtmlTitle("Hello");
+            CommandLineArgs genHtmlCommandLine;
+            vector<string> excludes;
 
-            SettingsNode::SettingsKeys baseSettingsKeys = {lcovConfigKey};
+            ExecutorStub executor;
+            ExecuteCallback executeCallback = [&executor](const Task& task) { executor.execute(task);};
+            registerExecuteCallback(executeCallback);
 
-            COMBINATION {
-                baseSettingsKeys.push_back(command);
+            FleetingOptionsStub fleetingOptions;
+            ExecutePlugin::push(&fleetingOptions);
+            ExecutePlugin::push(SettingsNode(PLUGIN_NAME));
+            ExecutePlugin::push(Patterns(patterns));
+
+            COMBINATIONS("Change the info file") {
+                infoFile = "/tmp";
+                variables.replace(INFO_FILE_KEY, infoFile.native());
             }
 
-            COMBINATION {
-                baseDirectory = "base-dir";
-                rootSettings.add(copyAndAppend(baseSettingsKeys, "base-directory"), baseDirectory);
+            COMBINATIONS("Change the base directory") {
+                baseDir /= "tmp";
+                variables.replace(BASE_DIR_KEY, baseDir.native());
             }
 
-            COMBINATION {
-                directory = "dir";
-                rootSettings.add(copyAndAppend(baseSettingsKeys, "directory"), directory);
-            }
-            
-            COMBINATION {
-                infoFile = "infoFile.info"; 
-                rootSettings.add(copyAndAppend(baseSettingsKeys, "info-file"), infoFile);
+            COMBINATIONS("Change the directory") {
+                dir /= "..";
+                variables.replace(DIR_KEY, dir.native());
             }
 
-            COMBINATION {
-                rootSettings.add(copyAndAppend(baseSettingsKeys, "zero-counters"), "yes");
-                expectedTasks.emplace_back(Task({"lcov", "--base-directory", baseDirectory, "--directory", directory, "--zerocounters"}));
+            COMBINATIONS("Add a command line") {
+                commandLine = {"{" + pattern1.getKey() + "}", "{" + pattern2.getKey() + "}"};
+                variables.add(COMMAND_LINE_KEY, commandLine);
             }
 
-            expectedTasks.emplace_back(Task({"lcov", "--base-directory", baseDirectory, "--directory", directory, "--capture", "--output", infoFile}));
-
-            COMBINATION {
-                rootSettings.add(copyAndAppend(baseSettingsKeys, "excludes"), "exclude1");
-                expectedTasks.emplace_back(Task({"lcov", "--remove", infoFile, R"("exclude1")", "--output-file", infoFile}));
+            COMBINATIONS("Switch on zero counters") {
+                zeroCounters = true;
+                variables.replace(ZERO_COUNTERS_KEY, "yes");
             }
 
-            COMBINATION {
-                genHtmlOutputDir = "output-dir";
-                rootSettings.add(copyAndAppend(baseSettingsKeys, "gen-html-output"), genHtmlOutputDir);
+            COMBINATIONS("Switch on html generation") {
+                genHtml = true;
+                variables.replace(GEN_HTML_KEY, "yes");
             }
 
-            COMBINATION {
-                const TaskCollection genHtmlCommandLineValue({"--option1", "--option2"});
-                rootSettings.add(copyAndAppend(baseSettingsKeys, "gen-html-command-line"), genHtmlCommandLineValue);
-                genHtmlCommandLine = genHtmlCommandLineValue;
+            COMBINATIONS("Set html output") {
+                genHtmlOutput = "/tmp/blaat";
+                variables.replace(GEN_HTML_OUTPUT_KEY, genHtmlOutput.native());
             }
 
-            COMBINATION {
-               genHtmlTitle = "random-title"; 
-               rootSettings.add(copyAndAppend(baseSettingsKeys, "gen-html-title"), genHtmlTitle);
+            COMBINATIONS("Set html title") {
+                genHtmlTitle = "World!";
+                variables.replace(GEN_HTML_TITLE_KEY, genHtmlTitle);
             }
 
-            COMBINATION {
-               rootSettings.add(copyAndAppend(baseSettingsKeys, "gen-html"), "yes");
-                Task expectedTask({"genhtml", "--output-directory", genHtmlOutputDir, "--title", genHtmlTitle, infoFile});
-                expectedTask.append(genHtmlCommandLine);
-                expectedTasks.emplace_back(expectedTask);
+            COMBINATIONS("Set gen html command line") {
+                genHtmlCommandLine = {"{" + pattern1.getKey() + "}", "{" + pattern2.getKey() + "}"};
+                variables.replace(GEN_HTML_COMMAND_LINE_KEY, genHtmlCommandLine);
             }
 
-            bool returnCode = plugin.apply(command, task, options);
-
-            THEN_CHECK("It should succeed") {
-                REQUIRE(returnCode);
+            COMBINATIONS("Set excludes") {
+                excludes = {"exclude1", "{" + pattern1.getKey() + "}"};
+                variables.replace(EXCLUDES_KEY, excludes);
             }
 
-            THEN_CHECK("It called the right commands") {
-                REQUIRE(expectedTasks == options.m_executor.getExecutedTasks());
+            ExecutorStub::TaskQueue expectedTasks;
+            if(zeroCounters) {
+                Task zeroCountersTask({PLUGIN_NAME, "--base-directory", baseDir.native(), "--directory", dir.native(), "--zerocounters"});
+                zeroCountersTask.append(commandLine); 
+                expectedTasks.emplace_back(zeroCountersTask);
+            }
+            for(const auto& command : runCommands) {
+                variables.add(RUN_COMMAND, command);
+            }
+            Task captureTask({PLUGIN_NAME, "--base-directory", baseDir.native(), "--directory", dir.native(), "--capture", "--output", infoFile.native()});
+            captureTask.append(commandLine);
+            expectedTasks.emplace_back(captureTask);
+
+            if(! excludes.empty()) {
+                Task excludeTask({PLUGIN_NAME, "--remove", infoFile.native()});
+                for(const auto& exclude : excludes) {
+                    excludeTask.append(string(R"(")").append(exclude).append(R"(")"));
+                }
+                excludeTask.append({"--output-file", infoFile.native()});
+                excludeTask.append(commandLine);
+                expectedTasks.emplace_back(excludeTask);
             }
 
-            THEN_CHECK("It should have called the appropriate plugin") {
-                checkMemories(memory, command);
+            if(genHtml) {
+                Task genHtml({"genhtml", "--output-directory", genHtmlOutput.native(), "--title", genHtmlTitle});
+                genHtml.append(genHtmlCommandLine);
+                genHtml.append(infoFile.native());
+                expectedTasks.emplace_back(genHtml);
             }
+
+            const ExecutorStub::TaskQueue replacedTasks = getExpectedTasks(expectedTasks, patterns);
+
+            THEN_WHEN("We apply the plugin") {
+                bool returnCode = plugin.apply(task, variables, patterns);
+                THEN_CHECK("It should succeed") {
+                    REQUIRE(returnCode);
+                }
+
+                THEN_CHECK("It called the right commands") {
+                    REQUIRE(replacedTasks == executor.getExecutedTasks());
+                }
+            }
+
+            ExecutePlugin::popFleetingOptions();
+            ExecutePlugin::popSettingsNode();
+            ExecutePlugin::popPatterns();
         }
     }
 } // namespace test

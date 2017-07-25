@@ -1,28 +1,45 @@
 #include "commandPlugin.h"
 
-#include "config/settingsNode.h"
+#include <gsl/string_span>
 
+#include "config/variablesMap.h"
+#include "log/assertions.h"
+
+#include "commandLine.h"
 #include "executePlugin.h"
 #include "logger.h"
 #include "pluginUtils.h"
 
 using std::string;
 
-using execHelper::config::SettingsNode;
-using execHelper::core::Command;
+using gsl::czstring;
+
+using execHelper::config::CommandCollection;
+using execHelper::config::FleetingOptionsInterface;
+using execHelper::config::Patterns;
+using execHelper::config::VariablesMap;
 using execHelper::core::Task;
-using execHelper::core::Options;
+
+namespace {
+   const czstring<> PLUGIN_NAME = "commands";
+} // namespace
 
 namespace execHelper { namespace plugins {
-    bool CommandPlugin::apply(const Command& command, Task task, const Options& options) const noexcept {
-        static const string commandKey("commands");
-        const SettingsNode& rootSettings = options.getSettings(commandKey);
-        if(! rootSettings.contains(command)) {
-            user_feedback_error("Error: undefined command");
-            return false;
-        }        
-        ExecutePlugin executePlugin({command});
-        return executePlugin.apply(command, task, options);
+    std::string CommandPlugin::getPluginName() const noexcept {
+        return PLUGIN_NAME;
+    }
+
+    VariablesMap CommandPlugin::getVariablesMap(const FleetingOptionsInterface& fleetingOptions) const noexcept {
+        VariablesMap defaults(PLUGIN_NAME);
+        defaults.add(PLUGIN_NAME, fleetingOptions.getCommands());
+        return defaults;
+    }
+
+    bool CommandPlugin::apply(Task task, const VariablesMap& variables, const Patterns& patterns) const noexcept {
+        ensures(variables.get<CommandCollection>(PLUGIN_NAME) != boost::none);
+        auto commands = variables.get<CommandCollection>(PLUGIN_NAME).get();
+        ExecutePlugin executePlugin(commands);
+        return executePlugin.apply(task, variables, patterns);
     }
 } // namespace plugins
 } // namespace execHelper

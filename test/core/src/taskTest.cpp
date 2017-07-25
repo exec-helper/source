@@ -5,8 +5,10 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
 
+#include "config/environment.h"
 #include "config/path.h"
 #include "core/task.h"
+#include "log/log.h"
 #include "unittest/catch.h"
 #include "utils/utils.h"
 
@@ -19,6 +21,8 @@ using std::vector;
 using boost::filesystem::current_path;
 using boost::trim_right;
 
+using execHelper::config::EnvironmentCollection;
+using execHelper::config::EnvironmentValue;
 using execHelper::config::Path;
 using execHelper::core::TaskCollection;
 
@@ -44,6 +48,8 @@ namespace {
 namespace execHelper { namespace core {
     namespace test {
         SCENARIO("Test the getters and setters of a task", "[task]") {
+            log::init();
+
             GIVEN("A task") {
                 MAKE_COMBINATIONS("Of getting and setting different parameters of a task") {
                     Task task;

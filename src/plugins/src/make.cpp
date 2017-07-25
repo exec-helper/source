@@ -2,45 +2,67 @@
 
 #include <string>
 
-#include "config/settingsNode.h"
+#include <gsl/string_span>
+
+#include "config/environment.h"
+#include "config/fleetingOptionsInterface.h"
+#include "config/variablesMap.h"
 #include "core/patterns.h"
-#include "core/patternsHandler.h"
 #include "core/task.h"
 
-#include "configValue.h"
+#include "commandLine.h"
 #include "pluginUtils.h"
+#include "threadedness.h"
+#include "verbosity.h"
 
 using std::string;
+using std::to_string;
+
+using gsl::czstring;
+
+using execHelper::config::Command;
+using execHelper::config::ENVIRONMENT_KEY;
+using execHelper::config::FleetingOptionsInterface;
+using execHelper::config::Path;
+using execHelper::config::PatternKeys;
+using execHelper::config::VariablesMap;
 using execHelper::core::Task;
-using execHelper::core::Command;
-using execHelper::core::Options;
-using execHelper::core::TaskCollection;
-using execHelper::core::PatternKeys;
-using execHelper::config::SettingsNode;
+
+namespace {
+    const czstring<> MAKE_KEY = "make";
+    using BuildDir = string;
+} // namespace
 
 namespace execHelper { namespace plugins {
-    bool Make::apply(const Command& command, Task task, const Options& options) const noexcept {
-        static const string MAKE_COMMAND("make");
+    std::string Make::getPluginName() const noexcept {
+        return MAKE_KEY;
+    }
 
-        const SettingsNode& rootSettings = options.getSettings({"make"});  
-        task.append(MAKE_COMMAND);
+    VariablesMap Make::getVariablesMap(const FleetingOptionsInterface& fleetingOptions) const noexcept {
+        VariablesMap defaults(MAKE_KEY);
+        defaults.add(getBuildDirKey(), ".");
+        defaults.add(COMMAND_LINE_KEY);
+        const auto verbosity = fleetingOptions.getVerbosity() ? "yes" : "no";
+        defaults.add(VERBOSITY_KEY, verbosity);
+        defaults.add(JOBS_KEY, to_string(fleetingOptions.getJobs()));
+        defaults.add(ENVIRONMENT_KEY);
+        return defaults;
+    }
 
-        if(getMultiThreaded(command, rootSettings, options)) {
-            task.append(TaskCollection({"--jobs", "4"}));
-        }
-        string buildDir = ConfigValue<string>::get(getBuildDirKey(), "", command, rootSettings);
-        if(!buildDir.empty()) {
-            task.append("--directory=" + buildDir);
-        }
-        if(options.getVerbosity()) {
+    bool Make::apply(core::Task task, const config::VariablesMap& variables, const config::Patterns& patterns) const noexcept {
+        task.append(MAKE_KEY);
+        task.append({"--directory", variables.get<Path>(getBuildDirKey()).get().native()});
+        task.append({"--jobs", to_string(variables.get<Jobs>(JOBS_KEY).get())});
+
+        if(variables.get<Verbosity>(VERBOSITY_KEY).get()) {
             task.append("--debug");
         }
-        task.append(ConfigValue<TaskCollection>::get(getCommandLineKey(), {}, command, rootSettings));
-        task.appendToEnvironment(getEnvironment(command, rootSettings));
+        task.append(variables.get<CommandLineArgs>(COMMAND_LINE_KEY).get());
+        task.appendToEnvironment(getEnvironment(variables));
 
-        for(const auto& combination : makePatternPermutator(command, rootSettings, options)) {
-            Task makeTask = replacePatternCombinations(task, combination);
-            if(! registerTask(makeTask, options)) {
+        for(const auto& combination : makePatternPermutator(patterns)) {
+            Task newTask = replacePatternCombinations(task, combination);
+            if(! registerTask(newTask)) {
                 return false;
             }
         }

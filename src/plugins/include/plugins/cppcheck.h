@@ -1,19 +1,7 @@
 #ifndef __CPPCHECK_H__
 #define __CPPCHECK_H__
 
-#include "core/patternsHandler.h"
-#include "core/task.h"
-
 #include "plugin.h"
-
-namespace execHelper {
-    namespace config {
-        class SettingsNode;
-    }
-    namespace core {
-        class TargetDescriptionElement;
-    }
-}
 
 namespace execHelper {
     namespace plugins {
@@ -22,7 +10,9 @@ namespace execHelper {
          */
         class Cppcheck : public Plugin {
             public:
-                bool apply(const core::Command& command, core::Task task, const core::Options& options) const noexcept override;
+                std::string getPluginName() const noexcept override;
+                config::VariablesMap getVariablesMap(const config::FleetingOptionsInterface& fleetingOptions) const noexcept override;
+                bool apply(core::Task task, const config::VariablesMap& variables, const config::Patterns& patterns) const noexcept override;
             private:
                 /**
                  * Returns the source dir to use for the analysis
@@ -31,16 +21,15 @@ namespace execHelper {
                  * \param[in] rootSettings  The configuration settings associated with the specific command
                  * \returns The source dir to use
                  */
-                static std::string getSourceDir(const core::Command& command, const config::SettingsNode& rootSettings) noexcept;
+                static std::string getSourceDir(const config::Command& command, const config::SettingsNode& rootSettings) noexcept;
 
                 /**
                  * Returns the checks to use for the analysis
                  *
-                 * \param[in] command   The command for which to get the enabled checks
-                 * \param[in] rootSettings  The configuration settings associated with the specific command
-                 * \returns The checks that are enbled for the analysis
+                 * \param[in] variables   The configuration for this plugin
+                 * \returns The checks that are enabled for the analysis
                  */
-                static std::string getEnabledChecks(const core::Command& command, const config::SettingsNode& rootSettings) noexcept;
+                static std::string getEnabledChecks(const config::VariablesMap& variables) noexcept;
         };
     }
 }

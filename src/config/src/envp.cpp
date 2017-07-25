@@ -14,7 +14,7 @@ using gsl::czstring;
 using gsl::span;
 
 namespace execHelper {
-    namespace core {
+    namespace config {
         Envp::Envp(const EnvironmentCollection& env) noexcept
         {
             static const string DELIMITER("=");
@@ -39,9 +39,7 @@ namespace execHelper {
         }
 
         Envp::~Envp() noexcept {
-            for(char* arg : m_envp) {
-                delete[] arg;
-            }
+            clear();
         }
 
         Envp& Envp::operator=(const Envp& other) noexcept {
@@ -72,13 +70,25 @@ namespace execHelper {
             return &m_envp.at(0);
         }
 
+        void Envp::clear() noexcept {
+            for(const auto& arg : m_envp) {
+                delete[] arg;
+            }
+            m_envp.clear();
+        }
+
         void Envp::deepCopy(const Envp& other) noexcept {
+            clear();    // Clear the current content first
             for(const auto& otherElement : other.m_envp) {
-                size_t length = strlen(otherElement);
+                if(otherElement == nullptr) {
+                    break;
+                }
+                size_t length = strlen(otherElement) + 1U;
                 auto* newArg = new char[length];
                 strncpy(newArg, otherElement, length);
                 m_envp.emplace_back(newArg);
             }
+            m_envp.emplace_back(nullptr);
         }
 
         std::ostream& operator<<(std::ostream& os, const Envp& envp) noexcept {
@@ -86,7 +96,7 @@ namespace execHelper {
             bool firstIteration = true;
             for(const auto& env : envs) {
                 if(!firstIteration) {
-                    os << " ";
+                    os << ", ";
                 } else {
                     firstIteration = false;
                 }
@@ -94,5 +104,5 @@ namespace execHelper {
             }
             return os;
         }
-    } // namespace core
+    } // namespace config
 } // namespace execHelper

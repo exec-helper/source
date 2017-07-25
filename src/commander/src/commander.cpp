@@ -3,38 +3,47 @@
 #include <iostream>
 #include <utility>
 
-#include "core/options.h"
+#include "config/fleetingOptionsInterface.h"
+#include "config/variablesMap.h"
+#include "config/settingsNode.h"
 #include "core/task.h"
-#include "plugins/commandPlugin.h"
+#include "plugins/executePlugin.h"
 
 #include "logger.h"
 
 using std::move;
 
+using gsl::not_null;
+
+using execHelper::config::EnvironmentCollection;
+using execHelper::config::FleetingOptionsInterface;
+using execHelper::config::SettingsNode;
+using execHelper::config::VariablesMap;
 using execHelper::config::Path;
-using execHelper::core::EnvironmentCollection;
-using execHelper::core::Options;
+using execHelper::config::Patterns;
 using execHelper::core::Task;
-using execHelper::plugins::CommandPlugin;
+using execHelper::plugins::ExecutePlugin;
 
 namespace execHelper { namespace commander {
-    Commander::Commander(const Options& options, config::Path workingDirectory, core::EnvironmentCollection&& env) :
-        m_options(options),
-        m_workingDirectory(move(workingDirectory)),
-        m_env(env)
-    {
-        ;
-    }
+    bool Commander::run(const FleetingOptionsInterface& fleetingOptions, SettingsNode&& settings, Patterns&& patterns, const Path& workingDirectory, const EnvironmentCollection& env) noexcept {
+        ExecutePlugin::push(not_null<const FleetingOptionsInterface*>(&fleetingOptions));
+        ExecutePlugin::push(move(settings));
+        ExecutePlugin::push(move(patterns));
+        Task task;
+        task.setWorkingDirectory(workingDirectory);
+        task.setEnvironment(env);
 
-    bool Commander::run() noexcept {
-        for(const auto& command : m_options.getCommands()) {
-            CommandPlugin plugin;
-            Task task({}, m_workingDirectory);
-            task.setEnvironment(m_env);
-            if(! plugin.apply(command, task, m_options)) {
-                return false;
-            }
+        auto commands = fleetingOptions.getCommands();
+        if(commands.empty()) {
+            user_feedback_error("You must define at least one command");
+            return false;
         }
-        return true;
+        ExecutePlugin plugin(move(commands));
+        auto returnCode = plugin.apply(task, VariablesMap("commands"), patterns);
+
+        ExecutePlugin::popFleetingOptions();
+        ExecutePlugin::popSettingsNode();
+        ExecutePlugin::popPatterns();
+        return returnCode;
     }
 } }

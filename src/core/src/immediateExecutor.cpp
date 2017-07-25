@@ -10,6 +10,8 @@
 using std::move;
 
 namespace execHelper { namespace core {
+
+    // cppcheck-suppress passedByValue
     ImmediateExecutor::ImmediateExecutor(std::shared_ptr<Shell> shell, Callback callback) noexcept :
         m_shell(move(shell)),
         m_callback(move(callback))
@@ -17,15 +19,12 @@ namespace execHelper { namespace core {
         assert(m_shell != nullptr);
     }
 
-    bool ImmediateExecutor::execute(const Task& task) noexcept {
+    void ImmediateExecutor::execute(const Task& task) noexcept {
         user_feedback_info("Executing " << task.toString());
         Shell::ShellReturnCode returnCode = m_shell->execute(task);
         if(! m_shell->isExecutedSuccessfully(returnCode)) {
             m_callback(returnCode);
-            return false;
         }
-        return true;
-
     }
 } // namespace core
 } // namespace execHelper

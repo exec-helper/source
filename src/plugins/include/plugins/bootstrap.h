@@ -1,8 +1,10 @@
 #ifndef __BOOTSTRAP_H__
 #define __BOOTSTRAP_H__
 
-#include "buildPlugin.h"
+#include "config/commandLineOptions.h"
 #include "core/task.h"
+
+#include "buildPlugin.h"
 
 namespace execHelper {
     namespace config {
@@ -20,7 +22,9 @@ namespace execHelper {
          */
         class Bootstrap : public BuildPlugin {
             public:
-                bool apply(const core::Command& command, core::Task task, const core::Options& options) const noexcept override;
+                std::string getPluginName() const noexcept override;
+                config::VariablesMap getVariablesMap(const config::FleetingOptionsInterface& fleetingOptions) const noexcept override;
+                bool apply(core::Task task, const config::VariablesMap& variables, const config::Patterns& patterns) const noexcept override;
 
             private:
                 /**
@@ -30,7 +34,7 @@ namespace execHelper {
                  * \param[in] rootSettings  The configuration settings associated with the specific command
                  * \returns The name of the bootstrap script to call
                  */
-                static std::string getBootstrapFilename(const core::Command& command, const config::SettingsNode& rootSettings) noexcept;
+                static std::string getBootstrapFilename(const config::Command& command, const config::SettingsNode& rootSettings) noexcept;
         };
     } // namespace plugins
 } // namespace execHelper

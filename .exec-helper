@@ -146,9 +146,9 @@ docs:
 
 selector:
     analyze:
-        pattern: ANALYZE
+        patterns: ANALYZE
     run-test:
-        pattern: RUNTARGET
+        patterns: RUNTARGET
 
 undefined-behaviour:
     - command-line-command
@@ -193,8 +193,14 @@ cppcheck:
     command-line:
         - --std=c++11
         - --error-exitcode=1
+        - --includes-file=suppressions/includesfile.cppcheck
+        - --inline-suppr
     enable-checks:
-        - all
+        - warning
+        - style
+        - performance
+        - portability
+        - information
 
 clang-static-analyzer:
     build-command:
@@ -213,7 +219,7 @@ command-line-command:
             - COMPILER
             - MODE
         command-line:
-            [ cmake, -H., "-Bbuild/{COMPILER}/{MODE}/build", "-DCMAKE_CXX_COMPILER={COMPILER}", "-DCMAKE_INSTALL_PREFIX=build/{COMPILER}/{MODE}/install", -DCMAKE_EXPORT_COMPILE_COMMANDS=ON, "-DCMAKE_BUILD_TYPE={MODE}", -DBUILD_HTML_DOCUMENTATION=ON, -DBUILD_XML_DOCUMENTATION=ON, -DBUILD_MAN_DOCUMENTATION=ON, "-DCMAKE_TOOLCHAIN_FILE=build/{COMPILER}/{MODE}/toolchain.cmake", -DTERMINATE_ON_ASSERT_FAILURE=ON]
+            [ cmake, -H., "-Bbuild/{COMPILER}/{MODE}/build", "-DCMAKE_CXX_COMPILER={COMPILER}", "-DCMAKE_INSTALL_PREFIX=build/{COMPILER}/{MODE}/install", -DCMAKE_EXPORT_COMPILE_COMMANDS=ON, "-DCMAKE_BUILD_TYPE={MODE}", -DBUILD_HTML_DOCUMENTATION=ON, -DBUILD_XML_DOCUMENTATION=OFF, -DBUILD_MAN_DOCUMENTATION=ON, "-DCMAKE_TOOLCHAIN_FILE=build/{COMPILER}/{MODE}/toolchain.cmake", -DTERMINATE_ON_ASSERT_FAILURE=ON]
     init-build:
         patterns:
             - COMPILER
@@ -254,8 +260,8 @@ command-line-command:
         command-line: build/{COMPILER}/{MODE}/install/bin/exec-helper-integration-test
     coverage:
         environment:
-            CXXFLAGS: --coverage -fprofile-arcs -ftest-coverage
-            LDFLAGS: -fprofile-arcs -ftest-coverage
+            CXXFLAGS: -g --coverage -fprofile-arcs -ftest-coverage
+            LDFLAGS: -g -fprofile-arcs -ftest-coverage
         command-line: [ exec-helper, init-build, build, analyze, --analyze, lcov, --compiler, g++, --mode, coverage, --run-target, unittest]
     undefined-behaviour:
         environment:
@@ -292,7 +298,8 @@ valgrind:
     analyze:
         tool: memcheck
         command-line:
-           - --leak-check=full 
+            - --leak-check=full
+            - --error-exitcode=1
 
 pmd:
     patterns:

@@ -8,8 +8,8 @@ The selector plugin is used for selecting a configuration path based on the valu
 # MANDATORY SETTINGS
 The configuration of the command-line-command must contain the following settings:
 
-## pattern
-The pattern key to use for selecting the configuration path. The runtime value(s) associated with the pattern key must resolve either to an existing (configured) plugin or a configured command.
+## patterns
+The pattern keys to use for selecting the configuration path. The runtime value(s) associated with the pattern key must resolve either to an existing (configured) plugin or a configured command.
 
 # OPTIONAL SETTINGS
 There are no optional settings for the selector plugin.

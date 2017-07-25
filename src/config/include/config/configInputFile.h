@@ -12,24 +12,24 @@ namespace execHelper {
          */
         class ConfigInputFile {
             public:
-		/*! @copydoc core::Argv::Argv(const Argv&)
+		/*! @copydoc config::Argv::Argv(const Argv&)
 		 * \note Deleted
 		 */
                 ConfigInputFile(const ConfigInputFile& other) = delete;
 
-		/*! @copydoc core::Argv::Argv(Argv&&)
+		/*! @copydoc config::Argv::Argv(Argv&&)
 		 * \note Deleted
 		 */
                 ConfigInputFile(ConfigInputFile&& other) noexcept = delete;
 
                 virtual ~ConfigInputFile() = default;
 
-		/*! @copydoc core::Argv::operator=(const Argv&)
+		/*! @copydoc config::Argv::operator=(const Argv&)
 		 * \note Deleted
 		 */
                 ConfigInputFile& operator=(const ConfigInputFile& other) = delete;
 
-		/*! @copydoc core::Argv::operator=(Argv&&)
+		/*! @copydoc config::Argv::operator=(Argv&&)
 		 * \note Deleted
 		 */
                 ConfigInputFile& operator=(ConfigInputFile&& other) noexcept = delete;

@@ -1,6 +1,9 @@
 #ifndef __CLANG_TIDY_H__
 #define __CLANG_TIDY_H__
 
+#include <string>
+#include <vector>
+
 #include "core/task.h"
 
 #include "plugin.h"
@@ -13,25 +16,30 @@ namespace execHelper {
         class ClangTidy : public Plugin
         {
             public:
-                bool apply(const core::Command& command, core::Task task, const core::Options& options) const noexcept override;
+                std::string getPluginName() const noexcept override;
+                config::VariablesMap getVariablesMap(const config::FleetingOptionsInterface& fleetingOptions) const noexcept override;
+                bool apply(core::Task task, const config::VariablesMap& variables, const config::Patterns& patterns) const noexcept override;
 
             private:
+                using Checks = std::vector<std::string>;
+                using WarningAsError = Checks;
+
                 /**
                  * Returns the configured checks as a clang-tidy check command line argument
                  *
-                 * @param[in] checksCollection  The configured checks
+                 * @param[in] checks  The configured checks
                  * @returns The configured checks as a clang-tidy check command line argument
                  */
-                static std::string getChecks(const core::TaskCollection& checksCollection) noexcept;
+                static core::TaskCollection getChecks(const Checks& checks) noexcept;
 
                 /**
                  * Returns the configured warning-as-errors as a clang-tidy check command line argument
                  *
-                 * @param[in] warningAsErrorCollection  The configured warning-as-errors
-                 * @param[in] checksCollection  The configured checks
+                 * @param[in] warningAsError The configured warning-as-errors
+                 * @param[in] checks The configured checks
                  * @returns The configured warning-as-errors as a clang-tidy check command line argument
                  */
-                static std::string getWarningAsError(const core::TaskCollection& warningAsErrorCollection, const core::TaskCollection& checksCollection) noexcept;
+                static core::TaskCollection getWarningAsError(const WarningAsError& warningAsError, const Checks& checks) noexcept;
 
                 /*
                  * Returns the given collection as clang-tidy command line style string
@@ -39,7 +47,7 @@ namespace execHelper {
                  * @param[in] checks  The collection to list
                  * @returns The configured collection as a clang-tidy command line style string
                  */
-                static std::string listChecks(const core::TaskCollection& checks) noexcept;
+                static std::string listChecks(const Checks& checks) noexcept;
         };
     }
 }

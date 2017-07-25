@@ -6,7 +6,10 @@
 
 #include <boost/filesystem.hpp>
 
+#include "config/environment.h"
+#include "config/path.h"
 #include "config/settingsNode.h"
+#include "config/variablesMap.h"
 #include "core/patterns.h"
 
 #include "bootstrap.h"
@@ -17,159 +20,115 @@
 #include "make.h"
 #include "scons.h"
 
-#include "configValue.h"
-
 using std::map;
+using std::ostream;
 using std::pair;
 using std::string;
 using std::vector;
 
 using boost::filesystem::current_path;
 
+using execHelper::config::ENVIRONMENT_KEY;
+using execHelper::config::EnvironmentCollection;
 using execHelper::config::Path;
-using execHelper::config::SettingsNode;
-using execHelper::core::Command;
+using execHelper::config::PatternKeys;
+using execHelper::config::PatternKey;
+using execHelper::config::Patterns;
+using execHelper::config::PatternValue;
+using execHelper::config::PatternValues;
+using execHelper::config::Command;
+using execHelper::config::SettingsKeys;
+using execHelper::config::VariablesMap;
 using execHelper::core::Task;
 using execHelper::core::TaskCollection;
-using execHelper::core::EnvironmentCollection;
-using execHelper::core::PatternCombinations;
+using execHelper::config::PatternCombinations;
 using execHelper::core::replacePatterns;
-using execHelper::core::PatternPermutator;
-using execHelper::core::PatternKeys;
-using execHelper::core::PatternKey;
-using execHelper::core::PatternValue;
-using execHelper::core::Options;
+using execHelper::plugins::PatternPermutator;
 
-namespace execHelper { namespace plugins {
-    const string& getPatternsKey() noexcept {
-        static const string patternsKey("patterns");
-        return patternsKey;
-    }
+namespace execHelper {
+    namespace plugins {
+        const PatternKey& getPatternsKey() noexcept {
+            static const PatternKey key("patterns");
+            return key;
+        }
 
-    const string& getCommandLineKey() noexcept {
-        static const string commandLineKey("command-line");
-        return commandLineKey;
-    }
+        PatternPermutator makePatternPermutator(const Patterns& patterns) noexcept {
+            std::map<PatternKey, PatternValues> patternValuesMap;
+            if(patterns.empty()) {
+                // If no patterns were given, iterate once
+                patternValuesMap.emplace("NO-KEY", PatternValues({"NO-VALUE"}));
+            }
+            for(const auto& pattern : patterns) {
+                patternValuesMap.emplace(pattern.getKey(), pattern.getValues());
+            }
+            return plugins::PatternPermutator(patternValuesMap);
+        }
 
-    Task replacePatternCombinations(const Task& task, const PatternCombinations& patternCombinations) noexcept {
-        Task replacedTask;
-        for(pair<std::string, std::string> environment : task.getEnvironment()) {
+        Task replacePatternCombinations(const Task& task, const PatternCombinations& patternCombinations) noexcept {
+            Task replacedTask;
+            for(pair<std::string, std::string> environment : task.getEnvironment()) {
+                for(const auto& pattern : patternCombinations) {
+                    environment.first = replacePatterns(environment.first, pattern.first, pattern.second);
+                    environment.second = replacePatterns(environment.second, pattern.first, pattern.second);
+                }
+                replacedTask.appendToEnvironment(std::move(environment));
+            }
+            string newWorkingDir = task.getWorkingDirectory().native();
             for(const auto& pattern : patternCombinations) {
-                environment.first = replacePatterns(environment.first, pattern.first, pattern.second);
-                environment.second = replacePatterns(environment.second, pattern.first, pattern.second);
+                newWorkingDir = replacePatterns(newWorkingDir, pattern.first, pattern.second);
             }
-            replacedTask.appendToEnvironment(std::move(environment));
-        }
-        string newWorkingDir = task.getWorkingDirectory().native();
-        for(const auto& pattern : patternCombinations) {
-            newWorkingDir = replacePatterns(newWorkingDir, pattern.first, pattern.second);
-        }
-        replacedTask.setWorkingDirectory(newWorkingDir);
-        for(auto argument : task.getTask()) {
-            for(const auto& pattern : patternCombinations) {
-                argument = replacePatterns(argument, pattern.first, pattern.second);
+            replacedTask.setWorkingDirectory(newWorkingDir);
+            for(auto argument : task.getTask()) {
+                for(const auto& pattern : patternCombinations) {
+                    argument = replacePatterns(argument, pattern.first, pattern.second);
+                }
+                replacedTask.append(argument);
             }
-            replacedTask.append(argument);
+            return replacedTask;
         }
-        return replacedTask;
-    }
 
-    boost::optional<const SettingsNode&> getContainingSettings(const string& key, const SettingsNode& rootSettings, const vector<string>& configKeys) noexcept {
-        const SettingsNode* settings = &rootSettings;
-        for(const auto& configKey : configKeys) {
-            if(!configKey.empty() && !settings->contains(configKey)) {
-                return boost::none;
-            }
-            settings = &((*settings)[configKey]);
-        }
-        if(settings->contains(key)) {
-            return (*settings)[key];
-        }
-        return boost::none;
-    }
-
-    TaskCollection getCommandLine(const Command& command, const SettingsNode& rootSettings) noexcept {
-        return ConfigValue<TaskCollection>::get("command-line", {}, command, rootSettings);
-    }
-
-    TaskCollection getCommandLine(const Command& command, const SettingsNode& rootSettings, const PatternCombinations& patternCombinations) noexcept {
-        TaskCollection commandArguments = getCommandLine(command, rootSettings);
-        for(auto& argument : commandArguments) {
-            for(const auto& pattern : patternCombinations) {
-                argument = replacePatterns(argument, pattern.first, pattern.second);
+        void replacePatternCombinations(TaskCollection& commandArguments, const PatternCombinations& patternCombinations) noexcept {
+            for(auto& argument : commandArguments) {
+                for(const auto& pattern : patternCombinations) {
+                    argument = replacePatterns(argument, pattern.first, pattern.second);
+                }
             }
         }
-        return commandArguments;
-    }
 
-    const std::string& getEnvironmentKey() noexcept {
-        static const string environmentKey("environment");
-        return environmentKey;
-    }
+        EnvironmentCollection getEnvironment(const VariablesMap& variables) noexcept {
+            EnvironmentCollection result;
+            SettingsKeys key({ENVIRONMENT_KEY});
+            auto environmentOpt = variables.get<vector<string>>(key);
+            if(! environmentOpt) {
+                return result;
+            }
 
-    core::EnvironmentCollection getEnvironment(const core::Command& command, const config::SettingsNode& rootSettings) noexcept {
-        EnvironmentCollection result;
-        boost::optional<const SettingsNode&> environmentSettingsOpt = ConfigValue<const SettingsNode&>::getSetting(getEnvironmentKey(), rootSettings, {{command}, {}});
-        if(environmentSettingsOpt == boost::none) {
+            for(auto variableName : environmentOpt.get()) {
+                auto variableValueOpt = variables.get<string>({ENVIRONMENT_KEY, variableName});
+                if(! variableValueOpt) {
+                    LOG(warning) << "Environment variable '" << variableName << "' does not have an associated value. Ignoring it.";
+                    continue;
+                }
+                result.emplace(variableName, move(variableValueOpt.get()));
+            }
             return result;
         }
 
-        const SettingsNode& environmentSettings = environmentSettingsOpt.get();
-        for(const auto& setting : environmentSettings.values()) {
-            auto environmentSettingValues = environmentSettings[setting].values();
-            if(!environmentSettingValues.empty()) {
-                result.emplace(make_pair(setting, environmentSettings[setting].values().back()));
+        const string& getWorkingDirKey() noexcept {
+            static const string workingDirKey("working-dir");
+            return workingDirKey;
+        }
+
+        string toString(const PatternKeys& values) noexcept {
+            string result;
+            if(values.empty()) {
+                return result;
             }
-        }
-        return result;
-    }
-
-    const string& getWorkingDirKey() noexcept {
-        static const string workingDirKey("working-dir");
-        return workingDirKey;
-    }
-
-    boost::optional<Path> getWorkingDir(const Command& command, const SettingsNode& rootSettings) noexcept {
-        boost::optional<string> pathOpt = ConfigValue<string>::getSetting(getWorkingDirKey(), rootSettings, {{command}, {}});
-        if(! pathOpt) {
-            return boost::none;
-        }
-        auto& path = pathOpt.get();
-        if(path == "<working-dir>") {
-            return current_path();
-        }
-        return Path(path);
-    }
-
-    boost::optional<string> getConfigurationSetting(const string& command, const SettingsNode& rootSettings, const string& configKey, const string& prepend) noexcept {
-        boost::optional<TaskCollection> collection = getConfigurationSettings(command, rootSettings, configKey);
-        if(collection == boost::none) {
-            return boost::none;
-        }
-        if(collection.get().empty()) {
-            return std::string();
-        }
-        return prepend + collection.get().back();
-    }
-
-    boost::optional<TaskCollection> getConfigurationSettings(const string& command, const SettingsNode& rootSettings, const string& configKey) noexcept {
-        return ConfigValue<TaskCollection>::getSetting(configKey, rootSettings, {{command}, {}});
-    }
-
-    PatternPermutator makePatternPermutator(const Command& command, const SettingsNode& rootSettings, const Options& options) noexcept {
-        boost::optional<PatternKeys> patternKeys = getConfigurationSettings(command, rootSettings, getPatternsKey());
-        if(patternKeys == boost::none) {
-            // If no patterns are defined, make sure to iterate once
-            static map<PatternKey, vector<PatternValue>> noKeysMap({{"NOKEY", {"NOVALUE"}}});
-            return PatternPermutator(noKeysMap);
-        }
-        for(const auto& pattern : patternKeys.get()) {
-            if(!options.getPatternsHandler().contains(pattern)) {
-                user_feedback_error("Error: pattern with key '" << pattern << "' not configured");
-                return PatternPermutator({});
+            result.append(values.front());
+            for(auto it = values.begin() + 1; it != values.end(); ++it) {
+                result.append(", ").append(*it);
             }
+            return result;
         }
-        return options.makePatternPermutator(patternKeys.get());
-    }
-} // namespace plugins
+    } // namespace plugins
 } // namespace execHelper

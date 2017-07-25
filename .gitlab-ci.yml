@@ -170,8 +170,6 @@ build:debian:
         paths:
             - build/native/release/src/applications/exec-helper
 
-
-
 build:gcc:
     stage: build
     image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-build
@@ -180,12 +178,21 @@ build:gcc:
     script:
         - *build_tools
         - *install_exec_helper
-        - exec-helper init build --compiler g++ --mode debug release
+        - exec-helper init build --compiler g++ --mode release
     artifacts:
         expire_in: 1 day
         paths:
-            - build/g++/debug/install
             - build/g++/release/install
+
+build:gcc:debug:
+    stage: build
+    image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-build
+    dependencies:
+        - build:native
+    script:
+        - *build_tools
+        - *install_exec_helper
+        - exec-helper init build --compiler g++ --mode debug
 
 build:gcc:limited-optimization:
     stage: build
@@ -208,11 +215,10 @@ build:clang:
     script: 
         - *build_tools
         - *install_exec_helper
-        - exec-helper init build --compiler clang++ --mode debug release
+        - exec-helper init build --compiler clang++ --mode release
     artifacts:
         expire_in: 1 day
         paths:
-            - build/clang++/debug/install
             - build/clang++/release/install
 
 unittests:
@@ -229,20 +235,8 @@ integration-test:
 memory-check:
     <<: *memory_check
     variables:
-        RUN_TARGET: unittest
-        MODULES: log yaml config core commander
-
-memory-check-plugins:
-    <<: *memory_check
-    variables:
-        RUN_TARGET: unittest
-        MODULES: plugins
-
-memory-check-integration:
-    <<: *memory_check
-    variables:
-        RUN_TARGET: integration
-        MODULES: integration
+        RUN_TARGET: $ALL_RUN_TARGETS
+        MODULES: $ALL_MODULES
 
 cppcheck-unittest:
     <<: *cppcheck

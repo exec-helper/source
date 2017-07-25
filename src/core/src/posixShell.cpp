@@ -13,10 +13,10 @@
 #include <gsl/span>
 #include <gsl/string_span>
 
+#include "config/argv.h"
+#include "config/envp.h"
 #include "log/assertions.h"
 
-#include "argv.h"
-#include "envp.h"
 #include "logger.h"
 #include "task.h"
 
@@ -28,6 +28,9 @@ using boost::system::error_code;
 using boost::system::errc::success;
 using gsl::zstring;
 using gsl::span;
+
+using execHelper::config::Argv;
+using execHelper::config::Envp;
 
 namespace {
     const execHelper::core::PosixShell::ShellReturnCode POSIX_SUCCESS = 0U;

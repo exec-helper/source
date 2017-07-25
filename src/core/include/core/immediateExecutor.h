@@ -31,10 +31,10 @@ namespace execHelper {
                  */
                 ImmediateExecutor(std::shared_ptr<Shell> shell, Callback callback) noexcept;
 
-                bool execute(const Task& task) noexcept override;
+                void execute(const Task& task) noexcept override;
 
             private:
-                std::shared_ptr<Shell> m_shell;
+                const std::shared_ptr<Shell> m_shell;
                 Callback m_callback;
         };
     } // namespace core

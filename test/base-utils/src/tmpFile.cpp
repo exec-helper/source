@@ -1,9 +1,16 @@
 #include "tmpFile.h"
 
+#include <algorithm>
 #include <iostream>
+#include <string>
 
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
+
+#include "base-utils/generateRandom.h"
+
+using std::count;
+using std::string;
 
 using boost::system::error_code;
 using boost::system::errc::success;
@@ -11,14 +18,35 @@ using boost::filesystem::fstream;
 using boost::filesystem::is_regular_file;
 using boost::filesystem::remove;
 using boost::filesystem::temp_directory_path;
-using boost::filesystem::unique_path;
 
 using execHelper::test::baseUtils::Path;
+using execHelper::test::baseUtils::generateRandomChar;
+
+namespace  {
+    /**
+     * Since valgrind reports boost::filesyste::unique_path to leak, we implement our own version
+     */
+    inline Path unique_path(Path model) {
+        string resultPathName = model.filename().native();
+        auto nbOfReplacements = count(resultPathName.begin(), resultPathName.end(), '%');
+        auto replacements = generateRandomChar(nbOfReplacements);
+        size_t pos = 0U;
+        auto index = 0U;
+
+        while((pos = resultPathName.find('%', pos)) != std::string::npos) {
+            assert(index < replacements.size());
+            resultPathName.replace(pos, 1U, string(1U, replacements[index]));
+            ++pos;
+            ++index;
+        }
+        return resultPathName;
+    }
+} // namespace
 
 namespace execHelper {
 namespace test {
 namespace baseUtils {
-    TmpFile::TmpFile(const Path& model) :
+    TmpFile::TmpFile(const string& model) :
         m_path(temp_directory_path() / unique_path(model))
     {
         ;

@@ -1,43 +1,67 @@
 #include "scons.h"
 
-#include <map>
 #include <string>
 
-#include "config/settingsNode.h"
-#include "core/patterns.h"
-#include "core/patternsHandler.h"
+#include <gsl/string_span>
 
-#include "configValue.h"
+#include "config/fleetingOptionsInterface.h"
+#include "config/variablesMap.h"
+#include "core/patterns.h"
+#include "log/assertions.h"
+
+#include "commandLine.h"
 #include "pluginUtils.h"
+#include "threadedness.h"
+#include "verbosity.h"
 
 using std::string;
+using std::to_string;
 
-using execHelper::config::SettingsNode;
-using execHelper::core::Command;
+using gsl::czstring;
+
+using execHelper::config::FleetingOptionsInterface;
+using execHelper::config::Patterns;
+using execHelper::config::VariablesMap;
 using execHelper::core::Task;
-using execHelper::core::Options;
-using execHelper::core::TaskCollection;
-using execHelper::core::PatternKeys;
+
+namespace {
+    const czstring<> PLUGIN_NAME = "scons";
+} // namespace
 
 namespace execHelper { namespace plugins {
-    bool Scons::apply(const Command& command, Task task, const Options& options) const noexcept {
-        static const string SCONS_COMMAND("scons");
+    std::string Scons::getPluginName() const noexcept {
+        return "scons";
+    }
 
-        const SettingsNode& rootSettings = options.getSettings({"scons"});
+    VariablesMap Scons::getVariablesMap(const FleetingOptionsInterface& fleetingOptions) const noexcept {
+        VariablesMap defaults(PLUGIN_NAME);
+        defaults.add(getBuildDirKey(), ".");
+        defaults.add(COMMAND_LINE_KEY);
+        const auto verbosity = fleetingOptions.getVerbosity() ? "yes" : "no";
+        defaults.add(VERBOSITY_KEY, verbosity);
+        defaults.add(JOBS_KEY, to_string(fleetingOptions.getJobs()));
+        return defaults;
+    }
 
-        task.append(SCONS_COMMAND);
+    bool Scons::apply(Task task, const VariablesMap& variables, const Patterns& patterns) const noexcept {
+        task.append(PLUGIN_NAME);
 
-        if(getMultiThreaded(command, rootSettings, options)) {
-            task.append(TaskCollection({"--jobs", "8"}));
-        }
-        if(options.getVerbosity()) {
+        ensures(variables.get<Verbosity>(VERBOSITY_KEY) != boost::none);
+        if(variables.get<Verbosity>(VERBOSITY_KEY).get()) {
             task.append("--debug=explain");
         }
-        task.append(ConfigValue<TaskCollection>::get(getCommandLineKey(), {}, command, rootSettings));
 
-        for(const auto& combination : makePatternPermutator(command, rootSettings, options)) {
-            Task sconsTask = replacePatternCombinations(task, combination);
-            registerTask(sconsTask, options);
+        ensures(variables.get<Jobs>(JOBS_KEY) != boost::none);
+        task.append({"--jobs", to_string(variables.get<Jobs>(JOBS_KEY).get())});
+
+        ensures(variables.get<CommandLineArgs>(COMMAND_LINE_KEY) != boost::none);
+        task.append(variables.get<CommandLineArgs>(COMMAND_LINE_KEY).get());
+
+        for(const auto& combination : makePatternPermutator(patterns)) {
+            Task newTask = replacePatternCombinations(task, combination);
+            if(! registerTask(newTask)) {
+                return false;
+            }
         }
         return true;
     }

@@ -3,10 +3,14 @@
 
 #include <map>
 
+#include <boost/optional/optional.hpp>
+
+#include "config/variablesMap.h"
+
 #include "pattern.h"
 
 namespace execHelper {
-    namespace core {
+    namespace config {
         /**
          * \brief Handles the patterns it is given
          */
@@ -15,20 +19,21 @@ namespace execHelper {
                 using PatternCollection = std::map<PatternKey, Pattern>;
 
             public:
-                /**
-                 * Equality operator
-                 *
-                 * \param[in] other The other object to compare with
-                 * \returns True    If the other object is considered equal
-                 *          False   Otherwise
+                PatternsHandler() = default;
+
+                /*! @copydoc config::Argv::Argv(const Argv& patterns)
+                 */
+                explicit PatternsHandler(const Patterns& other);
+
+                /*! @copydoc config::Argv::Argv(Argv&& patterns)
+                 */
+                explicit PatternsHandler(Patterns&& other) noexcept;
+
+                /*! @copydoc config::Argv::operator==(const config::Argv& other) const
                  */
                 bool operator==(const PatternsHandler& other) const noexcept;
 
-                /**
-                 * Inequality operator
-                 *
-                 * \param[in] other The other object to compare with
-                 * \returns ! \ref operator==(const PatternsHandler& other) const
+                /*! @copydoc config::Argv::operator!=(const config::Argv& other) const
                  */
                 bool operator!=(const PatternsHandler& other) const noexcept;
 
@@ -57,6 +62,23 @@ namespace execHelper {
                  */
                 const Pattern& getPattern(const PatternKey& key) const noexcept;
 
+                /**
+                 * Returns the default pattern map for a pattern
+                 *
+                 * \param[in] key   The root key to use for the newly created variables map
+                 * \returns The default variables map
+                 */
+                static config::VariablesMap getDefaultPatternMap(const PatternKey& key) noexcept;
+
+                /**
+                 * Converts the given patternMap to a pattern
+                 *
+                 * \param[in] key   The key associated with the pattern
+                 * \param[in] patternMap    The variables map containing the values for the pattern to create
+                 * \returns The created pattern if the variables map is valid
+                 *          boost::none otherwise
+                 */
+                static boost::optional<Pattern> toPattern(const PatternKey& key, const config::VariablesMap& patternMap) noexcept;
             private:
                 PatternCollection m_patterns;
         };

@@ -32,20 +32,20 @@ namespace execHelper {
                  */
                 explicit Yaml(const std::string& yamlConfig);
 
-		/*! @copydoc core::Argv::Argv(const Argv&)
+                /*! @copydoc config::Argv::Argv(const Argv&)
 		 */
                 Yaml(const Yaml& other) = delete;
 
-		/*! @copydoc core::Argv::Argv(Argv&&)
+		/*! @copydoc config::Argv::Argv(Argv&&)
 		 */
                 Yaml(Yaml&& other) noexcept = delete;
                 ~Yaml() override = default;
 
-		/*! @copydoc core::Argv::operator=(const Argv&)
+		/*! @copydoc config::Argv::operator=(const Argv&)
 		 */
                 Yaml& operator=(const Yaml& other) = delete;
 
-		/*! @copydoc core::Argv::operator=(Argv&&)
+		/*! @copydoc config::Argv::operator=(Argv&&)
 		 */
                 Yaml& operator=(Yaml&& other) noexcept = delete;
 

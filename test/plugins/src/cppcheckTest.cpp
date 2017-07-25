@@ -2,124 +2,154 @@
 
 #include <gsl/string_span>
 
-#include "config/settingsNode.h"
-#include "core/execHelperOptions.h"
-#include "core/pattern.h"
+#include "config/pattern.h"
+#include "config/variablesMap.h"
+#include "plugins/commandLine.h"
 #include "plugins/cppcheck.h"
+#include "plugins/threadedness.h"
+#include "plugins/verbosity.h"
 #include "unittest/catch.h"
 #include "utils/utils.h"
 
 #include "executorStub.h"
-#include "optionsStub.h"
+#include "fleetingOptionsStub.h"
 
 using std::string;
+using std::to_string;
 
 using gsl::czstring;
 
-using execHelper::config::SettingsNode;
-using execHelper::core::test::ExecutorStub;
+using execHelper::config::Pattern;
+using execHelper::config::Patterns;
+using execHelper::config::VariablesMap;
 using execHelper::core::Task;
 using execHelper::core::TaskCollection;
-using execHelper::core::CommandCollection;
+using execHelper::plugins::JOBS_KEY;
+using execHelper::plugins::VERBOSITY_KEY;
 
-using execHelper::test::OptionsStub;
-using execHelper::test::utils::Patterns;
-using execHelper::test::utils::addPatterns;
-using execHelper::test::utils::TargetUtil;
-using execHelper::test::utils::CompilerUtil;
-using execHelper::test::utils::copyAndAppend;
+using execHelper::test::FleetingOptionsStub;
+using execHelper::core::test::ExecutorStub;
+using execHelper::test::utils::getExpectedTasks;
 
 namespace {
-    const czstring<> PLUGIN_CONFIG_KEY("cppcheck");
-    const czstring<> PLUGIN_COMMAND("cppcheck");
+    const czstring<> PLUGIN_NAME = "cppcheck";
+    const czstring<> ENABLE_CHECKS_KEY = "enable-checks";
+    const czstring<> SRC_DIR_KEY = "src-dir";
 } // namespace
 
 namespace execHelper { namespace plugins { namespace test {
-    SCENARIO("Testing the configuration settings of the cppcheck plugin", "[plugins][cppcheck]") {
+    SCENARIO("Obtain the plugin name of the cppcheck plugin", "[cppcheck]") {
+        GIVEN("A plugin") {
+            Cppcheck plugin;
+
+            WHEN("We request the plugin name") {
+                const string pluginName = plugin.getPluginName();
+
+                THEN("We should find the correct plugin name") {
+                    REQUIRE(pluginName == PLUGIN_NAME);
+                }
+            }
+        }
+    }
+
+    SCENARIO("Obtain the default variables map of the cppcheck plugin", "[cppcheck]") {
+        MAKE_COMBINATIONS("The default fleeting options") {
+            FleetingOptionsStub fleetingOptions;
+            Cppcheck plugin;
+
+            VariablesMap actualVariables(plugin.getPluginName());
+            actualVariables.add(ENABLE_CHECKS_KEY, "all");
+            actualVariables.add(COMMAND_LINE_KEY);
+            actualVariables.add(SRC_DIR_KEY, ".");
+            actualVariables.add(VERBOSITY_KEY, "no");
+            actualVariables.add(JOBS_KEY, to_string(fleetingOptions.m_jobs));
+
+            COMBINATIONS("Switch on verbosity") {
+                fleetingOptions.m_verbose = true;
+                actualVariables.replace(VERBOSITY_KEY, "yes");
+            }
+
+            COMBINATIONS("Switch on threadedness") {
+                fleetingOptions.m_jobs = 6U;
+                actualVariables.replace(JOBS_KEY, to_string(fleetingOptions.m_jobs));
+            }
+
+            THEN_WHEN("We request the variables map") {
+                VariablesMap variables = plugin.getVariablesMap(fleetingOptions);
+
+                THEN_CHECK("We should find the same ones") {
+                    REQUIRE(variables == actualVariables);
+                }
+            }
+        }
+    }
+ 
+
+    SCENARIO("Testing the configuration settings of the cppcheck plugin", "[cppcheck]") {
         MAKE_COMBINATIONS("Of several settings") {
-            const string command("make-command");
+            FleetingOptionsStub fleetingOptions;
 
-            OptionsStub options;
-
-            TargetUtil targetUtil;
-            addPatterns(targetUtil.getPatterns(), &options);
-
-            CompilerUtil compilerUtil;
-            addPatterns(compilerUtil.getPatterns(), &options);
-
-            SettingsNode& rootSettings = options.m_settings;
-            rootSettings.add({PLUGIN_CONFIG_KEY, "patterns"}, targetUtil.getKeys());
-            rootSettings.add({PLUGIN_CONFIG_KEY, "patterns"}, compilerUtil.getKeys());
-
-            // Add the settings of an other command to make sure we take the expected ones
-            const string otherCommandKey("other-command");
+            const Pattern pattern1("PATTERN1", {"value1a", "value1b"});
+            const Pattern pattern2("PATTERN2", {"value2a", "value2b"});
+            const Patterns patterns({pattern1, pattern2});
 
             Cppcheck plugin;
-            Task task;
+            
+            VariablesMap variables = plugin.getVariablesMap(FleetingOptionsStub());
 
-            Task expectedTask({PLUGIN_COMMAND});
             std::string enabledChecks("--enable=all");
             std::string srcDir(".");
+            Jobs jobs = fleetingOptions.m_jobs;
             TaskCollection verbosity;
             TaskCollection commandLine;
 
-            SettingsNode::SettingsKeys baseSettingsKeys = {PLUGIN_CONFIG_KEY};
-            SettingsNode::SettingsKeys otherBaseSettingsKeys = {PLUGIN_CONFIG_KEY, otherCommandKey};
-
-            COMBINATIONS("Toggle between general and specific command settings") {
-                baseSettingsKeys.push_back(command);
-            }
+            ExecutorStub executor;
+            ExecuteCallback executeCallback = [&executor](const Task& task) { executor.execute(task);};
+            registerExecuteCallback(executeCallback);
 
             COMBINATIONS("Change the enabled checks") {
                 TaskCollection enabledChecksValue = {"warning", "style", "performance"}; 
-                rootSettings.add(copyAndAppend(baseSettingsKeys, "enable-checks"), enabledChecksValue);
-                enabledChecks.clear();
+                variables.replace(ENABLE_CHECKS_KEY, enabledChecksValue);
                 enabledChecks = "--enable=warning,style,performance";
             }
 
             COMBINATIONS("Change the source dir") {
-                srcDir.clear();
-                srcDir = "{" + targetUtil.target.getKey() + "}/{HELLO}/{" + targetUtil.runTarget.getKey() + "}";
-                rootSettings.add(copyAndAppend(baseSettingsKeys, "src-dir"), srcDir);
-                rootSettings.add(copyAndAppend(otherBaseSettingsKeys, "src-dir"), "other-src-dir");
-            }
-
-            COMBINATIONS("Change the target dir") {
-                const string target("{" + targetUtil.runTarget.getKey() + "}/{HELLO}");
-                srcDir +=  "/" + target;
-                rootSettings.add(copyAndAppend(baseSettingsKeys, "target-path"), target);
-                rootSettings.add(copyAndAppend(otherBaseSettingsKeys, "target-path"), "other-target");
-            }
-
-            COMBINATIONS("Switch off verbosity") {
-                options.m_verbosity = false;
+                srcDir = "{" + pattern1.getKey() + "}/{HELLO}/{" + pattern2.getKey() + "}";
+                variables.replace(SRC_DIR_KEY, srcDir);
             }
 
             COMBINATIONS("Switch on verbosity") {
-                options.m_verbosity = true;
-                verbosity.emplace_back("--verbose");
+                variables.replace(VERBOSITY_KEY, "yes");
+                verbosity = {"--verbose"};
             }
 
             COMBINATIONS("Add a command line") {
-                commandLine = {"{" + targetUtil.target.getKey() + "}", "{" + targetUtil.runTarget.getKey() + "}"};
-                rootSettings.add(copyAndAppend(baseSettingsKeys, "command-line"), commandLine);
-                rootSettings.add(copyAndAppend(otherBaseSettingsKeys, "command-line"), "--other-command");
+                commandLine = {"{" + pattern1.getKey() + "}", "{" + pattern2.getKey() + "}"};
+                variables.replace(COMMAND_LINE_KEY, commandLine);
             }
 
+            COMBINATIONS("Switch on single threaded") {
+                jobs = 1U;
+                variables.replace(JOBS_KEY, to_string(jobs));
+            }
+
+            Task expectedTask({PLUGIN_NAME});
             expectedTask.append(enabledChecks);
             expectedTask.append(verbosity);
+            expectedTask.append({"-j", to_string(jobs)});
             expectedTask.append(commandLine);
             expectedTask.append(srcDir);
 
-            ExecutorStub::TaskQueue expectedTasks = getExpectedTasks(expectedTask, compilerUtil, targetUtil);
+            ExecutorStub::TaskQueue expectedTasks = getExpectedTasks(expectedTask, patterns);
 
-            bool returnCode = plugin.apply(command, task, options);
+            Task task;
+            bool returnCode = plugin.apply(task, variables, patterns);
             THEN_CHECK("It should succeed") {
                 REQUIRE(returnCode);
             }
 
             THEN_CHECK("It called the right commands") {
-                REQUIRE(expectedTasks == options.m_executor.getExecutedTasks());
+                REQUIRE(expectedTasks == executor.getExecutedTasks());
             }
         }
     }

@@ -2,16 +2,10 @@
 #define __PATTERNS_H__
 
 #include <string>
-#include <vector>
 
-#include "options.h"
+#include "config/pattern.h"
 
-namespace execHelper {
-    namespace core {
-        class TargetDescriptionElement;
-        class CompilerDescriptionElement;
-    } // namespace core
-} // namespace execHelper
+#include "mapPermutator.h"
 
 namespace execHelper {
     namespace core {
@@ -24,16 +18,6 @@ namespace execHelper {
          * \returns The replaced string
          */
         std::string replacePatterns(const std::string& subject, const std::string& pattern, const std::string& replacement) noexcept;
-
-        /**
-         * \deprecated
-         */
-        std::string replacePatterns(const std::string& subject, const PatternKeys& patterns, const core::TargetDescriptionElement& target) noexcept;
-
-        /**
-         * \deprecated
-         */
-        std::string replacePatterns(const std::string& subject, const PatternKeys& patterns, const core::CompilerDescriptionElement& compiler) noexcept;
     } // namespace core
 } // namespace execHelper
 

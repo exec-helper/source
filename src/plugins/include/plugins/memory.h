@@ -4,7 +4,8 @@
 #include <tuple>
 #include <vector>
 
-#include "core/options.h"
+#include "config/pattern.h"
+#include "config/variablesMap.h"
 #include "core/task.h"
 
 #include "plugin.h"
@@ -15,27 +16,24 @@ namespace execHelper {
          * \brief   Remembers information that was passed to it
          */
         struct Memory_t {
-            const core::Command command; //!< brief The command to remember
-            const core::Task* const taskAddress; //!< brief The original address of the task. The actual task may already be destroyed when used.
-            const core::Task task; //!< brief The task to remember
-            const core::Options* const options; //!< brief The options to remember. The actual options may already be destroyed when used.
+            const core::Task task;  //!< The task to remember
+            const config::VariablesMap variables;   //!< The variables to remember
+            const config::Patterns patterns;    //!< The patterns to remember
 
             /**
              * Constructor
              *
-             * \param[in] aCommand  The command to remember
-             * \param[in] aTaskAddress  The address of the task to remember. The lifetime of the task does not necessarily need to be guaranteed during the lifetime of this object, though it is the user's reponsibility whether it is safe to dereference it later on.
              * \param[in] aTask     The task to remember
-             * \param[in] aOptions  The options to remember. The lifetime of the options object does not necessarily need to be guaranteed during the lifetime of this object, though it is the user's responsability whether it is safe to dereference it later on.
+             * \param[in] variables The variables to remember
+             * \param[in] patterns  The patterns to remember
              */
-            inline Memory_t(core::Command aCommand, const core::Task* const aTaskAddress, core::Task aTask, const core::Options* const aOptions) :
-              command(std::move(aCommand)),
-              taskAddress(aTaskAddress),
+            Memory_t(core::Task aTask, config::VariablesMap variables, const config::Patterns patterns) :
               task(std::move(aTask)),
-              options(aOptions)
-            {
-                ;
-            }
+              variables(std::move(variables)),
+              patterns(patterns)
+          {
+            ;
+          }
         };
 
         /**
@@ -47,24 +45,27 @@ namespace execHelper {
 
                 Memory() = default;
 
-		/*! @copydoc core::Argv::Argv(const Argv&)
-		 */
+                /*! @copydoc config::Argv::Argv(const Argv&)
+                */
                 Memory(const Memory& other) = delete;
 
-		/*! @copydoc core::Argv::Argv(Argv&&)
-		 */
+                /*! @copydoc config::Argv::Argv(Argv&&)
+                */
                 Memory(Memory&& other) noexcept = delete;
                 ~Memory() override = default;
 
-		/*! @copydoc core::Argv::operator=(const Argv&)
-		 */
+                /*! @copydoc config::Argv::operator=(const Argv&)
+                */
                 Memory& operator=(const Memory& other) = delete;
 
-		/*! @copydoc core::Argv::operator=(Argv&&)
-		 */
+                /*! @copydoc config::Argv::operator=(Argv&&)
+                */
                 Memory& operator=(Memory&& other) noexcept = delete;
 
-                bool apply(const core::Command& command, core::Task task, const core::Options& options) const noexcept override;
+                std::string getPluginName() const noexcept override;
+                config::VariablesMap getVariablesMap(const config::FleetingOptionsInterface& fleetingOptions) const noexcept override;
+                bool apply(core::Task task, const config::VariablesMap& variables, const config::Patterns& patterns) const noexcept override;
+
             protected:
                 /**
                  * Getter for the executions that were remembered
@@ -99,21 +100,21 @@ namespace execHelper {
 
                 MemoryHandler();
 
-		/*! @copydoc core::Argv::Argv(const Argv&)
-		 */
+                /*! @copydoc config::Argv::Argv(const Argv&)
+                */
                 MemoryHandler(const MemoryHandler& other) = delete;
 
-		/*! @copydoc core::Argv::Argv(Argv&&)
-		 */
+                /*! @copydoc config::Argv::Argv(Argv&&)
+                */
                 MemoryHandler(MemoryHandler&& other) noexcept = delete;
                 ~MemoryHandler() override;
 
-		/*! @copydoc core::Argv::operator=(const Argv&)
-		 */
+                /*! @copydoc config::Argv::operator=(const Argv&)
+                */
                 MemoryHandler& operator=(const MemoryHandler& other) = delete;
 
-		/*! @copydoc core::Argv::operator=(Argv&&)
-		 */
+                /*! @copydoc config::Argv::operator=(Argv&&)
+                 */
                 MemoryHandler& operator=(MemoryHandler&& other) noexcept = delete;
 
                 /*! @copydoc Memory::getExecutions()

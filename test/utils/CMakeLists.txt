@@ -3,7 +3,6 @@ set(LIBRARY_NAME ${PROJECT_NAME}-${MODULE_NAME})
 
 set(SRCS
         src/utils.cpp
-        src/combinationHelpers.cpp
    )
 
 set(DEPENDENCIES

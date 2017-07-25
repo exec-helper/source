@@ -1,12 +1,30 @@
 #include "plugin.h"
+
 #include "core/executorInterface.h"
 
+#include "logger.h"
+
 using execHelper::core::Task;
-using execHelper::core::Options;
+
+namespace {
+    void noExecuteCallback(const Task& /*task*/) noexcept {
+        LOG(warning) << "Execute callback is called while no execute callback was registered";
+    }
+
+    execHelper::plugins::ExecuteCallback& getExecuteCallback() noexcept {
+        static execHelper::plugins::ExecuteCallback executeCallback(noExecuteCallback);
+        return executeCallback;
+    }
+} // namespace
 
 namespace execHelper { namespace plugins {
-    bool registerTask(const Task& task, const Options& options) noexcept {
-        return options.getExecutor()->execute(task);
+    void registerExecuteCallback(const ExecuteCallback& callback) noexcept {
+        getExecuteCallback() = callback;
+    }
+
+    bool registerTask(const Task& task) noexcept {
+        getExecuteCallback()(task);
+        return true;
     }
 } // namespace plugins
 } // namespace execHelper

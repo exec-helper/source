@@ -1,219 +1,154 @@
 #include <string>
-#include <vector>
 
-#include <catch.hpp>
+#include <gsl/string_span>
 
-#include "core/options.h"
-#include "core/pattern.h"
+#include "config/commandLineOptions.h"
+#include "config/pattern.h"
+#include "config/settingsNode.h"
+#include "config/variablesMap.h"
 #include "core/task.h"
+#include "log/log.h"
+#include "plugins/executePlugin.h"
+#include "plugins/logger.h"
 #include "plugins/memory.h"
 #include "plugins/selector.h"
+#include "unittest/catch.h"
 #include "utils/utils.h"
 
 #include "executorStub.h"
-#include "optionsStub.h"
+#include "fleetingOptionsStub.h"
 
-using std::vector;
 using std::string;
 
+using gsl::czstring;
+
+using execHelper::config::Command;
+using execHelper::config::CommandCollection;
+using execHelper::config::Pattern;
+using execHelper::config::PatternKey;
+using execHelper::config::PatternValues;
+using execHelper::config::Patterns;
+using execHelper::config::VariablesMap;
 using execHelper::config::SettingsNode;
 using execHelper::core::Task;
-using execHelper::core::Pattern;
+using execHelper::plugins::ExecutePlugin;
 using execHelper::plugins::MemoryHandler;
 
-using execHelper::test::OptionsStub;
+using execHelper::test::FleetingOptionsStub;
 using execHelper::core::test::ExecutorStub;
-using execHelper::test::utils::Patterns;
-using execHelper::test::utils::copyAndAppend;
-using execHelper::test::utils::combineVectors;
 
 namespace {
-    void setupBasicOptions(OptionsStub* options, const Patterns& patterns) {
-        SettingsNode& rootSettings = options->m_settings;
-        rootSettings.add({"command", "selector-command"}, "selector");
-        rootSettings.add({"command", "selector"}, "selector-command");
-
-        for(const auto& pattern : patterns) {
-            options->m_patternsHandler->addPattern(pattern);
-        }
-    }
-
-    void checkMemories(const MemoryHandler& memory) {
-        const MemoryHandler::Memories& memories = memory.getExecutions();
-        for(size_t i = 0; i < memories.size(); ++i) {
-            for(size_t j = 0; j < i; ++j) {
-                // Note: tasks should point to different objects, but since
-                // the previous task is destroyed before the next one is constructed,
-                // it may happen that they point to the same chunk of memory.
-                REQUIRE(memories[i].command == memories[j].command);
-                REQUIRE(memories[i].task == memories[j].task);
-                REQUIRE(memories[i].options == memories[j].options);
-            }
-        }
-    }
+    const czstring<> PLUGIN_NAME = "selector";
+    const czstring<> PATTERN_KEY = "patterns";
+    const czstring<> MEMORY_KEY = "memory";
 } // namespace
 
 namespace execHelper { namespace plugins { namespace test {
-    SCENARIO("Testing the default selector settings", "[plugins][selector]") {
-        GIVEN("A selector plugin object and the default options") {
-            OptionsStub options;
+    SCENARIO("Obtain the plugin name of the selector plugin", "[selector]") {
+        log::init();
 
+        GIVEN("A plugin") {
             Selector plugin;
-            Task task;
 
-            WHEN("We apply the selector plugin") {
-                bool success = plugin.apply("random-command", task, options);
+            WHEN("We request the plugin name") {
+                const string pluginName = plugin.getPluginName();
 
-                THEN("It should not succeed") {
-                    REQUIRE_FALSE(success);
+                THEN("We should find the correct plugin name") {
+                    REQUIRE(pluginName == PLUGIN_NAME);
                 }
             }
         }
     }
 
-    SCENARIO("Test the selector plugin when no related arguments are passed on the command line", "[plugins][selector]") {
-        GIVEN("A selector object and the correct configuration") {
-            vector<string> selectionOptions1 = {"memory", "memory", "memory"};
-            vector<string> selectionOptions2 = {"memory", "memory", "memory"};
-            Pattern testPattern1("TESTPATTERN1", selectionOptions1, 't', "--test-pattern1");
-            Pattern testPattern2("TESTPATTERN2", selectionOptions2, 'u', "--test-pattern2");
-            const string command1("selector-command");
-            const string command2("selector-command2");
+    SCENARIO("Obtaining the default variables map of the selector plugin", "[selector]") {
+        MAKE_COMBINATIONS("of fleeting options") {
+            FleetingOptionsStub fleetingOptions;
+            Selector plugin;
+
+            VariablesMap actualVariables(plugin.getPluginName());
+
+            THEN_WHEN("We request the variables map") {
+                VariablesMap variables = plugin.getVariablesMap(fleetingOptions);
+
+                THEN_CHECK("We should find the right one") {
+                    REQUIRE(variables == actualVariables);
+                }
+            }
+        }
+    }
+
+    SCENARIO("Make combinations of configurations for the selector plugin") {
+        MAKE_COMBINATIONS("Of several configurations") {
+            const Pattern pattern1("PATTERN1", {MEMORY_KEY});
+            const Pattern pattern2("PATTERN2", {MEMORY_KEY, MEMORY_KEY});
+            Patterns patterns({pattern1});
+
+            Command command = "selector-command";
 
             MemoryHandler memory;
 
-            OptionsStub options;
-            SettingsNode& rootSettings = options.m_settings;
-            SettingsNode::SettingsKeys baseSettingsKeys = {"selector"};
-
-            setupBasicOptions(&options, {testPattern1, testPattern2});
-            rootSettings.add(combineVectors(baseSettingsKeys, {command1, "pattern"}), testPattern1.getKey());
-            rootSettings.add(copyAndAppend(baseSettingsKeys, "pattern"), testPattern2.getKey());
-
             Selector plugin;
-            Task task;
 
-            WHEN("We apply the selector to command 1") {
-                bool returnCode = plugin.apply(command1, task, options);
+            VariablesMap variables = plugin.getVariablesMap(FleetingOptionsStub());
+            variables.add(PATTERN_KEY, pattern1.getKey());
 
-                THEN("It should return that it succeeded") {
+            ExecutorStub::TaskQueue expectedTasks;
+            expectedTasks.emplace_back(Task());
+
+            COMBINATIONS("Add another select entry") {
+                PatternValues newValues = patterns.front().getValues();
+                newValues.push_back(MEMORY_KEY);
+                patterns.front().setValues(newValues);
+                expectedTasks.emplace_back(Task());
+            }
+
+            COMBINATIONS("Add another pattern entry") {
+                variables.add(PATTERN_KEY, pattern2.getKey());
+                patterns.push_back(pattern2);
+                for(const auto& entry : pattern2.getValues()) {
+                    expectedTasks.emplace_back(Task());
+                }
+            }
+
+            FleetingOptionsStub fleetingOptions;
+            ExecutePlugin::push(&fleetingOptions);
+            ExecutePlugin::push(SettingsNode(PLUGIN_NAME));
+            ExecutePlugin::push(Patterns(patterns));
+
+            THEN_WHEN("We apply the plugin") {
+                Task task;
+                bool returnCode = plugin.apply(task, variables, patterns);
+                THEN_CHECK("It should succeed") {
                     REQUIRE(returnCode);
                 }
-                THEN("All default actions should be executed") {
-                    const Memory::Memories& memories = memory.getExecutions();
-                    REQUIRE(memories.size() == selectionOptions1.size());
-                    for(size_t i = 0; i < selectionOptions1.size(); ++i) {
-                        REQUIRE(memories[i].command == command1);
-                    }
-                }
-                THEN("They should be called with the appropriate values") {
-                    checkMemories(memory);
-                }
-            }
-            WHEN("We apply the selector to command 2") {
-                bool returnCode = plugin.apply(command2, task, options);
 
-                THEN("It should return that it succeeded") {
-                    REQUIRE(returnCode);
-                }
-                THEN("All default actions should be executed") {
+                THEN_CHECK("It called the right commands") {
                     const Memory::Memories& memories = memory.getExecutions();
-                    REQUIRE(memories.size() == selectionOptions2.size());
-                    for(size_t i = 0; i < selectionOptions2.size(); ++i) {
-                        REQUIRE(memories[i].command == command2);
+                    REQUIRE(memories.size() == expectedTasks.size());
+                    auto expectedTask = expectedTasks.begin();
+                    for(auto memory = memories.begin(); memory != memories.end(); ++memory, ++expectedTask) {
+                        REQUIRE(memory->task == *expectedTask);
+                        REQUIRE(memory->patterns.empty());
                     }
                 }
-                THEN("They should be called with the appropriate values") {
-                    checkMemories(memory);
-                }
             }
+
+            ExecutePlugin::popFleetingOptions();
+            ExecutePlugin::popSettingsNode();
+            ExecutePlugin::popPatterns();
         }
     }
 
-    SCENARIO("Test the selector plugin when related arguments are passed on the command line", "[plugins][selector]") {
-        GIVEN("A selector object and a the correct configuration") {
-            const string command1("memory");
-            const string command2("memory");
-            const string commandlineCommand1("selector-command");
-            const string commandlineCommand2("selector-command2");
-            vector<string> selectionOptions1 = {command1, "command1", "command2"};
-            vector<string> selectionOptions2 = {"command1", "command2", "command3"};
-            vector<string> commandLineOptions1 = {command1};
-            vector<string> commandLineOptions2 = {command2};
-            Pattern testPattern1("TESTPATTERN1", selectionOptions1, 't', "--test-pattern1");
-            Pattern testPattern2("TESTPATTERN2", selectionOptions2, 'u', "--test-pattern2");
-
-            MemoryHandler memory;
-
-            OptionsStub options;
-            SettingsNode& rootSettings = options.m_settings;
-            SettingsNode::SettingsKeys baseSettingsKeys = {"selector"};
-
-            setupBasicOptions(&options, {testPattern1, testPattern2});
-            rootSettings.add(combineVectors(baseSettingsKeys, {commandlineCommand1, "pattern"}), testPattern1.getKey());
-            rootSettings.add(copyAndAppend(baseSettingsKeys, "pattern"), testPattern2.getKey());
-
-            options.m_options.insert(make_pair(testPattern1.getLongOption(), commandLineOptions1));
-            options.m_options.insert(make_pair(testPattern2.getLongOption(), commandLineOptions2));
-
+    SCENARIO("Erroneous situations", "[selector]") {
+        GIVEN("A config without select commands defined") {
             Selector plugin;
-            Task task;
+            VariablesMap variables = plugin.getVariablesMap(FleetingOptionsStub());
 
-            WHEN("We apply the selector with command 1") {
-                REQUIRE(plugin.apply(commandlineCommand1, task, options));
+            WHEN("We call the plugin") {
+                bool returnCode = plugin.apply(Task(), variables, Patterns());
 
-                THEN("All actions defined on the command line should be executed") {
-                    ExecutorStub::TaskQueue executedTasks = options.m_executor.getExecutedTasks();
-                    const Memory::Memories& memories = memory.getExecutions();
-                    REQUIRE(memories.size() == commandLineOptions1.size());
-                    for(size_t i = 0; i < commandLineOptions1.size(); ++i) {
-                        REQUIRE(memories[i].command == commandlineCommand1);
-                    }
-                }
-                THEN("They should be called with the appropriate values") {
-                    checkMemories(memory);
-                }
-            }
-            WHEN("We apply the selector with command 2") {
-                REQUIRE(plugin.apply(commandlineCommand2, task, options));
-
-                THEN("All actions defined on the command line should be executed") {
-                    ExecutorStub::TaskQueue executedTasks = options.m_executor.getExecutedTasks();
-                    const Memory::Memories& memories = memory.getExecutions();
-                    REQUIRE(memories.size() == commandLineOptions2.size());
-                    for(size_t i = 0; i < commandLineOptions2.size(); ++i) {
-                        REQUIRE(memories[i].command == commandlineCommand2);
-                    }
-                }
-                THEN("They should be called with the appropriate values") {
-                    checkMemories(memory);
-                }
-            }
-        }
-    }
-    SCENARIO("Test the selector plugin when no pattern parameter is defined in the configuration", "[plugins][selector]") {
-        GIVEN("A selector object and the correct configuration") {
-            vector<string> selectionOptions = {"memory", "memory", "memory"};
-            Pattern testPattern("TESTPATTERN", selectionOptions, 't', "--test-pattern");
-            const string command("selector-command");
-
-            MemoryHandler memory;
-            OptionsStub options;
-
-            setupBasicOptions(&options, {testPattern});
-
-            Selector plugin;
-            Task task;
-
-            WHEN("We apply the selector to command 1") {
-                bool returnCode = plugin.apply(command, task, options);
-
-                THEN("It should return that it succeeded") {
+                THEN("It should fail") {
                     REQUIRE_FALSE(returnCode);
-                }
-                THEN("All default actions should be executed") {
-                    const Memory::Memories& memories = memory.getExecutions();
-                    REQUIRE(memories.empty());
                 }
             }
         }

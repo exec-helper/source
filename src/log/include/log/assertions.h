@@ -28,12 +28,14 @@ namespace execHelper {
 /**
  * Checks that an invariant still holds
  */
-#define ensures(cond)   assertMessage(cond, "Invariant violated", #cond);
+#define ensuresMessage(cond, message)   assertMessage(cond, "Invariant violated", message);
+#define ensures(cond)   ensuresMessage(cond, #cond);
 
 #else
 
 #define expectsMessage(cond, message)
 #define expects(cond)
+#define ensuresMessage(cond, message)
 #define ensures(cond)
 
 #endif

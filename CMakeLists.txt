@@ -19,6 +19,8 @@ option(POSITION_INDEPENDENT_CODE "Create position independent code" ON)
 mark_as_advanced(POSITION_INDEPENDENT_CODE)
 set(CMAKE_POSITION_INDEPENDENT_CODE ${POSITION_INDEPENDENT_CODE})
 
+list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/modules)
+
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
     add_definitions(-Wall -Wextra -Werror)
 
@@ -45,10 +47,14 @@ endif()
 set(BIN_DIRECTORY ${CMAKE_INSTALL_BINDIR})
 set(LIB_DIRECTORY ${CMAKE_INSTALL_LIBDIR})
 
+option(ENABLE_TESTING "Enable building tests" ON)
+
 add_subdirectory(3rdparty)
 add_subdirectory(src)
 
-enable_testing()
-add_subdirectory(test)
+if(${ENABLE_TESTING})
+    enable_testing()
+    add_subdirectory(test)
+endif()
 add_subdirectory(docs)
 add_subdirectory(gitchangelog)

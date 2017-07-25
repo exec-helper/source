@@ -2,6 +2,8 @@
 
 #include <regex>
 
+#include "logger.h"
+
 using std::string;
 using std::regex;
 using std::regex_replace;

@@ -1,12 +1,9 @@
 set(EXE_NAME ${PROJECT_NAME}-core-unittest)
 
 set(SRCS
-        src/patternTest.cpp
         src/permutationIteratorTest.cpp
         src/posixShellTest.cpp
         src/taskTest.cpp
-        src/patternHandlerTest.cpp
-        src/execHelperOptionsTest.cpp
         src/immediateExecutorTest.cpp
    )
 
@@ -23,4 +20,4 @@ target_include_directories(${EXE_NAME} PRIVATE ${DEPENDENCIES})
 target_link_libraries(${EXE_NAME} PRIVATE ${DEPENDENCIES})
 add_test(${EXE_NAME} ${EXE_NAME})
 
-install(TARGETS ${EXE_NAME} DESTINATION ${UNITTEST_BIN_DIR})
+install(TARGETS ${EXE_NAME} DESTINATION ${UNITTEST_BIN_DIR} COMPONENT core)

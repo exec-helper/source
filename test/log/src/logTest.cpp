@@ -9,9 +9,9 @@
 #include <boost/log/sinks/text_ostream_backend.hpp>
 #include <boost/log/sources/logger.hpp>
 #include <boost/xpressive/xpressive.hpp>
-#include <catch.hpp>
 
 #include "log/logger.h"
+#include "unittest/catch.h"
 
 using std::cout;
 using std::endl;
