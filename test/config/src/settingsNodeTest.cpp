@@ -339,12 +339,20 @@ namespace execHelper { namespace core { namespace test {
                 similarSettings.add(key1, value1);
                 similarSettings.add(key2, value2);
 
-                THEN("They should be equal") {
+                THEN("They should not be equal") {
                     REQUIRE_FALSE(settings == similarSettings);
                     REQUIRE(settings != similarSettings);
                 }
             }
+            WHEN("We create a similar settings node with a different value") {
+                SettingsNode similarSettings("root-key");
+                similarSettings.add(key1, value2);
 
+                THEN("They should not be equal") {
+                    REQUIRE_FALSE(settings == similarSettings);
+                    REQUIRE(settings != similarSettings);
+                }
+            }
             WHEN("We create an almost similar settings node") {
                 SettingsNode similarSettings(rootKey);
                 similarSettings.add(key1, value1);
