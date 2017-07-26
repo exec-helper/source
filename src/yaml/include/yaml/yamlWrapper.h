@@ -30,6 +30,8 @@ namespace execHelper {
                     return node.as<T>();
                 }
 
+                YAML::Node getSubNode(const std::initializer_list<std::string>& keys) const;
+
                 // Convenience wrapper for parsing the whole tree
                 bool getTree(const std::initializer_list<std::string>& keys, config::SettingsNode& settings) const noexcept;
                 static bool getTree(const YAML::Node& rootNode, config::SettingsNode& settings) noexcept;

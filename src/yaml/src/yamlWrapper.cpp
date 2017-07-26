@@ -25,9 +25,17 @@ namespace execHelper { namespace yaml {
         ;
     }
 
+    YAML::Node YamlWrapper::getSubNode(const std::initializer_list<std::string>& keys) const {
+        YAML::Node node = Clone(m_node);
+        for(const auto& key : keys) {
+            node = node[key];
+        }
+        return node;
+    }
+
     bool YamlWrapper::getTree(const initializer_list<string>& keys, SettingsNode& settings) const noexcept {
         try {
-            const YAML::Node& node = get<YAML::Node>(keys);
+            const YAML::Node& node = getSubNode(keys);
             if(node.size() == 0 || node.IsNull()) {
                 return false;
             }
