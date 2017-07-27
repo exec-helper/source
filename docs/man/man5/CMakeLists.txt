@@ -34,7 +34,7 @@ string (REPLACE ".md" "${MAN5_EXTENSION}" MAN5_OUTPUT_PAGES "${MAN5_OUTPUT_TMP}"
 string(REPLACE "${MAN5_EXTENSION}" "${MAN5_EXTENSION}.gz" MAN5_OUTPUT_GZ "${MAN5_OUTPUT_PAGES}")
 
 # Set example paths for Doxygen
-set(EXAMPLE_PATH_LIST ${PROJECT_SOURCE_DIR}/src/plugins/examples ${PROJECT_SOURCE_DIR}/src/plugins/examples)
+set(EXAMPLE_PATH_LIST ${PROJECT_SOURCE_DIR}/src/plugins/examples ${PROJECT_SOURCE_DIR}/src/config/examples)
 string (REPLACE ";" " " EXAMPLE_PATH "${EXAMPLE_PATH_LIST}")    # CMAKE separates multiple values with a ';', while Doxygen uses ' '
 
 configure_file(${doxyfile_in} ${doxyfile} @ONLY)
