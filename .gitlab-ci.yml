@@ -213,6 +213,7 @@ examples:
         - export ROOT_DIR=$(pwd)
         - cd ${ROOT_DIR}/src/config/examples
         - exec-helper --settings-file exec-helper-config.example build clean rebuild
+        - exec-helper --settings-file exec-helper-config-environment.example example
         - cd ${ROOT_DIR}/src/plugins/examples
         - exec-helper --settings-file command-line-command.example example
         - exec-helper --settings-file selector.example example
