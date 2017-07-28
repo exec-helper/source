@@ -1,0 +1,14 @@
+commands:
+    example: run the environment example
+
+example:
+    - command-line-command
+
+command-line-command:
+    example:
+        environment:            # Define the environment
+            EXAMPLE_HELLO: hello    # EXAMPLE_HELLO will always contain the value 'hello'
+            EXAMPLE_WORLD: world!
+        command-line:
+            - hello: [echo, "${EXAMPLE_HELLO}"]
+            - world: [echo, "${EXAMPLE_WORLD}"]

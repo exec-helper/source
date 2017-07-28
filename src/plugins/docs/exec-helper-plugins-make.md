@@ -12,10 +12,10 @@ There are no mandatory settings for this plugin.
 The configuration of the make plugin may contain the following settings:
  
 ## patterns
-A list of _patterns_ to apply on the command line. See [exec-helper-patterns](@ref exec-helper-patterns)(5).
+A list of _patterns_ to apply on the command line. See [exec-helper-config-patterns](@ref exec-helper-config-patterns)(5).
  
-## env
-A list of _environment variables_ that should be set before the commands are executed. See [exec-helper-env](@ref exec-helper-env)(5).
+## enviroment
+A list of _environment variables_ that should be set before the commands are executed. See [exec-helper-config-environment](@ref exec-helper-config-environment)(5).
 
 ## build-dir
 The path to the Makefile. This is either an absolute path are a path relative to the location of this file. Default: \em . (the current working directory).

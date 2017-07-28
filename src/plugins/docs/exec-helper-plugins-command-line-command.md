@@ -13,16 +13,16 @@ The command-line to execute. There are two different usages:
 - _No identification key_: Set one command line as a list of separate arguments. This form is only usable if only one line needs to be executed.
 - _With identification key_: Make a map with arbitrary keys, where each associated value is one command line, described as a list of separate arguments. This form is usable if one or more lines need to be executed. Multiple commands are executed in the order the identification keys are defined.
   
-Note: see the documentation of [wordexp](@ref wordexp)(3) for the limitations on what characters are not allowed in the command-line command.
+Note: see the documentation of __wordexp__(3) for the limitations on what characters are not allowed in the command-line command.
 
 # OPTIONAL SETTINGS
 The configuration of the command-line-command plugin may contain the following settings:
  
 ## patterns
-A list of _patterns_ to apply on the command line. See [exec-helper-patterns](@ref exec-helper-patterns)(5).
+A list of _patterns_ to apply on the command line. See [exec-helper-config-patterns](@ref exec-helper-config-patterns)(5).
  
-## env
-A list of _environment variables_ that should be set before the commands are executed. See [exec-helper-env](@ref exec-helper-env)(5).
+## environment
+A list of _environment variables_ that should be set before the commands are executed. See [exec-helper-config-environment](@ref exec-helper-config-environment)(5).
 
 # EXAMPLE
 ## Configuration

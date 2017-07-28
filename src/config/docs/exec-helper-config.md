@@ -21,24 +21,15 @@ For at least every plugin that is used by a _command_ key, configure the specifi
 Optionally the configuration file contains the following keys on the root level of the configuration file:
 
 ## patterns
-Patterns are parts of the configuration that will be replaced by its value when evaluated by exec-helper. The _patterns_ keyword describes a list of patterns identified by their key. See the @ref patterns section for more information about how to define a pattern.
-
-# PATTERNS      {#patterns}
-A pattern can contain the following fields:
-## default-values
-A list of default values to use when no values have been defined.
-
-## short-option
-The short option on the command line associated with this pattern
-
-## long-option
-The long option on the command line associated with this pattern
+Patterns are parts of the configuration that will be replaced by its value when evaluated by exec-helper. The _patterns_ keyword describes a list of patterns identified by their key. See the @ref exec-helper-config-patterns for more information about how to define a pattern.
 
 # EXAMPLE CONFIGURATION
 \include exec-helper-config.example
 
 # SEE ALSO
-See [exec-helper](@ref exec-helper)(1) for information about the usage of exec-helper
+See [exec-helper-config-patterns](@ref exec-helper-config-patterns)(5) for more information on defining and using patterns.
+
+See [exec-helper](@ref exec-helper)(1) for information about the usage of exec-helper.
 
 See [exec-helper-plugins](@ref exec-helper-plugins)(5) for the available plugins and their configuration options.
 

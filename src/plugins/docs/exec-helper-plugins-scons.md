@@ -12,7 +12,7 @@ There are no mandatory settings for this plugin.
 The configuration of the scons plugin may contain the following settings:
  
 ## patterns
-A list of _patterns_ to apply on the command line. See [exec-helper-patterns](@ref exec-helper-patterns)(5).
+A list of _patterns_ to apply on the command line. See [exec-helper-config-patterns](@ref exec-helper-config-patterns)(5).
  
 ## command-line
 Additional command line parameters to pass to the scons as a list of separate arguments. By default no additional arguments are added.

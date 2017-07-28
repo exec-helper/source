@@ -1,13 +1,11 @@
 set(doxyfile_in ${CMAKE_CURRENT_SOURCE_DIR}/../Doxyfile.in)
 set(doxyfile ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
 
-set(MAN1_SOURCES    src/applications/exec-helper.md
-    )
-set(MAN1_EXTENSION .1)
 set(MAN_EXTENSION ${MAN1_EXTENSION})
+set(REFERENCED_PAGES ${MAN5_SOURCES})      # Reference these pages in order to avoid Doxygen complaining about not finding them. Do not install them though.
 
 # Create the input paths for the Doxyfile
-PREPEND(MAN1_SOURCES_FULL_PATH ${PROJECT_SOURCE_DIR} ${MAN1_SOURCES})
+PREPEND(MAN1_SOURCES_FULL_PATH ${PROJECT_SOURCE_DIR} ${MAN1_SOURCES} ${REFERENCED_PAGES})
 string (REPLACE ";" " " MAN_SOURCES "${MAN1_SOURCES_FULL_PATH}")    # CMAKE separates multiple values with a ';', while Doxygen uses ' '
 
 # Create the output paths

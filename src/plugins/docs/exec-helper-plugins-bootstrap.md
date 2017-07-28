@@ -12,7 +12,7 @@ There are no mandatory settings for the bootstrap plugin.
 The configuration of the bootstrap plugin may contain the following settings:
  
 ## patterns
-A list of \em patterns to apply on the command line. See [exec-helper-patterns](@ref exec-helper-patterns)(5).
+A list of _patterns_ to apply on the command line. See [exec-helper-config-patterns](@ref exec-helper-config-patterns)(5).
  
 ## filename
 The name of the bootstrap script. Default: _bootstrap.sh_.

@@ -3,8 +3,9 @@ exec-helper, eh          {#exec-helper}
 \brief Or How To Get Your Coffee In Peace: A meta-wrapper for executables
 
 # SYNOPSIS
-exec-helper <commands> [options]
-eh <commands> [options]
+exec-helper \<commands\> [options]
+
+eh \<commands\> [options]
 
 # DESCRIPTION
 The _exec-helper_ utility is a meta-wrapper for executables, optimizing one of the slowest links in most workflows: you. It enables the user to optimize the existing workflow in three major ways:

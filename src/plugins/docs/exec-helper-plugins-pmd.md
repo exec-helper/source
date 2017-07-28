@@ -19,7 +19,7 @@ The pmd tool to use. The currently supported tools are:
 The configuration of the pmd plugin may contain the following settings:
  
 ## patterns
-A list of _patterns_ to apply on the command line. See [exec-helper-patterns](@ref exec-helper-patterns)(5).
+A list of _patterns_ to apply on the command line. See [exec-helper-config-patterns](@ref exec-helper-config-patterns)(5).
 
 ## language
 Specify the language PMD is analyzing. Check the _-language_ option of the pmd documentation for more information. Default: no explicit language parameter is passed.

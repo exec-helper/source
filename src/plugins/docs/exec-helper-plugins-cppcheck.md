@@ -12,7 +12,7 @@ There are no mandatory settings for the cppcheck plugin.
 The configuration of the cppcheck plugin may contain the following settings:
 
 ## patterns
-A list of _patterns_ to apply on the command line. See [exec-helper-patterns](@ref exec-helper-patterns)(5).
+A list of _patterns_ to apply on the command line. See [exec-helper-config-patterns](@ref exec-helper-config-patterns)(5).
 
 ## enable-checks
 A list of checks that should be enabled or disabled. Check the documentation of cppcheck for a list of all the available checks. Default: _all_.

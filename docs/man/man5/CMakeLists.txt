@@ -1,28 +1,11 @@
 set(doxyfile_in ${CMAKE_CURRENT_SOURCE_DIR}/../Doxyfile.in)
 set(doxyfile ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
 
-set(MAN5_SOURCES    src/config/docs/exec-helper-config.md
-                    src/plugins/docs/exec-helper-plugins-pmd.md
-                    src/plugins/docs/exec-helper-plugins-valgrind.md
-                    src/plugins/docs/exec-helper-plugins-execute-plugin.md
-                    src/plugins/docs/exec-helper-plugins-selector.md
-                    src/plugins/docs/exec-helper-plugins-cppcheck.md
-                    src/plugins/docs/exec-helper-plugins.md
-                    src/plugins/docs/exec-helper-plugins-command-plugin.md
-                    src/plugins/docs/exec-helper-plugins-bootstrap.md
-                    src/plugins/docs/exec-helper-plugins-memory.md
-                    src/plugins/docs/exec-helper-plugins-scons.md
-                    src/plugins/docs/exec-helper-plugins-make.md
-                    src/plugins/docs/exec-helper-plugins-clang-tidy.md
-                    src/plugins/docs/exec-helper-plugins-command-line-command.md
-                    src/plugins/docs/exec-helper-plugins-clang-static-analyzer.md
-                    src/plugins/docs/exec-helper-plugins-lcov.md 
-    )
-set(MAN5_EXTENSION .5)
 set(MAN_EXTENSION ${MAN5_EXTENSION})
+set(REFERENCED_PAGES ${MAN1_SOURCES})      # Reference these pages in order to avoid Doxygen complaining about not finding them. Do not install them though.
 
 # Create the input paths for the Doxyfile
-PREPEND(MAN5_SOURCES_FULL_PATH ${PROJECT_SOURCE_DIR} ${MAN5_SOURCES})
+PREPEND(MAN5_SOURCES_FULL_PATH ${PROJECT_SOURCE_DIR} ${MAN5_SOURCES} ${REFERENCED_PAGES})
 string (REPLACE ";" " " MAN_SOURCES "${MAN5_SOURCES_FULL_PATH}")    # CMAKE separates multiple values with a ';', while Doxygen uses ' '
 
 # Create the output paths
@@ -32,10 +15,6 @@ string (REPLACE ".md" "${MAN5_EXTENSION}" MAN5_OUTPUT_PAGES "${MAN5_OUTPUT_TMP}"
 
 # Create the gzipped output paths
 string(REPLACE "${MAN5_EXTENSION}" "${MAN5_EXTENSION}.gz" MAN5_OUTPUT_GZ "${MAN5_OUTPUT_PAGES}")
-
-# Set example paths for Doxygen
-set(EXAMPLE_PATH_LIST ${PROJECT_SOURCE_DIR}/src/plugins/examples ${PROJECT_SOURCE_DIR}/src/config/examples)
-string (REPLACE ";" " " EXAMPLE_PATH "${EXAMPLE_PATH_LIST}")    # CMAKE separates multiple values with a ';', while Doxygen uses ' '
 
 configure_file(${doxyfile_in} ${doxyfile} @ONLY)
 

@@ -12,7 +12,7 @@ There are no mandatory settings for the clang-tidy plugin.
 The configuration of the clang-tidy plugin may contain the following settings:
 
 ## patterns
-A list of _patterns_ to apply on the command line. See [exec-helper-patterns](@ref exec-helper-patterns)(5).
+A list of _patterns_ to apply on the command line. See [exec-helper-config-patterns](@ref exec-helper-config-patterns)(5).
 
 ## sources
 A list of sources that must be checked by the clang-tidy plugin. The sources may contain wildcards.
@@ -23,10 +23,10 @@ A list of checks that should be enabled or disabled. Enabling or disabling check
 ## warning-as-errors
 Threat warnings as errors.
 The value associated with this key is either:
-  -# A list of checks: for which warnings will be threated as errors. See @ref checks for the format.
+  -# A list of checks: for which warnings will be threated as errors. See __checks__ for the format.
   -# The single keyword _all_: means that all enabled checks will be threated as errors.
 
-_Note_: This options is only supported if the clang-tidy binary supports the _-warnings-as-error=<string>_ option.
+_Note_: This options is only supported if the clang-tidy binary supports the _-warnings-as-error=\<string\>_ option.
  
 ## command-line
 Additional command line parameters to pass to clang-tidy as a list of separate arguments. By default no additional arguments are added.

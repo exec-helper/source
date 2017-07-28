@@ -24,6 +24,30 @@ if(BUILD_MAN_DOCUMENTATION)
         message(FATAL_ERROR "Doxygen is required to build the documentation.")
     endif()
 
+    set(MAN1_SOURCES    src/applications/exec-helper.md)
+    set(MAN1_EXTENSION .1)
+
+    set(MAN5_SOURCES    src/config/docs/exec-helper-config.md
+                    src/config/docs/exec-helper-config-patterns.md
+                    src/config/docs/exec-helper-config-environment.md
+                    src/plugins/docs/exec-helper-plugins-pmd.md
+                    src/plugins/docs/exec-helper-plugins-valgrind.md
+                    src/plugins/docs/exec-helper-plugins-execute-plugin.md
+                    src/plugins/docs/exec-helper-plugins-selector.md
+                    src/plugins/docs/exec-helper-plugins-cppcheck.md
+                    src/plugins/docs/exec-helper-plugins.md
+                    src/plugins/docs/exec-helper-plugins-command-plugin.md
+                    src/plugins/docs/exec-helper-plugins-bootstrap.md
+                    src/plugins/docs/exec-helper-plugins-memory.md
+                    src/plugins/docs/exec-helper-plugins-scons.md
+                    src/plugins/docs/exec-helper-plugins-make.md
+                    src/plugins/docs/exec-helper-plugins-clang-tidy.md
+                    src/plugins/docs/exec-helper-plugins-command-line-command.md
+                    src/plugins/docs/exec-helper-plugins-clang-static-analyzer.md
+                    src/plugins/docs/exec-helper-plugins-lcov.md
+    )
+    set(MAN5_EXTENSION .5)
+
     list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/modules)
     find_package(Gzip REQUIRED)
     if(NOT DOXYGEN_FOUND)

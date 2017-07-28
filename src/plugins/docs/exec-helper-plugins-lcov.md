@@ -30,10 +30,10 @@ Set this option to _yes_ to reset the coverage counters before starting the anal
 Set this option to _yes_ to enable HTML report generation of the coverage data.
 
 ## gen-html-output
-Set the output directory of the generated HTML report. Does nothing if \ref gen-html is not enabled. Default: \em . (the current working directory).
+Set the output directory of the generated HTML report. Does nothing if __gen-html__ is not enabled. Default: \em . (the current working directory).
 
 ## gen-html-title
-Set the title of the generated HTML report. Does nothing if \ref gen-html is not enabled. Default: _Hello_.
+Set the title of the generated HTML report. Does nothing if __gen-html__ is not enabled. Default: _Hello_.
 
 ## excludes
 A list of directories and files to excluse from the coverage report. The paths are relative to the current working directory. Default: an empty list.
