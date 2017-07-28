@@ -24,6 +24,12 @@ if(BUILD_MAN_DOCUMENTATION)
         message(FATAL_ERROR "Doxygen is required to build the documentation.")
     endif()
 
+    if(CMAKE_VERBOSE_MAKEFILE)
+        set(DOXYGEN_QUIET NO)
+    else()
+        set(DOXYGEN_QUIET YES)
+    endif()
+
     set(MAN1_SOURCES    src/applications/exec-helper.md)
     set(MAN1_EXTENSION .1)
 
