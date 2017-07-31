@@ -10,8 +10,7 @@
 namespace execHelper {
     namespace config {
         /**
-         * \class SettingsNode
-         * \brief A class containing a configuration hierarchy
+         * A class containing a configuration hierarchy
          */
         class SettingsNode {
             public:
@@ -69,15 +68,13 @@ namespace execHelper {
                  */ 
                 bool operator!=(const SettingsNode& other) const noexcept;
                 
-                // Only allow const SettingsNode as return type
-                // It is only valid to call this function if contains(key) == true
                 /**
                  * Access the direct child element associated with the given key
                  *
                  * \pre #contains() == true
                  * \warning Causes undefined behaviour if the precondition is not met.
                  * \param key   The child element key to return
-                 * \returns A reference to the node with the given key
+                 * \returns A const reference to the node with the given key
                  */
                 const SettingsNode& operator[](const SettingsKey& key) const noexcept;
 
