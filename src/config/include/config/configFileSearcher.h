@@ -8,7 +8,7 @@
 namespace execHelper {
     namespace config {
         /**
-         * Searches the config in the order of the given search paths
+         * \brief Searches the config in the order of the given search paths
          */
         class ConfigFileSearcher {
             public:

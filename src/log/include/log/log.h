@@ -17,6 +17,10 @@ namespace execHelper {
             BG_BLUE     = 44,
             BG_DEFAULT  = 49
         };
+
+        /**
+         * \brief Modifies the command line output format
+         */
         class Modifier {
             ColorCode code;
         public:

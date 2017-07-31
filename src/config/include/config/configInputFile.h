@@ -8,7 +8,7 @@
 namespace execHelper {
     namespace config {
         /**
-         * Interface for configuration files
+         * \brief Interface for configuration files
          */
         class ConfigInputFile {
             public:

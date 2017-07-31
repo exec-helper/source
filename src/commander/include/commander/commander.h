@@ -20,7 +20,7 @@ namespace execHelper {
 namespace execHelper {
     namespace commander {
         /**
-         * Class that will read the commands to be run and kicks all the plugins related to these commands
+         * \brief Reads the commands to be run and kicks all the plugins related to these commands
          */
         class Commander {
             public:

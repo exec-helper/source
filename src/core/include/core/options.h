@@ -29,7 +29,7 @@ namespace execHelper {
         typedef MapPermutator<PatternKey, PatternValue> PatternPermutator;
 
         /**
-         * Interface for classes that interpret command line options
+         * \brief Interface for classes that interpret command line options
          */
         class Options {
             public:
