@@ -87,8 +87,8 @@ namespace execHelper { namespace core {
         return true;
     }
 
-    bool Task::appendToEnvironment(EnvironmentCollection&& newValues) noexcept {
-        for(auto&& value : newValues) {
+    bool Task::appendToEnvironment(EnvironmentCollection&& newValue) noexcept {
+        for(auto&& value : newValue) {
             appendToEnvironment(value);
         }
         return true;

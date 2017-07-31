@@ -8,6 +8,9 @@
 
 namespace execHelper {
     namespace core {
+        /**
+         * \brief Implementation for Shell that represents a posix shell
+         */
         class PosixShell : public Shell {
             public:
                 virtual ShellReturnCode execute(const Task& task) noexcept;

@@ -153,13 +153,11 @@ namespace execHelper {
                  */
                 bool add(const SettingsKeys& keys, const SettingsValue& newValue) noexcept;
 
-                /**
-                 * See #add(const SettingsValues&)
+                /*! @copydoc add(const SettingsValues&)
                  */
                 bool add(const std::initializer_list<SettingsValue>& newValues) noexcept;
 
-                /**
-                 * See #add(const SettingsKeys&, const SettingsValues&)
+                /*! @copydoc add(const SettingsKeys&, const SettingsValues&)
                  */
                 bool add(const SettingsKeys& keys, const std::initializer_list<SettingsValue>& newValues) noexcept;
 

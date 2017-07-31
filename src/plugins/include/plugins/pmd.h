@@ -5,6 +5,9 @@
 
 namespace execHelper {
     namespace plugins {
+        /**
+         * \brief Implements the PMD plugin
+         */
         class Pmd : public Plugin {
             public:
                 virtual bool apply(const std::string& command, core::Task& task, const core::Options& options) const noexcept override;
