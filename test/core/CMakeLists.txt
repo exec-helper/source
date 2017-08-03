@@ -6,7 +6,6 @@ set(SRCS
         src/patternTest.cpp
         src/permutationIteratorTest.cpp
         src/posixShellTest.cpp
-        src/sequentialTaskRunnerTest.cpp
         src/taskTest.cpp
         src/patternHandlerTest.cpp
         src/execHelperOptionsTest.cpp
