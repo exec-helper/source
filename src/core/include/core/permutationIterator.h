@@ -9,7 +9,11 @@
 
 namespace execHelper {
     namespace core {
-        // Currently the PermutationIterator implements std::forward_iterator_tag interface
+        /**
+         * \brief Iterates over permutations of the given collection
+         *
+         * Currently the PermutationIterator implements std::forward_iterator_tag interface
+         */
         template<typename IteratorType, typename CollectionType1, typename... CollectionTypes>
         class PermutationIterator {
             private:

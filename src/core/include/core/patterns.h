@@ -15,8 +15,24 @@ namespace execHelper {
 
 namespace execHelper {
     namespace core {
+        /**
+         * Replaces all occurences of the given pattern in the subject with replacement
+         *
+         * \param subject   The subject
+         * \param pattern   The pattern
+         * \param replacement   The replacement
+         * \returns The replaced string
+         */
         std::string replacePatterns(const std::string& subject, const std::string& pattern, const std::string& replacement) noexcept;
+
+        /**
+         * \deprecated
+         */
         std::string replacePatterns(const std::string& subject, const PatternKeys& patterns, const core::TargetDescriptionElement& target) noexcept;
+
+        /**
+         * \deprecated
+         */
         std::string replacePatterns(const std::string& subject, const PatternKeys& patterns, const core::CompilerDescriptionElement& compiler) noexcept;
     } // namespace core
 } // namespace execHelper

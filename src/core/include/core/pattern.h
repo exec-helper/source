@@ -11,16 +11,65 @@ namespace execHelper {
         using PatternKeys = std::vector<PatternKey>;
         using PatternValues = std::vector<PatternValue>;
 
+        /**
+         * \brief A pattern that can be used in expressions
+         */
         class Pattern {
             public:
+                /**
+                 * Constructor
+                 *
+                 * \param patternKey    The key of the pattern
+                 * \param defaultValues The default value for the pattern
+                 * \param shortOption   The short option associated with the pattern
+                 * \param longOption    The long option associated with the pattern
+                 */
                 Pattern(PatternKey patternKey, PatternValues defaultValues, char shortOption, std::string longOption) noexcept;
 
+                /**
+                 * Equality operator
+                 *
+                 * \param other The other object to compare with
+                 * \returns True    If the other object is considered equal
+                 *          False   Otherwise
+                 */
                 bool operator==(const Pattern& other) const noexcept;
+
+                /**
+                 * Inequality operator
+                 *
+                 * \param other The other object to compare with
+                 * \returns ! \ref operator==(const Pattern& other) const
+                 *
+                 */
                 bool operator!=(const Pattern& other) const noexcept;
 
+                /**
+                 * Getter for the key
+                 *
+                 * \returns The key
+                 */
                 const PatternKey& getKey() const noexcept;
+
+                /**
+                 * Getter for the default pattern value
+                 *
+                 * \returns The default values
+                 */
                 const PatternValues& getDefaultValues() const noexcept;
+
+                /**
+                 * Getter for the short option
+                 *
+                 * \returns The short option
+                 */
                 char getShortOption() const noexcept;
+
+                /**
+                 * Getter for the long option
+                 *
+                 * \returns The long option
+                 */
                 const std::string& getLongOption() const noexcept;
 
             private:

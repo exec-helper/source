@@ -5,8 +5,16 @@
 
 namespace execHelper {
     namespace core {
+        /**
+         * \brief Wrapper for the envp argument
+         */
         class Envp {
             public:
+                /**
+                 * Create an object from the contents of an environment collection
+                 *
+                 * \param env   The environment collection to take the content from
+                 */
                 explicit Envp(const EnvironmentCollection& env) noexcept;
                 Envp(const Envp& other) noexcept;
                 Envp(Envp&& other) noexcept;
@@ -15,15 +23,39 @@ namespace execHelper {
                 Envp& operator=(const Envp& other) noexcept;
                 Envp& operator=(Envp&& other) noexcept;
 
+                /**
+                 * Swap contents
+                 *
+                 * \param other The other object to swap with
+                 */
                 void swap(Envp& other) noexcept;
 
+                /**
+                 * Returns the size of the collection
+                 *
+                 * \returns The size of the collection
+                 */
                 size_t size() const noexcept;
+
+                /**
+                 * Get the envp pointer as an array of C-style strings. The array is delimited by a nullptr.
+                 *
+                 * \returns A pointer to an array of pointers to environment variables
+                 */
                 char** getEnvp() noexcept;
+
+                /*! @copydoc getEnvp()
+                 */
                 const char* const * getEnvp() const noexcept;
 
             private:
                 using Envp_t = std::vector<char*>;
 
+                /**
+                 * Create a deep copy
+                 *
+                 * \param other The other object to copy
+                 */
                 void deepCopy(const Envp& other) noexcept;
 
                 Envp_t m_envp;

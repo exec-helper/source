@@ -6,6 +6,9 @@
 
 namespace execHelper {
     namespace core {
+        /**
+         * \brief Represents all permutations for the values of a given map
+         */
         template<typename T, typename U>
         class MapPermutator {
             public:
@@ -15,6 +18,9 @@ namespace execHelper {
                     ;
                 }
 
+                /**
+                 * \brief Iterator object for iterating over all permutations
+                 */
                 template<typename IteratorType>
                 class Iterator {
                     private:
@@ -24,6 +30,12 @@ namespace execHelper {
                         using iterator = Iterator;
  
                     public:
+                        /**
+                         * Constructor for the iterator
+                         *
+                         * \param map   The map to permutate and iterate over
+                         * \param end   Whether the constructed iterator is an end iterator
+                         */
                         explicit Iterator(const std::map<T, std::vector<U>>& map, bool end = false) noexcept :
                             m_map(map),
                             m_end(end)
@@ -40,6 +52,11 @@ namespace execHelper {
                             }
                         }
 
+                        /**
+                         * Postcrement operator
+                         *
+                         * \returns The next iterator element
+                         */
                         iterator& operator++() noexcept {
                             if(m_end) {
                                 return *this;
@@ -62,6 +79,13 @@ namespace execHelper {
                             return *this;
                         }
 
+                        /**
+                         * Equality operator
+                         *
+                         * \param other The other object to compare with
+                         * \returns True    If the other object is considered equal to this one
+                         *          False   Otherwise
+                         */
                         bool operator==(const iterator& other) const {
                             if(m_map != other.m_map) {
                                 return false;
@@ -77,10 +101,21 @@ namespace execHelper {
                             return true;
                         }
 
+                        /**
+                         * Inequality operator
+                         *
+                         * \param other The other object to compare with
+                         * \returns ! \ref operator==(const iterator& other) const
+                         */
                         bool operator!=(const iterator& other) const {
                             return !(*this == other);
                         }
 
+                        /**
+                         * Dereference operator
+                         *
+                         * \returns The dereferenced object
+                         */
                         value_type operator*() const {
                             value_type result;
                             for(const auto& index : m_indexes) {
@@ -98,18 +133,34 @@ namespace execHelper {
                 using iterator = Iterator<std::map<T, U>>;
                 using const_iterator = Iterator<const std::map<T, U>>;
 
+                /**
+                 * Return iterator to beginning
+                 *
+                 * \returns A begin iterator
+                 */
                 iterator begin() noexcept {
                     return iterator(m_map);
                 }
 
+                /*! @copydoc begin()
+                 *
+                 */
                 const_iterator begin() const noexcept {
                     return const_iterator(m_map);
                 }
 
+                /**
+                 * Return iterator to end
+                 *
+                 * \returns An end iterator
+                 */
                 iterator end() noexcept {
                     return iterator(m_map, true);
                 }
 
+                /*! @copydoc end()
+                 *
+                 */
                 const_iterator end() const noexcept {
                     return const_iterator(m_map, true);
                 }

@@ -8,8 +8,14 @@ namespace execHelper {
 }
 
 namespace execHelper { namespace core {
+    /**
+     * \brief Interface for executing tasks
+     */
     class ExecutorInterface {
         public:
+            /**
+             * Execute the given task
+             */
             virtual bool execute(const Task& task) noexcept = 0;
 
         protected:

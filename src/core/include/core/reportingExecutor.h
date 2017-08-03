@@ -15,6 +15,9 @@ namespace execHelper {
 
 namespace execHelper {
     namespace core {
+        /**
+         * \brief Implements an executor that only reports what it is executing
+         */
         class ReportingExecutor : public ExecutorInterface {
             public:
                 ReportingExecutor() noexcept;

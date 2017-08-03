@@ -21,6 +21,9 @@ namespace execHelper {
 
 namespace execHelper {
     namespace core {
+        /**
+         * \brief Implements the options for exec-helper
+         */
         class ExecHelperOptions : public Options {
             public:
                 ExecHelperOptions() noexcept;
@@ -36,6 +39,13 @@ namespace execHelper {
 
                 void swap(ExecHelperOptions& other) noexcept;
 
+                /**
+                 * Returns the settings file that is used
+                 *
+                 * \param argc  The number of arguments in argv
+                 * \param argv  The arguments passed on the command line
+                 * \returns The relative or absolute path to the settings file
+                 */
                 std::string getSettingsFile(int argc, const char* const * argv) const noexcept;
                 bool parse(int argc, const char* const * argv) override;
                 bool parseSettingsFile(const config::Path& file) noexcept override;
@@ -55,6 +65,9 @@ namespace execHelper {
                 PatternValues getValues(const Pattern& pattern) const noexcept override;
                 PatternPermutator makePatternPermutator(const PatternKeys& patterns) const noexcept override;
 
+                /**
+                 * Prints the help for these options
+                 */
                 void printHelp() const noexcept;
 
                 void setExecutor(ExecutorInterface* executor) noexcept override;
