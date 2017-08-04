@@ -30,7 +30,7 @@ build:gcc:
 build:gcc:limited-optimization:
     stage: build
     script:
-        - pacman -S --noconfirm --needed gcc cmake make git libunistring ncurses python-pip pkg-config
+        - pacman -S --noconfirm --needed gcc cmake make python-pip pkg-config
         - pip install gitchangelog
         - cmake -H. -Bbuild/g++/release/build -DCMAKE_CXX_COMPILER=g++ -DCMAKE_INSTALL_PREFIX=build/g++/release/install -DCMAKE_BUILD_TYPE=Release -DUSE_SYSTEM_CATCH=OFF -DLIMITED_OPTIMIZATION=ON && make -C build/g++/release/build --jobs 4 && make -C build/g++/release/build install
     artifacts:
@@ -41,7 +41,7 @@ build:gcc:limited-optimization:
 build:clang:
     stage: build
     script: 
-        - pacman -S --noconfirm --needed clang cmake make git libunistring ncurses python-pip pkg-config
+        - pacman -S --noconfirm --needed clang cmake make python-pip pkg-config
         - pip install gitchangelog
         - cmake -H. -Bbuild/clang++/debug/build -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_INSTALL_PREFIX=build/clang++/debug/install -DCMAKE_BUILD_TYPE=Debug -DUSE_SYSTEM_CATCH=OFF && make -C build/clang++/debug/build --jobs 4 && make -C build/clang++/debug/build install
         - cmake -H. -Bbuild/clang++/release/build -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_INSTALL_PREFIX=build/clang++/release/install -DCMAKE_BUILD_TYPE=Release -DUSE_SYSTEM_CATCH=OFF && make -C build/clang++/release/build --jobs 4 && make -C build/clang++/release/build install
@@ -164,7 +164,7 @@ clang-static-analyzer:
     dependencies:
         - build:gcc
     script:
-        - pacman -S --noconfirm --needed clang cmake make git libunistring ncurses pkg-config
+        - pacman -S --noconfirm --needed clang cmake make pkg-config
         - build/g++/release/install/bin/exec-helper analyze --analyze clang-static-analyzer --mode debug --compiler ''
 
 undefined-behaviour:
@@ -172,7 +172,7 @@ undefined-behaviour:
     dependencies:
         - build:gcc
     script:
-        - pacman -S --noconfirm --needed clang cmake make git libunistring ncurses pkg-config
+        - pacman -S --noconfirm --needed clang cmake make pkg-config
         - export PATH=$PATH:build/g++/release/install/bin
         - build/g++/release/install/bin/exec-helper undefined-behaviour
 
@@ -192,7 +192,7 @@ coverage:
     dependencies:
         - build:gcc
     script:
-        - pacman -S --noconfirm --needed base-devel curl gcc cmake make git libunistring ncurses pkg-config
+        - pacman -S --noconfirm --needed base-devel curl gcc cmake make pkg-config
         - bash -x gitlab/install-aur.sh lcov
         - export PATH=$PATH:build/g++/release/install/bin
         - build/g++/release/install/bin/exec-helper coverage
@@ -230,8 +230,9 @@ examples:
 cross-compilation:
     image: debian:testing
     stage: analyze
-    script:
+    before_script:
         - apt-get update
+    script:
         - apt-get install --yes debootstrap cmake make pkg-config g++-aarch64-linux-gnu doxygen
         - sudo debootstrap --download-only --arch=arm64 --foreign --variant=minbase --include=libboost-program-options-dev,libyaml-cpp-dev,doxygen,libc6-dev testing ./sysroot_arm64 http://deb.debian.org/debian/
         - cp -r /usr/aarch64-linux-gnu/* sysroot_arm64/usr
