@@ -227,6 +227,19 @@ examples:
         - exec-helper --settings-file pmd.example example
         - exec-helper --settings-file valgrind.example example
 
+cross-compilation:
+    image: debian:testing
+    stage: analyze
+    script:
+        - apt-get update
+        - apt-get install debootstrap cmake make
+        - sudo debootstrap --download-only --arch=arm64 --foreign --variant=minbase --include=libboost-program-options-dev,libyaml-cpp-dev,doxygen,libc6-dev testing ./sysroot_arm64 http://deb.debian.org/debian/
+        - cp -r /usr/aarch64-linux-gnu/* sysroot_arm64/usr
+        - mkdir build
+        - cd build
+        - cmake -DCMAKE_TOOLCHAIN_FILE=../toolchain.cmake -DUSE_SYSTEM_YAML_CPP=ON -DUSE_SYSTEM_CATCH=OFF -DBOOST_ROOT=/root/sysroot_arm64 -DBOOST_LIBRARYDIR=/root/sysroot_arm64/usr/lib/aarch64-linux-gnu ..
+        - make -j8
+
 pages:
     stage: deploy
     dependencies:
