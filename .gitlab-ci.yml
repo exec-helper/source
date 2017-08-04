@@ -134,7 +134,7 @@ clang-tidy-core:
     dependencies:
         - build:gcc
     script:
-        - pacman -S --needed --noconfirm cppcheck gcc cmake make clang-tools-extra
+        - pacman -S --needed --noconfirm cppcheck gcc cmake make pkg-config clang-tools-extra
         - build/g++/release/install/bin/exec-helper setup init-build -c g++ -m release
         - make -C build/g++/release/build Catch
         - build/g++/release/install/bin/exec-helper analyze --analyze clang-tidy --module core
@@ -144,7 +144,7 @@ clang-tidy-plugin:
     dependencies:
         - build:gcc
     script:
-        - pacman -S --needed --noconfirm cppcheck gcc cmake make clang-tools-extra
+        - pacman -S --needed --noconfirm cppcheck gcc cmake make pkg-config clang-tools-extra
         - build/g++/release/install/bin/exec-helper setup init-build -c g++ -m release
         - make -C build/g++/release/build Catch
         - build/g++/release/install/bin/exec-helper analyze --analyze clang-tidy --module plugins
@@ -154,7 +154,7 @@ clang-tidy-rest:
     dependencies:
         - build:gcc
     script:
-        - pacman -S --needed --noconfirm cppcheck gcc cmake make clang-tools-extra
+        - pacman -S --needed --noconfirm cppcheck gcc cmake make pkg-config clang-tools-extra
         - build/g++/release/install/bin/exec-helper setup init-build -c g++ -m release
         - make -C build/g++/release/build Catch
         - build/g++/release/install/bin/exec-helper analyze --analyze clang-tidy --module yaml commander config
@@ -234,7 +234,7 @@ cross-compilation:
         - apt-get update
     script:
         - apt-get install --yes debootstrap cmake make pkg-config g++-aarch64-linux-gnu doxygen
-        - sudo debootstrap --download-only --arch=arm64 --foreign --variant=minbase --include=libboost-program-options-dev,libyaml-cpp-dev,doxygen,libc6-dev testing ./sysroot_arm64 http://deb.debian.org/debian/
+        - debootstrap --download-only --arch=arm64 --foreign --variant=minbase --include=libboost-program-options-dev,libyaml-cpp-dev,doxygen,libc6-dev testing ./sysroot_arm64 http://deb.debian.org/debian/
         - cp -r /usr/aarch64-linux-gnu/* sysroot_arm64/usr
         - mkdir build
         - cd build
