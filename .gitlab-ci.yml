@@ -52,6 +52,7 @@ build:clang:
             - build/clang++/release/install
 
 build:debian:
+    image: debian:testing
     stage: build
     before_script:
         - apt-get update
