@@ -4,9 +4,9 @@ set(CHANGELOG_OUTPUT   ${CMAKE_CURRENT_BINARY_DIR}/exec-helper.changelog)
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/modules)
 find_package(Gitchangelog)
 
-if(GITCHANGELOG_FOUND)
+if(Gitchangelog_FOUND)
     add_custom_command(OUTPUT ${CHANGELOG_OUTPUT}
-        COMMAND gitchangelog > ${CHANGELOG_OUTPUT}
+        COMMAND ${Gitchangelog} > ${CHANGELOG_OUTPUT}
         MAIN_DEPENDENCY ${CHANGELOG_SOURCES}
         VERBATIM)
 

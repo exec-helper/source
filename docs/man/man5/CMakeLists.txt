@@ -1,6 +1,8 @@
 set(doxyfile_in ${CMAKE_CURRENT_SOURCE_DIR}/../Doxyfile.in)
 set(doxyfile ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
 
+find_package(Gzip REQUIRED)
+
 set(MAN_EXTENSION ${MAN5_EXTENSION})
 set(REFERENCED_PAGES ${MAN1_SOURCES})      # Reference these pages in order to avoid Doxygen complaining about not finding them. Do not install them though.
 
@@ -26,7 +28,7 @@ add_custom_command(OUTPUT ${MAN5_OUTPUT_PAGES}
 
 FOREACH(FILE ${MAN5_OUTPUT_PAGES})
     add_custom_command(OUTPUT ${FILE}.gz
-        COMMAND ${GZIP} --force ${FILE}
+        COMMAND ${Gzip} --force ${FILE}
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
         DEPENDS ${FILE}
         VERBATIM)

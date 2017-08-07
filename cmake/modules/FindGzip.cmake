@@ -1,6 +1,17 @@
-find_program(GZIP NAMES gzip PATHS /bin /usr/bin /usr/local/bin)
+set(MODULE_NAME Gzip)
+set(EXE_NAME gzip)
 
-mark_as_advanced(GZIP)
+if(NOT ${MODULE_NAME}_FOUND)
+    find_program(${MODULE_NAME} NAMES ${EXE_NAME} PATHS /bin /usr/bin /usr/local/bin)
 
-set(${MODULE_NAME}_INCLUDE_DIRS ${${MODULE_NAME}_INCLUDE_DIR} )
-set(${MODULE_NAME}_LIBRARY_DIRS  ${${MODULE_NAME}_LIBRARY})
+    mark_as_advanced(${MODULE_NAME})
+
+    if(${${MODULE_NAME}} EQUAL ${MODULE_NAME}-NOTFOUND)
+        MESSAGE(STATUS "Did not find " ${MODULE_NAME})
+        set(${MODULE_NAME}_FOUND FALSE)
+        unset(${MODULE_NAME})
+    else()
+        MESSAGE(STATUS "Found " ${MODULE_NAME} ": " ${${MODULE_NAME}})
+        set(${MODULE_NAME}_FOUND TRUE)
+    endif()
+endif()
