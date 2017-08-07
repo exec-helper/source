@@ -60,7 +60,7 @@ patterns:
 commands:
     setup: Setup the repository for building
     init: Initialize the build infrastructure
-    init-build: Initialize the build infrastructure and switches off everything that has nothing to do with building the exec-helper binary itself
+    init-build: Initialize the build infrastructure and switches off everything that has nothing to do with building the exec-helper binaries themselves
     build: Build-only + install
     build-only: Build only
     install: Install only
