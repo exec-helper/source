@@ -6,8 +6,8 @@ if(NOT ${MODULE_NAME}_FOUND)
 
     mark_as_advanced(${MODULE_NAME})
 
-    if(${${MODULE_NAME}} EQUAL ${MODULE_NAME}-NOTFOUND)
-        MESSAGE(STATUS "Did not find " ${MODULE_NAME})
+    if(${MODULE_NAME} EQUAL ${MODULE_NAME}-NOTFOUND)
+        MESSAGE(STATUS "Could NOT find " ${MODULE_NAME})
         set(${MODULE_NAME}_FOUND FALSE)
         unset(${MODULE_NAME})
     else()
