@@ -51,11 +51,16 @@ patterns:
             - man
         short-option: d
         long-option: docs-type
+    SYSROOT:
+        default-values:
+            - "/"
+        short-option: y
+        long-option: sysroot
 
 commands:
     setup: Setup the repository for building
     init: Initialize the build infrastructure
-    init-build: Initialize the build infrastructure and switches off everything that has nothing to do with building the exec-helper binary itself
+    init-build: Initialize the build infrastructure and switches off everything that has nothing to do with building the exec-helper binaries themselves
     build: Build-only + install
     build-only: Build only
     install: Install only
@@ -69,14 +74,17 @@ commands:
     undefined-behaviour: Check for undefined behaviour using UBSan
     docs: Build + install the documentation
     changelog: Build the changelog
+    create-toolchain-file: Create the associated toolchain file
 
 setup:
     - command-line-command
 
 init:
+    - create-toolchain-file
     - command-line-command
 
 init-build:
+    - create-toolchain-file
     - command-line-command
 
 build:
@@ -124,6 +132,9 @@ undefined-behaviour:
 
 changelog:
     - make
+    - command-line-command
+
+create-toolchain-file:
     - command-line-command
 
 make:
@@ -177,12 +188,26 @@ command-line-command:
         patterns:
             - COMPILER
             - MODE
-        command-line: [ cmake, -H., "-Bbuild/{COMPILER}/{MODE}/build", "-DCMAKE_CXX_COMPILER={COMPILER}", "-DCMAKE_INSTALL_PREFIX=build/{COMPILER}/{MODE}/install", -DCMAKE_EXPORT_COMPILE_COMMANDS=ON, "-DCMAKE_BUILD_TYPE={MODE}", -DUSE_SYSTEM_CATCH=OFF, -DBUILD_HTML_DOCUMENTATION=ON, -DBUILD_MAN_DOCUMENTATION=ON]
+        command-line:
+            [ cmake, -H., "-Bbuild/{COMPILER}/{MODE}/build", "-DCMAKE_CXX_COMPILER={COMPILER}", "-DCMAKE_INSTALL_PREFIX=build/{COMPILER}/{MODE}/install", -DCMAKE_EXPORT_COMPILE_COMMANDS=ON, "-DCMAKE_BUILD_TYPE={MODE}", -DUSE_SYSTEM_CATCH=OFF, -DBUILD_HTML_DOCUMENTATION=ON, -DBUILD_MAN_DOCUMENTATION=ON, "-DCMAKE_TOOLCHAIN_FILE=build/{COMPILER}/{MODE}/toolchain.cmake"]
     init-build:
         patterns:
             - COMPILER
             - MODE
-        command-line: [ cmake, -H., "-Bbuild/{COMPILER}/{MODE}/build", "-DCMAKE_CXX_COMPILER={COMPILER}", "-DCMAKE_INSTALL_PREFIX=build/{COMPILER}/{MODE}/install", -DCMAKE_EXPORT_COMPILE_COMMANDS=ON, "-DCMAKE_BUILD_TYPE={MODE}", -DUSE_SYSTEM_CATCH=OFF, -DBUILD_HTML_DOCUMENTATION=OFF, -DBUILD_MAN_DOCUMENTATION=OFF]
+        command-line: [ cmake, -H., "-Bbuild/{COMPILER}/{MODE}/build", "-DCMAKE_CXX_COMPILER={COMPILER}", "-DCMAKE_INSTALL_PREFIX=build/{COMPILER}/{MODE}/install", -DCMAKE_EXPORT_COMPILE_COMMANDS=ON, "-DCMAKE_BUILD_TYPE={MODE}", -DUSE_SYSTEM_CATCH=OFF, -DBUILD_HTML_DOCUMENTATION=OFF, -DBUILD_MAN_DOCUMENTATION=OFF, "-DCMAKE_TOOLCHAIN_FILE=build/{COMPILER}/{MODE}/toolchain.cmake"]
+    create-toolchain-file:
+        patterns:
+            - COMPILER
+            - SYSROOT
+            - MODE
+        command-line:
+            - remove-toolchain-tmp: [ rm, -f, "build/{COMPILER}/{MODE}/toolchain.cmake"]
+            - create-build-dir: [ mkdir, -p, "build/{COMPILER}/{MODE}"]
+            - create-toolchain-tmp: [ cp, toolchain.cmake.in, "build/{COMPILER}/{MODE}/toolchain.cmake"]
+            - replace-C-compiler: [ sed, -i, 's/@C_COMPILER@/gcc/g', "build/{COMPILER}/{MODE}/toolchain.cmake"]
+            - replace-CPP-compiler: [ sed, -i, 's/@CXX_COMPILER@/{COMPILER}/g', "build/{COMPILER}/{MODE}/toolchain.cmake"]
+            - replace-sysroot: [ sed, -i, 's%@SYSROOT@%{SYSROOT}%g', "build/{COMPILER}/{MODE}/toolchain.cmake"]
+            - replace-compiler-triplet: [ sed, -i, 's/@COMPILER_TRIPLET@/$({COMPILER} -print-multiarch)/g', "build/{COMPILER}/{MODE}/toolchain.cmake"]
     distclean:
         patterns:
             - COMPILER
