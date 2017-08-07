@@ -231,14 +231,14 @@ cross-compilation:
     image: debian:testing
     stage: analyze
     dependencies:
-        - build:gcc
     before_script:
         - apt-get update
     script:
-        - apt-get install --yes debootstrap cmake make pkg-config g++-aarch64-linux-gnu doxygen
+        - apt-get install --yes cmake make libboost-dev libboost-program-options-dev libyaml-cpp-dev doxygen pkg-config gcc
+        - make && make install
+        - apt-get install --yes debootstrap g++-aarch64-linux-gnu
         - debootstrap --download-only --arch=arm64 --foreign --download-only --variant=minbase --include=libboost-program-options-dev,libyaml-cpp-dev,doxygen,libc6-dev testing ./sysroot_arm64 http://deb.debian.org/debian/
         - for DEB in $(find sysroot_arm64/var/cache/apt/archives -not -path sysroot_arm64/var/cache/apt/archives/partial -type f); do echo "Extracting ${DEB}..."; dpkg -x ${DEB} sysroot_arm64; done   # Unpack all downloaded debian packages, since debootstrap does not seem to unpack the additional included ones and their dependencies
-        - cp -r /usr/aarch64-linux-gnu/* sysroot_arm64/usr      # Required since most compilers will only accept one sysroot directory
         - build/g++/release/install/bin/exec-helper init build --compiler aarch64-linux-gnu-g++ --mode release --sysroot $(pwd)/sysroot_arm64
 
 pages:
