@@ -1,8 +1,56 @@
 image: dock0/arch
 
+.prepare: &prepare
+        pacman -Sy --noconfirm
+
+.install_exec_helper: &install_exec_helper
+        pacman -S --noconfirm --needed boost boost-libs yaml-cpp make cmake && make install-bin
+
+.prepare_debian: &prepare_debian
+        rm -rf /var/lib/apt/lists/* && apt-get update           # Work around for debian mirror issues that often occur on Gitlab
+
+.install_exec_helper_debian: &install_exec_helper_debian
+        apt-get install --yes libboost-program-options-dev libyaml-cpp-dev make cmake && make install-bin    # Install dev packages so we do not have to keep track of the version numbering in the runtime package names
+
+.unittest: &unittest
+    stage: test
+    variables:
+        MODULES: UNKNOWN
+    dependencies:
+        - build:gcc
+        - build:clang
+    script:
+        - *install_exec_helper
+        - exec-helper run-test --module $MODULES --run-target unittest --compiler g++ clang++ --mode release
+
+.memory-check: &memory_check
+    stage: analyze
+    variables:
+        MODULES: UNKNOWN
+    dependencies:
+        - build:gcc
+        - build:gcc:limited-optimization
+    script:
+        - pacman -S --noconfirm valgrind
+        - *install_exec_helper
+        - exec-helper analyze --analyze valgrind --run-target unittest --compiler g++ --mode release --module $MODULES
+
+.clang_tidy: &clang_tidy
+    stage: analyze
+    variables:
+        MODULES: UNKNOWN
+    dependencies:
+        - build:gcc
+    script:
+        - pacman -S --needed --noconfirm gcc cmake make pkg-config clang-tools-extra
+        - *install_exec_helper
+        - exec-helper setup init-build -c g++ -m release
+        - make -C build/g++/release/build Catch
+        - exec-helper analyze --analyze clang-tidy --module $MODULES
+
+
 before_script:
-    - pacman -Sy --noconfirm
-    - pacman -S --noconfirm --needed boost boost-libs yaml-cpp
+    - *prepare
 
 stages:
     - build
@@ -13,26 +61,25 @@ stages:
 build:gcc:
     stage: build
     script:
-        - pacman -S --noconfirm --needed gcc cmake make doxygen python-pip pkg-config
+        - pacman -S --noconfirm --needed boost boost-libs yaml-cpp gcc cmake make doxygen python-pip pkg-config
         - pip install gitchangelog
-        - cmake -H. -Bbuild/g++/debug/build -DCMAKE_CXX_COMPILER=g++ -DCMAKE_INSTALL_PREFIX=build/g++/debug/install -DCMAKE_BUILD_TYPE=Debug -DUSE_SYSTEM_CATCH=OFF
-        - make -C build/g++/debug/build --jobs 4
-        - make -C build/g++/debug/build install
-        - cmake -H. -Bbuild/g++/release/build -DCMAKE_CXX_COMPILER=g++ -DCMAKE_INSTALL_PREFIX=build/g++/release/install -DCMAKE_BUILD_TYPE=Release -DUSE_SYSTEM_CATCH=OFF
-        - make -C build/g++/release/build --jobs 4
-        - make -C build/g++/release/build install
+        - make && make install
+        - exec-helper init build --compiler g++ --mode debug release
     artifacts:
         expire_in: 1 day
         paths:
+            - build/native
             - build/g++/debug/install
             - build/g++/release/install
 
 build:gcc:limited-optimization:
     stage: build
     script:
-        - pacman -S --noconfirm --needed gcc cmake make python-pip pkg-config
+        - pacman -S --noconfirm --needed boost boost-libs yaml-cpp gcc cmake make python-pip pkg-config
         - pip install gitchangelog
-        - cmake -H. -Bbuild/g++/release/build -DCMAKE_CXX_COMPILER=g++ -DCMAKE_INSTALL_PREFIX=build/g++/release/install -DCMAKE_BUILD_TYPE=Release -DUSE_SYSTEM_CATCH=OFF -DLIMITED_OPTIMIZATION=ON && make -C build/g++/release/build --jobs 4 && make -C build/g++/release/build install
+        - cmake -H. -Bbuild/g++/release/build -DCMAKE_CXX_COMPILER=g++ -DCMAKE_INSTALL_PREFIX=build/g++/release/install -DCMAKE_BUILD_TYPE=Release -DUSE_SYSTEM_CATCH=OFF -DLIMITED_OPTIMIZATION=ON
+        - make -C build/g++/release/build --jobs 4
+        - make -C build/g++/release/build install
     artifacts:
         expire_in: 1 day
         paths:
@@ -41,10 +88,10 @@ build:gcc:limited-optimization:
 build:clang:
     stage: build
     script: 
-        - pacman -S --noconfirm --needed clang cmake make python-pip pkg-config
+        - pacman -S --noconfirm --needed boost boost-libs yaml-cpp clang cmake make python-pip pkg-config doxygen
         - pip install gitchangelog
-        - cmake -H. -Bbuild/clang++/debug/build -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_INSTALL_PREFIX=build/clang++/debug/install -DCMAKE_BUILD_TYPE=Debug -DUSE_SYSTEM_CATCH=OFF && make -C build/clang++/debug/build --jobs 4 && make -C build/clang++/debug/build install
-        - cmake -H. -Bbuild/clang++/release/build -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_INSTALL_PREFIX=build/clang++/release/install -DCMAKE_BUILD_TYPE=Release -DUSE_SYSTEM_CATCH=OFF && make -C build/clang++/release/build --jobs 4 && make -C build/clang++/release/build install
+        - make && make install
+        - exec-helper init build --compiler clang++ --mode debug release
     artifacts:
         expire_in: 1 day
         paths:
@@ -55,8 +102,7 @@ build:debian:
     image: debian:testing
     stage: build
     before_script:
-        - rm -rf /var/lib/apt/lists/*           # Work around for debian mirror issues that often occur on Gitlab
-        - apt-get update
+        - *prepare_debian
     script:
         - apt-get install --yes cmake make libboost-dev libboost-program-options-dev libyaml-cpp-dev pkg-config g++ git doxygen python-pip
         - pip install gitchangelog
@@ -66,75 +112,25 @@ build:debian:
         paths:
             - build/native/release
 
-test-distribution:ubuntu-yakkety:
-    image: ubuntu:yakkety
-    stage: analyze
-    before_script:
-        - apt-get update
-        - apt-get install --yes build-essential cmake make gcc g++ clang libboost-program-options-dev libyaml-cpp-dev git doxygen pkg-config
-        # Workaround for issue with cmake thinking make is in the /usr/sbin directory
-        - ln -fs /usr/bin/make /usr/sbin/make
-        - which make
-        - ls -l /usr/sbin
-    script:
-        - cmake -H. -Bbuild/g++/release/build -DCMAKE_CXX_COMPILER=g++ -DCMAKE_INSTALL_PREFIX=build/g++/release/install -DCMAKE_BUILD_TYPE=Release -DUSE_SYSTEM_CATCH=OFF
-        - cmake -H. -Bbuild/clang++/release/build -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_INSTALL_PREFIX=build/clang++/release/install -DCMAKE_BUILD_TYPE=Release -DUSE_SYSTEM_CATCH=OFF
-
-unittest-core:
-    stage: test
-    dependencies:
-        - build:gcc
-        - build:clang
-    script:
-        - build/g++/release/install/bin/exec-helper run-test --module core --run-target unittest --compiler g++ clang++ --mode release
-
-unittest-yaml:
-    stage: test
-    dependencies:
-        - build:gcc
-        - build:clang
-    script:
-        - build/g++/release/install/bin/exec-helper run-test --module yaml --run-target unittest --compiler g++ clang++ --mode release
-
-unittest-config:
-    stage: test
-    dependencies:
-        - build:gcc
-        - build:clang
-    script:
-        - build/g++/release/install/bin/exec-helper run-test --module config --run-target unittest --compiler g++ clang++ --mode release
+unittests:
+    <<: *unittest
+    variables:
+        MODULES: core config yaml commander
 
 unittest-plugins:
-    stage: test
-    dependencies:
-        - build:gcc
-        - build:clang
-    script:
-        - build/g++/release/install/bin/exec-helper run-test --module plugins --run-target unittest --compiler g++ clang++ --mode release
-
-unittest-commander:
-    stage: test
-    dependencies:
-        - build:gcc
-        - build:clang
-    script:
-        - build/g++/release/install/bin/exec-helper run-test --module commander --run-target unittest --compiler g++ clang++ --mode release
+    <<: *unittest
+    variables:
+        MODULES: plugins
 
 memory-check:
-    stage: analyze
-    dependencies:
-        - build:gcc:limited-optimization
-    script:
-        - pacman -S --noconfirm valgrind
-        - build/g++/release/install/bin/exec-helper analyze --analyze valgrind --run-target unittest --compiler g++ --mode release --module core yaml config commander
+    <<: *memory_check
+    variables:
+        MODULES: core yaml config commander
 
 memory-check-plugins:
-    stage: analyze
-    dependencies:
-        - build:gcc:limited-optimization
-    script:
-        - pacman -S --noconfirm valgrind
-        - build/g++/release/install/bin/exec-helper analyze --analyze valgrind --run-target unittest --compiler g++ --mode release --module plugins
+    <<: *memory_check
+    variables:
+        MODULES: plugins
 
 cppcheck:
     stage: analyze
@@ -142,37 +138,23 @@ cppcheck:
         - build:gcc
     script:
         - pacman -S --noconfirm cppcheck
-        - build/g++/release/install/bin/exec-helper analyze --analyze cppcheck
+        - *install_exec_helper
+        - exec-helper analyze --analyze cppcheck
 
 clang-tidy-core:
-    stage: analyze
-    dependencies:
-        - build:gcc
-    script:
-        - pacman -S --needed --noconfirm cppcheck gcc cmake make pkg-config clang-tools-extra
-        - build/g++/release/install/bin/exec-helper setup init-build -c g++ -m release
-        - make -C build/g++/release/build Catch
-        - build/g++/release/install/bin/exec-helper analyze --analyze clang-tidy --module core
+    <<: *clang_tidy
+    variables:
+        MODULES: yaml commander config
+
+clang-tidy-core:
+    <<: *clang_tidy
+    variables:
+        MODULES: core
 
 clang-tidy-plugin:
-    stage: analyze
-    dependencies:
-        - build:gcc
-    script:
-        - pacman -S --needed --noconfirm cppcheck gcc cmake make pkg-config clang-tools-extra
-        - build/g++/release/install/bin/exec-helper setup init-build -c g++ -m release
-        - make -C build/g++/release/build Catch
-        - build/g++/release/install/bin/exec-helper analyze --analyze clang-tidy --module plugins
-
-clang-tidy-rest:
-    stage: analyze
-    dependencies:
-        - build:gcc
-    script:
-        - pacman -S --needed --noconfirm cppcheck gcc cmake make pkg-config clang-tools-extra
-        - build/g++/release/install/bin/exec-helper setup init-build -c g++ -m release
-        - make -C build/g++/release/build Catch
-        - build/g++/release/install/bin/exec-helper analyze --analyze clang-tidy --module yaml commander config
+    <<: *clang_tidy
+    variables:
+        MODULES: plugin
 
 clang-static-analyzer:
     stage: analyze
@@ -180,7 +162,8 @@ clang-static-analyzer:
         - build:gcc
     script:
         - pacman -S --noconfirm --needed clang cmake make pkg-config
-        - build/g++/release/install/bin/exec-helper analyze --analyze clang-static-analyzer --mode debug --compiler ''
+        - *install_exec_helper
+        - exec-helper analyze --analyze clang-static-analyzer --mode debug --compiler ''
 
 undefined-behaviour:
     stage: analyze
@@ -188,8 +171,8 @@ undefined-behaviour:
         - build:gcc
     script:
         - pacman -S --noconfirm --needed clang cmake make pkg-config
-        - export PATH=$PATH:build/g++/release/install/bin
-        - build/g++/release/install/bin/exec-helper undefined-behaviour
+        - *install_exec_helper
+        - exec-helper undefined-behaviour
 
 
 code-duplication-pmd-cpd:
@@ -200,7 +183,8 @@ code-duplication-pmd-cpd:
         - pacman -S --noconfirm --needed java-environment unzip wget
         - mkdir -p 3rdparty/pmd
         - pushd 3rdparty/pmd && wget --no-check-certificate "https://downloads.sourceforge.net/project/pmd/pmd/5.7.0/pmd-bin-5.7.0.zip" && unzip pmd-bin-5.7.0.zip; popd
-        - build/g++/release/install/bin/exec-helper analyze --analyze pmd
+        - *install_exec_helper
+        - exec-helper analyze --analyze pmd
 
 coverage:
     stage: analyze
@@ -209,8 +193,8 @@ coverage:
     script:
         - pacman -S --noconfirm --needed base-devel curl gcc cmake make pkg-config
         - bash -x gitlab/install-aur.sh lcov
-        - export PATH=$PATH:build/g++/release/install/bin
-        - build/g++/release/install/bin/exec-helper coverage
+        - *install_exec_helper
+        - exec-helper coverage
     artifacts:
         paths:
             - test_coverage/
@@ -223,8 +207,9 @@ examples:
         - pacman -S --noconfirm --needed base-devel curl gcc clang make scons clang-tools-extra cppcheck git java-environment unzip wget valgrind
         - bash -x gitlab/install-aur.sh lcov
         - mkdir -p 3rdparty/pmd
+        - *install_exec_helper
         - pushd 3rdparty/pmd && wget --no-check-certificate "https://downloads.sourceforge.net/project/pmd/pmd/5.7.0/pmd-bin-5.7.0.zip" && unzip pmd-bin-5.7.0.zip; popd
-        - export PATH=$PATH:$(pwd)/build/g++/release/install/bin:$(pwd)/3rdparty/pmd/pmd-bin-5.7.0/bin
+        - export PATH=$PATH:$(pwd)/3rdparty/pmd/pmd-bin-5.7.0/bin
         - export ROOT_DIR=$(pwd)
         - cd ${ROOT_DIR}/src/config/examples
         - exec-helper --settings-file exec-helper-config.example build clean rebuild
@@ -248,12 +233,10 @@ cross-compilation:
     dependencies:
         - build:debian
     before_script:
-        - apt-get update
-        - apt-get install --yes libboost-program-options-dev libyaml-cpp-dev    # Install dev packages so we do not have to keep track of the version numbering in the runtime package names
-        - apt-get install --yes cmake make pkg-config 
-        - make install-bin
+        - *prepare_debian
+        - *install_exec_helper_debian
     script:
-        - apt-get install --yes debootstrap g++-aarch64-linux-gnu
+        - apt-get install --yes debootstrap g++-aarch64-linux-gnu cmake make pkg-config git
         - debootstrap --download-only --arch=arm64 --foreign --download-only --variant=minbase --include=libboost-program-options-dev,libyaml-cpp-dev,doxygen,libc6-dev testing ./sysroot_arm64 http://deb.debian.org/debian/
         - for DEB in $(find sysroot_arm64/var/cache/apt/archives -not -path sysroot_arm64/var/cache/apt/archives/partial -type f); do echo "Extracting ${DEB}..."; dpkg -x ${DEB} sysroot_arm64; done   # Unpack all downloaded debian packages, since debootstrap does not seem to unpack the additional included ones and their dependencies
         - exec-helper init-build build --compiler aarch64-linux-gnu-g++ --mode release --sysroot $(pwd)/sysroot_arm64
