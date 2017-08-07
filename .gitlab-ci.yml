@@ -234,7 +234,7 @@ cross-compilation:
     before_script:
         - apt-get update
     script:
-        - apt-get install --yes cmake make libboost-dev libboost-program-options-dev libyaml-cpp-dev doxygen pkg-config gcc
+        - apt-get install --yes cmake make libboost-dev libboost-program-options-dev libyaml-cpp-dev doxygen pkg-config g++
         - make && make install
         - apt-get install --yes debootstrap g++-aarch64-linux-gnu
         - debootstrap --download-only --arch=arm64 --foreign --download-only --variant=minbase --include=libboost-program-options-dev,libyaml-cpp-dev,doxygen,libc6-dev testing ./sysroot_arm64 http://deb.debian.org/debian/
