@@ -230,6 +230,7 @@ examples:
 cross-compilation:
     image: debian:testing
     stage: analyze
+    dependencies:           # Do not download any artifacts
     before_script:
         - apt-get update
     script:
