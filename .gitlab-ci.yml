@@ -141,7 +141,7 @@ cppcheck:
         - *install_exec_helper
         - exec-helper analyze --analyze cppcheck
 
-clang-tidy-core:
+clang-tidy:
     <<: *clang_tidy
     variables:
         MODULES: yaml commander config
@@ -173,7 +173,6 @@ undefined-behaviour:
         - pacman -S --noconfirm --needed clang cmake make pkg-config
         - *install_exec_helper
         - exec-helper undefined-behaviour
-
 
 code-duplication-pmd-cpd:
     stage: analyze
