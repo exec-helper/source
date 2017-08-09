@@ -25,6 +25,7 @@ using boost::program_options::variables_map;
 
 using execHelper::core::CommandCollection;
 
+using execHelper::config::Path;
 using execHelper::config::SettingsNode;
 
 using execHelper::yaml::Yaml;
@@ -112,9 +113,9 @@ namespace execHelper { namespace core {
         return true;
     }
 
-    bool ExecHelperOptions::parseSettingsFile(const std::string& file) noexcept {
+    bool ExecHelperOptions::parseSettingsFile(const Path& file) noexcept {
         YamlFile yamlFile;
-        yamlFile.file = file;
+        yamlFile.file = file.native();
         Yaml yaml(yamlFile);
         if(! yaml.getTree({}, m_settings)) {
             LOG("Could not get settings tree");

@@ -1,32 +1,35 @@
 #include "configFileSearcher.h"
 
-#include <fstream>
+#include <boost/filesystem.hpp>
+#include <boost/filesystem/fstream.hpp>
 
-using std::ifstream;
 using std::string;
+
+using boost::filesystem::exists;
+using boost::filesystem::ifstream;
+using boost::filesystem::path;
 
 namespace execHelper {
     namespace config {
-        ConfigFileSearcher::ConfigFileSearcher(SearchPaths searchPaths) noexcept :
+        ConfigFileSearcher::ConfigFileSearcher(Paths searchPaths) noexcept :
             m_searchPaths(std::move(searchPaths))
         {
             ;
         }
 
-        boost::optional<std::string> ConfigFileSearcher::find(const std::string& filename) noexcept {
-            for(const std::string& searchPath : m_searchPaths) {
-                string path(searchPath);
-                path.append("/").append(filename);
-                if(fileExist(path)) {
-                    return path;
+        boost::optional<Path> ConfigFileSearcher::find(const Path& filename) noexcept {
+            for(const auto& searchPath : m_searchPaths) {
+                Path pathToCheck = searchPath;
+                pathToCheck /= filename;
+                if(fileExist(pathToCheck)) {
+                    return pathToCheck;
                 }
             }
             return boost::none;
         }
 
-        bool ConfigFileSearcher::fileExist(const string& path) noexcept {
-            ifstream infile(path);
-            return infile.good();
+        bool ConfigFileSearcher::fileExist(const Path& pathToCheck) noexcept {
+            return exists(pathToCheck);
         }
     } // config
 } // execHelper

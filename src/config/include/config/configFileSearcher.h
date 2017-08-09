@@ -5,6 +5,8 @@
 
 #include <boost/optional/optional.hpp>
 
+#include "path.h"
+
 namespace execHelper {
     namespace config {
         /**
@@ -12,15 +14,13 @@ namespace execHelper {
          */
         class ConfigFileSearcher {
             public:
-                typedef std::string SearchPath;
-                typedef std::vector<SearchPath> SearchPaths;
 
                 /**
                  * Constructs a config file searcher
                  *
                  * \param searchPaths  The paths to search for ordered by which paths to look in first.
                  */
-                ConfigFileSearcher(SearchPaths searchPaths) noexcept;
+                ConfigFileSearcher(Paths searchPaths) noexcept;
 
                 /**
                  * Find the given filename
@@ -29,20 +29,20 @@ namespace execHelper {
                  * \returns The path in search path with the highest importance under which the filename was found.
                  *          boost::none Otherwise
                  */
-                boost::optional<std::string> find(const std::string& filename) noexcept;
+                boost::optional<Path> find(const Path& filename) noexcept;
 
             private:
 
                 /**
                  * Checks whether the given path exists
                  *
-                 * \param path The path to check
+                 * \param pathToCheck The path to check
                  * \returns True    If the path exists on the current system
                  *          False   Otherwise
                  */
-                bool fileExist(const std::string& path) noexcept;
+                bool fileExist(const Path& pathToCheck) noexcept;
 
-                const SearchPaths m_searchPaths;
+                const Paths m_searchPaths;
         };
     } // config
 } // execHelper

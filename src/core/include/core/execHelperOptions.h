@@ -32,7 +32,7 @@ namespace execHelper {
 
                 std::string getSettingsFile(int argc, const char* const * argv) const noexcept;
                 virtual bool parse(int argc, const char* const * argv) override;
-                virtual bool parseSettingsFile(const std::string& file) noexcept override;
+                virtual bool parseSettingsFile(const config::Path& file) noexcept override;
 
                 virtual bool getVerbosity() const noexcept override;
                 virtual bool getDryRun() const noexcept override;

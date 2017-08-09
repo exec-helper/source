@@ -6,6 +6,8 @@
 #include <map>
 #include <memory>
 
+#include "config/path.h"
+
 #include "pattern.h"
 #include "mapPermutator.h"
 
@@ -52,7 +54,7 @@ namespace execHelper {
                  * \returns True    If the settings file was successfully parsed
                  *          False   Otherwise
                  */
-                virtual bool parseSettingsFile(const std::string& file) noexcept = 0;
+                virtual bool parseSettingsFile(const config::Path& file) noexcept = 0;
 
                 /**
                  * Returns whether verbose mode is set

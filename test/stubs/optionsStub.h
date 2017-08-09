@@ -29,7 +29,7 @@ namespace execHelper {
                     return false;  //  This function is currently not supported
                 }
 
-                virtual bool parseSettingsFile(const std::string& /*file*/) noexcept override {
+                virtual bool parseSettingsFile(const config::Path& /*file*/) noexcept override {
                     return false;  //  This function is currently not supported
                 }
 

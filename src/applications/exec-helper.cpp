@@ -16,6 +16,9 @@
 
 using std::string;
 using std::make_pair;
+
+using execHelper::config::Path;
+using execHelper::config::Paths;
 using execHelper::config::ConfigFileSearcher;
 using execHelper::core::ExecHelperOptions;
 using execHelper::core::PosixShell;
@@ -46,8 +49,8 @@ namespace {
         return result;
     }
 
-    inline ConfigFileSearcher::SearchPaths getSearchPaths(const EnvironmentCollection& env) {
-        ConfigFileSearcher::SearchPaths searchPaths({"."});
+    inline Paths getSearchPaths(const EnvironmentCollection& env) {
+        Paths searchPaths({Path(".")});
         const string HOME_DIR_KEY("HOME");
         if(env.count(HOME_DIR_KEY) > 0) {
             searchPaths.push_back(env.at(HOME_DIR_KEY));
@@ -63,14 +66,14 @@ int execHelperMain(int argc, char** argv, char** envp) {
     EnvironmentCollection env = toEnvCollection(envp);
 
     ConfigFileSearcher configFileSearcher(getSearchPaths(env));
-    boost::optional<string> settingsFile = configFileSearcher.find(settingsFileName);
+    boost::optional<Path> settingsFile = configFileSearcher.find(settingsFileName);
     if(settingsFile == boost::none) {
         user_feedback("Could not find a settings file");
         options.printHelp();
         return EXIT_FAILURE;
     }
 
-    if(! options.parseSettingsFile(settingsFile.get())) {
+    if(! options.parseSettingsFile(settingsFile.get().native())) {
         user_feedback("Could not parse settings file '" << settingsFile.get() << "'");
         options.printHelp();
         return EXIT_FAILURE;

@@ -4,6 +4,7 @@
 #include <utility>
 #include <vector>
 
+#include <boost/filesystem.hpp>
 #include <catch.hpp>
 
 #include "config/settingsNode.h"
@@ -17,8 +18,10 @@ using std::vector;
 using std::stringstream;
 using std::endl;
 
+using boost::filesystem::current_path;
+
+using execHelper::config::Path;
 using execHelper::config::SettingsNode;
-using execHelper::test::utils::basename;
 using execHelper::test::utils::convertToConfig;
 using execHelper::test::utils::writeSettingsFile;
 
@@ -48,8 +51,9 @@ namespace execHelper { namespace yaml { namespace test {
 
     SCENARIO("Extensive Yaml file wrapper test", "[yaml][yamlwrapper]") {
         GIVEN("A yaml config file to parse and the right result") {
+            Path yamlFile("test.yaml");
             YamlFile file;
-            file.file = basename(__FILE__) + "/../test.yaml";
+            file.file = absolute(yamlFile).native();
 
             vector<string> correctCommands = {"init", "build", "run", "analyze"};
             vector<string> correctInit = {"git-submodules", "configure"};
@@ -78,7 +82,7 @@ namespace execHelper { namespace yaml { namespace test {
             correctSettings.add({"pmd", "auto-install"}, correctPmdAutoInstall);
             correctSettings.add({"command-line", "run"}, correctRunCommandLine);
 
-            writeSettingsFile(file.file, correctSettings, {});
+            writeSettingsFile(yamlFile.native(), correctSettings, {});
 
             WHEN("We pass the config to the yaml wrapper") {
                 Yaml yaml(file);
