@@ -1,4 +1,3 @@
-#include <fstream>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -12,7 +11,6 @@
 
 #include "utils/utils.h"
 
-using std::ofstream;
 using std::pair;
 using std::string;
 using std::vector;

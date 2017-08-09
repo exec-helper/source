@@ -1,4 +1,3 @@
-#include <fstream>
 #include <iostream>
 #include <map>
 #include <memory>
@@ -6,6 +5,8 @@
 #include <vector>
 
 #include <catch.hpp>
+
+#include <boost/filesystem/fstream.hpp>
 
 #include "log/log.h"
 
@@ -20,7 +21,8 @@
 using std::string;
 using std::vector;
 using std::map;
-using std::ofstream;
+
+using boost::filesystem::ofstream;
 
 using execHelper::config::SettingsNode;
 using execHelper::core::PatternsHandler;

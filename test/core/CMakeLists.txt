@@ -1,6 +1,6 @@
 set(EXE_NAME ${PROJECT_NAME}-core-unittest)
 
-find_package(Boost REQUIRED)
+find_package(Boost REQUIRED COMPONENTS program_options filesystem)
 
 set(SRCS
         src/patternTest.cpp
@@ -24,12 +24,14 @@ include_directories(${EXE_NAME}
 target_link_libraries(${EXE_NAME}
         ${${PROJECT_NAME}-core_LIBRARIES}
         ${${PROJECT_NAME}-test-utils_LIBRARIES}
+        ${Boost_LIBRARIES}
         ${UNITTEST_LIBRARIES}
     )
 
 link_directories(${EXE_NAME}
         ${${PROJECT_NAME}-core_LIBRARY_DIRS}
         ${${PROJECT_NAME}-test-utils_LIBRARY_DIRS}
+        ${Boost_LIBRARY_DIRS}
     )
 
 install(TARGETS ${EXE_NAME} DESTINATION ${UNITTEST_BIN_DIR})

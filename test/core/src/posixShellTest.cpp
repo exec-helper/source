@@ -1,5 +1,4 @@
 #include <cstdio>
-#include <fstream>
 #include <string>
 
 #include <catch.hpp>
@@ -8,7 +7,6 @@
 #include "core/task.h"
 #include "utils/utils.h"
 
-using std::ofstream;
 using std::string;
 using std::remove;
 

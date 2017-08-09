@@ -1,4 +1,3 @@
-#include <fstream>
 #include <string>
 
 #include "core/pattern.h"

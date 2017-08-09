@@ -1,6 +1,5 @@
-#include <experimental/filesystem>
-#include <fstream>
-
+#include <boost/filesystem.hpp>
+#include <boost/filesystem/fstream.hpp>
 #include <boost/optional/optional.hpp>
 #include <boost/optional/optional_io.hpp>
 
@@ -8,10 +7,12 @@
 
 #include "config/configFileSearcher.h"
 
-using std::experimental::filesystem::create_directories;
-using std::experimental::filesystem::remove_all;
-using std::ofstream;
 using std::string;
+
+using boost::filesystem::path;
+using boost::filesystem::ofstream;
+using boost::filesystem::create_directories;
+using boost::filesystem::remove_all;
 
 namespace execHelper {
 namespace config {
@@ -31,15 +32,15 @@ namespace test {
                 }
 
                 for(auto it = searchPaths.rbegin(); it != searchPaths.rend(); ++it) {
-                    create_directories(*it);
+                    create_directories(path(*it));
                 }
 
                 for(auto it = searchPaths.rbegin(); it != searchPaths.rend(); ++it) {
                     const string correctFilePath = *it;
                     ofstream file;
-                    string filename(correctFilePath);
-                    filename += "/";
-                    filename += settingsFile;
+                    path filename(correctFilePath);
+                    filename.append( "/");
+                    filename.append(settingsFile);
 
                     file.open(filename, std::ios::out | std::ios::trunc);
                     file << "test.exec-helper" << std::endl;
@@ -55,7 +56,7 @@ namespace test {
                 // Clean up after ourselves
                 for(auto it = searchPaths.rbegin(); it != searchPaths.rend(); ++it) {
                     const string fileToDelete = *it + "/" + settingsFile;
-                    REQUIRE(remove_all(fileToDelete));
+                    REQUIRE(remove_all(path(fileToDelete)));
                 }
             }
 

@@ -1,4 +1,3 @@
-#include <fstream>
 #include <string>
 #include <vector>
 
@@ -12,7 +11,6 @@
 #include "optionsStub.h"
 
 using std::string;
-using std::ofstream;
 
 using execHelper::core::Task;
 using execHelper::core::TaskCollection;

@@ -1,4 +1,3 @@
-#include <fstream>
 #include <string>
 
 #include "config/settingsNode.h"
@@ -12,7 +11,6 @@
 #include "optionsStub.h"
 
 using std::string;
-using std::ofstream;
 
 using execHelper::config::SettingsNode;
 using execHelper::core::test::ExecutorStub;

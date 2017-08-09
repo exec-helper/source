@@ -2,7 +2,9 @@
 
 #include <iostream>
 #include <sstream>
-#include <fstream>
+
+#include <boost/filesystem.hpp>
+#include <boost/filesystem/fstream.hpp>
 
 #include "config/settingsNode.h"
 #include "core/pattern.h"
@@ -10,15 +12,17 @@
 #include "plugins/pluginUtils.h"
 
 using std::initializer_list;
-using std::ifstream;
 using std::endl;
 using std::map;
-using std::ofstream;
 using std::pair;
 using std::reference_wrapper;
 using std::string;
 using std::stringstream;
 using std::vector;
+
+using boost::filesystem::ifstream;
+using boost::filesystem::ofstream;
+using boost::filesystem::path;
 
 using execHelper::config::SettingsNode;
 using execHelper::core::Options;
@@ -163,7 +167,7 @@ namespace execHelper { namespace test { namespace utils {
 
     void writeSettingsFile(const string& filename, const SettingsNode& settings, const vector<Pattern>& patterns) noexcept {
         ofstream file;
-        file.open(filename, std::ios::out | std::ios::trunc);
+        file.open(path(filename), std::ios::out | std::ios::trunc);
         if(! patterns.empty()) {
             file << convertToConfig(patterns) << std::endl;
         }

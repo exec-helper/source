@@ -10,7 +10,7 @@ image: dock0/arch
         rm -rf /var/lib/apt/lists/* && apt-get update           # Work around for debian mirror issues that often occur on Gitlab
 
 .install_exec_helper_debian: &install_exec_helper_debian
-        apt-get install --yes libboost-program-options-dev libyaml-cpp-dev make cmake && make install-bin    # Install dev packages so we do not have to keep track of the version numbering in the runtime package names
+        apt-get install --yes libboost-program-options-dev libboost-filesystem-dev libyaml-cpp-dev make cmake && make install-bin    # Install dev packages so we do not have to keep track of the version numbering in the runtime package names
 
 .unittest: &unittest
     stage: test
@@ -104,7 +104,7 @@ build:debian:
     before_script:
         - *prepare_debian
     script:
-        - apt-get install --yes cmake make libboost-dev libboost-program-options-dev libyaml-cpp-dev pkg-config g++ git doxygen python-pip
+        - apt-get install --yes cmake make libboost-dev libboost-program-options-dev libboost-filesystem-dev libyaml-cpp-dev pkg-config g++ git doxygen python-pip
         - pip install gitchangelog
         - make && make install-bin
     artifacts:
@@ -236,7 +236,7 @@ cross-compilation:
         - *install_exec_helper_debian
     script:
         - apt-get install --yes debootstrap g++-aarch64-linux-gnu cmake make pkg-config git
-        - debootstrap --download-only --arch=arm64 --foreign --download-only --variant=minbase --include=libboost-program-options-dev,libyaml-cpp-dev,doxygen,libc6-dev testing ./sysroot_arm64 http://deb.debian.org/debian/
+        - debootstrap --download-only --arch=arm64 --foreign --download-only --variant=minbase --include=libboost-program-options-dev,libboost-filesystem-dev,libyaml-cpp-dev,doxygen,libc6-dev testing ./sysroot_arm64 http://deb.debian.org/debian/
         - for DEB in $(find sysroot_arm64/var/cache/apt/archives -not -path sysroot_arm64/var/cache/apt/archives/partial -type f); do echo "Extracting ${DEB}..."; dpkg -x ${DEB} sysroot_arm64; done   # Unpack all downloaded debian packages, since debootstrap does not seem to unpack the additional included ones and their dependencies
         - exec-helper init-build build --compiler aarch64-linux-gnu-g++ --mode release --sysroot $(pwd)/sysroot_arm64
 
