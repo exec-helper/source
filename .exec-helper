@@ -204,10 +204,8 @@ command-line-command:
             - remove-toolchain-tmp: [ rm, -f, "build/{COMPILER}/{MODE}/toolchain.cmake"]
             - create-build-dir: [ mkdir, -p, "build/{COMPILER}/{MODE}"]
             - create-toolchain-tmp: [ cp, toolchain.cmake.in, "build/{COMPILER}/{MODE}/toolchain.cmake"]
-            - replace-C-compiler: [ sed, -i, 's/@C_COMPILER@/gcc/g', "build/{COMPILER}/{MODE}/toolchain.cmake"]
-            - replace-CPP-compiler: [ sed, -i, 's/@CXX_COMPILER@/{COMPILER}/g', "build/{COMPILER}/{MODE}/toolchain.cmake"]
+            - replace-CPP-compiler: [ sed, -i, 's%@CXX_COMPILER@%{COMPILER}%g', "build/{COMPILER}/{MODE}/toolchain.cmake"]
             - replace-sysroot: [ sed, -i, 's%@SYSROOT@%{SYSROOT}%g', "build/{COMPILER}/{MODE}/toolchain.cmake"]
-            - replace-compiler-triplet: [ sed, -i, 's/@COMPILER_TRIPLET@/$({COMPILER} -print-multiarch)/g', "build/{COMPILER}/{MODE}/toolchain.cmake"]
     distclean:
         patterns:
             - COMPILER

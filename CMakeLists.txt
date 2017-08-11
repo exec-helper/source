@@ -2,6 +2,14 @@ cmake_minimum_required(VERSION 3.1)
 
 project(exec-helper)
 
+include(GNUInstallDirs)
+
+# Configure pkg-config (needs to be set explicitly to support cross compilation)
+set(PKG_CONFIG_USE_CMAKE_PREFIX_PATH ON)
+set(ENV{PKG_CONFIG_DIR} "")
+set(ENV{PKG_CONFIG_LIBDIR} "${CMAKE_SYSROOT}/usr/${CMAKE_INSTALL_LIBDIR}/pkgconfig:${CMAKE_SYSROOT}/usr/${CMAKE_INSTALL_LIBDIR}/${CMAKE_LIBRARY_ARCHITECTURE}/pkgconfig:${CMAKE_SYSROOT}/usr/share/pkgconfig")
+set(ENV{PKG_CONFIG_SYSROOT_DIR} ${CMAKE_FIND_ROOT_PATH})
+
 set (CMAKE_CXX_STANDARD 11)
 
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
@@ -22,8 +30,8 @@ if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" MATCH
 endif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
 endif(LIMITED_OPTIMIZATION)
 
-set(BIN_DIRECTORY bin)
-set(LIB_DIRECTORY lib)
+set(BIN_DIRECTORY ${CMAKE_INSTALL_BINDIR})
+set(LIB_DIRECTORY ${CMAKE_INSTALL_LIBDIR})
 
 add_subdirectory(3rdparty)
 add_subdirectory(src)
