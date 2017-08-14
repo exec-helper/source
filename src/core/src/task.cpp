@@ -130,8 +130,9 @@ namespace execHelper { namespace core {
         for(const auto& subTask : subtasks) {
             os << string(" ") << subTask;
         }
+        os << string("} ");
+        os << string("Working-dir: {") << task.getWorkingDirectory().native() << "}";
         os << string("}");
-        os << string(" }");
         os << endl;
         return os;
     }

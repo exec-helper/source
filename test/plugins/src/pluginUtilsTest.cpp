@@ -295,4 +295,18 @@ namespace execHelper { namespace plugins { namespace test {
             }
         }
     }
+
+    SCENARIO("Test the working directory key", "[plugins][pluginUtils]") {
+        GIVEN("The correct working directory key") {
+            string correctWorkingDirKey("working-dir");
+
+            WHEN("We get the working directory key") {
+                string actualWorkingDirKey = getWorkingDirKey();
+
+                THEN("They should match") {
+                    REQUIRE(actualWorkingDirKey == correctWorkingDirKey);
+                }
+            }
+        }
+    }
 } } }

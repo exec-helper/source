@@ -56,6 +56,11 @@ namespace execHelper { namespace plugins {
             }
             replacedTask.appendToEnvironment(std::move(environment));
         }
+        string newWorkingDir = task.getWorkingDirectory().native();
+        for(const auto& pattern : patternCombinations) {
+            newWorkingDir = replacePatterns(newWorkingDir, pattern.first, pattern.second);
+        }
+        replacedTask.setWorkingDirectory(std::move(newWorkingDir));
         for(auto argument : task.getTask()) {
             for(const auto& pattern : patternCombinations) {
                 argument = replacePatterns(argument, pattern.first, pattern.second);
@@ -125,7 +130,7 @@ namespace execHelper { namespace plugins {
     }
 
     boost::optional<Path> getWorkingDir(const Command& command, const SettingsNode& rootSettings) noexcept {
-        boost::optional<string> path = ConfigValue<string>::getSetting(getWorkingDirKey(), rootSettings, command);
+        boost::optional<string> path = ConfigValue<string>::getSetting(getWorkingDirKey(), rootSettings, {{command}, {}});
         if(! path) {
             return boost::none;
         }

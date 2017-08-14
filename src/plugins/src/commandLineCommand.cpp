@@ -38,8 +38,8 @@ namespace execHelper { namespace plugins {
             user_feedback_error("The '" << getCommandLineKey() << "' setting for command '" << command << "' in the '" << commandLineCommandKey << "' settings is empty");
             return false;
         }
-
         task.appendToEnvironment(getEnvironment(command, rootSettings));
+
         boost::optional<Path> path = getWorkingDir(command, rootSettings);
         if(path) {
             task.setWorkingDirectory(path.get());

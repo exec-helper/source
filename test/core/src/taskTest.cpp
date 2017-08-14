@@ -260,12 +260,14 @@ namespace execHelper { namespace core {
             GIVEN("An empty stream and a task") {
                 stringstream stream;
                 stringstream actualStream;
+                const Path actualWorkingDirectory("/tmp");
 
                 const TaskCollection tasks({"task1", "task2"});
                 Task task;
                 task.append(tasks);
                 const EnvironmentCollection env({{"ENV1", "value1"}, {"ENV2", "value2"}});
                 task.setEnvironment(env);
+                task.setWorkingDirectory(actualWorkingDirectory);
 
                 WHEN("We stream the task") {
                     stream << task;
@@ -286,6 +288,7 @@ namespace execHelper { namespace core {
                             actualStream << " " << taskPart;
                         }
                         actualStream << "} ";
+                        actualStream << "Working-dir: {" << actualWorkingDirectory.native() << "}";
                         actualStream << "}" << endl;
                         REQUIRE(stream.str() == actualStream.str());
                     }

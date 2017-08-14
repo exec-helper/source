@@ -58,7 +58,7 @@ namespace execHelper { namespace plugins { namespace test {
             const string commandKey("command1");
             const TaskCollection command1({"command1"});
             const TaskCollection command2({"{" + compilerUtil.compiler.getKey() + "}/{" + compilerUtil.mode.getKey() + "}", "{" + targetUtil.target.getKey() + "}/{" + targetUtil.runTarget.getKey() + "}"});
-           const vector<TaskCollection> commandLines({command1, command2});
+            const vector<TaskCollection> commandLines({command1, command2});
 
             // Add the settings of an other command to make sure we take the expected ones
             const string otherCommandKey("other-command");
@@ -88,9 +88,9 @@ namespace execHelper { namespace plugins { namespace test {
             }
 
             COMBINATIONS("Set the working directory") {
-                static const string newWorkingDir = "tmp";
-                rootSettings.add({WORKING_DIR_KEY}, {newWorkingDir});
-                expectedTask.setWorkingDirectory(current_path() / newWorkingDir);
+                static const string newWorkingDir("{" + compilerUtil.compiler.getKey() + "}/{" + targetUtil.target.getKey() + "}");
+                rootSettings.add(combineVectors(baseSettingsKeys, {WORKING_DIR_KEY}), {newWorkingDir});
+                expectedTask.setWorkingDirectory(newWorkingDir);
             }
 
             ExecutorStub::TaskQueue expectedTasks;
