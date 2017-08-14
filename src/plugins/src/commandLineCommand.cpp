@@ -14,6 +14,7 @@
 using std::string;
 using std::vector;
 
+using execHelper::config::Path;
 using execHelper::config::SettingsNode;
 using execHelper::core::Task;
 using execHelper::core::Options;
@@ -39,6 +40,10 @@ namespace execHelper { namespace plugins {
         }
 
         task.appendToEnvironment(getEnvironment(command, rootSettings));
+        boost::optional<Path> path = getWorkingDir(command, rootSettings);
+        if(path) {
+            task.setWorkingDirectory(path.get());
+        }
 
         vector<Task> tasks;
         auto commandLineValues = commandLineSettings.values();

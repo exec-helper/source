@@ -9,6 +9,8 @@
 #include <vector>
 #include <wordexp.h>
 
+#include "boost/filesystem.hpp"
+
 #include "log/log.h"
 
 #include "argv.h"
@@ -17,6 +19,10 @@
 
 using std::string;
 using std::numeric_limits;
+
+using boost::filesystem::current_path;
+using boost::system::error_code;
+using boost::system::errc::success;
 
 namespace {
     const execHelper::core::PosixShell::ShellReturnCode POSIX_SUCCESS = 0U;
@@ -47,12 +53,21 @@ namespace execHelper { namespace core {
         Argv argv(taskCollection);
         Envp envp(task.getEnvironment());
 
+        // Change to the correct working directory
+        error_code error;
+        LOG("Changing to directory " << task.getWorkingDirectory() << "...");
+        current_path(task.getWorkingDirectory(), error);
+        if(error != success) {
+            LOG("Could not change to directory " << task.getWorkingDirectory() << " (" << error << ")");
+            _exit(127);
+        }
+
         // A full copy of m_env is not required, since it is used in a separate process
         if ((returnCode = execvpe(argv[0], argv.getArgv(), envp.getEnvp())) == -1) {
             LOG("Could not execvpe command: " << strerror(errno) << " (" << errno << ")"); 
         }
+
         // execvp only returns if something goes wrong
-        // Delete it, though we are going to free it anyway once we exit
         _exit(127);
     }
 

@@ -3,27 +3,30 @@
 
 #include <catch.hpp>
 
+#include "config/path.h"
 #include "core/posixShell.h"
 #include "core/task.h"
+#include "utils/tmpFile.h"
 #include "utils/utils.h"
 
 using std::string;
-using std::remove;
 
-using execHelper::test::utils::fileExists;
+using boost::filesystem::current_path;
+
+using execHelper::config::Path;
+
+using execHelper::test::utils::TmpFile;
 
 namespace execHelper { namespace core { namespace test {
     SCENARIO("Test the posix shell for successfull commands", "[shell][posixshell]") {
         GIVEN("A posix shell and a file that can be shown in it") {
-            const string filename("test-posix-shell.exec-helper");
-            remove(filename.c_str());   // Make sure the file does not exist beforehand
+            const TmpFile file;
 
             PosixShell shell;
 
             WHEN("We apply it on a task to show the file") {
-                Task task;
-                task.append("touch");
-                task.append(filename);
+                Task task({"touch", file.getFilename()});
+                task.setWorkingDirectory(file.getPath().parent_path());
 
                 PosixShell::ShellReturnCode returnCode = shell.execute(task);
 
@@ -32,25 +35,20 @@ namespace execHelper { namespace core { namespace test {
                 }
 
                 THEN("The file should exist") {
-                    REQUIRE(fileExists(filename));
+                    REQUIRE(file.exists());
                 }
             }
-            remove(filename.c_str());
         }
     }
 
     SCENARIO("Test the posix shell for shell expansion", "[shell][posixshell]") {
         GIVEN("A posix shell and a file that can be shown in it") {
-            const string filename("test-posix-shell.exec-helper");
-            remove(filename.c_str());   // Make sure the file does not exist beforehand
+            const TmpFile file(current_path());
 
             PosixShell shell;
 
             WHEN("We apply it on a task to show the file") {
-                Task task;
-                task.append("touch");
-                task.append("$(pwd)/" + filename);
-
+                Task task({"touch", "$(pwd)/" + file.getFilename()});
                 PosixShell::ShellReturnCode returnCode = shell.execute(task);
 
                 THEN("The call should succeed") {
@@ -58,27 +56,21 @@ namespace execHelper { namespace core { namespace test {
                 }
 
                 THEN("The file should exist") {
-                    REQUIRE(fileExists(filename));
+                    REQUIRE(file.exists());
                 }
             }
-            remove(filename.c_str());
         }
     }
 
     SCENARIO("Test the posix shell for word expansion", "[shell][posixshell]") {
         GIVEN("A posix shell and a file that can be shown in it") {
-            const string filename("test-posix-shell.exec-helper");
-            remove(filename.c_str());   // Make sure the file does not exist beforehand
-
+            TmpFile file(current_path());
             EnvironmentCollection env = {{"PWD", "."}};
-
             PosixShell shell;
 
             WHEN("We use a command with variable expansion") {
-                Task task(env);
-                task.append("touch");
-                task.append("$PWD/" + filename);
-
+                Task task({"touch", "$PWD/" + file.getFilename()});
+                task.setEnvironment(env);
                 PosixShell::ShellReturnCode returnCode = shell.execute(task);
 
                 THEN("The call should succeed") {
@@ -86,14 +78,13 @@ namespace execHelper { namespace core { namespace test {
                 }
 
                 THEN("The file should exist") {
-                    REQUIRE(fileExists(filename));
+                    REQUIRE(file.exists());
                 }
             }
 
             WHEN("We use a command with variable expansion") {
-                Task task(env);
-                task.append("touch");
-                task.append("${PWD}/" + filename);
+                Task task({"touch", "${PWD}/" + file.getFilename()});
+                task.setEnvironment(env);
 
                 PosixShell::ShellReturnCode returnCode = shell.execute(task);
 
@@ -102,14 +93,12 @@ namespace execHelper { namespace core { namespace test {
                 }
 
                 THEN("The file should exist") {
-                    REQUIRE(fileExists(filename));
+                    REQUIRE(file.exists());
                 }
             }
 
             WHEN("We use a command with command expansion") {
-                Task task;
-                task.append("touch");
-                task.append("$(pwd)/" + filename);
+                Task task({"touch", "$(pwd)/" + file.getFilename()});
 
                 PosixShell::ShellReturnCode returnCode = shell.execute(task);
 
@@ -118,16 +107,15 @@ namespace execHelper { namespace core { namespace test {
                 }
 
                 THEN("The file should exist") {
-                    REQUIRE(fileExists(filename));
+                    REQUIRE(file.exists());
                 }
             }
 
             WHEN("We use a command with variable not inherited from the outside environment") {
-                env.emplace(make_pair("SELF_DEFINED_FILENAME", filename));
+                env.emplace(make_pair("SELF_DEFINED_FILENAME", file.getFilename()));
 
-                Task task(env);
-                task.append("touch");
-                task.append("./${SELF_DEFINED_FILENAME}");
+                Task task({"touch", "./${SELF_DEFINED_FILENAME}"});
+                task.setEnvironment(env);
 
                 PosixShell::ShellReturnCode returnCode = shell.execute(task);
 
@@ -136,22 +124,19 @@ namespace execHelper { namespace core { namespace test {
                 }
 
                 THEN("The file should exist") {
-                    REQUIRE(fileExists(filename));
+                    REQUIRE(file.exists());
                 }
             }
-            remove(filename.c_str());
         }
     }
 
     SCENARIO("Test the posix shell for unsuccessfull commands", "[shell][posixshell]") {
         GIVEN("A posix shell and a file that can be shown in it") {
-            string filename("non-existing-file.file");
+            TmpFile file;
             PosixShell shell;
 
             WHEN("We apply it on a task to show the file") {
-                Task task;
-                task.append("cat");
-                task.append(filename);
+                Task task({"cat", file.toString()});
 
                 PosixShell::ShellReturnCode returnCode = shell.execute(task);
 

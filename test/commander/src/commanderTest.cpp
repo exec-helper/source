@@ -2,6 +2,7 @@
 #include <tuple>
 #include <vector>
 
+#include <boost/filesystem.hpp>
 #include <catch.hpp>
 
 #include "commander/commander.h"
@@ -14,6 +15,9 @@
 using std::vector;
 using std::string;
 
+using boost::filesystem::current_path;
+
+using execHelper::config::Path;
 using execHelper::core::Command;
 using execHelper::core::EnvironmentCollection;
 using execHelper::plugins::Memory;
@@ -38,7 +42,7 @@ namespace execHelper { namespace commander { namespace test {
 
             MemoryHandler memory;
 
-            Commander commander(options);
+            Commander commander(options, current_path());
 
             WHEN("We apply the configuration and run the commander") {
                 REQUIRE(commander.run());
@@ -68,7 +72,7 @@ namespace execHelper { namespace commander { namespace test {
 
             options.m_commands = {"command3"};
 
-            Commander commander(options);
+            Commander commander(options, current_path());
 
             WHEN("We apply the configuration and run the commander") {
                 THEN("It should fail") {
@@ -94,7 +98,7 @@ namespace execHelper { namespace commander { namespace test {
             WHEN("We define an empty environment and run the commander") {
                 const EnvironmentCollection environment;
                 EnvironmentCollection commanderEnvironment = environment;
-                Commander commander(options, std::move(commanderEnvironment));
+                Commander commander(options, current_path(), std::move(commanderEnvironment));
                 bool returnCode = commander.run();
 
                 THEN("It must succeed") {
@@ -112,7 +116,7 @@ namespace execHelper { namespace commander { namespace test {
             WHEN("We define an environment and run the commander") {
                 const EnvironmentCollection environment = {{"VAR1", "value1"}, {"VAR2", "value2"}};
                 EnvironmentCollection commanderEnvironment = environment;
-                Commander commander(options, std::move(commanderEnvironment));
+                Commander commander(options, current_path(), std::move(commanderEnvironment));
                 bool returnCode = commander.run();
 
                 THEN("It must succeed") {
@@ -124,6 +128,38 @@ namespace execHelper { namespace commander { namespace test {
                     REQUIRE(memories.size() == 1U);
                     REQUIRE(memories[0].command == command1);
                     REQUIRE(memories[0].task.getEnvironment() == environment);
+                }
+            }
+        }
+    }
+
+    SCENARIO("Test the working directory") {
+        GIVEN("A basic setup for the commander") {
+            string command("command1");
+            vector<string> commands({command});
+
+            OptionsStub options;
+            addSettings(options.m_settings, "commands", commands);
+            addSettings(options.m_settings, command, {"memory"});
+
+            options.m_commands = commands;
+
+            MemoryHandler memory;
+
+            WHEN("We create and run the commander with an existing working directory") {
+                Path actualWorkingDirectory("./tmp");
+
+                Commander commander(options, actualWorkingDirectory);
+                bool returnCode = commander.run();
+
+                THEN("It should succeed") {
+                    REQUIRE(returnCode);
+                }
+
+                THEN("We should find the correct working directory") {
+                    const Memory::Memories& memories = memory.getExecutions();
+                    REQUIRE(memories.size() == 1U);
+                    REQUIRE(memories[0].task.getWorkingDirectory() == actualWorkingDirectory);
                 }
             }
         }

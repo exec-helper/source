@@ -22,6 +22,7 @@ using std::pair;
 using std::string;
 using std::vector;
 
+using execHelper::config::Path;
 using execHelper::config::SettingsNode;
 using execHelper::core::Command;
 using execHelper::core::Task;
@@ -116,6 +117,19 @@ namespace execHelper { namespace plugins {
             }
         }
         return result;
+    }
+
+    const string& getWorkingDirKey() noexcept {
+        static const string workingDirKey("working-dir");
+        return workingDirKey;
+    }
+
+    boost::optional<Path> getWorkingDir(const Command& command, const SettingsNode& rootSettings) noexcept {
+        boost::optional<string> path = ConfigValue<string>::getSetting(getWorkingDirKey(), rootSettings, command);
+        if(! path) {
+            return boost::none;
+        }
+        return Path(path.get());
     }
 
     boost::optional<string> getConfigurationSetting(const string& command, const SettingsNode& rootSettings, const string& configKey, const string& prepend) noexcept {

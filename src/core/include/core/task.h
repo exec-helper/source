@@ -5,6 +5,10 @@
 #include <string>
 #include <vector>
 
+#include <boost/filesystem.hpp>
+
+#include "config/path.h"
+
 namespace execHelper {
     namespace core {
         typedef std::vector<std::string> TaskCollection;
@@ -16,6 +20,14 @@ namespace execHelper {
          */
         class Task {
             public:
+                /**
+                 * Create a task
+                 *
+                 * \param subtasks  The task subdivided in separate arguments
+                 * \param workingDirectory  The working directory for the task
+                 */
+                Task(const std::initializer_list<std::string>& subtasks = {}, const config::Path& workingDirectory = boost::filesystem::current_path()) noexcept;
+
                 /**
                  * Returns the task
                  *
@@ -36,21 +48,20 @@ namespace execHelper {
                  * \returns A collection of the environment
                  */
                 const EnvironmentCollection& getEnvironment() const noexcept;
-                
-                /**
-                 * Create a task
-                 *
-                 * \param env   The environment to apply to the task
-                 */
-                Task(EnvironmentCollection env = EnvironmentCollection()) noexcept;
 
                 /**
-                 * \copybrief Task(EnvironmentCollection)
+                 * Sets the working directory of the task
                  *
-                 * \param subtasks  The task subdivided in separate arguments
-                 * \copydetails Task(EnvironmentCollection)
+                 * \param workingDirectory  The new working directory to set
                  */
-                Task(const std::initializer_list<std::string>& subtasks, EnvironmentCollection env = EnvironmentCollection()) noexcept;
+                void setWorkingDirectory(const config::Path& workingDirectory) noexcept;
+
+                /**
+                 * Gets the working directory of the task
+                 *
+                 * \returns The working directory associated with this task
+                 */
+                const config::Path& getWorkingDirectory() const noexcept;
 
                 /**
                  * Append to this task
@@ -82,10 +93,15 @@ namespace execHelper {
                  */
                 bool setEnvironment(const EnvironmentCollection& env) noexcept;
 
+                /*! @copydoc(const EnvirontmentCollection&)
+                 */
+                bool setEnvironment(EnvironmentCollection&& env) noexcept;
+
                 /**
-                 * Append an additional value to the environment of the task
+                 * Add or replace an additional value to the environment of the task.
+                 * If the new key already exists in the environment, the existing value for the key is overwritten.
                  *
-                 * \param newValue The new value to add to the task
+                 * \param newValue The new value to add or replace to the task
                  * \returns True    If the new value was successfully appended to the task
                  *          False   Otherwise
                  */
@@ -115,6 +131,7 @@ namespace execHelper {
             private:
                 TaskCollection m_task;
                 EnvironmentCollection m_env;
+                config::Path m_workingDirectory;
         };
         
         /**

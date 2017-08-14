@@ -15,6 +15,8 @@ using std::ostream;
 using std::string;
 using std::vector;
 
+using execHelper::config::Path;
+
 namespace {
     inline string implodeVector(const vector<string>& toImplode, const string& delimiter = string(" ")) {
         string result;
@@ -30,15 +32,9 @@ namespace {
 
 namespace execHelper { namespace core {
 
-    Task::Task(EnvironmentCollection env) noexcept :
-        m_env(std::move(env))
-    {
-        ;
-    }
-
-    Task::Task(const initializer_list<string>& subtasks, EnvironmentCollection env) noexcept :
+    Task::Task(const initializer_list<string>& subtasks, const Path& workingDirectory) noexcept :
         m_task(subtasks),
-        m_env(std::move(env))
+        m_workingDirectory(workingDirectory)
     {
         ;
     }
@@ -54,6 +50,15 @@ namespace execHelper { namespace core {
     const EnvironmentCollection& Task::getEnvironment() const noexcept {
         return m_env;
     }
+
+    void Task::setWorkingDirectory(const Path& workingDirectory) noexcept {
+        m_workingDirectory = workingDirectory;
+    }
+
+    const Path& Task::getWorkingDirectory() const noexcept {
+        return m_workingDirectory;
+    }
+
 
     bool Task::append(const string& taskPart) noexcept {
         m_task.push_back(taskPart);
@@ -82,7 +87,15 @@ namespace execHelper { namespace core {
         return true;
     }
 
+    bool Task::setEnvironment(EnvironmentCollection&& env) noexcept {
+        m_env = move(env);
+        return true;
+    }
+
     bool Task::appendToEnvironment(EnvironmentValue&& newValue) noexcept {
+        if(m_env.count(newValue.first) > 0U) {
+            m_env.erase(newValue.first);
+        }
         m_env.emplace(newValue);
         return true;
     }
@@ -95,7 +108,7 @@ namespace execHelper { namespace core {
     }
 
     bool Task::operator==(const Task& other) const noexcept {
-        return (m_task == other.m_task && m_env == other.m_env);
+        return (m_task == other.m_task && m_workingDirectory == other.m_workingDirectory && m_env == other.m_env);
     }
 
     bool Task::operator!=(const Task& other) const noexcept {
@@ -109,7 +122,7 @@ namespace execHelper { namespace core {
 
         os << string("Environment(") << environment.size() << "): {";
         for(const auto& envVar : environment) {
-            os << string(" ") << envVar.first << ": " << envVar.second << "; ";
+            os << string(" ") << envVar.first << ": " << envVar.second << ";";
         }
         os << string("} ");
 
@@ -117,7 +130,7 @@ namespace execHelper { namespace core {
         for(const auto& subTask : subtasks) {
             os << string(" ") << subTask;
         }
-        os << string(" }");
+        os << string("}");
         os << string(" }");
         os << endl;
         return os;

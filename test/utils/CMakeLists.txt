@@ -5,6 +5,7 @@ find_package(Boost REQUIRED COMPONENTS program_options filesystem)
 set(SRCS
         src/utils.cpp
         src/combinationHelpers.cpp
+        src/tmpFile.cpp
    )
 
 set(LIBRARY_INCLUDES

@@ -11,3 +11,6 @@
 
 #define COMBINATIONS(desc)    if(make_combinations_index == 0) { ++NUMBER_OF_COMBINATIONS;} \
                               if(make_combinations_index & (1 << (__COUNTER__ - CURRENT_COUNT - 1U)))
+
+#define COMBINATIONS_NO_BRANCH_TAKEN         if(make_combinations_index <= 1U)
+#define COMBINATIONS_ONLY_IF_BRANCH_TAKEN    if(make_combinations_index > 1U)

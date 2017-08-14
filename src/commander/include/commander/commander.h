@@ -5,6 +5,7 @@
 #include <map>
 #include <memory>
 
+#include "config/path.h"
 #include "core/task.h"
 
 namespace execHelper {
@@ -28,9 +29,10 @@ namespace execHelper {
                  * Creates a commander
                  *
                  * \param options   The command line options
+                 * \param options   The working directory for the commander
                  * \param env       The environment to apply the plugins in
                  */
-                Commander(const core::Options& options, core::EnvironmentCollection&& env = core::EnvironmentCollection());
+                Commander(const core::Options& options, config::Path workingDirectory, core::EnvironmentCollection&& env = core::EnvironmentCollection());
 
                 /**
                  * Run the commander
@@ -53,6 +55,7 @@ namespace execHelper {
                 bool executePlugin(const std::string& pluginName, const std::string& command, const core::Options& options) noexcept;
 
                 const core::Options& m_options;
+                const config::Path& m_workingDirectory;
                 const core::EnvironmentCollection m_env;
         };
     }

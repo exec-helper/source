@@ -5,6 +5,7 @@
 
 #include <boost/optional/optional.hpp>
 
+#include "config/path.h"
 #include "config/settingsNode.h"
 #include "core/options.h"
 #include "core/task.h"
@@ -25,11 +26,13 @@ namespace execHelper {
         const std::string& getPatternsKey() noexcept;
         const std::string& getCommandLineKey() noexcept;
         const std::string& getEnvironmentKey() noexcept;
+        const std::string& getWorkingDirKey() noexcept;
 
         boost::optional<const config::SettingsNode&> getContainingSettings(const std::string& key, const config::SettingsNode& rootSettings, const std::vector<std::string>& configKeys) noexcept;
         core::TaskCollection getCommandLine(const core::Command& command, const config::SettingsNode& rootSettings) noexcept;
         core::TaskCollection getCommandLine(const core::Command& command, const config::SettingsNode& rootSettings, const core::PatternCombinations& patternCombinations) noexcept;
         core::EnvironmentCollection getEnvironment(const core::Command& command, const config::SettingsNode& rootSettings) noexcept;
+        boost::optional<config::Path> getWorkingDir(const core::Command& command, const config::SettingsNode& rootSettings) noexcept;
 
         void replacePatternCombinations(core::TaskCollection& commandArguments, const core::PatternCombinations& patternCombinations) noexcept;
         core::Task replacePatternCombinations(const core::Task& task, const core::PatternCombinations& patternCombinations) noexcept;

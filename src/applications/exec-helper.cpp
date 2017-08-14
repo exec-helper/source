@@ -2,6 +2,7 @@
 #include <string>
 
 #include <boost/algorithm/string.hpp>
+#include <boost/filesystem.hpp>
 #include <boost/optional/optional.hpp>
 
 #include "log/log.h"
@@ -16,6 +17,8 @@
 
 using std::string;
 using std::make_pair;
+
+using boost::filesystem::current_path;
 
 using execHelper::config::Path;
 using execHelper::config::Paths;
@@ -50,7 +53,7 @@ namespace {
     }
 
     inline Paths getSearchPaths(const EnvironmentCollection& env) {
-        Paths searchPaths({Path(".")});
+        Paths searchPaths({current_path()});
         const string HOME_DIR_KEY("HOME");
         if(env.count(HOME_DIR_KEY) > 0) {
             searchPaths.push_back(env.at(HOME_DIR_KEY));
@@ -104,7 +107,7 @@ int execHelperMain(int argc, char** argv, char** envp) {
     }
     options.setExecutor(executor.get());
 
-    Commander commander(options, std::move(env));
+    Commander commander(options, settingsFile.get().parent_path(), std::move(env));
     if(commander.run()) {
         return EXIT_SUCCESS;
     } else {

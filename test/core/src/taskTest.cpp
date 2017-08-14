@@ -3,189 +3,149 @@
 #include <vector>
 
 #include <boost/algorithm/string.hpp>
+#include <boost/filesystem.hpp>
 
-#include <catch.hpp>
-
+#include "config/path.h"
 #include "core/task.h"
+#include "unittest/catch.h"
 #include "utils/utils.h"
 
+using std::endl;
+using std::move;
 using std::string;
-using std::istringstream;
 using std::stringstream;
 using std::vector;
-using std::move;
-using boost::split;
+
+using boost::filesystem::current_path;
+using boost::trim_right;
+
+using execHelper::config::Path;
+using execHelper::core::TaskCollection;
 
 using execHelper::test::utils::appendVectors;
 
+namespace {
+    template<typename T>
+    inline vector<T> reverse(vector<T> toReverse) {
+        std::reverse(toReverse.begin(), toReverse.end());
+        return toReverse;
+    }
+
+    string toString(const TaskCollection& task) {
+        string result;
+        for(const auto& taskPart : task) {
+            result.append(taskPart).append(" ");
+        }
+        trim_right(result);
+        return result;
+    }
+}
+
 namespace execHelper { namespace core {
     namespace test {
-        SCENARIO("Check the tasks", "[task]") {
-            GIVEN("A task and a line of commands") {
-                Task task;
-                string actualCommand = "command1 command2 command3";
+        SCENARIO("Test the getters and setters of a task", "[task]") {
+            GIVEN("A task") {
+                MAKE_COMBINATIONS("Of getting and setting different parameters of a task") {
+                    Task task;
 
-                // Convert the string command to a collection of separate commands
-                TaskCollection actualCommandCollection;
-                split(actualCommandCollection, actualCommand, boost::is_any_of(" "));
+                    TaskCollection actualCommands;
+                    Path actualWorkingDir = current_path();
+                    EnvironmentCollection actualEnvironment;
 
-                WHEN("We add each command separately to the task") {
-                    for(const auto& command : actualCommandCollection) {
-                        task.append(command);
+                    COMBINATIONS("Append a string") {
+                        const string taskPart = "const string task";
+                        actualCommands.push_back(taskPart);
+                        task.append(taskPart);
                     }
 
-                    THEN("We should be able to find back all commands in order") {
-                        REQUIRE(task.getTask() == actualCommandCollection); 
-                    }
-                    THEN("We should get the accumulated string") {
-                        REQUIRE(task.toString() == actualCommand); 
-                    }
-                }
-
-                WHEN("We add the entire string as one single command parameter") {
-                    task.append(actualCommand);
-
-                    THEN("We should find it back as a single command parameter") {
-                        TaskCollection resultTask = task.getTask();
-                        REQUIRE(resultTask.size() == 1U);
-                        REQUIRE(resultTask.front() == actualCommand); 
-                    }
-                    THEN("We should get the accumulated string") {
-                        REQUIRE(task.toString() == actualCommand); 
-                    }
-                }
-
-                WHEN("We add each command as a collection to the task") {
-                    task.append(actualCommandCollection);
-
-                    THEN("We should be able to find back all commands in order") {
-                        REQUIRE(task.getTask() == actualCommandCollection); 
-                    }
-                    THEN("We should get the accumulated string") {
-                        REQUIRE(task.toString() == actualCommand); 
-                    }
-                }
-            }
-
-            GIVEN("A task and an empty line of commands") {
-                Task task;
-                string actualCommand;
-
-                // Convert the string command to a collection of separate commands
-                TaskCollection actualCommandCollection;
-                split(actualCommandCollection, actualCommand, boost::is_any_of(" "));
-
-                WHEN("We add the entire string as one single command parameter") {
-                    task.append(actualCommand);
-
-                    THEN("We should find it back as a single command parameter") {
-                        TaskCollection resultTask = task.getTask();
-                        REQUIRE(resultTask.size() == 1U);
-                        REQUIRE(resultTask.front() == actualCommand); 
-                    }
-                    THEN("We should get the accumulated string") {
-                        REQUIRE(task.toString() == actualCommand); 
-                    }
-                }
-
-                WHEN("We add each command as a collection to the task") {
-                    task.append(actualCommandCollection);
-
-                    THEN("We should be able to find back all commands in order") {
-                        REQUIRE(task.getTask() == actualCommandCollection); 
-                    }
-                    THEN("We should get the accumulated string") {
-                        REQUIRE(task.toString() == actualCommand); 
-                    }
-                }
-            }
-
-            GIVEN("A task and an empty line of commands") {
-                Task task;
-                string actualCommand;
-
-                // Convert the string command to a collection of separate commands
-                TaskCollection actualCommandCollection;
-                split(actualCommandCollection, actualCommand, boost::is_any_of(" "));
-
-                WHEN("We add the entire string as one single command parameter") {
-                    task.append(actualCommand);
-
-                    THEN("We should find it the empty string back as a single command parameter") {
-                        TaskCollection resultTask = task.getTask();
-                        REQUIRE(resultTask.size() == 1U);
-                        REQUIRE(resultTask.front() == actualCommand); 
-                    }
-                    THEN("We should get the empty string") {
-                        REQUIRE(task.toString() == actualCommand); 
-                    }
-                }
-
-                WHEN("We add each command as a collection to the task") {
-                    task.append(actualCommandCollection);
-
-                    THEN("We should be able to find back the empty string in a collection") {
-                        REQUIRE(task.getTask() == actualCommandCollection); 
-                    }
-                    THEN("We should get the empty string") {
-                        REQUIRE(task.toString() == actualCommand); 
-                    }
-                }
-            }
-            GIVEN("A task and a line of commands") {
-                Task task;
-                string actualCommand = "command1 command2 command3";
-
-                // Convert the string command to a collection of separate commands
-                TaskCollection actualCommandCollection;
-                split(actualCommandCollection, actualCommand, boost::is_any_of(" "));
-                TaskCollection moveCommandCollection = actualCommandCollection;
-
-                WHEN("We move each command separately to the task") {
-                    for(const auto& command : moveCommandCollection) {
-                        task.append(command);
+                    COMBINATIONS("Append a moved string") {
+                        string taskPart = "const string task";
+                        actualCommands.push_back(taskPart);
+                        task.append(move(taskPart));
                     }
 
-                    THEN("We should be able to find back all commands in order") {
-                        REQUIRE(task.getTask() == actualCommandCollection); 
+                    COMBINATIONS("Append a task collection") {
+                        const TaskCollection taskPart = {"taskcollection1", "taskcollection2", "taskcollection3"};
+                        appendVectors(actualCommands, taskPart);
+                        task.append(taskPart);
                     }
-                    THEN("We should get the accumulated string") {
-                        REQUIRE(task.toString() == actualCommand); 
-                    }
-                }
-                WHEN("We move all command together to the task") {
-                    task.append(move(moveCommandCollection));
 
-                    THEN("We should be able to find back all commands in order") {
-                        REQUIRE(task.getTask() == actualCommandCollection); 
+                    COMBINATIONS("Move a task collection") {
+                        TaskCollection taskPart = {"taskcollection1", "taskcollection2", "taskcollection3"};
+                        appendVectors(actualCommands, taskPart);
+                        task.append(move(taskPart));
                     }
-                    THEN("We should get the accumulated string") {
-                        REQUIRE(task.toString() == actualCommand); 
+
+                    COMBINATIONS("Add a string with the space separator as part of the argument") {
+                        const string taskPart = "This is one command in total";
+                        actualCommands.push_back(taskPart);
+                        task.append(taskPart);
                     }
-                }
-            }
-            GIVEN("A task and an initializer list that initializes it") {
-                Task task({"task1", "task2", "task3"});
-                vector<string> additionalTasks({"taskA", "taskB", "taskC"});
-                TaskCollection additionalCollection({"taskAlpha", "taskBeta"});
 
-                WHEN("We add the additional tasks") {
-                    for(const auto& subtask : additionalTasks) {
-                        task.append(subtask);
-                    } 
-                    task.append(additionalCollection);
+                    COMBINATIONS("Add a collection with the space separator as part of the argument") {
+                        const TaskCollection taskPart = {"This is one command in total", "This is another command that is one"};
+                        appendVectors(actualCommands, taskPart);
+                        task.append(taskPart);
+                    }
 
-                    THEN("We should find all tasks in order") {
-                        TaskCollection correctResults({"task1", "task2", "task3"});
-                        appendVectors(correctResults, additionalTasks);
-                        appendVectors(correctResults, additionalCollection);
-                        REQUIRE(task.getTask() == correctResults);
+                    COMBINATIONS("Set an environment") {
+                        const EnvironmentCollection environment = {{"ENV1", "value1"}, {"ENV2", "value2"}};
+                        actualEnvironment = environment;
+                        task.setEnvironment(environment);
+                    }
+
+                    COMBINATIONS("Set a moved environment") {
+                        EnvironmentCollection environment = {{"MOVE-ENV1", "value1"}, {"MOVE-ENV2", "value2"}};
+                        actualEnvironment = environment;
+                        task.setEnvironment(move(environment));
+                    }
+
+                    COMBINATIONS("Append an environment value") {
+                        EnvironmentValue value1("APPEND1", "append-value1");
+                        actualEnvironment.insert(value1);
+                        task.appendToEnvironment(move(value1));
+                    }
+
+                    COMBINATIONS("Append an environment value twice with a different value") {
+                        EnvironmentValue value1("OVERWRITE1", "append-value1");
+                        task.appendToEnvironment(move(value1));
+                        EnvironmentValue value2("OVERWRITE1", "append-value2");
+                        actualEnvironment.insert(value2);
+                        task.appendToEnvironment(move(value2));
+                    }
+
+                    COMBINATIONS("Append an environment collection") {
+                        EnvironmentCollection collection({{"APPENDCOLLECTION1", "append-collection1"}, {"APPENDCOLLECTION2", "append-collection2"}});
+                        for(const auto& value : collection) {
+                            actualEnvironment.insert(value);
+                        }
+                        task.appendToEnvironment(move(collection));
+                    }
+
+                    COMBINATIONS("Setting the work directory") {
+                        actualWorkingDir /= "tmp";
+                        task.setWorkingDirectory(actualWorkingDir);
+                    }
+
+                    THEN_WHEN("We check the getters") {
+                        THEN_CHECK("The commands are correct") {
+                            REQUIRE(task.getTask() == actualCommands);
+                        }
+                        THEN_CHECK("The command string is correct") {
+                            REQUIRE(task.toString() == toString(actualCommands));
+                        }
+                        THEN_CHECK("The environment is correct") {
+                            REQUIRE(task.getEnvironment() == actualEnvironment);
+                        }
+                        THEN_CHECK("The working directory is correct") {
+                            REQUIRE(task.getWorkingDirectory() == actualWorkingDir);
+                        }
                     }
                 }
             }
         }
 
-        SCENARIO("Check the task comparison operators", "[task]") {
+        SCENARIO("Test the comparison operators", "[task]") {
             GIVEN("One task") {
                 Task actualTask;
                 actualTask.append("task1");
@@ -198,35 +158,136 @@ namespace execHelper { namespace core {
                     }
                 }
             }
-            GIVEN("Two matching tasks") {
-                Task task1;
-                task1.append("task1");
-                task1.append("task2");
+            GIVEN("Two tasks used for equality comparison") {
+                MAKE_COMBINATIONS("For different equality situations") {
+                    Task task1;
+                    Task task2;
 
-                Task task2;
-                task2.append("task1");
-                task2.append("task2");
+                    COMBINATIONS("Append the same commands") {
+                        static const TaskCollection actualTask({"task1", "task2"}); 
+                        task1.append(actualTask);
+                        task2.append(actualTask);
+                    }
 
-                WHEN("We compare them") {
-                    THEN("It should return true") {
-                        REQUIRE(task1 == task2);
-                        REQUIRE_FALSE(task1 != task2);
+                    COMBINATIONS("Add the same environment") {
+                        static const EnvironmentCollection env({{"ENV1", "value1"}, {"ENV2", "value2"}, {"ENV3", "value3"}});
+                        task1.setEnvironment(env);
+                        task2.setEnvironment(env);
+                    }
+
+                    COMBINATIONS("Add the same working directories") {
+                        static const Path workingDirectory("/tmp");
+                        task1.setWorkingDirectory(workingDirectory);
+                        task2.setWorkingDirectory(workingDirectory);
+                    }
+
+                    THEN_WHEN("We compare them") {
+                        THEN_CHECK("They should compare equal") {
+                            REQUIRE(task1 == task2);
+                            REQUIRE_FALSE(task1 != task2);
+                        }
                     }
                 }
             }
-            GIVEN("Two non-matching tasks") {
-                Task task1;
-                task1.append("task1");
-                task1.append("task2");
 
-                Task task2;
-                task2.append("task2");
-                task2.append("task1");
+            GIVEN("Two tasks used for equality comparison") {
+                MAKE_COMBINATIONS("For different inequality situations") {
+                    Task task1;
+                    Task task2;
 
-                WHEN("We compare them") {
-                    THEN("It should return false") {
-                        REQUIRE_FALSE(task1 == task2);
-                        REQUIRE(task1 != task2);
+                    COMBINATIONS("Append to one a command") {
+                        task1.append("one-command");
+                    }
+
+                    COMBINATIONS("Different commands") {
+                        task1.append("command1");
+                        task2.append("command2");
+                    }
+
+                    COMBINATIONS("Different number of commands") {
+                        task1.append("command1");
+                        task2.append(TaskCollection({"command1", "command2"}));
+                    }
+
+                    COMBINATIONS("Commands in different order") {
+                        TaskCollection commands({"command1", "command2"});
+                        task1.append(commands);
+                        task2.append(reverse(commands));
+                    }
+
+                    COMBINATIONS("Append to one an additional environment variable") {
+                        task1.appendToEnvironment(EnvironmentValue("ONE-ENV", "env1"));
+                    }
+
+                    COMBINATIONS("Append different number of environment variables") {
+                        const EnvironmentValue value1("ENV1", "value1");
+                        EnvironmentValue moveValue1ForTask1(value1);
+                        EnvironmentValue moveValue1ForTask2(value1);
+                        const EnvironmentValue value2("ENV2", "value1");
+                        EnvironmentValue moveValue2ForTask2(value2);
+                        task1.appendToEnvironment(move(moveValue1ForTask1));
+                        task2.appendToEnvironment(move(moveValue1ForTask2));
+                        task2.appendToEnvironment(move(moveValue2ForTask2));
+                    }
+
+                    COMBINATIONS("Append environment variables with different keys") {
+                        task1.appendToEnvironment(EnvironmentValue("key1", "value"));
+                        task1.appendToEnvironment(EnvironmentValue("key2", "value"));
+                    }
+
+                    COMBINATIONS("Append environment variables with different values") {
+                        task1.appendToEnvironment(EnvironmentValue("key", "value1"));
+                        task1.appendToEnvironment(EnvironmentValue("key", "value2"));
+                    }
+
+                    COMBINATIONS("Change the working directories") {
+                        task1.setWorkingDirectory(current_path());
+                        task2.setWorkingDirectory(current_path() / "tmp");
+                    }
+
+                    THEN_WHEN("We compare them") {
+                        THEN_CHECK("They should not compare equal") {
+                            COMBINATIONS_ONLY_IF_BRANCH_TAKEN {
+                                REQUIRE(task1 != task2);
+                                REQUIRE_FALSE(task1 == task2);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        SCENARIO("Test the streaming operator", "[task]") {
+            GIVEN("An empty stream and a task") {
+                stringstream stream;
+                stringstream actualStream;
+
+                const TaskCollection tasks({"task1", "task2"});
+                Task task;
+                task.append(tasks);
+                const EnvironmentCollection env({{"ENV1", "value1"}, {"ENV2", "value2"}});
+                task.setEnvironment(env);
+
+                WHEN("We stream the task") {
+                    stream << task;
+
+                    THEN("The stream should be ok") {
+                        REQUIRE(stream.good());
+                    }
+
+                    THEN("The stream should have the correct format") {
+                        actualStream << "Task {Environment(" << env.size() << "): {";
+                        for(const auto& envValue : env) {
+                            actualStream << " " << envValue.first << ": " << envValue.second << ";";
+                        }
+                        actualStream << "} ";
+
+                        actualStream << "Command(" << tasks.size() << "): {";
+                        for(const auto& taskPart : tasks) { 
+                            actualStream << " " << taskPart;
+                        }
+                        actualStream << "} ";
+                        actualStream << "}" << endl;
+                        REQUIRE(stream.str() == actualStream.str());
                     }
                 }
             }

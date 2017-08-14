@@ -2,6 +2,8 @@
 #include <string>
 #include <vector>
 
+#include <boost/filesystem.hpp>
+
 #include "config/settingsNode.h"
 #include "core/task.h"
 #include "plugins/commandLineCommand.h"
@@ -14,6 +16,8 @@
 
 using std::string;
 using std::vector;
+
+using boost::filesystem::current_path;
 
 using execHelper::config::SettingsNode;
 using execHelper::core::Task;
@@ -31,6 +35,7 @@ using execHelper::test::combinationHelpers::setEnvironment;
 
 namespace {
     const string PLUGIN_CONFIG_KEY("command-line-command");
+    const string WORKING_DIR_KEY("working-dir");
 }
 
 namespace execHelper { namespace plugins { namespace test {
@@ -80,6 +85,12 @@ namespace execHelper { namespace plugins { namespace test {
 
             COMBINATIONS("Set environment") {
                 setEnvironment(baseSettingsKeys, &expectedTask, &rootSettings, {{"VAR1", "environmentValue{" + compilerUtil.compiler.getKey() + "}"}, {"VAR{" + compilerUtil.compiler.getKey() + "}", "environmentValue2"}});
+            }
+
+            COMBINATIONS("Set the working directory") {
+                static const string newWorkingDir = "tmp";
+                rootSettings.add({WORKING_DIR_KEY}, {newWorkingDir});
+                expectedTask.setWorkingDirectory(current_path() / newWorkingDir);
             }
 
             ExecutorStub::TaskQueue expectedTasks;
