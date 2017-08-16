@@ -49,10 +49,6 @@ namespace execHelper { namespace core {
     void PosixShell::childProcessExecute(const Task& task) const noexcept {
         int returnCode;
 
-        TaskCollection taskCollection = shellExpand(task);
-        Argv argv(taskCollection);
-        Envp envp(task.getEnvironment());
-
         // Change to the correct working directory
         error_code error;
         LOG("Changing to directory " << task.getWorkingDirectory() << "...");
@@ -61,6 +57,10 @@ namespace execHelper { namespace core {
             LOG("Could not change to directory " << task.getWorkingDirectory() << " (" << error << ")");
             _exit(127);
         }
+
+        TaskCollection taskCollection = shellExpand(task);
+        Argv argv(taskCollection);
+        Envp envp(task.getEnvironment());
 
         // A full copy of m_env is not required, since it is used in a separate process
         if ((returnCode = execvpe(argv[0], argv.getArgv(), envp.getEnvp())) == -1) {

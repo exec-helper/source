@@ -20,3 +20,5 @@ command-line-command:           # Command-line-command configuration settings
             - world:            # The same as [echo, "{EXAMPLE_PATTERN}"]
                 - echo
                 - "{EXAMPLE_PATTERN}"
+            - workingdir: [ echo, working, directory, is, "$(pwd)"]     # Print out the current working directory
+        working-dir: /tmp       # Set the working directory to a predefined value
