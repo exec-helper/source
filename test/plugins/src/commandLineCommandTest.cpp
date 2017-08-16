@@ -36,6 +36,7 @@ using execHelper::test::combinationHelpers::setEnvironment;
 namespace {
     const string PLUGIN_CONFIG_KEY("command-line-command");
     const string WORKING_DIR_KEY("working-dir");
+    const string CURRENT_DIR_WORKING_DIR_KEY("<working-dir>");
 }
 
 namespace execHelper { namespace plugins { namespace test {
@@ -91,6 +92,12 @@ namespace execHelper { namespace plugins { namespace test {
                 static const string newWorkingDir("{" + compilerUtil.compiler.getKey() + "}/{" + targetUtil.target.getKey() + "}");
                 rootSettings.add(combineVectors(baseSettingsKeys, {WORKING_DIR_KEY}), {newWorkingDir});
                 expectedTask.setWorkingDirectory(newWorkingDir);
+            }
+
+            COMBINATIONS("Set the working directory to the current directory") {
+                rootSettings.clear(combineVectors(baseSettingsKeys, {WORKING_DIR_KEY}));
+                rootSettings.add(combineVectors(baseSettingsKeys, {WORKING_DIR_KEY}), {CURRENT_DIR_WORKING_DIR_KEY});
+                expectedTask.setWorkingDirectory(current_path());
             }
 
             ExecutorStub::TaskQueue expectedTasks;

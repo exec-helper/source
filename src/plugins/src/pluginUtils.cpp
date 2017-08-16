@@ -4,6 +4,8 @@
 #include <utility>
 #include <vector>
 
+#include <boost/filesystem.hpp>
+
 #include "config/settingsNode.h"
 #include "core/patterns.h"
 #include "log/log.h"
@@ -21,6 +23,8 @@ using std::map;
 using std::pair;
 using std::string;
 using std::vector;
+
+using boost::filesystem::current_path;
 
 using execHelper::config::Path;
 using execHelper::config::SettingsNode;
@@ -130,11 +134,15 @@ namespace execHelper { namespace plugins {
     }
 
     boost::optional<Path> getWorkingDir(const Command& command, const SettingsNode& rootSettings) noexcept {
-        boost::optional<string> path = ConfigValue<string>::getSetting(getWorkingDirKey(), rootSettings, {{command}, {}});
-        if(! path) {
+        boost::optional<string> pathOpt = ConfigValue<string>::getSetting(getWorkingDirKey(), rootSettings, {{command}, {}});
+        if(! pathOpt) {
             return boost::none;
         }
-        return Path(path.get());
+        auto& path = pathOpt.get();
+        if(path == "<working-dir>") {
+            return current_path();
+        }
+        return Path(path);
     }
 
     boost::optional<string> getConfigurationSetting(const string& command, const SettingsNode& rootSettings, const string& configKey, const string& prepend) noexcept {
