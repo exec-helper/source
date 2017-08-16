@@ -163,6 +163,8 @@ clang-static-analyzer:
     script:
         - pacman -S --noconfirm --needed clang cmake make pkg-config
         - *install_exec_helper
+        # Ugly hack for circumventing issues with the (unused) scan-build c compiler.
+        - echo "SET(CMAKE_C_COMPILER  clang)" >> toolchain.cmake.in
         - exec-helper analyze --analyze clang-static-analyzer --mode debug --compiler ''
 
 undefined-behaviour:
