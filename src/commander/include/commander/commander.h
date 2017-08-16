@@ -55,7 +55,7 @@ namespace execHelper {
                 bool executePlugin(const std::string& pluginName, const std::string& command, const core::Options& options) noexcept;
 
                 const core::Options& m_options;
-                const config::Path& m_workingDirectory;
+                const config::Path m_workingDirectory;
                 const core::EnvironmentCollection m_env;
         };
     }
