@@ -28,7 +28,7 @@ namespace execHelper {
                 /**
                  * Creates a commander
                  *
-                 * \param options   The command line options
+                 * \param options   The command line options. ! Note: the passed options must exist until all associated commander objects are destroyed.
                  * \param workingDirectory   The working directory for the commander
                  * \param env       The environment to apply the plugins in
                  */
