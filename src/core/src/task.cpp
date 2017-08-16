@@ -32,9 +32,9 @@ namespace {
 
 namespace execHelper { namespace core {
 
-    Task::Task(const initializer_list<string>& subtasks, const Path& workingDirectory) noexcept :
+    Task::Task(const initializer_list<string>& subtasks, Path workingDirectory) noexcept :
         m_task(subtasks),
-        m_workingDirectory(workingDirectory)
+        m_workingDirectory(move(workingDirectory))
     {
         ;
     }

@@ -94,36 +94,27 @@ namespace execHelper { namespace commander { namespace test {
             options.m_commands = commands;
 
             MemoryHandler memory;
+            EnvironmentCollection environment;
 
             WHEN("We define an empty environment and run the commander") {
-                const EnvironmentCollection environment;
-                EnvironmentCollection commanderEnvironment = environment;
-                Commander commander(options, current_path(), std::move(commanderEnvironment));
-                bool returnCode = commander.run();
-
-                THEN("It must succeed") {
-                    REQUIRE(returnCode);
-                }
-
-                THEN("We must find the same environment") {
-                    const Memory::Memories& memories = memory.getExecutions();
-                    REQUIRE(memories.size() == 1U);
-                    REQUIRE(memories[0].command == command1);
-                    REQUIRE(memories[0].task.getEnvironment() == environment);
-                }
+                ;
             }
 
             WHEN("We define an environment and run the commander") {
-                const EnvironmentCollection environment = {{"VAR1", "value1"}, {"VAR2", "value2"}};
+                environment.emplace("VAR1", "value1");
+                environment.emplace("VAR2", "value2");
+            }
+
+            THEN_WHEN("We run the commander") {
                 EnvironmentCollection commanderEnvironment = environment;
                 Commander commander(options, current_path(), std::move(commanderEnvironment));
                 bool returnCode = commander.run();
 
-                THEN("It must succeed") {
+                THEN_CHECK("It must succeed") {
                     REQUIRE(returnCode);
                 }
 
-                THEN("We must find the same environment") {
+                THEN_CHECK("We must find the same environment") {
                     const Memory::Memories& memories = memory.getExecutions();
                     REQUIRE(memories.size() == 1U);
                     REQUIRE(memories[0].command == command1);

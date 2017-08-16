@@ -26,7 +26,7 @@ namespace execHelper {
                  * \param subtasks  The task subdivided in separate arguments
                  * \param workingDirectory  The working directory for the task
                  */
-                Task(const std::initializer_list<std::string>& subtasks = {}, const config::Path& workingDirectory = boost::filesystem::current_path()) noexcept;
+                Task(const std::initializer_list<std::string>& subtasks = {}, config::Path workingDirectory = boost::filesystem::current_path()) noexcept;
 
                 /**
                  * Returns the task
