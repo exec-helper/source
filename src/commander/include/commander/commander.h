@@ -29,7 +29,7 @@ namespace execHelper {
                  * Creates a commander
                  *
                  * \param options   The command line options
-                 * \param options   The working directory for the commander
+                 * \param workingDirectory   The working directory for the commander
                  * \param env       The environment to apply the plugins in
                  */
                 Commander(const core::Options& options, config::Path workingDirectory, core::EnvironmentCollection&& env = core::EnvironmentCollection());

@@ -93,7 +93,7 @@ namespace execHelper {
                  */
                 bool setEnvironment(const EnvironmentCollection& env) noexcept;
 
-                /*! @copydoc(const EnvirontmentCollection&)
+                /*! @copydoc setEnvironment(const EnvironmentCollection&)
                  */
                 bool setEnvironment(EnvironmentCollection&& env) noexcept;
 
