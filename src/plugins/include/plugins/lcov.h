@@ -9,7 +9,7 @@ namespace execHelper {
     namespace plugins {
         class Lcov : public Plugin {
             public:
-                virtual bool apply(const core::Command& command, core::Task& task, const core::Options& options) const noexcept override;
+                bool apply(const core::Command& command, core::Task task, const core::Options& options) const noexcept override;
             private:
                 static bool generateGenHtmlTask(const core::Command& command, const config::SettingsNode& rootSettings, const std::string& infoFile, core::Task& task) noexcept;
                 static bool generateZeroCountersTask(const core::Command& command, const config::SettingsNode& rootSettings, const std::string& baseDirectory, const std::string& directory, const core::TaskCollection& commandLine, core::Task& task) noexcept;

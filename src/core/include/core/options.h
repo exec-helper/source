@@ -1,15 +1,15 @@
 #ifndef __OPTIONS_H__
 #define __OPTIONS_H__
 
-#include <string>
-#include <vector>
 #include <map>
 #include <memory>
+#include <string>
+#include <vector>
 
 #include "config/path.h"
 
-#include "pattern.h"
 #include "mapPermutator.h"
+#include "pattern.h"
 
 namespace execHelper {
     namespace core {
@@ -24,18 +24,18 @@ namespace execHelper {
 
 namespace execHelper {
     namespace core {
-        typedef std::string Command;
-        typedef std::vector<Command> CommandCollection;
+        using Command = std::string;
+        using CommandCollection = std::vector<Command>;
 
-        typedef std::map<PatternKey, PatternValue> PatternCombinations;
-        typedef MapPermutator<PatternKey, PatternValue> PatternPermutator;
+        using PatternCombinations = std::map<PatternKey, PatternValue>;
+        using PatternPermutator = MapPermutator<PatternKey, PatternValue>;
 
         /**
          * \brief Interface for classes that interpret command line options
          */
         class Options {
             public:
-                virtual ~Options() {};
+                virtual ~Options() = default;
 
                 /**
                  * Parses the given options
@@ -159,7 +159,7 @@ namespace execHelper {
                  *
                  * \param executor     The executor to set. The caller stays the owner of the executor and should not remove it while it is set for this option object
                  */
-                virtual void setExecutor(ExecutorInterface* const executor) noexcept = 0;
+                virtual void setExecutor(ExecutorInterface* executor) noexcept = 0;
 
                 /**
                  * Gets the executor
@@ -169,7 +169,13 @@ namespace execHelper {
                 virtual ExecutorInterface* getExecutor() const noexcept = 0;
 
             protected:
-                Options() {}
+                Options() = default;
+                Options(const Options& other) = default;
+                Options(Options&& other) noexcept = default;
+
+                Options& operator=(const Options& other) = default;
+                Options& operator=(Options&& other) noexcept = default;
+
         };
     }
 }

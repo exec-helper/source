@@ -12,6 +12,14 @@ namespace execHelper {
          */
         class ConfigInputFile {
             public:
+                ConfigInputFile(const ConfigInputFile& other) = delete;
+                ConfigInputFile(ConfigInputFile&& other) noexcept = delete;
+
+                virtual ~ConfigInputFile() = default;
+
+                ConfigInputFile& operator=(const ConfigInputFile& other) = delete;
+                ConfigInputFile& operator=(ConfigInputFile&& other) noexcept = delete;
+
                 /**
                  * Returns the settings under the node defined by keys
                  *
@@ -20,10 +28,10 @@ namespace execHelper {
                  * \return  True    If the settings node was successfully filled
                  *          False   Otherwise
                  */
-                virtual bool getTree(const std::initializer_list<std::string>& keys, SettingsNode& settings) const noexcept = 0;
+                virtual bool getTree(const std::initializer_list<std::string>& keys, SettingsNode* settings) const noexcept = 0;
 
             protected:
-                ConfigInputFile() {}
+                ConfigInputFile() = default;
         };
     }
 }

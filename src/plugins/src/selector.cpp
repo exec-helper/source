@@ -18,7 +18,7 @@ using execHelper::core::PatternValues;
 using execHelper::core::TaskCollection;
 
 namespace execHelper { namespace plugins {
-    bool Selector::apply(const core::Command& command, core::Task& task, const core::Options& options) const noexcept {
+    bool Selector::apply(const core::Command& command, core::Task task, const core::Options& options) const noexcept {
         static const string selectorKey("selector");
         if(! options.getSettings().contains(selectorKey)) {
             return false;

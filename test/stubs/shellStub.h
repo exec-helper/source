@@ -11,21 +11,20 @@ namespace execHelper { namespace core { namespace test {
 
     class ShellStub : public Shell {
         public:
-            typedef std::vector<Task> TaskQueue;
+            using TaskQueue = std::vector<Task>;
 
-            ShellStub(ShellReturnCode returnCode = RETURN_CODE_SUCCESS) :
-                Shell(),
+            explicit ShellStub(ShellReturnCode returnCode = RETURN_CODE_SUCCESS) :
                 m_returnCode(returnCode)
             {
                 ;
             }
 
-            virtual ShellReturnCode execute(const Task& task) noexcept {
+            ShellReturnCode execute(const Task& task) noexcept override {
                 m_executedTasks.push_back(task);
                 return m_returnCode;
             }
 
-            virtual bool isExecutedSuccessfully(ShellReturnCode returnCode) const noexcept {
+            bool isExecutedSuccessfully(ShellReturnCode returnCode) const noexcept override {
                 return returnCode == RETURN_CODE_SUCCESS;
             }
 

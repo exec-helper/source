@@ -10,18 +10,22 @@ namespace execHelper {
     namespace core {
         class Argv {
             public:
-                Argv(const TaskCollection& task) noexcept;
+                explicit Argv(const TaskCollection& task) noexcept;
                 Argv(const Argv& other) noexcept;
+                Argv(Argv&& other) noexcept;
                 ~Argv() noexcept;
 
                 Argv& operator=(const Argv& other) noexcept;
+                Argv& operator=(Argv&& other) noexcept;
                 char* operator[](size_t index) const noexcept;
+
+                void swap(Argv& other)  noexcept;
 
                 size_t getArgc() const noexcept;
                 char** getArgv() noexcept;
 
             private:
-                typedef std::vector<char*> Argv_t;
+                using Argv_t = std::vector<char*>;
 
                 void deepCopy(const Argv& other) noexcept;
 

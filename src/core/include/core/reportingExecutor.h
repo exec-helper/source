@@ -19,7 +19,7 @@ namespace execHelper {
             public:
                 ReportingExecutor() noexcept;
 
-                virtual bool execute(const Task& task) noexcept override;
+                bool execute(const Task& task) noexcept override;
         };
     }
 }

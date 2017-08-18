@@ -296,20 +296,30 @@ clang-tidy:
                     - "*"
                     - -google-readability-namespace-comments
                     - -llvm-namespace-comment
+                    - -llvm-header-guard
                     - -cppcoreguidelines-pro-bounds-pointer-arithmetic
                     - -clang-analyzer-alpha.deadcode.UnreachableCode
                     - -clang-analyzer-alpha.core.CastToStruct
                     - -modernize-make-unique
                     - -readability-redundant-declaration        # Static member variable definitions give false positives when enabled
+                    - -misc-macro-parentheses                   # Remove once switched to a decent logging library
+                    - -google-runtime-references
+                    - -misc-noexcept-move-constructor           # Due to bug in clang-tidy not realizing that default move constructors are already marked noexcept
             test/{MODULE}/src/*.cpp:
                 checks:
                     - "*"
                     - -google-readability-namespace-comments
                     - -llvm-namespace-comment
+                    - -llvm-header-guard
                     - -clang-analyzer-alpha.deadcode.UnreachableCode
                     - -performance-unnecessary-copy-initialization
                     - -modernize-loop-convert
                     - -google-readability-function-size
                     - -readability-function-size
                     - -cert-err58-cpp
+                    - -misc-macro-parentheses                   # Remove once switched to a decent logging library
+                    - -google-runtime-references
+                    - -misc-noexcept-move-constructor           # Due to bug in clang-tidy not realizing that default move constructors are already marked noexcept
         warnings-as-errors: all
+        command-line:
+            - -header-filter=.*

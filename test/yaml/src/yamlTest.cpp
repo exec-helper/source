@@ -104,7 +104,7 @@ namespace execHelper { namespace yaml { namespace test {
 
                 THEN("We should find them all in the subtree") {
                     SettingsNode settings(correctSettings.key());
-                    yaml.getTree({}, settings);
+                    yaml.getTree({}, &settings);
                     REQUIRE(settings.key() == correctSettings.key());
                     REQUIRE(settings["commands"].values() == correctCommands);
                     REQUIRE(settings["init"].values() == correctInit);
@@ -148,7 +148,7 @@ namespace execHelper { namespace yaml { namespace test {
                 Yaml yaml(yamlConfig);
                 SettingsNode settings(rootKey);
 
-                bool returnCode = yaml.getTree({rootKey}, settings);
+                bool returnCode = yaml.getTree({rootKey}, &settings);
 
                 THEN("It should succeed") {
                     REQUIRE(returnCode);
@@ -173,7 +173,7 @@ namespace execHelper { namespace yaml { namespace test {
                 Yaml yaml(yamlConfig);
                 SettingsNode settings(rootKey);
 
-                bool returnCode = yaml.getTree({rootKey}, settings);
+                bool returnCode = yaml.getTree({rootKey}, &settings);
 
                 THEN("It should succeed") {
                     REQUIRE(returnCode);
@@ -192,27 +192,23 @@ namespace execHelper { namespace yaml { namespace test {
         GIVEN("A configuration file that does not exist") {
             YamlFile file;
             file.file = "non-existing-file.exec-helper";
+            const string expectedErrorMessage("bad file");
 
             WHEN("We pass it to yaml") {
-                Yaml yaml(file);
+                try {
+                    Yaml yaml(file);
 
-                THEN("We should not be able to get any value") {
-                    REQUIRE(yaml.getValue({"commands"}).empty());
-                    REQUIRE(yaml.getValue({"commands", "some-command"}).empty());
-                }
-                THEN("We should not be able to get any value collection") {
-                    REQUIRE(yaml.getValueCollection({"commands"}).empty());
-                    REQUIRE(yaml.getValueCollection({"commands", "some-command"}).empty());
-                }
-                THEN("We should not be able to get a tree and should give the strong exception guarantee") {
-                    string settingsKey("blaat");
-                    SettingsNode settings(settingsKey);
-                    REQUIRE_FALSE(yaml.getTree({"commands"}, settings));
-                    REQUIRE_FALSE(yaml.getTree({"commands", "some-command"}, settings));
-
-                    // Check the strong exception guarantee
-                    REQUIRE(settings.key() == settingsKey);
-                    REQUIRE(settings.values().empty());
+                    THEN("We should not get here") {
+                        REQUIRE(false);
+                    }
+                } catch(const YAML::BadFile& e) {
+                    THEN("We should get the right error message") {
+                        REQUIRE(e.what() == expectedErrorMessage);
+                    }
+                } catch(const std::exception&) {
+                    THEN("We should not get here") {
+                        REQUIRE(false);    
+                    }
                 }
             }
         }
@@ -238,8 +234,8 @@ namespace execHelper { namespace yaml { namespace test {
                 THEN("We should not be able to get a tree and should give the strong exception guarantee") {
                     string settingsKey("blaat");
                     SettingsNode settings(settingsKey);
-                    REQUIRE_FALSE(yaml.getTree({"commands"}, settings));
-                    REQUIRE_FALSE(yaml.getTree({"commands", "command1"}, settings));
+                    REQUIRE_FALSE(yaml.getTree({"commands"}, &settings));
+                    REQUIRE_FALSE(yaml.getTree({"commands", "command1"}, &settings));
 
                     // Check the strong exception guarantee
                     REQUIRE(settings.key() == settingsKey);
@@ -275,8 +271,8 @@ namespace execHelper { namespace yaml { namespace test {
                     string settingsKey("some-key");
                     SettingsNode settings(settingsKey);
 
-                    REQUIRE_FALSE(yaml.getTree({"invalid-key"}, settings));
-                    REQUIRE_FALSE(yaml.getTree({"invalid-key", "invalid-subkey"}, settings));
+                    REQUIRE_FALSE(yaml.getTree({"invalid-key"}, &settings));
+                    REQUIRE_FALSE(yaml.getTree({"invalid-key", "invalid-subkey"}, &settings));
 
                     REQUIRE(settings.key() == settingsKey);
                     REQUIRE(settings.values().empty());

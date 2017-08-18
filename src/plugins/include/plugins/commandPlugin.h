@@ -7,7 +7,7 @@ namespace execHelper {
     namespace plugins {
         class CommandPlugin : public Plugin {
             public:
-                virtual bool apply(const core::Command& command, core::Task& task, const core::Options& options) const noexcept override;
+                bool apply(const core::Command& command, core::Task task, const core::Options& options) const noexcept override;
         };
     }
 }

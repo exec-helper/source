@@ -9,8 +9,8 @@
 namespace execHelper { namespace core { namespace test {
     class ExecutorStub : public ExecutorInterface {
         public:
-            typedef std::vector<Task> TaskQueue;
-            virtual bool execute(const Task& task) noexcept {
+            using TaskQueue = std::vector<Task>;
+            bool execute(const Task& task) noexcept override {
                 m_executedTasks.push_back(task);
                 return true;
             }

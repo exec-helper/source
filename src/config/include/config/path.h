@@ -5,8 +5,8 @@
 
 namespace execHelper {
     namespace config {
-        typedef boost::filesystem::path Path;
-        typedef std::vector<Path> Paths;
+        using Path = boost::filesystem::path;
+        using Paths = std::vector<Path>;
     } // config
 } // execHelper
 

@@ -1,7 +1,7 @@
 #ifndef __POSIX_SHELL_H__
 #define __POSIX_SHELL_H__
 
-#include <signal.h>
+#include <csignal>
 
 #include "shell.h"
 #include "task.h"
@@ -13,8 +13,8 @@ namespace execHelper {
          */
         class PosixShell : public Shell {
             public:
-                virtual ShellReturnCode execute(const Task& task) noexcept;
-                virtual bool isExecutedSuccessfully(ShellReturnCode returnCode) const noexcept;
+                ShellReturnCode execute(const Task& task) noexcept override;
+                bool isExecutedSuccessfully(ShellReturnCode returnCode) const noexcept override;
 
             private:
                 void childProcessExecute(const Task& task) const noexcept;

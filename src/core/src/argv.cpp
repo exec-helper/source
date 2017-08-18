@@ -19,6 +19,10 @@ namespace execHelper { namespace core {
         deepCopy(other);
     }
 
+    Argv::Argv(Argv&& other) noexcept {
+        swap(other);
+    }
+
     Argv::~Argv() noexcept {
         for(char* arg : m_argv) {
             delete[] arg;
@@ -40,11 +44,20 @@ namespace execHelper { namespace core {
         return *this;
     }
 
+    Argv& Argv::operator=(Argv&& other) noexcept {
+        swap(other);
+        return *this;
+    }
+
     char* Argv::operator[](size_t index) const noexcept {
         if(index >= m_argv.size()) {
             return nullptr; 
         }
         return m_argv[index];
+    }
+
+    void Argv::swap(Argv& other) noexcept {
+        m_argv.swap(other.m_argv);
     }
 
     size_t Argv::getArgc() const noexcept {

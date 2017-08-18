@@ -6,10 +6,10 @@
 
 namespace execHelper {
     namespace core {
-        typedef std::string PatternKey;
-        typedef std::string PatternValue;
-        typedef std::vector<PatternKey> PatternKeys;
-        typedef std::vector<PatternValue> PatternValues;
+        using PatternKey = std::string;
+        using PatternValue = std::string;
+        using PatternKeys = std::vector<PatternKey>;
+        using PatternValues = std::vector<PatternValue>;
 
         class Pattern {
             public:

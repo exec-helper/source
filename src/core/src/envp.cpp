@@ -26,6 +26,10 @@ namespace execHelper {
             deepCopy(other);
         }
 
+        Envp::Envp(Envp&& other) noexcept {
+            swap(other);
+        }
+
         Envp::~Envp() noexcept {
             for(char* arg : m_envp) {
                 delete[] arg;
@@ -36,6 +40,15 @@ namespace execHelper {
             m_envp.reserve(other.m_envp.size());
             deepCopy(other);
             return *this;
+        }
+
+        Envp& Envp::operator=(Envp&& other) noexcept {
+            swap(other);
+            return *this;
+        }
+
+        void Envp::swap(Envp& other) noexcept {
+            m_envp.swap(other.m_envp);
         }
 
         char** Envp::getEnvp() noexcept {

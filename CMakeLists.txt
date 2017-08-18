@@ -25,21 +25,20 @@ if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" MATCH
 endif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
 
 option(LIMITED_OPTIMIZATION "Use only limited optimization. This is mostly interesting for certain analysis tools." OFF)
-
 if(LIMITED_OPTIMIZATION)
-if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
-    add_definitions(-O1)
-endif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
+    if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
+        add_definitions(-O1)
+    endif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
 endif(LIMITED_OPTIMIZATION)
-
-set(BIN_DIRECTORY ${CMAKE_INSTALL_BINDIR})
-set(LIB_DIRECTORY ${CMAKE_INSTALL_LIBDIR})
 
 option(TERMINATE_ON_ASSERT_FAILURE "Terminate on assertion failure" OFF)
 MESSAGE(STATUS "Terminate on assert failure: " ${TERMINATE_ON_ASSERT_FAILURE})
 if(${TERMINATE_ON_ASSERT_FAILURE})
     add_definitions(-DTERMINATE_ON_ASSERT_FAILURE)
 endif()
+
+set(BIN_DIRECTORY ${CMAKE_INSTALL_BINDIR})
+set(LIB_DIRECTORY ${CMAKE_INSTALL_LIBDIR})
 
 add_subdirectory(3rdparty)
 add_subdirectory(src)

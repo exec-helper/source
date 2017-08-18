@@ -53,8 +53,8 @@ namespace execHelper { namespace plugins { namespace test {
             OptionsStub options;
 
             SettingsNode& rootSettings = options.m_settings;
-            addSettings(rootSettings, PLUGIN_CONFIG_KEY, command);
-            addSettings(rootSettings, command, "memory");
+            addSettings(&rootSettings, PLUGIN_CONFIG_KEY, command);
+            addSettings(&rootSettings, command, "memory");
 
             MemoryHandler memory;
 
@@ -78,8 +78,8 @@ namespace execHelper { namespace plugins { namespace test {
             }
 
             WHEN("We add the command multiple times") {
-                addSettings(rootSettings, PLUGIN_CONFIG_KEY, command);
-                addSettings(rootSettings, PLUGIN_CONFIG_KEY, command);
+                addSettings(&rootSettings, PLUGIN_CONFIG_KEY, command);
+                addSettings(&rootSettings, PLUGIN_CONFIG_KEY, command);
 
                 bool return_code = plugin.apply(command, task, options);
 

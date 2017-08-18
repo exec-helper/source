@@ -17,7 +17,7 @@ namespace execHelper {
     namespace plugins {
         class Make : public BuildPlugin {
             public:
-                virtual bool apply(const core::Command& command, core::Task& task, const core::Options& options) const noexcept override;
+                bool apply(const core::Command& command, core::Task task, const core::Options& options) const noexcept override;
         };
     }
 }

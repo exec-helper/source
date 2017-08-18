@@ -4,10 +4,10 @@
 #include <tuple>
 #include <vector>
 
-#include "plugin.h"
-
-#include "core/task.h"
 #include "core/options.h"
+#include "core/task.h"
+
+#include "plugin.h"
 
 namespace execHelper {
     namespace plugins {
@@ -17,10 +17,10 @@ namespace execHelper {
             const core::Task task;
             const core::Options* const options;
 
-            Memory_t(const core::Command& aCommand, const core::Task* const aTaskAddress, const core::Task& aTask, const core::Options* const aOptions) :
-              command(aCommand),
+            Memory_t(core::Command aCommand, const core::Task* const aTaskAddress, core::Task aTask, const core::Options* const aOptions) :
+              command(std::move(aCommand)),
               taskAddress(aTaskAddress),
-              task(aTask),
+              task(std::move(aTask)),
               options(aOptions)
           {
             ;
@@ -29,9 +29,17 @@ namespace execHelper {
 
         class Memory : public Plugin {
             public:
-                typedef std::vector<Memory_t> Memories;
+                using Memories = std::vector<Memory_t>;
 
-                virtual bool apply(const core::Command& command, core::Task& task, const core::Options& options) const noexcept override;
+                Memory() = default;
+                Memory(const Memory& other) = delete;
+                Memory(Memory&& other) noexcept = delete;
+                ~Memory() override = default;
+
+                Memory& operator=(const Memory& other) = delete;
+                Memory& operator=(Memory&& other) noexcept = delete;
+
+                bool apply(const core::Command& command, core::Task task, const core::Options& options) const noexcept override;
             protected:
                 static const Memories& getExecutions() noexcept;
                 static void reset() noexcept;
@@ -44,10 +52,15 @@ namespace execHelper {
 
         class MemoryHandler : public Memory {
             public:
-                typedef Memory::Memories Memories;
+                using Memories = Memory::Memories;
 
                 MemoryHandler();
-                ~MemoryHandler();
+                MemoryHandler(const MemoryHandler& other) = delete;
+                MemoryHandler(MemoryHandler&& other) noexcept = delete;
+                ~MemoryHandler() override;
+
+                MemoryHandler& operator=(const MemoryHandler& other) = delete;
+                MemoryHandler& operator=(MemoryHandler&& other) noexcept = delete;
 
                 const Memories& getExecutions() const noexcept;
                 void reset() noexcept;

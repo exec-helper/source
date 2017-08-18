@@ -11,9 +11,9 @@
 
 namespace execHelper {
     namespace core {
-        typedef std::vector<std::string> TaskCollection;
-        typedef std::map<std::string, std::string> EnvironmentCollection;
-        typedef std::pair<std::string, std::string> EnvironmentValue;
+        using TaskCollection = std::vector<std::string>;
+        using EnvironmentCollection = std::map<std::string, std::string>;
+        using EnvironmentValue = std::pair<std::string, std::string>;
 
         /**
          * \brief Represents a task to execute

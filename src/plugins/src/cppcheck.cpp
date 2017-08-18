@@ -24,7 +24,7 @@ using execHelper::core::PatternCombinations;
 using execHelper::config::SettingsNode;
 
 namespace execHelper { namespace plugins {
-    bool Cppcheck::apply(const Command& command, Task& task, const Options& options) const noexcept {
+    bool Cppcheck::apply(const Command& command, Task task, const Options& options) const noexcept {
         static const string cppcheckCommand("cppcheck");
         static const string cppcheckKey("cppcheck");
         const SettingsNode& rootSettings = options.getSettings(cppcheckKey);  

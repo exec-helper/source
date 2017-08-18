@@ -24,7 +24,7 @@ namespace execHelper {
         class Modifier {
             ColorCode code;
         public:
-            Modifier(ColorCode cCode) : code(cCode) {}
+            explicit Modifier(ColorCode cCode) noexcept : code(cCode) {}
             friend std::ostream&
             operator<<(std::ostream& os, const Modifier& mod) {
                 return os << "\033[" << mod.code << "m";

@@ -20,7 +20,7 @@ using execHelper::core::Command;
 using execHelper::config::SettingsNode;
 
 namespace execHelper { namespace plugins {
-    bool ClangStaticAnalyzer::apply(const Command& command, Task& task, const Options& options) const noexcept {
+    bool ClangStaticAnalyzer::apply(const Command& command, Task task, const Options& options) const noexcept {
         static const string clangStaticAnalyzerCommand("scan-build");
         static const string clangStaticAnalyzerKey("clang-static-analyzer");
 

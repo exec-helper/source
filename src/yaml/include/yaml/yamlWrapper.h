@@ -1,11 +1,11 @@
 #ifndef __YAML_WRAPPER_H__
 #define __YAML_WRAPPER_H__
 
-#include <string>
 #include <iostream>
+#include <string>
 
-#include <yaml-cpp/yaml.h>
 #include <yaml-cpp/node/node.h>
+#include <yaml-cpp/yaml.h>
 
 #include "config/settingsNode.h"
 
@@ -18,8 +18,18 @@ namespace execHelper {
 
         class YamlWrapper {
             public:
-                YamlWrapper(const YamlWrapperFile& file);
-                YamlWrapper(const std::string& yamlConfig);
+                // May throw YAML::BadFile exception
+                explicit YamlWrapper(const YamlWrapperFile& file);
+                explicit YamlWrapper(const std::string& yamlConfig);
+
+                YamlWrapper(const YamlWrapper& other);
+                YamlWrapper(YamlWrapper&& other) noexcept;
+                ~YamlWrapper() = default;
+
+                YamlWrapper& operator=(const YamlWrapper& other);
+                YamlWrapper& operator=(YamlWrapper&& other) noexcept;
+
+                void swap(const YamlWrapper& other) noexcept;
 
                 template<typename T>
                 T get(const std::initializer_list<std::string>& keys) const {
@@ -33,13 +43,13 @@ namespace execHelper {
                 YAML::Node getSubNode(const std::initializer_list<std::string>& keys) const;
 
                 // Convenience wrapper for parsing the whole tree
-                bool getTree(const std::initializer_list<std::string>& keys, config::SettingsNode& settings) const noexcept;
-                static bool getTree(const YAML::Node& rootNode, config::SettingsNode& settings) noexcept;
+                bool getTree(const std::initializer_list<std::string>& keys, config::SettingsNode* settings) const noexcept;
+                static bool getTree(const YAML::Node& rootNode, config::SettingsNode* settings) noexcept;
 
             private:
-                static void getSubTree(const YAML::Node& node, config::SettingsNode& yamlNode, const config::SettingsNode::SettingsKeys& keys) noexcept;
+                static void getSubTree(const YAML::Node& node, config::SettingsNode* yamlNode, const config::SettingsNode::SettingsKeys& keys) noexcept;
 
-                const YAML::Node m_node;
+                YAML::Node m_node;
         };
     }
 }

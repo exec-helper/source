@@ -22,19 +22,19 @@ namespace execHelper {
             template<typename T, bool isCollection>
             class ConfigValueImpl {
                 public:
-                    static boost::optional<T> getValue(config::SettingsNode::SettingsValues& collection) noexcept {
-                        return collection;
+                    static boost::optional<T> getValue(config::SettingsNode::SettingsValues* collection) noexcept {
+                        return *collection;
                     }
             };
 
             template<typename T>
             class ConfigValueImpl<T, false> {
                 public:
-                    static boost::optional<T> getValue(config::SettingsNode::SettingsValues& collection) noexcept {
-                        if(collection.empty()) {
+                    static boost::optional<T> getValue(config::SettingsNode::SettingsValues* collection) noexcept {
+                        if(collection->empty()) {
                             return boost::none;
                         }
-                        return collection.back();
+                        return collection->back();
                     }
             };
         }
@@ -45,7 +45,7 @@ namespace execHelper {
         template<typename T>
         class ConfigValue {
             public:
-                typedef std::initializer_list<std::vector<std::string>> OrderedConfigKeys;
+                using OrderedConfigKeys = std::initializer_list<std::vector<std::string>>;
 
                 /**
                  * Returns the setting for the given key in the given settings node by searching in order on the given paths.
@@ -63,7 +63,7 @@ namespace execHelper {
                         keys.push_back(key);
                         boost::optional<config::SettingsNode::SettingsValues> values = rootSettings.get(keys);
                         if(values != boost::none) {
-                            return detail::ConfigValueImpl<T, isContainer<T>::value>::getValue(values.get());
+                            return detail::ConfigValueImpl<T, isContainer<T>::value>::getValue(&values.get());
                         }
                     }
                     return boost::none;
@@ -118,7 +118,7 @@ namespace execHelper {
         template<>
         class ConfigValue<const config::SettingsNode&> {
             public:
-                typedef std::initializer_list<std::vector<std::string>> OrderedConfigKeys;
+                using OrderedConfigKeys = std::initializer_list<std::vector<std::string>>;
 
                 static boost::optional<const config::SettingsNode&> getSetting(const std::string& key, const config::SettingsNode& rootSettings, const OrderedConfigKeys& orderedConfigKeys) noexcept {
                     for(const auto& configKeys : orderedConfigKeys) {

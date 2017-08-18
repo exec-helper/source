@@ -14,18 +14,18 @@ namespace execHelper {
          */
         class SettingsNode {
             public:
-                typedef std::string SettingsKey; //!< The settings key type
-                typedef std::vector<SettingsKey> SettingsKeys; //!< A SettingsKey collection
+                using SettingsKey = std::string; //!< The settings key type
+                using SettingsKeys = std::vector<SettingsKey>; //!< A SettingsKey collection
 
-                typedef SettingsKey SettingsValue; //!< The settings value type
-                typedef std::vector<SettingsValue> SettingsValues; //!< A SettingsValue collection
+                using SettingsValue = SettingsKey; //!< The settings value type
+                using SettingsValues = std::vector<SettingsValue>; //!< A SettingsValue collection
 
                 /**
                  * Create a new node with the given key
                  *
                  * \param key   The key to associate with the root of the node
                  */ 
-                SettingsNode(SettingsKey key) noexcept;
+                explicit SettingsNode(SettingsKey key) noexcept;
 
                 /**
                  * Create a new node by making a deep copy of the given other node
@@ -50,6 +50,10 @@ namespace execHelper {
                  * \returns A reference to this
                  */
                 SettingsNode& operator=(const SettingsNode& other) noexcept;
+
+                /*! @copydoc operator=(const SettingsNode&)
+                 */
+                SettingsNode& operator=(SettingsNode&& other) noexcept;
 
                 /**
                  * Returns whether the given node equals this node
@@ -196,8 +200,15 @@ namespace execHelper {
                  */
                 bool clear(const SettingsKeys& keys) noexcept;
 
+                /**
+                 * Swap the other element with this one
+                 *
+                 * @param other The element to swap with
+                 */
+                void swap(SettingsNode& other) noexcept;
+
             private:
-                typedef std::vector<SettingsNode> SettingsNodeCollection; //!< A collection of nodes
+                using SettingsNodeCollection = std::vector<SettingsNode>; //!< A collection of nodes
 
                 /**
                  * Make a deep copy of the content of other to this node

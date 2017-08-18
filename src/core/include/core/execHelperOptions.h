@@ -3,7 +3,6 @@
 
 #include <string>
 #include <vector>
-#include <memory>
 
 #include <boost/program_options.hpp>
 
@@ -25,45 +24,52 @@ namespace execHelper {
         class ExecHelperOptions : public Options {
             public:
                 ExecHelperOptions() noexcept;
-                ExecHelperOptions(const ExecHelperOptions& other) noexcept;
+                ExecHelperOptions(const ExecHelperOptions& other) = delete;
+                ExecHelperOptions(ExecHelperOptions&& other) noexcept = delete;
+                ~ExecHelperOptions() override = default;
+
+                ExecHelperOptions& operator=(const ExecHelperOptions& other) = delete;
+                ExecHelperOptions& operator=(ExecHelperOptions&& other) = delete;
 
                 bool operator==(const ExecHelperOptions& other) const noexcept;
                 bool operator!=(const ExecHelperOptions& other) const noexcept;
 
-                std::string getSettingsFile(int argc, const char* const * argv) const noexcept;
-                virtual bool parse(int argc, const char* const * argv) override;
-                virtual bool parseSettingsFile(const config::Path& file) noexcept override;
+                void swap(ExecHelperOptions& other) noexcept;
 
-                virtual bool getVerbosity() const noexcept override;
-                virtual bool getDryRun() const noexcept override;
-                virtual bool getSingleThreaded() const noexcept override;
-                virtual const CommandCollection& getCommands() const noexcept override;
-                virtual const config::SettingsNode& getSettings() const noexcept override;
-                virtual const config::SettingsNode& getSettings(const std::string& key) noexcept override;
-                virtual const config::SettingsNode& getSettings(const std::string& key) const noexcept override;
-                virtual bool containsHelp() const noexcept override;
-                virtual bool contains(const std::string& longOptions) const noexcept override;
-                virtual std::vector<std::string> getLongOption(const std::string& longOptions) const noexcept override;
-                virtual const PatternsHandler& getPatternsHandler() const noexcept override;
-                virtual PatternValues getValues(const Pattern& pattern) const noexcept override;
-                virtual PatternPermutator makePatternPermutator(const PatternKeys& patterns) const noexcept override;
+                std::string getSettingsFile(int argc, const char* const * argv) const noexcept;
+                bool parse(int argc, const char* const * argv) override;
+                bool parseSettingsFile(const config::Path& file) noexcept override;
+
+                bool getVerbosity() const noexcept override;
+                bool getDryRun() const noexcept override;
+                bool getSingleThreaded() const noexcept override;
+                const CommandCollection& getCommands() const noexcept override;
+                const config::SettingsNode& getSettings() const noexcept override;
+                const config::SettingsNode& getSettings(const std::string& key) noexcept override;
+                const config::SettingsNode& getSettings(const std::string& key) const noexcept override;
+                bool containsHelp() const noexcept override;
+                bool contains(const std::string& longOptions) const noexcept override;
+                std::vector<std::string> getLongOption(const std::string& longOptions) const noexcept override;
+                const PatternsHandler& getPatternsHandler() const noexcept override;
+                PatternValues getValues(const Pattern& pattern) const noexcept override;
+                PatternPermutator makePatternPermutator(const PatternKeys& patterns) const noexcept override;
 
                 void printHelp() const noexcept;
 
-                virtual void setExecutor(ExecutorInterface* const executor) noexcept override;
-                virtual ExecutorInterface* getExecutor() const noexcept override;
+                void setExecutor(ExecutorInterface* executor) noexcept override;
+                ExecutorInterface* getExecutor() const noexcept override;
 
             private:
-                bool m_verbose;
-                bool m_dryRun;
-                bool m_singleThreaded;
+                bool m_verbose{false};
+                bool m_dryRun{false};
+                bool m_singleThreaded{false};
                 CommandCollection m_commands;
                 config::SettingsNode m_settings;
                 boost::program_options::variables_map m_optionsMap;
                 PatternsHandler m_patternsHandler;
-                OptionDescriptions m_optionsDescriptions;
+                execHelper::core::OptionDescriptions m_optionsDescriptions;
 
-                ExecutorInterface* m_executor;       // Non-owning pointer
+                ExecutorInterface* m_executor{nullptr};       // Non-owning pointer
         };
     }
 }

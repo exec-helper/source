@@ -35,9 +35,8 @@ namespace execHelper { namespace plugins {
         ;
     }
 
-    bool ExecutePlugin::apply(const Command& command, Task& task, const Options& options) const noexcept {
+    bool ExecutePlugin::apply(const Command& command, Task task, const Options& options) const noexcept {
         for(const auto& pluginName : m_commands) {
-            Task newTask = task;
             unique_ptr<Plugin> plugin = getPlugin(pluginName);
             Command commandToPass = command;
             if(!plugin) {
@@ -51,7 +50,7 @@ namespace execHelper { namespace plugins {
                     return false;
                 }
             }
-            if(!plugin || !plugin->apply(commandToPass, newTask, options)) {
+            if(!plugin || !plugin->apply(commandToPass, task, options)) {
                 return false;
             }
         }

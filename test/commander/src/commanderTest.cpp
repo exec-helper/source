@@ -34,9 +34,9 @@ namespace execHelper { namespace commander { namespace test {
             vector<string> commands({command1, command2});
 
             OptionsStub options;
-            addSettings(options.m_settings, "commands", commands);
-            addSettings(options.m_settings, command1, {"memory"});
-            addSettings(options.m_settings, command2, {"memory"});
+            addSettings(&options.m_settings, "commands", commands);
+            addSettings(&options.m_settings, command1, {"memory"});
+            addSettings(&options.m_settings, command2, {"memory"});
 
             options.m_commands = commands;
 
@@ -66,9 +66,9 @@ namespace execHelper { namespace commander { namespace test {
             vector<string> commands({command1, command2});
 
             OptionsStub options;
-            addSettings(options.m_settings, "commands", commands);
-            addSettings(options.m_settings, command1, {"memory"});
-            addSettings(options.m_settings, command2, {"memory"});
+            addSettings(&options.m_settings, "commands", commands);
+            addSettings(&options.m_settings, command1, {"memory"});
+            addSettings(&options.m_settings, command2, {"memory"});
 
             options.m_commands = {"command3"};
 
@@ -88,8 +88,8 @@ namespace execHelper { namespace commander { namespace test {
             vector<string> commands({command1});
 
             OptionsStub options;
-            addSettings(options.m_settings, "commands", commands);
-            addSettings(options.m_settings, command1, {"memory"});
+            addSettings(&options.m_settings, "commands", commands);
+            addSettings(&options.m_settings, command1, {"memory"});
 
             options.m_commands = commands;
 
@@ -130,8 +130,8 @@ namespace execHelper { namespace commander { namespace test {
             vector<string> commands({command});
 
             OptionsStub options;
-            addSettings(options.m_settings, "commands", commands);
-            addSettings(options.m_settings, command, {"memory"});
+            addSettings(&options.m_settings, "commands", commands);
+            addSettings(&options.m_settings, command, {"memory"});
 
             options.m_commands = commands;
 

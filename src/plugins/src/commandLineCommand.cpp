@@ -23,7 +23,7 @@ using execHelper::core::EnvironmentCollection;
 using execHelper::core::PatternKeys;
 
 namespace execHelper { namespace plugins {
-    bool CommandLineCommand::apply(const std::string& command, Task& task, const Options& options) const noexcept {
+    bool CommandLineCommand::apply(const std::string& command, Task task, const Options& options) const noexcept {
         static string commandLineCommandKey("command-line-command");
         static string commandLineKey("command-line");
 

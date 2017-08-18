@@ -13,7 +13,7 @@ namespace execHelper { namespace core {
             virtual bool execute(const Task& task) noexcept = 0;
 
         protected:
-            ExecutorInterface() {};
+            ExecutorInterface() = default;
     };
 } }
 

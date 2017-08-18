@@ -7,7 +7,7 @@
 
 #include <exception>
 
-#include <gsl/gsl>
+#include <gsl/gsl_assert>
 
 #include "log.h"
 

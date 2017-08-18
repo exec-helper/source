@@ -153,15 +153,15 @@ namespace execHelper { namespace test { namespace utils {
         return file.substr(0,found);
     }
 
-    void addSettings(SettingsNode& settings, const SettingsNode::SettingsKey& key, const SettingsNode::SettingsValue& value) noexcept {
+    void addSettings(SettingsNode* settings, const SettingsNode::SettingsKey& key, const SettingsNode::SettingsValue& value) noexcept {
         addSettings(settings, key, {value});
     }
 
-    void addSettings(SettingsNode& settings, const SettingsNode::SettingsKey& key, const SettingsNode::SettingsValues& values) noexcept {
-        settings.add({key}, values);
+    void addSettings(SettingsNode* settings, const SettingsNode::SettingsKey& key, const SettingsNode::SettingsValues& values) noexcept {
+        settings->add({key}, values);
     }
 
-    void addSettings(SettingsNode& settings, const SettingsNode::SettingsKey& key, const std::initializer_list<string>& values) noexcept {
+    void addSettings(SettingsNode* settings, const SettingsNode::SettingsKey& key, const std::initializer_list<string>& values) noexcept {
         addSettings(settings, key, SettingsNode::SettingsValues(values));
     }
 
@@ -217,7 +217,7 @@ namespace execHelper { namespace test { namespace utils {
         for(const auto& pattern : patterns) {
             patternValuesMatrix.emplace(make_pair(pattern.getKey(), pattern.getDefaultValues()));
         }
-        return patternValuesMatrix;
+        return PatternPermutator(patternValuesMatrix);
     }
 
     TargetUtilNames TargetUtil::toNames(const std::map<PatternKey, PatternValue>& pattern) const noexcept {
@@ -253,7 +253,7 @@ namespace execHelper { namespace test { namespace utils {
         for(const auto& pattern : patterns) {
             patternValuesMatrix.emplace(make_pair(pattern.getKey(), pattern.getDefaultValues()));
         }
-        return patternValuesMatrix;
+        return PatternPermutator(patternValuesMatrix);
     }
 
     CompilerUtilNames CompilerUtil::toNames(const std::map<PatternKey, PatternValue>& pattern) const noexcept {
@@ -285,9 +285,9 @@ namespace execHelper { namespace test { namespace utils {
         return allPatterns;
     }
 
-    void addPatterns(const Patterns& patterns, OptionsStub& options) noexcept {
+    void addPatterns(const Patterns& patterns, OptionsStub* options) noexcept {
         for(const auto& pattern : patterns) {
-            options.m_patternsHandler->addPattern(pattern);
+            options->m_patternsHandler->addPattern(pattern);
         }
     }
 

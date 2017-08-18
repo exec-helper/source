@@ -1,5 +1,7 @@
 set(LIBRARY_NAME ${PROJECT_NAME}-catch-main)
 
+list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/modules)
+
 set(SRCS    catch.cpp
    )
 
@@ -9,9 +11,9 @@ add_library(${LIBRARY_NAME} ${SRCS})
 install(TARGETS ${LIBRARY_NAME} DESTINATION ${LIB_DIRECTORY})
 
 if(NOT ${USE_SYSTEM_CATCH})
-    add_dependencies(${LIBRARY_NAME} Catch)
+    add_dependencies(${LIBRARY_NAME} catch)
 else()
-    find_package(Catch)
+    find_package(catch)
 endif()
 
 set(${LIBRARY_NAME}_INCLUDE_DIRS include)

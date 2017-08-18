@@ -20,7 +20,7 @@ using execHelper::core::TaskCollection;
 using execHelper::core::PatternKeys;
 
 namespace execHelper { namespace plugins {
-    bool Scons::apply(const Command& command, Task& task, const Options& options) const noexcept {
+    bool Scons::apply(const Command& command, Task task, const Options& options) const noexcept {
         static const string SCONS_COMMAND("scons");
 
         const SettingsNode& rootSettings = options.getSettings({"scons"});

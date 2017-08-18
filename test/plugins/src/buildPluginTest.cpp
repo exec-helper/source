@@ -50,7 +50,7 @@ namespace execHelper { namespace plugins { namespace test {
             }
         }
         GIVEN("A default configuration setting with an empty value for the multi-threaded setting") {
-            addSettings(rootSettings, command, key);
+            addSettings(&rootSettings, command, key);
             bool correctResult = true;
 
             WHEN("We request the multi threaded settings") {

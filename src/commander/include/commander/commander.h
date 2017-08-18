@@ -1,9 +1,9 @@
 #ifndef __COMMANDER_H__
 #define __COMMANDER_H__
 
-#include <string>
 #include <map>
 #include <memory>
+#include <string>
 
 #include "config/path.h"
 #include "core/task.h"

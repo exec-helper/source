@@ -9,7 +9,7 @@ namespace execHelper {
     namespace core {
         class PatternsHandler {
             private:
-                typedef std::map<PatternKey, Pattern> PatternCollection;
+                using PatternCollection = std::map<PatternKey, Pattern>;
 
             public:
                 bool operator==(const PatternsHandler& other) const noexcept;

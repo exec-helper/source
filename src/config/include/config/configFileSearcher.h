@@ -20,7 +20,7 @@ namespace execHelper {
                  *
                  * \param searchPaths  The paths to search for ordered by which paths to look in first.
                  */
-                ConfigFileSearcher(Paths searchPaths) noexcept;
+                explicit ConfigFileSearcher(Paths searchPaths) noexcept;
 
                 /**
                  * Find the given filename

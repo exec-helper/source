@@ -10,7 +10,7 @@ namespace execHelper {
          */
         class Pmd : public Plugin {
             public:
-                virtual bool apply(const std::string& command, core::Task& task, const core::Options& options) const noexcept override;
+                bool apply(const std::string& command, core::Task task, const core::Options& options) const noexcept override;
         };
     }
 }

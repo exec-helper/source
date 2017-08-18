@@ -4,6 +4,7 @@
 #include "executorInterface.h"
 
 #include <functional>
+#include <memory>
 
 #include "shell.h"
 
@@ -17,15 +18,15 @@ namespace execHelper {
     namespace core {
         class ImmediateExecutor : public ExecutorInterface {
             public:
-                typedef std::function<void(Shell::ShellReturnCode)> Callback;
+                using Callback = std::function<void(Shell::ShellReturnCode)>;
 
-                ImmediateExecutor(Shell& shell, Callback& callback) noexcept;
+                ImmediateExecutor(std::shared_ptr<Shell> shell, Callback callback) noexcept;
 
-                virtual bool execute(const Task& task) noexcept override;
+                bool execute(const Task& task) noexcept override;
 
             private:
-                Shell& m_shell;
-                Callback& m_callback;
+                std::shared_ptr<Shell> m_shell;
+                Callback m_callback;
         };
     }
 }

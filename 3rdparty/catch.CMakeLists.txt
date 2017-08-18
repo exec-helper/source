@@ -12,7 +12,7 @@ else(${USE_SYSTEM_CATCH})
 
     set(CATCH_INSTALL_DIR ${LIB_DIRECTORY}/catch)
 
-    ExternalProject_Add(Catch
+    ExternalProject_Add(catch
         PREFIX catch
         GIT_REPOSITORY https://github.com/philsquared/Catch.git
         CONFIGURE_COMMAND ""
@@ -21,6 +21,6 @@ else(${USE_SYSTEM_CATCH})
         UPDATE_COMMAND ""
         )
 
-    set(CATCH_INCLUDE_DIRS ${CMAKE_CURRENT_BINARY_DIR}/catch/src/Catch/single_include/ CACHE INTERNAL CATCH_INCLUDE_DIRS)
+    set(CATCH_INCLUDE_DIRS ${CMAKE_CURRENT_BINARY_DIR}/catch/src/catch/single_include/ CACHE INTERNAL CATCH_INCLUDE_DIRS)
 
 endif(${USE_SYSTEM_CATCH})

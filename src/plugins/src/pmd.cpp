@@ -18,7 +18,7 @@ using execHelper::core::TaskCollection;
 using execHelper::core::PatternKeys;
 
 namespace execHelper { namespace plugins {
-    bool Pmd::apply(const std::string& command, Task& task, const Options& options) const noexcept {
+    bool Pmd::apply(const std::string& command, Task task, const Options& options) const noexcept {
         const string pmdConfigKey("pmd");
         const SettingsNode& rootSettings = options.getSettings(pmdConfigKey);
 

@@ -18,7 +18,7 @@ namespace {
 
 
 namespace execHelper { namespace plugins {
-    bool ClangTidy::apply(const Command& command, Task& task, const Options& options) const noexcept {
+    bool ClangTidy::apply(const Command& command, Task task, const Options& options) const noexcept {
         static const string CLANG_TIDY_COMMAND("clang-tidy");
         static const string CLANG_TIDY_KEY("clang-tidy");
 

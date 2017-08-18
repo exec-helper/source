@@ -5,6 +5,8 @@
 #include <sstream>
 #include <string>
 
+#include <boost/filesystem.hpp>
+
 #include "config/settingsNode.h"
 #include "log/assert.h"
 #include "log/log.h"
@@ -19,6 +21,8 @@ using std::stringstream;
 using std::setw;
 using std::vector;
 
+using boost::filesystem::is_regular_file;
+using boost::filesystem::is_symlink;
 using boost::program_options::variables_map;
 
 using execHelper::core::CommandCollection;
@@ -29,25 +33,18 @@ using execHelper::config::SettingsNode;
 using execHelper::yaml::Yaml;
 using execHelper::yaml::YamlFile;
 
+namespace {
+}
+
 namespace execHelper { namespace core {
     ExecHelperOptions::ExecHelperOptions() noexcept :
-        m_verbose(false),
-        m_dryRun(false),
-        m_singleThreaded(false),
-        m_settings("ExecHelperRoot"),
-        m_executor(nullptr)
+        m_settings("ExecHelperRoot")
     {
         ;
     }
 
-    ExecHelperOptions::ExecHelperOptions(const ExecHelperOptions& other) noexcept :
-        m_verbose(other.m_verbose),
-        m_dryRun(other.m_dryRun),
-        m_singleThreaded(other.m_singleThreaded),
-        m_settings(other.m_settings),
-        m_executor(other.m_executor)
-    {
-        ;
+    void ExecHelperOptions::swap(ExecHelperOptions& other) noexcept {
+        m_settings.swap(other.m_settings);
     }
 
     bool ExecHelperOptions::operator==(const ExecHelperOptions& other) const noexcept {
@@ -112,10 +109,16 @@ namespace execHelper { namespace core {
     }
 
     bool ExecHelperOptions::parseSettingsFile(const Path& file) noexcept {
+        if(!is_regular_file(file) && !is_symlink(file)) {
+            user_feedback_error("File '" << file.native() << "' does not exist or is not a file");
+            return false;
+        }
+
         YamlFile yamlFile;
         yamlFile.file = file.native();
+
         Yaml yaml(yamlFile);
-        if(! yaml.getTree({}, m_settings)) {
+        if(! yaml.getTree({}, &m_settings)) {
             LOG("Could not get settings tree");
             return false;
         }
@@ -187,7 +190,7 @@ namespace execHelper { namespace core {
     }
 
 
-    void ExecHelperOptions::setExecutor(ExecutorInterface* const executor) noexcept {
+    void ExecHelperOptions::setExecutor(ExecutorInterface* executor) noexcept {
         m_executor = executor;
     }
 

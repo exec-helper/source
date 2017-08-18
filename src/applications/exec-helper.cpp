@@ -1,4 +1,5 @@
 #include <cstdlib>
+#include <memory>
 #include <string>
 
 #include <boost/algorithm/string.hpp>
@@ -16,8 +17,10 @@
 #include "core/task.h"
 #include "commander/commander.h"
 
-using std::string;
 using std::make_pair;
+using std::make_shared;
+using std::move;
+using std::string;
 
 using boost::filesystem::current_path;
 
@@ -94,7 +97,7 @@ int execHelperMain(int argc, char** argv, char** envp) {
         return EXIT_SUCCESS;
     }
 
-    PosixShell shell;
+    auto shell = make_shared<PosixShell>();
     execHelper::core::ImmediateExecutor::Callback callback = 
                  [](Shell::ShellReturnCode returnCode) { 
                     user_feedback_error("Error executing commands");

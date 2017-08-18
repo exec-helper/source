@@ -64,7 +64,7 @@ namespace execHelper { namespace plugins {
         for(const auto& pattern : patternCombinations) {
             newWorkingDir = replacePatterns(newWorkingDir, pattern.first, pattern.second);
         }
-        replacedTask.setWorkingDirectory(std::move(newWorkingDir));
+        replacedTask.setWorkingDirectory(newWorkingDir);
         for(auto argument : task.getTask()) {
             for(const auto& pattern : patternCombinations) {
                 argument = replacePatterns(argument, pattern.first, pattern.second);

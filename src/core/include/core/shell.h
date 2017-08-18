@@ -16,7 +16,7 @@ namespace execHelper {
          */
         class Shell {
             public:
-                typedef uint32_t ShellReturnCode;
+                using ShellReturnCode = uint32_t;
 
                 /**
                  * Executes the given task
@@ -36,7 +36,7 @@ namespace execHelper {
                 virtual bool isExecutedSuccessfully(ShellReturnCode returnCode) const noexcept = 0;
 
             protected:
-                Shell() {};
+                Shell() = default;
         };
     }
 }

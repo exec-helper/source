@@ -39,6 +39,11 @@ namespace execHelper {
             return *this;
         }
 
+        SettingsNode& SettingsNode::operator=(SettingsNode&& other) noexcept {
+            swap(other);
+            return *this;
+        }
+
         bool SettingsNode::operator==(const SettingsNode& other) const noexcept {
             if(m_key != other.m_key) {
                 return false;
@@ -125,7 +130,7 @@ namespace execHelper {
             if(!m_values) {
                 m_values.reset(new SettingsNodeCollection());
             }
-            m_values->push_back(newValue);
+            m_values->emplace_back(SettingsNode(newValue));
             return true;
         }
 
@@ -157,7 +162,10 @@ namespace execHelper {
             if(!m_values) {
                 m_values.reset(new SettingsNodeCollection());
             }
-            m_values->insert(m_values->end(), newValues.begin(), newValues.end());
+            m_values->reserve(m_values->size() + newValues.size());
+            for(const auto& newValue : newValues) {
+                m_values->emplace_back(SettingsNode(newValue));
+            }
             return true;
         }
 
@@ -191,6 +199,11 @@ namespace execHelper {
 
         SettingsNode::SettingsKey SettingsNode::key() const noexcept {
             return m_key;
+        }
+
+        void SettingsNode::swap(SettingsNode& other) noexcept {
+            m_key.swap(other.m_key);
+            m_values.swap(other.m_values);
         }
 
         SettingsNode* SettingsNode::at(const SettingsKey& key) noexcept {

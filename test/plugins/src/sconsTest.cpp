@@ -36,10 +36,10 @@ namespace execHelper { namespace plugins { namespace test {
             OptionsStub options;
 
             TargetUtil targetUtil;
-            addPatterns(targetUtil.getPatterns(), options);
+            addPatterns(targetUtil.getPatterns(), &options);
 
             CompilerUtil compilerUtil;
-            addPatterns(compilerUtil.getPatterns(), options);
+            addPatterns(compilerUtil.getPatterns(), &options);
 
             SettingsNode& rootSettings = options.m_settings;
             rootSettings.add({PLUGIN_CONFIG_KEY, "patterns"}, targetUtil.getKeys());

@@ -13,11 +13,11 @@ namespace execHelper {
         template<typename IteratorType, typename CollectionType1, typename... CollectionTypes>
         class PermutationIterator {
             private:
-                typedef IteratorType value_type;
-                typedef IteratorType* pointer;
-                typedef IteratorType& reference;
-                typedef PermutationIterator<IteratorType, CollectionType1, CollectionTypes...> iterator;
-                typedef std::tuple<typename CollectionType1::value_type, typename CollectionTypes::value_type...> Tuple;
+                using value_type = IteratorType;
+                using pointer = IteratorType*;
+                using reference = IteratorType&;
+                using iterator = PermutationIterator<IteratorType, CollectionType1, CollectionTypes...>;
+                using Tuple = std::tuple<typename CollectionType1::value_type, typename CollectionTypes::value_type...>;
 
                 const typename CollectionType1::const_iterator m_outerBeginIterator;
                 typename CollectionType1::const_iterator m_outerIterator;
@@ -75,7 +75,7 @@ namespace execHelper {
                 value_type operator*() const {
                     expects(m_outerIterator != m_outerEndIterator);
                     expects(!m_innerIterator.atEnd());
-                    typedef typename std::decay<Tuple>::type ttype;
+                    using ttype = typename std::decay<Tuple>::type;
                     return detail::createObject<IteratorType, Tuple, 0 == std::tuple_size<ttype>::value, std::tuple_size<ttype>::value>::getObject(getElementValue());
                 }
 
@@ -92,10 +92,10 @@ namespace execHelper {
         template<typename IteratorType, typename CollectionType>
         class PermutationIterator<IteratorType, CollectionType> {
             private:
-                typedef IteratorType value_type;
-                typedef IteratorType* pointer;
-                typedef IteratorType& reference;
-                typedef PermutationIterator<IteratorType, CollectionType> iterator;
+                using value_type = IteratorType;
+                using pointer = IteratorType*;
+                using reference = IteratorType&;
+                using iterator = PermutationIterator<IteratorType, CollectionType>;
 
                 typename CollectionType::const_iterator m_collectionIterator;
                 const typename CollectionType::const_iterator m_collectionBeginIterator;

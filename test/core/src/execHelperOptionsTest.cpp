@@ -52,32 +52,6 @@ namespace execHelper { namespace core {
             }
         }
 
-        SCENARIO("Test the copy constructor", "[core][execHelperOptions]") {
-            GIVEN("An execHelperOptions object to copy") {
-                ExecHelperOptions execHelper;
-
-                WHEN("We copy the object") {
-                    ExecHelperOptions copy(execHelper);
-
-                    THEN("They should be equal") {
-                        REQUIRE(execHelper == copy);
-                        REQUIRE_FALSE(execHelper != copy);
-                    }
-                }
-                
-                WHEN("We copy and change the object") {
-                    ExecHelperOptions copy(execHelper);
-                    ExecutorStub executor;
-                    copy.setExecutor(&executor);
-
-                    THEN("They should not be equal") {
-                        REQUIRE_FALSE(execHelper == copy);
-                        REQUIRE(execHelper != copy);
-                    }
-                }
-            }
-        }
-
         SCENARIO("Test the settings related functions", "[core][execHelperOptions]") {
             GIVEN("An options object") {
                 const string settingsFile("test-settings-file.exec-helper");
@@ -102,7 +76,7 @@ namespace execHelper { namespace core {
                 ExecHelperOptions options;
                 options.parseSettingsFile(settingsFile);
 
-                const ExecHelperOptions constOptions = options;
+                const ExecHelperOptions& constOptions = options;
 
                 WHEN("We request the root settings") {
                     const SettingsNode& rootSettings = options.getSettings();
@@ -362,8 +336,8 @@ namespace execHelper { namespace core {
                 const vector<Pattern> patterns = {pattern1, pattern2, pattern3, pattern4};
 
                 SettingsNode settings("ExecHelperTest");
-                addSettings(settings, commandKey, commandValues);
-                addSettings(settings, command1Key, command1Values);
+                addSettings(&settings, commandKey, commandValues);
+                addSettings(&settings, command1Key, command1Values);
                 writeSettingsFile(settingsFile, settings, patterns);
 
                 ExecHelperOptions options;

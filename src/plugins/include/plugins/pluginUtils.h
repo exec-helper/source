@@ -8,8 +8,8 @@
 #include "config/path.h"
 #include "config/settingsNode.h"
 #include "core/options.h"
-#include "core/task.h"
 #include "core/patternsHandler.h"
+#include "core/task.h"
 
 namespace execHelper {
     namespace core {

@@ -94,7 +94,7 @@ namespace execHelper { namespace plugins { namespace test {
         MAKE_COMBINATIONS("Of several settings") {
             OptionsStub options;
 
-            addPatterns(targetUtil.getPatterns(), options);
+            addPatterns(targetUtil.getPatterns(), &options);
 
             SettingsNode& rootSettings = options.m_settings;
             rootSettings.add({PLUGIN_CONFIG_KEY, "patterns"}, targetUtil.getKeys());

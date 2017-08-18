@@ -47,9 +47,9 @@ using execHelper::test::utils::addSettings;
 
 namespace {
     void setupBasicOptions(OptionsStub* options, const Patterns& patterns) {
-        addSettings(options->m_settings, "commands", {"execute-command"});
-        addSettings(options->m_settings, "execute-command", {"execute-plugin"});
-        addSettings(options->m_settings, "execute-plugin", {"execute-command"});
+        addSettings(&options->m_settings, "commands", {"execute-command"});
+        addSettings(&options->m_settings, "execute-command", {"execute-plugin"});
+        addSettings(&options->m_settings, "execute-plugin", {"execute-command"});
 
         for(const auto& pattern : patterns) {
             options->m_patternsHandler->addPattern(pattern);

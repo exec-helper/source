@@ -17,6 +17,13 @@ namespace execHelper {
          */
         class Plugin {
             public: 
+                Plugin(const Plugin& other) = delete;
+                Plugin(Plugin&& other) noexcept = delete;
+                virtual ~Plugin() = default;
+
+                Plugin& operator=(const Plugin& other) = delete;
+                Plugin& operator=(Plugin&& other) noexcept = delete;
+
                 /**
                  * Apply the plugin
                  *
@@ -26,11 +33,10 @@ namespace execHelper {
                  * \returns True    If the application was successful
                  *          False   Otherwise
                  */
-                virtual bool apply(const core::Command& command, core::Task& task, const core::Options& options) const noexcept = 0;
-                virtual ~Plugin() {};
+                virtual bool apply(const core::Command& command, core::Task task, const core::Options& options) const noexcept = 0;
 
             protected:
-                Plugin() {}
+                Plugin() = default;
         };
 
         /**

@@ -5,15 +5,15 @@
 #define THEN_CHECK(x)
 
 #include <initializer_list>
-#include <string>
 #include <memory>
+#include <string>
 #include <vector>
 
-#include "core/pattern.h"
 #include "core/options.h"
+#include "core/pattern.h"
 
-#include "optionsStub.h"
 #include "executorStub.h"
+#include "optionsStub.h"
 
 namespace execHelper {
     namespace config {
@@ -24,7 +24,7 @@ namespace execHelper {
 namespace execHelper {
     namespace test {
         namespace utils {
-            typedef std::vector<core::Pattern> Patterns;
+            using Patterns = std::vector<core::Pattern>;
 
             template<typename T>
             void appendVectors(T& appendTo, const T& appendFrom) {
@@ -49,7 +49,7 @@ namespace execHelper {
                 int argc;
                 std::unique_ptr<char*[]> argv;
 
-                MainVariables(const std::vector<std::string>& arguments);
+                explicit MainVariables(const std::vector<std::string>& arguments);
             };
 
             std::string convertToConfig(const Patterns& patterns) noexcept;
@@ -67,10 +67,10 @@ namespace execHelper {
             std::string convertToConfig(const std::vector<std::string>& keys, const std::vector<std::string>& values, const std::string& prepend = std::string()) noexcept;
             std::string basename(const std::string& file);
 
-            void addSettings(config::SettingsNode& settings, const config::SettingsNode::SettingsKey& key, const config::SettingsNode::SettingsValue& value) noexcept;
-            void addSettings(config::SettingsNode& settings, const config::SettingsNode::SettingsKey& key, const std::initializer_list<std::string>& values) noexcept;
-            void addSettings(config::SettingsNode& settings, const config::SettingsNode::SettingsKey& key, const config::SettingsNode::SettingsValues& values) noexcept;
-            void addSettings(config::SettingsNode& settings, const config::SettingsNode::SettingsKeys& key, const config::SettingsNode::SettingsValues& values) noexcept;
+            void addSettings(config::SettingsNode* settings, const config::SettingsNode::SettingsKey& key, const config::SettingsNode::SettingsValue& value) noexcept;
+            void addSettings(config::SettingsNode* settings, const config::SettingsNode::SettingsKey& key, const std::initializer_list<std::string>& values) noexcept;
+            void addSettings(config::SettingsNode* settings, const config::SettingsNode::SettingsKey& key, const config::SettingsNode::SettingsValues& values) noexcept;
+            void addSettings(config::SettingsNode* settings, const config::SettingsNode::SettingsKeys& key, const config::SettingsNode::SettingsValues& values) noexcept;
             void writeSettingsFile(const std::string& filename, const config::SettingsNode& settings, const std::vector<core::Pattern>& patterns) noexcept;
 
             core::PatternCombinations createPatternCombination(const std::initializer_list<core::PatternKey>& keys, const std::initializer_list<core::PatternValue>& values) noexcept;
@@ -97,10 +97,10 @@ namespace execHelper {
                 core::Pattern runTarget;
 
                 TargetUtil();
-                virtual std::vector<std::string> getKeys() const noexcept override;
-                virtual std::vector<core::Pattern> getPatterns() const noexcept override;
-                virtual core::PatternPermutator makePatternPermutator() const noexcept override;
-                virtual core::PatternPermutator makePatternPermutator(const std::vector<core::Pattern>& patterns) const noexcept override;
+                std::vector<std::string> getKeys() const noexcept override;
+                std::vector<core::Pattern> getPatterns() const noexcept override;
+                core::PatternPermutator makePatternPermutator() const noexcept override;
+                core::PatternPermutator makePatternPermutator(const std::vector<core::Pattern>& patterns) const noexcept override;
 
                 TargetUtilNames toNames(const std::map<core::PatternKey, core::PatternValue>& pattern) const noexcept;
             };
@@ -119,10 +119,10 @@ namespace execHelper {
                 core::Pattern distribution;
 
                 CompilerUtil();
-                virtual std::vector<std::string> getKeys() const noexcept override;
-                virtual std::vector<core::Pattern> getPatterns() const noexcept override;
-                virtual core::PatternPermutator makePatternPermutator() const noexcept override;
-                virtual core::PatternPermutator makePatternPermutator(const std::vector<core::Pattern>& patterns) const noexcept override;
+                std::vector<std::string> getKeys() const noexcept override;
+                std::vector<core::Pattern> getPatterns() const noexcept override;
+                core::PatternPermutator makePatternPermutator() const noexcept override;
+                core::PatternPermutator makePatternPermutator(const std::vector<core::Pattern>& patterns) const noexcept override;
                 
                 CompilerUtilNames toNames(const std::map<core::PatternKey, core::PatternValue>& pattern) const noexcept;
             };
@@ -130,7 +130,7 @@ namespace execHelper {
             core::PatternKeys getAllPatternKeys(const std::initializer_list<std::reference_wrapper<const PatternUtil>>& patterns) noexcept;
             Patterns getAllPatterns(const std::initializer_list<std::reference_wrapper<const PatternUtil>>& patterns) noexcept;
 
-            void addPatterns(const Patterns& patterns, OptionsStub& options) noexcept;
+            void addPatterns(const Patterns& patterns, OptionsStub* options) noexcept;
 
             const core::Pattern PATTERN1("PATTERN1", {"pattern1"}, 'p', "--pattern1");
             const core::Pattern PATTERN2("PATTERN2", {"pattern2a", "pattern2b"}, 'q', "--pattern2");

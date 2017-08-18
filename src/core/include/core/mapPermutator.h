@@ -3,15 +3,14 @@
 
 #include <map>
 #include <vector>
-#include <iostream>
 
 namespace execHelper {
     namespace core {
         template<typename T, typename U>
         class MapPermutator {
             public:
-                MapPermutator(const std::map<T,std::vector<U>>& map) noexcept :
-                    m_map(map)
+                explicit MapPermutator(std::map<T,std::vector<U>> map) noexcept :
+                    m_map(std::move(map))
                 {
                     ;
                 }
@@ -19,19 +18,19 @@ namespace execHelper {
                 template<typename IteratorType>
                 class Iterator {
                     private:
-                        typedef IteratorType value_type;
-                        typedef IteratorType* pointer;
-                        typedef IteratorType& reference;
-                        typedef Iterator iterator;
+                        using value_type = IteratorType;
+                        using pointer = IteratorType*;
+                        using reference = IteratorType&;
+                        using iterator = Iterator;
  
                     public:
-                        Iterator(const std::map<T, std::vector<U>>& map, bool end = false) noexcept :
+                        explicit Iterator(const std::map<T, std::vector<U>>& map, bool end = false) noexcept :
                             m_map(map),
                             m_end(end)
                         {
                             for(const auto& mapElement : map) {
                                 uint32_t index = 0U;
-                                if(mapElement.second.size() == 0) {
+                                if(mapElement.second.empty()) {
                                     m_end = true;
                                 }
                                 if(m_end) {
@@ -96,8 +95,8 @@ namespace execHelper {
                         bool m_end;
                 };
 
-                typedef Iterator<std::map<T, U>> iterator;
-                typedef Iterator<const std::map<T, U>> const_iterator;
+                using iterator = Iterator<std::map<T, U>>;
+                using const_iterator = Iterator<const std::map<T, U>>;
 
                 iterator begin() noexcept {
                     return iterator(m_map);

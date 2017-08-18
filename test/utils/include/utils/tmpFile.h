@@ -9,9 +9,15 @@ namespace execHelper {
             class TmpFile {
                 public:
                     TmpFile() noexcept;
-                    TmpFile(const std::string& filename) noexcept;
-                    TmpFile(const config::Path& directory) noexcept;
+                    explicit TmpFile(const std::string& filename) noexcept;
+                    explicit TmpFile(const config::Path& directory) noexcept;
+                    
+                    TmpFile(const TmpFile& other) = delete;
+                    TmpFile(TmpFile&& other) noexcept = delete;
                     ~TmpFile() noexcept;
+
+                    TmpFile& operator=(const TmpFile& other) = delete;
+                    TmpFile& operator=(TmpFile&& other) noexcept = delete;
 
                     bool exists() const noexcept;
                     bool create(const std::string& content = "") const noexcept;

@@ -34,7 +34,7 @@ namespace {
 }
 
 namespace execHelper { namespace plugins {
-    bool Lcov::apply(const Command& command, Task& task, const Options& options) const noexcept {
+    bool Lcov::apply(const Command& command, Task task, const Options& options) const noexcept {
         static const string lcovConfigKey("lcov");
 
         const SettingsNode& rootSettings = options.getSettings(lcovConfigKey);

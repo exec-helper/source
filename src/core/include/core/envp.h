@@ -7,16 +7,20 @@ namespace execHelper {
     namespace core {
         class Envp {
             public:
-                Envp(const EnvironmentCollection& env) noexcept;
+                explicit Envp(const EnvironmentCollection& env) noexcept;
                 Envp(const Envp& other) noexcept;
+                Envp(Envp&& other) noexcept;
                 ~Envp() noexcept;
 
                 Envp& operator=(const Envp& other) noexcept;
+                Envp& operator=(Envp&& other) noexcept;
+
+                void swap(Envp& other) noexcept;
 
                 char** getEnvp() noexcept;
 
             private:
-                typedef std::vector<char*> Envp_t;
+                using Envp_t = std::vector<char*>;
 
                 void deepCopy(const Envp& other) noexcept;
 

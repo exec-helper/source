@@ -21,7 +21,7 @@ using execHelper::core::Command;
 using execHelper::config::SettingsNode;
 
 namespace execHelper { namespace plugins {
-    bool Bootstrap::apply(const Command& command, Task& task, const Options& options) const noexcept {
+    bool Bootstrap::apply(const Command& command, Task task, const Options& options) const noexcept {
         static string bootstrapKey("bootstrap");
         const SettingsNode& rootSettings = options.getSettings(bootstrapKey);  
 
