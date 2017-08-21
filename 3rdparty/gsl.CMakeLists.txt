@@ -1,0 +1,26 @@
+option(USE_SYSTEM_GSL "Use the gsl library provided by the system" OFF)
+
+if(${USE_SYSTEM_GSL})
+    find_package(gsl REQUIRED)
+
+    set(GSL_INCLUDE_DIRS ${gsl_INCLUDE_DIRS} CACHE INTERNAL GSL_INCLUDE_DIRS)
+    set(GSL_LIBRARIES ${gsl_LIBRARIES} CACHE INTERNAL GSL_LIBRARIES)
+    set(GSL_LIBRARY_DIRS ${gsl_LIBRARY_DIRS} CACHE INTERNAL GSL_LIBRARY_DIRS)
+
+else(${USE_SYSTEM_GSL})
+    include(ExternalProject)
+
+    set(GSL_INSTALL_DIR ${LIB_DIRECTORY}/gsl)
+
+    ExternalProject_Add(Gsl
+        PREFIX gsl
+        GIT_REPOSITORY https://github.com/Microsoft/GSL.git
+        CONFIGURE_COMMAND ""
+        BUILD_COMMAND ""
+        INSTALL_COMMAND ""
+        UPDATE_COMMAND ""
+        )
+
+    set(GSL_INCLUDE_DIRS ${CMAKE_CURRENT_BINARY_DIR}/gsl/src/Gsl/include/ CACHE INTERNAL GSL_INCLUDE_DIRS)
+
+endif(${USE_SYSTEM_GSL})
