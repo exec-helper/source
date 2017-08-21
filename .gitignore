@@ -99,3 +99,7 @@ test_coverage/
 test*.exec-helper
 lcov-plugin.info
 compile_commands.json
+
+# Coverity files
+cov-int/
+exec-helper.xz
