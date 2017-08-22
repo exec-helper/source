@@ -5,6 +5,9 @@
 
 namespace execHelper {
     namespace plugins {
+        /**
+         * \brief   Plugin for running valgrind
+         */
         class Valgrind : public Plugin {
             public:
                 bool apply(const std::string& command, core::Task task, const core::Options& options) const noexcept override;

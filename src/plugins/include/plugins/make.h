@@ -15,6 +15,9 @@ namespace execHelper {
 
 namespace execHelper {
     namespace plugins {
+        /**
+         * \brief   Plugin for running make
+         */
         class Make : public BuildPlugin {
             public:
                 bool apply(const core::Command& command, core::Task task, const core::Options& options) const noexcept override;

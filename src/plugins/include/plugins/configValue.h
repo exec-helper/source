@@ -12,13 +12,22 @@
 
 namespace execHelper {
     namespace plugins {
+        /**
+         * \brief Struct defining whether type T is a container type
+         */
         template<class T>
         struct isContainer : public std::false_type {};
 
+        /**
+         * Partial specialization for isContainer<T, Alloc> for the vector type
+         */
         template<class T, class Alloc>
         struct isContainer<std::vector<T, Alloc>> : public std::true_type {};
 
         namespace detail {
+            /**
+             * \brief Class for returning either the whole collection or only the last value, depending on the given type T and whether T is a collection
+             */
             template<typename T, bool isCollection>
             class ConfigValueImpl {
                 public:
@@ -27,6 +36,9 @@ namespace execHelper {
                     }
             };
 
+            /**
+             * Partial specialization for ConfigValueImpl<T, isCollection> when T is not a collection
+             */
             template<typename T>
             class ConfigValueImpl<T, false> {
                 public:
@@ -115,6 +127,9 @@ namespace execHelper {
                 }
         };
 
+        /**
+         * \brief Partial specialization for ConfigValue<T>
+         */
         template<>
         class ConfigValue<const config::SettingsNode&> {
             public:

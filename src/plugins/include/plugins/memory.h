@@ -11,6 +11,9 @@
 
 namespace execHelper {
     namespace plugins {
+        /**
+         * \brief   Remembers information that was passed to it
+         */
         struct Memory_t {
             const core::Command command;
             const core::Task* const taskAddress;
@@ -22,11 +25,14 @@ namespace execHelper {
               taskAddress(aTaskAddress),
               task(std::move(aTask)),
               options(aOptions)
-          {
-            ;
-          }
+            {
+                ;
+            }
         };
 
+        /**
+         * \brief   Plugin for remembering later on what has been executed. Mainly useful for testing purposes.
+         */
         class Memory : public Plugin {
             public:
                 using Memories = std::vector<Memory_t>;
@@ -41,8 +47,23 @@ namespace execHelper {
 
                 bool apply(const core::Command& command, core::Task task, const core::Options& options) const noexcept override;
             protected:
+                /**
+                 * Getter for the executions that were remembered
+                 *
+                 * \returns A collection of memories
+                 */
                 static const Memories& getExecutions() noexcept;
+
+                /**
+                 * Reset the remembered memories
+                 */
                 static void reset() noexcept;
+
+                /**
+                 * Set the return code for the next invocation(s) of a Memory object
+                 *
+                 * \param   returnCode  The code to return on the next invocation(s)
+                 */
                 static void setReturnCode(bool returnCode) noexcept;
 
             private:
@@ -50,6 +71,9 @@ namespace execHelper {
                 static Memories m_executions;
         };
 
+        /**
+         * \brief Makes access to a memory more accessible
+         */
         class MemoryHandler : public Memory {
             public:
                 using Memories = Memory::Memories;
@@ -62,8 +86,16 @@ namespace execHelper {
                 MemoryHandler& operator=(const MemoryHandler& other) = delete;
                 MemoryHandler& operator=(MemoryHandler&& other) noexcept = delete;
 
+                /*! @copydoc Memory::getExecutions()
+                 */
                 const Memories& getExecutions() const noexcept;
+
+                /*! @copydoc Memory::reset()
+                 */
                 void reset() noexcept;
+
+                /*! @copydoc Memory::setReturnCode(bool)
+                 */
                 void setReturnCode(bool returnCode) noexcept;
         };
     }

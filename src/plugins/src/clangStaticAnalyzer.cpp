@@ -30,7 +30,7 @@ namespace execHelper { namespace plugins {
         // Note: we leave replacing the values in the command line to the build-command plugin
         task.append(getCommandLine(command, rootSettings));
 
-        TaskCollection buildCommand = getSystemName(command, "build-command", rootSettings);
+        TaskCollection buildCommand = ConfigValue<TaskCollection>::get("build-command", {}, command, rootSettings);
         if(buildCommand.empty()) {
             user_feedback_error("Missing 'build-command' option for the '" << command << "' command and the clang-static-analyzer plugin");
             return false;
@@ -42,10 +42,6 @@ namespace execHelper { namespace plugins {
 
         ExecutePlugin buildExecutePlugin(buildCommand);
         return buildExecutePlugin.apply(command, task, options);
-    }
-
-    TaskCollection ClangStaticAnalyzer::getSystemName(const Command& command, const string& key, const SettingsNode& rootSettings) noexcept {
-        return ConfigValue<TaskCollection>::get(key, {}, command, rootSettings);
     }
 } // namespace plugins
 } // namespace execHelper

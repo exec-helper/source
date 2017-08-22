@@ -15,11 +15,21 @@ namespace execHelper {
 
 namespace execHelper {
     namespace plugins {
+        /**
+         * \brief Plugin for running the typical bootstrap stage in a build process
+         */
         class Bootstrap : public BuildPlugin {
             public:
                 bool apply(const core::Command& command, core::Task task, const core::Options& options) const noexcept override;
 
             private:
+                /**
+                 * Returns the bootstrap filename to use
+                 *
+                 * \param command   The command to find the bootstrap filename for
+                 * \param rootSettings  The configuration settings associated with the specific command
+                 * \returns The name of the bootstrap script to call
+                 */
                 static std::string getBootstrapFilename(const core::Command& command, const config::SettingsNode& rootSettings) noexcept;
         };
     } // namespace plugins

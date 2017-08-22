@@ -15,6 +15,9 @@ namespace execHelper {
 
 namespace execHelper {
     namespace plugins {
+        /**
+         * \brief   Plugin for running scons
+         */
         class Scons : public BuildPlugin {
             public:
                 bool apply(const core::Command& command, core::Task task, const core::Options& options) const noexcept override;
