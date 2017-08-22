@@ -23,20 +23,10 @@ using std::make_unique;
 using std::string;
 using std::vector;
 using std::unique_ptr;
-using std::forward;
 
 using execHelper::core::Command;
 using execHelper::core::Task;
 using execHelper::core::Options;
-
-//namespace {
-    //// Create this function our selves in order to stay compliant with c++11
-    //template<typename T, typename... Args>
-    //std::unique_ptr<T> make_unique(Args&&... args)
-    //{
-        //return unique_ptr<T>(new T(forward<Args>(args)...));
-    //}
-//}
 
 namespace execHelper { namespace plugins {
     ExecutePlugin::ExecutePlugin(vector<string> commands) noexcept :
