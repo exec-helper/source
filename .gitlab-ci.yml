@@ -45,9 +45,8 @@ image: dock0/arch
         - pacman -S --needed --noconfirm gcc cmake make pkg-config clang-tools-extra
         - *install_exec_helper
         - exec-helper setup init-build -c g++ -m release
-        - make -C build/g++/release/build Catch
+        - make -C build/g++/release/build Catch gsl
         - exec-helper analyze --analyze clang-tidy --module $MODULES
-
 
 before_script:
     - *prepare
