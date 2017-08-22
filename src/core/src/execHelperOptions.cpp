@@ -1,10 +1,11 @@
 #include "execHelperOptions.h"
 
-#include <cassert>
 #include <iomanip>
 #include <iostream>
 #include <sstream>
 #include <string>
+
+#include <gsl/gsl>
 
 #include "config/settingsNode.h"
 #include "log/log.h"
@@ -194,7 +195,7 @@ namespace execHelper { namespace core {
     }
 
     ExecutorInterface* ExecHelperOptions::getExecutor() const noexcept {
-        assert(m_executor != 0);
+        Expects(m_executor != nullptr);
         return m_executor;
     }
 

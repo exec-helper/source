@@ -1,8 +1,9 @@
 #ifndef __PERMUTATION_ITERATOR_H__
 #define __PERMUTATION_ITERATOR_H__
 
-#include <cassert>
 #include <tuple>
+
+#include <gsl/gsl>
 
 #include "createObject.h"
 
@@ -67,13 +68,13 @@ namespace execHelper {
                 }
 
                 Tuple getElementValue() const {
-                    assert(m_outerIterator != m_outerEndIterator);
+                    Expects(m_outerIterator != m_outerEndIterator);
                     return std::tuple_cat(std::make_tuple(*m_outerIterator), m_innerIterator.getElementValue());
                 }
 
                 value_type operator*() const {
-                    assert(m_outerIterator != m_outerEndIterator);
-                    assert(!m_innerIterator.atEnd());
+                    Expects(m_outerIterator != m_outerEndIterator);
+                    Expects(!m_innerIterator.atEnd());
                     typedef typename std::decay<Tuple>::type ttype;
                     return detail::createObject<IteratorType, Tuple, 0 == std::tuple_size<ttype>::value, std::tuple_size<ttype>::value>::getObject(getElementValue());
                 }
@@ -138,7 +139,7 @@ namespace execHelper {
                 }
 
                 std::tuple<typename CollectionType::value_type> getElementValue() const {
-                    assert(m_collectionIterator != m_collectionEndIterator);
+                    Expects(m_collectionIterator != m_collectionEndIterator);
                     return  std::make_tuple(*m_collectionIterator);
                 }
 

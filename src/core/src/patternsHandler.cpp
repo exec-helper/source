@@ -1,6 +1,6 @@
 #include "patternsHandler.h"
 
-#include <cassert>
+#include <gsl/gsl>
 
 using execHelper::core::Pattern;
 
@@ -23,7 +23,7 @@ namespace execHelper { namespace core {
 
     const Pattern& PatternsHandler::getPattern(const PatternKey& key) const noexcept {
         const PatternCollection& constPatterns = m_patterns;
-        assert(constPatterns.count(key) > 0U);
+        Ensures(constPatterns.count(key) > 0U);
         return constPatterns.at(key); 
     }
 } }

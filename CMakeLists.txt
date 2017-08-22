@@ -35,6 +35,14 @@ endif(LIMITED_OPTIMIZATION)
 set(BIN_DIRECTORY ${CMAKE_INSTALL_BINDIR})
 set(LIB_DIRECTORY ${CMAKE_INSTALL_LIBDIR})
 
+option(TERMINATE_ON_ASSERT_FAILURE "Terminate on assertion failure" OFF)
+MESSAGE(STATUS "Terminate on assert failure: " ${TERMINATE_ON_ASSERT_FAILURE})
+if(${TERMINATE_ON_ASSERT_FAILURE})
+    add_definitions(-DGSL_THROW_ON_CONTRACT_VIOLATION)
+else()
+    add_definitions(-DGSL_UNENFORCED_ON_CONTRACT_VIOLATION)
+endif()
+
 add_subdirectory(3rdparty)
 add_subdirectory(src)
 

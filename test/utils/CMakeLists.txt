@@ -1,6 +1,9 @@
 set(LIBRARY_NAME ${PROJECT_NAME}-test-utils)
 
 find_package(Boost REQUIRED COMPONENTS program_options filesystem)
+if(${USE_SYSTEM_GSL})
+    find_package(gsl REQUIRED)
+endif()
 
 set(SRCS
         src/utils.cpp
@@ -22,6 +25,10 @@ include_directories(${LIBRARY_NAME}
 
 add_library(${LIBRARY_NAME} ${SRCS})
 install(TARGETS ${LIBRARY_NAME} DESTINATION ${LIB_DIRECTORY})
+
+if(NOT ${USE_SYSTEM_GSL})
+    add_dependencies(${LIBRARY_NAME} gsl)
+endif()
 
 set(${LIBRARY_NAME}_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include ${LIBRARY_INCLUDES} CACHE INTERNAL ${LIBRARY_NAME}_INCLUDE_DIRS)
 
