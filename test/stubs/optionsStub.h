@@ -1,8 +1,7 @@
 #ifndef __OPTIONS_STUB_H__
 #define __OPTIONS_STUB_H__
 
-#include <gsl/gsl>
-
+#include "log/assert.h"
 #include "core/options.h"
 #include "core/patternsHandler.h"
 #include "config/settingsNode.h"
@@ -73,7 +72,7 @@ namespace execHelper {
 
                 // Note: executor needs to be allocated on the heap here
                 virtual void setExecutor(core::ExecutorInterface* const /*executor*/) noexcept override {
-                    Ensures(false);
+                    ensures(false);
                 }
 
                 virtual core::ExecutorInterface* getExecutor() const noexcept override {

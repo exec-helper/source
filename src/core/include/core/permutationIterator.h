@@ -3,7 +3,7 @@
 
 #include <tuple>
 
-#include <gsl/gsl>
+#include <log/assert.h>
 
 #include "createObject.h"
 
@@ -68,13 +68,13 @@ namespace execHelper {
                 }
 
                 Tuple getElementValue() const {
-                    Expects(m_outerIterator != m_outerEndIterator);
+                    expects(m_outerIterator != m_outerEndIterator);
                     return std::tuple_cat(std::make_tuple(*m_outerIterator), m_innerIterator.getElementValue());
                 }
 
                 value_type operator*() const {
-                    Expects(m_outerIterator != m_outerEndIterator);
-                    Expects(!m_innerIterator.atEnd());
+                    expects(m_outerIterator != m_outerEndIterator);
+                    expects(!m_innerIterator.atEnd());
                     typedef typename std::decay<Tuple>::type ttype;
                     return detail::createObject<IteratorType, Tuple, 0 == std::tuple_size<ttype>::value, std::tuple_size<ttype>::value>::getObject(getElementValue());
                 }
@@ -139,7 +139,7 @@ namespace execHelper {
                 }
 
                 std::tuple<typename CollectionType::value_type> getElementValue() const {
-                    Expects(m_collectionIterator != m_collectionEndIterator);
+                    expects(m_collectionIterator != m_collectionEndIterator);
                     return  std::make_tuple(*m_collectionIterator);
                 }
 

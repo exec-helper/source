@@ -3,7 +3,7 @@
 #include <iostream>
 #include <ostream>
 
-#include <gsl/gsl>
+#include <log/assert.h>
 
 using std::string;
 using std::initializer_list;
@@ -62,13 +62,13 @@ namespace execHelper {
         }
 
         const SettingsNode& SettingsNode::operator[](const SettingsKey& key) const noexcept {
-            Expects(contains(key));
+            expects(contains(key));
             for(const auto& value : *m_values) {
                 if(value.m_key == key) {
                     return value;
                 }
             }
-            Ensures(false);
+            ensures(false);
             return *this;
         }
 
@@ -194,24 +194,24 @@ namespace execHelper {
         }
 
         SettingsNode* SettingsNode::at(const SettingsKey& key) noexcept {
-            Expects(contains(key));
+            expects(contains(key));
             for(SettingsNode& value : *m_values) {
                 if(value.m_key == key) {
                     return &value;
                 }
             }
-            Ensures(false);
+            ensures(false);
             return this;
         }
 
         const SettingsNode* SettingsNode::at(const SettingsKey& key) const noexcept {
-            Expects(contains(key));
+            expects(contains(key));
             for(const SettingsNode& value : *m_values) {
                 if(value.m_key == key) {
                     return &value;
                 }
             }
-            Ensures(false);
+            ensures(false);
             return this;
         }
 
@@ -238,3 +238,4 @@ namespace execHelper {
         }
     } // config
 } // execHelper
+

@@ -10,7 +10,9 @@ install(TARGETS ${LIBRARY_NAME} DESTINATION ${LIB_DIRECTORY})
 
 if(NOT ${USE_SYSTEM_CATCH})
     add_dependencies(${LIBRARY_NAME} Catch)
-endif(NOT ${USE_SYSTEM_CATCH})
+else()
+    find_package(Catch)
+endif()
 
 set(${LIBRARY_NAME}_INCLUDE_DIRS include)
 set(${LIBRARY_NAME}_LIBRARIES ${LIBRARY_NAME})

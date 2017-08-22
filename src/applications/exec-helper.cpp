@@ -4,8 +4,8 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/optional/optional.hpp>
-#include <gsl/gsl>
 
+#include "log/assert.h"
 #include "log/log.h"
 #include "config/configFileSearcher.h"
 #include "core/execHelperOptions.h"
@@ -43,7 +43,7 @@ namespace {
             string newEnv(envValue); 
 
             size_t pos = newEnv.find_first_of(DELIMITER);
-            Ensures(pos != newEnv.npos);
+            ensures(pos != newEnv.npos);
 
             string key = newEnv.substr(0, pos);
             string value = newEnv.substr(pos + DELIMITER.size(), newEnv.npos);

@@ -5,9 +5,8 @@
 #include <sstream>
 #include <string>
 
-#include <gsl/gsl>
-
 #include "config/settingsNode.h"
+#include "log/assert.h"
 #include "log/log.h"
 #include "yaml/yaml.h"
 
@@ -195,7 +194,7 @@ namespace execHelper { namespace core {
     }
 
     ExecutorInterface* ExecHelperOptions::getExecutor() const noexcept {
-        Expects(m_executor != nullptr);
+        expects(m_executor != nullptr);
         return m_executor;
     }
 

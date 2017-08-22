@@ -4,10 +4,6 @@ set(SRCS
         exec-helper.cpp
    )
 
-if(${USE_SYSTEM_GSL})
-    find_package(gsl REQUIRED)
-endif()
-
 add_executable(${EXE_NAME} ${SRCS})
 
 include_directories(${EXE_NAME}
@@ -39,9 +35,3 @@ install(CODE "MESSAGE(\"-- Linking ${CMAKE_INSTALL_PREFIX}/${BIN_DIRECTORY}/${SH
               execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink ${EXE_NAME} ${CMAKE_INSTALL_PREFIX}/${BIN_DIRECTORY}/${SHORT_EXE_NAME})"
         COMPONENT runtime
        )
-
-if(NOT ${USE_SYSTEM_GSL})
-   add_dependencies(${EXE_NAME} gsl)
-endif()
-
-
