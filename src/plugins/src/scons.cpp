@@ -41,4 +41,5 @@ namespace execHelper { namespace plugins {
         }
         return true;
     }
-} }
+} // namespace plugins
+} // namespace execHelper

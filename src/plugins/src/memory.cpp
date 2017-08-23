@@ -1,7 +1,7 @@
 #include "memory.h"
 
 namespace execHelper { namespace plugins {
-    Memory::Memories Memory::m_executions;
+    Memory::Memories Memory::m_executions = {};
     bool Memory::m_returnCode = true;
 
     bool Memory::apply(const core::Command& command, core::Task task, const core::Options& options) const noexcept {
@@ -44,4 +44,5 @@ namespace execHelper { namespace plugins {
     void MemoryHandler::setReturnCode(bool returnCode) noexcept {
         Memory::setReturnCode(returnCode);
     }
-} }
+} // namespace plugins
+} // namespace execHelper

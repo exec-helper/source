@@ -8,11 +8,11 @@
 #include <boost/filesystem.hpp>
 
 #include "config/settingsNode.h"
-#include "log/assert.h"
-#include "log/log.h"
+#include "log/assertions.h"
 #include "yaml/yaml.h"
 
 #include "executorInterface.h"
+#include "logger.h"
 #include "pattern.h"
 #include "patternsHandler.h"
 
@@ -23,6 +23,7 @@ using std::vector;
 
 using boost::filesystem::is_regular_file;
 using boost::filesystem::is_symlink;
+using boost::optional;
 using boost::program_options::variables_map;
 
 using execHelper::core::CommandCollection;
@@ -32,9 +33,6 @@ using execHelper::config::SettingsNode;
 
 using execHelper::yaml::Yaml;
 using execHelper::yaml::YamlFile;
-
-namespace {
-}
 
 namespace execHelper { namespace core {
     ExecHelperOptions::ExecHelperOptions() noexcept :
@@ -72,6 +70,22 @@ namespace execHelper { namespace core {
 
     bool ExecHelperOptions::getSingleThreaded() const noexcept {
         return m_singleThreaded;
+    }
+
+    optional<log::LogLevel> ExecHelperOptions::getLogLevel() const noexcept {
+        if(m_optionsMap.count("debug") == 0) {
+            return boost::none;
+        }
+        auto debugLevel = m_optionsMap["debug"].as<string>();
+        if(debugLevel == "none") {
+            return boost::none;
+        }
+        try {
+           return log::toLogLevel(debugLevel);
+        } catch(const log::InvalidLogLevel& e) {
+            user_feedback_error("Invalid log level: '" + debugLevel + "'. Ignoring option...");
+        }
+        return boost::none;
     }
 
     const CommandCollection& ExecHelperOptions::getCommands() const noexcept {
@@ -119,7 +133,7 @@ namespace execHelper { namespace core {
 
         Yaml yaml(yamlFile);
         if(! yaml.getTree({}, &m_settings)) {
-            LOG("Could not get settings tree");
+            LOG(error) << "Could not get settings tree";
             return false;
         }
 
@@ -245,4 +259,5 @@ namespace execHelper { namespace core {
         }
         return core::PatternPermutator(patternValuesMatrix);
     }
-} }
+} // namespace core
+} // namespace execHelper

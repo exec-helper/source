@@ -19,6 +19,7 @@ set(SRCS
         src/clangStaticAnalyzer.cpp
         src/clangTidy.cpp
         src/lcov.cpp
+        src/logger.cpp
    )
 
 set(DEPENDENCIES

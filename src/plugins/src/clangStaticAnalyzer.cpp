@@ -6,10 +6,10 @@
 #include "core/execHelperOptions.h"
 #include "core/patterns.h"
 #include "core/task.h"
-#include "log/log.h"
 
 #include "configValue.h"
 #include "executePlugin.h"
+#include "logger.h"
 
 using std::string;
 
@@ -47,4 +47,5 @@ namespace execHelper { namespace plugins {
     TaskCollection ClangStaticAnalyzer::getSystemName(const Command& command, const string& key, const SettingsNode& rootSettings) noexcept {
         return ConfigValue<TaskCollection>::get(key, {}, command, rootSettings);
     }
-} }
+} // namespace plugins
+} // namespace execHelper

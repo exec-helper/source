@@ -1,15 +1,18 @@
-#include "unittest/catch.h"
-
 #include <string>
+
+#include <gsl/string_span>
 
 #include "core/task.h"
 #include "plugins/lcov.h"
 #include "plugins/memory.h"
+#include "unittest/catch.h"
 #include "utils/utils.h"
 
 #include "optionsStub.h"
 
 using std::string;
+
+using gsl::czstring;
 
 using execHelper::config::SettingsNode;
 using execHelper::core::Command;
@@ -23,16 +26,16 @@ using execHelper::test::utils::copyAndAppend;
 using execHelper::core::test::ExecutorStub;
 
 namespace {
-    const string lcovConfigKey("lcov");
+    const czstring<> lcovConfigKey("lcov");
 
     void checkMemories(const MemoryHandler& memory, const Command& command) {
-        const MemoryHandler::Memories memories = memory.getExecutions();
+        const MemoryHandler::Memories& memories = memory.getExecutions();
         REQUIRE(memories.size() == 1U);
         for(const auto& memoryElement : memories) {
             REQUIRE(memoryElement.command == command);
         }
     }
-}
+} // namespace
 
 namespace execHelper { namespace plugins { namespace test {
     SCENARIO("Test the default options of the lcov plugin", "[plugins][lcov]") {
@@ -386,4 +389,6 @@ namespace execHelper { namespace plugins { namespace test {
             }
         }
     }
-} } }
+} // namespace test
+} // namespace plugins
+} // namespace execHelper

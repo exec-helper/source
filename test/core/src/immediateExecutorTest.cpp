@@ -14,8 +14,8 @@ using execHelper::core::ImmediateExecutor;
 using execHelper::core::Shell;
 
 namespace {
-    ImmediateExecutor::Callback IGNORE_CALLBACK = [](Shell::ShellReturnCode /* returnCode */) {};
-}
+    ImmediateExecutor::Callback IGNORE_CALLBACK = [](Shell::ShellReturnCode /* returnCode */) noexcept {};  // NOLINT(cert-err58-cpp)
+} // namespace
 
 namespace execHelper { namespace core {
     namespace test {
@@ -68,5 +68,6 @@ namespace execHelper { namespace core {
                 }
             }
         }
-    }
-} }
+    } // namespace test
+} // namespace core
+} // namespace execHelper

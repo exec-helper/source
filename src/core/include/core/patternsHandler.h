@@ -22,7 +22,7 @@ namespace execHelper {
             private:
                 PatternCollection m_patterns;
         };
-    }
-}
+    } // namespace core
+} // namespace execHelper
 
 #endif  /* __PATTERNS_HANDLER_H__ */

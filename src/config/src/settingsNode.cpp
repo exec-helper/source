@@ -1,10 +1,12 @@
 #include "settingsNode.h"
 
 #include <iostream>
+#include <memory>
 #include <ostream>
 
-#include <log/assert.h>
+#include <log/assertions.h>
 
+using std::make_unique;
 using std::string;
 using std::initializer_list;
 
@@ -128,7 +130,7 @@ namespace execHelper {
 
         bool SettingsNode::add(const SettingsValue& newValue) noexcept {
             if(!m_values) {
-                m_values.reset(new SettingsNodeCollection());
+                m_values = make_unique<SettingsNodeCollection>();
             }
             m_values->emplace_back(SettingsNode(newValue));
             return true;
@@ -160,7 +162,7 @@ namespace execHelper {
 
         bool SettingsNode::add(const SettingsValues& newValues) noexcept {
             if(!m_values) {
-                m_values.reset(new SettingsNodeCollection());
+                m_values = make_unique<SettingsNodeCollection>();
             }
             m_values->reserve(m_values->size() + newValues.size());
             for(const auto& newValue : newValues) {
@@ -232,7 +234,7 @@ namespace execHelper {
             if(!other.m_values) {
                 return;
             }
-            m_values.reset(new SettingsNodeCollection());
+            m_values = make_unique<SettingsNodeCollection>();
 
             SettingsNode::SettingsValues otherValues = other.values();
             m_values->reserve(otherValues.size());
@@ -249,6 +251,6 @@ namespace execHelper {
             }
             return os;
         }
-    } // config
-} // execHelper
+    } // namespace config
+} // namespace execHelper
 

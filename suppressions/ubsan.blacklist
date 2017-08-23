@@ -1,0 +1,2 @@
+src:.*/boost/smart_ptr/detail/*
+src:.*/boost/log/*

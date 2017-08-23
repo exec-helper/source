@@ -3,7 +3,6 @@
 #include "config/settingsNode.h"
 #include "core/options.h"
 #include "core/task.h"
-#include "log/log.h"
 
 #include "bootstrap.h"
 #include "clangStaticAnalyzer.h"
@@ -11,6 +10,7 @@
 #include "commandLineCommand.h"
 #include "cppcheck.h"
 #include "lcov.h"
+#include "logger.h"
 #include "make.h"
 #include "memory.h"
 #include "plugin.h"
@@ -96,4 +96,5 @@ namespace execHelper { namespace plugins {
         }
         return unique_ptr<Plugin>();
     }
-} }
+} // namespace plugins
+} // namespace execHelper

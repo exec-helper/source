@@ -3,7 +3,7 @@
 
 #include <tuple>
 
-#include <log/assert.h>
+#include <log/assertions.h>
 
 #include "createObject.h"
 

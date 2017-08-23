@@ -1,9 +1,9 @@
 #include "commandPlugin.h"
 
 #include "config/settingsNode.h"
-#include "log/log.h"
 
 #include "executePlugin.h"
+#include "logger.h"
 #include "pluginUtils.h"
 
 using std::string;
@@ -24,4 +24,5 @@ namespace execHelper { namespace plugins {
         ExecutePlugin executePlugin({command});
         return executePlugin.apply(command, task, options);
     }
-} }
+} // namespace plugins
+} // namespace execHelper

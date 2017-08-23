@@ -8,8 +8,6 @@
 
 #include <boost/filesystem/fstream.hpp>
 
-#include "log/log.h"
-
 #include "core/execHelperOptions.h"
 #include "core/patternsHandler.h"
 
@@ -496,5 +494,6 @@ namespace execHelper { namespace core {
                 }
             }
         }
-    }
-} }
+    } // namespace test
+} // namespace core
+} // namespace execHelper

@@ -21,6 +21,7 @@ namespace execHelper { namespace core {
             ("settings-file,s", value<string>(), "Set settings file")
             ("single-threaded,u", "Set single threaded")
             ("dry-run,n", "Dry run exec-helper")
+            ("debug,d", value<string>(), "Set debug logging")
         ;
     }
 
@@ -42,4 +43,5 @@ namespace execHelper { namespace core {
         notify(optionsMap);
         return optionsMap;
     }
-} }
+} // namespace core
+} // namespace execHelper

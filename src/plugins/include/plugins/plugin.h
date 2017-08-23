@@ -7,8 +7,8 @@ namespace execHelper {
     namespace core {
         class Task;
         class Options;
-    }
-}
+    } // namespace core
+} // namespace execHelper
 
 namespace execHelper {
     namespace plugins {
@@ -48,7 +48,7 @@ namespace execHelper {
          *          False   Otherwise
          */
         bool registerTask(const core::Task& task, const core::Options& options) noexcept;
-    }
-}
+    } // namespace plugins
+} // namespace execHelper
 
 #endif /* __PLUGIN_H__ */

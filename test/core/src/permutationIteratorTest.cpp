@@ -111,7 +111,7 @@ namespace {
         }
         REQUIRE(orderedCombinationsIndex == orderedCombinations.size());
     }
-}
+} // namespace
 
 namespace execHelper { namespace core { namespace test {
     SCENARIO("Test the permutation iterators when looping over the entire collection", "[permutationiterator]") {
@@ -125,7 +125,7 @@ namespace execHelper { namespace core { namespace test {
                 }
                 THEN("We should be able to do so using iterators") {
                     size_t orderedCombinationsIndex = 0U;
-                    for(auto it = permute.begin(); it != permute.end(); ++it) {
+                    for(auto it = permute.begin(); it != permute.end(); ++it) {     // NOLINT(modernize-loop-convert)
                         REQUIRE(orderedCombinationsIndex < orderedCombinations.size());
                         REQUIRE(*it == orderedCombinations[orderedCombinationsIndex]);
                         ++orderedCombinationsIndex;
@@ -151,7 +151,7 @@ namespace execHelper { namespace core { namespace test {
                 }
                 THEN("We should be able to do so using iterators") {
                     size_t orderedCombinationsIndex = 0U;
-                    for(auto it = permute.begin(); it != permute.end(); ++it) {
+                    for(auto it = permute.begin(); it != permute.end(); ++it) {     // NOLINT(modernize-loop-convert)
                         REQUIRE(orderedCombinationsIndex < orderedCombinations.size());
                         REQUIRE(*it == orderedCombinations[orderedCombinationsIndex]);
                         ++orderedCombinationsIndex;
@@ -247,4 +247,6 @@ namespace execHelper { namespace core { namespace test {
             }
         }
     }
-} } }
+} // namespace test
+} // namespace core
+} // namespace execHelper

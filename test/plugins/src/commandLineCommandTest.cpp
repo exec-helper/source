@@ -3,6 +3,7 @@
 #include <vector>
 
 #include <boost/filesystem.hpp>
+#include <gsl/string_span>
 
 #include "config/settingsNode.h"
 #include "core/task.h"
@@ -18,6 +19,7 @@ using std::string;
 using std::vector;
 
 using boost::filesystem::current_path;
+using gsl::czstring;
 
 using execHelper::config::SettingsNode;
 using execHelper::core::Task;
@@ -34,10 +36,10 @@ using execHelper::test::utils::addPatterns;
 using execHelper::test::combinationHelpers::setEnvironment;
 
 namespace {
-    const string PLUGIN_CONFIG_KEY("command-line-command");
-    const string WORKING_DIR_KEY("working-dir");
-    const string CURRENT_DIR_WORKING_DIR_KEY("<working-dir>");
-}
+    const czstring<> PLUGIN_CONFIG_KEY("command-line-command");
+    const czstring<> WORKING_DIR_KEY("working-dir");
+    const czstring<> CURRENT_DIR_WORKING_DIR_KEY("<working-dir>");
+} // namespace
 
 namespace execHelper { namespace plugins { namespace test {
     SCENARIO("Testing the configuration settings of the command-line-command plugin", "[plugins][commandLineCommand]") {
@@ -160,4 +162,6 @@ namespace execHelper { namespace plugins { namespace test {
             }
         }
     }
-} } }
+} // namespace test
+} // namespace plugins
+} // namespace execHelper

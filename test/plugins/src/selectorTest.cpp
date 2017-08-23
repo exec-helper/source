@@ -39,7 +39,7 @@ namespace {
     }
 
     void checkMemories(const MemoryHandler& memory) {
-        const MemoryHandler::Memories memories = memory.getExecutions();
+        const MemoryHandler::Memories& memories = memory.getExecutions();
         for(size_t i = 0; i < memories.size(); ++i) {
             for(size_t j = 0; j < i; ++j) {
                 // Note: tasks should point to different objects, but since
@@ -51,7 +51,7 @@ namespace {
             }
         }
     }
-}
+} // namespace
 
 namespace execHelper { namespace plugins { namespace test {
     SCENARIO("Testing the default selector settings", "[plugins][selector]") {
@@ -100,7 +100,7 @@ namespace execHelper { namespace plugins { namespace test {
                     REQUIRE(returnCode);
                 }
                 THEN("All default actions should be executed") {
-                    const Memory::Memories memories = memory.getExecutions();
+                    const Memory::Memories& memories = memory.getExecutions();
                     REQUIRE(memories.size() == selectionOptions1.size());
                     for(size_t i = 0; i < selectionOptions1.size(); ++i) {
                         REQUIRE(memories[i].command == command1);
@@ -117,7 +117,7 @@ namespace execHelper { namespace plugins { namespace test {
                     REQUIRE(returnCode);
                 }
                 THEN("All default actions should be executed") {
-                    const Memory::Memories memories = memory.getExecutions();
+                    const Memory::Memories& memories = memory.getExecutions();
                     REQUIRE(memories.size() == selectionOptions2.size());
                     for(size_t i = 0; i < selectionOptions2.size(); ++i) {
                         REQUIRE(memories[i].command == command2);
@@ -164,7 +164,7 @@ namespace execHelper { namespace plugins { namespace test {
 
                 THEN("All actions defined on the command line should be executed") {
                     ExecutorStub::TaskQueue executedTasks = options.m_executor.getExecutedTasks();
-                    const Memory::Memories memories = memory.getExecutions();
+                    const Memory::Memories& memories = memory.getExecutions();
                     REQUIRE(memories.size() == commandLineOptions1.size());
                     for(size_t i = 0; i < commandLineOptions1.size(); ++i) {
                         REQUIRE(memories[i].command == commandlineCommand1);
@@ -179,7 +179,7 @@ namespace execHelper { namespace plugins { namespace test {
 
                 THEN("All actions defined on the command line should be executed") {
                     ExecutorStub::TaskQueue executedTasks = options.m_executor.getExecutedTasks();
-                    const Memory::Memories memories = memory.getExecutions();
+                    const Memory::Memories& memories = memory.getExecutions();
                     REQUIRE(memories.size() == commandLineOptions2.size());
                     for(size_t i = 0; i < commandLineOptions2.size(); ++i) {
                         REQUIRE(memories[i].command == commandlineCommand2);
@@ -212,10 +212,12 @@ namespace execHelper { namespace plugins { namespace test {
                     REQUIRE_FALSE(returnCode);
                 }
                 THEN("All default actions should be executed") {
-                    const Memory::Memories memories = memory.getExecutions();
+                    const Memory::Memories& memories = memory.getExecutions();
                     REQUIRE(memories.empty());
                 }
             }
         }
     }
-} } }
+} // namespace test
+} // namespace plugins
+} // namespace execHelper

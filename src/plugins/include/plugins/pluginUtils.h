@@ -15,11 +15,11 @@ namespace execHelper {
     namespace core {
         class TargetDescriptionElement;
         class CompilerDescriptionElement;
-    }
+    } // namespace core
     namespace plugins {
         class Plugin;
-    }
-}
+    } // namespace plugins
+} // namespace execHelper
 
 namespace execHelper {
     namespace plugins {
@@ -34,13 +34,12 @@ namespace execHelper {
         core::EnvironmentCollection getEnvironment(const core::Command& command, const config::SettingsNode& rootSettings) noexcept;
         boost::optional<config::Path> getWorkingDir(const core::Command& command, const config::SettingsNode& rootSettings) noexcept;
 
-        void replacePatternCombinations(core::TaskCollection& commandArguments, const core::PatternCombinations& patternCombinations) noexcept;
         core::Task replacePatternCombinations(const core::Task& task, const core::PatternCombinations& patternCombinations) noexcept;
 
         boost::optional<std::string> getConfigurationSetting(const std::string& command, const config::SettingsNode& rootSettings, const std::string& configKey, const std::string& prepend = std::string()) noexcept;
         boost::optional<core::TaskCollection> getConfigurationSettings(const std::string& command, const config::SettingsNode& rootSettings, const std::string& configKey) noexcept;
         core::PatternPermutator makePatternPermutator(const core::Command& command, const config::SettingsNode& rootSettings, const core::Options& options) noexcept;
-    }
-}
+    } // namespace plugins
+} // namespace execHelper
 
 #endif  /* __PLUGIN_UTILS_H__ */

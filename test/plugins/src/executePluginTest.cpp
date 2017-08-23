@@ -62,7 +62,7 @@ namespace {
         auto* derived = dynamic_cast<T*>(plugin.get());  // derived will be a nullptr if the cast fails
         return (derived != nullptr);
     }
-}
+} // namespace
 
 namespace execHelper { namespace plugins { namespace test {
     SCENARIO("Testing the default execute settings", "[plugins][execute]") {
@@ -103,19 +103,19 @@ namespace execHelper { namespace plugins { namespace test {
                     REQUIRE(returnCode);
                 }
                 THEN("All default actions should be executed") {
-                    const Memory::Memories memories = memory.getExecutions();
+                    const Memory::Memories memories = memory.getExecutions();   // NOLINT(performance-unnecessary-copy-initialization)
                     REQUIRE(memories.size() == selectionOptions.size());
                     for(size_t i = 0; i < selectionOptions.size(); ++i) {
                         REQUIRE(memories[i].command == command);
                     }
                 }
                 THEN("They should be called with the appropriate values") {
-                    const Memory::Memories memories = memory.getExecutions();
+                    const Memory::Memories& memories = memory.getExecutions();
                     for(size_t i = 0; i < memories.size(); ++i) {
                         for(size_t j = 0; j < i; ++j) {
                             REQUIRE(memories[i].command == memories[j].command);
-                            REQUIRE(memories[i].task == memories[j].task);
                             REQUIRE(memories[i].options == memories[j].options);
+                            REQUIRE(memories[i].task == memories[j].task);
                         }
                     }
                 }
@@ -184,4 +184,6 @@ namespace execHelper { namespace plugins { namespace test {
             }
         }
     }
-} } }
+} // namespace test
+} // namespace plugins
+} // namespace execHelper

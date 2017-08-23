@@ -1,6 +1,8 @@
 #include <string>
 #include <vector>
 
+#include <gsl/string_span>
+
 #include "core/execHelperOptions.h"
 #include "plugins/bootstrap.h"
 #include "plugins/pluginUtils.h"
@@ -11,6 +13,8 @@
 #include "optionsStub.h"
 
 using std::string;
+
+using gsl::czstring;
 
 using execHelper::core::Task;
 using execHelper::core::TaskCollection;
@@ -27,8 +31,8 @@ using execHelper::test::utils::Patterns;
 using execHelper::test::utils::addPatterns;
 
 namespace {
-    const string pluginConfigKey("bootstrap");
-}
+    czstring<> pluginConfigKey("bootstrap");
+} // namespace
 
 namespace execHelper { namespace plugins { namespace test {
     SCENARIO("Test the combination of several settings for the bootstrap plugin", "[plugins][bootstrap]") {
@@ -139,4 +143,6 @@ namespace execHelper { namespace plugins { namespace test {
             }
         }
     }
-} } }
+} // namespace test
+} // namespace plugins
+} // namespace execHelper

@@ -5,8 +5,9 @@
 
 #include "core/options.h"
 #include "core/task.h"
-#include "log/log.h"
 #include "plugins/commandPlugin.h"
+
+#include "logger.h"
 
 using std::move;
 

@@ -3,6 +3,7 @@ set(LIBRARY_NAME ${PROJECT_NAME}-${MODULE_NAME})
 
 set(SRCS
     src/commander.cpp
+    src/logger.cpp
    )
 
 set(DEPENDENCIES
@@ -10,6 +11,13 @@ set(DEPENDENCIES
         core
         plugins
     )
+
+set(LIBRARY_LINKED_LIBS
+    ${${PROJECT_NAME}-plugins_LIBRARIES}
+    ${${PROJECT_NAME}-core_LIBRARIES}
+    ${${PROJECT_NAME}-log_LIBRARIES}
+
+)
 
 include_directories(
         include/commander

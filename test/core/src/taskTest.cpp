@@ -39,7 +39,7 @@ namespace {
         trim_right(result);
         return result;
     }
-}
+} // namespace
 
 namespace execHelper { namespace core {
     namespace test {
@@ -295,5 +295,6 @@ namespace execHelper { namespace core {
                 }
             }
         }
-    }
-} }
+    } // namespace test
+} // namespace core
+} // namespace execHelper

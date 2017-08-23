@@ -3,7 +3,15 @@
 #include <cstring>
 #include <string>
 
+#include <gsl/span>
+#include <gsl/string_span>
+
+#include "log/assertions.h"
+
 using std::string;
+
+using gsl::czstring;
+using gsl::span;
 
 namespace execHelper {
     namespace core {
@@ -50,9 +58,18 @@ namespace execHelper {
         void Envp::swap(Envp& other) noexcept {
             m_envp.swap(other.m_envp);
         }
+        
+        size_t Envp::size() const noexcept {
+            ensures(m_envp.size() > 0U);
+            return m_envp.size() - 1U;
+        }
 
         char** Envp::getEnvp() noexcept {
-            return &m_envp[0];
+            return &m_envp.at(0);
+        }
+
+        const char* const * Envp::getEnvp() const noexcept {
+            return &m_envp.at(0);
         }
 
         void Envp::deepCopy(const Envp& other) noexcept {
@@ -63,5 +80,19 @@ namespace execHelper {
                 m_envp.emplace_back(newArg);
             }
         }
-    } // core
-} // execHelper
+
+        std::ostream& operator<<(std::ostream& os, const Envp& envp) noexcept {
+            const span<const czstring<>> envs(envp.getEnvp(), envp.size());
+            bool firstIteration = true;
+            for(const auto& env : envs) {
+                if(!firstIteration) {
+                    os << " ";
+                } else {
+                    firstIteration = false;
+                }
+                os << env;
+            }
+            return os;
+        }
+    } // namespace core
+} // namespace execHelper

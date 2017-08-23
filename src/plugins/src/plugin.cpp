@@ -8,4 +8,5 @@ namespace execHelper { namespace plugins {
     bool registerTask(const Task& task, const Options& options) noexcept {
         return options.getExecutor()->execute(task);
     }
-} }
+} // namespace plugins
+} // namespace execHelper

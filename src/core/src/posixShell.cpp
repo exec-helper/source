@@ -10,11 +10,12 @@
 #include <wordexp.h>
 
 #include "boost/filesystem.hpp"
-
-#include "log/log.h"
+#include "gsl/span"
+#include "gsl/string_span"
 
 #include "argv.h"
 #include "envp.h"
+#include "logger.h"
 #include "task.h"
 
 using std::string;
@@ -23,12 +24,12 @@ using std::numeric_limits;
 using boost::filesystem::current_path;
 using boost::system::error_code;
 using boost::system::errc::success;
+using gsl::zstring;
+using gsl::span;
 
 namespace {
     const execHelper::core::PosixShell::ShellReturnCode POSIX_SUCCESS = 0U;
-}
-
-extern char** environ;
+} // namespace
 
 namespace execHelper { namespace core {
     PosixShell::ShellReturnCode PosixShell::execute(const Task& task) noexcept {
@@ -51,20 +52,23 @@ namespace execHelper { namespace core {
 
         // Change to the correct working directory
         error_code error;
-        LOG("Changing to directory " << task.getWorkingDirectory() << "...");
+        LOG(info) << "Changing to directory " << task.getWorkingDirectory() << "...";
         current_path(task.getWorkingDirectory(), error);
         if(error != success) {
-            LOG("Could not change to directory " << task.getWorkingDirectory() << " (" << error << ")");
+           LOG(error) << "Could not change to directory " << task.getWorkingDirectory() << " (" << error << ")";
             _exit(127);
         }
 
         TaskCollection taskCollection = shellExpand(task);
-        Argv argv(taskCollection);
         Envp envp(task.getEnvironment());
+        LOG(debug) << "Environment: \"" << envp << "\"";
+
+        Argv argv(taskCollection);
+        LOG(debug) << "Executing \"" << argv << "\"";
 
         // A full copy of m_env is not required, since it is used in a separate process
         if ((returnCode = execvpe(argv[0], argv.getArgv(), envp.getEnvp())) == -1) {
-            LOG("Could not execvpe command: " << strerror(errno) << " (" << errno << ")"); 
+            LOG(error) << "Could not execvpe command: " << strerror(errno) << " (" << errno << ")"; 
         }
 
         // execvp only returns if something goes wrong
@@ -76,12 +80,12 @@ namespace execHelper { namespace core {
         int status;
         while ((ret = waitpid(pid, &status, 0)) == -1) {
             if (errno != EINTR) {
-                LOG("Child exited with error state");
+                LOG(error) << "Child exited with error state";
                 break;
             }
         }
         if(ret == -1) {
-            LOG("Error executing command");
+            LOG(error) << "Error executing command";
             return std::numeric_limits<PosixShell::ShellReturnCode>::max();
         }
         if(status == 0) {
@@ -90,7 +94,7 @@ namespace execHelper { namespace core {
         if (WIFEXITED(status) && WEXITSTATUS(status)) {
             return WEXITSTATUS(status);
         }
-        LOG("Child exited with unexpected child status: " << status);
+        LOG(error) << "Child exited with unexpected child status: " << status;
         return status;
     }
 
@@ -111,9 +115,8 @@ namespace execHelper { namespace core {
             wordexp_t p{};
             size_t returnCode = wordexp(taskItem.c_str(), &p, WRDE_SHOWERR | WRDE_UNDEF);
             if(returnCode == 0) {
-                char** w = p.we_wordv;
-                for (size_t i = 0; i < p.we_wordc; i++) {
-                    string expandedWord(w[i]);
+                span<zstring<>> w(p.we_wordv, p.we_wordc);
+                for(const auto& expandedWord : w) {
                     result.emplace_back(expandedWord);
                 }
             } else {
@@ -138,4 +141,5 @@ namespace execHelper { namespace core {
         environ = cached_environ;
         return result;
     }
-} }
+} // namespace core
+} // namespace execHelper

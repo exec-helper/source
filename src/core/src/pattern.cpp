@@ -42,4 +42,5 @@ namespace execHelper { namespace core {
     const string& Pattern::getLongOption() const noexcept {
         return m_longOption;
     }
-} }
+} // namespace core
+} // namespace execHelper

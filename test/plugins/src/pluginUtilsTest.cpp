@@ -30,7 +30,7 @@ namespace execHelper { namespace plugins { namespace test {
             string correctPatternsKey("patterns");
 
             WHEN("We get the patterns key") {
-                string actualPatternsKey = getPatternsKey();
+                const string& actualPatternsKey = getPatternsKey();
 
                 THEN("They should match") {
                     REQUIRE(actualPatternsKey == correctPatternsKey); 
@@ -247,7 +247,7 @@ namespace execHelper { namespace plugins { namespace test {
             string correctEnvironmentKey("environment");
 
             WHEN("We get the environment key") {
-                string actualEnvironmentKey = getEnvironmentKey();
+                const string& actualEnvironmentKey = getEnvironmentKey();
 
                 THEN("They should match") {
                     REQUIRE(actualEnvironmentKey == correctEnvironmentKey); 
@@ -259,7 +259,7 @@ namespace execHelper { namespace plugins { namespace test {
     SCENARIO("Test getting the environment", "[plugins][pluginUtils]") {
         MAKE_COMBINATIONS("Of several environment settings") {
             const string command("environment-command");
-            const string environmentKey(getEnvironmentKey());
+            const string& environmentKey = getEnvironmentKey();
 
             SettingsNode rootSettings("plugin-key");
             const string otherCommandKey("other-command");
@@ -301,7 +301,7 @@ namespace execHelper { namespace plugins { namespace test {
             string correctWorkingDirKey("working-dir");
 
             WHEN("We get the working directory key") {
-                string actualWorkingDirKey = getWorkingDirKey();
+                const string& actualWorkingDirKey = getWorkingDirKey();
 
                 THEN("They should match") {
                     REQUIRE(actualWorkingDirKey == correctWorkingDirKey);
@@ -309,4 +309,6 @@ namespace execHelper { namespace plugins { namespace test {
             }
         }
     }
-} } }
+} // namespace test
+} // namespace plugins
+} // namespace execHelper

@@ -1,18 +1,21 @@
-#include <catch.hpp>
-
 #include <string>
 #include <vector>
+
+#include <gsl/string_span>
 
 #include "core/pattern.h"
 #include "core/task.h"
 #include "plugins/memory.h"
 #include "plugins/valgrind.h"
+#include "unittest/catch.h"
 #include "utils/utils.h"
 
 #include "optionsStub.h"
 
 using std::vector;
 using std::string;
+
+using gsl::czstring;
 
 using execHelper::config::SettingsNode;
 using execHelper::core::Task;
@@ -27,8 +30,8 @@ using execHelper::test::utils::PATTERN2;
 using execHelper::test::utils::PATTERNS;
 
 namespace {
-    const string valgrindConfigKey("valgrind");
-}
+    const czstring<> valgrindConfigKey("valgrind");
+} // namespace
 
 namespace execHelper { namespace plugins { namespace test {
     SCENARIO("Test the default options of the valgrind plugin", "[plugins][valgrind]") {
@@ -318,4 +321,6 @@ namespace execHelper { namespace plugins { namespace test {
             }
         }
     }
-} } }
+} // namespace test
+} // namespace plugins
+} // namespace execHelper

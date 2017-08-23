@@ -17,7 +17,9 @@ namespace execHelper {
 
                 void swap(Envp& other) noexcept;
 
+                size_t size() const noexcept;
                 char** getEnvp() noexcept;
+                const char* const * getEnvp() const noexcept;
 
             private:
                 using Envp_t = std::vector<char*>;
@@ -26,7 +28,9 @@ namespace execHelper {
 
                 Envp_t m_envp;
         };
-    } // core
-} // execHelper
+
+        std::ostream& operator<<(std::ostream& os, const Envp& argv) noexcept;
+    } // namespace core
+} // namespace execHelper
 
 #endif  /* ENVP_INCLUDES */

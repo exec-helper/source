@@ -7,9 +7,9 @@
 #include "core/patterns.h"
 #include "core/patternsHandler.h"
 #include "core/task.h"
-#include "log/log.h"
 
 #include "configValue.h"
+#include "logger.h"
 #include "pluginUtils.h"
 
 using std::string;
@@ -54,4 +54,5 @@ namespace execHelper { namespace plugins {
         }
         return "./" + filename;
     }
-} }
+} // namespace plugins
+} // namespace execHelper

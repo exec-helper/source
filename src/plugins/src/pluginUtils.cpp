@@ -8,12 +8,12 @@
 
 #include "config/settingsNode.h"
 #include "core/patterns.h"
-#include "log/log.h"
 
 #include "bootstrap.h"
 #include "clangStaticAnalyzer.h"
 #include "commandLineCommand.h"
 #include "cppcheck.h"
+#include "logger.h"
 #include "make.h"
 #include "scons.h"
 
@@ -74,14 +74,6 @@ namespace execHelper { namespace plugins {
         return replacedTask;
     }
 
-    void replacePatternCombinations(TaskCollection& commandArguments, const PatternCombinations& patternCombinations) noexcept {
-        for(auto& argument : commandArguments) {
-            for(const auto& pattern : patternCombinations) {
-                argument = replacePatterns(argument, pattern.first, pattern.second);
-            }
-        }
-    }
-
     boost::optional<const SettingsNode&> getContainingSettings(const string& key, const SettingsNode& rootSettings, const vector<string>& configKeys) noexcept {
         const SettingsNode* settings = &rootSettings;
         for(const auto& configKey : configKeys) {
@@ -102,7 +94,11 @@ namespace execHelper { namespace plugins {
 
     TaskCollection getCommandLine(const Command& command, const SettingsNode& rootSettings, const PatternCombinations& patternCombinations) noexcept {
         TaskCollection commandArguments = getCommandLine(command, rootSettings);
-        replacePatternCombinations(commandArguments, patternCombinations);
+        for(auto& argument : commandArguments) {
+            for(const auto& pattern : patternCombinations) {
+                argument = replacePatterns(argument, pattern.first, pattern.second);
+            }
+        }
         return commandArguments;
     }
 
@@ -175,4 +171,5 @@ namespace execHelper { namespace plugins {
         }
         return options.makePatternPermutator(patternKeys.get());
     }
-} }
+} // namespace plugins
+} // namespace execHelper

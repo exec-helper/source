@@ -1,5 +1,7 @@
 #include <string>
 
+#include <gsl/string_span>
+
 #include "config/settingsNode.h"
 #include "core/execHelperOptions.h"
 #include "core/pattern.h"
@@ -11,6 +13,8 @@
 #include "optionsStub.h"
 
 using std::string;
+
+using gsl::czstring;
 
 using execHelper::config::SettingsNode;
 using execHelper::core::test::ExecutorStub;
@@ -26,9 +30,9 @@ using execHelper::test::utils::CompilerUtil;
 using execHelper::test::utils::copyAndAppend;
 
 namespace {
-    const string PLUGIN_CONFIG_KEY("cppcheck");
-    const string PLUGIN_COMMAND("cppcheck");
-}
+    const czstring<> PLUGIN_CONFIG_KEY("cppcheck");
+    const czstring<> PLUGIN_COMMAND("cppcheck");
+} // namespace
 
 namespace execHelper { namespace plugins { namespace test {
     SCENARIO("Testing the configuration settings of the cppcheck plugin", "[plugins][cppcheck]") {
@@ -119,4 +123,6 @@ namespace execHelper { namespace plugins { namespace test {
             }
         }
     }
-} } }
+} // namespace test
+} // namespace plugins
+} // namespace execHelper

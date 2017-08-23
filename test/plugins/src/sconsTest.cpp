@@ -1,5 +1,7 @@
 #include <string>
 
+#include <gsl/string_span>
+
 #include "core/pattern.h"
 #include "plugins/pluginUtils.h"
 #include "plugins/scons.h"
@@ -10,6 +12,8 @@
 #include "optionsStub.h"
 
 using std::string;
+
+using gsl::czstring;
 
 using execHelper::config::SettingsNode;
 using execHelper::core::Task;
@@ -24,9 +28,9 @@ using execHelper::test::utils::Patterns;
 using execHelper::test::utils::addPatterns;
 
 namespace {
-    const string PLUGIN_CONFIG_KEY("scons");
-    const string PLUGIN_COMMAND("scons");
-}
+    const czstring<> PLUGIN_CONFIG_KEY("scons");
+    const czstring<> PLUGIN_COMMAND("scons");
+} // namespace
 
 namespace execHelper { namespace plugins { namespace test {
     SCENARIO("Testing the configuration settings of the scons plugin", "[plugins][scons]") {
@@ -113,4 +117,6 @@ namespace execHelper { namespace plugins { namespace test {
             }
         }
     }
-} } }
+} // namespace test
+} // namespace plugins
+} // namespace execHelper

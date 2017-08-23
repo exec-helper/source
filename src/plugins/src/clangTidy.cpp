@@ -1,8 +1,7 @@
 #include "clangTidy.h"
 
-#include "log/log.h"
-
 #include "configValue.h"
+#include "logger.h"
 #include "pluginUtils.h"
 
 using std::string;
@@ -12,10 +11,6 @@ using execHelper::core::Options;
 using execHelper::core::Command;
 using execHelper::core::Task;
 using execHelper::core::TaskCollection;
-
-namespace {
-}
-
 
 namespace execHelper { namespace plugins {
     bool ClangTidy::apply(const Command& command, Task task, const Options& options) const noexcept {
@@ -107,4 +102,5 @@ namespace execHelper { namespace plugins {
         result += checks.back();
         return result;
     }
-} }
+} // namespace plugins
+} // namespace execHelper

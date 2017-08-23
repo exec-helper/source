@@ -18,19 +18,19 @@ using execHelper::config::Path;
 namespace execHelper {
 namespace test {
 namespace utils {
-    TmpFile::TmpFile() noexcept :
+    TmpFile::TmpFile() :
         m_path(temp_directory_path() / unique_path())
     {
         ;
     }
 
-    TmpFile::TmpFile(const std::string& filename) noexcept :
+    TmpFile::TmpFile(const std::string& filename) :
         m_path(filename)
     {
         ;
     }
 
-    TmpFile::TmpFile(const Path& directory) noexcept :
+    TmpFile::TmpFile(const Path& directory) :
         m_path(directory / unique_path()) 
     {
         ;

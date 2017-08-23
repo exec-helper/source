@@ -7,9 +7,9 @@
 #include "core/options.h"
 #include "core/patterns.h"
 #include "core/task.h"
-#include "log/log.h"
 
 #include "configValue.h"
+#include "logger.h"
 #include "pluginUtils.h"
 
 using std::string;
@@ -67,4 +67,5 @@ namespace execHelper { namespace plugins {
         result += enabledChecks.back();
         return result;
     }
-} }
+} // namespace plugins
+} // namespace execHelper

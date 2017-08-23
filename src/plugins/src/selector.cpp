@@ -4,10 +4,10 @@
 
 #include "config/settingsNode.h"
 #include "core/pattern.h"
-#include "log/log.h"
 
 #include "configValue.h"
 #include "executePlugin.h"
+#include "logger.h"
 
 using std::string;
 using std::vector;
@@ -40,4 +40,5 @@ namespace execHelper { namespace plugins {
         ExecutePlugin executePlugin(commandsToExecute);
         return executePlugin.apply(command, task, options);
     }
-} }
+} // namespace plugins
+} // namespace execHelper

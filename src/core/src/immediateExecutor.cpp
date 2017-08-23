@@ -27,4 +27,5 @@ namespace execHelper { namespace core {
         return true;
 
     }
-} }
+} // namespace core
+} // namespace execHelper

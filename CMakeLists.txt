@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.1)
 
-project(exec-helper)
+project(exec-helper
+        LANGUAGES CXX)
 
 include(GNUInstallDirs)
 
@@ -13,6 +14,10 @@ set(ENV{PKG_CONFIG_SYSROOT_DIR} ${CMAKE_FIND_ROOT_PATH})
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+
+option(POSITION_INDEPENDENT_CODE "Create position independent code" ON)
+mark_as_advanced(POSITION_INDEPENDENT_CODE)
+set(CMAKE_POSITION_INDEPENDENT_CODE ${POSITION_INDEPENDENT_CODE})
 
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
     add_definitions(-Wall -Wextra -Werror)

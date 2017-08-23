@@ -3,6 +3,7 @@ set(LIBRARY_NAME ${PROJECT_NAME}-${MODULE_NAME})
 
 set(SRCS    src/settingsNode.cpp
             src/configFileSearcher.cpp
+            src/logger.cpp
 )
 
 set(DEPENDENCIES

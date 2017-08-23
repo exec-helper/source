@@ -11,7 +11,7 @@ namespace std {
         }
         return os;
     }
-}
+} // namespace std
 
 #include <boost/optional/optional_io.hpp>
 #include <catch.hpp>
@@ -24,7 +24,7 @@ using std::ostream;
 
 using execHelper::config::SettingsNode;
 
-namespace execHelper { namespace core { namespace test {
+namespace execHelper { namespace config { namespace test {
     SCENARIO("Basic addition and getting of values", "[config][settingsNode]") {
         GIVEN("A basic setup") {
             const SettingsNode::SettingsKey rootKey("root-key");
@@ -469,4 +469,6 @@ namespace execHelper { namespace core { namespace test {
             }
         }
     }
-} } }
+} // namespace test
+} // namespace config
+} // namespace execHelper

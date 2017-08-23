@@ -4,7 +4,7 @@
 #include "config/settingsNode.h"
 #include "core/options.h"
 #include "core/patternsHandler.h"
-#include "log/assert.h"
+#include "log/assertions.h"
 
 #include "executorStub.h"
 
@@ -37,6 +37,10 @@ namespace execHelper {
 
                 bool getSingleThreaded() const noexcept override {
                     return m_singleThreaded;
+                }
+
+                boost::optional<log::LogLevel> getLogLevel() const noexcept override {
+                    return m_logLevel;
                 }
 
                 const core::CommandCollection& getCommands() const noexcept override {
@@ -124,6 +128,7 @@ namespace execHelper {
                 bool m_verbosity{false};
                 bool m_dryRun{false};
                 bool m_singleThreaded{false};
+                boost::optional<log::LogLevel> m_logLevel;
                 core::CommandCollection m_commands;
                 std::map<std::string, std::vector<std::string>> m_options;
                 config::SettingsNode m_settings{"OptionsStub"};

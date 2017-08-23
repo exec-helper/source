@@ -35,7 +35,7 @@ namespace execHelper {
             private:
                 YamlWrapper m_yaml;
         };
-    }
-}
+    } // namespace yaml
+} // namespace execHelper
 
 #endif  /*__YAML_H__*/

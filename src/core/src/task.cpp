@@ -28,7 +28,7 @@ namespace {
                     return string(a + delimiter + b);
 				});
     }
-}
+} // namespace
 
 namespace execHelper { namespace core {
 
@@ -136,4 +136,5 @@ namespace execHelper { namespace core {
         os << endl;
         return os;
     }
-} }
+} // namespace core
+} // namespace execHelper

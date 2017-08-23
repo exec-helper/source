@@ -4,6 +4,7 @@ set(LIBRARY_NAME ${PROJECT_NAME}-${MODULE_NAME})
 set(SRCS
     src/yamlWrapper.cpp
     src/yaml.cpp
+    src/logger.cpp
    )
 
 set(DEPENDENCIES

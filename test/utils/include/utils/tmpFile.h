@@ -8,9 +8,9 @@ namespace execHelper {
         namespace utils {
             class TmpFile {
                 public:
-                    TmpFile() noexcept;
-                    explicit TmpFile(const std::string& filename) noexcept;
-                    explicit TmpFile(const config::Path& directory) noexcept;
+                    TmpFile();
+                    explicit TmpFile(const std::string& filename);
+                    explicit TmpFile(const config::Path& directory);
                     
                     TmpFile(const TmpFile& other) = delete;
                     TmpFile(TmpFile&& other) noexcept = delete;

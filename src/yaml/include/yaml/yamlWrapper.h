@@ -51,7 +51,7 @@ namespace execHelper {
 
                 YAML::Node m_node;
         };
-    }
-}
+    } // namespace yaml
+} // namespace execHelper
 
 #endif  /* __YAML_WRAPPER_H__ */

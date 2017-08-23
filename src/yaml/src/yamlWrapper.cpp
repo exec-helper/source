@@ -5,7 +5,7 @@
 
 #include <yaml-cpp/yaml.h>
 
-#include "log/log.h"
+#include "logger.h"
 
 using std::initializer_list;
 using std::string;
@@ -67,7 +67,7 @@ namespace execHelper { namespace yaml {
             }
             return getTree(node, settings);
         } catch(YAML::Exception& e) {
-            LOG("YAML parser threw error: " << e.what());
+            LOG(error) << "YAML parser threw error: " << e.what();
             return false;
         }
     }
@@ -103,4 +103,5 @@ namespace execHelper { namespace yaml {
                 break;
         }
     }
-} }
+} // namespace yaml
+} // namespace execHelper

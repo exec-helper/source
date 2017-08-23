@@ -2,6 +2,8 @@
 #include <string>
 #include <vector>
 
+#include <gsl/string_span>
+
 #include "config/settingsNode.h"
 #include "plugins/clangTidy.h"
 #include "unittest/catch.h"
@@ -13,6 +15,8 @@
 using std::string;
 using std::vector;
 using std::map;
+
+using gsl::czstring;
 
 using execHelper::config::SettingsNode;
 using execHelper::core::Task;
@@ -26,11 +30,11 @@ using execHelper::test::utils::combineVectors;
 using execHelper::core::test::ExecutorStub;
 
 namespace {
-    const string PLUGIN_CONFIG_KEY("clang-tidy");
-    const string PLUGIN_COMMAND("clang-tidy");
-    const string SOURCES_KEY("sources");
-    const string WARNING_AS_ERROR_KEY("warnings-as-errors");
-    const string WARNING_AS_ERROR_INHERIT_KEY("all");
+    const czstring<> PLUGIN_CONFIG_KEY("clang-tidy");
+    const czstring<> PLUGIN_COMMAND("clang-tidy");
+    const czstring<> SOURCES_KEY("sources");
+    const czstring<> WARNING_AS_ERROR_KEY("warnings-as-errors");
+    const czstring<> WARNING_AS_ERROR_INHERIT_KEY("all");
 
     TaskCollection toChecks(const TaskCollection& taskCollection) noexcept {
         if(taskCollection.empty()) {
@@ -77,7 +81,7 @@ namespace {
             }
         }
     }
-}
+} // namespace
 
 namespace execHelper { namespace plugins { namespace test {
     SCENARIO("Testing the configuration settings of the clang-tidy plugin", "[plugins][clang-tidy]") {
@@ -253,4 +257,6 @@ namespace execHelper { namespace plugins { namespace test {
             }
         }
     }
-} } }
+} // namespace test
+} // namespace plugins
+} // namespace execHelper

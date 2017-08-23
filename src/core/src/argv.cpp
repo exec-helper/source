@@ -2,6 +2,12 @@
 
 #include <cstring>
 
+#include <gsl/span>
+#include <gsl/string_span>
+
+using gsl::czstring;
+using gsl::span;
+
 namespace execHelper { namespace core {
     Argv::Argv(const TaskCollection& task) noexcept {
         m_argv.reserve(task.size() + 1);
@@ -65,7 +71,25 @@ namespace execHelper { namespace core {
     }
 
     char** Argv::getArgv() noexcept {
-        return &m_argv[0];
+        return &m_argv.at(0);
     }
 
-} /* core */ } /* execHelper */
+    const char* const * Argv::getArgv() const noexcept {
+        return &m_argv.at(0);
+    }
+
+    std::ostream& operator<<(std::ostream& os, const Argv& argv) noexcept {
+        const span<const czstring<>> args(argv.getArgv(), argv.getArgc());
+        bool firstIteration = true;
+        for(const auto& arg : args) {
+            if(!firstIteration) {
+                os << " ";
+            } else {
+                firstIteration = false;
+            }
+            os << arg;
+        }
+        return os;
+    }
+} // namespace core
+} // namespace execHelper

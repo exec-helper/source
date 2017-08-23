@@ -2,6 +2,8 @@
 
 #include <string>
 
+#include <gsl/string_span>
+
 #include "core/pattern.h"
 #include "plugins/clangStaticAnalyzer.h"
 #include "plugins/memory.h"
@@ -12,6 +14,8 @@
 #include "optionsStub.h"
 
 using std::string;
+
+using gsl::czstring;
 
 using execHelper::config::SettingsNode;
 using execHelper::core::Task;
@@ -24,9 +28,9 @@ using execHelper::test::utils::addPatterns;
 using execHelper::test::utils::copyAndAppend;
 
 namespace {
-    const string PLUGIN_CONFIG_KEY("clang-static-analyzer");
-    const string PLUGIN_COMMAND("scan-build");
-}
+    const czstring<> PLUGIN_CONFIG_KEY("clang-static-analyzer");
+    const czstring<> PLUGIN_COMMAND("scan-build");
+} // namespace
 
 namespace execHelper { namespace plugins { namespace test {
     SCENARIO("Testing the configuration settings of the clang-static-analyzer plugin", "[plugins][clangStaticAnalyzer]") {
@@ -137,4 +141,6 @@ namespace execHelper { namespace plugins { namespace test {
             }
         }
     }
-} } }
+} // namespace test
+} // namespace plugins
+} // namespace execHelper

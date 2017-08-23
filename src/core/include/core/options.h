@@ -6,7 +6,10 @@
 #include <string>
 #include <vector>
 
+#include <boost/optional.hpp>
+
 #include "config/path.h"
+#include "log/log.h"
 
 #include "mapPermutator.h"
 #include "pattern.h"
@@ -15,12 +18,12 @@ namespace execHelper {
     namespace core {
         class ExecutorInterface;
         class PatternsHandler;
-    }
+    } // namespace core
 
     namespace config {
         class SettingsNode;
-    }
-}
+    } // namespace config
+} // namespace execHelper
 
 namespace execHelper {
     namespace core {
@@ -79,6 +82,14 @@ namespace execHelper {
                  *          False   Otherwise
                  */
                 virtual bool getSingleThreaded() const noexcept = 0;
+
+                /**
+                 * Returns the configured log level
+                 *
+                 * \returns The loglevel if it was explicitly set
+                 *          boost::none otherwise
+                 */
+                virtual boost::optional<log::LogLevel> getLogLevel() const noexcept = 0;
 
                 /**
                  * Returns the commands that were set on the command line
@@ -177,7 +188,7 @@ namespace execHelper {
                 Options& operator=(Options&& other) noexcept = default;
 
         };
-    }
-}
+    } // namespace core
+} // namespace execHelper
 
 #endif  /* __OPTIONS_H__ */

@@ -31,5 +31,5 @@ namespace execHelper {
         bool ConfigFileSearcher::fileExist(const Path& pathToCheck) noexcept {
             return exists(pathToCheck);
         }
-    } // config
-} // execHelper
+    } // namespace config
+} // namespace execHelper

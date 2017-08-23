@@ -1,12 +1,13 @@
 #include <cstdlib>
 #include <memory>
 #include <string>
+#include <vector>
 
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/optional/optional.hpp>
 
-#include "log/assert.h"
+#include "log/assertions.h"
 #include "log/log.h"
 #include "config/configFileSearcher.h"
 #include "core/execHelperOptions.h"
@@ -19,10 +20,13 @@
 
 using std::make_pair;
 using std::make_shared;
+using std::make_unique;
 using std::move;
 using std::string;
+using std::vector;
 
 using boost::filesystem::current_path;
+using boost::optional;
 
 using execHelper::config::Path;
 using execHelper::config::Paths;
@@ -35,8 +39,11 @@ using execHelper::core::ImmediateExecutor;
 using execHelper::core::ReportingExecutor;
 using execHelper::core::EnvironmentCollection;
 using execHelper::commander::Commander;
+using execHelper::log::LogLevel;
+using execHelper::log::setSeverity;
 
 namespace {
+    vector<string> logModules({"log", "yaml", "config", "core", "plugins", "commander"});
     inline EnvironmentCollection toEnvCollection(char** envp) {
         static const string DELIMITER("=");
         EnvironmentCollection result;
@@ -97,6 +104,16 @@ int execHelperMain(int argc, char** argv, char** envp) {
         return EXIT_SUCCESS;
     }
 
+    execHelper::log::init();
+    LogLevel level = execHelper::log::none;     // Disable logging by default
+    optional<LogLevel> logLevel = options.getLogLevel();
+    if(logLevel) {
+        level = logLevel.get();
+    }
+    for(const auto& logModule : logModules) {
+        setSeverity(logModule, level);
+    }
+
     auto shell = make_shared<PosixShell>();
     execHelper::core::ImmediateExecutor::Callback callback = 
                  [](Shell::ShellReturnCode returnCode) { 
@@ -105,9 +122,9 @@ int execHelperMain(int argc, char** argv, char** envp) {
                  };
     std::unique_ptr<ExecutorInterface> executor;
     if(options.getDryRun()) {
-        executor.reset(new ReportingExecutor());
+        executor = make_unique<ReportingExecutor>();
     } else {
-        executor.reset(new ImmediateExecutor(shell, callback));
+        executor = make_unique<ImmediateExecutor>(shell, callback);
     }
     options.setExecutor(executor.get());
 

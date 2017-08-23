@@ -33,7 +33,7 @@ namespace execHelper {
             protected:
                 ConfigInputFile() = default;
         };
-    }
-}
+    } // namespace config
+} // namespace execHelper
 
 #endif  /* __CONFIG_INPUT_FILE_H__ */

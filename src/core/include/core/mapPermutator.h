@@ -117,7 +117,7 @@ namespace execHelper {
             private:
                 const std::map<T, std::vector<U>> m_map;
         };
-    }
-}
+    } // namespace core
+} // namespace execHelper
 
 #endif  /* __MAP_PERMUTATOR_H__ */

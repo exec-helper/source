@@ -23,6 +23,7 @@ patterns:
         long-option: run-target
     MODULE:
         default-values:
+            - log
             - config
             - yaml
             - core
@@ -56,6 +57,11 @@ patterns:
             - "/"
         short-option: y
         long-option: sysroot
+    SOURCE_TYPE:
+        default-values:
+            - src
+            - test
+        long-option: source-type
 
 commands:
     setup: Setup the repository for building
@@ -163,8 +169,9 @@ make:
 cppcheck:
     patterns:
         - MODULE
+        - SOURCE_TYPE
         - TARGET
-    src-dir: src/{MODULE}
+    src-dir: "{SOURCE_TYPE}/{MODULE}"
     target-path: "{TARGET}"
     command-line:
         - --std=c++11
@@ -231,10 +238,10 @@ command-line-command:
         command-line: [ exec-helper, init-build, build, analyze, --analyze, lcov, --compiler, g++, --mode, coverage, --run-target, unittest]
     undefined-behaviour:
         environment:
-            CXXFLAGS: -g -fsanitize=undefined -fno-omit-frame-pointer -fno-sanitize-recover=undefined
-            LDFLAGS: -g -fsanitize=undefined -fno-omit-frame-pointer -fno-sanitize-recover=undefined
+            CXXFLAGS: -g -fsanitize=undefined -fno-omit-frame-pointer -fno-sanitize-recover=undefined -fsanitize-blacklist="$(pwd)/suppressions/ubsan.blacklist"
+            LDFLAGS: -g -fsanitize=undefined -fno-omit-frame-pointer -fno-sanitize-recover=undefined -fsanitize-blacklist="$(pwd)/suppressions/ubsan.blacklist"
             UBSAN_OPTIONS: print_stacktrace=1
-        command-line: [ exec-helper, init-build, build, run-test, --compiler, g++, --mode, undefined-behaviour, --run-target, unittest]
+        command-line: [ exec-helper, init-build, build, run-test, --compiler, clang++, --mode, undefined-behaviour, --run-target, unittest]
     memory-check:
         command-line: [ exec-helper, analyze, --analyze, valgrind, --run-target, unittest, --compiler, g++, --mode, debug]
     docs:
@@ -260,7 +267,7 @@ valgrind:
 pmd:
     patterns:
         - MODULE
-    exec: 3rdparty/pmd/pmd-bin-5.7.0/bin/run.sh
+    exec: 3rdparty/pmd/pmd-bin-5.8.1/bin/run.sh
     tool:
         - cpd
     language: cpp
@@ -290,36 +297,6 @@ clang-tidy:
     analyze:
         patterns:
             - MODULE
+            - SOURCE_TYPE
         sources:
-            src/{MODULE}/src/*.cpp:
-                checks: 
-                    - "*"
-                    - -google-readability-namespace-comments
-                    - -llvm-namespace-comment
-                    - -llvm-header-guard
-                    - -cppcoreguidelines-pro-bounds-pointer-arithmetic
-                    - -clang-analyzer-alpha.deadcode.UnreachableCode
-                    - -clang-analyzer-alpha.core.CastToStruct
-                    - -modernize-make-unique
-                    - -readability-redundant-declaration        # Static member variable definitions give false positives when enabled
-                    - -misc-macro-parentheses                   # Remove once switched to a decent logging library
-                    - -google-runtime-references
-                    - -misc-noexcept-move-constructor           # Due to bug in clang-tidy not realizing that default move constructors are already marked noexcept
-            test/{MODULE}/src/*.cpp:
-                checks:
-                    - "*"
-                    - -google-readability-namespace-comments
-                    - -llvm-namespace-comment
-                    - -llvm-header-guard
-                    - -clang-analyzer-alpha.deadcode.UnreachableCode
-                    - -performance-unnecessary-copy-initialization
-                    - -modernize-loop-convert
-                    - -google-readability-function-size
-                    - -readability-function-size
-                    - -cert-err58-cpp
-                    - -misc-macro-parentheses                   # Remove once switched to a decent logging library
-                    - -google-runtime-references
-                    - -misc-noexcept-move-constructor           # Due to bug in clang-tidy not realizing that default move constructors are already marked noexcept
-        warnings-as-errors: all
-        command-line:
-            - -header-filter=.*
+            - "{SOURCE_TYPE}/{MODULE}/src/*.cpp"

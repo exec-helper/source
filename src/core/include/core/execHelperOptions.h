@@ -43,6 +43,7 @@ namespace execHelper {
                 bool getVerbosity() const noexcept override;
                 bool getDryRun() const noexcept override;
                 bool getSingleThreaded() const noexcept override;
+                boost::optional<log::LogLevel> getLogLevel() const noexcept override;
                 const CommandCollection& getCommands() const noexcept override;
                 const config::SettingsNode& getSettings() const noexcept override;
                 const config::SettingsNode& getSettings(const std::string& key) noexcept override;

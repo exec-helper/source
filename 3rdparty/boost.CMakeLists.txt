@@ -1,4 +1,4 @@
-find_package(Boost REQUIRED COMPONENTS filesystem program_options system)
+find_package(Boost REQUIRED COMPONENTS filesystem program_options system log)
 
 link_directories(${Boost_LIBRARY_DIRS})
 
@@ -15,7 +15,31 @@ target_include_directories(${BOOST_LIBRARY} INTERFACE ${Boost_INCLUDE_DIRS})
 target_link_libraries(${BOOST_LIBRARY} INTERFACE ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
 # boost system
-set(BOOST_LIBRARY boost-optional)
+set(BOOST_LIBRARY boost-system)
 add_library(${BOOST_LIBRARY} INTERFACE)
 target_include_directories(${BOOST_LIBRARY} INTERFACE ${Boost_INCLUDE_DIRS})
 target_link_libraries(${BOOST_LIBRARY} INTERFACE ${Boost_SYSTEM_LIBRARY})
+
+# boost optional
+add_library(boost-optional ALIAS boost-system)
+
+# boost thread
+set(BOOST_LIBRARY boost-thread)
+add_library(${BOOST_LIBRARY} INTERFACE)
+target_include_directories(${BOOST_LIBRARY} INTERFACE ${Boost_INCLUDE_DIRS})
+target_link_libraries(${BOOST_LIBRARY} INTERFACE ${Boost_THREAD_LIBRARY})
+
+# boost log-setup
+set(BOOST_LIBRARY boost-log-setup)
+add_library(${BOOST_LIBRARY} INTERFACE)
+target_include_directories(${BOOST_LIBRARY} INTERFACE ${Boost_INCLUDE_DIRS})
+target_link_libraries(${BOOST_LIBRARY} INTERFACE ${Boost_LOG_SETUP_LIBRARY})
+
+# boost log
+set(BOOST_LIBRARY boost-log)
+add_library(${BOOST_LIBRARY} INTERFACE)
+target_include_directories(${BOOST_LIBRARY} INTERFACE ${Boost_INCLUDE_DIRS})
+
+# Explicitly add dependencies on boost-thread and boost-system, since FindBoost is not doing this itself
+# Linking with pthread is requiered by Boost when multithreaded support enabled
+target_link_libraries(${BOOST_LIBRARY} INTERFACE ${Boost_LOG_LIBRARY} boost-log-setup boost-thread boost-system pthread)

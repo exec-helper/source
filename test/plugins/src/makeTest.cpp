@@ -1,5 +1,7 @@
 #include <string>
 
+#include <gsl/string_span>
+
 #include "config/settingsNode.h"
 #include "plugins/make.h"
 #include "plugins/pluginUtils.h"
@@ -11,6 +13,8 @@
 #include "optionsStub.h"
 
 using std::string;
+
+using gsl::czstring;
 
 using execHelper::config::SettingsNode;
 using execHelper::core::test::ExecutorStub;
@@ -29,8 +33,8 @@ using execHelper::test::utils::getExpectedTasks;
 using execHelper::test::combinationHelpers::setEnvironment;
 
 namespace {
-    const string pluginConfigKey("make");
-}
+    const czstring<> pluginConfigKey("make");
+} // namespace
 
 namespace execHelper { namespace plugins { namespace test {
     SCENARIO("Testing the plugin configuration settings", "[plugins][make]") {
@@ -128,4 +132,6 @@ namespace execHelper { namespace plugins { namespace test {
             }
         }
     }
-} } }
+} // namespace test
+} // namespace plugins
+} // namespace execHelper

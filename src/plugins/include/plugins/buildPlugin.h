@@ -9,14 +9,14 @@
 namespace execHelper {
     namespace config {
         class SettingsNode;
-    }
+    } // namespace config
 
     namespace core {
         class TargetDescriptionElement;
         class CompilerDescriptionElement;
         class Options;
-    }
-}
+    } // namespace core
+} // namespace execHelper
 
 namespace execHelper {
     namespace plugins {
@@ -35,7 +35,7 @@ namespace execHelper {
             protected:
                 BuildPlugin() = default;
         };
-    }
-}
+    } // namespace plugins
+} // namespace execHelper
 
 #endif  /* __BUILD_PLUGIN_H__ */

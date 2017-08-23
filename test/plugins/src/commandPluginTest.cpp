@@ -1,5 +1,7 @@
 #include <string>
 
+#include <gsl/string_span>
+
 #include "unittest/catch.h"
 
 #include "config/settingsNode.h"
@@ -13,6 +15,8 @@
 
 using std::string;
 
+using gsl::czstring;
+
 using execHelper::config::SettingsNode;
 using execHelper::core::Task;
 using execHelper::core::TaskCollection;
@@ -21,8 +25,8 @@ using execHelper::test::OptionsStub;
 using execHelper::test::utils::addSettings;
 
 namespace {
-    const string PLUGIN_CONFIG_KEY("commands");
-}
+    const czstring<> PLUGIN_CONFIG_KEY("commands");
+} // namespace
 
 namespace execHelper { namespace plugins { namespace test {
     SCENARIO("Testing erroneous configuration conditions for the commandPlugin", "[plugins][commandPlugin]") {
@@ -69,7 +73,7 @@ namespace execHelper { namespace plugins { namespace test {
                 }
 
                 THEN("All default actions should be executed") {
-                    const Memory::Memories memories = memory.getExecutions();
+                    const Memory::Memories memories = memory.getExecutions();   // NOLINT(performance-unnecessary-copy-initialization)
                     REQUIRE(memories.size() == 1U);
                     REQUIRE(memories[0].command == command);
                     REQUIRE(memories[0].task == task);
@@ -88,7 +92,7 @@ namespace execHelper { namespace plugins { namespace test {
                 }
 
                 THEN("All default actions should be executed") {
-                    const Memory::Memories memories = memory.getExecutions();
+                    const Memory::Memories& memories = memory.getExecutions();
                     REQUIRE(memories.size() == 1U);
                     REQUIRE(memories[0].command == command);
                     REQUIRE(memories[0].task == task);
@@ -97,4 +101,6 @@ namespace execHelper { namespace plugins { namespace test {
             }
         }
     }
-} } }
+} // namespace test
+} // namespace plugins
+} // namespace execHelper

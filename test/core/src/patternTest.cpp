@@ -56,7 +56,7 @@ namespace execHelper { namespace core {
                 Pattern pattern(key, values, shortOption, longOption);
 
                 WHEN("We copy the pattern") {
-                    Pattern other(pattern);
+                    Pattern other(pattern); // NOLINT(performance-unnecessary-copy-initialization)
 
                     THEN("We should get the same pattern") {
                         REQUIRE(pattern == other);
@@ -94,5 +94,6 @@ namespace execHelper { namespace core {
                 }
             }
         }
-    }
-} }
+    } // namespace test
+} // namespace core
+} // namespace execHelper

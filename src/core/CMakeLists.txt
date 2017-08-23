@@ -13,6 +13,7 @@ set(SRCS
         src/posixShell.cpp
         src/argv.cpp
         src/envp.cpp
+        src/logger.cpp
    )
 
 set(DEPENDENCIES

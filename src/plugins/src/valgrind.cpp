@@ -5,9 +5,9 @@
 #include "config/settingsNode.h"
 #include "core/patterns.h"
 #include "core/task.h"
-#include "log/log.h"
 
 #include "executePlugin.h"
+#include "logger.h"
 #include "pluginUtils.h"
 
 using std::string;
@@ -53,4 +53,5 @@ namespace execHelper { namespace plugins {
         }
         return true;
     }
-} }
+} // namespace plugins
+} // namespace execHelper

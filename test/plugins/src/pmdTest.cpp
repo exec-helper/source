@@ -1,5 +1,6 @@
 #include <vector>
 
+#include <gsl/string_span>
 
 #include "core/pattern.h"
 #include "core/task.h"
@@ -13,6 +14,8 @@
 
 using std::vector;
 using std::string;
+
+using gsl::czstring;
 
 using execHelper::config::SettingsNode;
 using execHelper::core::Task;
@@ -29,14 +32,14 @@ using execHelper::test::utils::copyAndAppend;
 using execHelper::core::test::ExecutorStub;
 
 namespace {
-    const string pmdConfigKey("pmd");
-    const string PLUGIN_CONFIG_KEY("pmd");
-    const string EXEC_CONFIG_KEY("exec");
-    const string TOOL_CONFIG_KEY("tool");
-    const string MINIMUM_TOKENS_CONFIG_KEY("minimum-tokens");
-    const string FILES_CONFIG_KEY("files");
-    const string LANGUAGE_CONFIG_KEY("language");
-}
+    const czstring<> pmdConfigKey("pmd");
+    const czstring<> PLUGIN_CONFIG_KEY("pmd");
+    const czstring<> EXEC_CONFIG_KEY("exec");
+    const czstring<> TOOL_CONFIG_KEY("tool");
+    const czstring<> MINIMUM_TOKENS_CONFIG_KEY("minimum-tokens");
+    const czstring<> FILES_CONFIG_KEY("files");
+    const czstring<> LANGUAGE_CONFIG_KEY("language");
+} // namespace
 
 namespace execHelper { namespace plugins { namespace test {
     SCENARIO("Test the default options of the pmd plugin", "[plugins][pmd]") {
@@ -229,4 +232,6 @@ namespace execHelper { namespace plugins { namespace test {
 
         }
     }
-} } }
+} // namespace test
+} // namespace plugins
+} // namespace execHelper

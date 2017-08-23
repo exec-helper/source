@@ -2,8 +2,6 @@
 
 #include <regex>
 
-#include "log/log.h"
-
 using std::string;
 using std::regex;
 using std::regex_replace;
@@ -14,4 +12,5 @@ namespace execHelper { namespace core {
         const string PATTERN_POSTFIX(R"(\})");
         return regex_replace(subject, regex(PATTERN_PREFIX + pattern + PATTERN_POSTFIX), replacement);
     }
-} }
+} // namespace core
+} // namespace execHelper

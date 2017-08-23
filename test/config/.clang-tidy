@@ -1,0 +1,5 @@
+---
+Checks: 'clang-diagnostic-*,clang-analyzer-*,*,-llvm-header-guard,-readability-function-size,-google-readability-function-size,-performance-unnecessary-copy-initialization'
+
+WarningsAsErrors: '.*'
+HeaderFilterRegex: '.*'

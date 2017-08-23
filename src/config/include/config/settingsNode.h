@@ -244,7 +244,7 @@ namespace execHelper {
          * \returns os
          */
         std::ostream& operator<<( std::ostream& os, const SettingsNode& settings) noexcept;
-    }
-}
+    } // namespace config
+} // namespace execHelper
 
 #endif /* __SETTINGS_NODE_H__ */

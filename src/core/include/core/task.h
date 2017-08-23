@@ -142,6 +142,6 @@ namespace execHelper {
          * \returns The given stream expanded with the details of the given task
          */
         std::ostream& operator<<( std::ostream& os, const Task& task ) noexcept;
-    }
-}
+    } // namespace core
+} // namespace execHelper
 #endif /* __TASK_H__ */

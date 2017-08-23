@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#include "log/log.h"
+#include "logger.h"
 
 using std::string;
 using std::vector;
@@ -27,7 +27,7 @@ namespace execHelper { namespace yaml {
         try {
             return m_yaml.get<string>(keys);
         } catch(YAML::Exception& e) {
-            LOG("Yaml parser threw an exception: " << e.what());
+            LOG(error) << "Yaml parser threw an exception: " << e.what();
             return "";
         }
     }
@@ -36,7 +36,7 @@ namespace execHelper { namespace yaml {
         try {
             return m_yaml.get<vector<string>>(keys);
         } catch(YAML::Exception& e) {
-            LOG("Yaml parser threw an exception: " << e.what());
+            LOG(error) << "Yaml parser threw an exception: " << e.what();
             return vector<string>();
         }
     }
@@ -44,4 +44,5 @@ namespace execHelper { namespace yaml {
     bool Yaml::getTree(const initializer_list<string>& keys, SettingsNode* settings) const noexcept {
         return m_yaml.getTree(keys, settings);
     }
-} }
+} // namespace yaml
+} // namespace execHelper

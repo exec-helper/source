@@ -7,8 +7,7 @@ namespace execHelper {
     namespace config {
         using Path = boost::filesystem::path;
         using Paths = std::vector<Path>;
-    } // config
-} // execHelper
-
+    } // namespace config
+} // namespace execHelper
 
 #endif  /* PATH_INCLUDE */

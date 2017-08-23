@@ -17,4 +17,5 @@ namespace execHelper { namespace core {
         user_feedback_info("Executing " << task.toString());
         return true;
     }
-} }
+} // namespace core
+} // namespace execHelper

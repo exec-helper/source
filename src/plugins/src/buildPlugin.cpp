@@ -32,5 +32,5 @@ namespace execHelper { namespace plugins {
         const string singleThreaded = ConfigValue<string>::get("single-threaded", "no", command, rootSettings);
         return singleThreaded != "yes";
     }
-} }
-
+} // namespace plugins
+} // namespace execHelper

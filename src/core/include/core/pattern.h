@@ -29,7 +29,7 @@ namespace execHelper {
                 char m_shortOption;
                 std::string m_longOption;
         };
-    }
-}
+    } // namespace core
+} // namespace execHelper
 
 #endif  /* __PATTERN__H__ */

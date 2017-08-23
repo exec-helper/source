@@ -4,10 +4,10 @@
 
 #include "config/settingsNode.h"
 #include "core/task.h"
-#include "log/log.h"
 
 #include "configValue.h"
 #include "executePlugin.h"
+#include "logger.h"
 #include "pluginUtils.h"
 
 using std::string;
@@ -31,7 +31,7 @@ namespace {
         replacePatternCombinations(task, combination);
         registerTask(task, options);
     }
-}
+} // namespace
 
 namespace execHelper { namespace plugins {
     bool Lcov::apply(const Command& command, Task task, const Options& options) const noexcept {
@@ -137,4 +137,5 @@ namespace execHelper { namespace plugins {
         task.append(TaskCollection({lcovBinary, baseDirectoryOption, baseDirectory, directoryOption, directory, "--capture", "--output", infoFile}));
         task.append(commandLine);
     }
-} }
+} // namespace plugins
+} // namespace execHelper

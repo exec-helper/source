@@ -37,7 +37,7 @@ namespace execHelper {
                         return collection->back();
                     }
             };
-        }
+        } // namespace detail
 
         /**
          * \brief   Convenience wrapper for retrieving a value from the configuration
@@ -152,7 +152,7 @@ namespace execHelper {
                     return defaultValue;
                 }
         };
-    }
-}
+    } // namespace plugins
+} // namespace execHelper
 
 #endif  /* __CONFIG_VALUE_H__ */

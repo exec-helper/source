@@ -22,7 +22,9 @@ namespace execHelper {
                 void swap(Argv& other)  noexcept;
 
                 size_t getArgc() const noexcept;
+
                 char** getArgv() noexcept;
+                const char* const * getArgv() const noexcept;
 
             private:
                 using Argv_t = std::vector<char*>;
@@ -31,7 +33,9 @@ namespace execHelper {
 
                 Argv_t m_argv;
         };
-    } /* core */
-} /* execHelper */
+
+        std::ostream& operator<<(std::ostream& os, const Argv& argv) noexcept;
+    } // namespace core
+} // namespace execHelper
 
 #endif  /* __ARGV_H__ */

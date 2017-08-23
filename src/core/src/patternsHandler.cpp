@@ -1,6 +1,6 @@
 #include "patternsHandler.h"
 
-#include <log/assert.h>
+#include <log/assertions.h>
 
 using execHelper::core::Pattern;
 
@@ -26,4 +26,5 @@ namespace execHelper { namespace core {
         ensures(constPatterns.count(key) > 0U);
         return constPatterns.at(key); 
     }
-} }
+} // namespace core
+} // namespace execHelper

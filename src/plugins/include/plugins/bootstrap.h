@@ -7,11 +7,11 @@
 namespace execHelper {
     namespace config {
         class SettingsNode;
-    }
+    } // namespace config
     namespace core {
         class CompilerDescriptionElement;
-    }
-}
+    } // namespace core
+} // namespace execHelper
 
 namespace execHelper {
     namespace plugins {
@@ -22,7 +22,7 @@ namespace execHelper {
             private:
                 static std::string getBootstrapFilename(const core::Command& command, const config::SettingsNode& rootSettings) noexcept;
         };
-    }
-}
+    } // namespace plugins
+} // namespace execHelper
 
 #endif /* __BOOTSTRAP_H__ */
