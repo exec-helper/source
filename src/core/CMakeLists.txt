@@ -1,8 +1,6 @@
 set(MODULE_NAME core)
 set(LIBRARY_NAME ${PROJECT_NAME}-${MODULE_NAME})
 
-find_package(Boost REQUIRED COMPONENTS program_options)
-
 set(SRCS
         src/pattern.cpp
         src/optionDescriptions.cpp
@@ -18,19 +16,17 @@ set(SRCS
    )
 
 set(DEPENDENCIES
+        boost-filesystem
+        boost-program-options
         log
         config
         yaml
    )
 
-set(LIBRARY_INCLUDES
-        ${Boost_INCLUDE_DIRS}
-    )
-
 add_library(${LIBRARY_NAME} ${SRCS})
 target_include_directories(${LIBRARY_NAME} PRIVATE include/core)
-target_include_directories(${LIBRARY_NAME} PUBLIC include  ${LIBRARY_INCLUDES} ${DEPENDENCIES})
-target_link_libraries(${LIBRARY_NAME} PUBLIC ${DEPENDENCIES} ${Boost_LIBRARIES})
+target_include_directories(${LIBRARY_NAME} PUBLIC include ${DEPENDENCIES})
+target_link_libraries(${LIBRARY_NAME} PUBLIC ${DEPENDENCIES})
 
 add_library(${MODULE_NAME} ALIAS ${LIBRARY_NAME})
 install(TARGETS ${LIBRARY_NAME} DESTINATION ${LIB_DIRECTORY})
