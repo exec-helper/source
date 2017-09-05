@@ -12,26 +12,14 @@ set(SRCS
         src/immediateExecutorTest.cpp
    )
 
+set(DEPENDENCIES
+        core
+        test-utils
+        unittest
+    )
+
 add_executable(${EXE_NAME} ${SRCS})
-
-include_directories(${EXE_NAME}
-        ${${PROJECT_NAME}-core_INCLUDE_DIRS}
-        ${${PROJECT_NAME}-test-utils_INCLUDE_DIRS}
-        ${UNITTEST_INCLUDE_DIRS} 
-        ${Boost_INCLUDE_DIR}
-    )
-
-target_link_libraries(${EXE_NAME}
-        ${${PROJECT_NAME}-core_LIBRARIES}
-        ${${PROJECT_NAME}-test-utils_LIBRARIES}
-        ${Boost_LIBRARIES}
-        ${UNITTEST_LIBRARIES}
-    )
-
-link_directories(${EXE_NAME}
-        ${${PROJECT_NAME}-core_LIBRARY_DIRS}
-        ${${PROJECT_NAME}-test-utils_LIBRARY_DIRS}
-        ${Boost_LIBRARY_DIRS}
-    )
+target_include_directories(${EXE_NAME} PRIVATE ${DEPENDENCIES} ${Boost_INCLUDE_DIR})
+target_link_libraries(${EXE_NAME} PRIVATE ${DEPENDENCIES} ${Boost_LIBRARIES})
 
 install(TARGETS ${EXE_NAME} DESTINATION ${UNITTEST_BIN_DIR})

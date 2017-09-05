@@ -1,24 +1,15 @@
 set(LIBRARY_NAME ${PROJECT_NAME}-catch-main)
 
-list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/modules)
-
 set(SRCS    catch.cpp
    )
 
-include_directories(${CATCH_INCLUDE_DIRS})
+set(DEPENDENCIES
+        catch
+    )
 
 add_library(${LIBRARY_NAME} ${SRCS})
+target_include_directories(${LIBRARY_NAME} PUBLIC include ${DEPENDENCIES})
+target_link_libraries(${LIBRARY_NAME} PUBLIC ${DEPENDENCIES})
+
+add_library(unittest ALIAS ${LIBRARY_NAME})
 install(TARGETS ${LIBRARY_NAME} DESTINATION ${LIB_DIRECTORY})
-
-if(NOT ${USE_SYSTEM_CATCH})
-    add_dependencies(${LIBRARY_NAME} catch)
-else()
-    find_package(catch)
-endif()
-
-set(${LIBRARY_NAME}_INCLUDE_DIRS include)
-set(${LIBRARY_NAME}_LIBRARIES ${LIBRARY_NAME})
-list(APPEND CATCH_LIBRARIES ${LIBRARY_NAME})
-
-set(UNITTEST_INCLUDE_DIRS ${CATCH_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR}/include CACHE INTERNAL UNITTEST_LIBRARIES)
-set(UNITTEST_LIBRARIES ${CATCH_LIBRARIES} CACHE INTERNAL UNITTEST_LIBRARIES)

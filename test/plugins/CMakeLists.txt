@@ -18,23 +18,15 @@ set(SRCS
         src/lcovTest.cpp
    )
 
+set(DEPENDENCIES
+        plugins
+        test-utils
+        unittest
+    )
+
+
 add_executable(${EXE_NAME} ${SRCS})
-
-include_directories(${EXE_NAME}
-        ${${PROJECT_NAME}-plugins_INCLUDE_DIRS}
-        ${${PROJECT_NAME}-test-utils_INCLUDE_DIRS}
-        ${UNITTEST_INCLUDE_DIRS} 
-    )
-
-target_link_libraries(${EXE_NAME}
-        ${${PROJECT_NAME}-plugins_LIBRARIES}
-        ${${PROJECT_NAME}-test-utils_LIBRARIES}
-        ${UNITTEST_LIBRARIES}
-    )
-
-link_directories(${EXE_NAME}
-        ${${PROJECT_NAME}-plugins_LIBRARY_DIRS}
-        ${${PROJECT_NAME}-test-utils_LIBRARY_DIRS}
-    )
+target_include_directories(${EXE_NAME} PRIVATE ${DEPENDENCIES})
+target_link_libraries(${EXE_NAME} PRIVATE ${DEPENDENCIES})
 
 install(TARGETS ${EXE_NAME} DESTINATION ${UNITTEST_BIN_DIR})

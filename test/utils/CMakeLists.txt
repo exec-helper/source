@@ -1,4 +1,5 @@
-set(LIBRARY_NAME ${PROJECT_NAME}-test-utils)
+set(MODULE_NAME test-utils)
+set(LIBRARY_NAME ${PROJECT_NAME}-${MODULE_NAME})
 
 find_package(Boost REQUIRED COMPONENTS program_options filesystem)
 
@@ -8,33 +9,20 @@ set(SRCS
         src/tmpFile.cpp
    )
 
+set(DEPENDENCIES
+        log
+        core
+        plugins
+    )
+
 set(LIBRARY_INCLUDES
-        ${CMAKE_CURRENT_SOURCE_DIR}/../stubs
-        ${${PROJECT_NAME}-core_INCLUDE_DIRS}
-        ${${PROJECT_NAME}-plugins_INCLUDE_DIRS}
         ${Boost_INCLUDE_DIR}
     )
 
-include_directories(${LIBRARY_NAME}
-        include/utils
-        ${LIBRARY_INCLUDES}
-    )
-
 add_library(${LIBRARY_NAME} ${SRCS})
+target_include_directories(${LIBRARY_NAME} PRIVATE include/utils)
+target_include_directories(${LIBRARY_NAME} PUBLIC ../stubs include ${DEPENDENCIES} ${LIBRARY_INCLUDES})
+target_link_libraries(${LIBRARY_NAME} PUBLIC ${DEPENDENCIES})
+
+add_library(${MODULE_NAME} ALIAS ${LIBRARY_NAME})
 install(TARGETS ${LIBRARY_NAME} DESTINATION ${LIB_DIRECTORY})
-
-set(${LIBRARY_NAME}_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include ${LIBRARY_INCLUDES} CACHE INTERNAL ${LIBRARY_NAME}_INCLUDE_DIRS)
-
-set(${LIBRARY_NAME}_LIBRARY_DIRS 
-        ${${PROJECT_NAME}-core_LIBRARY_DIRS}
-        ${${PROJECT_NAME}-plugins_LIBRARY_DIRS}
-        ${Boost_LIBRARY_DIRS}
-    CACHE INTERNAL ${LIBRARY_NAME}_LIBRARY_DIRS)
-
-set(${LIBRARY_NAME}_LIBRARIES ${LIBRARY_NAME} 
-        ${${PROJECT_NAME}-core_LIBRARIES}
-        ${${PROJECT_NAME}-plugins_LIBRARIES}
-        ${Boost_LIBRARIES}
-    CACHE INTERNAL ${LIBRARY_NAME}_LIBRARIES)
-
-install(TARGETS ${EXE_NAME} DESTINATION ${UNITTEST_BIN_DIR})

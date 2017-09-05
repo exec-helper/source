@@ -1,4 +1,5 @@
-set(LIBRARY_NAME ${PROJECT_NAME}-config)
+set(MODULE_NAME config)
+set(LIBRARY_NAME ${PROJECT_NAME}-${MODULE_NAME})
 
 find_package(Boost REQUIRED COMPONENTS filesystem)
 
@@ -6,31 +7,18 @@ set(SRCS    src/settingsNode.cpp
             src/configFileSearcher.cpp
 )
 
+set(DEPENDENCIES
+        log
+   )
+
 set(LIBRARY_INCLUDES
-    ${${PROJECT_NAME}-log_INCLUDE_DIRS}
     ${Boost_INCLUDE_DIRS}
 )
 
-include_directories(
-    include/config
-    ${LIBRARY_INCLUDES}
-)
-
 add_library(${LIBRARY_NAME} ${SRCS})
+target_include_directories(${LIBRARY_NAME} PRIVATE include/config)
+target_include_directories(${LIBRARY_NAME} PUBLIC include ${LIBRARY_INCLUDES} ${DEPENDENCIES})
+target_link_libraries(${LIBRARY_NAME} PUBLIC ${DEPENDENCIES} ${Boost_LIBRARIES})
+
+add_library(${MODULE_NAME} ALIAS ${LIBRARY_NAME})
 install(TARGETS ${LIBRARY_NAME} DESTINATION ${LIB_DIRECTORY})
-
-set(${LIBRARY_NAME}_INCLUDE_DIRS
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
-    ${LIBRARY_INCLUDES}
-    CACHE INTERNAL ${LIBRARY_NAME}_INCLUDE_DIRS)
-
-set(${LIBRARY_NAME}_LIBRARIES
-    ${LIBRARY_NAME}
-    ${${PROJECT_NAME}-log_LIBRARIES}
-    ${Boost_LIBRARIES}
-    CACHE INTERNAL ${LIBRARY_NAME}_LIBRARIES)
-
-set(${LIBRARY_NAME}_LIBRARY_DIRS
-    ${${PROJECT_NAME}-log_LIBRARY_DIRS}
-    ${Boost_LIBRARY_DIRS}
-    CACHE INTERNAL ${LIBRARY_NAME}_LIBRARY_DIRS)

@@ -6,24 +6,14 @@ set(SRCS    src/settingsNodeTest.cpp
             src/configFileSearcherTest.cpp
    )
 
-add_executable(${EXE_NAME} ${SRCS})
-
-include_directories(${EXE_NAME}
-        ${${PROJECT_NAME}-config_INCLUDE_DIRS}
+set(DEPENDENCIES
+        config
+        unittest
         ${Boost_INCLUDE_DIRS}
-        ${UNITTEST_INCLUDE_DIRS} 
     )
 
-link_directories(
-    ${${PROJECT_NAME}-config_LIBRARY_DIRS}
-    ${Boost_LIBRARY_DIRS}
-    ${UNITTEST_LIBRARY_DIRS}
-)
-
-target_link_libraries(${EXE_NAME}
-        ${${PROJECT_NAME}-config_LIBRARIES}
-        ${Boost_LIBRARIES}
-        ${UNITTEST_LIBRARIES}
-    )
+add_executable(${EXE_NAME} ${SRCS})
+target_include_directories(${EXE_NAME} PRIVATE ${DEPENDENCIES})
+target_link_libraries(${EXE_NAME} PRIVATE ${DEPENDENCIES})
 
 install(TARGETS ${EXE_NAME} DESTINATION ${UNITTEST_BIN_DIR})

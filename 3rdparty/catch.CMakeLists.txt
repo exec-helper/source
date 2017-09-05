@@ -1,18 +1,13 @@
 option(USE_SYSTEM_CATCH "Use the catch library provided by the system" ON)
 
 if(${USE_SYSTEM_CATCH})
-    find_package(catch REQUIRED)
-
-    set(CATCH_INCLUDE_DIRS ${catch_INCLUDE_DIRS} CACHE INTERNAL CATCH_INCLUDE_DIRS)
-    set(CATCH_LIBRARIES ${catch_LIBRARIES} CACHE INTERNAL CATCH_LIBRARIES)
-    set(CATCH_LIBRARY_DIRS ${catch_LIBRARY_DIRS} CACHE INTERNAL CATCH_LIBRARY_DIRS)
-
+    find_package(Catch REQUIRED)
 else(${USE_SYSTEM_CATCH})
     include(ExternalProject)
 
     set(CATCH_INSTALL_DIR ${LIB_DIRECTORY}/catch)
 
-    ExternalProject_Add(catch
+    ExternalProject_Add(Catch
         PREFIX catch
         GIT_REPOSITORY https://github.com/philsquared/Catch.git
         CONFIGURE_COMMAND ""
@@ -21,6 +16,12 @@ else(${USE_SYSTEM_CATCH})
         UPDATE_COMMAND ""
         )
 
-    set(CATCH_INCLUDE_DIRS ${CMAKE_CURRENT_BINARY_DIR}/catch/src/catch/single_include/ CACHE INTERNAL CATCH_INCLUDE_DIRS)
-
+    set(Catch_INCLUDE_DIRS ${CMAKE_CURRENT_BINARY_DIR}/catch/src/Catch/single_include)
 endif(${USE_SYSTEM_CATCH})
+
+add_library(catch INTERFACE)
+target_include_directories(catch SYSTEM INTERFACE ${Catch_INCLUDE_DIRS})
+
+if(NOT ${USE_SYSTEM_CATCH})
+    add_dependencies(catch Catch)
+endif()

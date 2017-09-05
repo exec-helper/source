@@ -1,8 +1,7 @@
 #include <string>
 
-#include <catch.hpp>
-
 #include "core/patterns.h"
+#include "unittest/catch.h"
 
 using std::string;
 

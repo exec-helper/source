@@ -2,11 +2,6 @@ option(USE_SYSTEM_YAML_CPP "Use the yaml-cpp library provided by the system" ON)
 
 if(${USE_SYSTEM_YAML_CPP})
     find_package(yaml-cpp REQUIRED)
-
-    set(YAML_INCLUDE_DIRS ${YAML_CPP_INCLUDE_DIRS} CACHE INTERNAL YAML_INCLUDE_DIRS)
-    set(YAML_LIBRARIES ${YAML_CPP_LIBRARIES} CACHE INTERNAL YAML_LIBRARIES)
-    set(YAML_LIBRARY_DIRS ${YAML_CPP_LIBRARY_DIRS} CACHE INTERNAL YAML_LIBRARY_DIRS)
-
 else(${USE_SYSTEM_YAML_CPP})
     include(ExternalProject)
 
@@ -20,10 +15,15 @@ else(${USE_SYSTEM_YAML_CPP})
         UPDATE_COMMAND ""
         )
 
-    set(YAML_INCLUDE_DIRS ${YAML_INSTALL_DIR}/include CACHE INTERNAL YAML_INCLUDE_DIRS)
-
-    # Mimic find_library() output: it returns an absolute path to the library
-    set(YAML_LIBRARIES ${YAML_INSTALL_DIR}/lib/libyaml-cpp.a CACHE INTERNAL YAML_LIBRARIES)
-    set(YAML_LIBRARY_DIRS ${YAML_INSTALL_DIR}/lib CACHE INTERNAL YAML_LIBRARY_DIRS)
-
+    set(YAML_CPP_INCLUDE_DIRS ${YAML_INSTALL_DIR}/include)
+    set(YAML_CPP_LIBRARIES ${YAML_INSTALL_DIR}/lib/libyaml-cpp.a)
+    set(YAML_CPP_LIBRARY_DIRS ${YAML_INSTALL_DIR}/lib)
 endif(${USE_SYSTEM_YAML_CPP})
+
+add_library(yaml-3rd INTERFACE)
+target_include_directories(yaml-3rd INTERFACE ${YAML_CPP_INCLUDE_DIRS})
+target_link_libraries(yaml-3rd INTERFACE ${YAML_CPP_LIBRARIES})
+
+if(NOT ${USE_SYSTEM_YAML_CPP})
+    add_dependencies(yaml-3rd Yaml-cpp)
+endif()
