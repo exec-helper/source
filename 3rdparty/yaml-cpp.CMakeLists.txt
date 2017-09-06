@@ -21,7 +21,7 @@ else(${USE_SYSTEM_YAML_CPP})
 endif(${USE_SYSTEM_YAML_CPP})
 
 add_library(yaml-3rd INTERFACE)
-target_include_directories(yaml-3rd INTERFACE ${YAML_CPP_INCLUDE_DIRS})
+target_include_directories(yaml-3rd SYSTEM INTERFACE ${YAML_CPP_INCLUDE_DIRS})
 target_link_libraries(yaml-3rd INTERFACE ${YAML_CPP_LIBRARIES})
 
 if(NOT ${USE_SYSTEM_YAML_CPP})
