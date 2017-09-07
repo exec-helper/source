@@ -13,13 +13,16 @@ Checkout the [exec-helper-package](https://github.com/bverhagen/exec-helper-pack
 
 ## Building from source
 ### Requirements
+#### Host build dependencies
+- Doxygen for building the man-pages and/or HTML documentation (optional)
+- gitchangelog for building the changelog (optional)
+
+#### Target build dependencies
 - A POSIX compliant operating system
 - A C++ 11 compatible compiler
 - boost-program-options development files
 - yaml-cpp development files (optional, will be downloaded and compiled in statically if missing)
 - catch unittest framework development files for building the tests (optional)
-- Doxygen for building the man-pages and/or HTML documentation (optional)
-- gitchangelog for building the changelog (optional)
 
 ### Quick installation
 ```sh
@@ -29,11 +32,25 @@ $ make
 
 Note: uses the CC and CXX environment variables for determining the compiler or the system's default compiler otherwise. Check the 'less quick install'-section for using other compilers.
 
-## Less quick install
+### Less quick install
 Check the [documentation](http://bverhagen.gitlab.io/exec-helper/docs/html/index.html).
+
+### Cross compilation
+Exec-helper supports both native and cross compilation (including building with a custom sysroot) builds. Cross compilation requires invoking cmake directly and appending *-DCMAKE_TOOLCHAIN_FILE=<toolchain-file>* to the cmake initialization command. Check the _toolchain.cmake.in_ file for a template on setting up the toolchain file for cross compilation and the _Makefile_ for a template of the cmake initalization command.
 
 ## Documentation
 See [documentation](http://bverhagen.gitlab.io/exec-helper/docs/html/index.html) for the latest documentation.
 
 ## Configuration
 Check the [Documentation](http://bverhagen.gitlab.io/exec-helper/docs/html/index.html) for more information about configuring exec-helper.
+
+## Project analysis
+The source code of this project is analyzed by multiple tools in an attempt to minimize the amount of released builds. Current releases should have passed of the following analysis from the following tools:
+- [valgrind](http://valgrind.org) (memcheck)
+- [cppcheck](http://cppcheck.sourceforge.net)
+- [clang-tidy](http://clang.llvm.org/extra/clang-tidy)
+- [clang-static-analyzer](https://clang-analyzer.llvm.org)
+- [UndefinedBehaviorSanitizer](https://clang.llvm.org/docs/UndefinedBehaviorSanitizer.html) (UBSan)
+- [pmd](https://pmd.github.io) (cpd)
+
+Check the _.exec-helper_ file for detailed information about how these analysis methods are configured and used. The analysis tools can be executed locally using exec-helper.
