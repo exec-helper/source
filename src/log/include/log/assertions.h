@@ -10,7 +10,14 @@
 
 #include <gsl/gsl_assert>
 
+/**
+ * Checks that an argument does not violate certain conditions (nominal programming style)
+ */
 #define expects(cond)   do { try{ Expects(cond); } catch(gsl::fail_fast& e) { std::cerr << e.what(); std::terminate(); } } while(false)
+
+/**
+ * Checks that an invariant still holds
+ */
 #define ensures(cond)   do { try{ Ensures(cond); } catch(gsl::fail_fast& e) { std::cerr << e.what(); std::terminate(); } } while(false)
 
 #else

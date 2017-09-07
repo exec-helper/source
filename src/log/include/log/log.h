@@ -18,6 +18,9 @@ BOOST_LOG_ATTRIBUTE_KEYWORD(lineLog, "Line", unsigned int)  // NOLINT(modernize-
 
 namespace execHelper {
     namespace log {
+        /**
+         * \brief   List of the potential log levels
+         */
         enum LogLevel
         {
             all,        // Use this to enable all logging
@@ -33,15 +36,46 @@ namespace execHelper {
         using Channel = std::string;
         using LoggerType = boost::log::sources::severity_channel_logger_mt<LogLevel, std::string>;
 
+        /**
+         * Initialize logging
+         *
+         * \param   The output stream to log to
+         */
         void init(std::ostream& logStream = std::clog) noexcept;
+
+        /**
+         * Set the minimum severity of each shown log message for a channel to the given severity
+         *
+         * \param channel   The channel to set the severity from
+         * \param severity  The severity to set the minimal severity to
+         * \returns True    If the severity was successfully set
+         *          False   Otherwise
+         */
         bool setSeverity(const Channel& channel, LogLevel severity) noexcept;
 
         // Throws InvalidLogLevel
+        /**
+         * Convert the given log level string to a log level
+         *
+         * \param level The log level string to convert
+         * \returns The associated log level
+         * \throws  InvalidLogLevel If the given level string is not associated with any log level
+         */
         LogLevel toLogLevel(const std::string& level);
+
+        /**
+         * Convert the log level to a string
+         *
+         * \param level The level to convert
+         * \returns The string associated with the log level
+         */
         std::string toString(LogLevel level) noexcept;
 
         std::ostream& operator<<(std::ostream& os, LogLevel level);
 
+        /**
+         * \brief   Thrown if an unknown log level is used
+         */
         struct InvalidLogLevel : public std::exception {};
     } // namespace log
 
