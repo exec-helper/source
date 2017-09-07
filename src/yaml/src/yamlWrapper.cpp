@@ -10,11 +10,12 @@
 using std::initializer_list;
 using std::string;
 
+using execHelper::config::Path;
 using execHelper::config::SettingsNode;
 
 namespace execHelper { namespace yaml {
-    YamlWrapper::YamlWrapper(const YamlWrapperFile& file) :
-        m_node(YAML::LoadFile(file.file))
+    YamlWrapper::YamlWrapper(const Path& file) :
+        m_node(YAML::LoadFile(file.native()))
     {
         ;
     }

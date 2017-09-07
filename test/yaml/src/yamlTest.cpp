@@ -10,6 +10,7 @@
 #include "config/settingsNode.h"
 #include "yaml/yaml.h"
 
+#include "utils/tmpFile.h"
 #include "utils/utils.h"
 
 using std::pair;
@@ -23,6 +24,7 @@ using boost::filesystem::current_path;
 using execHelper::config::Path;
 using execHelper::config::SettingsNode;
 using execHelper::test::utils::convertToConfig;
+using execHelper::test::utils::TmpFile;
 using execHelper::test::utils::writeSettingsFile;
 
 namespace execHelper { namespace yaml { namespace test {
@@ -51,9 +53,7 @@ namespace execHelper { namespace yaml { namespace test {
 
     SCENARIO("Extensive Yaml file wrapper test", "[yaml][yamlwrapper]") {
         GIVEN("A yaml config file to parse and the right result") {
-            Path yamlFile("test.yaml");
-            YamlFile file;
-            file.file = absolute(yamlFile).native();
+            TmpFile file;
 
             vector<string> correctCommands = {"init", "build", "run", "analyze"};
             vector<string> correctInit = {"git-submodules", "configure"};
@@ -82,10 +82,10 @@ namespace execHelper { namespace yaml { namespace test {
             correctSettings.add({"pmd", "auto-install"}, correctPmdAutoInstall);
             correctSettings.add({"command-line", "run"}, correctRunCommandLine);
 
-            writeSettingsFile(yamlFile.native(), correctSettings, {});
+            writeSettingsFile(file.getPath().native(), correctSettings, {});
 
             WHEN("We pass the config to the yaml wrapper") {
-                Yaml yaml(file);
+                Yaml yaml(file.getPath());
 
                 THEN("We should find all values") {
                     REQUIRE(yaml.getValueCollection({"commands"}) == correctCommands);
@@ -190,25 +190,12 @@ namespace execHelper { namespace yaml { namespace test {
 
     SCENARIO("Yaml does not find the supplied configuration file", "[yaml][yamlwrapper]") {
         GIVEN("A configuration file that does not exist") {
-            YamlFile file;
-            file.file = "non-existing-file.exec-helper";
+            TmpFile file;
             const string expectedErrorMessage("bad file");
 
             WHEN("We pass it to yaml") {
-                try {
-                    Yaml yaml(file);
-
-                    THEN("We should not get here") {
-                        REQUIRE(false);
-                    }
-                } catch(const YAML::BadFile& e) {
-                    THEN("We should get the right error message") {
-                        REQUIRE(e.what() == expectedErrorMessage);
-                    }
-                } catch(const std::exception&) {
-                    THEN("We should not get here") {
-                        REQUIRE(false);    
-                    }
+                THEN("We should not get here") {
+                    REQUIRE_THROWS_AS(Yaml(file.getPath()), YAML::BadFile);
                 }
             }
         }

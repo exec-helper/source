@@ -8,10 +8,11 @@ using std::string;
 using std::vector;
 using std::initializer_list;
 
+using execHelper::config::Path;
 using execHelper::config::SettingsNode;
 
 namespace execHelper { namespace yaml {
-    Yaml::Yaml(const YamlFile& file) :
+    Yaml::Yaml(const Path& file) :
         m_yaml(file)
     {
         ;

@@ -7,19 +7,15 @@
 #include <yaml-cpp/node/node.h>
 #include <yaml-cpp/yaml.h>
 
+#include "config/path.h"
 #include "config/settingsNode.h"
 
 namespace execHelper { 
     namespace yaml {
-        // Struct is mainly meant to identify the correct constructor to use
-        struct YamlWrapperFile {
-            std::string file;
-        };
-
         class YamlWrapper {
             public:
                 // May throw YAML::BadFile exception
-                explicit YamlWrapper(const YamlWrapperFile& file);
+                explicit YamlWrapper(const config::Path& file);
                 explicit YamlWrapper(const std::string& yamlConfig);
 
                 YamlWrapper(const YamlWrapper& other);

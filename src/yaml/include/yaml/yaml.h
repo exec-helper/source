@@ -6,18 +6,16 @@
 #include <vector>
 
 #include "config/configInputFile.h"
+#include "config/path.h"
 #include "config/settingsNode.h"
 
 #include "yamlWrapper.h"
 
 namespace execHelper { 
     namespace yaml {
-        // Struct is mainly meant to identify the correct constructor to use
-        using YamlFile = YamlWrapperFile;
-
         class Yaml : public config::ConfigInputFile {
             public:
-                explicit Yaml(const YamlFile& file);
+                explicit Yaml(const config::Path& file);
                 explicit Yaml(const std::string& yamlConfig);
 
                 Yaml(const Yaml& other) = delete;

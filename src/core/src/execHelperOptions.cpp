@@ -32,7 +32,6 @@ using execHelper::config::Path;
 using execHelper::config::SettingsNode;
 
 using execHelper::yaml::Yaml;
-using execHelper::yaml::YamlFile;
 
 namespace execHelper { namespace core {
     ExecHelperOptions::ExecHelperOptions() noexcept :
@@ -128,10 +127,7 @@ namespace execHelper { namespace core {
             return false;
         }
 
-        YamlFile yamlFile;
-        yamlFile.file = file.native();
-
-        Yaml yaml(yamlFile);
+        Yaml yaml(file);
         if(! yaml.getTree({}, &m_settings)) {
             LOG(error) << "Could not get settings tree";
             return false;
