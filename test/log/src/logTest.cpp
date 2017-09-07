@@ -143,7 +143,7 @@ namespace test {
 
             WHEN("We convert the string to a log level") {
                 THEN("We should get an exception") {
-                    REQUIRE_THROWS_AS(toLogLevel(wrongLogLevel), InvalidLogLevel);
+                    REQUIRE_THROWS_AS(toLogLevel(wrongLogLevel), const InvalidLogLevel&);
                 }
             }
         }

@@ -195,7 +195,7 @@ namespace execHelper { namespace yaml { namespace test {
 
             WHEN("We pass it to yaml") {
                 THEN("We should not get here") {
-                    REQUIRE_THROWS_AS(Yaml(file.getPath()), YAML::BadFile);
+                    REQUIRE_THROWS_AS(Yaml(file.getPath()), const YAML::BadFile&);
                 }
             }
         }
