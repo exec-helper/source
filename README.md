@@ -39,7 +39,7 @@ Note: uses the CC and CXX environment variables for determining the compiler or 
 Check the [documentation](http://bverhagen.gitlab.io/exec-helper/docs/html/index.html).
 
 ### Cross compilation
-Exec-helper supports both native and cross compilation (including building with a custom sysroot) builds. Cross compilation requires invoking cmake directly and appending *-DCMAKE_TOOLCHAIN_FILE=\<toolchain-file\>* to the cmake initialization command. Check the _toolchain.cmake.in_ file for a template on setting up the toolchain file for cross compilation and the _Makefile_ for a template of the cmake initalization command.
+Exec-helper supports both native and cross compilation (including building with a custom sysroot) builds. Cross compilation requires invoking cmake directly and appending *-DCMAKE_TOOLCHAIN_FILE=\<toolchain-file\>* to the cmake initialization command. Check the _toolchain.cmake.in_ file for a template on setting up the toolchain file for cross compilation and the _Makefile_ for a template of the cmake initialization command.
 
 ## Documentation
 See [documentation](http://bverhagen.gitlab.io/exec-helper/docs/html/index.html) for the latest documentation.
