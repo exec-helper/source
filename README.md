@@ -19,10 +19,13 @@ Checkout the [exec-helper-package](https://github.com/bverhagen/exec-helper-pack
 
 #### Target build dependencies
 - A POSIX compliant operating system
-- A C++ 11 compatible compiler
-- boost-program-options development files
-- yaml-cpp development files (optional, will be downloaded and compiled in statically if missing)
-- catch unittest framework development files for building the tests (optional)
+- A C++ 14 compatible compiler
+- [boost-program-options](https://github.com/boostorg/program_options) development files
+- [boost-log](https://github.com/boostorg/log) development files
+- [boost-filesystem](https://github.com/boostorg/filesystem) development files
+- [yaml-cpp](https://github.com/jbeder/yaml-cpp) development files (optional, will be downloaded and compiled in statically if missing)
+- [Microsoft gsl](https://github.com/Microsoft/GSL) development files (optional, will be downloaded and compiled in statically if missing)
+- [catch](https://github.com/philsquared/Catch) unittest framework development files for building the tests (optional, for building the tests)
 
 ### Quick installation
 ```sh
@@ -32,7 +35,7 @@ $ make
 
 Note: uses the CC and CXX environment variables for determining the compiler or the system's default compiler otherwise. Check the 'less quick install'-section for using other compilers.
 
-### Less quick install
+### Less quick, advanced install
 Check the [documentation](http://bverhagen.gitlab.io/exec-helper/docs/html/index.html).
 
 ### Cross compilation
