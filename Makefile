@@ -28,6 +28,9 @@ docs-man:
 changelog: init
 	make -C $(BUILD_DIR) --jobs $(NB_OF_CORES) changelog
 
+print-changelog:
+	gitchangelog
+
 docs: init docs-html docs-man
 
 install-bin:
