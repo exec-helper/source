@@ -16,11 +16,22 @@ namespace execHelper {
                  * \param env   The environment collection to take the content from
                  */
                 explicit Envp(const EnvironmentCollection& env) noexcept;
+
+                /*! @copydoc Argv::Argv(const Argv& other)
+                 */
                 Envp(const Envp& other) noexcept;
+
+                /*! @copydoc Argv::Argv(Argv&& other)
+                 */
                 Envp(Envp&& other) noexcept;
                 ~Envp() noexcept;
 
+                /*! @copydoc Argv::operator=(const Argv& other)
+                 */
                 Envp& operator=(const Envp& other) noexcept;
+
+                /*! @copydoc Argv::operator=(Argv&& other)
+                 */
                 Envp& operator=(Envp&& other) noexcept;
 
                 /**

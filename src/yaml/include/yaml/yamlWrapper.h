@@ -24,19 +24,32 @@ namespace execHelper {
                  * \throws YAML::BadFile    If the given file does not exist
                  */
                 explicit YamlWrapper(const config::Path& file);
+
+                /**
+                 * Constructor
+                 *
+                 * \param[in] yamlConfig    The content to parse
+                 */
                 explicit YamlWrapper(const std::string& yamlConfig);
 
+                /*! @copydoc core::Argv::Argv(const Argv&)
+                 */
                 YamlWrapper(const YamlWrapper& other);
+
+                /*! @copydoc core::Argv::Argv(Argv&&)
+                 */
                 YamlWrapper(YamlWrapper&& other) noexcept;
                 ~YamlWrapper() = default;
 
+                /*! @copydoc core::Argv::operator=(const Argv&)
+                 */
                 YamlWrapper& operator=(const YamlWrapper& other);
+
+                /*! @copydoc core::Argv::operator=(Argv&&)
+                 */
                 YamlWrapper& operator=(YamlWrapper&& other) noexcept;
 
-                /**
-                 * Swap contents
-                 *
-                 * \param other The other object to swap with
+                /*! @copydoc core::Argv::swap(Argv&)
                  */
                 void swap(const YamlWrapper& other) noexcept;
 

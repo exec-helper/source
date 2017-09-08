@@ -55,6 +55,14 @@ namespace execHelper { namespace core {
         return *this;
     }
 
+    bool Argv::operator==(const Argv& other) noexcept {
+        return m_argv == other.m_argv;
+    }
+
+    bool Argv::operator!=(const Argv& other) noexcept {
+        return !(*this == other);
+    }
+
     char* Argv::operator[](size_t index) const noexcept {
         if(index >= m_argv.size()) {
             return nullptr; 

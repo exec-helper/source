@@ -18,7 +18,18 @@ namespace execHelper {
          */
         class Yaml : public config::ConfigInputFile {
             public:
+                /**
+                 * Constructor
+                 *
+                 * \param[in] file  Path to the file to parse
+                 */
                 explicit Yaml(const config::Path& file);
+
+                /**
+                 * Constructor
+                 *
+                 * \param[in] yamlConfig    The content to parse
+                 */
                 explicit Yaml(const std::string& yamlConfig);
 
                 Yaml(const Yaml& other) = delete;

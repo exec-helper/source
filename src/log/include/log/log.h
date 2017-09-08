@@ -94,16 +94,18 @@ namespace execHelper {
         /**
          * \brief Modifies the command line output format
          */
-        class Modifier {
-            ColorCode code;
-        public:
-            explicit Modifier(ColorCode cCode) noexcept : code(cCode) {}
-            friend std::ostream&
-            operator<<(std::ostream& os, const Modifier& mod) {
-                return os << "\033[" << mod.code << "m";
-            }
+        struct Modifier {
+            ColorCode code; //!< The color code to use for the modifier
 
+            /**
+             * The modifier to use
+             *
+             * \param cCode The color code to use
+             */
+            explicit Modifier(ColorCode cCode) noexcept : code(cCode) {}
         };
+
+        std::ostream& operator<<(std::ostream& os, const Modifier& mod);
 
         static Modifier def(FG_DEFAULT);
         static Modifier blue(FG_BLUE);

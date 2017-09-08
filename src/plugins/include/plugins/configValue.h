@@ -31,7 +31,17 @@ namespace execHelper {
             template<typename T, bool isCollection>
             class ConfigValueImpl {
                 public:
+                    /**
+                     * Returns the collection
+                     *
+                     * \param collection    The collection
+                     * \returns The collection  If the collection is not a nullptr
+                     *          boost::none     Otherwise
+                     */
                     static boost::optional<T> getValue(config::SettingsNode::SettingsValues* collection) noexcept {
+                        if(!collection) {
+                            return boost::none;
+                        }
                         return *collection;
                     }
             };
@@ -42,8 +52,15 @@ namespace execHelper {
             template<typename T>
             class ConfigValueImpl<T, false> {
                 public:
+                    /**
+                     * Returns the last element of the collection
+                     *
+                     * \param collection    The collection
+                     * \returns The last element  If the collection is not a nullptr and not empty
+                     *          boost::none     Otherwise
+                     */
                     static boost::optional<T> getValue(config::SettingsNode::SettingsValues* collection) noexcept {
-                        if(collection->empty()) {
+                        if(!collection || collection->empty()) {
                             return boost::none;
                         }
                         return collection->back();
@@ -57,7 +74,7 @@ namespace execHelper {
         template<typename T>
         class ConfigValue {
             public:
-                using OrderedConfigKeys = std::initializer_list<std::vector<std::string>>;
+                using OrderedConfigKeys = std::initializer_list<std::vector<std::string>>; //!< brief The sub-key hierarchy that together form a key
 
                 /**
                  * Returns the setting for the given key in the given settings node by searching in order on the given paths.
@@ -133,8 +150,10 @@ namespace execHelper {
         template<>
         class ConfigValue<const config::SettingsNode&> {
             public:
-                using OrderedConfigKeys = std::initializer_list<std::vector<std::string>>;
+                using OrderedConfigKeys = std::initializer_list<std::vector<std::string>>; //!< brief The sub-key hierarchy that together form a key
 
+                /*! @copydoc ConfigValue::getSetting(const std::string&, const config::SettingsNode&, const OrderedConfigKeys&)
+                 */
                 static boost::optional<const config::SettingsNode&> getSetting(const std::string& key, const config::SettingsNode& rootSettings, const OrderedConfigKeys& orderedConfigKeys) noexcept {
                     for(const auto& configKeys : orderedConfigKeys) {
                         config::SettingsNode::SettingsKeys keys = configKeys;
@@ -151,14 +170,20 @@ namespace execHelper {
                     return boost::none;
                 }
 
+                /*! @copydoc ConfigValue::getSetting(const std::string&, const config::SettingsNode&, const core::Command&)
+                 */
                 static boost::optional<const config::SettingsNode&> getSetting(const std::string& key, const config::SettingsNode& rootSettings, const core::Command& command) noexcept {
                     return getSetting(key, rootSettings, {{command}, {}});
                 }
 
+                /*! @copydoc ConfigValue::get(const std::string&, const T&, const core::Command&, const config::SettingsNode&)
+                 */
                 static const config::SettingsNode& get(const std::string& configKey, const config::SettingsNode& defaultValue, const core::Command& command, const config::SettingsNode& rootSettings) noexcept {
                     return get(configKey, defaultValue, rootSettings, {{command}, {}});
                 }
 
+                /*! @copydoc ConfigValue::get(const std::string&, const T&, const config::SettingsNode&, const OrderedConfigKeys&)
+                 */
                 static const config::SettingsNode& get(const std::string& configKey, const config::SettingsNode& defaultValue, const config::SettingsNode& rootSettings, const OrderedConfigKeys& orderedConfigKeys) noexcept {
                     auto configValue = getSetting(configKey, rootSettings, orderedConfigKeys);
                     if(configValue != boost::none) {

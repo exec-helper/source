@@ -21,7 +21,7 @@ namespace execHelper {
          */
         class ImmediateExecutor : public ExecutorInterface {
             public:
-                using Callback = std::function<void(Shell::ShellReturnCode)>;
+                using Callback = std::function<void(Shell::ShellReturnCode)>; //!< Brief Callback function signature
 
                 /**
                  * Create an executor

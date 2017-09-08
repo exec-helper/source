@@ -181,10 +181,21 @@ namespace execHelper {
 
             protected:
                 Options() = default;
+
+                /*! @copydoc Argv::Argv(const Argv& other)
+                 */
                 Options(const Options& other) = default;
+
+                /*! @copydoc Argv::Argv(Argv&& other)
+                 */
                 Options(Options&& other) noexcept = default;
 
+                /*! @copydoc Argv::operator=(const Argv& other)
+                 */
                 Options& operator=(const Options& other) = default;
+
+                /*! @copydoc Argv::operator=(Argv&& other)
+                 */
                 Options& operator=(Options&& other) noexcept = default;
 
         };

@@ -29,6 +29,14 @@ namespace execHelper {
                 PermutationIterator<IteratorType, CollectionTypes...> m_innerIterator;
 
             public:
+                /**
+                 * Constructor
+                 *
+                 * \param[in] c1BeginIterator   The begin iterator for the first collection
+                 * \param[in] otherBeginIterators   The begin iterators for additional collections
+                 * \param[in] c1EndIterator     The end iterator for the first collection
+                 * \param[in] otherEndIterators The end iterators for additional collections
+                 */
                 PermutationIterator(const typename CollectionType1::const_iterator& c1BeginIterator, const typename CollectionTypes::const_iterator&... otherBeginIterators, const typename CollectionType1::const_iterator& c1EndIterator, const typename CollectionTypes::const_iterator&... otherEndIterators) noexcept :
                     m_outerBeginIterator(c1BeginIterator),
                     m_outerIterator(c1BeginIterator),
@@ -40,6 +48,11 @@ namespace execHelper {
                     }
                 }
 
+                /**
+                 * Increment operator
+                 *
+                 * \returns An iterator pointing to the next object
+                 */
                 iterator& operator++() noexcept {
                     // The iterator is at its end if the m_outerIterator is at its own end
                     if(m_outerIterator != m_outerEndIterator) {
@@ -55,10 +68,18 @@ namespace execHelper {
                     return *this;
                 }
 
+                /**
+                 * Returns whether any of the given collections is empty
+                 *
+                 * \returns True    If any of the given collections is empty
+                 *          False   Otherwise
+                 */
                 bool hasEmptyCollection() const noexcept {
                     return m_outerBeginIterator == m_outerEndIterator || m_innerIterator.hasEmptyCollection();
                 }
 
+                /*! @copydoc Argv::operator==(const Argv&)
+                 */
                 bool operator==(const iterator& other) const {
                     if(atEnd()) {
                         // If the outer iterator is at the end, we do not care about the state of the inner iterators
@@ -67,15 +88,27 @@ namespace execHelper {
                     return (m_innerIterator == other.m_innerIterator && m_outerIterator == other.m_outerIterator);
                 }
 
+                /*! @copydoc Argv::operator!=(const Argv&)
+                 */
                 bool operator!=(const iterator& other) const {
                     return !(*this == other);
                 }
 
+                /**
+                 * Convert the current iterator position to a tuple of the actual objects they are pointing to
+                 *
+                 * \returns The actual objects the current iterator position is pointing to
+                 */
                 Tuple getElementValue() const {
                     expects(m_outerIterator != m_outerEndIterator);
                     return std::tuple_cat(std::make_tuple(*m_outerIterator), m_innerIterator.getElementValue());
                 }
 
+                /**
+                 * Dereference operator
+                 *
+                 * \returns The object the current iterator is pointing to
+                 */
                 value_type operator*() const {
                     expects(m_outerIterator != m_outerEndIterator);
                     expects(!m_innerIterator.atEnd());
@@ -83,16 +116,27 @@ namespace execHelper {
                     return detail::createObject<IteratorType, Tuple, 0 == std::tuple_size<ttype>::value, std::tuple_size<ttype>::value>::getObject(getElementValue());
                 }
 
+                /**
+                 * Returns whether the current iterator is at the end
+                 *
+                 * \returns True    If the current iterator is at the end
+                 *          False   Otherwise
+                 */
                 bool atEnd() const {
                     return m_outerIterator == m_outerEndIterator;
                 }
 
+                /**
+                 * Restart the iterator
+                 */
                 void restart() {
                     m_outerIterator = m_outerBeginIterator;
                     m_innerIterator.restart();
                 }
         };
 
+        /*!@copydoc PermutationIterator
+         */
         template<typename IteratorType, typename CollectionType>
         class PermutationIterator<IteratorType, CollectionType> {
             private:
@@ -106,6 +150,12 @@ namespace execHelper {
                 const typename CollectionType::const_iterator m_collectionEndIterator;
 
             public:
+                /**
+                 * Constructor
+                 *
+                 * \param[in] beginIterator The begin iterator for the collection
+                 * \param[in] endIterator   The end iterator for the collection
+                 */
                 PermutationIterator(const typename CollectionType::const_iterator& beginIterator, const typename CollectionType::const_iterator& endIterator) noexcept :
                     m_collectionIterator(beginIterator),
                     m_collectionBeginIterator(beginIterator),
@@ -114,6 +164,8 @@ namespace execHelper {
                     ;
                 }
 
+                /*! @copydoc PermutationIterator::operator++()
+                 */
                 iterator& operator++() noexcept {
                     // The iterator is at its end if the m_outerIterator is at its own end
                     if(! atEnd()) {
@@ -122,31 +174,45 @@ namespace execHelper {
                     return *this;
                 }
 
+                /*! @copydoc PermutationIterator::atEnd()
+                 */
                 bool atEnd() const {
                     return m_collectionIterator == m_collectionEndIterator;
                 }
 
+                /*! @copydoc PermutationIterator::hasEmptyCollection()
+                 */
                 bool hasEmptyCollection() const noexcept {
                     return m_collectionBeginIterator == m_collectionEndIterator;
                 }
 
+                /*! @copydoc PermutationIterator::operator==()
+                 */
                 bool operator==(const iterator& other) const {
                     return m_collectionIterator == other.m_collectionIterator;
                 }
 
+                /*! @copydoc PermutationIterator::operator!=()
+                 */
                 bool operator!=(const iterator& other) const {
                     return !(*this == other);
                 }
 
+                /*! @copydoc PermutationIterator::operator*()
+                 */
                 value_type operator*() const {
                     return IteratorType(std::get<CollectionType::value>(getElementValue()));
                 }
 
+                /*! @copydoc PermutationIterator::getElementValue()
+                 */
                 std::tuple<typename CollectionType::value_type> getElementValue() const {
                     expects(m_collectionIterator != m_collectionEndIterator);
                     return  std::make_tuple(*m_collectionIterator);
                 }
 
+                /*! @copydoc PermutationIterator::restart()
+                 */
                 void restart() {
                     m_collectionIterator = m_collectionBeginIterator;
                 }

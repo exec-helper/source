@@ -34,9 +34,16 @@ namespace execHelper {
                 ExecHelperOptions& operator=(const ExecHelperOptions& other) = delete;
                 ExecHelperOptions& operator=(ExecHelperOptions&& other) = delete;
 
+                /*! @copydoc Argv::operator==(const Argv&)
+                 */
                 bool operator==(const ExecHelperOptions& other) const noexcept;
+
+                /*! @copydoc Argv::operator!=(const Argv&)
+                 */
                 bool operator!=(const ExecHelperOptions& other) const noexcept;
 
+                /*! @copydoc Argv::swap(Argv&)
+                 */
                 void swap(ExecHelperOptions& other) noexcept;
 
                 /**

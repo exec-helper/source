@@ -16,7 +16,7 @@ namespace execHelper {
          */
         class Shell {
             public:
-                using ShellReturnCode = uint32_t;
+                using ShellReturnCode = uint32_t; //!< brief Shell return code abstraction
 
                 /**
                  * Executes the given task

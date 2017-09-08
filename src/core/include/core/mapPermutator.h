@@ -12,6 +12,11 @@ namespace execHelper {
         template<typename T, typename U>
         class MapPermutator {
             public:
+                /**
+                 * Constructor
+                 *
+                 * \param map   The map to permutate over
+                 */
                 explicit MapPermutator(std::map<T,std::vector<U>> map) noexcept :
                     m_map(std::move(map))
                 {
@@ -130,8 +135,8 @@ namespace execHelper {
                         bool m_end;
                 };
 
-                using iterator = Iterator<std::map<T, U>>;
-                using const_iterator = Iterator<const std::map<T, U>>;
+                using iterator = Iterator<std::map<T, U>>; //!< brief iterator type
+                using const_iterator = Iterator<const std::map<T, U>>; //!< brief const iterator type
 
                 /**
                  * Return iterator to beginning
