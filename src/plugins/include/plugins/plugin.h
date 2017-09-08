@@ -17,19 +17,29 @@ namespace execHelper {
          */
         class Plugin {
             public: 
+		/*! @copydoc core::Argv::Argv(const Argv&)
+		 */
                 Plugin(const Plugin& other) = delete;
+
+		/*! @copydoc core::Argv::Argv(Argv&&)
+		 */
                 Plugin(Plugin&& other) noexcept = delete;
                 virtual ~Plugin() = default;
 
+		/*! @copydoc core::Argv::operator=(const Argv&)
+		 */
                 Plugin& operator=(const Plugin& other) = delete;
+
+		/*! @copydoc core::Argv::operator=(Argv&&)
+		 */
                 Plugin& operator=(Plugin&& other) noexcept = delete;
 
                 /**
                  * Apply the plugin
                  *
-                 * \param command   The command that is being executed
-                 * \param task      The task to extend
-                 * \param options   The options that were passed
+                 * \param[in] command   The command that is being executed
+                 * \param[in] task      The task to extend
+                 * \param[in] options   The options that were passed
                  * \returns True    If the application was successful
                  *          False   Otherwise
                  */
@@ -42,8 +52,8 @@ namespace execHelper {
         /**
          * Register a finished task to an executor
          *
-         * \param task  The finished task
-         * \param options   The options that were passed
+         * \param[in] task  The finished task
+         * \param[in] options   The options that were passed
          * \returns True    If the task was successfully registered
          *          False   Otherwise
          */

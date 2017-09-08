@@ -14,7 +14,7 @@ namespace execHelper {
                 /**
                  * Create the object
                  *
-                 * \param tuple    The tuple containing the arguments for creating the object
+                 * \param[in] tuple    The tuple containing the arguments for creating the object
                  * \returns The created object
                  */
                 static ReturnType getObject(Tup&& tuple) {
@@ -34,7 +34,7 @@ namespace execHelper {
                 /**
                  * This is a partial template specialization. Please check the generic template declaration for the documentation.
                  *
-                 * \param tuple A tuple containing the arguments to pass to the constructor of the ReturnType
+                 * \param[in] tuple A tuple containing the arguments to pass to the constructor of the ReturnType
                  * \returns A ReturnType object constructed using the given arguments
                  */
                 static ReturnType getObject(Tup&& tuple) {

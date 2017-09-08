@@ -18,9 +18,9 @@ namespace execHelper {
         /**
          * Replaces all occurences of the given pattern in the subject with replacement
          *
-         * \param subject   The subject
-         * \param pattern   The pattern
-         * \param replacement   The replacement
+         * \param[in] subject   The subject
+         * \param[in] pattern   The pattern
+         * \param[in] replacement   The replacement
          * \returns The replaced string
          */
         std::string replacePatterns(const std::string& subject, const std::string& pattern, const std::string& replacement) noexcept;

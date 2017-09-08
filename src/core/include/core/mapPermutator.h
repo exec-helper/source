@@ -15,7 +15,7 @@ namespace execHelper {
                 /**
                  * Constructor
                  *
-                 * \param map   The map to permutate over
+                 * \param[in] map   The map to permutate over
                  */
                 explicit MapPermutator(std::map<T,std::vector<U>> map) noexcept :
                     m_map(std::move(map))
@@ -38,8 +38,8 @@ namespace execHelper {
                         /**
                          * Constructor for the iterator
                          *
-                         * \param map   The map to permutate and iterate over
-                         * \param end   Whether the constructed iterator is an end iterator
+                         * \param[in] map   The map to permutate and iterate over
+                         * \param[in] end   Whether the constructed iterator is an end iterator
                          */
                         explicit Iterator(const std::map<T, std::vector<U>>& map, bool end = false) noexcept :
                             m_map(map),
@@ -84,12 +84,7 @@ namespace execHelper {
                             return *this;
                         }
 
-                        /**
-                         * Equality operator
-                         *
-                         * \param other The other object to compare with
-                         * \returns True    If the other object is considered equal to this one
-                         *          False   Otherwise
+                        /*! @copydoc Argv::operator==(const Argv&)
                          */
                         bool operator==(const iterator& other) const {
                             if(m_map != other.m_map) {
@@ -106,11 +101,7 @@ namespace execHelper {
                             return true;
                         }
 
-                        /**
-                         * Inequality operator
-                         *
-                         * \param other The other object to compare with
-                         * \returns ! \ref operator==(const iterator& other) const
+                        /*! @copydoc Argv::operator!=(const Argv&)
                          */
                         bool operator!=(const iterator& other) const {
                             return !(*this == other);

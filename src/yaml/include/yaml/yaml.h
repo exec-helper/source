@@ -32,17 +32,27 @@ namespace execHelper {
                  */
                 explicit Yaml(const std::string& yamlConfig);
 
+		/*! @copydoc core::Argv::Argv(const Argv&)
+		 */
                 Yaml(const Yaml& other) = delete;
+
+		/*! @copydoc core::Argv::Argv(Argv&&)
+		 */
                 Yaml(Yaml&& other) noexcept = delete;
                 ~Yaml() override = default;
 
+		/*! @copydoc core::Argv::operator=(const Argv&)
+		 */
                 Yaml& operator=(const Yaml& other) = delete;
+
+		/*! @copydoc core::Argv::operator=(Argv&&)
+		 */
                 Yaml& operator=(Yaml&& other) noexcept = delete;
 
                 /**
                  * Returns the value associated with the given key list
                  *
-                 * \param keys  A collection of keys to follow
+                 * \param[in] keys  A collection of keys to follow
                  * \returns The associated value
                  */
                 std::string getValue(const std::initializer_list<std::string>& keys);
@@ -50,7 +60,7 @@ namespace execHelper {
                 /**
                  * Returns the collection of values associated with the given key list
                  *
-                 * \param keys  A collection of keys to follow
+                 * \param[in] keys  A collection of keys to follow
                  * \return  The associated values
                  */
                 std::vector<std::string> getValueCollection(const std::initializer_list<std::string>& keys);

@@ -19,17 +19,17 @@ namespace execHelper {
                 /**
                  * Constructor
                  *
-                 * \param patternKey    The key of the pattern
-                 * \param defaultValues The default value for the pattern
-                 * \param shortOption   The short option associated with the pattern
-                 * \param longOption    The long option associated with the pattern
+                 * \param[in] patternKey    The key of the pattern
+                 * \param[in] defaultValues The default value for the pattern
+                 * \param[in] shortOption   The short option associated with the pattern
+                 * \param[in] longOption    The long option associated with the pattern
                  */
                 Pattern(PatternKey patternKey, PatternValues defaultValues, char shortOption, std::string longOption) noexcept;
 
                 /**
                  * Equality operator
                  *
-                 * \param other The other object to compare with
+                 * \param[in] other The other object to compare with
                  * \returns True    If the other object is considered equal
                  *          False   Otherwise
                  */
@@ -38,7 +38,7 @@ namespace execHelper {
                 /**
                  * Inequality operator
                  *
-                 * \param other The other object to compare with
+                 * \param[in] other The other object to compare with
                  * \returns ! \ref operator==(const Pattern& other) const
                  *
                  */

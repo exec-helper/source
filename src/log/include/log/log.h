@@ -39,15 +39,15 @@ namespace execHelper {
         /**
          * Initialize logging
          *
-         * \param   The output stream to log to
+         * \param[in]   The output stream to log to
          */
         void init(std::ostream& logStream = std::clog) noexcept;
 
         /**
          * Set the minimum severity of each shown log message for a channel to the given severity
          *
-         * \param channel   The channel to set the severity from
-         * \param severity  The severity to set the minimal severity to
+         * \param[in] channel   The channel to set the severity from
+         * \param[in] severity  The severity to set the minimal severity to
          * \returns True    If the severity was successfully set
          *          False   Otherwise
          */
@@ -57,7 +57,7 @@ namespace execHelper {
         /**
          * Convert the given log level string to a log level
          *
-         * \param level The log level string to convert
+         * \param[in] level The log level string to convert
          * \returns The associated log level
          * \throws  InvalidLogLevel If the given level string is not associated with any log level
          */
@@ -66,7 +66,7 @@ namespace execHelper {
         /**
          * Convert the log level to a string
          *
-         * \param level The level to convert
+         * \param[in] level The level to convert
          * \returns The string associated with the log level
          */
         std::string toString(LogLevel level) noexcept;
@@ -100,7 +100,7 @@ namespace execHelper {
             /**
              * The modifier to use
              *
-             * \param cCode The color code to use
+             * \param[in] cCode The color code to use
              */
             explicit Modifier(ColorCode cCode) noexcept : code(cCode) {}
         };

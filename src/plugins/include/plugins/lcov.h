@@ -17,9 +17,9 @@ namespace execHelper {
                 /**
                  * Add the command to generate html
                  *
-                 * \param command   The command associated with the action
-                 * \param rootSettings  The configuration settings associated with the specific command
-                 * \param task  The current task
+                 * \param[in] command   The command associated with the action
+                 * \param[in] rootSettings  The configuration settings associated with the specific command
+                 * \param[in] task  The current task
                  * \returns True    if the command was successfully added to the given task
                  *          False   otherwise
                  */
@@ -28,12 +28,12 @@ namespace execHelper {
                 /**
                  * Add the command to zero all counters
                  *
-                 * \param command   The command associated with the action
-                 * \param rootSettings  The configuration settings associated with the specific command
-                 * \param baseDirectory The base directory to use. See lcov manpage
-                 * \param directory     The directory to use. See lcov manpage
-                 * \param commandLine   The additional command line arguments to add
-                 * \param task  The current task
+                 * \param[in] command   The command associated with the action
+                 * \param[in] rootSettings  The configuration settings associated with the specific command
+                 * \param[in] baseDirectory The base directory to use. See lcov manpage
+                 * \param[in] directory     The directory to use. See lcov manpage
+                 * \param[in] commandLine   The additional command line arguments to add
+                 * \param[in] task  The current task
                  * \returns True    if the command was successfully added to the given task
                  *          False   otherwise
                  */
@@ -42,8 +42,8 @@ namespace execHelper {
                 /**
                  * Get the excludes
                  *
-                 * \param command   The command associated with the action
-                 * \param rootSettings  The configuration settings associated with the specific command
+                 * \param[in] command   The command associated with the action
+                 * \param[in] rootSettings  The configuration settings associated with the specific command
                  * \returns A collection of directories to exclude from the analysis
                  */
                 static core::TaskCollection getExcludes(const core::Command& command, const config::SettingsNode& rootSettings) noexcept;
@@ -51,11 +51,11 @@ namespace execHelper {
                 /**
                  * Add the command to exclude directories
                  *
-                 * \param command   The command associated with the action
-                 * \param rootSettings  The configuration settings associated with the specific command
-                 * \param infoFile      The info file associated with the analysis
-                 * \param commandLine   The additional command line arguments to add
-                 * \param task  The current task
+                 * \param[in] command   The command associated with the action
+                 * \param[in] rootSettings  The configuration settings associated with the specific command
+                 * \param[in] infoFile      The info file associated with the analysis
+                 * \param[in] commandLine   The additional command line arguments to add
+                 * \param[in] task  The current task
                  * \returns True    if the command was successfully added to the given task
                  *          False   otherwise
                  */
@@ -64,11 +64,11 @@ namespace execHelper {
                 /**
                  * Add the command to capture the coverage
                  *
-                 * \param baseDirectory The base directory to use. See lcov manpage
-                 * \param directory     The directory to use. See lcov manpage
-                 * \param infoFile      The info file associated with the analysis
-                 * \param commandLine   The additional command line arguments to add
-                 * \param task  The current task
+                 * \param[in] baseDirectory The base directory to use. See lcov manpage
+                 * \param[in] directory     The directory to use. See lcov manpage
+                 * \param[in] infoFile      The info file associated with the analysis
+                 * \param[in] commandLine   The additional command line arguments to add
+                 * \param[in] task  The current task
                  */
                 static void generateCaptureTask(const std::string& baseDirectory, const std::string& directory, const std::string& infoFile, const core::TaskCollection& commandLine, core::Task& task) noexcept;
         };

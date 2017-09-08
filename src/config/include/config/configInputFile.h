@@ -12,19 +12,33 @@ namespace execHelper {
          */
         class ConfigInputFile {
             public:
+		/*! @copydoc core::Argv::Argv(const Argv&)
+		 * \note Deleted
+		 */
                 ConfigInputFile(const ConfigInputFile& other) = delete;
+
+		/*! @copydoc core::Argv::Argv(Argv&&)
+		 * \note Deleted
+		 */
                 ConfigInputFile(ConfigInputFile&& other) noexcept = delete;
 
                 virtual ~ConfigInputFile() = default;
 
+		/*! @copydoc core::Argv::operator=(const Argv&)
+		 * \note Deleted
+		 */
                 ConfigInputFile& operator=(const ConfigInputFile& other) = delete;
+
+		/*! @copydoc core::Argv::operator=(Argv&&)
+		 * \note Deleted
+		 */
                 ConfigInputFile& operator=(ConfigInputFile&& other) noexcept = delete;
 
                 /**
                  * Returns the settings under the node defined by keys
                  *
-                 * \param keys  The path to the root node to get the tree from
-                 * \param settings  The settings node to fill
+                 * \param[in] keys  The path to the root node to get the tree from
+                 * \param[in] settings  The settings node to fill
                  * \return  True    If the settings node was successfully filled
                  *          False   Otherwise
                  */

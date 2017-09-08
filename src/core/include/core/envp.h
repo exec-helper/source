@@ -13,31 +13,28 @@ namespace execHelper {
                 /**
                  * Create an object from the contents of an environment collection
                  *
-                 * \param env   The environment collection to take the content from
+                 * \param[in] env   The environment collection to take the content from
                  */
                 explicit Envp(const EnvironmentCollection& env) noexcept;
 
-                /*! @copydoc Argv::Argv(const Argv& other)
+                /*! @copydoc Argv::Argv(const Argv&)
                  */
                 Envp(const Envp& other) noexcept;
 
-                /*! @copydoc Argv::Argv(Argv&& other)
+                /*! @copydoc Argv::Argv(Argv&&)
                  */
                 Envp(Envp&& other) noexcept;
                 ~Envp() noexcept;
 
-                /*! @copydoc Argv::operator=(const Argv& other)
+                /*! @copydoc Argv::operator=(const Argv&)
                  */
                 Envp& operator=(const Envp& other) noexcept;
 
-                /*! @copydoc Argv::operator=(Argv&& other)
+                /*! @copydoc Argv::operator=(Argv&&)
                  */
                 Envp& operator=(Envp&& other) noexcept;
 
-                /**
-                 * Swap contents
-                 *
-                 * \param other The other object to swap with
+                /*! @copydoc Argv::swap(Argv&)
                  */
                 void swap(Envp& other) noexcept;
 
@@ -65,7 +62,7 @@ namespace execHelper {
                 /**
                  * Create a deep copy
                  *
-                 * \param other The other object to copy
+                 * \param[in] other The other object to copy
                  */
                 void deepCopy(const Envp& other) noexcept;
 

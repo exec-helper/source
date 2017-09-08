@@ -43,8 +43,8 @@ namespace execHelper {
                 /**
                  * Parses the given options
                  *
-                 * \param argc     The number of options that were passed on the command line
-                 * \param argv     An array of pointers the beginning of each argument as a char string
+                 * \param[in] argc     The number of options that were passed on the command line
+                 * \param[in] argv     An array of pointers the beginning of each argument as a char string
                  * \returns True    If the options could be successfully parsed
                  *          False   Otherwise
                  */
@@ -53,7 +53,7 @@ namespace execHelper {
                 /**
                  * Parses the given settings file
                  *
-                 * \param file     The settings file to parse
+                 * \param[in] file     The settings file to parse
                  * \returns True    If the settings file was successfully parsed
                  *          False   Otherwise
                  */
@@ -108,7 +108,7 @@ namespace execHelper {
                 /**
                  * Returns the settings node associated with the given key
                  *
-                 * \param key  The associated key to return the settings node for
+                 * \param[in] key  The associated key to return the settings node for
                  * \returns The settings node associated with the given key
                  */
                 virtual const config::SettingsNode& getSettings(const std::string& key) noexcept = 0;
@@ -128,7 +128,7 @@ namespace execHelper {
                 /**
                  * Returns whether the pattern settings contain a specific long option
                  *
-                 * \param longOptions   The long option to check for
+                 * \param[in] longOptions   The long option to check for
                  * \returns True    If the pattern settings contain the long option
                  *          False   Otherwise
                  */
@@ -137,7 +137,7 @@ namespace execHelper {
                 /**
                  * Get the values set for a specific long option
                  *
-                 * \param longOptions  The long option
+                 * \param[in] longOptions  The long option
                  * \returns A collection of the options set on the command line for the specified long option
                  */
                 virtual std::vector<std::string> getLongOption(const std::string& longOptions) const noexcept = 0;
@@ -152,7 +152,7 @@ namespace execHelper {
                 /**
                  * Returns the values associated with the given pattern
                  *
-                 * \param pattern  The pattern to get the values for
+                 * \param[in] pattern  The pattern to get the values for
                  * \returns A collection of the values associated with the pattern
                  */
                 virtual PatternValues getValues(const Pattern& pattern) const noexcept = 0;
@@ -160,7 +160,7 @@ namespace execHelper {
                 /**
                  * Creates a permutator that permutates all options of the given pattern keys
                  *
-                 * \param patterns The pattern keys to permutate over
+                 * \param[in] patterns The pattern keys to permutate over
                  * \returns A permutator over the given pattern keys
                  */
                 virtual PatternPermutator makePatternPermutator(const PatternKeys& patterns) const noexcept = 0;
@@ -168,7 +168,7 @@ namespace execHelper {
                 /**
                  * Sets the executor
                  *
-                 * \param executor     The executor to set. The caller stays the owner of the executor and should not remove it while it is set for this option object
+                 * \param[in] executor     The executor to set. The caller stays the owner of the executor and should not remove it while it is set for this option object
                  */
                 virtual void setExecutor(ExecutorInterface* executor) noexcept = 0;
 

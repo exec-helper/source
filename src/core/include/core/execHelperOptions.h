@@ -27,11 +27,22 @@ namespace execHelper {
         class ExecHelperOptions : public Options {
             public:
                 ExecHelperOptions() noexcept;
+
+		/*! @copydoc Argv::Argv(const Argv&)
+		 */
                 ExecHelperOptions(const ExecHelperOptions& other) = delete;
+
+		/*! @copydoc Argv::Argv(Argv&&)
+		 */
                 ExecHelperOptions(ExecHelperOptions&& other) noexcept = delete;
                 ~ExecHelperOptions() override = default;
 
+		/*! @copydoc Argv::operator=(const Argv&)
+		 */
                 ExecHelperOptions& operator=(const ExecHelperOptions& other) = delete;
+
+		/*! @copydoc Argv::operator=(Argv&&)
+		 */
                 ExecHelperOptions& operator=(ExecHelperOptions&& other) = delete;
 
                 /*! @copydoc Argv::operator==(const Argv&)
@@ -49,8 +60,8 @@ namespace execHelper {
                 /**
                  * Returns the settings file that is used
                  *
-                 * \param argc  The number of arguments in argv
-                 * \param argv  The arguments passed on the command line
+                 * \param[in] argc  The number of arguments in argv
+                 * \param[in] argv  The arguments passed on the command line
                  * \returns The relative or absolute path to the settings file
                  */
                 std::string getSettingsFile(int argc, const char* const * argv) const noexcept;

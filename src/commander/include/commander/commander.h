@@ -28,9 +28,9 @@ namespace execHelper {
                 /**
                  * Creates a commander
                  *
-                 * \param options   The command line options. ! Note: the passed options must exist until all associated commander objects are destroyed.
-                 * \param workingDirectory   The working directory for the commander
-                 * \param env       The environment to apply the plugins in
+                 * \param[in] options   The command line options. ! Note: the passed options must exist until all associated commander objects are destroyed.
+                 * \param[in] workingDirectory   The working directory for the commander
+                 * \param[in] env       The environment to apply the plugins in
                  */
                 Commander(const core::Options& options, config::Path workingDirectory, core::EnvironmentCollection&& env = core::EnvironmentCollection());
 
@@ -46,9 +46,9 @@ namespace execHelper {
                 /**
                  * Applies the plugin associated with the given plugin name
                  * 
-                 * \param pluginName    The name of the plugin to execute
-                 * \param command       The command that is currently being run
-                 * \param options       The options associated with the command being run
+                 * \param[in] pluginName    The name of the plugin to execute
+                 * \param[in] command       The command that is currently being run
+                 * \param[in] options       The options associated with the command being run
                  * \returns True    If the plugin was successfully applied
                  *          False   Otherwise
                  */

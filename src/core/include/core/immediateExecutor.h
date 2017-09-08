@@ -26,8 +26,8 @@ namespace execHelper {
                 /**
                  * Create an executor
                  *
-                 * \param shell     The shell to execute the command with
-                 * \param callback  The function to call with the result when a command finishes
+                 * \param[in] shell     The shell to execute the command with
+                 * \param[in] callback  The function to call with the result when a command finishes
                  */
                 ImmediateExecutor(std::shared_ptr<Shell> shell, Callback callback) noexcept;
 

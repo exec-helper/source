@@ -18,7 +18,7 @@ namespace execHelper {
                 /**
                  * Equality operator
                  *
-                 * \param other The other object to compare with
+                 * \param[in] other The other object to compare with
                  * \returns True    If the other object is considered equal
                  *          False   Otherwise
                  */
@@ -27,7 +27,7 @@ namespace execHelper {
                 /**
                  * Inequality operator
                  *
-                 * \param other The other object to compare with
+                 * \param[in] other The other object to compare with
                  * \returns ! \ref operator==(const PatternsHandler& other) const
                  */
                 bool operator!=(const PatternsHandler& other) const noexcept;
@@ -35,7 +35,7 @@ namespace execHelper {
                 /**
                  * Returns whether the pattern associated with the given key is registered
                  *
-                 * \param key   The key of the pattern
+                 * \param[in] key   The key of the pattern
                  * \returns True    If the handler handles the pattern
                  *          False   Otherwise
                  */
@@ -44,7 +44,7 @@ namespace execHelper {
                 /**
                  * Registers a pattern with the handler
                  *
-                 * \param pattern   The pattern to register
+                 * \param[in] pattern   The pattern to register
                  */
                 void addPattern(const Pattern& pattern) noexcept;
 
@@ -52,7 +52,7 @@ namespace execHelper {
                  * Returns the pattern associated with the given key
                  *
                  * \pre \ref contains(const PatternKey&) const for the given key returns true
-                 * \param key   The key of the pattern
+                 * \param[in] key   The key of the pattern
                  * \returns The found pattern
                  */
                 const Pattern& getPattern(const PatternKey& key) const noexcept;

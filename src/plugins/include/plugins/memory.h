@@ -46,11 +46,22 @@ namespace execHelper {
                 using Memories = std::vector<Memory_t>; //!< brief A collection of memories
 
                 Memory() = default;
+
+		/*! @copydoc core::Argv::Argv(const Argv&)
+		 */
                 Memory(const Memory& other) = delete;
+
+		/*! @copydoc core::Argv::Argv(Argv&&)
+		 */
                 Memory(Memory&& other) noexcept = delete;
                 ~Memory() override = default;
 
+		/*! @copydoc core::Argv::operator=(const Argv&)
+		 */
                 Memory& operator=(const Memory& other) = delete;
+
+		/*! @copydoc core::Argv::operator=(Argv&&)
+		 */
                 Memory& operator=(Memory&& other) noexcept = delete;
 
                 bool apply(const core::Command& command, core::Task task, const core::Options& options) const noexcept override;
@@ -70,7 +81,7 @@ namespace execHelper {
                 /**
                  * Set the return code for the next invocation(s) of a Memory object
                  *
-                 * \param   returnCode  The code to return on the next invocation(s)
+                 * \param[in]   returnCode  The code to return on the next invocation(s)
                  */
                 static void setReturnCode(bool returnCode) noexcept;
 
@@ -87,11 +98,22 @@ namespace execHelper {
                 using Memories = Memory::Memories; //!< brief A collection of memories
 
                 MemoryHandler();
+
+		/*! @copydoc core::Argv::Argv(const Argv&)
+		 */
                 MemoryHandler(const MemoryHandler& other) = delete;
+
+		/*! @copydoc core::Argv::Argv(Argv&&)
+		 */
                 MemoryHandler(MemoryHandler&& other) noexcept = delete;
                 ~MemoryHandler() override;
 
+		/*! @copydoc core::Argv::operator=(const Argv&)
+		 */
                 MemoryHandler& operator=(const MemoryHandler& other) = delete;
+
+		/*! @copydoc core::Argv::operator=(Argv&&)
+		 */
                 MemoryHandler& operator=(MemoryHandler&& other) noexcept = delete;
 
                 /*! @copydoc Memory::getExecutions()

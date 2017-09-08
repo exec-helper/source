@@ -24,9 +24,9 @@ namespace execHelper {
                 /**
                  * Add an option description
                  *
-                 * \param options   The command line options as a comma separated list
-                 * \param explanation   The explanation to print for the specific option
-                 * \param multitoken    Whether the option is a multitoken option
+                 * \param[in] options   The command line options as a comma separated list
+                 * \param[in] explanation   The explanation to print for the specific option
+                 * \param[in] multitoken    Whether the option is a multitoken option
                  */
                 template<typename T>
                 void addOption(const std::string& options, const std::string& explanation, bool multitoken = false) noexcept {
@@ -40,9 +40,9 @@ namespace execHelper {
                 /**
                  * Returns a map containing the parsed option descriptions for the given command line arguments
                  *
-                 * \param argc  The length of argv
-                 * \param argv  Collection of pointers to the beginning of the arguments
-                 * \param allowUnregistered Whether to allow options in argv that are not described in this option description
+                 * \param[in] argc  The length of argv
+                 * \param[in] argv  Collection of pointers to the beginning of the arguments
+                 * \param[in] allowUnregistered Whether to allow options in argv that are not described in this option description
                  * \returns A key-value collection containing the values of the known arguments in argv
                  */
                 boost::program_options::variables_map getOptionsMap(int argc, const char* const* argv, bool allowUnregistered = false) const noexcept;

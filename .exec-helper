@@ -50,7 +50,7 @@ patterns:
         default-values:
             - html
             - man
-        short-option: d
+        short-option: o
         long-option: docs-type
     SYSROOT:
         default-values:

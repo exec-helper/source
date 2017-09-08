@@ -19,7 +19,7 @@ namespace execHelper {
                 /**
                  * Returns the configured checks as a clang-tidy check command line argument
                  *
-                 * @param checksCollection  The configured checks
+                 * @param[in] checksCollection  The configured checks
                  * @returns The configured checks as a clang-tidy check command line argument
                  */
                 static std::string getChecks(const core::TaskCollection& checksCollection) noexcept;
@@ -27,8 +27,8 @@ namespace execHelper {
                 /**
                  * Returns the configured warning-as-errors as a clang-tidy check command line argument
                  *
-                 * @param warningAsErrorCollection  The configured warning-as-errors
-                 * @param checksCollection  The configured checks
+                 * @param[in] warningAsErrorCollection  The configured warning-as-errors
+                 * @param[in] checksCollection  The configured checks
                  * @returns The configured warning-as-errors as a clang-tidy check command line argument
                  */
                 static std::string getWarningAsError(const core::TaskCollection& warningAsErrorCollection, const core::TaskCollection& checksCollection) noexcept;
@@ -36,7 +36,7 @@ namespace execHelper {
                 /*
                  * Returns the given collection as clang-tidy command line style string
                  *
-                 * @param checks  The collection to list
+                 * @param[in] checks  The collection to list
                  * @returns The configured collection as a clang-tidy command line style string
                  */
                 static std::string listChecks(const core::TaskCollection& checks) noexcept;

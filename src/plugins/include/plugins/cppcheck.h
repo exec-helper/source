@@ -27,8 +27,8 @@ namespace execHelper {
                 /**
                  * Returns the source dir to use for the analysis
                  *
-                 * \param command   The command for which to get the source directory
-                 * \param rootSettings  The configuration settings associated with the specific command
+                 * \param[in] command   The command for which to get the source directory
+                 * \param[in] rootSettings  The configuration settings associated with the specific command
                  * \returns The source dir to use
                  */
                 static std::string getSourceDir(const core::Command& command, const config::SettingsNode& rootSettings) noexcept;
@@ -36,8 +36,8 @@ namespace execHelper {
                 /**
                  * Returns the checks to use for the analysis
                  *
-                 * \param command   The command for which to get the enabled checks
-                 * \param rootSettings  The configuration settings associated with the specific command
+                 * \param[in] command   The command for which to get the enabled checks
+                 * \param[in] rootSettings  The configuration settings associated with the specific command
                  * \returns The checks that are enbled for the analysis
                  */
                 static std::string getEnabledChecks(const core::Command& command, const config::SettingsNode& rootSettings) noexcept;

@@ -16,7 +16,7 @@ namespace execHelper { namespace core {
             /**
              * Execute the given task
              *
-             * \param task  The task to execute
+             * \param[in] task  The task to execute
              * \returns True    When the task is successfully added to the executor. Note: this does not necessarily mean that the task got executed or will successfully execute.
              *          False   Otherwise
              */

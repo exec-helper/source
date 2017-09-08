@@ -21,7 +21,7 @@ namespace execHelper {
                 /**
                  * Executes the given task
                  *
-                 * \param task  The task to execute
+                 * \param[in] task  The task to execute
                  * \returns A shell return code
                  */
                 virtual ShellReturnCode execute(const Task& task) noexcept = 0;
@@ -29,7 +29,7 @@ namespace execHelper {
                 /**
                  * Checks whether the given shell return code can be associated with a successful execution
                  *
-                 * \param returnCode    The return code to check
+                 * \param[in] returnCode    The return code to check
                  * \returns True    If the return code implies a successful execution
                  *          False   Otherwise
                  */

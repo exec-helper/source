@@ -20,7 +20,7 @@ namespace execHelper {
                 /**
                  * Constructor
                  *
-                 * \param file  The file to load
+                 * \param[in] file  The file to load
                  * \throws YAML::BadFile    If the given file does not exist
                  */
                 explicit YamlWrapper(const config::Path& file);
@@ -56,7 +56,7 @@ namespace execHelper {
                 /**
                  * Returns the value associated with the keys as the given type
                  *
-                 * \param keys  A collection of keys to follow
+                 * \param[in] keys  A collection of keys to follow
                  * \returns The associated value
                  */
                 template<typename T>
@@ -71,7 +71,7 @@ namespace execHelper {
                 /**
                  * Returns the node below the given key structure
                  *
-                 * \param keys  A collection of keys to follow
+                 * \param[in] keys  A collection of keys to follow
                  * \returns The node associated with the given key structure
                  */
                 YAML::Node getSubNode(const std::initializer_list<std::string>& keys) const;
@@ -80,8 +80,8 @@ namespace execHelper {
                 /**
                  * Parses the tree below the given keys and writes it to the given settings
                  *
-                 * \param keys  The keys to write to the settings
-                 * \param settings  The settings to write the parsed structure to
+                 * \param[in] keys  The keys to write to the settings
+                 * \param[out] settings  The settings to write the parsed structure to
                  * \returns True    If the parsing was successful
                  *          False   Otherwise
                  */
@@ -90,8 +90,8 @@ namespace execHelper {
                 /**
                  * Parses the given node and writes it to the given settings
                  * 
-                 * \param rootNode  The node to start from
-                 * \param settings  The settings to write the parsed structure to
+                 * \param[in] rootNode  The node to start from
+                 * \param[out] settings  The settings to write the parsed structure to
                  * \returns True    If the parsing was successful
                  *          False   Otherwise
                  */
@@ -101,9 +101,9 @@ namespace execHelper {
                 /**
                  * Parse the given node and add it to the given settings under the given key structure
                  *
-                 * \param node  The node to parse
-                 * \param yamlNode  The root settings
-                 * \param keys  The key structure of the root settings under which to write the parsed structure
+                 * \param[in] node  The node to parse
+                 * \param[out] yamlNode  The root settings
+                 * \param[in] keys  The key structure of the root settings under which to write the parsed structure
                  */
                 static void getSubTree(const YAML::Node& node, config::SettingsNode* yamlNode, const config::SettingsNode::SettingsKeys& keys) noexcept;
 

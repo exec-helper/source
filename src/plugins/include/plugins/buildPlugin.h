@@ -25,11 +25,21 @@ namespace execHelper {
          */
         class BuildPlugin : public Plugin {
             public:
+		/*! @copydoc core::Argv::Argv(const Argv&)
+		 */
                 BuildPlugin(const BuildPlugin& other) = delete;
+
+		/*! @copydoc core::Argv::Argv(Argv&&)
+		 */
                 BuildPlugin(BuildPlugin&& other) noexcept = delete;
                 ~BuildPlugin() override = default;
 
+		/*! @copydoc core::Argv::operator=(const Argv&)
+		 */
                 BuildPlugin& operator=(const BuildPlugin& other) = delete;
+
+		/*! @copydoc core::Argv::operator=(Argv&&)
+		 */
                 BuildPlugin& operator=(BuildPlugin&& other) noexcept = delete;
 
                 /**
@@ -42,9 +52,9 @@ namespace execHelper {
                 /**
                  * Returns whether the multi-threaded option is set
                  *
-                 * \param command   The command to check the option for
-                 * \param rootSettings  The configuration settings associated with the specific command
-                 * \param options  The command line options
+                 * \param[in] command   The command to check the option for
+                 * \param[in] rootSettings  The configuration settings associated with the specific command
+                 * \param[in] options  The command line options
                  * \returns Whether the multi-threaded option is set
                  */
                 static bool getMultiThreaded(const core::Command& command, const config::SettingsNode& rootSettings, const core::Options& options) noexcept;

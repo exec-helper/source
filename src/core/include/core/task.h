@@ -23,8 +23,8 @@ namespace execHelper {
                 /**
                  * Create a task
                  *
-                 * \param subtasks  The task subdivided in separate arguments
-                 * \param workingDirectory  The working directory for the task
+                 * \param[in] subtasks  The task subdivided in separate arguments
+                 * \param[in] workingDirectory  The working directory for the task
                  */
                 Task(const std::initializer_list<std::string>& subtasks = {}, config::Path workingDirectory = boost::filesystem::current_path()) noexcept;
 
@@ -52,7 +52,7 @@ namespace execHelper {
                 /**
                  * Sets the working directory of the task
                  *
-                 * \param workingDirectory  The new working directory to set
+                 * \param[in] workingDirectory  The new working directory to set
                  */
                 void setWorkingDirectory(const config::Path& workingDirectory) noexcept;
 
@@ -66,7 +66,7 @@ namespace execHelper {
                 /**
                  * Append to this task
                  *
-                 * \param taskPart     The part to add to the task
+                 * \param[in] taskPart     The part to add to the task
                  * \returns True    If the part was successfully added to the task
                  *          False   Otherwise
                  */
@@ -87,7 +87,7 @@ namespace execHelper {
                 /**
                  * Set the environment of the task
                  *
-                 * \param env  The environment to set for the task
+                 * \param[in] env  The environment to set for the task
                  * \returns True    If the new environment was successfully set
                  *          False   Otherwise
                  */
@@ -101,7 +101,7 @@ namespace execHelper {
                  * Add or replace an additional value to the environment of the task.
                  * If the new key already exists in the environment, the existing value for the key is overwritten.
                  *
-                 * \param newValue The new value to add or replace to the task
+                 * \param[in] newValue The new value to add or replace to the task
                  * \returns True    If the new value was successfully appended to the task
                  *          False   Otherwise
                  */
@@ -114,7 +114,7 @@ namespace execHelper {
                 /**
                  * Checks whether other instance equals this instance of the object
                  *
-                 * \param other The other instance to compare with
+                 * \param[in] other The other instance to compare with
                  * \returns True    If the other instance is equal to this instance of the object
                  *          False   Otherwise
                  */
@@ -123,7 +123,7 @@ namespace execHelper {
                 /**
                  * Checks whether other instance does not equal this instance of the object
                  *
-                 * \param other The other instance to compare with
+                 * \param[in] other The other instance to compare with
                  * \returns ! \ref operator==(const Task&) const
                  */
                 bool operator!=(const Task& other) const noexcept;
@@ -137,8 +137,8 @@ namespace execHelper {
         /**
          * Adds the details of the Task object to the given stream
          *
-         * \param os    The stream to add the details to
-         * \param task  The task to add the details from
+         * \param[in] os    The stream to add the details to
+         * \param[in] task  The task to add the details from
          * \returns The given stream expanded with the details of the given task
          */
         std::ostream& operator<<( std::ostream& os, const Task& task ) noexcept;

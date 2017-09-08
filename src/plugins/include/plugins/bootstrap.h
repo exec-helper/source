@@ -26,8 +26,8 @@ namespace execHelper {
                 /**
                  * Returns the bootstrap filename to use
                  *
-                 * \param command   The command to find the bootstrap filename for
-                 * \param rootSettings  The configuration settings associated with the specific command
+                 * \param[in] command   The command to find the bootstrap filename for
+                 * \param[in] rootSettings  The configuration settings associated with the specific command
                  * \returns The name of the bootstrap script to call
                  */
                 static std::string getBootstrapFilename(const core::Command& command, const config::SettingsNode& rootSettings) noexcept;
