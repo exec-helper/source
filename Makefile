@@ -11,6 +11,9 @@ PREFIX=/usr 		# Override this on the command line if required
 NB_OF_CORES:=$(shell grep -c ^processor /proc/cpuinfo)
 BUILD_DIR:=build/native/release
 
+CHANGELOG_CONFIG = .gitchangelog.rc 	# Use this file by default. Overwrite on the command line.
+CHANGELOG_OUTPUT = &1	# Redirect to stdout by default. Overwrite on the command line
+
 all: binary docs changelog
 
 init:
@@ -29,7 +32,7 @@ changelog: init
 	make -C $(BUILD_DIR) --jobs $(NB_OF_CORES) changelog
 
 print-changelog:
-	gitchangelog
+	GITCHANGELOG_CONFIG_FILENAME=$(CHANGELOG_CONFIG) gitchangelog >$(CHANGELOG_OUTPUT)
 
 docs: init docs-html docs-man
 
