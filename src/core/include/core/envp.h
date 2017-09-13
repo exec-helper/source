@@ -69,7 +69,7 @@ namespace execHelper {
                 Envp_t m_envp;
         };
 
-        std::ostream& operator<<(std::ostream& os, const Envp& argv) noexcept;
+        std::ostream& operator<<(std::ostream& os, const Envp& envp) noexcept;
     } // namespace core
 } // namespace execHelper
 

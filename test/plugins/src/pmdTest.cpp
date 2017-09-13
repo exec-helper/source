@@ -18,16 +18,14 @@ using std::string;
 using gsl::czstring;
 
 using execHelper::config::SettingsNode;
+using execHelper::core::Pattern;
+using execHelper::core::PatternKeys;
 using execHelper::core::Task;
 using execHelper::core::TaskCollection;
 using execHelper::plugins::Pmd;
 
 using execHelper::test::OptionsStub;
 using execHelper::test::utils::Patterns;
-using execHelper::test::utils::PATTERN1;
-using execHelper::test::utils::PATTERN2;
-using execHelper::test::utils::PATTERNS;
-using execHelper::test::utils::PATTERN_KEYS;
 using execHelper::test::utils::copyAndAppend;
 using execHelper::core::test::ExecutorStub;
 
@@ -119,6 +117,11 @@ namespace execHelper { namespace plugins { namespace test {
     SCENARIO("Make combinations of different configurations for the pmd plugin", "[plugins][pmd]") {
         MAKE_COMBINATIONS("Of several settings") {
             const string command("pmd-command");
+
+            const Pattern PATTERN1("PATTERN1", {"pattern1"}, 'p', "--pattern1");
+            const Pattern PATTERN2("PATTERN2", {"pattern2a", "pattern2b"}, 'q', "--pattern2");
+            const Patterns PATTERNS({PATTERN1, PATTERN2});
+            const PatternKeys PATTERN_KEYS({PATTERN1.getKey(), PATTERN2.getKey()});
 
             OptionsStub options;
             for(const auto& pattern : PATTERNS) {

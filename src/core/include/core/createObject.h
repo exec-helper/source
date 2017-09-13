@@ -42,8 +42,8 @@ namespace execHelper {
                     return ReturnType(std::get<N>(std::forward<Tup>(tuple))...);
                 }
             };
-        }
-    }
-}
+        } // namespace detail
+    } // namespace core
+} // namespace execHelper
 
 #endif  /* __CREATE_OBJECT_H__ */

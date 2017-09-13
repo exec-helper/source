@@ -217,7 +217,7 @@ namespace execHelper {
                     m_collectionIterator = m_collectionBeginIterator;
                 }
         };
-    }
-}
+    } // namespace core
+} // namespace execHelper
 
 #endif /* __PERMUTATION_ITERATOR_H__ */

@@ -6,8 +6,8 @@
 namespace execHelper {
     namespace core {
         class Task;
-    }
-}
+    } // namespace core
+} // namespace execHelper
 
 namespace execHelper {
     namespace core {
@@ -38,7 +38,7 @@ namespace execHelper {
             protected:
                 Shell() = default;
         };
-    }
-}
+    } // namespace core
+} // namespace execHelper
 
 #endif /* __SHELL_INTERFACE_H__ */

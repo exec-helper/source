@@ -8,20 +8,18 @@ namespace execHelper {
         namespace utils {
             class TmpFile {
                 public:
-                    TmpFile();
-                    explicit TmpFile(const std::string& filename);
-                    explicit TmpFile(const config::Path& directory);
-                    
-                    TmpFile(const TmpFile& other) = delete;
-                    TmpFile(TmpFile&& other) noexcept = delete;
+                    explicit TmpFile(const config::Path& model = "exec-helper.tmp.%%%%");
+                    TmpFile(const TmpFile& other) = default;
+                    TmpFile(TmpFile&& other) = default;     // NOLINT(misc-noexcept-move-constructor)
                     ~TmpFile() noexcept;
 
-                    TmpFile& operator=(const TmpFile& other) = delete;
-                    TmpFile& operator=(TmpFile&& other) noexcept = delete;
+                    TmpFile& operator=(const TmpFile& other) = default;
+                    TmpFile& operator=(TmpFile&& other) = default;  // NOLINT(misc-noexcept-move-constructor)
 
                     bool exists() const noexcept;
                     bool create(const std::string& content = "") const noexcept;
                     bool createDirectories() const noexcept;
+                    void clear() noexcept;
 
                     config::Path getPath() const noexcept;
                     std::string toString() const noexcept;
@@ -31,11 +29,8 @@ namespace execHelper {
                 private:
                     config::Path m_path;
             };
-            
-        } // utils
-        
-    } // test
-    
-} // execHelper
+        } // namespace utils
+    } // namespace test
+} // namespace execHelper
 
 #endif  /* TMP_FILE_INCLUDE */

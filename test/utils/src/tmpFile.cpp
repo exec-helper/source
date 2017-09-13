@@ -18,20 +18,8 @@ using execHelper::config::Path;
 namespace execHelper {
 namespace test {
 namespace utils {
-    TmpFile::TmpFile() :
-        m_path(temp_directory_path() / unique_path())
-    {
-        ;
-    }
-
-    TmpFile::TmpFile(const std::string& filename) :
-        m_path(filename)
-    {
-        ;
-    }
-
-    TmpFile::TmpFile(const Path& directory) :
-        m_path(directory / unique_path()) 
+    TmpFile::TmpFile(const Path& model) :
+        m_path(temp_directory_path() / unique_path(model))
     {
         ;
     }
@@ -76,6 +64,10 @@ namespace utils {
 
     std::string TmpFile::getParentDirectory() const noexcept {
         return m_path.parent_path().native();
+    }
+
+    void TmpFile::clear() noexcept {
+        m_path.clear();
     }
 } // utils
 } // test

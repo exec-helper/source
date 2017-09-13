@@ -9,6 +9,8 @@
 #include <string>
 #include <vector>
 
+#include <gsl/string_span>
+
 #include "core/options.h"
 #include "core/pattern.h"
 
@@ -18,8 +20,8 @@
 namespace execHelper {
     namespace config {
         class SettingsNode;
-    }
-}
+    } // namespace config
+} // namespace execHelper
 
 namespace execHelper {
     namespace test {
@@ -132,19 +134,14 @@ namespace execHelper {
 
             void addPatterns(const Patterns& patterns, OptionsStub* options) noexcept;
 
-            const core::Pattern PATTERN1("PATTERN1", {"pattern1"}, 'p', "--pattern1");
-            const core::Pattern PATTERN2("PATTERN2", {"pattern2a", "pattern2b"}, 'q', "--pattern2");
-            const Patterns PATTERNS({PATTERN1, PATTERN2});
-            const core::PatternKeys PATTERN_KEYS({PATTERN1.getKey(), PATTERN2.getKey()});
-
             core::test::ExecutorStub::TaskQueue getExpectedTasks(const core::Task& expectedTask, const TargetUtil& targetUtil) noexcept;
             core::test::ExecutorStub::TaskQueue getExpectedTasks(const core::Task& expectedTask, const CompilerUtil& compilerUtil, const TargetUtil& targetUtil) noexcept;
             core::test::ExecutorStub::TaskQueue getExpectedTasks(const core::test::ExecutorStub::TaskQueue& expectedTask, const CompilerUtil& compilerUtil, const TargetUtil& targetUtil) noexcept;
 
             std::string toString(const config::SettingsNode& settings, unsigned int nbOfTabs = 0) noexcept;
             bool fileExists(const std::string& path) noexcept;
-        }
-    }
-}
+        } // namespace utils
+    } // namespace test
+} // namespace execHelper
 
 #endif  /* __TEST_UTILS_H__ */

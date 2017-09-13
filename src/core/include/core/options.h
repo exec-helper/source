@@ -188,7 +188,7 @@ namespace execHelper {
 
                 /*! @copydoc Argv::Argv(Argv&& other)
                  */
-                Options(Options&& other) noexcept = default;
+                Options(Options&& other) noexcept = default;    // NOLINT(misc-noexcept-move-constructor)
 
                 /*! @copydoc Argv::operator=(const Argv& other)
                  */
@@ -196,7 +196,7 @@ namespace execHelper {
 
                 /*! @copydoc Argv::operator=(Argv&& other)
                  */
-                Options& operator=(Options&& other) noexcept = default;
+                Options& operator=(Options&& other) noexcept = default;     // NOLINT(misc-noexcept-move-constructor)
 
         };
     } // namespace core

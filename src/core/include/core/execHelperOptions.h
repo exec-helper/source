@@ -16,8 +16,8 @@
 namespace execHelper {
     namespace core {
         class OptionDescriptions;
-    }
-}
+    } // namespace core
+} // namespace execHelper
 
 namespace execHelper {
     namespace core {
@@ -103,7 +103,7 @@ namespace execHelper {
 
                 ExecutorInterface* m_executor{nullptr};       // Non-owning pointer
         };
-    }
-}
+    } // namespace core
+} // namespace execHelper
 
 #endif /* __EXEC_HELPER_OPTIONS_H__ */

@@ -5,6 +5,8 @@ set(SRCS
         src/utils.cpp
         src/combinationHelpers.cpp
         src/tmpFile.cpp
+        src/executionContent.cpp
+        src/configFileWriter.cpp
    )
 
 set(DEPENDENCIES

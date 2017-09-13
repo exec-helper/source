@@ -60,7 +60,7 @@ namespace execHelper {
         }
         
         size_t Envp::size() const noexcept {
-            ensures(m_envp.size() > 0U);
+            ensures(!m_envp.empty());
             return m_envp.size() - 1U;
         }
 

@@ -8,3 +8,6 @@ add_subdirectory(yaml)
 add_subdirectory(core)
 add_subdirectory(plugins)
 add_subdirectory(commander)
+
+set(INTEGRATION_TEST_BIN_DIR ${BIN_DIRECTORY}/test/integration)
+add_subdirectory(integration)

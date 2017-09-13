@@ -11,8 +11,8 @@
 namespace execHelper {
     namespace core {
         class Task;
-    }
-}
+    } // namespace core
+} // namespace execHelper
 
 namespace execHelper {
     namespace core {
@@ -37,6 +37,6 @@ namespace execHelper {
                 std::shared_ptr<Shell> m_shell;
                 Callback m_callback;
         };
-    }
-}
+    } // namespace core
+} // namespace execHelper
 #endif /* __IMMEDIATE_EXECUTOR_H__ */

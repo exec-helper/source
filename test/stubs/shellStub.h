@@ -36,6 +36,8 @@ namespace execHelper { namespace core { namespace test {
             TaskQueue m_executedTasks;
             ShellReturnCode m_returnCode; 
     };
-} } }
+} // namespace test
+} // namespace core
+} // namespace execHelper
 
 #endif /* __EXECUTOR_STUB_H__ */

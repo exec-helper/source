@@ -23,7 +23,7 @@ namespace execHelper {
                 static TaskCollection shellExpand(const Task& task) noexcept;
                 static TaskCollection wordExpand(const Task& task) noexcept;
         };
-    }
-}
+    } // namespace core
+} // namespace execHelper
 
 #endif  /* __POSIX_SHELL_H__ */

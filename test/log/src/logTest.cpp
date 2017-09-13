@@ -13,11 +13,15 @@
 
 #include "log/logger.h"
 
+using std::cout;
+using std::endl;
+using std::exception;
 using std::move;
 using std::ostream;
 using std::string;
 using std::stringbuf;
 using std::stringstream;
+using std::terminate;
 using std::vector;
 
 using boost::xpressive::sregex;
@@ -40,8 +44,25 @@ using execHelper::log::toLogLevel;
 using execHelper::log::toString;
 
 namespace {
-    const vector<LogLevel> LOG_LEVELS({none, fatal, error, warning, info, debug, trace, all});
-    const vector<string> LOG_LEVEL_STRINGS({"none", "fatal", "error", "warning", "info", "debug", "trace", "all"});
+    const vector<LogLevel>& getLogLevels() {
+        try {
+            static const vector<LogLevel> LOG_LEVELS({none, fatal, error, warning, info, debug, trace, all});
+            return LOG_LEVELS;
+        } catch(exception& e) {
+            cout << e.what() << endl;
+        }
+        terminate();
+    }
+
+    const vector<string>& getLogLevelStrings() {
+        try {
+            static const vector<string> LOG_LEVEL_STRINGS({"none", "fatal", "error", "warning", "info", "debug", "trace", "all"});
+            return LOG_LEVEL_STRINGS;
+        } catch(exception& e) {
+            cout << e.what() << endl;
+        }
+        terminate();
+    }
 
     struct LogMessage {
         string date;
@@ -101,10 +122,10 @@ namespace config {
 namespace test {
     SCENARIO("Test the conversion of correct a log level to a string", "[log]") {
         GIVEN("A list of severities") {
-            REQUIRE(LOG_LEVELS.size() == LOG_LEVEL_STRINGS.size());     // Make sure the log level mappings have at least the same size
+            REQUIRE(getLogLevels().size() == getLogLevelStrings().size());     // Make sure the log level mappings have at least the same size
 
-            auto logString = LOG_LEVEL_STRINGS.begin();
-            for(auto logLevel = LOG_LEVELS.begin(); logLevel != LOG_LEVELS.end(); ++logString, ++logLevel) {
+            auto logString = getLogLevelStrings().begin();
+            for(auto logLevel = getLogLevels().begin(); logLevel != getLogLevels().end(); ++logString, ++logLevel) {
                 WHEN("We convert the severity to a string") {
                     THEN("We should get the right string") {
                         REQUIRE(toString(*logLevel) == *logString);
@@ -124,10 +145,10 @@ namespace test {
 
     SCENARIO("Test the conversion of a correct string to a log level", "[log]") {
         GIVEN("A list of severities") {
-            REQUIRE(LOG_LEVELS.size() == LOG_LEVEL_STRINGS.size());     // Make sure the log level mappings have at least the same size
+            REQUIRE(getLogLevels().size() == getLogLevelStrings().size());     // Make sure the log level mappings have at least the same size
 
-            auto logString = LOG_LEVEL_STRINGS.begin();
-            for(auto logLevel = LOG_LEVELS.begin(); logLevel != LOG_LEVELS.end(); ++logString, ++logLevel) {
+            auto logString = getLogLevelStrings().begin();
+            for(auto logLevel = getLogLevels().begin(); logLevel != getLogLevels().end(); ++logString, ++logLevel) {
             WHEN("We convert the string to a severity") {
                     THEN("We should get the right severity") {
                         REQUIRE(toLogLevel(*logString) == *logLevel);
@@ -151,7 +172,7 @@ namespace test {
 
     SCENARIO("Write a log message with the severity enabled", "[log]") {
         GIVEN("A list of severities") {
-            for(auto severity : LOG_LEVELS) {
+            for(auto severity : getLogLevels()) {
                 const string message1("Hello world!!!");
 
                 WHEN("We switch on the right severity") {
@@ -179,7 +200,7 @@ namespace test {
 
     SCENARIO("Write a log message with the severity disabled", "[log]") {
         GIVEN("A list of severities") {
-            for(auto severity : LOG_LEVELS) {
+            for(auto severity : getLogLevels()) {
                 if(severity == none) {  // Skip the none severity, as we can not raise the severity above this level: messages that are 'logged' at this level will always be shown
                     continue;
                 }

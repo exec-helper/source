@@ -4,8 +4,8 @@
 namespace execHelper {
     namespace core {
         class Task;
-    }
-}
+    } // namespace core
+} // namespace execHelper
 
 namespace execHelper { namespace core {
     /**
@@ -25,6 +25,7 @@ namespace execHelper { namespace core {
         protected:
             ExecutorInterface() = default;
     };
-} }
+} // namespace core
+} // namespace execHelper
 
 #endif /* __EXECUTOR_INTERFACE_H__ */

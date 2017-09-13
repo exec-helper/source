@@ -44,8 +44,7 @@ namespace execHelper {
 
                 const Paths m_searchPaths;
         };
-    } // config
-} // execHelper
-
+    } // namespace config
+} // namespace execHelper
 
 #endif  /* CONFIG_FILE_SEARCHER_INCLUDE */

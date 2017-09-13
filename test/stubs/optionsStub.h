@@ -136,7 +136,7 @@ namespace execHelper {
                 mutable core::test::ExecutorStub m_executor;
                 std::shared_ptr<core::PatternsHandler> m_patternsHandler;
         };
-    }
-}
+    } // namespace test
+} // namespace execHelper
 
 #endif  /* __OPTIONS_STUB_H__ */

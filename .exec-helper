@@ -18,7 +18,8 @@ patterns:
         long-option: target
     RUNTARGET:
         default-values:
-            - all
+            - unittest
+            - integration
         short-option: r
         long-option: run-target
     MODULE:
@@ -74,7 +75,9 @@ commands:
     distclean: Distclean build
     rebuild: Clean + build
     analyze: Run the specified analysis tool(s)
-    run-test: Run the specified tests
+    run-test: unittest + integration
+    unittest: Run the specified unittests
+    integration: Run the specified integration tests
     coverage: Run the coverage analysis tools using a specific setup (for convenience)
     memory-check: Run the memory check analysis tool for a specific setup (for convenience)
     undefined-behaviour: Check for undefined behaviour using UBSan
@@ -117,6 +120,12 @@ analyze:
     - selector
 
 run-test:
+    - selector
+
+unittest:
+    - command-line-command
+
+integration:
     - command-line-command
 
 coverage:
@@ -132,6 +141,8 @@ docs:
 selector:
     analyze:
         pattern: ANALYZE
+    run-test:
+        pattern: RUNTARGET
 
 undefined-behaviour:
     - command-line-command
@@ -168,8 +179,8 @@ make:
 
 cppcheck:
     patterns:
-        - MODULE
         - SOURCE_TYPE
+        - MODULE
         - TARGET
     src-dir: "{SOURCE_TYPE}/{MODULE}"
     target-path: "{TARGET}"
@@ -224,13 +235,17 @@ command-line-command:
             - MODE
             - COMPONENT
         command-line: [ cmake, "-DCOMPONENT={COMPONENT}", -P, "build/{COMPILER}/{MODE}/build/cmake_install.cmake"]
-    run-test:
+    unittest:
         patterns:
             - COMPILER
             - MODE
-            - RUNTARGET
             - MODULE
-        command-line: build/{COMPILER}/{MODE}/install/bin/test/{RUNTARGET}/exec-helper-{MODULE}-{RUNTARGET}
+        command-line: build/{COMPILER}/{MODE}/install/bin/test/unittest/exec-helper-{MODULE}-unittest
+    integration:
+        patterns:
+            - COMPILER
+            - MODE
+        command-line: build/{COMPILER}/{MODE}/install/bin/test/integration/exec-helper-integration-test
     coverage:
         environment:
             CXXFLAGS: --coverage -fprofile-arcs -ftest-coverage
@@ -266,14 +281,14 @@ valgrind:
 
 pmd:
     patterns:
+        - SOURCE_TYPE
         - MODULE
     exec: 3rdparty/pmd/pmd-bin-5.8.1/bin/run.sh
     tool:
         - cpd
     language: cpp
     files: 
-        - src/{MODULE}
-        - test/{MODULE}
+        - "{SOURCE_TYPE}/{MODULE}"
     minimum-tokens: 100
     command-line:
         - " "
@@ -296,7 +311,7 @@ lcov:
 clang-tidy:
     analyze:
         patterns:
-            - MODULE
             - SOURCE_TYPE
+            - MODULE
         sources:
             - "{SOURCE_TYPE}/{MODULE}/src/*.cpp"

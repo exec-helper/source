@@ -1,5 +1,10 @@
 image: dock0/arch
 
+variables:
+    ALL_RUN_TARGETS: unittest integration
+    ALL_MODULES: log config yaml core commander plugins
+    ALL_SOURCE_TYPES: src test
+
 .prepare: &prepare
         pacman -Sy --noconfirm
 
@@ -12,33 +17,38 @@ image: dock0/arch
 .install_exec_helper_debian: &install_exec_helper_debian
         apt-get install --yes libboost-program-options-dev libboost-filesystem-dev libboost-log-dev libyaml-cpp-dev make cmake && make install-bin    # Install dev packages so we do not have to keep track of the version numbering in the runtime package names
 
-.unittest: &unittest
+.run_test: &run_test
     stage: test
     variables:
-        MODULES: UNKNOWN
+        RUN_TARGET: $ALL_RUN_TARGETS
+        MODULES: $ALL_MODULES
     dependencies:
         - build:gcc
         - build:clang
     script:
         - *install_exec_helper
-        - exec-helper run-test --module $MODULES --run-target unittest --compiler g++ clang++ --mode release
+        - echo "using run target '$RUN_TARGET'"
+        - echo "using modules '$MODULES'"
+        - exec-helper run-test --run-target $RUN_TARGET --module $MODULES --compiler g++ clang++ --mode release
 
 .memory-check: &memory_check
     stage: analyze
     variables:
-        MODULES: UNKNOWN
+        MODULES: $ALL_MODULES
+        RUN_TARGET: $ALL_RUN_TARGETS
     dependencies:
         - build:gcc
         - build:gcc:limited-optimization
     script:
         - pacman -S --noconfirm valgrind
         - *install_exec_helper
-        - exec-helper analyze --analyze valgrind --run-target unittest --compiler g++ --mode release --module $MODULES
+        - exec-helper analyze --analyze valgrind --run-target $RUN_TARGET --compiler g++ --mode release --module $MODULES
 
 .clang_tidy: &clang_tidy
     stage: analyze
     variables:
-        MODULES: UNKNOWN
+        MODULES: $ALL_MODULES
+        SOURCE_TYPE: $ALL_SOURCE_TYPES
     dependencies:
         - build:gcc
     script:
@@ -46,7 +56,34 @@ image: dock0/arch
         - *install_exec_helper
         - exec-helper setup init-build -c g++ -m release
         - make -C build/g++/release/build Catch Gsl
-        - exec-helper analyze --analyze clang-tidy --module $MODULES
+        - exec-helper analyze --analyze clang-tidy --module $MODULES --source-type $SOURCE_TYPE
+
+.cppcheck: &cppcheck
+    stage: analyze
+    variables:
+        SOURCE_TYPE: $ALL_SOURCE_TYPES
+        MODULES: $ALL_MODULES
+    dependencies:
+        - build:gcc
+    script:
+        - pacman -S --noconfirm cppcheck
+        - *install_exec_helper
+        - exec-helper analyze --analyze cppcheck --source-type $SOURCE_TYPE --module $MODULES
+
+.undefined_behaviour: &undefined_behaviour
+    stage: analyze
+    variables:
+        RUN_TARGET: $ALL_RUN_TARGETS
+        MODULES: $ALL_MODULES
+    dependencies:
+        - build:gcc
+    script:
+        - pacman -S --noconfirm --needed clang pkg-config
+        - *install_exec_helper
+        - export CXXFLAGS="-g -fsanitize=undefined -fno-omit-frame-pointer -fno-sanitize-recover=undefined -fsanitize-blacklist=\"$(pwd)/suppressions/ubsan.blacklist\""
+        - export LDFLAGS="-g -fsanitize=undefined -fno-omit-frame-pointer -fno-sanitize-recover=undefined -fsanitize-blacklist=\"$(pwd)/suppressions/ubsan.blacklist\""
+        - export UBSAN_OPTIONS="print_stacktrace=1"
+        - exec-helper init-build build run-test --compiler clang++ --mode undefined-behaviour --run-target ${RUN_TARGET}
 
 before_script:
     - *prepare
@@ -112,48 +149,48 @@ build:debian:
             - build/native/release
 
 unittests:
-    <<: *unittest
+    <<: *run_test
     variables:
-        MODULES: log yaml config core commander
+        RUN_TARGET: unittest
+        MODULES: $ALL_MODULES
 
-unittest-plugins:
-    <<: *unittest
+integration-test:
+    <<: *run_test
     variables:
-        MODULES: plugins
+        RUN_TARGET: integration
 
 memory-check:
     <<: *memory_check
     variables:
+        RUN_TARGET: unittest
         MODULES: log yaml config core commander
 
 memory-check-plugins:
     <<: *memory_check
     variables:
+        RUN_TARGET: unittest
         MODULES: plugins
 
-cppcheck:
-    stage: analyze
-    dependencies:
-        - build:gcc
-    script:
-        - pacman -S --noconfirm cppcheck
-        - *install_exec_helper
-        - exec-helper analyze --analyze cppcheck --source-type src
+memory-check-integration:
+    <<: *memory_check
+    variables:
+        RUN_TARGET: integration
+        MODULES: integration
+
+cppcheck-unittest:
+    <<: *cppcheck
+    variables:
+        SOURCE_TYPE: src
+        MODULES: $ALL_MODULES
 
 clang-tidy:
     <<: *clang_tidy
-    variables:
-        MODULES: log yaml commander config
 
-clang-tidy-core:
+clang-tidy-integration:
     <<: *clang_tidy
     variables:
-        MODULES: core
-
-clang-tidy-plugin:
-    <<: *clang_tidy
-    variables:
-        MODULES: plugin
+        SOURCE_TYPE: test
+        MODULES: integration
 
 clang-static-analyzer:
     stage: analyze
@@ -167,16 +204,7 @@ clang-static-analyzer:
         - exec-helper analyze --analyze clang-static-analyzer --mode debug --compiler ''
 
 undefined-behaviour:
-    stage: analyze
-    dependencies:
-        - build:gcc
-    script:
-        - pacman -S --noconfirm --needed clang pkg-config
-        - *install_exec_helper
-        - export CXXFLAGS="-g -fsanitize=undefined -fno-omit-frame-pointer -fno-sanitize-recover=undefined -fsanitize-blacklist=\"$(pwd)/suppressions/ubsan.blacklist\""
-        - export LDFLAGS="-g -fsanitize=undefined -fno-omit-frame-pointer -fno-sanitize-recover=undefined -fsanitize-blacklist=\"$(pwd)/suppressions/ubsan.blacklist\""
-        - export UBSAN_OPTIONS="print_stacktrace=1"
-        - exec-helper init-build build run-test --compiler clang++ --mode undefined-behaviour --run-target unittest
+    <<: *undefined_behaviour
 
 code-duplication-pmd-cpd:
     stage: analyze
@@ -188,6 +216,7 @@ code-duplication-pmd-cpd:
         - pushd 3rdparty/pmd && wget --no-check-certificate "https://downloads.sourceforge.net/project/pmd/pmd/5.8.1/pmd-bin-5.8.1.zip" && unzip pmd-bin-5.8.1.zip; popd
         - *install_exec_helper
         - exec-helper analyze --analyze pmd
+        - exec-helper analyze --analyze pmd --module integration --source-type test
 
 coverage:
     stage: analyze

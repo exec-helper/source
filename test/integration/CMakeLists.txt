@@ -1,0 +1,18 @@
+set(EXE_NAME ${PROJECT_NAME}-integration-test)
+
+set(SRCS    src/executeMultipleStatements.cpp
+   )
+
+set(DEPENDENCIES
+        yaml-cpp
+        gsl
+        log
+        test-utils
+        unittest
+   )
+
+add_executable(${EXE_NAME} ${SRCS})
+target_include_directories(${EXE_NAME} PRIVATE ${DEPENDENCIES})
+target_link_libraries(${EXE_NAME} PRIVATE ${DEPENDENCIES})
+
+install(TARGETS ${EXE_NAME} DESTINATION ${INTEGRATION_TEST_BIN_DIR})

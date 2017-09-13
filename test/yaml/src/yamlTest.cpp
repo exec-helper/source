@@ -19,8 +19,6 @@ using std::vector;
 using std::stringstream;
 using std::endl;
 
-using boost::filesystem::current_path;
-
 using execHelper::config::Path;
 using execHelper::config::SettingsNode;
 using execHelper::test::utils::convertToConfig;

@@ -51,7 +51,7 @@ namespace execHelper {
                 boost::program_options::options_description m_optionDescription;
                 boost::program_options::options_description_easy_init m_descriptions;
         };
-    }
-}
+    } // namespace core
+} // namespace execHelper
 
 #endif  /* __OPTION_DESCRIPTIONS_H__ */

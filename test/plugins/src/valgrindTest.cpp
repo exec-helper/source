@@ -19,15 +19,14 @@ using gsl::czstring;
 
 using execHelper::config::SettingsNode;
 using execHelper::core::Task;
+using execHelper::core::Pattern;
+using execHelper::core::PatternKeys;
 using execHelper::plugins::Valgrind;
 using execHelper::plugins::Memory;
 using execHelper::plugins::MemoryHandler;
 
 using execHelper::test::OptionsStub;
 using execHelper::test::utils::Patterns;
-using execHelper::test::utils::PATTERN1;
-using execHelper::test::utils::PATTERN2;
-using execHelper::test::utils::PATTERNS;
 
 namespace {
     const czstring<> valgrindConfigKey("valgrind");
@@ -246,6 +245,11 @@ namespace execHelper { namespace plugins { namespace test {
             }
 
             WHEN("We call the plugin with a proper command-line setting") {
+                const Pattern PATTERN1("PATTERN1", {"pattern1"}, 'p', "--pattern1");
+                const Pattern PATTERN2("PATTERN2", {"pattern2a", "pattern2b"}, 'q', "--pattern2");
+                const Patterns PATTERNS({PATTERN1, PATTERN2});
+                const PatternKeys PATTERN_KEYS({PATTERN1.getKey(), PATTERN2.getKey()});
+
                 // Add the pattern to the options
                 for(const auto& pattern : PATTERNS) {
                     options.m_patternsHandler->addPattern(pattern);

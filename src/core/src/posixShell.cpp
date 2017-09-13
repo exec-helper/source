@@ -9,9 +9,11 @@
 #include <vector>
 #include <wordexp.h>
 
-#include "boost/filesystem.hpp"
-#include "gsl/span"
-#include "gsl/string_span"
+#include <boost/filesystem.hpp>
+#include <gsl/span>
+#include <gsl/string_span>
+
+#include "log/assertions.h"
 
 #include "argv.h"
 #include "envp.h"
@@ -61,10 +63,10 @@ namespace execHelper { namespace core {
 
         TaskCollection taskCollection = shellExpand(task);
         Envp envp(task.getEnvironment());
-        LOG(debug) << "Environment: \"" << envp << "\"";
+        LOG(debug) << R"(Environment: ")" << envp << R"(")";
 
         Argv argv(taskCollection);
-        LOG(debug) << "Executing \"" << argv << "\"";
+        LOG(debug) << R"(Executing ")" << argv << R"(")";
 
         // A full copy of m_env is not required, since it is used in a separate process
         if ((returnCode = execvpe(argv[0], argv.getArgv(), envp.getEnvp())) == -1) {
@@ -72,6 +74,7 @@ namespace execHelper { namespace core {
         }
 
         // execvp only returns if something goes wrong
+        expects(false);
         _exit(127);
     }
 

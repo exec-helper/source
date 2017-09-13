@@ -22,6 +22,8 @@ namespace execHelper { namespace core { namespace test {
         private:
             TaskQueue m_executedTasks;
     };
-} } }
+} // namespace test
+} // namespace core
+} // namespace execHelper
 
 #endif /* __EXECUTOR_STUB_H__ */

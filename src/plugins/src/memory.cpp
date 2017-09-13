@@ -1,8 +1,8 @@
 #include "memory.h"
 
 namespace execHelper { namespace plugins {
-    Memory::Memories Memory::m_executions = {};
-    bool Memory::m_returnCode = true;
+    Memory::Memories Memory::m_executions = {}; // NOLINT(readability-redundant-declaration)
+    bool Memory::m_returnCode = true;   // NOLINT(readability-redundant-declaration)
 
     bool Memory::apply(const core::Command& command, core::Task task, const core::Options& options) const noexcept {
         Memory_t newElement(command, &task, task, &options);
