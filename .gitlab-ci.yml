@@ -239,8 +239,8 @@ coverity:
         - build:gcc
     script:
         - *install_exec_helper
-        - pacman -S --noconfirm --needed gcc cmake make git libunistring ncurses doxygen wget curl tar xz rsync
-        - wget https://scan.coverity.com/download/linux64 --post-data "token=INxicvq4GqijG23xZzPNEA&project=bverhagen%2Fexec-helper" -O coverity_tool.tgz
+        - pacman -S --noconfirm --needed gcc cmake make pkg-config git doxygen curl tar xz
+        - curl --data "token=INxicvq4GqijG23xZzPNEA&project=bverhagen%2Fexec-helper" https://scan.coverity.com/download/linux64 -o coverity_tool.tgz
         - tar -C /tmp -xf coverity_tool.tgz
         - pushd /tmp/cov-analysis-linux64-*/bin
         - export PATH=$PATH:$(pwd)
