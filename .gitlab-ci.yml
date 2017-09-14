@@ -233,21 +233,20 @@ coverage:
 
 coverity:
     stage: analyze
+    variables:
+        - COVERITY_ARCHIVE_NAME: exec-helper_${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}.xz
     dependencies:
         - build:gcc
     script:
+        - *install_exec_helper
         - pacman -S --noconfirm --needed gcc cmake make git libunistring ncurses doxygen wget curl tar xz rsync
         - wget https://scan.coverity.com/download/linux64 --post-data "token=INxicvq4GqijG23xZzPNEA&project=bverhagen%2Fexec-helper" -O coverity_tool.tgz
         - tar -C /tmp -xf coverity_tool.tgz
-        - export PATH=$PATH:$(pwd)/build/g++/release/install/bin
         - pushd /tmp/cov-analysis-linux64-*/bin
         - export PATH=$PATH:$(pwd)
         - popd
-        - rsync --recursive . coverity
-        - cd coverity
-        - exec-helper distclean
-        - exec-helper analyze --analyze coverity --compiler g++ --mode release
-        - curl --form token=${COVERITY_SCAN_TOKEN} --form email=barrie.verhagen@gmail.com --form file=@exec-helper_*.xz --form version="${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}" --form description="Analysis scan for ${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}" https://scan.coverity.com/builds?project=bverhagen%2Fexec-helper
+        - exec-helper distclean analyze --analyze coverity --compiler g++ --mode release --coverity-archive-name $COVERITY_ARCHIVE_NAME
+        - curl --form token=${COVERITY_SCAN_TOKEN} --form email=barrie.verhagen@gmail.com --form file=@${COVERITY_ARCHIVE_NAME} --form version="${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}" --form description="Analysis scan for ${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}" https://scan.coverity.com/builds?project=bverhagen%2Fexec-helper
 
 examples:
     stage: analyze
