@@ -247,7 +247,7 @@ coverity:
         - cd coverity
         - exec-helper distclean
         - exec-helper analyze --analyze coverity --compiler g++ --mode release
-        - curl --form token=${COVERITY_SCAN_TOKEN} --form email=barrie.verhagen@gmail.com --form file=@exec-helper.xz --form version="${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}" --form description="Analysis scan for ${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}" https://scan.coverity.com/builds?project=bverhagen%2Fexec-helper
+        - curl --form token=${COVERITY_SCAN_TOKEN} --form email=barrie.verhagen@gmail.com --form file=@exec-helper_*.xz --form version="${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}" --form description="Analysis scan for ${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}" https://scan.coverity.com/builds?project=bverhagen%2Fexec-helper
 
 examples:
     stage: analyze

@@ -54,7 +54,10 @@ patterns:
             - man
         short-option: o
         long-option: docs-type
-<<<<<<< bf1453f908e17d391692c32092f238316b51a6f5
+    COVERITY_ARCHIVE_NAME:
+        default-values:
+            - exec-helper_$(git describe).xz
+        long-option: coverity-archive-name
     SYSROOT:
         default-values:
             - "/"
