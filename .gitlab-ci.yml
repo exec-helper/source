@@ -234,7 +234,7 @@ coverage:
 coverity:
     stage: analyze
     variables:
-        - COVERITY_ARCHIVE_NAME: exec-helper_${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}.xz
+        COVERITY_ARCHIVE_NAME: exec-helper_${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}.xz
     dependencies:
         - build:gcc
     script:
