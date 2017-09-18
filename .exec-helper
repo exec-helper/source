@@ -298,7 +298,7 @@ pmd:
     patterns:
         - SOURCE_TYPE
         - MODULE
-    exec: 3rdparty/pmd/pmd-bin-5.8.1/bin/run.sh
+    exec: ""
     tool:
         - cpd
     language: cpp

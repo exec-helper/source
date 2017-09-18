@@ -1,34 +1,33 @@
-image: dock0/arch
+image: scratch
+
+stages:
+    - build-image
+    - build-native
+    - build
+    - test
+    - analyze
+    - deploy
 
 variables:
     ALL_RUN_TARGETS: unittest integration
     ALL_MODULES: log config yaml core commander plugins
     ALL_SOURCE_TYPES: src test
-
-.prepare: &prepare
-        pacman -Sy --noconfirm
+    DOCKER_DRIVER: overlay2         # Overwrite default docker driver
 
 .build_tools: &build_tools
-        pacman -S --noconfirm --needed boost boost-libs yaml-cpp gcc cmake make doxygen python-pip pkg-config sudo file fakeroot && bash -x gitlab/install-aur.sh libcatch-cpp-headers && bash -x gitlab/install-aur.sh microsoft-gsl-git
-
-.build_tools_changelog: &build_tools_changelog
-        pip install gitchangelog
+        ":"           # Delegated to docker images
 
 .install_exec_helper: &install_exec_helper
-        pacman -S --noconfirm --needed boost-libs yaml-cpp && cp build/native/release/src/applications/exec-helper /usr/local/bin/
-
-.prepare_debian: &prepare_debian
-        rm -rf /var/lib/apt/lists/* && apt-get update           # Work around for debian mirror issues that often occur on Gitlab
-
-.install_exec_helper_debian: &install_exec_helper_debian
-        apt-get install --yes libboost-program-options-dev libboost-filesystem-dev libboost-log-dev libyaml-cpp-dev make cmake && make install-bin    # Install dev packages so we do not have to keep track of the version numbering in the runtime package names
+        cp build/native/release/src/applications/exec-helper /usr/local/bin/
 
 .run_test: &run_test
     stage: test
+    image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-run
     variables:
         RUN_TARGET: $ALL_RUN_TARGETS
         MODULES: $ALL_MODULES
     dependencies:
+        - build:native
         - build:gcc
         - build:clang
     script:
@@ -39,87 +38,160 @@ variables:
 
 .memory-check: &memory_check
     stage: analyze
+    image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-analyze
     variables:
         MODULES: $ALL_MODULES
         RUN_TARGET: $ALL_RUN_TARGETS
     dependencies:
-        - build:gcc
+        - build:native
         - build:gcc:limited-optimization
     script:
-        - pacman -S --noconfirm valgrind
         - *install_exec_helper
         - exec-helper analyze --analyze valgrind --run-target $RUN_TARGET --compiler g++ --mode release --module $MODULES
 
 .clang_tidy: &clang_tidy
     stage: analyze
+    image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-analyze
     variables:
         MODULES: $ALL_MODULES
         SOURCE_TYPE: $ALL_SOURCE_TYPES
     dependencies:
-        - build:gcc
+        - build:native
     script:
         - *build_tools
-        - pacman -S --noconfirm --needed clang clang-tools-extra
         - *install_exec_helper
         - exec-helper setup init-build -c g++ -m release
         - exec-helper analyze --analyze clang-tidy --module $MODULES --source-type $SOURCE_TYPE
 
 .cppcheck: &cppcheck
     stage: analyze
+    image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-analyze
     variables:
         SOURCE_TYPE: $ALL_SOURCE_TYPES
         MODULES: $ALL_MODULES
     dependencies:
-        - build:gcc
+        - build:native
     script:
-        - pacman -S --noconfirm cppcheck
         - *install_exec_helper
         - exec-helper analyze --analyze cppcheck --source-type $SOURCE_TYPE --module $MODULES
 
 .undefined_behaviour: &undefined_behaviour
     stage: analyze
+    image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-analyze
     variables:
         RUN_TARGET: $ALL_RUN_TARGETS
         MODULES: $ALL_MODULES
     dependencies:
-        - build:gcc
+        - build:native
     script:
         - *build_tools
         - *install_exec_helper
-        - pacman -S --noconfirm --needed clang
         - export CXXFLAGS="-g -fsanitize=undefined -fno-omit-frame-pointer -fno-sanitize-recover=undefined -fsanitize-blacklist=\"$(pwd)/suppressions/ubsan.blacklist\""
         - export LDFLAGS="-g -fsanitize=undefined -fno-omit-frame-pointer -fno-sanitize-recover=undefined -fsanitize-blacklist=\"$(pwd)/suppressions/ubsan.blacklist\""
         - export UBSAN_OPTIONS="print_stacktrace=1"
         - exec-helper init-build build run-test --compiler clang++ --mode undefined-behaviour --run-target ${RUN_TARGET}
 
-before_script:
-    - *prepare
+build-image:build:
+    stage: build-image
+    image: docker:latest
+    services:
+        - docker:dind
+    variables:
+        BUILD_IMAGE: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-build
+    before_script:
+        - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
+    script:
+        - echo "Building image '$BUILD_IMAGE'"
+        - docker build -t ${BUILD_IMAGE} -f docker/build/Dockerfile .
+        - docker push ${BUILD_IMAGE}
 
-stages:
-    - build
-    - test
-    - analyze
-    - deploy
+build-image:build-debian:
+    stage: build-image
+    image: docker:latest
+    services:
+        - docker:dind
+    variables:
+        BUILD_IMAGE: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-build-debian
+    before_script:
+        - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
+    script:
+        - echo "Building image '$BUILD_IMAGE'"
+        - docker build -t ${BUILD_IMAGE} -f docker/build/debian.Dockerfile .
+        - docker push ${BUILD_IMAGE}
 
-build:gcc:
-    stage: build
+build-image:run:
+    stage: build-image
+    image: docker:latest
+    services:
+        - docker:dind
+    variables:
+        RUN_IMAGE: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-run
+    before_script:
+        - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
+    script:
+        - echo "Building image '$RUN_IMAGE'"
+        - docker build -t ${RUN_IMAGE} -f docker/run/Dockerfile .
+        - docker push ${RUN_IMAGE}
+
+build-image:analyze:
+    stage: build-image
+    image: docker:latest
+    services:
+        - docker:dind
+    variables:
+        ANALYZE_IMAGE: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-analyze
+    before_script:
+        - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
+    script:
+        - echo "Building image '$ANALYZE_IMAGE'"
+        - docker build -t ${ANALYZE_IMAGE} -f docker/analyze/Dockerfile .
+        - docker push ${ANALYZE_IMAGE}
+
+build:native:
+    stage: build-native
+    image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-build
+    dependencies: []
     script:
         - *build_tools
-        - *build_tools_changelog
         - make && make install
-        - exec-helper init build --compiler g++ --mode debug release
     artifacts:
         expire_in: 1 day
         paths:
             - build/native/release/src/applications/exec-helper
+
+build:debian:
+    stage: build-native
+    image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-build-debian
+    dependencies: []
+    script:
+        - make USE_SYSTEM_GSL=OFF && make install-bin
+    artifacts:
+        expire_in: 1 day
+        paths:
+            - build/native/release/src/applications/exec-helper
+
+
+
+build:gcc:
+    stage: build
+    image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-build
+    dependencies:
+        - build:native
+    script:
+        - *build_tools
+        - *install_exec_helper
+        - exec-helper init build --compiler g++ --mode debug release
+    artifacts:
+        expire_in: 1 day
+        paths:
             - build/g++/debug/install
             - build/g++/release/install
 
 build:gcc:limited-optimization:
     stage: build
+    image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-build
     script:
         - *build_tools
-        - *build_tools_changelog
         - cmake -H. -Bbuild/g++/release/build -DCMAKE_CXX_COMPILER=g++ -DCMAKE_INSTALL_PREFIX=build/g++/release/install -DCMAKE_BUILD_TYPE=Release -DLIMITED_OPTIMIZATION=ON
         - make -C build/g++/release/build --jobs 4
         - make -C build/g++/release/build install
@@ -130,31 +202,18 @@ build:gcc:limited-optimization:
 
 build:clang:
     stage: build
+    image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-build
+    dependencies:
+        - build:native
     script: 
         - *build_tools
-        - pacman -S --noconfirm --needed clang
-        - *build_tools_changelog
-        - make && make install
+        - *install_exec_helper
         - exec-helper init build --compiler clang++ --mode debug release
     artifacts:
         expire_in: 1 day
         paths:
             - build/clang++/debug/install
             - build/clang++/release/install
-
-build:debian:
-    image: debian:testing
-    stage: build
-    before_script:
-        - *prepare_debian
-    script:
-        - apt-get install --yes cmake make libboost-dev libboost-program-options-dev libboost-filesystem-dev libboost-log-dev libyaml-cpp-dev pkg-config g++ git doxygen python-pip catch
-        - pip install gitchangelog
-        - make USE_SYSTEM_GSL=OFF && make install-bin
-    artifacts:
-        expire_in: 1 day
-        paths:
-            - build/native/release
 
 unittests:
     <<: *run_test
@@ -202,12 +261,12 @@ clang-tidy-integration:
 
 clang-static-analyzer:
     stage: analyze
+    image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-analyze
     dependencies:
-        - build:gcc
+        - build:native
     script:
         - *build_tools
         - *install_exec_helper
-        - pacman -S --noconfirm --needed clang
         # Ugly hack for circumventing issues with the (unused) scan-build c compiler.
         - echo "SET(CMAKE_C_COMPILER  clang)" >> toolchain.cmake.in
         - exec-helper analyze --analyze clang-static-analyzer --mode debug --compiler ''
@@ -217,24 +276,22 @@ undefined-behaviour:
 
 code-duplication-pmd-cpd:
     stage: analyze
+    image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-analyze
     dependencies:
-        - build:gcc
+        - build:native
     script:
-        - pacman -S --noconfirm --needed java-environment unzip wget
-        - mkdir -p 3rdparty/pmd
-        - pushd 3rdparty/pmd && wget --no-check-certificate "https://downloads.sourceforge.net/project/pmd/pmd/5.8.1/pmd-bin-5.8.1.zip" && unzip pmd-bin-5.8.1.zip; popd
         - *install_exec_helper
         - exec-helper analyze --analyze pmd
         - exec-helper analyze --analyze pmd --module integration --source-type test
 
 coverage:
     stage: analyze
+    image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-analyze
     dependencies:
+        - build:native
         - build:gcc
     script:
         - *build_tools
-        - pacman -S --noconfirm --needed patch
-        - bash -x gitlab/install-aur.sh lcov
         - *install_exec_helper
         - exec-helper coverage
     artifacts:
@@ -246,7 +303,7 @@ coverity:
     variables:
         COVERITY_ARCHIVE_NAME: exec-helper_${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}.xz
     dependencies:
-        - build:gcc
+        - build:native
     script:
         - *build_tools
         - *install_exec_helper
@@ -262,15 +319,11 @@ coverity:
 
 examples:
     stage: analyze
+    image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-analyze
     dependencies:
-        - build:gcc
+        - build:native
     script:
-        - pacman -S --noconfirm --needed base-devel curl gcc clang make scons clang-tools-extra cppcheck git java-environment unzip wget valgrind
-        - bash -x gitlab/install-aur.sh lcov
-        - mkdir -p 3rdparty/pmd
         - *install_exec_helper
-        - pushd 3rdparty/pmd && wget --no-check-certificate "https://downloads.sourceforge.net/project/pmd/pmd/5.7.0/pmd-bin-5.7.0.zip" && unzip pmd-bin-5.7.0.zip; popd
-        - export PATH=$PATH:$(pwd)/3rdparty/pmd/pmd-bin-5.7.0/bin
         - export ROOT_DIR=$(pwd)
         - cd ${ROOT_DIR}/src/config/examples
         - exec-helper --settings-file exec-helper-config.example build clean rebuild
@@ -289,13 +342,12 @@ examples:
         - exec-helper --settings-file valgrind.example example
 
 cross-compilation:
-    image: debian:testing
     stage: analyze
+    image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-build-debian
     dependencies:
         - build:debian
     before_script:
-        - *prepare_debian
-        - *install_exec_helper_debian
+        - *install_exec_helper
     script:
         - apt-get install --yes debootstrap g++-aarch64-linux-gnu cmake make pkg-config git
         - debootstrap --download-only --arch=arm64 --foreign --download-only --variant=minbase --include=catch,libboost-program-options-dev,libboost-filesystem-dev,libboost-log-dev,libyaml-cpp-dev,doxygen,libc6-dev testing ./sysroot_arm64 http://deb.debian.org/debian/
@@ -305,6 +357,7 @@ cross-compilation:
 
 pages:
     stage: deploy
+    image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-run
     dependencies:
         - coverage
         - build:gcc
