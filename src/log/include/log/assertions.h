@@ -3,22 +3,32 @@
 
 #ifdef TERMINATE_ON_ASSERT_FAILURE
 
-#define GSL_THROW_ON_CONTRACT_VIOLATION
-
-#include <exception>
 #include <iostream>
+#include <string>
 
-#include <gsl/gsl_assert>
+namespace execHelper {
+    namespace log {
+        static inline void assertHelper(bool cond, const std::string& message) noexcept {
+            if(!cond) {
+                std::cerr << message << std::endl;
+                std::terminate();
+            }
+        }
+    } // namespace log
+} // namespace execHelper
+
+#define assertMessage(cond, prefix, message) do { ::execHelper::log::assertHelper(cond, std::string(__FILE__).append(":").append(std::to_string(__LINE__)).append(":0 ").append(prefix).append(": ").append(message)); } while(false);
 
 /**
  * Checks that an argument does not violate certain conditions (nominal programming style)
  */
-#define expects(cond)   do { try{ Expects(cond); } catch(gsl::fail_fast& e) { std::cerr << e.what(); std::terminate(); } } while(false)
+#define expectsMessage(cond, message)   assertMessage(cond, "Precondition violated", message);
+#define expects(cond) expectsMessage(cond, #cond);
 
 /**
  * Checks that an invariant still holds
  */
-#define ensures(cond)   do { try{ Ensures(cond); } catch(gsl::fail_fast& e) { std::cerr << e.what(); std::terminate(); } } while(false)
+#define ensures(cond)   assertMessage(cond, "Invariant violated", #cond);
 
 #else
 

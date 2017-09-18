@@ -74,7 +74,6 @@ namespace execHelper { namespace core {
         }
 
         // execvp only returns if something goes wrong
-        expects(false);
         _exit(127);
     }
 

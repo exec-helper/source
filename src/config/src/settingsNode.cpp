@@ -69,7 +69,7 @@ namespace execHelper {
         }
 
         const SettingsNode& SettingsNode::operator[](const SettingsKey& key) const noexcept {
-            expects(contains(key));
+            expectsMessage(contains(key), "Key must exist");
             for(const auto& value : *m_values) {
                 if(value.m_key == key) {
                     return value;
@@ -209,7 +209,7 @@ namespace execHelper {
         }
 
         SettingsNode* SettingsNode::at(const SettingsKey& key) noexcept {
-            expects(contains(key));
+            expectsMessage(contains(key), "Key must exist");
             for(SettingsNode& value : *m_values) {
                 if(value.m_key == key) {
                     return &value;
@@ -220,7 +220,7 @@ namespace execHelper {
         }
 
         const SettingsNode* SettingsNode::at(const SettingsKey& key) const noexcept {
-            expects(contains(key));
+            expectsMessage(contains(key), "Key must exist");
             for(const SettingsNode& value : *m_values) {
                 if(value.m_key == key) {
                     return &value;

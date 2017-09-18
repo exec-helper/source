@@ -58,19 +58,19 @@ namespace {
         
         error_code error;
         current_path(workingDir, error);
-        expects(error == success);
+        expectsMessage(error == success, "Either works or fix the test");
         
         // Suppress output
         int fd = open("/dev/null", O_WRONLY | O_CLOEXEC);
         returnCode = dup2(fd, 1);
-        expects(returnCode >= 0);
+        expectsMessage(returnCode >= 0, "Either works or fix the test");
         close(fd);
 
         if ((returnCode = execvp(line[0], &(line[0]))) == -1) {
             cout << "Could not execvp command: " << strerror(errno) << " (" << errno << ")" << endl; 
         }
         // execvp replaces the process: the return code for valid execvp calls should be obtained from the parent
-        expects(false);
+        expectsMessage(false, "Either works or fix the test");
     }
 
     ReturnCode waitForChild(pid_t pid) noexcept {
@@ -81,7 +81,7 @@ namespace {
                 break;
             }
         }
-        expects(ret != -1);
+        expectsMessage(ret != -1, "Either works or fix the test");
         if(status == 0) {
             return 0;
         }

@@ -55,7 +55,7 @@ namespace execHelper { namespace yaml {
             m_node = Clone(other.m_node);
         } catch(const YAML::InvalidNode&) {
             LOG(fatal) << "Swap failed";
-            expects(false);
+            expectsMessage(false, "Should not get here");
         }
     }
 

@@ -100,7 +100,7 @@ namespace execHelper {
                  * \returns The actual objects the current iterator position is pointing to
                  */
                 Tuple getElementValue() const {
-                    expects(m_outerIterator != m_outerEndIterator);
+                    expectsMessage(m_outerIterator != m_outerEndIterator, "Do not dereference end iterator");
                     return std::tuple_cat(std::make_tuple(*m_outerIterator), m_innerIterator.getElementValue());
                 }
 
@@ -110,8 +110,8 @@ namespace execHelper {
                  * \returns The object the current iterator is pointing to
                  */
                 value_type operator*() const {
-                    expects(m_outerIterator != m_outerEndIterator);
-                    expects(!m_innerIterator.atEnd());
+                    expectsMessage(m_outerIterator != m_outerEndIterator, "Do not dereference outer end iterator");
+                    expectsMessage(!m_innerIterator.atEnd(), "Do not dereference inner end iterator");
                     using ttype = typename std::decay<Tuple>::type;
                     return detail::createObject<IteratorType, Tuple, 0 == std::tuple_size<ttype>::value, std::tuple_size<ttype>::value>::getObject(getElementValue());
                 }
@@ -207,7 +207,7 @@ namespace execHelper {
                 /*! @copydoc PermutationIterator::getElementValue()
                  */
                 std::tuple<typename CollectionType::value_type> getElementValue() const {
-                    expects(m_collectionIterator != m_collectionEndIterator);
+                    expectsMessage(m_collectionIterator != m_collectionEndIterator, "Do not dereference end iterator");
                     return  std::make_tuple(*m_collectionIterator);
                 }
 

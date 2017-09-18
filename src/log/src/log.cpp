@@ -96,7 +96,7 @@ namespace execHelper {
         }
 
         string toString(LogLevel level) noexcept {
-            expects(level < getLogLevelStrings().size());
+            expectsMessage(level < getLogLevelStrings().size(), "Level must be a log level value");
             return getLogLevelStrings()[level];
         }
     } // namespace log

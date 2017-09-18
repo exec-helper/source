@@ -218,7 +218,7 @@ namespace execHelper { namespace core {
     }
 
     ExecutorInterface* ExecHelperOptions::getExecutor() const noexcept {
-        expects(m_executor != nullptr);
+        expectsMessage(m_executor != nullptr, "executor can not be null");
         return m_executor;
     }
 
