@@ -68,10 +68,6 @@ patterns:
             - src
             - test
         long-option: source-type
-    COVERITY_ARCHIVE_NAME:
-        default-values:
-            - exec-helper.xz
-        long-option: coverity-archive-name
 
 commands:
     setup: Setup the repository for building
