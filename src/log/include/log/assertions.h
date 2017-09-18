@@ -32,6 +32,7 @@ namespace execHelper {
 
 #else
 
+#define expectsMessage(cond, message)
 #define expects(cond)
 #define ensures(cond)
 
