@@ -4,6 +4,7 @@ Or How To Get Your Coffee In Peace. That is al you ever wanted, no?
 ## Continuous integration
 [![build status](https://gitlab.com/bverhagen/exec-helper/badges/master/build.svg)](https://gitlab.com/bverhagen/exec-helper/commits/master)
 [![coverage report](https://gitlab.com/bverhagen/exec-helper/badges/master/coverage.svg)](https://gitlab.com/bverhagen/exec-helper/commits/master)
+[![Coverity Scan Build Status](https://scan.coverity.com/projects/exec-helper/badge.svg)](https://scan.coverity.com/projects/exec-helper)
 
 ## Why
 Exec-helper is a meta-wrapper for executing repeatable tasks.
@@ -55,5 +56,6 @@ The source code of this project is analyzed by multiple tools in an attempt to m
 - [clang-static-analyzer](https://clang-analyzer.llvm.org)
 - [UndefinedBehaviorSanitizer](https://clang.llvm.org/docs/UndefinedBehaviorSanitizer.html) (UBSan)
 - [pmd](https://pmd.github.io) (cpd)
+- [coverity](https://scan.coverity.com/projects/exec-helper)
 
 Check the _.exec-helper_ file for detailed information about how these analysis methods are configured and used. The analysis tools can be executed locally using exec-helper.
