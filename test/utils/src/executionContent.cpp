@@ -64,6 +64,12 @@ namespace execHelper {
                 } catch(const YAML::ParserException& e) {
                     cout << "Parser issue: " << e.what() << endl;
                     terminate();
+                } catch(const YAML::TypedBadConversion<string>& e) {
+                    cout << "Bad conversion: " << e.what() << endl;
+                    terminate();
+                } catch(const YAML::InvalidNode& e) {
+                    cout << "Invalid node: " << e.what() << endl;
+                    terminate();
                 }
                 return 0U;
             }

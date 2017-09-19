@@ -62,6 +62,7 @@ namespace {
         
         // Suppress output
         int fd = open("/dev/null", O_WRONLY | O_CLOEXEC);
+        expectsMessage(fd >= 0, "Either works or fix the test");
         returnCode = dup2(fd, 1);
         expectsMessage(returnCode >= 0, "Either works or fix the test");
         close(fd);

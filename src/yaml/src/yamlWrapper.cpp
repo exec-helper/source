@@ -86,7 +86,15 @@ namespace execHelper { namespace yaml {
     }
 
     bool YamlWrapper::getSubTree(const YAML::Node& node, SettingsNode* yamlNode, const SettingsNode::SettingsKeys& keys) noexcept {
-        switch(node.Type()) {
+        YAML::NodeType::value type = YAML::NodeType::Null;
+        try {
+            type = node.Type();
+        } catch(const YAML::InvalidNode&) {
+            expectsMessage(false, "Should not get here");
+            LOG(error) << "Using an invalid YAML node";
+            return false;
+        }
+        switch(type) {
             case YAML::NodeType::Null:
             case YAML::NodeType::Undefined:
                 break;
