@@ -48,6 +48,7 @@ set(LIB_DIRECTORY ${CMAKE_INSTALL_LIBDIR})
 add_subdirectory(3rdparty)
 add_subdirectory(src)
 
+enable_testing()
 add_subdirectory(test)
 add_subdirectory(docs)
 add_subdirectory(gitchangelog)
