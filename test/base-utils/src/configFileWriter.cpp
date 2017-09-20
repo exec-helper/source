@@ -8,7 +8,7 @@ using boost::filesystem::ofstream;
 
 namespace execHelper {
     namespace test {
-       namespace utils {
+       namespace baseUtils {
             ConfigFileWriter::ConfigFileWriter() noexcept :
                 m_file("exec-helper.config.%%%%")
             {

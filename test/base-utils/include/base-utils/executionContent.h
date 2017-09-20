@@ -3,11 +3,11 @@
 
 #include <string>
 
-#include "tmpFile.h"
+#include "base-utils/tmpFile.h"
 
 namespace execHelper {
     namespace test {
-        namespace utils {
+        namespace baseUtils {
             class ExecutionContent
             {
                 public:
@@ -26,7 +26,7 @@ namespace execHelper {
                     unsigned int getNumberOfExecutions() noexcept;
 
                 private:
-                    TmpFile m_file;
+                    baseUtils::TmpFile m_file;
             };
             
         } // namespace utils

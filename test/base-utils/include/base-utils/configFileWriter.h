@@ -9,7 +9,7 @@
 
 namespace execHelper {
     namespace test {
-        namespace utils {
+        namespace baseUtils {
             class ConfigFileWriter {
                 public:
                     ConfigFileWriter() noexcept;

@@ -12,10 +12,10 @@
 #include <boost/filesystem.hpp>
 #include <gsl/string_span>
 
+#include "base-utils/configFileWriter.h"
 #include "log/assertions.h"
-#include "utils/configFileWriter.h"
-#include "utils/executionContent.h"
-#include "utils/tmpFile.h"
+#include "base-utils/executionContent.h"
+#include "base-utils/tmpFile.h"
 
 using std::cout;
 using std::endl;
@@ -30,10 +30,10 @@ using boost::system::errc::success;
 using gsl::czstring;
 using gsl::zstring;
 
-using execHelper::test::utils::ConfigFileWriter;
-using execHelper::test::utils::ExecutionContent;
-using execHelper::test::utils::TmpFile;
-using execHelper::test::utils::YamlWriter;
+using execHelper::test::baseUtils::ConfigFileWriter;
+using execHelper::test::baseUtils::ExecutionContent;
+using execHelper::test::baseUtils::TmpFile;
+using execHelper::test::baseUtils::YamlWriter;
 
 namespace {
     using Command = string;

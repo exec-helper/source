@@ -5,7 +5,7 @@
 
 namespace execHelper {
     namespace test {
-        namespace utils {
+        namespace baseUtils {
             using YamlReader = YAML::Node;
             using YamlWriter = YAML::Node;
         } // namespace utils

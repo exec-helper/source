@@ -10,7 +10,7 @@
 #include "config/settingsNode.h"
 #include "yaml/yaml.h"
 
-#include "utils/tmpFile.h"
+#include "base-utils/tmpFile.h"
 #include "utils/utils.h"
 
 using std::pair;
@@ -21,8 +21,8 @@ using std::endl;
 
 using execHelper::config::Path;
 using execHelper::config::SettingsNode;
+using execHelper::test::baseUtils::TmpFile;
 using execHelper::test::utils::convertToConfig;
-using execHelper::test::utils::TmpFile;
 using execHelper::test::utils::writeSettingsFile;
 
 namespace execHelper { namespace yaml { namespace test {

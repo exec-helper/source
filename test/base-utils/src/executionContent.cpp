@@ -8,7 +8,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 
-#include "yaml.h"
+#include "base-utils/yaml.h"
 
 using std::cout;
 using std::endl;
@@ -19,9 +19,11 @@ using std::vector;
 using boost::filesystem::exists;
 using boost::filesystem::ofstream;
 
+using execHelper::test::baseUtils::YamlReader;
+
 namespace execHelper {
     namespace test {
-        namespace utils {
+        namespace baseUtils {
             ExecutionContent::ExecutionContent() noexcept :
                 m_file("exec-helper.execution.%%%%") 
             {

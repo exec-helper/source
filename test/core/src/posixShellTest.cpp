@@ -6,7 +6,7 @@
 #include "config/path.h"
 #include "core/posixShell.h"
 #include "core/task.h"
-#include "utils/tmpFile.h"
+#include "base-utils/tmpFile.h"
 #include "utils/utils.h"
 
 using std::string;
@@ -15,7 +15,7 @@ using boost::filesystem::current_path;
 
 using execHelper::config::Path;
 
-using execHelper::test::utils::TmpFile;
+using execHelper::test::baseUtils::TmpFile;
 
 namespace execHelper { namespace core { namespace test {
     SCENARIO("Test the posix shell for successfull commands", "[shell][posixshell]") {

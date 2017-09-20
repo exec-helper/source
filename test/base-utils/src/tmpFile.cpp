@@ -13,11 +13,11 @@ using boost::filesystem::remove;
 using boost::filesystem::temp_directory_path;
 using boost::filesystem::unique_path;
 
-using execHelper::config::Path;
+using execHelper::test::baseUtils::Path;
 
 namespace execHelper {
 namespace test {
-namespace utils {
+namespace baseUtils {
     TmpFile::TmpFile(const Path& model) :
         m_path(temp_directory_path() / unique_path(model))
     {
@@ -50,7 +50,7 @@ namespace utils {
         return (error == success);
     }
 
-    config::Path TmpFile::getPath() const noexcept {
+    Path TmpFile::getPath() const noexcept {
         return m_path;
     }
 
