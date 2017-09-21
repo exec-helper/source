@@ -30,7 +30,8 @@ if(BUILD_MAN_DOCUMENTATION)
         set(DOXYGEN_QUIET YES)
     endif()
 
-    set(MAN1_SOURCES    src/applications/exec-helper.md test/integration/exec-helper-integration-test.md)
+    set(MAN1_SOURCES    src/applications/exec-helper.md)
+    set(MAN1_SOURCES_INTEGRATION    test/integration/exec-helper-integration-test.md)
     set(MAN1_EXTENSION .1)
 
     set(MAN5_SOURCES    src/config/docs/exec-helper-config.md
@@ -64,5 +65,6 @@ if(BUILD_MAN_DOCUMENTATION)
     add_dependencies(docs docs-man)
 
     add_subdirectory(man1)
+    add_subdirectory(man1-integration)
     add_subdirectory(man5)
 endif()
