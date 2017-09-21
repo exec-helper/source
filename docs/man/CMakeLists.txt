@@ -30,7 +30,7 @@ if(BUILD_MAN_DOCUMENTATION)
         set(DOXYGEN_QUIET YES)
     endif()
 
-    set(MAN1_SOURCES    src/applications/exec-helper.md)
+    set(MAN1_SOURCES    src/applications/exec-helper.md test/integration/exec-helper-integration-test.md)
     set(MAN1_EXTENSION .1)
 
     set(MAN5_SOURCES    src/config/docs/exec-helper-config.md

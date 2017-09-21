@@ -245,12 +245,12 @@ command-line-command:
             - COMPILER
             - MODE
             - MODULE
-        command-line: build/{COMPILER}/{MODE}/install/bin/test/unittest/exec-helper-{MODULE}-unittest
+        command-line: build/{COMPILER}/{MODE}/install/bin/exec-helper-{MODULE}-unittest
     integration:
         patterns:
             - COMPILER
             - MODE
-        command-line: build/{COMPILER}/{MODE}/install/bin/test/integration/exec-helper-integration-test
+        command-line: build/{COMPILER}/{MODE}/install/bin/exec-helper-integration-test
     coverage:
         environment:
             CXXFLAGS: --coverage -fprofile-arcs -ftest-coverage
