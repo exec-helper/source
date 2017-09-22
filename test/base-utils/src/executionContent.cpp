@@ -27,11 +27,7 @@ namespace execHelper {
             ExecutionContent::ExecutionContent() noexcept :
                 m_file("exec-helper.execution.%%%%") 
             {
-                ofstream outputStream;
-                outputStream.open(m_file.getPath());
-                outputStream << "executions:" << std::endl;
-                outputStream << getIterationContent() << std::endl;
-                outputStream.close();
+                init();
             }
 
             ExecutionContent::ExecutionContent(ExecutionContent&& other) noexcept {
@@ -44,19 +40,32 @@ namespace execHelper {
             }
 
             void ExecutionContent::swap(ExecutionContent& other) noexcept {
+                TmpFile tmp = std::move(m_file);
                 m_file = std::move(other.m_file);
-                other.m_file.clear();
+                other.m_file = std::move(tmp);
             }
 
-            std::string ExecutionContent::getPath() noexcept {
+            void ExecutionContent::init() noexcept {
+                ofstream outputStream;
+                outputStream.open(m_file.getPath(), std::ios_base::out | std::ios_base::trunc);
+                outputStream << "executions:" << std::endl;
+                outputStream << getIterationContent() << std::endl;
+                outputStream.close();
+            }
+
+            std::string ExecutionContent::getPath() const noexcept {
                 return m_file.getPath().native();
+            }
+
+            ExecutionContent::ConfigCommand ExecutionContent::getConfigCommand() const noexcept {
+                return {"sed", "-i", string("'$ a\\").append(getIterationContent()).append("'"), getPath()};
             }
 
             string ExecutionContent::getIterationContent() noexcept {
                 return "  - x";
             }
 
-            unsigned int ExecutionContent::getNumberOfExecutions() noexcept {
+            unsigned int ExecutionContent::getNumberOfExecutions() const noexcept {
                 if(! exists(m_file.getPath())) {
                     return 0U;
                 }
@@ -74,6 +83,10 @@ namespace execHelper {
                     terminate();
                 }
                 return 0U;
+            }
+
+            void ExecutionContent::clear() noexcept {
+                init();
             }
         } // namespace utils
     } // namespace test

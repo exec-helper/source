@@ -11,6 +11,8 @@ namespace execHelper {
             class ExecutionContent
             {
                 public:
+                    using ConfigCommand = std::vector<std::string>;
+
                     ExecutionContent() noexcept;
                     ExecutionContent(const ExecutionContent& other) = delete;
                     ExecutionContent(ExecutionContent&& other) noexcept;
@@ -20,10 +22,15 @@ namespace execHelper {
 
                     void swap(ExecutionContent& other) noexcept;
 
+                    void init() noexcept;
+
+                    ConfigCommand getConfigCommand() const noexcept;
                     static std::string getIterationContent() noexcept;
 
-                    std::string getPath() noexcept;
-                    unsigned int getNumberOfExecutions() noexcept;
+                    std::string getPath() const noexcept;
+                    unsigned int getNumberOfExecutions() const noexcept;
+
+                    void clear() noexcept;
 
                 private:
                     baseUtils::TmpFile m_file;
