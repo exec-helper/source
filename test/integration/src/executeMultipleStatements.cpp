@@ -22,6 +22,7 @@ using std::endl;
 using std::map;
 using std::string;
 using std::stringstream;
+using std::to_string;
 using std::vector;
 
 using boost::filesystem::current_path;
@@ -140,7 +141,7 @@ namespace integration {
 
             WHEN("we call each of these commands separately") {
                 for(const auto& command : commands) {
-                    const ReturnCode returnCode = execute({"exec-helper", command, "--settings-file", config.getFilename()}, config.getDirectory());
+                    const ReturnCode returnCode = execute({EXEC_HELPER_BINARY, command, "--settings-file", config.getFilename()}, config.getDirectory());
 
                     THEN("the call should succeed") {
                         REQUIRE(returnCode == SUCCESS);
@@ -160,6 +161,66 @@ namespace integration {
                 }
             }
         } 
+    }
+
+    /**
+     * Implements @ref scenario-execute-multiple-statements-predefined-order-multiple
+     */
+    SCENARIO("Scenario: Execution order of commands consisting of multiple predefined statements", "[execute-multiple-statements][execute-multiple-statements-predefined-order][scenario-execute-multiple-statements-predefined-order-multiple]") {
+        GIVEN("A valid configuration with multiple commands consisting of multiple, predefined, valid, successful statements") {
+            const Commands commands({"command1", "command2", "command3", "command4"});
+            YamlWriter yaml;
+            OutputFiles output;
+
+            const unsigned int NB_OF_SUBCOMMANDS = 3U;
+
+            for(const auto& command : commands) {
+                output.emplace(command, OutputFile());
+
+                Commands subcommands;
+                for(unsigned int i = 0; i < NB_OF_SUBCOMMANDS; ++i) {
+                    string subcommand = command;
+                    subcommand.append("-subcommand").append(to_string(i));
+                    subcommands.emplace_back(subcommand);
+                }
+
+                yaml[COMMAND_KEY][command] = "Execute the command";
+                yaml[command] = subcommands;
+
+                for(const auto& subcommand : subcommands) {
+                    yaml[subcommand] = COMMAND_LINE_COMMAND_KEY;
+                    yaml[COMMAND_LINE_COMMAND_KEY][subcommand][COMMAND_LINE_COMMAND_LINE_KEY].push_back("sed");
+                    yaml[COMMAND_LINE_COMMAND_KEY][subcommand][COMMAND_LINE_COMMAND_LINE_KEY].push_back("-i");
+                    yaml[COMMAND_LINE_COMMAND_KEY][subcommand][COMMAND_LINE_COMMAND_LINE_KEY].push_back("'$ a\\" + output.at(command).getIterationContent() + "'");
+                    yaml[COMMAND_LINE_COMMAND_KEY][subcommand][COMMAND_LINE_COMMAND_LINE_KEY].push_back(output.at(command).getPath());
+                }
+            }
+
+            ConfigFileWriter config;
+            config.write(yaml);
+
+            WHEN("we call each of these commands separately") {
+                for(const auto& command : commands) {
+                    const ReturnCode returnCode = execute({EXEC_HELPER_BINARY, command, "--settings-file", config.getFilename()}, config.getDirectory());
+
+                    THEN("the call should succeed") {
+                        REQUIRE(returnCode == SUCCESS);
+                    }
+
+                    THEN("the associated predefined statements should be called the expected number of times in the right order") {
+                        REQUIRE(output.at(command).getNumberOfExecutions() == NB_OF_SUBCOMMANDS);
+                    }
+
+                    THEN("no other predefined statements should have been called") {
+                        for(const auto& otherCommand : commands) {
+                            if(command != otherCommand) {
+                                REQUIRE(output.at(otherCommand).getNumberOfExecutions() == 0U);
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 } // namespace integration
 } // namespace execHelper
