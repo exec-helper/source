@@ -17,15 +17,18 @@ CHANGELOG_OUTPUT = &1	# Redirect to stdout by default. Overwrite on the command 
 all: binary docs changelog
 
 init:
-	cmake -H. -B$(BUILD_DIR) -DCMAKE_INSTALL_PREFIX=${PREFIX} -DCMAKE_BUILD_TYPE=Release -DUSE_SYSTEM_CATCH=OFF -DCMAKE_EXPORT_COMPILE_COMMANDS=OFF -DBUILD_HTML_DOCUMENTATION=ON -DBUILD_MAN_DOCUMENTATION=ON
+	cmake -H. -B$(BUILD_DIR) -DCMAKE_INSTALL_PREFIX=${PREFIX} -DCMAKE_BUILD_TYPE=Release -DUSE_SYSTEM_CATCH=OFF -DCMAKE_EXPORT_COMPILE_COMMANDS=OFF -DBUILD_HTML_DOCUMENTATION=ON -DBUILD_XML_DOCUMENTATION=ON -DBUILD_MAN_DOCUMENTATION=ON
 
 binary: init
 	make -C $(BUILD_DIR) --jobs $(NB_OF_CORES) exec-helper
 
-docs-html:
+docs-html: init
 	make -C $(BUILD_DIR) --jobs $(NB_OF_CORES) docs-html
 
-docs-man:
+docs-xml: init
+	make -C $(BUILD_DIR) --jobs $(NB_OF_CORES) docs-xml
+
+docs-man: init
 	make -C $(BUILD_DIR) --jobs $(NB_OF_CORES) docs-man
 
 changelog: init
@@ -40,6 +43,7 @@ install-bin:
 	cmake -DCOMPONENT=runtime -P $(BUILD_DIR)/cmake_install.cmake
 
 install-docs:
+	# Omitting installation of xml documentation
 	cmake -DCOMPONENT=docs-man -P $(BUILD_DIR)/cmake_install.cmake
 	cmake -DCOMPONENT=docs-html -P $(BUILD_DIR)/cmake_install.cmake
 

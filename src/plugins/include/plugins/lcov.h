@@ -19,6 +19,7 @@ namespace execHelper {
                  *
                  * \param[in] command   The command associated with the action
                  * \param[in] rootSettings  The configuration settings associated with the specific command
+                 * \param[in] infoFile  The infofile to use
                  * \param[in] task  The current task
                  * \returns True    if the command was successfully added to the given task
                  *          False   otherwise

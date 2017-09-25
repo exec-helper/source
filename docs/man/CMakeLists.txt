@@ -1,5 +1,3 @@
-find_package(Doxygen)
-
 option(BUILD_MAN_DOCUMENTATION "Create and install the MAN API documentation (requires Doxygen)" ${DOXYGEN_FOUND})
 
 FUNCTION(PREPEND var prefix)

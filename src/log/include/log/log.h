@@ -39,7 +39,7 @@ namespace execHelper {
         /**
          * Initialize logging
          *
-         * \param[in]   The output stream to log to
+         * \param[in] logStream   The output stream to log to
          */
         void init(std::ostream& logStream = std::clog) noexcept;
 

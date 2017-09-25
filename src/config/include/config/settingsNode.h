@@ -218,7 +218,12 @@ namespace execHelper {
                 void deepCopy(const SettingsNode& other) noexcept;
 
                 /**
-                 * See #at(const SettingsKey&)
+                 * Get the node with the given key
+                 *
+                 * \pre #contains() == true
+                 * \warning This function is undefined if the precondition is not fulfilled
+                 * \param[in] key   The key
+                 * \return  A pointer to the node with the associated key
                  */
                 SettingsNode* at(const SettingsKey& key) noexcept;
 
