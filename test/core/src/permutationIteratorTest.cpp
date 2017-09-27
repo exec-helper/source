@@ -109,7 +109,7 @@ namespace {
             REQUIRE((combination == orderedCombinations[orderedCombinationsIndex]));
             ++orderedCombinationsIndex;
         }
-        REQUIRE(orderedCombinationsIndex == orderedCombinations.size());
+        REQUIRE((orderedCombinationsIndex == orderedCombinations.size()));
     }
 } // namespace
 
@@ -141,13 +141,7 @@ namespace execHelper { namespace core { namespace test {
 
             WHEN("We iterate over them entirely") {
                 THEN("We should be able to do so using a foreach loop") {
-                    size_t orderedCombinationsIndex = 0U;
-                    for(const auto& combination : permute) {
-                        REQUIRE(orderedCombinationsIndex < orderedCombinations.size());
-                        REQUIRE(combination == orderedCombinations[orderedCombinationsIndex]);
-                        ++orderedCombinationsIndex;
-                    }
-                    REQUIRE(orderedCombinationsIndex == orderedCombinations.size());
+                    testForeach(permute, orderedCombinations);
                 }
                 THEN("We should be able to do so using iterators") {
                     size_t orderedCombinationsIndex = 0U;
