@@ -302,7 +302,8 @@ pages:
         - mkdir public
         - mv pages/index.html public/
         - mv test_coverage/ public/coverage
-        - mv build/g++/release/install/share/doc/exec-helper/html public/docs
+        - mkdir -p public/docs
+        - mv build/g++/release/install/share/doc/exec-helper/html public/docs/
     artifacts:
         paths:
             - public
