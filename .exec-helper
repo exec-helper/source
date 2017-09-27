@@ -272,4 +272,5 @@ clang-tidy:
                     - -google-readability-function-size
                     - -readability-function-size
                     - -cert-err58-cpp
+                    - -hicpp-function-size
         warnings-as-errors: all
