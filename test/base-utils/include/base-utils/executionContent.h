@@ -14,6 +14,8 @@ namespace execHelper {
                     using ConfigCommand = std::vector<std::string>;
 
                     ExecutionContent() noexcept;
+                    ~ExecutionContent() = default;
+
                     ExecutionContent(const ExecutionContent& other) = delete;
                     ExecutionContent(ExecutionContent&& other) noexcept;
 
@@ -36,7 +38,7 @@ namespace execHelper {
                     baseUtils::TmpFile m_file;
             };
             
-        } // namespace utils
+        } // namespace baseUtils
     } // namespace test
 } // namespace execHelper
 

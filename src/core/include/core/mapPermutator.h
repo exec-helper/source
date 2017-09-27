@@ -91,7 +91,7 @@ namespace execHelper {
                             if(m_map != other.m_map) {
                                 return false;
                             }
-                            if(m_end == true && m_end == other.m_end) {
+                            if(m_end && m_end == other.m_end) {
                                 return true;
                             }
                             for(const auto& indexElement : m_indexes) {

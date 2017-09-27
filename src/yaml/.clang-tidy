@@ -1,5 +1,5 @@
 ---
 Checks: 'clang-diagnostic-*,clang-analyzer-*,*,-llvm-header-guard'
 
-WarningsAsErrors: '.*'
+WarningsAsErrors: '*'
 HeaderFilterRegex: '^(?!gsl_).*'

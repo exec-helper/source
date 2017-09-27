@@ -3,6 +3,8 @@
 
 #include <map>
 
+#include <gsl/gsl>
+
 #include "executionContent.h"
 
 namespace execHelper {
@@ -22,19 +24,19 @@ namespace execHelper {
                      */
                     class ExecutionHandlerIterationRAII {
                         public:
-                            ExecutionHandlerIterationRAII(ExecutionContentCollection& outputs);
+                            explicit ExecutionHandlerIterationRAII(gsl::not_null<ExecutionContentCollection*> outputs);
                             ~ExecutionHandlerIterationRAII();
 
                             ExecutionHandlerIterationRAII(const ExecutionHandlerIterationRAII& other) = default;
-                            ExecutionHandlerIterationRAII(ExecutionHandlerIterationRAII&& other) noexcept = default;
+                            ExecutionHandlerIterationRAII(ExecutionHandlerIterationRAII&& other) = default;
 
                             ExecutionHandlerIterationRAII& operator=(const ExecutionHandlerIterationRAII& other) = default;
-                            ExecutionHandlerIterationRAII& operator=(ExecutionHandlerIterationRAII&& other) noexcept = default;
+                            ExecutionHandlerIterationRAII& operator=(ExecutionHandlerIterationRAII&& other) noexcept = default;     // NOLINT(misc-noexcept-move-constructor)
 
                             const ExecutionContent& at(const std::string& key) const noexcept;
 
                         private:
-                            ExecutionContentCollection& m_outputs;
+                            gsl::not_null<ExecutionContentCollection*> m_outputs;
                     };
 
                     ExecutionContentCollection m_outputs;

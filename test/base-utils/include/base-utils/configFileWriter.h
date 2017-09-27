@@ -13,6 +13,7 @@ namespace execHelper {
             class ConfigFileWriter {
                 public:
                     ConfigFileWriter() noexcept;
+                    ~ConfigFileWriter() = default;
 
                     ConfigFileWriter(const ConfigFileWriter& other) = delete;
                     ConfigFileWriter(ConfigFileWriter&& other) noexcept = delete;
@@ -28,7 +29,7 @@ namespace execHelper {
                 private:
                     TmpFile m_file;
             };
-        } // namespace utils
+        } // namespace baseUtils
     } // namespace test
 } // namespace execHelper
 

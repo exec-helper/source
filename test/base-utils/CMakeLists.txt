@@ -10,6 +10,7 @@ set(SRCS
    )
 
 set(DEPENDENCIES
+        gsl
         boost-filesystem
         yaml-3rd
     )

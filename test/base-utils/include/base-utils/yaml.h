@@ -8,7 +8,7 @@ namespace execHelper {
         namespace baseUtils {
             using YamlReader = YAML::Node;
             using YamlWriter = YAML::Node;
-        } // namespace utils
+        } // namespace baseUtils
     } // namespace test
 } // namespace execHelper
 

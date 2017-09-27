@@ -29,7 +29,7 @@ namespace execHelper {
                 private:
                     Path m_path;
             };
-        } // namespace utils
+        } // namespace baseUtils
     } // namespace test
 } // namespace execHelper
 

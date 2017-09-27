@@ -2,4 +2,4 @@
 Checks: 'clang-diagnostic-*,clang-analyzer-*,*,-llvm-header-guard'
 
 WarningsAsErrors: '*'
-HeaderFilterRegex: '^(?!gsl).*'
+HeaderFilterRegex: '.*'
