@@ -1,9 +1,4 @@
-# - Try to find LibXml2
-# Once done this will define
-#  LIBCATCH_FOUND - System has LibXml2
-#  LIBCATCH_INCLUDE_DIRS - The LibXml2 include directories
-
-set(MODULE_NAME catch)
+set(MODULE_NAME Catch)
 set(MODULE_INCLUDES catch.hpp)
 
 find_package(PkgConfig)
