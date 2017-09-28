@@ -3,7 +3,7 @@
 #include <vector>
 
 // Hack required for streaming boost::optional<vector<T>> types
-namespace std {
+namespace std {     // NOLINT(cert-dcl58-cpp)
     template<typename T>
     std::ostream& operator<<(std::ostream& os, const std::vector<T>& stream) {
         for(const auto& element : stream) {
@@ -112,24 +112,24 @@ namespace execHelper { namespace config { namespace test {
                     firstLevelValues.push_back(testKey6);
 
                     REQUIRE(settings.values() == firstLevelValues);
-                    REQUIRE(settings[testValue1].values() == SettingsNode::SettingsValues());
+                    REQUIRE(settings[testValue1].values().empty());
                     REQUIRE(settings[testKey2].values() == SettingsNode::SettingsValues({testValue2}));
                     for(const auto& key : testValue3) {
-                        REQUIRE(settings[key].values() == SettingsNode::SettingsValues());
+                        REQUIRE(settings[key].values().empty());
                     }
 
                     for(const auto& key : testValue4) {
-                        REQUIRE(settings[key].values() == SettingsNode::SettingsValues());
+                        REQUIRE(settings[key].values().empty());
                     }
 
                     REQUIRE(settings[testKey5].values() == testValue5);
                     for(const auto& key : testValue5) {
-                        REQUIRE(settings[testKey5][key].values() == SettingsNode::SettingsValues());
+                        REQUIRE(settings[testKey5][key].values().empty());
                     }
 
                     REQUIRE(settings[testKey6].values() == SettingsNode::SettingsValues(testValue6));
                     for(const auto& key : testValue6) {
-                        REQUIRE(settings[testKey6][key].values() == SettingsNode::SettingsValues());
+                        REQUIRE(settings[testKey6][key].values().empty());
                     }
                 }
 

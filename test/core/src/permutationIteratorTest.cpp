@@ -69,19 +69,19 @@ namespace {
             }
 
             iterator begin() noexcept {
-                return iterator(m_collection1.begin(), m_collection2.begin(), m_collection1.end(), m_collection2.end());
+                return {m_collection1.begin(), m_collection2.begin(), m_collection1.end(), m_collection2.end()};
             }
 
             const_iterator begin() const noexcept {
-                return const_iterator(m_collection1.begin(), m_collection2.begin(), m_collection1.end(), m_collection2.end());
+                return {m_collection1.begin(), m_collection2.begin(), m_collection1.end(), m_collection2.end()};
             }
 
             iterator end() noexcept {
-                return iterator(m_collection1.end(), m_collection2.end(), m_collection1.end(), m_collection2.end());
+                return {m_collection1.end(), m_collection2.end(), m_collection1.end(), m_collection2.end()};
             }
 
             const_iterator end() const noexcept {
-                return const_iterator(m_collection1.end(), m_collection2.end(), m_collection1.end(), m_collection2.end());
+                return {m_collection1.end(), m_collection2.end(), m_collection1.end(), m_collection2.end()};
             }
 
         private:
