@@ -6,18 +6,19 @@
 # Note: if you want to change the default installation directory, then add the PREFIX variable to the first make command:
 #   make PREFIX=<installation root directory>
 
-PREFIX=/usr 		# Override this on the command line if required
-
+# Override these on the command line if required
+PREFIX := /usr
 NB_OF_CORES:=$(shell grep -c ^processor /proc/cpuinfo)
 BUILD_DIR:=build/native/release
-
-CHANGELOG_CONFIG = .gitchangelog.rc 	# Use this file by default. Overwrite on the command line.
-CHANGELOG_OUTPUT = &1	# Redirect to stdout by default. Overwrite on the command line
+CHANGELOG_CONFIG := .gitchangelog.rc 	# Use this file by default. Overwrite on the command line.
+CHANGELOG_OUTPUT := &1	# Redirect to stdout by default. Overwrite on the command line
+CMAKE_BUILD_TYPE := Release
+USE_SYSTEM_GSL := ON
 
 all: binary docs changelog
 
 init:
-	cmake -H. -B$(BUILD_DIR) -DCMAKE_INSTALL_PREFIX=${PREFIX} -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=OFF -DBUILD_HTML_DOCUMENTATION=ON -DBUILD_XML_DOCUMENTATION=ON -DBUILD_MAN_DOCUMENTATION=ON
+	cmake -H. -B$(BUILD_DIR) -DCMAKE_INSTALL_PREFIX=$(PREFIX) -DCMAKE_BUILD_TYPE=$(CMAKE_BUILD_TYPE) -DUSE_SYSTEM_GSL=$(USE_SYSTEM_GSL) -DCMAKE_EXPORT_COMPILE_COMMANDS=OFF -DBUILD_HTML_DOCUMENTATION=ON -DBUILD_XML_DOCUMENTATION=ON -DBUILD_MAN_DOCUMENTATION=ON
 
 binary: init
 	make -C $(BUILD_DIR) --jobs $(NB_OF_CORES) exec-helper

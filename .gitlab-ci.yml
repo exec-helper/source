@@ -8,8 +8,14 @@ variables:
 .prepare: &prepare
         pacman -Sy --noconfirm
 
+.build_tools: &build_tools
+        pacman -S --noconfirm --needed boost boost-libs yaml-cpp gcc cmake make doxygen python-pip pkg-config sudo file fakeroot && bash -x gitlab/install-aur.sh libcatch-cpp-headers && bash -x gitlab/install-aur.sh microsoft-gsl-git
+
+.build_tools_changelog: &build_tools_changelog
+        pip install gitchangelog
+
 .install_exec_helper: &install_exec_helper
-        pacman -S --noconfirm --needed boost boost-libs yaml-cpp make cmake && make install-bin
+        pacman -S --noconfirm --needed boost-libs yaml-cpp && cp build/native/release/src/applications/exec-helper /usr/local/bin/
 
 .prepare_debian: &prepare_debian
         rm -rf /var/lib/apt/lists/* && apt-get update           # Work around for debian mirror issues that often occur on Gitlab
@@ -52,10 +58,10 @@ variables:
     dependencies:
         - build:gcc
     script:
-        - pacman -S --needed --noconfirm gcc cmake make pkg-config clang-tools-extra
+        - *build_tools
+        - pacman -S --noconfirm --needed clang clang-tools-extra
         - *install_exec_helper
         - exec-helper setup init-build -c g++ -m release
-        - make -C build/g++/release/build Catch Gsl
         - exec-helper analyze --analyze clang-tidy --module $MODULES --source-type $SOURCE_TYPE
 
 .cppcheck: &cppcheck
@@ -78,8 +84,9 @@ variables:
     dependencies:
         - build:gcc
     script:
-        - pacman -S --noconfirm --needed clang pkg-config
+        - *build_tools
         - *install_exec_helper
+        - pacman -S --noconfirm --needed clang
         - export CXXFLAGS="-g -fsanitize=undefined -fno-omit-frame-pointer -fno-sanitize-recover=undefined -fsanitize-blacklist=\"$(pwd)/suppressions/ubsan.blacklist\""
         - export LDFLAGS="-g -fsanitize=undefined -fno-omit-frame-pointer -fno-sanitize-recover=undefined -fsanitize-blacklist=\"$(pwd)/suppressions/ubsan.blacklist\""
         - export UBSAN_OPTIONS="print_stacktrace=1"
@@ -97,23 +104,23 @@ stages:
 build:gcc:
     stage: build
     script:
-        - pacman -S --noconfirm --needed boost boost-libs yaml-cpp gcc cmake make doxygen python-pip pkg-config
-        - pip install gitchangelog
+        - *build_tools
+        - *build_tools_changelog
         - make && make install
         - exec-helper init build --compiler g++ --mode debug release
     artifacts:
         expire_in: 1 day
         paths:
-            - build/native
+            - build/native/release/src/applications/exec-helper
             - build/g++/debug/install
             - build/g++/release/install
 
 build:gcc:limited-optimization:
     stage: build
     script:
-        - pacman -S --noconfirm --needed boost boost-libs yaml-cpp gcc cmake make python-pip pkg-config
-        - pip install gitchangelog
-        - cmake -H. -Bbuild/g++/release/build -DCMAKE_CXX_COMPILER=g++ -DCMAKE_INSTALL_PREFIX=build/g++/release/install -DCMAKE_BUILD_TYPE=Release -DUSE_SYSTEM_CATCH=OFF -DLIMITED_OPTIMIZATION=ON
+        - *build_tools
+        - *build_tools_changelog
+        - cmake -H. -Bbuild/g++/release/build -DCMAKE_CXX_COMPILER=g++ -DCMAKE_INSTALL_PREFIX=build/g++/release/install -DCMAKE_BUILD_TYPE=Release -DLIMITED_OPTIMIZATION=ON
         - make -C build/g++/release/build --jobs 4
         - make -C build/g++/release/build install
     artifacts:
@@ -124,8 +131,9 @@ build:gcc:limited-optimization:
 build:clang:
     stage: build
     script: 
-        - pacman -S --noconfirm --needed boost boost-libs yaml-cpp clang cmake make python-pip pkg-config doxygen
-        - pip install gitchangelog
+        - *build_tools
+        - pacman -S --noconfirm --needed clang
+        - *build_tools_changelog
         - make && make install
         - exec-helper init build --compiler clang++ --mode debug release
     artifacts:
@@ -140,9 +148,9 @@ build:debian:
     before_script:
         - *prepare_debian
     script:
-        - apt-get install --yes cmake make libboost-dev libboost-program-options-dev libboost-filesystem-dev libboost-log-dev libyaml-cpp-dev pkg-config g++ git doxygen python-pip
+        - apt-get install --yes cmake make libboost-dev libboost-program-options-dev libboost-filesystem-dev libboost-log-dev libyaml-cpp-dev pkg-config g++ git doxygen python-pip catch
         - pip install gitchangelog
-        - make && make install-bin
+        - make USE_SYSTEM_GSL=OFF && make install-bin
     artifacts:
         expire_in: 1 day
         paths:
@@ -197,8 +205,9 @@ clang-static-analyzer:
     dependencies:
         - build:gcc
     script:
-        - pacman -S --noconfirm --needed clang cmake make pkg-config
+        - *build_tools
         - *install_exec_helper
+        - pacman -S --noconfirm --needed clang
         # Ugly hack for circumventing issues with the (unused) scan-build c compiler.
         - echo "SET(CMAKE_C_COMPILER  clang)" >> toolchain.cmake.in
         - exec-helper analyze --analyze clang-static-analyzer --mode debug --compiler ''
@@ -223,7 +232,8 @@ coverage:
     dependencies:
         - build:gcc
     script:
-        - pacman -S --noconfirm --needed base-devel curl gcc cmake make pkg-config
+        - *build_tools
+        - pacman -S --noconfirm --needed patch
         - bash -x gitlab/install-aur.sh lcov
         - *install_exec_helper
         - exec-helper coverage
@@ -238,8 +248,8 @@ coverity:
     dependencies:
         - build:gcc
     script:
+        - *build_tools
         - *install_exec_helper
-        - pacman -S --noconfirm --needed gcc cmake make pkg-config git doxygen curl tar xz
         - curl --data "token=INxicvq4GqijG23xZzPNEA&project=bverhagen%2Fexec-helper" https://scan.coverity.com/download/linux64 -o coverity_tool.tgz
         - tar -C /tmp -xf coverity_tool.tgz
         - pushd /tmp/cov-analysis-linux64-*/bin
@@ -288,7 +298,7 @@ cross-compilation:
         - *install_exec_helper_debian
     script:
         - apt-get install --yes debootstrap g++-aarch64-linux-gnu cmake make pkg-config git
-        - debootstrap --download-only --arch=arm64 --foreign --download-only --variant=minbase --include=libboost-program-options-dev,libboost-filesystem-dev,libboost-log-dev,libyaml-cpp-dev,doxygen,libc6-dev testing ./sysroot_arm64 http://deb.debian.org/debian/
+        - debootstrap --download-only --arch=arm64 --foreign --download-only --variant=minbase --include=catch,libboost-program-options-dev,libboost-filesystem-dev,libboost-log-dev,libyaml-cpp-dev,doxygen,libc6-dev testing ./sysroot_arm64 http://deb.debian.org/debian/
         - for DEB in $(find sysroot_arm64/var/cache/apt/archives -not -path sysroot_arm64/var/cache/apt/archives/partial -type f); do echo "Extracting ${DEB}..."; dpkg -x ${DEB} sysroot_arm64; done   # Unpack all downloaded debian packages, since debootstrap does not seem to unpack the additional included ones and their dependencies
         - find ./sysroot_arm64 -name pthread.h
         - exec-helper init-build build --compiler aarch64-linux-gnu-g++ --mode release --sysroot $(pwd)/sysroot_arm64

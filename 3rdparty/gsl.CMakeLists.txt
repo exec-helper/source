@@ -1,7 +1,10 @@
-option(USE_SYSTEM_GSL "Use the gsl library provided by the system" OFF)
+find_package(Gsl)
+option(USE_SYSTEM_GSL "Use the gsl library provided by the system" ${Gsl_FOUND})
 
 if(${USE_SYSTEM_GSL})
-    find_package(Gsl REQUIRED)
+    if(NOT ${Gsl_FOUND})
+        MESSAGE(FATAL_ERROR "Could NOT find gsl")
+    endif()
 else()
     include(ExternalProject)
 

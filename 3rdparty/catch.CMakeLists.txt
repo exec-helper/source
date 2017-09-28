@@ -1,8 +1,14 @@
-option(USE_SYSTEM_CATCH "Use the catch library provided by the system" ON)
+set(MODULE_NAME catch)
+set(PACKAGE_NAME Catch)
+
+find_package(${PACKAGE_NAME})
+option(USE_SYSTEM_CATCH "Use the ${MODULE_NAME} library provided by the system" ${${PACKAGE_NAME}_FOUND})
 
 if(${USE_SYSTEM_CATCH})
-    find_package(Catch REQUIRED)
-else(${USE_SYSTEM_CATCH})
+    if(NOT ${${PACKAGE_NAME}_FOUND})
+        MESSAGE(FATAL_ERROR "Could NOT find ${MODULE_NAME}")
+    endif()
+else()
     include(ExternalProject)
 
     set(CATCH_INSTALL_DIR ${LIB_DIRECTORY}/catch)
@@ -16,8 +22,8 @@ else(${USE_SYSTEM_CATCH})
         UPDATE_COMMAND ""
         )
 
-    set(Catch_INCLUDE_DIRS ${CMAKE_CURRENT_BINARY_DIR}/catch/src/Catch/single_include)
-endif(${USE_SYSTEM_CATCH})
+    set(${PACKAGE_NAME}_INCLUDE_DIRS ${CMAKE_CURRENT_BINARY_DIR}/catch/src/Catch/single_include)
+endif()
 
 add_library(catch INTERFACE)
 target_include_directories(catch SYSTEM INTERFACE ${Catch_INCLUDE_DIRS})

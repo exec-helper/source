@@ -111,6 +111,17 @@ namespace {
         }
         REQUIRE((orderedCombinationsIndex == orderedCombinations.size()));
     }
+
+    template<typename T>
+    inline void testIterators(T& permute, const vector<PermuteObjectElement>& orderedCombinations) {
+        size_t orderedCombinationsIndex = 0U;
+        for(auto it = permute.begin(); it != permute.end(); ++it) {     // NOLINT(modernize-loop-convert)
+            REQUIRE(orderedCombinationsIndex < orderedCombinations.size());
+            REQUIRE((*it == orderedCombinations[orderedCombinationsIndex]));
+            ++orderedCombinationsIndex;
+        }
+        REQUIRE((orderedCombinationsIndex == orderedCombinations.size()));
+    }
 } // namespace
 
 namespace execHelper { namespace core { namespace test {
@@ -124,13 +135,7 @@ namespace execHelper { namespace core { namespace test {
                     testForeach(permute, orderedCombinations);
                 }
                 THEN("We should be able to do so using iterators") {
-                    size_t orderedCombinationsIndex = 0U;
-                    for(auto it = permute.begin(); it != permute.end(); ++it) {     // NOLINT(modernize-loop-convert)
-                        REQUIRE(orderedCombinationsIndex < orderedCombinations.size());
-                        REQUIRE(*it == orderedCombinations[orderedCombinationsIndex]);
-                        ++orderedCombinationsIndex;
-                    }
-                    REQUIRE(orderedCombinationsIndex == orderedCombinations.size());
+                    testIterators(permute, orderedCombinations);
                 }
             }
         }
@@ -144,13 +149,7 @@ namespace execHelper { namespace core { namespace test {
                     testForeach(permute, orderedCombinations);
                 }
                 THEN("We should be able to do so using iterators") {
-                    size_t orderedCombinationsIndex = 0U;
-                    for(auto it = permute.begin(); it != permute.end(); ++it) {     // NOLINT(modernize-loop-convert)
-                        REQUIRE(orderedCombinationsIndex < orderedCombinations.size());
-                        REQUIRE(*it == orderedCombinations[orderedCombinationsIndex]);
-                        ++orderedCombinationsIndex;
-                    }
-                    REQUIRE(orderedCombinationsIndex == orderedCombinations.size());
+                    testIterators(permute, orderedCombinations);
                 }
             }
         }

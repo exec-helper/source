@@ -4,7 +4,7 @@ set(SRCS    src/executeMultipleStatements.cpp
    )
 
 set(DEPENDENCIES
-        yaml-cpp
+        yaml-3rd
         gsl
         log
         test-base-utils

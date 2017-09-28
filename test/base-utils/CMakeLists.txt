@@ -9,7 +9,7 @@ set(SRCS
 
 set(DEPENDENCIES
         boost-filesystem
-        yaml-cpp
+        yaml-3rd
     )
 
 add_library(${LIBRARY_NAME} ${SRCS})

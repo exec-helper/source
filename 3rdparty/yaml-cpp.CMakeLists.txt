@@ -1,11 +1,17 @@
-option(USE_SYSTEM_YAML_CPP "Use the yaml-cpp library provided by the system" ON)
+set(MODULE_NAME yaml-cpp)
+set(PACKAGE_NAME Yaml-cpp)
+
+find_package(${PACKAGE_NAME})
+option(USE_SYSTEM_YAML_CPP "Use the ${MODULE_NAME} library provided by the system" ${${PACKAGE_NAME}_FOUND})
 
 if(${USE_SYSTEM_YAML_CPP})
-    find_package(yaml-cpp REQUIRED)
-else(${USE_SYSTEM_YAML_CPP})
+    if(NOT ${${PACKAGE_NAME}_FOUND})
+        MESSAGE(FATAL_ERROR "Could NOT find ${MODULE_NAME}")
+    endif()
+else()
     include(ExternalProject)
 
-    set(YAML_INSTALL_DIR ${CMAKE_CURRENT_BINARY_DIR}/yaml-cpp)
+    set(YAML_INSTALL_DIR ${CMAKE_CURRENT_BINARY_DIR}/${MODULE_NAME})
 
     ExternalProject_Add(Yaml-cpp
         PREFIX yaml-cpp
@@ -15,15 +21,15 @@ else(${USE_SYSTEM_YAML_CPP})
         UPDATE_COMMAND ""
         )
 
-    set(YAML_CPP_INCLUDE_DIRS ${YAML_INSTALL_DIR}/include)
-    set(YAML_CPP_LIBRARIES ${YAML_INSTALL_DIR}/lib/libyaml-cpp.a)
-    set(YAML_CPP_LIBRARY_DIRS ${YAML_INSTALL_DIR}/lib)
-endif(${USE_SYSTEM_YAML_CPP})
+    set(${PACKAGE_NAME}_INCLUDE_DIRS ${YAML_INSTALL_DIR}/include)
+    set(${PACKAGE_NAME}_LIBRARIES ${YAML_INSTALL_DIR}/lib/libyaml-cpp.a)
+    set(${PACKAGE_NAME}_LIBRARY_DIRS ${YAML_INSTALL_DIR}/lib)
+endif()
 
 add_library(yaml-3rd INTERFACE)
-target_include_directories(yaml-3rd SYSTEM INTERFACE ${YAML_CPP_INCLUDE_DIRS})
-target_link_libraries(yaml-3rd INTERFACE ${YAML_CPP_LIBRARIES})
+target_include_directories(yaml-3rd SYSTEM INTERFACE ${${PACKAGE_NAME}_INCLUDE_DIRS})
+target_link_libraries(yaml-3rd INTERFACE ${${PACKAGE_NAME}_LIBRARIES})
 
 if(NOT ${USE_SYSTEM_YAML_CPP})
-    add_dependencies(yaml-3rd Yaml-cpp)
+    add_dependencies(yaml-3rd ${PACKAGE_NAME})
 endif()
