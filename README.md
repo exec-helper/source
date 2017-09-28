@@ -1,5 +1,5 @@
 # exec-helper
-Or How To Get Your Coffee In Peace. That is al you ever wanted, no?
+Or How To Get Your Coffee In Peace.
 
 ## Continuous integration
 [![build status](https://gitlab.com/bverhagen/exec-helper/badges/master/build.svg)](https://gitlab.com/bverhagen/exec-helper/commits/master)
