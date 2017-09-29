@@ -411,7 +411,7 @@ namespace execHelper { namespace config { namespace test {
             settings.add(key3, value3);
 
             WHEN("We copy the settings") {
-                SettingsNode copy(settings);
+                SettingsNode copy(settings);    // NOLINT(performance-unnecessary-copy-initialization)
 
                 THEN("We should find back the values") {
                     REQUIRE(copy.key() == rootKey);
