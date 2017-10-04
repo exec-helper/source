@@ -14,6 +14,7 @@ using std::cout;
 using std::endl;
 using std::string;
 using std::terminate;
+using std::to_string;
 using std::vector;
 
 using boost::filesystem::exists;
@@ -59,6 +60,10 @@ namespace execHelper {
 
             ExecutionContent::ConfigCommand ExecutionContent::getConfigCommand() const noexcept {
                 return {"sed", "-i", string("'$ a\\").append(getIterationContent()).append("'"), getPath()};
+            }
+
+            ExecutionContent::ConfigCommand ExecutionContent::getFailingConfigCommand(ReturnCode returnCode) const noexcept {
+                return {"sh", "-c", string("\"exit ").append(to_string(returnCode)).append("\"")};
             }
 
             string ExecutionContent::getIterationContent() noexcept {

@@ -2,6 +2,7 @@
 
 #include <fcntl.h>
 #include <iostream>
+#include <limits>
 #include <map>
 #include <random>
 #include <string>
@@ -22,6 +23,7 @@
 using std::cout;
 using std::endl;
 using std::mt19937;
+using std::numeric_limits;
 using std::ofstream;
 using std::string;
 using std::stringstream;
@@ -37,15 +39,17 @@ using gsl::zstring;
 using execHelper::test::baseUtils::ConfigFileWriter;
 using execHelper::test::baseUtils::ExecutionContent;
 using execHelper::test::baseUtils::ExecutionHandler;
+using execHelper::test::baseUtils::ReturnCode;
 using execHelper::test::baseUtils::TmpFile;
 using execHelper::test::baseUtils::YamlWriter;
 
 namespace {
     using Command = string;
     using Commands = vector<string>;
+    using Statement = string;
+    using Statements = vector<string>;
     using CommandLineRaw = vector<zstring<>>;
     using CommandLine = vector<string>;
-    using ReturnCode = int;
 
     using ConfigFile = TmpFile;
 
@@ -91,8 +95,11 @@ namespace {
         if(status == 0) {
             return 0;
         }
-        if (WIFEXITED(status) && WEXITSTATUS(status)) {
+        if (WIFEXITED(status)) {
             return WEXITSTATUS(status);
+        }
+        if (WIFSIGNALED(status)) {
+            return WTERMSIG(status);
         }
         return status;
     }
@@ -173,24 +180,24 @@ namespace integration {
             YamlWriter yaml;
             ExecutionHandler executions;
 
-            const unsigned int NB_OF_SUBCOMMANDS = 3U;
+            const unsigned int NB_OF_STATEMENTS = 3U;
 
             for(const auto& command : commands) {
                 executions.add(command, ExecutionContent());
 
-                Commands subcommands;
-                for(unsigned int i = 0; i < NB_OF_SUBCOMMANDS; ++i) {
-                    string subcommand = command;
-                    subcommand.append("-subcommand").append(to_string(i));
-                    subcommands.emplace_back(subcommand);
+                Statements statements;
+                for(unsigned int i = 0; i < NB_OF_STATEMENTS; ++i) {
+                    string statement = command;
+                    statement.append("-subcommand").append(to_string(i));
+                    statements.emplace_back(statement);
                 }
 
                 yaml[COMMAND_KEY][command] = "Execute the command";
-                yaml[command] = subcommands;
+                yaml[command] = statements;
 
-                for(const auto& subcommand : subcommands) {
-                    yaml[subcommand] = COMMAND_LINE_COMMAND_KEY;
-                    yaml[COMMAND_LINE_COMMAND_KEY][subcommand][COMMAND_LINE_COMMAND_LINE_KEY] = executions.at(command).getConfigCommand();
+                for(const auto& statement : statements) {
+                    yaml[statement] = COMMAND_LINE_COMMAND_KEY;
+                    yaml[COMMAND_LINE_COMMAND_KEY][statement][COMMAND_LINE_COMMAND_LINE_KEY] = executions.at(command).getConfigCommand();
                 }
             }
 
@@ -207,7 +214,7 @@ namespace integration {
                     }
 
                     THEN("the associated predefined statements for " + command + " should be called the expected number of times in the right order") {
-                        REQUIRE(executions.at(command).getNumberOfExecutions() == NB_OF_SUBCOMMANDS);
+                        REQUIRE(executions.at(command).getNumberOfExecutions() == NB_OF_STATEMENTS);
                     }
 
                     THEN("no other predefined statements except for " + command + " should have been called") {
@@ -243,7 +250,7 @@ namespace integration {
             yaml[COMMAND_KEY][commandWithDuplicates] = "Execute the command";
 
             const unsigned int NB_OF_DUPLICATE_STATEMENTS = 5U;
-            const Command duplicateStatement("duplicate-statement");
+            const Statement duplicateStatement("duplicate-statement");
             executions.add(commandWithDuplicates, ExecutionContent());
             yaml[COMMAND_LINE_COMMAND_KEY][duplicateStatement][COMMAND_LINE_COMMAND_LINE_KEY] = executions.at(commandWithDuplicates).getConfigCommand();
             yaml[duplicateStatement] = COMMAND_LINE_COMMAND_KEY;
@@ -253,7 +260,7 @@ namespace integration {
 
             const unsigned int NB_OF_UNIQUE_STATEMENTS = 5U;
             for(unsigned int i = 0U; i < NB_OF_UNIQUE_STATEMENTS; ++i) {
-                Command uniqueStatement("unique-statement-" + to_string(i));
+                Statement uniqueStatement("unique-statement-" + to_string(i));
 
                 yaml[uniqueStatement] = COMMAND_LINE_COMMAND_KEY;
                 yaml[COMMAND_LINE_COMMAND_KEY][uniqueStatement][COMMAND_LINE_COMMAND_LINE_KEY] = executions.at(commandWithDuplicates).getConfigCommand();
@@ -289,41 +296,74 @@ namespace integration {
      */
     SCENARIO("Execute multiple statements: predefined order: failing statements", "[execute-multiple-statements][scenario-execute-multiple-statements-predefined-order-failing-statements]") {
         GIVEN("A valid configuration with a command consisting of multiple, predefined, valid, successful statements and a failing statement that is not the first nor the last statement") {
-            const Commands commands({"command1", "command2", "command3", "command4"});
+            const Command command("command1");
+            const Commands commands({"command1", command, "command3", "command4"});
+
             YamlWriter yaml;
             ExecutionHandler executions;
 
-            const unsigned int NB_OF_SUBCOMMANDS = 3U;
+            for(const auto& aCommand : commands) {
+                yaml[COMMAND_KEY][aCommand] = "Execute the command";
+                executions.add(aCommand, ExecutionContent());
+            }
 
-            for(const auto& command : commands) {
-                executions.add(command, ExecutionContent());
+            const unsigned int NB_OF_STATEMENTS = 3U;
+            const auto expectedReturnCode = EXIT_FAILURE;
+            ensures(expectedReturnCode != SUCCESS);   // Test invariant check: the expected return code should not be equal to the success return code
+            auto failIndex = numeric_limits<unsigned int>::max();
 
-                Commands subcommands;
-                for(unsigned int i = 0; i < NB_OF_SUBCOMMANDS; ++i) {
-                    string subcommand = command;
-                    subcommand.append("-subcommand").append(to_string(i));
-                    subcommands.emplace_back(subcommand);
-                }
+            Statements statements;
+            for(unsigned int i = 0; i < NB_OF_STATEMENTS; ++i) {
+                string statement = command;
+                statement.append("-statement").append(to_string(i));
+                statements.emplace_back(statement);
+            }
+            yaml[command] = statements;
 
-                REQUIRE(subcommands.size() >= 3);   // In order to have a failing command that is not the first nor the last statement, a statement size of at least 3 statements is required
+            REQUIRE(statements.size() >= 3);   // In order to have a failing command that is not the first nor the last statement, a statement size of at least 3 statements is required
 
-                // Define a failing command in a random way
-                std::mt19937 gen(0);
-                std::uniform_int_distribution<> dis(1, subcommands.size() - 2U);    // Find a random index that will fail, that is not the first nor the last one
+            // Define a failing command in a random way
+            mt19937 gen(0);
+            uniform_int_distribution<> dis(1, statements.size() - 2U);    // Find a random index that will fail, that is not the first nor the last one
 
-                yaml[COMMAND_KEY][command] = "Execute the command";
-                yaml[command] = subcommands;
-
-                for(const auto& subcommand : subcommands) {
-                    yaml[subcommand] = COMMAND_LINE_COMMAND_KEY;
-                    yaml[COMMAND_LINE_COMMAND_KEY][subcommand][COMMAND_LINE_COMMAND_LINE_KEY] = executions.at(command).getConfigCommand();
+            failIndex = dis(gen);
+            const Command failingCommand = statements[failIndex];
+            for(const auto& statement : statements) {
+                yaml[statement] = COMMAND_LINE_COMMAND_KEY;
+                if(failingCommand == statement) {
+                    yaml[COMMAND_LINE_COMMAND_KEY][statement][COMMAND_LINE_COMMAND_LINE_KEY] = executions.at(command).getFailingConfigCommand(expectedReturnCode);
+                } else {
+                    yaml[COMMAND_LINE_COMMAND_KEY][statement][COMMAND_LINE_COMMAND_LINE_KEY] = executions.at(command).getConfigCommand();
                 }
             }
 
             ConfigFileWriter config;
             config.write(yaml);
 
+            WHEN("we call this command") {
+                auto iterator = executions.startIteration();
+                const ReturnCode returnCode = execute({EXEC_HELPER_BINARY, command, "--settings-file", config.getFilename()}, config.getDirectory());
 
+                THEN("the call should fail") {
+                    REQUIRE(returnCode != SUCCESS);
+                }
+
+                THEN("the call should exit with the same return code as the failed statement") {
+                    REQUIRE(returnCode == expectedReturnCode);
+                }
+
+                THEN("the statements configured before the failed statement and the failed statements should have been executed") {
+                    REQUIRE(executions.at(command).getNumberOfExecutions() == failIndex);
+                }
+
+                THEN("no other predefined statements should have been called") {
+                    for(const auto& otherCommand : commands) {
+                        if(command != otherCommand) {
+                            REQUIRE(executions.at(otherCommand).getNumberOfExecutions() == 0U);
+                        }
+                    }
+                }
+            }
         }
     }
 } // namespace integration

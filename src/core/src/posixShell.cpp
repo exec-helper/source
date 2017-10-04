@@ -93,11 +93,17 @@ namespace execHelper { namespace core {
             LOG(error) << "Error executing command";
             return std::numeric_limits<PosixShell::ShellReturnCode>::max();
         }
-        if(status == 0) {
-            return POSIX_SUCCESS;
+        if (WIFEXITED(status)) {
+            if(!WEXITSTATUS(status)) {
+                return POSIX_SUCCESS;
+            } else {
+                LOG(debug) << "Process terminated with return code '" << WEXITSTATUS(status) << "'";
+                return WEXITSTATUS(status);
+            }
         }
-        if (WIFEXITED(status) && WEXITSTATUS(status)) {
-            return WEXITSTATUS(status);
+        if (WIFSIGNALED(status)) {
+            LOG(warning) << "Child terminated because of uncaught signal '" << WTERMSIG(status) << "'";
+            return WTERMSIG(status);
         }
         LOG(error) << "Child exited with unexpected child status: " << status;
         return status;

@@ -8,6 +8,8 @@
 namespace execHelper {
     namespace test {
         namespace baseUtils {
+            using ReturnCode = int;
+
             class ExecutionContent
             {
                 public:
@@ -27,6 +29,7 @@ namespace execHelper {
                     void init() noexcept;
 
                     ConfigCommand getConfigCommand() const noexcept;
+                    ConfigCommand getFailingConfigCommand(ReturnCode returnCode) const noexcept;
                     static std::string getIterationContent() noexcept;
 
                     std::string getPath() const noexcept;
