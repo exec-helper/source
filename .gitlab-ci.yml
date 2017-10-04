@@ -300,6 +300,7 @@ coverage:
 
 coverity:
     stage: analyze
+    image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-analyze
     variables:
         COVERITY_ARCHIVE_NAME: exec-helper_${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}.xz
     dependencies:
@@ -315,6 +316,7 @@ coverity:
         - exec-helper distclean analyze --analyze coverity --compiler g++ --mode release --coverity-archive-name $COVERITY_ARCHIVE_NAME
         - curl --form token=${COVERITY_SCAN_TOKEN} --form email=barrie.verhagen@gmail.com --form file=@${COVERITY_ARCHIVE_NAME} --form version="${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}" --form description="Analysis scan for ${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}" https://scan.coverity.com/builds?project=bverhagen%2Fexec-helper
     only:
+        - master
         - dev
 
 examples:
