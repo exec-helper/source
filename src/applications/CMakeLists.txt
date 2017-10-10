@@ -16,14 +16,19 @@ add_executable(${EXE_NAME} ${SRCS})
 target_include_directories(${EXE_NAME} PRIVATE ${DEPENDENCIES})
 target_link_libraries(${EXE_NAME} PRIVATE ${DEPENDENCIES})
 
+set(SHORT_EXE_NAME eh)
+add_custom_command(TARGET ${EXE_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E create_symlink ${EXE_NAME} ${SHORT_EXE_NAME}
+        MAIN_DEPENDENCY ${EXE_NAME}
+        COMMENT "Linking ${SHORT_EXE_NAME} -> ${EXE_NAME}"
+    )
+
 install(TARGETS ${EXE_NAME}
         DESTINATION ${BIN_DIRECTORY}
         COMPONENT runtime
        )
 
-# Create eh symlink if supported by the OS
-set(SHORT_EXE_NAME eh)
-install(CODE "MESSAGE(\"-- Linking ${CMAKE_INSTALL_PREFIX}/${BIN_DIRECTORY}/${SHORT_EXE_NAME} -> ${EXE_NAME}\")
-              execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink ${EXE_NAME} ${CMAKE_INSTALL_PREFIX}/${BIN_DIRECTORY}/${SHORT_EXE_NAME})"
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${SHORT_EXE_NAME}
+        DESTINATION ${BIN_DIRECTORY}
         COMPONENT runtime
        )
