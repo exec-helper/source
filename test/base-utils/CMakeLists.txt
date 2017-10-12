@@ -7,12 +7,18 @@ set(SRCS
         src/configFileWriter.cpp
         src/generateRandom.cpp
         src/executionHandler.cpp
+        src/execution.cpp
+        src/configBuilder.cpp
+        src/testCommand.cpp
+        src/indirectStatement.cpp
    )
 
 set(DEPENDENCIES
         gsl
         boost-filesystem
+        boost-system
         yaml-3rd
+        pthread
     )
 
 add_library(${LIBRARY_NAME} ${SRCS})
@@ -22,3 +28,5 @@ target_link_libraries(${LIBRARY_NAME} PUBLIC ${DEPENDENCIES})
 
 add_library(${MODULE_NAME} ALIAS ${LIBRARY_NAME})
 install(TARGETS ${LIBRARY_NAME} DESTINATION ${LIB_DIRECTORY})
+
+add_subdirectory(application)

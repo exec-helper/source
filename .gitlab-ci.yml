@@ -32,6 +32,7 @@ variables:
         - build:clang
     script:
         - *install_exec_helper
+        - export PATH=$(pwd)/build/g++/release/install/bin:$PATH
         - echo "using run target '$RUN_TARGET'"
         - echo "using modules '$MODULES'"
         - exec-helper run-test --run-target $RUN_TARGET --module $MODULES --compiler g++ clang++ --mode release
@@ -47,6 +48,7 @@ variables:
         - build:gcc:limited-optimization
     script:
         - *install_exec_helper
+        - export PATH=$(pwd)/build/g++/release/install/bin:$PATH
         - exec-helper analyze --analyze valgrind --run-target $RUN_TARGET --compiler g++ --mode release --module $MODULES
 
 .clang_tidy: &clang_tidy
@@ -89,6 +91,7 @@ variables:
         - export CXXFLAGS="-g -fsanitize=undefined -fno-omit-frame-pointer -fno-sanitize-recover=undefined -fsanitize-blacklist=\"$(pwd)/suppressions/ubsan.blacklist\""
         - export LDFLAGS="-g -fsanitize=undefined -fno-omit-frame-pointer -fno-sanitize-recover=undefined -fsanitize-blacklist=\"$(pwd)/suppressions/ubsan.blacklist\""
         - export UBSAN_OPTIONS="print_stacktrace=1"
+        - export PATH=$(pwd)/build/clang++/undefined-behaviour/install/bin:$PATH
         - exec-helper init-build build run-test --compiler clang++ --mode undefined-behaviour --run-target ${RUN_TARGET}
 
 build-image:build:

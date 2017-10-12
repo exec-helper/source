@@ -34,19 +34,6 @@ namespace execHelper {
 
             vector<char> generateRandomChar(size_t length) noexcept {
                 vector<char> result;
-
-                auto strengthReductionLevel = 4U;
-                using StrengthReducedType = uint8_t;
-                assert(strengthReductionLevel * NB_OF_VALID_RANDOM_CHARS < numeric_limits<StrengthReducedType>::max());  // Make sure the resulting value fits the strength reduced type
-
-                while(length >= strengthReductionLevel) {
-                    auto randomValue = generateRandomInt<StrengthReducedType>(0, strengthReductionLevel * NB_OF_VALID_RANDOM_CHARS - 1U);
-                    result.emplace_back(convertToAlphaNumeric(randomValue));
-                    result.emplace_back(convertToAlphaNumeric(randomValue - 1 * NB_OF_VALID_RANDOM_CHARS));
-                    result.emplace_back(convertToAlphaNumeric(randomValue - 2 * NB_OF_VALID_RANDOM_CHARS));
-                    result.emplace_back(convertToAlphaNumeric(randomValue - 3 * NB_OF_VALID_RANDOM_CHARS));
-                    length -= strengthReductionLevel;
-                }
                 for(size_t i = 0U; i < length; ++i) {
                     result.emplace_back(generateRandomChar()); 
                 }

@@ -57,7 +57,7 @@ namespace execHelper { namespace core {
 
         // Change to the correct working directory
         error_code error;
-        LOG(info) << "Changing to directory " << task.getWorkingDirectory() << "...";
+        LOG(trace) << "Changing to directory " << task.getWorkingDirectory() << "...";
         current_path(task.getWorkingDirectory(), error);
         if(error != success) {
            LOG(error) << "Could not change to directory " << task.getWorkingDirectory() << " (" << error << ")";
@@ -66,10 +66,10 @@ namespace execHelper { namespace core {
 
         TaskCollection taskCollection = shellExpand(task);
         Envp envp(task.getEnvironment());
-        LOG(debug) << R"(Environment: ")" << envp << R"(")";
+        LOG(trace) << R"(Environment: ")" << envp << R"(")";
 
         Argv argv(taskCollection);
-        LOG(debug) << R"(Executing ")" << argv << R"(")";
+        LOG(trace) << R"(Executing ")" << argv << R"(")";
 
         // A full copy of m_env is not required, since it is used in a separate process
         if ((returnCode = execvpe(argv[0], argv.getArgv(), envp.getEnvp())) == -1) {
@@ -96,10 +96,9 @@ namespace execHelper { namespace core {
         if (WIFEXITED(status)) {
             if(!WEXITSTATUS(status)) {
                 return POSIX_SUCCESS;
-            } else {
-                LOG(debug) << "Process terminated with return code '" << WEXITSTATUS(status) << "'";
-                return WEXITSTATUS(status);
             }
+            LOG(debug) << "Process terminated with return code '" << WEXITSTATUS(status) << "'";
+            return WEXITSTATUS(status);
         }
         if (WIFSIGNALED(status)) {
             LOG(warning) << "Child terminated because of uncaught signal '" << WTERMSIG(status) << "'";

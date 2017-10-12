@@ -4,12 +4,11 @@
 #include <boost/filesystem/operations.hpp>
 #include <catch.hpp>
 
+#include "base-utils/tmpFile.h"
 #include "config/path.h"
 #include "core/posixShell.h"
 #include "core/task.h"
 #include "log/log.h"
-
-#include "base-utils/tmpFile.h"
 #include "utils/utils.h"
 
 using std::string;

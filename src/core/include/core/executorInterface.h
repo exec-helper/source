@@ -13,23 +13,23 @@ namespace execHelper { namespace core {
      */
     class ExecutorInterface {
         public:
-            /*! @copydoc core::Argv::Argv(const Argv&)
+            /*! @copydoc config::Argv::Argv(const Argv&)
              * \note Deleted
              */
             ExecutorInterface(const ExecutorInterface& other) = delete;
 
-            /*! @copydoc core::Argv::Argv(Argv&&)
+            /*! @copydoc config::Argv::Argv(Argv&&)
              * \note Deleted
              */
             ExecutorInterface(ExecutorInterface&& other) = delete;
             virtual ~ExecutorInterface() = default;
 
-            /*! @copydoc core::Argv::operator=(const Argv&)
+            /*! @copydoc config::Argv::operator=(const Argv&)
              * \note Deleted
              */
             ExecutorInterface& operator=(const ExecutorInterface& other) = delete;
 
-            /*! @copydoc core::Argv::operator=(Argv&&)
+            /*! @copydoc config::Argv::operator=(Argv&&)
              * \note Deleted
              */
             ExecutorInterface& operator=(ExecutorInterface&& other) = delete;

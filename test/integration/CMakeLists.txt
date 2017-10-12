@@ -1,6 +1,7 @@
 set(EXE_NAME ${PROJECT_NAME}-integration-test)
 
-set(SRCS    src/executeMultipleStatements.cpp
+set(SRCS
+            src/executeMultipleStatements.cpp
    )
 
 set(DEPENDENCIES
@@ -12,7 +13,7 @@ set(DEPENDENCIES
    )
 
 add_executable(${EXE_NAME} ${SRCS})
-target_include_directories(${EXE_NAME} PRIVATE ${DEPENDENCIES})
+target_include_directories(${EXE_NAME} PRIVATE include/integration ${DEPENDENCIES})
 target_link_libraries(${EXE_NAME} PRIVATE ${DEPENDENCIES})
 add_test(${EXE_NAME} ${EXE_NAME})
 
