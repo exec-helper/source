@@ -17,7 +17,7 @@ Arch linux users can use the [exec-helper-git](https://aur.archlinux.org/package
 Checkout the [exec-helper-package](https://github.com/bverhagen/exec-helper-package) project for building exec-helper as a package, if your system is supported.
 
 ### Other distributions
-Checkout the [Building from source](building-from-source) section.
+Checkout the [Building from source](#building-from-source) section.
 
 ## Building from source
 ### Requirements
