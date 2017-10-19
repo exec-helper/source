@@ -7,16 +7,25 @@ Or How To Get Your Coffee In Peace.
 [![Coverity Scan Build Status](https://scan.coverity.com/projects/exec-helper/badge.svg)](https://scan.coverity.com/projects/exec-helper)
 
 ## Why
-Exec-helper is a meta-wrapper for executing repeatable tasks.
+Exec-helper is a meta-wrapper for executing tasks on the command line.
 
-## Building a package
+## Installing from package
+### Arch Linux based distributions
+Arch linux users can use the [exec-helper-git](https://aur.archlinux.org/packages/exec-helper-git) (AUR) package or checkout the [exec-helper-package](https://github.com/bverhagen/exec-helper-package) project for building the package from source.
+
+### Debian based distributions
 Checkout the [exec-helper-package](https://github.com/bverhagen/exec-helper-package) project for building exec-helper as a package, if your system is supported.
+
+### Other distributions
+Checkout the [Building from source](building-from-source) section.
 
 ## Building from source
 ### Requirements
 #### Host build dependencies
 - Doxygen for building the man-pages and/or HTML documentation (optional)
 - gitchangelog for building the changelog (optional)
+- cmake
+- make for the quick install
 
 #### Target build dependencies
 - A POSIX compliant operating system
@@ -34,9 +43,13 @@ $ make
 # make install
 ```
 
-Note: uses the CC and CXX environment variables for determining the compiler or the system's default compiler otherwise. Check the 'less quick install'-section for using other compilers.
+Use
+```sh
+$ make help
+```
+for an overview of the available quick installation targets and for an overview of the (very limited) available configuration options. More configuration options are available by following the 'advanced install' section.
 
-### Less quick, advanced install
+### Advanced install
 Check the [documentation](http://bverhagen.gitlab.io/exec-helper/docs/html/index.html).
 
 ### Cross compilation
@@ -49,7 +62,7 @@ See [documentation](http://bverhagen.gitlab.io/exec-helper/docs/html/index.html)
 Check the [Documentation](http://bverhagen.gitlab.io/exec-helper/docs/html/index.html) for more information about configuring exec-helper.
 
 ## Project analysis
-The source code of this project is analyzed by multiple tools in an attempt to minimize the amount of released builds. Current releases should have passed of the following analysis from the following tools:
+The source code of this project is continuously analyzed by multiple tools in an attempt to catch and fix issues and bugs as quickly as possible. Released versions should have passed the analysis from the following tools:
 - [valgrind](http://valgrind.org) (memcheck)
 - [cppcheck](http://cppcheck.sourceforge.net)
 - [clang-tidy](http://clang.llvm.org/extra/clang-tidy)
@@ -58,4 +71,4 @@ The source code of this project is analyzed by multiple tools in an attempt to m
 - [pmd](https://pmd.github.io) (cpd)
 - [coverity](https://scan.coverity.com/projects/exec-helper)
 
-Check the _.exec-helper_ file for detailed information about how these analysis methods are configured and used. The analysis tools can be executed locally using exec-helper.
+Check the _.exec-helper_ file for detailed information about how these analysis methods are configured and used. The analysis tools can be executed locally using exec-helper with this project.
