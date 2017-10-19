@@ -7,13 +7,13 @@
 #   make PREFIX=<installation root directory>
 
 # Override these on the command line if required
-PREFIX:=/usr ## Sets the installation prefix. Default: /usr.
-JOBS:=$(shell grep -c ^processor /proc/cpuinfo) ## Sets the number of jobs. Default: number of processors in /proc/cpuinfo.
-BUILD_DIR:=build/native/release ## Sets the build folder. Default: build/native/release.
-CHANGELOG_CONFIG := .gitchangelog.rc ## Sets the changelog config to use. Default: .gitchangelog.rc
-CHANGELOG_OUTPUT := &1	## Sets the changelog output redirection for print-changelog. Default: stdout
-CMAKE_BUILD_TYPE := Release	## Sets the cmake build type. Default: Release
-USE_SYSTEM_GSL := ON ## Sets whether to use the system GSL package. Default: ON
+PREFIX?=/usr## Sets the installation prefix. Default: /usr.
+JOBS?= $(shell grep -c ^processor /proc/cpuinfo)## Sets the number of jobs. Default: number of processors in /proc/cpuinfo.
+BUILD_DIR?=build/native/release## Sets the build folder. Default: build/native/release.
+CHANGELOG_CONFIG?= .gitchangelog.rc## Sets the changelog config to use. Default: .gitchangelog.rc
+CHANGELOG_OUTPUT?= &1## Sets the changelog output redirection for print-changelog. Default: stdout
+CMAKE_BUILD_TYPE?=Release	## Sets the cmake build type. Default: Release
+USE_SYSTEM_GSL?= ON## Sets whether to use the system GSL package. Default: ON
 
 all: binary docs changelog
 
@@ -61,9 +61,9 @@ distclean: clean	## Clean everything
 
 help:           ## Show this help.
 	@echo 'Command line overrides:'
-	@grep "##" $(MAKEFILE_LIST) | grep -P "^[^\t]" | grep ":=" | sed -e 's/^\([^:]*\):=.*##\(.*\)$$/  \1:\2/g'
+	@grep "##" $(MAKEFILE_LIST) | grep -P "^[^\t]" | grep "?=" | sed -e 's/^\([^?]*\)?=.*##\(.*\)$$/  \1:\2/g'
 	@echo 'Targets:'
-	@grep "##" $(MAKEFILE_LIST) | grep -P "^[^\t]" | grep -v ":=" | sed -e 's/^\([^:]*\):.*##\(.*\)$$/  \1:\2/g'
+	@grep "##" $(MAKEFILE_LIST) | grep -P "^[^\t]" | grep -v "?=" | grep -v ":=" | sed -e 's/^\([^:]*\):.*##\(.*\)$$/  \1:\2/g'
 
 list:			## List all targets
 	@grep "##" $(MAKEFILE_LIST) | grep -P "^[^\t]" | sed -e 's/^\([^:]*\):.*/\1/g'
