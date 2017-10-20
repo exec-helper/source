@@ -6,7 +6,7 @@ if(${PKG_CONFIG_FOUND})
 endif()
 
 # Attempt to find it if not configured in pkgconfig
-if(NOT ${${MODULE_NAME}_FOUND})
+if(NOT ${MODULE_NAME}_FOUND)
     MESSAGE(STATUS "Looking manually")
     set(${MODULE_NAME}_LIBRARIES yaml-cpp)
     find_path(${MODULE_NAME}_INCLUDE_DIRS NAMES yaml.h PATH_SUFFIXES yaml-cpp)
