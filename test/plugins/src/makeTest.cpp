@@ -60,7 +60,7 @@ namespace execHelper { namespace plugins { namespace test {
             Task task;
 
             Task expectedTask({"make"});
-            TaskCollection jobs({"--jobs", "8"});
+            TaskCollection jobs({"--jobs", "4"});
             TaskCollection buildDir;
             TaskCollection verbosity;
             TaskCollection commandLine;
@@ -81,7 +81,7 @@ namespace execHelper { namespace plugins { namespace test {
             COMBINATIONS("Switch on multi-threading") {
                 rootSettings.add(copyAndAppend(baseSettingsKeys, "single-threaded"), "no");     // Last one counts
                 rootSettings.add(copyAndAppend(otherBaseSettingsKeys, "single-threaded"), "yes");
-                jobs = TaskCollection({"--jobs", "8"});
+                jobs = TaskCollection({"--jobs", "4"});
             }
 
             COMBINATIONS("Switch off the multi-threading option") {

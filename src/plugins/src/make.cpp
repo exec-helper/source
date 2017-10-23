@@ -26,7 +26,7 @@ namespace execHelper { namespace plugins {
         task.append(MAKE_COMMAND);
 
         if(getMultiThreaded(command, rootSettings, options)) {
-            task.append(TaskCollection({"--jobs", "8"}));
+            task.append(TaskCollection({"--jobs", "4"}));
         }
         string buildDir = ConfigValue<string>::get(getBuildDirKey(), "", command, rootSettings);
         if(!buildDir.empty()) {
