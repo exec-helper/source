@@ -32,7 +32,6 @@ namespace execHelper {
         config::EnvironmentCollection getEnvironment(const config::VariablesMap& variables) noexcept;
 
         PatternPermutator makePatternPermutator(const config::Patterns& patterns) noexcept;
-        void replacePatternCombinations(core::TaskCollection& commandArguments, const config::PatternCombinations& patternCombinations) noexcept;
         core::Task replacePatternCombinations(const core::Task& task, const config::PatternCombinations& patternCombinations) noexcept;
         std::string toString(const config::PatternKeys& values) noexcept;
     } // namespace plugins

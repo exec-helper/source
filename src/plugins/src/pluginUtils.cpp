@@ -87,14 +87,6 @@ namespace execHelper {
             return replacedTask;
         }
 
-        void replacePatternCombinations(TaskCollection& commandArguments, const PatternCombinations& patternCombinations) noexcept {
-            for(auto& argument : commandArguments) {
-                for(const auto& pattern : patternCombinations) {
-                    argument = replacePatterns(argument, pattern.first, pattern.second);
-                }
-            }
-        }
-
         EnvironmentCollection getEnvironment(const VariablesMap& variables) noexcept {
             EnvironmentCollection result;
             SettingsKeys key({ENVIRONMENT_KEY});
