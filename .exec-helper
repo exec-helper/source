@@ -47,6 +47,7 @@ patterns:
             - clang-tidy
             - coverity
             - format
+            - asan
         short-option: a
         long-option: analyze
     DOCSTYPE:
@@ -88,6 +89,7 @@ commands:
     coverage: Run the coverage analysis tools using a specific setup (for convenience)
     memory-check: Run the memory check analysis tool for a specific setup (for convenience)
     undefined-behaviour: Check for undefined behaviour using UBSan
+    asan: Check for memory usage errors using AddressSanitizer
     docs: Build + install the documentation
     changelog: Build the changelog
     create-toolchain-file: Create the associated toolchain file
@@ -155,6 +157,9 @@ selector:
         patterns: RUNTARGET
 
 undefined-behaviour:
+    - command-line-command
+
+asan:
     - command-line-command
 
 changelog:
@@ -275,6 +280,14 @@ command-line-command:
         command-line: [ exec-helper, init-build, build, run-test, --compiler, clang++, --mode, undefined-behaviour, --run-target, unittest]
     memory-check:
         command-line: [ exec-helper, analyze, --analyze, valgrind, --run-target, unittest, --compiler, g++, --mode, debug]
+    asan:
+        patterns:
+            - MODULE
+        environment:
+            CXXFLAGS: -fsanitize=address,leak -fno-omit-frame-pointer
+            LDFLAGS: -fsanitize=address,leak -fno-omit-frame-pointer
+            ASAN_OPTIONS: check_initialization_order=1 print_stacktrace=1
+        command-line: [ exec-helper, init-build, build, run-test, --compiler, clang++, --mode, asan, --run-target, unittest, --module, "{MODULE}"]
     docs:
         patterns:
             - COMPILER

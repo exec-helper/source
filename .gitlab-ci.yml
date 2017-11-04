@@ -106,6 +106,18 @@ variables:
         - *install_exec_helper
         - exec-helper analyze -a format
 
+.asan: &asan_check
+    stage: analyze
+    image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-analyze
+    variables:
+        MODULES: $ALL_MODULES
+    dependencies:
+        - build:native
+    script:
+        - *build_tools
+        - *install_exec_helper
+        - exec-helper analyze --analyze asan --module ${ALL_MODULES}
+
 build-image:build:
     stage: build-image
     image: docker:latest
@@ -284,6 +296,9 @@ clang-static-analyzer:
 
 undefined-behaviour:
     <<: *undefined_behaviour
+
+address-sanitizer:
+    <<: *asan_check
 
 code-duplication-pmd-cpd:
     stage: analyze
