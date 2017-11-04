@@ -97,11 +97,13 @@ variables:
 .code_format: &code_format
     stage: analyze
     image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-analyze
-    dependencies: []
+    dependencies:
+        - build:native
     variables:
         MODULES: $ALL_MODULES
         SOURCE_TYPE: $ALL_SOURCE_TYPES
     script:
+        - *install_exec_helper
         - exec-helper analyze -a format
 
 build-image:build:

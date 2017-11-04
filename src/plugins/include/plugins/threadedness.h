@@ -8,13 +8,11 @@
 #include "config/commandLineOptions.h"
 
 namespace execHelper {
-    namespace plugins {
-        using Jobs = config::Jobs_t;
+namespace plugins {
+using Jobs = config::Jobs_t;
 
-        const gsl::czstring<> JOBS_KEY = "jobs";
-    } // plugins
-} // execHelper
+const gsl::czstring<> JOBS_KEY = "jobs";
+} // namespace plugins
+} // namespace execHelper
 
-
-
-#endif  /* THREADEDNESS_INCLUDE */
+#endif /* THREADEDNESS_INCLUDE */

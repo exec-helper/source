@@ -296,8 +296,7 @@ command-line-command:
             - SOURCE_TYPE
             - MODULE
         command-line:
-            - rewrite-headers: [ clang-format, -i, "{SOURCE_TYPE}/{MODULE}/**/**/*.h"]
-            - rewrite-sources: [ clang-format, -i, "{SOURCE_TYPE}/{MODULE}/**/*.cpp"]
+            - rewrite-files: [ clang-format, -i, '$(find "{SOURCE_TYPE}/{MODULE}" -name "*.cpp" -o -name "*.h")']
             - check-rewritten: [ git, diff-index, --quiet, HEAD, --]
     changelog:
         patterns:

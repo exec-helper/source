@@ -21,25 +21,28 @@ using execHelper::config::VariablesMap;
 using execHelper::core::Task;
 
 namespace {
-   const czstring<> PLUGIN_NAME = "commands";
+const czstring<> PLUGIN_NAME = "commands";
 } // namespace
 
-namespace execHelper { namespace plugins {
-    std::string CommandPlugin::getPluginName() const noexcept {
-        return PLUGIN_NAME;
-    }
+namespace execHelper {
+namespace plugins {
+std::string CommandPlugin::getPluginName() const noexcept {
+    return PLUGIN_NAME;
+}
 
-    VariablesMap CommandPlugin::getVariablesMap(const FleetingOptionsInterface& fleetingOptions) const noexcept {
-        VariablesMap defaults(PLUGIN_NAME);
-        defaults.add(PLUGIN_NAME, fleetingOptions.getCommands());
-        return defaults;
-    }
+VariablesMap CommandPlugin::getVariablesMap(
+    const FleetingOptionsInterface& fleetingOptions) const noexcept {
+    VariablesMap defaults(PLUGIN_NAME);
+    defaults.add(PLUGIN_NAME, fleetingOptions.getCommands());
+    return defaults;
+}
 
-    bool CommandPlugin::apply(Task task, const VariablesMap& variables, const Patterns& patterns) const noexcept {
-        ensures(variables.get<CommandCollection>(PLUGIN_NAME) != boost::none);
-        auto commands = variables.get<CommandCollection>(PLUGIN_NAME).get();
-        ExecutePlugin executePlugin(commands);
-        return executePlugin.apply(task, variables, patterns);
-    }
+bool CommandPlugin::apply(Task task, const VariablesMap& variables,
+                          const Patterns& patterns) const noexcept {
+    ensures(variables.get<CommandCollection>(PLUGIN_NAME) != boost::none);
+    auto commands = variables.get<CommandCollection>(PLUGIN_NAME).get();
+    ExecutePlugin executePlugin(commands);
+    return executePlugin.apply(task, variables, patterns);
+}
 } // namespace plugins
 } // namespace execHelper

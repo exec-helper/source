@@ -9,96 +9,64 @@
 using std::thread;
 
 using boost::lexical_cast;
-using boost::bad_lexical_cast;
 
 using execHelper::log::LogLevel;
 
-namespace {
-    inline uint32_t getAutoConcurrency() noexcept {
-        uint32_t concurrency = thread::hardware_concurrency();
-        if(concurrency == 0U) {
-            concurrency = 1U;
-        }
-        return concurrency;
-    } 
-} // namespace 
-
 namespace execHelper {
-    namespace config {
-        FleetingOptions::FleetingOptions(const VariablesMap& optionsMap) noexcept :
-            m_help(optionsMap.get<HelpOption_t>(HELP_KEY).get()),
-            m_verbose(optionsMap.get<VerboseOption_t>(VERBOSE_KEY).get()),
-            m_dryRun(optionsMap.get<DryRunOption_t>(DRY_RUN_KEY).get()),
-            m_jobs(1U),
-            m_logLevel(optionsMap.get<LogLevelOption_t>(LOG_LEVEL_KEY).get()),
-            m_commands(optionsMap.get<CommandCollection>(COMMAND_KEY).get())
-        {
-            auto jobs = optionsMap.get<JobsOption_t>(JOBS_KEY).get();
-            if(jobs == "auto") {
-                m_jobs = getAutoConcurrency();
-            } else {
-                try {
-                    m_jobs = lexical_cast<Jobs_t>(jobs);
-                } catch(const bad_lexical_cast& e) {
-                    LOG(warning) << "Failed reading the number of jobs with error: '" << e.what() << "'. Falling back to auto";
-                    m_jobs = getAutoConcurrency();
-                }
-            }
-        }
+namespace config {
+FleetingOptions::FleetingOptions(const VariablesMap& optionsMap) noexcept
+    : m_help(optionsMap.get<HelpOption_t>(HELP_KEY).get()),
+      m_verbose(optionsMap.get<VerboseOption_t>(VERBOSE_KEY).get()),
+      m_dryRun(optionsMap.get<DryRunOption_t>(DRY_RUN_KEY).get()),
+      m_jobs(1U),
+      m_logLevel(optionsMap.get<LogLevelOption_t>(LOG_LEVEL_KEY).get()),
+      m_commands(optionsMap.get<CommandCollection>(COMMAND_KEY).get()) {
+    auto jobs = optionsMap.get<JobsOption_t>(JOBS_KEY).get();
+    if(jobs == "auto") {
+        m_jobs = thread::hardware_concurrency();
+    } else {
+        m_jobs = lexical_cast<Jobs_t>(jobs);
+    }
+}
 
-        bool FleetingOptions::operator==(const FleetingOptions& other) {
-            return
-                m_help == other.m_help &&
-                m_verbose == other.m_verbose &&
-                m_dryRun == other.m_dryRun &&
-                m_jobs == other.m_jobs &&
-                m_logLevel == other.m_logLevel &&
-                m_commands == other.m_commands;
-        }
+bool FleetingOptions::operator==(const FleetingOptions& other) {
+    return m_help == other.m_help && m_verbose == other.m_verbose &&
+           m_dryRun == other.m_dryRun && m_jobs == other.m_jobs &&
+           m_logLevel == other.m_logLevel && m_commands == other.m_commands;
+}
 
-        bool FleetingOptions::operator!=(const FleetingOptions& other) {
-            return !(*this == other);
-        }
+bool FleetingOptions::operator!=(const FleetingOptions& other) {
+    return !(*this == other);
+}
 
-        HelpOption_t FleetingOptions::getHelp() const noexcept {
-            return m_help;
-        }
+HelpOption_t FleetingOptions::getHelp() const noexcept { return m_help; }
 
-        VerboseOption_t FleetingOptions::getVerbosity() const noexcept {
-            return m_verbose;
-        }
+VerboseOption_t FleetingOptions::getVerbosity() const noexcept {
+    return m_verbose;
+}
 
-        DryRunOption_t FleetingOptions::getDryRun() const noexcept {
-            return m_dryRun;
-        }
+DryRunOption_t FleetingOptions::getDryRun() const noexcept { return m_dryRun; }
 
-        Jobs_t FleetingOptions::getJobs() const noexcept {
-            return m_jobs;
-        }
+Jobs_t FleetingOptions::getJobs() const noexcept { return m_jobs; }
 
-        const CommandCollection& FleetingOptions::getCommands() const noexcept {
-            return m_commands;
-        }
+const CommandCollection& FleetingOptions::getCommands() const noexcept {
+    return m_commands;
+}
 
-        LogLevel FleetingOptions::getLogLevel() const noexcept {
-            try {
-                return log::toLogLevel(m_logLevel);
-            } catch(const log::InvalidLogLevel& e) {
-                LOG(warning) << "Invalid log level: '" << m_logLevel << "'. Continuing with the log level set to 'none'";
-            }
-            return log::none;
-        }
+LogLevel FleetingOptions::getLogLevel() const noexcept {
+    return log::toLogLevel(m_logLevel);
+}
 
-        VariablesMap FleetingOptions::getDefault() noexcept {
-           VariablesMap defaults("exec-helper"); 
-           defaults.add(HELP_KEY, "no");
-           defaults.add(VERBOSE_KEY, "no");
-           defaults.add(DRY_RUN_KEY, "no");
-           defaults.add(JOBS_KEY, "auto");
-           defaults.add(SETTINGS_FILE_KEY);
-           defaults.add(LOG_LEVEL_KEY, "none");
-           defaults.add(COMMAND_KEY);
-           return defaults;
-        }
-    } // namespace config
+VariablesMap FleetingOptions::getDefault() noexcept {
+    VariablesMap defaults("exec-helper");
+    defaults.add(HELP_KEY, "no");
+    defaults.add(VERBOSE_KEY, "no");
+    defaults.add(DRY_RUN_KEY, "no");
+    defaults.add(JOBS_KEY, "auto");
+    defaults.add(SETTINGS_FILE_KEY);
+    defaults.add(LOG_LEVEL_KEY, "none");
+    defaults.add(COMMAND_KEY);
+    return defaults;
+}
+} // namespace config
 } // namespace execHelper

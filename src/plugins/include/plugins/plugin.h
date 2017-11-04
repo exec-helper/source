@@ -9,90 +9,94 @@
 #include "config/variablesMap.h"
 
 namespace execHelper {
-    namespace config {
-        class FleetingOptionsInterface;
-    }
-    namespace core {
-        class Task;
-    } // namespace core
+namespace config {
+class FleetingOptionsInterface;
+}
+namespace core {
+class Task;
+} // namespace core
 } // namespace execHelper
 
 namespace execHelper {
-    namespace plugins {
-        /**
-         * \brief Interface declaration to which plugins should comply
-         */
-        class Plugin {
-            public: 
-                /*! @copydoc config::Argv::Argv(const Argv&)
-                 */
-                Plugin(const Plugin& other) = delete;
+namespace plugins {
+/**
+ * \brief Interface declaration to which plugins should comply
+ */
+class Plugin {
+  public:
+    /*! @copydoc config::Argv::Argv(const Argv&)
+     */
+    Plugin(const Plugin& other) = delete;
 
-                /*! @copydoc config::Argv::Argv(Argv&&)
-                 */
-                Plugin(Plugin&& other) noexcept = delete;
-                virtual ~Plugin() = default;
+    /*! @copydoc config::Argv::Argv(Argv&&)
+     */
+    Plugin(Plugin&& other) noexcept = delete;
+    virtual ~Plugin() = default;
 
-                /*! @copydoc config::Argv::operator=(const Argv&)
-                 */
-                Plugin& operator=(const Plugin& other) = delete;
+    /*! @copydoc config::Argv::operator=(const Argv&)
+     */
+    Plugin& operator=(const Plugin& other) = delete;
 
-                /*! @copydoc config::Argv::operator=(Argv&&)
-                 */
-                Plugin& operator=(Plugin&& other) noexcept = delete;
+    /*! @copydoc config::Argv::operator=(Argv&&)
+     */
+    Plugin& operator=(Plugin&& other) noexcept = delete;
 
-                /**
-                 * Get the name of the plugin
-                 *
-                 * \returns The name of the plugin
-                 */
-                virtual std::string getPluginName() const noexcept = 0;
+    /**
+     * Get the name of the plugin
+     *
+     * \returns The name of the plugin
+     */
+    virtual std::string getPluginName() const noexcept = 0;
 
-                /**
-                 * Returns the default variables map based on the given fleeting options
-                 *
-                 * \param[in] fleetingOptions   The fleeting options to base the defaults on
-                 * \returns The default constructed variables map
-                 */
-                virtual config::VariablesMap getVariablesMap(const config::FleetingOptionsInterface& fleetingOptions) const noexcept = 0;
-                
-                /**
-                 * Returns the root settings key for the patterns of a plugin
-                 *
-                 * \returns The root settings key
-                 */
-                virtual config::SettingsKey getPatternsKey() const noexcept {
-                    return "patterns";
-                }
+    /**
+     * Returns the default variables map based on the given fleeting options
+     *
+     * \param[in] fleetingOptions   The fleeting options to base the defaults on
+     * \returns The default constructed variables map
+     */
+    virtual config::VariablesMap getVariablesMap(
+        const config::FleetingOptionsInterface& fleetingOptions) const
+        noexcept = 0;
 
-                /**
-                 * Apply the plugin
-                 *
-                 * \param[in] task      The task to extend
-                 * \param[in] variables The variables map containing the values to use for the executed command for this specific plugin
-                 * \param[in] patterns  The patterns that were configured to use for the executed command for this specific plugin
-                 * \returns True    If the application was successful
-                 *          False   Otherwise
-                 */
-                virtual bool apply(core::Task task, const config::VariablesMap& variables, const config::Patterns& patterns) const noexcept = 0;
+    /**
+     * Returns the root settings key for the patterns of a plugin
+     *
+     * \returns The root settings key
+     */
+    virtual config::SettingsKey getPatternsKey() const noexcept {
+        return "patterns";
+    }
 
-            protected:
-                Plugin() = default;
-        };
+    /**
+     * Apply the plugin
+     *
+     * \param[in] task      The task to extend
+     * \param[in] variables The variables map containing the values to use for
+     * the executed command for this specific plugin \param[in] patterns  The
+     * patterns that were configured to use for the executed command for this
+     * specific plugin \returns True    If the application was successful False
+     * Otherwise
+     */
+    virtual bool apply(core::Task task, const config::VariablesMap& variables,
+                       const config::Patterns& patterns) const noexcept = 0;
 
-        using ExecuteCallback = std::function<void(const core::Task&)>;
+  protected:
+    Plugin() = default;
+};
 
-        void registerExecuteCallback(const ExecuteCallback& callback) noexcept;
+using ExecuteCallback = std::function<void(const core::Task&)>;
 
-        /**
-         * Register a finished task to an executor
-         *
-         * \param[in] task  The finished task
-         * \returns True    If the task was successfully registered
-         *          False   Otherwise
-         */
-        bool registerTask(const core::Task& task) noexcept;
-    } // namespace plugins
+void registerExecuteCallback(const ExecuteCallback& callback) noexcept;
+
+/**
+ * Register a finished task to an executor
+ *
+ * \param[in] task  The finished task
+ * \returns True    If the task was successfully registered
+ *          False   Otherwise
+ */
+bool registerTask(const core::Task& task) noexcept;
+} // namespace plugins
 } // namespace execHelper
 
 #endif /* __PLUGIN_H__ */

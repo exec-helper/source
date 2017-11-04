@@ -70,5 +70,6 @@ The source code of this project is continuously analyzed by multiple tools in an
 - [UndefinedBehaviorSanitizer](https://clang.llvm.org/docs/UndefinedBehaviorSanitizer.html) (UBSan)
 - [pmd](https://pmd.github.io) (cpd)
 - [coverity](https://scan.coverity.com/projects/exec-helper)
+- [clang-format](https://clang.llvm.org/docs/UndefinedBehaviorSanitizer.html)
 
 Check the _.exec-helper_ file for detailed information about how these analysis methods are configured and used. The analysis tools can be executed locally using exec-helper with this project.

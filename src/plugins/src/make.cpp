@@ -29,44 +29,47 @@ using execHelper::config::VariablesMap;
 using execHelper::core::Task;
 
 namespace {
-    const czstring<> MAKE_KEY = "make";
-    using BuildDir = string;
+const czstring<> MAKE_KEY = "make";
+using BuildDir = string;
 } // namespace
 
-namespace execHelper { namespace plugins {
-    std::string Make::getPluginName() const noexcept {
-        return MAKE_KEY;
+namespace execHelper {
+namespace plugins {
+std::string Make::getPluginName() const noexcept { return MAKE_KEY; }
+
+VariablesMap
+Make::getVariablesMap(const FleetingOptionsInterface& fleetingOptions) const
+    noexcept {
+    VariablesMap defaults(MAKE_KEY);
+    defaults.add(getBuildDirKey(), ".");
+    defaults.add(COMMAND_LINE_KEY);
+    const auto verbosity = fleetingOptions.getVerbosity() ? "yes" : "no";
+    defaults.add(VERBOSITY_KEY, verbosity);
+    defaults.add(JOBS_KEY, to_string(fleetingOptions.getJobs()));
+    defaults.add(ENVIRONMENT_KEY);
+    return defaults;
+}
+
+bool Make::apply(core::Task task, const config::VariablesMap& variables,
+                 const config::Patterns& patterns) const noexcept {
+    task.append(MAKE_KEY);
+    task.append(
+        {"--directory", variables.get<Path>(getBuildDirKey()).get().native()});
+    task.append({"--jobs", to_string(variables.get<Jobs>(JOBS_KEY).get())});
+
+    if(variables.get<Verbosity>(VERBOSITY_KEY).get()) {
+        task.append("--debug");
     }
+    task.append(variables.get<CommandLineArgs>(COMMAND_LINE_KEY).get());
+    task.appendToEnvironment(getEnvironment(variables));
 
-    VariablesMap Make::getVariablesMap(const FleetingOptionsInterface& fleetingOptions) const noexcept {
-        VariablesMap defaults(MAKE_KEY);
-        defaults.add(getBuildDirKey(), ".");
-        defaults.add(COMMAND_LINE_KEY);
-        const auto verbosity = fleetingOptions.getVerbosity() ? "yes" : "no";
-        defaults.add(VERBOSITY_KEY, verbosity);
-        defaults.add(JOBS_KEY, to_string(fleetingOptions.getJobs()));
-        defaults.add(ENVIRONMENT_KEY);
-        return defaults;
-    }
-
-    bool Make::apply(core::Task task, const config::VariablesMap& variables, const config::Patterns& patterns) const noexcept {
-        task.append(MAKE_KEY);
-        task.append({"--directory", variables.get<Path>(getBuildDirKey()).get().native()});
-        task.append({"--jobs", to_string(variables.get<Jobs>(JOBS_KEY).get())});
-
-        if(variables.get<Verbosity>(VERBOSITY_KEY).get()) {
-            task.append("--debug");
+    for(const auto& combination : makePatternPermutator(patterns)) {
+        Task newTask = replacePatternCombinations(task, combination);
+        if(!registerTask(newTask)) {
+            return false;
         }
-        task.append(variables.get<CommandLineArgs>(COMMAND_LINE_KEY).get());
-        task.appendToEnvironment(getEnvironment(variables));
-
-        for(const auto& combination : makePatternPermutator(patterns)) {
-            Task newTask = replacePatternCombinations(task, combination);
-            if(! registerTask(newTask)) {
-                return false;
-            }
-        }
-        return true;
     }
+    return true;
+}
 } // namespace plugins
 } // namespace execHelper

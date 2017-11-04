@@ -7,33 +7,30 @@ using std::string;
 using boost::filesystem::ofstream;
 
 namespace execHelper {
-    namespace test {
-       namespace baseUtils {
-            ConfigFileWriter::ConfigFileWriter() noexcept :
-                m_file("exec-helper.config.%%%%")
-            {
-                ;
-            }
+namespace test {
+namespace baseUtils {
+ConfigFileWriter::ConfigFileWriter() noexcept
+    : m_file("exec-helper.config.%%%%") {
+    ;
+}
 
-            Path ConfigFileWriter::getPath() const noexcept {
-                return m_file.getPath();
-            }
+Path ConfigFileWriter::getPath() const noexcept { return m_file.getPath(); }
 
-            string ConfigFileWriter::getFilename() const noexcept {
-                return m_file.getFilename();
-            }
+string ConfigFileWriter::getFilename() const noexcept {
+    return m_file.getFilename();
+}
 
-            string ConfigFileWriter::getDirectory() const noexcept {
-                return m_file.getParentDirectory();
-            }
+string ConfigFileWriter::getDirectory() const noexcept {
+    return m_file.getParentDirectory();
+}
 
-            bool ConfigFileWriter::write(const YamlWriter& yaml) noexcept {
-                ofstream configStream;
-                configStream.open(m_file.getPath(), ofstream::out | ofstream::trunc);
-                configStream << yaml;
-                configStream.close();
-                return configStream.good();
-            }
-       } // namespace utils 
-    } // namespace test
+bool ConfigFileWriter::write(const YamlWriter& yaml) noexcept {
+    ofstream configStream;
+    configStream.open(m_file.getPath(), ofstream::out | ofstream::trunc);
+    configStream << yaml;
+    configStream.close();
+    return configStream.good();
+}
+} // namespace baseUtils
+} // namespace test
 } // namespace execHelper

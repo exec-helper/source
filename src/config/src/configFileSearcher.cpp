@@ -10,26 +10,25 @@ using boost::filesystem::ifstream;
 using boost::filesystem::path;
 
 namespace execHelper {
-    namespace config {
-        ConfigFileSearcher::ConfigFileSearcher(Paths searchPaths) noexcept :
-            m_searchPaths(std::move(searchPaths))
-        {
-            ;
-        }
+namespace config {
+ConfigFileSearcher::ConfigFileSearcher(Paths searchPaths) noexcept
+    : m_searchPaths(std::move(searchPaths)) {
+    ;
+}
 
-        boost::optional<Path> ConfigFileSearcher::find(const Path& filename) noexcept {
-            for(const auto& searchPath : m_searchPaths) {
-                Path pathToCheck = searchPath;
-                pathToCheck /= filename;
-                if(fileExist(pathToCheck)) {
-                    return pathToCheck;
-                }
-            }
-            return boost::none;
+boost::optional<Path> ConfigFileSearcher::find(const Path& filename) noexcept {
+    for(const auto& searchPath : m_searchPaths) {
+        Path pathToCheck = searchPath;
+        pathToCheck /= filename;
+        if(fileExist(pathToCheck)) {
+            return pathToCheck;
         }
+    }
+    return boost::none;
+}
 
-        bool ConfigFileSearcher::fileExist(const Path& pathToCheck) noexcept {
-            return exists(pathToCheck);
-        }
-    } // namespace config
+bool ConfigFileSearcher::fileExist(const Path& pathToCheck) noexcept {
+    return exists(pathToCheck);
+}
+} // namespace config
 } // namespace execHelper

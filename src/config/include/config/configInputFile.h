@@ -6,48 +6,49 @@
 #include "config/settingsNode.h"
 
 namespace execHelper {
-    namespace config {
-        /**
-         * \brief Interface for configuration files
-         */
-        class ConfigInputFile {
-            public:
-		/*! @copydoc config::Argv::Argv(const Argv&)
-		 * \note Deleted
-		 */
-                ConfigInputFile(const ConfigInputFile& other) = delete;
+namespace config {
+/**
+ * \brief Interface for configuration files
+ */
+class ConfigInputFile {
+  public:
+    /*! @copydoc config::Argv::Argv(const Argv&)
+     * \note Deleted
+     */
+    ConfigInputFile(const ConfigInputFile& other) = delete;
 
-		/*! @copydoc config::Argv::Argv(Argv&&)
-		 * \note Deleted
-		 */
-                ConfigInputFile(ConfigInputFile&& other) noexcept = delete;
+    /*! @copydoc config::Argv::Argv(Argv&&)
+     * \note Deleted
+     */
+    ConfigInputFile(ConfigInputFile&& other) noexcept = delete;
 
-                virtual ~ConfigInputFile() = default;
+    virtual ~ConfigInputFile() = default;
 
-		/*! @copydoc config::Argv::operator=(const Argv&)
-		 * \note Deleted
-		 */
-                ConfigInputFile& operator=(const ConfigInputFile& other) = delete;
+    /*! @copydoc config::Argv::operator=(const Argv&)
+     * \note Deleted
+     */
+    ConfigInputFile& operator=(const ConfigInputFile& other) = delete;
 
-		/*! @copydoc config::Argv::operator=(Argv&&)
-		 * \note Deleted
-		 */
-                ConfigInputFile& operator=(ConfigInputFile&& other) noexcept = delete;
+    /*! @copydoc config::Argv::operator=(Argv&&)
+     * \note Deleted
+     */
+    ConfigInputFile& operator=(ConfigInputFile&& other) noexcept = delete;
 
-                /**
-                 * Returns the settings under the node defined by keys
-                 *
-                 * \param[in] keys  The path to the root node to get the tree from
-                 * \param[in] settings  The settings node to fill
-                 * \return  True    If the settings node was successfully filled
-                 *          False   Otherwise
-                 */
-                virtual bool getTree(const std::initializer_list<std::string>& keys, SettingsNode* settings) const noexcept = 0;
+    /**
+     * Returns the settings under the node defined by keys
+     *
+     * \param[in] keys  The path to the root node to get the tree from
+     * \param[in] settings  The settings node to fill
+     * \return  True    If the settings node was successfully filled
+     *          False   Otherwise
+     */
+    virtual bool getTree(const std::initializer_list<std::string>& keys,
+                         SettingsNode* settings) const noexcept = 0;
 
-            protected:
-                ConfigInputFile() = default;
-        };
-    } // namespace config
+  protected:
+    ConfigInputFile() = default;
+};
+} // namespace config
 } // namespace execHelper
 
-#endif  /* __CONFIG_INPUT_FILE_H__ */
+#endif /* __CONFIG_INPUT_FILE_H__ */

@@ -8,22 +8,22 @@
 #include "shell.h"
 
 namespace execHelper {
-    namespace core {
-        class Task;
-    }
+namespace core {
+class Task;
 }
+} // namespace execHelper
 
 namespace execHelper {
-    namespace core {
-        /**
-         * \brief Implements an executor that only reports what it is executing
-         */
-        class ReportingExecutor : public ExecutorInterface {
-            public:
-                ReportingExecutor() noexcept;
+namespace core {
+/**
+ * \brief Implements an executor that only reports what it is executing
+ */
+class ReportingExecutor : public ExecutorInterface {
+  public:
+    ReportingExecutor() noexcept;
 
-                void execute(const Task& task) noexcept override;
-        };
-    }
-}
+    void execute(const Task& task) noexcept override;
+};
+} // namespace core
+} // namespace execHelper
 #endif /* __REPORTING_EXECUTOR_H__ */

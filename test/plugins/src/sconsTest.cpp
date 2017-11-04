@@ -33,112 +33,117 @@ using execHelper::test::FleetingOptionsStub;
 using execHelper::test::utils::getExpectedTasks;
 
 namespace {
-    const czstring<> PLUGIN_NAME = "scons";
-    const czstring<> BUILD_DIR_KEY = "build-dir";
+const czstring<> PLUGIN_NAME = "scons";
+const czstring<> BUILD_DIR_KEY = "build-dir";
 } // namespace
 
-namespace execHelper { namespace plugins { namespace test {
-    SCENARIO("Obtain the plugin name of the scons plugin", "[scons]") {
-        GIVEN("A plugin") {
-            Scons plugin;
+namespace execHelper {
+namespace plugins {
+namespace test {
+SCENARIO("Obtain the plugin name of the scons plugin", "[scons]") {
+    GIVEN("A plugin") {
+        Scons plugin;
 
-            WHEN("We request the plugin name") {
-                const string pluginName = plugin.getPluginName();
+        WHEN("We request the plugin name") {
+            const string pluginName = plugin.getPluginName();
 
-                THEN("We should find the correct plugin name") {
-                    REQUIRE(pluginName == PLUGIN_NAME);
-                }
+            THEN("We should find the correct plugin name") {
+                REQUIRE(pluginName == PLUGIN_NAME);
             }
         }
     }
+}
 
-    SCENARIO("Obtain the default variables map of the scons plugin", "[scons]") {
-        MAKE_COMBINATIONS("The default fleeting options") {
-            FleetingOptionsStub fleetingOptions;
-            Scons plugin;
+SCENARIO("Obtain the default variables map of the scons plugin", "[scons]") {
+    MAKE_COMBINATIONS("The default fleeting options") {
+        FleetingOptionsStub fleetingOptions;
+        Scons plugin;
 
-            VariablesMap actualVariables(plugin.getPluginName());
-            actualVariables.add(BUILD_DIR_KEY, ".");
-            actualVariables.add(COMMAND_LINE_KEY);
-            actualVariables.add(VERBOSITY_KEY, "no");
-            actualVariables.add(JOBS_KEY, to_string(fleetingOptions.getJobs()));
+        VariablesMap actualVariables(plugin.getPluginName());
+        actualVariables.add(BUILD_DIR_KEY, ".");
+        actualVariables.add(COMMAND_LINE_KEY);
+        actualVariables.add(VERBOSITY_KEY, "no");
+        actualVariables.add(JOBS_KEY, to_string(fleetingOptions.getJobs()));
 
-            COMBINATIONS("Switch on verbosity") {
-                fleetingOptions.m_verbose = true;
-                actualVariables.replace(VERBOSITY_KEY, "yes");
-            }
+        COMBINATIONS("Switch on verbosity") {
+            fleetingOptions.m_verbose = true;
+            actualVariables.replace(VERBOSITY_KEY, "yes");
+        }
 
-            COMBINATIONS("Switch on single threaded") {
-                fleetingOptions.m_jobs = 1U;
-                actualVariables.replace(JOBS_KEY, to_string(fleetingOptions.m_jobs));
-            }
+        COMBINATIONS("Switch on single threaded") {
+            fleetingOptions.m_jobs = 1U;
+            actualVariables.replace(JOBS_KEY,
+                                    to_string(fleetingOptions.m_jobs));
+        }
 
-            THEN_WHEN("We request the variables map") {
-                VariablesMap variables = plugin.getVariablesMap(fleetingOptions);
+        THEN_WHEN("We request the variables map") {
+            VariablesMap variables = plugin.getVariablesMap(fleetingOptions);
 
-                THEN_CHECK("We should find the same ones") {
-                    REQUIRE(variables == actualVariables);
-                }
+            THEN_CHECK("We should find the same ones") {
+                REQUIRE(variables == actualVariables);
             }
         }
     }
+}
 
+SCENARIO("Testing the configuration settings of the scons plugin", "[scons]") {
+    MAKE_COMBINATIONS("Of several settings") {
+        const Pattern pattern1("PATTERN1", {"value1a", "value1b"});
+        const Pattern pattern2("PATTERN2", {"value2a", "value2b"});
+        const Patterns patterns({pattern1, pattern2});
 
-    SCENARIO("Testing the configuration settings of the scons plugin", "[scons]") {
-        MAKE_COMBINATIONS("Of several settings") {
-            const Pattern pattern1("PATTERN1", {"value1a", "value1b"});
-            const Pattern pattern2("PATTERN2", {"value2a", "value2b"});
-            const Patterns patterns({pattern1, pattern2});
+        Scons plugin;
+        VariablesMap variables = plugin.getVariablesMap(FleetingOptionsStub());
 
-            Scons plugin;
-            VariablesMap variables = plugin.getVariablesMap(FleetingOptionsStub());
+        Path workingDir(".");
+        CommandLineArgs commandLine;
+        bool verbosity = false;
+        auto jobs = variables.get<Jobs>(JOBS_KEY).get();
 
-            Path workingDir(".");
-            CommandLineArgs commandLine;
-            bool verbosity = false;
-            auto jobs = variables.get<Jobs>(JOBS_KEY).get();
+        ExecutorStub executor;
+        ExecuteCallback executeCallback = [&executor](const Task& task) {
+            executor.execute(task);
+        };
+        registerExecuteCallback(executeCallback);
 
-            ExecutorStub executor;
-            ExecuteCallback executeCallback = [&executor](const Task& task) { executor.execute(task);};
-            registerExecuteCallback(executeCallback);
+        COMBINATIONS("Switch off threading") {
+            jobs = 1U;
+            variables.replace(JOBS_KEY, to_string(jobs));
+        }
 
-            COMBINATIONS("Switch off threading") {
-                jobs = 1U;
-                variables.replace(JOBS_KEY, to_string(jobs));
-            }
+        COMBINATIONS("Switch on verbosity") {
+            verbosity = true;
+            variables.replace(VERBOSITY_KEY, "yes");
+        }
 
-            COMBINATIONS("Switch on verbosity") {
-                verbosity = true;
-                variables.replace(VERBOSITY_KEY, "yes");
-            }
+        COMBINATIONS("Add a command line") {
+            commandLine = {"{" + pattern1.getKey() + "}{" + pattern2.getKey() +
+                               "}",
+                           "blaat/{HELLO}/{" + pattern1.getKey() + "}"};
+            variables.replace(COMMAND_LINE_KEY, commandLine);
+        }
 
-            COMBINATIONS("Add a command line") {
-                commandLine = {"{" + pattern1.getKey() + "}{" + pattern2.getKey() + "}", "blaat/{HELLO}/{" + pattern1.getKey() + "}"};
-                variables.replace(COMMAND_LINE_KEY, commandLine);
-            }
+        Task expectedTask({PLUGIN_NAME});
+        if(verbosity) {
+            expectedTask.append("--debug=explain");
+        }
+        expectedTask.append({"--jobs", to_string(jobs)});
+        expectedTask.append(commandLine);
 
-            Task expectedTask({PLUGIN_NAME});
-            if(verbosity) {
-                expectedTask.append("--debug=explain");
-            }
-            expectedTask.append({"--jobs", to_string(jobs)});
-            expectedTask.append(commandLine);
+        ExecutorStub::TaskQueue expectedTasks =
+            getExpectedTasks(expectedTask, patterns);
 
-            ExecutorStub::TaskQueue expectedTasks = getExpectedTasks(expectedTask, patterns);
+        THEN_WHEN("We apply the plugin") {
+            Task task;
+            bool returnCode = plugin.apply(task, variables, patterns);
+            THEN_CHECK("It should succeed") { REQUIRE(returnCode); }
 
-            THEN_WHEN("We apply the plugin") {
-                Task task;
-                bool returnCode = plugin.apply(task, variables, patterns);
-                THEN_CHECK("It should succeed") {
-                    REQUIRE(returnCode);
-                }
-
-                THEN_CHECK("It called the right commands") {
-                    REQUIRE(expectedTasks == executor.getExecutedTasks());
-                }
+            THEN_CHECK("It called the right commands") {
+                REQUIRE(expectedTasks == executor.getExecutedTasks());
             }
         }
     }
+}
 } // namespace test
 } // namespace plugins
 } // namespace execHelper

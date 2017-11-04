@@ -11,17 +11,18 @@
 #include "settingsNode.h"
 
 namespace execHelper {
-    namespace config {
-        class OptionDescriptions;
-    }
+namespace config {
+class OptionDescriptions;
 }
+} // namespace execHelper
 
 namespace execHelper {
-    namespace config {
-        using PatternSettingsPair = std::pair<Patterns, config::SettingsNode>;
-                
-        boost::optional<PatternSettingsPair> parseSettingsFile(const Path& file) noexcept;
-    } // config
-} // execHelper
+namespace config {
+using PatternSettingsPair = std::pair<Patterns, config::SettingsNode>;
 
-#endif  /* CONFIG_INCLUDE */
+boost::optional<PatternSettingsPair>
+parseSettingsFile(const Path& file) noexcept;
+} // namespace config
+} // namespace execHelper
+
+#endif /* CONFIG_INCLUDE */

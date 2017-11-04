@@ -36,144 +36,148 @@ using execHelper::plugins::Memory;
 using execHelper::plugins::MemoryHandler;
 using execHelper::plugins::Valgrind;
 
-using execHelper::test::utils::getExpectedTasks;
 using execHelper::core::test::ExecutorStub;
 using execHelper::test::FleetingOptionsStub;
+using execHelper::test::utils::getExpectedTasks;
 
 namespace {
-    const czstring<> PLUGIN_NAME = "valgrind";
-    const czstring<> MEMORY_KEY = "memory";
-    const czstring<> TOOL_KEY = "tool";
-    const czstring<> RUN_COMMAND_KEY = "run-command";
+const czstring<> PLUGIN_NAME = "valgrind";
+const czstring<> MEMORY_KEY = "memory";
+const czstring<> TOOL_KEY = "tool";
+const czstring<> RUN_COMMAND_KEY = "run-command";
 } // namespace
 
-namespace execHelper { namespace plugins { namespace test {
-    SCENARIO("Obtain the plugin name of the valgrind plugin", "[valgrind]") {
-        GIVEN("A plugin") {
-            Valgrind plugin;
+namespace execHelper {
+namespace plugins {
+namespace test {
+SCENARIO("Obtain the plugin name of the valgrind plugin", "[valgrind]") {
+    GIVEN("A plugin") {
+        Valgrind plugin;
 
-            WHEN("We request the plugin name") {
-                const string pluginName = plugin.getPluginName();
+        WHEN("We request the plugin name") {
+            const string pluginName = plugin.getPluginName();
 
-                THEN("We should find the correct plugin name") {
-                    REQUIRE(pluginName == PLUGIN_NAME);
-                }
+            THEN("We should find the correct plugin name") {
+                REQUIRE(pluginName == PLUGIN_NAME);
             }
         }
     }
+}
 
-    SCENARIO("Obtaining the default variables map of the valgrind plugin", "[valgrind]") {
-        GIVEN("The default fleeting options") {
-            FleetingOptionsStub fleetingOptions;
-            Valgrind plugin;
+SCENARIO("Obtaining the default variables map of the valgrind plugin",
+         "[valgrind]") {
+    GIVEN("The default fleeting options") {
+        FleetingOptionsStub fleetingOptions;
+        Valgrind plugin;
 
-            VariablesMap actualVariables(plugin.getPluginName());
-            actualVariables.add(COMMAND_LINE_KEY);
-            actualVariables.add(VERBOSITY_KEY, "no");
+        VariablesMap actualVariables(plugin.getPluginName());
+        actualVariables.add(COMMAND_LINE_KEY);
+        actualVariables.add(VERBOSITY_KEY, "no");
 
-            WHEN("We request the variables map") {
-                VariablesMap variables = plugin.getVariablesMap(fleetingOptions);
+        WHEN("We request the variables map") {
+            VariablesMap variables = plugin.getVariablesMap(fleetingOptions);
 
-                THEN("We should find the same ones") {
-                    REQUIRE(variables == actualVariables);
-                }
+            THEN("We should find the same ones") {
+                REQUIRE(variables == actualVariables);
             }
         }
     }
+}
 
-    SCENARIO("Test the variables map of the valgrind plugin", "[valgrind]") {
-        MAKE_COMBINATIONS("Of several configurations") {
-            const Pattern pattern1("PATTERN1", {"value1a", "value1b"});
-            const Pattern pattern2("PATTERN2", {"value2a", "value2b"});
-            const Patterns patterns({pattern1, pattern2});
+SCENARIO("Test the variables map of the valgrind plugin", "[valgrind]") {
+    MAKE_COMBINATIONS("Of several configurations") {
+        const Pattern pattern1("PATTERN1", {"value1a", "value1b"});
+        const Pattern pattern2("PATTERN2", {"value2a", "value2b"});
+        const Patterns patterns({pattern1, pattern2});
 
-            Valgrind plugin;
-            VariablesMap variables = plugin.getVariablesMap(FleetingOptionsStub());
+        Valgrind plugin;
+        VariablesMap variables = plugin.getVariablesMap(FleetingOptionsStub());
 
-            CommandCollection runCommands({MEMORY_KEY});
+        CommandCollection runCommands({MEMORY_KEY});
+        variables.add(RUN_COMMAND_KEY, MEMORY_KEY);
+
+        CommandLineArgs commandLine;
+        string tool;
+
+        MemoryHandler memory;
+        SettingsNode settings(PLUGIN_NAME);
+
+        ExecutorStub executor;
+        ExecuteCallback executeCallback = [&executor](const Task& task) {
+            executor.execute(task);
+        };
+        registerExecuteCallback(executeCallback);
+
+        COMBINATIONS("Add an additional run command") {
+            runCommands.emplace_back(MEMORY_KEY);
             variables.add(RUN_COMMAND_KEY, MEMORY_KEY);
-
-            CommandLineArgs commandLine;
-            string tool;
-
-            MemoryHandler memory;
-            SettingsNode settings(PLUGIN_NAME);
-
-            ExecutorStub executor;
-            ExecuteCallback executeCallback = [&executor](const Task& task) { executor.execute(task);};
-            registerExecuteCallback(executeCallback);
-
-            COMBINATIONS("Add an additional run command") {
-                runCommands.emplace_back(MEMORY_KEY);
-                variables.add(RUN_COMMAND_KEY, MEMORY_KEY);
-            }
-
-            COMBINATIONS("Set the tool") {
-                tool = "tool1";
-                variables.replace(TOOL_KEY, tool);
-            }
-
-            COMBINATIONS("Set the command line") {
-                commandLine = {"{" + pattern1.getKey() + "}", "{" + pattern2.getKey() + "}"};
-                variables.add(COMMAND_LINE_KEY, commandLine);
-            }
-
-            FleetingOptionsStub fleetingOptions;
-            ExecutePlugin::push(&fleetingOptions);
-            ExecutePlugin::push(move(settings));
-            ExecutePlugin::push(Patterns(patterns));
-
-            ExecutorStub::TaskQueue expectedTasks;
-            for(const auto& command : runCommands) {
-                Task expectedTask({PLUGIN_NAME});
-                if(!tool.empty()) {
-                    expectedTask.append("--tool=" + tool);
-                }
-                expectedTask.append(commandLine);
-                expectedTasks.emplace_back(expectedTask);
-            }
-
-            ExecutorStub::TaskQueue replacedTasks = getExpectedTasks(expectedTasks, patterns);
-
-            THEN_WHEN("We apply the plugin") {
-                Task task;
-
-                bool returnCode = plugin.apply(task, variables, patterns);
-                THEN_CHECK("It should succeed") {
-                    REQUIRE(returnCode);
-                }
-
-                THEN_CHECK("It called the right commands") {
-                    const Memory::Memories& memories = memory.getExecutions();
-                    REQUIRE(memories.size() == replacedTasks.size());
-                    auto replacedTask = replacedTasks.begin();
-                    for(auto memory = memories.begin(); memory != memories.end(); ++memory, ++replacedTask) {
-                        REQUIRE(memory->task == *replacedTask);
-                        REQUIRE(memory->patterns.empty());
-                    }
-                }
-            }
-
-            ExecutePlugin::popFleetingOptions();
-            ExecutePlugin::popSettingsNode();
-            ExecutePlugin::popPatterns();
         }
-    }
 
-    SCENARIO("Test erroneous scenarios", "[valgrind]") {
-        GIVEN("A configuration without a configured run command") {
-            Valgrind plugin;
-            VariablesMap variables = plugin.getVariablesMap(FleetingOptionsStub());
+        COMBINATIONS("Set the tool") {
+            tool = "tool1";
+            variables.replace(TOOL_KEY, tool);
+        }
 
-            WHEN("We call the plugin") {
-                bool returnCode = plugin.apply(Task(), variables, Patterns());
+        COMBINATIONS("Set the command line") {
+            commandLine = {"{" + pattern1.getKey() + "}",
+                           "{" + pattern2.getKey() + "}"};
+            variables.add(COMMAND_LINE_KEY, commandLine);
+        }
 
-                THEN("It should fail") {
-                    REQUIRE_FALSE(returnCode);
+        FleetingOptionsStub fleetingOptions;
+        ExecutePlugin::push(&fleetingOptions);
+        ExecutePlugin::push(move(settings));
+        ExecutePlugin::push(Patterns(patterns));
+
+        ExecutorStub::TaskQueue expectedTasks;
+        for(const auto& command : runCommands) {
+            Task expectedTask({PLUGIN_NAME});
+            if(!tool.empty()) {
+                expectedTask.append("--tool=" + tool);
+            }
+            expectedTask.append(commandLine);
+            expectedTasks.emplace_back(expectedTask);
+        }
+
+        ExecutorStub::TaskQueue replacedTasks =
+            getExpectedTasks(expectedTasks, patterns);
+
+        THEN_WHEN("We apply the plugin") {
+            Task task;
+
+            bool returnCode = plugin.apply(task, variables, patterns);
+            THEN_CHECK("It should succeed") { REQUIRE(returnCode); }
+
+            THEN_CHECK("It called the right commands") {
+                const Memory::Memories& memories = memory.getExecutions();
+                REQUIRE(memories.size() == replacedTasks.size());
+                auto replacedTask = replacedTasks.begin();
+                for(auto memory = memories.begin(); memory != memories.end();
+                    ++memory, ++replacedTask) {
+                    REQUIRE(memory->task == *replacedTask);
+                    REQUIRE(memory->patterns.empty());
                 }
             }
         }
+
+        ExecutePlugin::popFleetingOptions();
+        ExecutePlugin::popSettingsNode();
+        ExecutePlugin::popPatterns();
     }
+}
+
+SCENARIO("Test erroneous scenarios", "[valgrind]") {
+    GIVEN("A configuration without a configured run command") {
+        Valgrind plugin;
+        VariablesMap variables = plugin.getVariablesMap(FleetingOptionsStub());
+
+        WHEN("We call the plugin") {
+            bool returnCode = plugin.apply(Task(), variables, Patterns());
+
+            THEN("It should fail") { REQUIRE_FALSE(returnCode); }
+        }
+    }
+}
 } // namespace test
 } // namespace plugins
 } // namespace execHelper

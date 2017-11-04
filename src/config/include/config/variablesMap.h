@@ -4,9 +4,9 @@
 #include "settingsNode.h"
 
 namespace execHelper {
-    namespace config {
-        using VariablesMap = SettingsNode;
-    } // config
-} // execHelper
+namespace config {
+using VariablesMap = SettingsNode;
+} // namespace config
+} // namespace execHelper
 
-#endif  /* VARIABLES_MAP_INCLUDE */
+#endif /* VARIABLES_MAP_INCLUDE */

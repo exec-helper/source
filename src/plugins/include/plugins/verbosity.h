@@ -4,11 +4,11 @@
 #include <gsl/string_span>
 
 namespace execHelper {
-    namespace plugins {
-        using Verbosity = bool;
+namespace plugins {
+using Verbosity = bool;
 
-        const gsl::czstring<> VERBOSITY_KEY = "verbose";
-    } // plugins
-} // execHelper
+const gsl::czstring<> VERBOSITY_KEY = "verbose";
+} // namespace plugins
+} // namespace execHelper
 
-#endif  /* VERBOSITY_INCLUDE */
+#endif /* VERBOSITY_INCLUDE */

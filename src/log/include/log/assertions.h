@@ -7,29 +7,43 @@
 #include <string>
 
 namespace execHelper {
-    namespace log {
-        static inline void assertHelper(bool cond, const std::string& message) noexcept {
-            if(!cond) {
-                std::cerr << message << std::endl;
-                std::terminate();
-            }
-        }
-    } // namespace log
+namespace log {
+static inline void assertHelper(bool cond,
+                                const std::string& message) noexcept {
+    if(!cond) {
+        std::cerr << message << std::endl;
+        std::terminate();
+    }
+}
+} // namespace log
 } // namespace execHelper
 
-#define assertMessage(cond, prefix, message) do { ::execHelper::log::assertHelper(cond, std::string(__FILE__).append(":").append(std::to_string(__LINE__)).append(":0 ").append(prefix).append(": ").append(message)); } while(false);
+#define assertMessage(cond, prefix, message)                                   \
+    do {                                                                       \
+        ::execHelper::log::assertHelper(cond,                                  \
+                                        std::string(__FILE__)                  \
+                                            .append(":")                       \
+                                            .append(std::to_string(__LINE__))  \
+                                            .append(":0 ")                     \
+                                            .append(prefix)                    \
+                                            .append(": ")                      \
+                                            .append(message));                 \
+    } while(false);
 
 /**
- * Checks that an argument does not violate certain conditions (nominal programming style)
+ * Checks that an argument does not violate certain conditions (nominal
+ * programming style)
  */
-#define expectsMessage(cond, message)   assertMessage(cond, "Precondition violated", message);
+#define expectsMessage(cond, message)                                          \
+    assertMessage(cond, "Precondition violated", message);
 #define expects(cond) expectsMessage(cond, #cond);
 
 /**
  * Checks that an invariant still holds
  */
-#define ensuresMessage(cond, message)   assertMessage(cond, "Invariant violated", message);
-#define ensures(cond)   ensuresMessage(cond, #cond);
+#define ensuresMessage(cond, message)                                          \
+    assertMessage(cond, "Invariant violated", message);
+#define ensures(cond) ensuresMessage(cond, #cond);
 
 #else
 
@@ -40,4 +54,4 @@ namespace execHelper {
 
 #endif
 
-#endif  /* ASSERT_INCLUDE */
+#endif /* ASSERT_INCLUDE */

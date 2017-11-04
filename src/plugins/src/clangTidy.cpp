@@ -22,88 +22,93 @@ using execHelper::core::Task;
 using execHelper::core::TaskCollection;
 
 namespace {
-    const czstring<> PLUGIN_NAME = "clang-tidy";
-    using Sources = vector<string>;
-    const czstring<> SOURCES_KEY = "sources";
-    const czstring<> CHECKS_KEY = "checks";
-    const czstring<> WARNING_AS_ERROR_KEY = "warning-as-errors";
+const czstring<> PLUGIN_NAME = "clang-tidy";
+using Sources = vector<string>;
+const czstring<> SOURCES_KEY = "sources";
+const czstring<> CHECKS_KEY = "checks";
+const czstring<> WARNING_AS_ERROR_KEY = "warning-as-errors";
 } // namespace
 
-namespace execHelper { namespace plugins {
-    string ClangTidy::getPluginName() const noexcept {
-        return "clang-tidy";
+namespace execHelper {
+namespace plugins {
+string ClangTidy::getPluginName() const noexcept { return "clang-tidy"; }
+
+VariablesMap ClangTidy::getVariablesMap(
+    const FleetingOptionsInterface& /*fleetingOptions*/) const noexcept {
+    VariablesMap defaults(PLUGIN_NAME);
+    defaults.add(COMMAND_LINE_KEY);
+    defaults.add(SOURCES_KEY, "*.cpp");
+    return defaults;
+}
+
+bool ClangTidy::apply(Task task, const VariablesMap& variables,
+                      const Patterns& patterns) const noexcept {
+    task.append(PLUGIN_NAME);
+
+    auto checks = variables.get<Checks>(CHECKS_KEY);
+    if(checks) {
+        task.append(getChecks(checks.get()));
     }
 
-    VariablesMap ClangTidy::getVariablesMap(const FleetingOptionsInterface& /*fleetingOptions*/) const noexcept {
-        VariablesMap defaults(PLUGIN_NAME);
-        defaults.add(COMMAND_LINE_KEY);
-        defaults.add(SOURCES_KEY, "*.cpp");
-        return defaults;
+    auto warningAsError = variables.get<WarningAsError>(WARNING_AS_ERROR_KEY);
+    if(warningAsError) {
+        task.append(getWarningAsError(warningAsError.get(),
+                                      variables.get<Checks>(CHECKS_KEY, {})));
     }
 
-    bool ClangTidy::apply(Task task, const VariablesMap& variables, const Patterns& patterns) const noexcept {
-        task.append(PLUGIN_NAME);
+    task.append(variables.get<CommandLineArgs>(COMMAND_LINE_KEY).get());
 
-        auto checks = variables.get<Checks>(CHECKS_KEY);
-        if(checks) {
-            task.append(getChecks(checks.get()));
+    ensures(variables.get<Sources>(SOURCES_KEY) != boost::none);
+    task.append(variables.get<Sources>(SOURCES_KEY).get());
+
+    for(const auto& combination : makePatternPermutator(patterns)) {
+        Task newTask = replacePatternCombinations(task, combination);
+        if(!registerTask(newTask)) {
+            return false;
         }
-
-        auto warningAsError = variables.get<WarningAsError>(WARNING_AS_ERROR_KEY);
-        if(warningAsError) {
-            task.append(getWarningAsError(warningAsError.get(), variables.get<Checks>(CHECKS_KEY, {})));
-        }
-
-        task.append(variables.get<CommandLineArgs>(COMMAND_LINE_KEY).get());
-
-        ensures(variables.get<Sources>(SOURCES_KEY) != boost::none);
-        task.append(variables.get<Sources>(SOURCES_KEY).get());
-
-        for(const auto& combination : makePatternPermutator(patterns)) {
-            Task newTask = replacePatternCombinations(task, combination);
-            if(! registerTask(newTask)) {
-                return false;
-            }
-        }
-        return true;
     }
+    return true;
+}
 
-    TaskCollection ClangTidy::getChecks(const Checks& checks) noexcept {
+TaskCollection ClangTidy::getChecks(const Checks& checks) noexcept {
+    if(checks.empty()) {
+        return TaskCollection();
+    }
+    string result("-checks=");
+    result += listChecks(checks);
+    return TaskCollection({result});
+}
+
+TaskCollection
+ClangTidy::getWarningAsError(const WarningAsError& warningAsError,
+                             const Checks& checks) noexcept {
+    // Check if we are in the special case where we inherit the values from
+    // checksCollection
+    string result("-warnings-as-errors=");
+    if(warningAsError.size() == 1U && warningAsError.front() == "all") {
         if(checks.empty()) {
             return TaskCollection();
         }
-        string result("-checks=");
         result += listChecks(checks);
-        return TaskCollection({result});
+    } else {
+        if(warningAsError.empty()) {
+            return TaskCollection();
+        }
+        result += listChecks(warningAsError);
     }
+    return TaskCollection({result});
+}
 
-    TaskCollection ClangTidy::getWarningAsError(const WarningAsError& warningAsError, const Checks& checks) noexcept {
-        // Check if we are in the special case where we inherit the values from checksCollection
-        string result("-warnings-as-errors=");
-        if(warningAsError.size() == 1U && warningAsError.front() == "all") {
-            if(checks.empty()) {
-                return TaskCollection();
-            }
-            result += listChecks(checks);
-        } else {
-            if(warningAsError.empty()) {
-                return TaskCollection();
-            }
-            result += listChecks(warningAsError);
-        }
-        return TaskCollection({result});
+string ClangTidy::listChecks(const Checks& checks) noexcept {
+    string result;
+    if(checks.empty()) {
+        return "";
     }
-
-    string ClangTidy::listChecks(const Checks& checks) noexcept {
-        string result;
-        if(checks.empty()) {
-            return "";
-        }
-        for(size_t i = 0; i < checks.size() - 1; ++i) {
-            result += checks[i] + ",";
-        }
-        result += checks.back();
-        return result;
+    for(size_t i = 0; i < checks.size() - 1; ++i) {
+        result += checks[i] + ",";
     }
+    result += checks.back();
+    return result;
+}
 } // namespace plugins
 } // namespace execHelper

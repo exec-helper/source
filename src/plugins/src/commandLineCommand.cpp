@@ -18,11 +18,11 @@ using std::string;
 
 using gsl::czstring;
 
-using execHelper::config::Path;
 using execHelper::config::Command;
 using execHelper::config::ENVIRONMENT_KEY;
 using execHelper::config::EnvironmentCollection;
 using execHelper::config::FleetingOptionsInterface;
+using execHelper::config::Path;
 using execHelper::config::Patterns;
 using execHelper::config::SettingsKeys;
 using execHelper::config::VariablesMap;
@@ -30,62 +30,67 @@ using execHelper::core::Task;
 using execHelper::core::Tasks;
 
 namespace {
-    const czstring<> PLUGIN_NAME = "command-line-command";
-    using WorkingDir = string;
-    const czstring<> WORKING_DIR_KEY = "working-dir";
+const czstring<> PLUGIN_NAME = "command-line-command";
+using WorkingDir = string;
+const czstring<> WORKING_DIR_KEY = "working-dir";
 } // namespace
 
-namespace execHelper { namespace plugins {
+namespace execHelper {
+namespace plugins {
 
-    std::string CommandLineCommand::getPluginName() const noexcept {
-        return PLUGIN_NAME; 
+std::string CommandLineCommand::getPluginName() const noexcept {
+    return PLUGIN_NAME;
+}
+
+config::VariablesMap CommandLineCommand::getVariablesMap(
+    const FleetingOptionsInterface& /*fleetingOptions*/) const noexcept {
+    VariablesMap defaults(PLUGIN_NAME);
+    defaults.add(COMMAND_LINE_KEY);
+    defaults.add(ENVIRONMENT_KEY);
+    return defaults;
+}
+
+bool CommandLineCommand::apply(Task task, const VariablesMap& variables,
+                               const Patterns& patterns) const noexcept {
+    task.appendToEnvironment(getEnvironment(variables));
+
+    auto workingDir = variables.get<WorkingDir>(WORKING_DIR_KEY);
+    if(workingDir) {
+        task.setWorkingDirectory(workingDir.get());
     }
 
-    config::VariablesMap CommandLineCommand::getVariablesMap(const FleetingOptionsInterface& /*fleetingOptions*/) const noexcept {
-        VariablesMap defaults(PLUGIN_NAME);
-        defaults.add(COMMAND_LINE_KEY);
-        defaults.add(ENVIRONMENT_KEY);
-        return defaults;
+    auto commandLine = variables.get<CommandLineArgs>(COMMAND_LINE_KEY).get();
+    if(commandLine.empty()) {
+        user_feedback_error("Could not find the '"
+                            << COMMAND_LINE_KEY << "' setting in the '"
+                            << PLUGIN_NAME << "' settings");
+        return false;
     }
 
-    bool CommandLineCommand::apply(Task task, const VariablesMap& variables, const Patterns& patterns) const noexcept {
-        task.appendToEnvironment(getEnvironment(variables));
-
-        auto workingDir = variables.get<WorkingDir>(WORKING_DIR_KEY);
-        if(workingDir) {
-            task.setWorkingDirectory(workingDir.get());
+    Tasks tasks;
+    if(variables[COMMAND_LINE_KEY][commandLine.front()].values().empty()) {
+        task.append(move(commandLine));
+        tasks.emplace_back(move(task));
+    } else {
+        SettingsKeys keys({COMMAND_LINE_KEY});
+        for(auto commandKey : variables[COMMAND_LINE_KEY].values()) {
+            SettingsKeys tmpKey = keys;
+            tmpKey.emplace_back(commandKey);
+            Task newTask = task;
+            newTask.append(move(variables.get<CommandLineArgs>(tmpKey).get()));
+            tasks.emplace_back(newTask);
         }
+    }
 
-        auto commandLine = variables.get<CommandLineArgs>(COMMAND_LINE_KEY).get();
-        if(commandLine.empty()) {
-            user_feedback_error("Could not find the '" << COMMAND_LINE_KEY << "' setting in the '" << PLUGIN_NAME << "' settings");
-            return false;
-        }
-
-        Tasks tasks;
-        if(variables[COMMAND_LINE_KEY][commandLine.front()].values().empty()) {
-            task.append(move(commandLine));
-            tasks.emplace_back(move(task));
-        } else {
-            SettingsKeys keys({COMMAND_LINE_KEY});
-            for(auto commandKey : variables[COMMAND_LINE_KEY].values()) {
-                SettingsKeys tmpKey = keys; 
-                tmpKey.emplace_back(commandKey);
-                Task newTask = task;
-                newTask.append(move(variables.get<CommandLineArgs>(tmpKey).get()));
-                tasks.emplace_back(newTask);
+    for(const auto& combination : makePatternPermutator(patterns)) {
+        for(const auto& executeTask : tasks) {
+            Task newTask = replacePatternCombinations(executeTask, combination);
+            if(!registerTask(newTask)) {
+                return false;
             }
         }
-
-        for(const auto& combination : makePatternPermutator(patterns)) {
-            for(const auto& executeTask : tasks) {
-                Task newTask = replacePatternCombinations(executeTask, combination);
-                if(! registerTask(newTask)) {
-                    return false;
-                }
-            }
-        }
-        return true;
     }
+    return true;
+}
 } // namespace plugins
 } // namespace execHelper

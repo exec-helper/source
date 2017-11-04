@@ -28,55 +28,59 @@ using execHelper::config::VariablesMap;
 using execHelper::core::Task;
 
 namespace {
-    const czstring<> PLUGIN_NAME = "valgrind";
-    using RunCommand = CommandCollection;
-    const czstring<> RUN_COMMAND_KEY = "run-command";
-    using Tool = string;
-    const czstring<> TOOL_KEY = "tool";
+const czstring<> PLUGIN_NAME = "valgrind";
+using RunCommand = CommandCollection;
+const czstring<> RUN_COMMAND_KEY = "run-command";
+using Tool = string;
+const czstring<> TOOL_KEY = "tool";
 } // namespace
 
-namespace execHelper { namespace plugins {
-    std::string Valgrind::getPluginName() const noexcept {
-        return PLUGIN_NAME;
+namespace execHelper {
+namespace plugins {
+std::string Valgrind::getPluginName() const noexcept { return PLUGIN_NAME; }
+
+VariablesMap
+Valgrind::getVariablesMap(const FleetingOptionsInterface& fleetingOptions) const
+    noexcept {
+    VariablesMap defaults(PLUGIN_NAME);
+    defaults.add(COMMAND_LINE_KEY);
+    const auto verbosity = fleetingOptions.getVerbosity() ? "yes" : "no";
+    defaults.add(VERBOSITY_KEY, verbosity);
+    return defaults;
+}
+
+bool Valgrind::apply(Task task, const VariablesMap& variables,
+                     const Patterns& patterns) const noexcept {
+    task.append(PLUGIN_NAME);
+
+    auto runCommand = variables.get<RunCommand>(RUN_COMMAND_KEY);
+    if(runCommand == boost::none) {
+        user_feedback_error("Could not find the '"
+                            << RUN_COMMAND_KEY << "' setting in the '"
+                            << PLUGIN_NAME << "' settings");
+        return false;
     }
 
-    VariablesMap Valgrind::getVariablesMap(const FleetingOptionsInterface& fleetingOptions) const noexcept {
-        VariablesMap defaults(PLUGIN_NAME);
-        defaults.add(COMMAND_LINE_KEY);
-        const auto verbosity = fleetingOptions.getVerbosity() ? "yes" : "no";
-        defaults.add(VERBOSITY_KEY, verbosity);
-        return defaults;
+    auto tool = variables.get<Tool>(TOOL_KEY);
+    if(tool) {
+        task.append(string("--tool=").append(tool.get()));
     }
 
-    bool Valgrind::apply(Task task, const VariablesMap& variables, const Patterns& patterns) const noexcept {
-        task.append(PLUGIN_NAME);
+    if(variables.get<Verbosity>(VERBOSITY_KEY).get()) {
+        task.append("--verbose");
+    }
 
-        auto runCommand = variables.get<RunCommand>(RUN_COMMAND_KEY);
-        if(runCommand == boost::none) {
-            user_feedback_error("Could not find the '" << RUN_COMMAND_KEY << "' setting in the '" << PLUGIN_NAME << "' settings");
+    ensures(variables.get<CommandLineArgs>(COMMAND_LINE_KEY) != boost::none);
+    task.append(variables.get<CommandLineArgs>(COMMAND_LINE_KEY).get());
+
+    for(const auto& combination : makePatternPermutator(patterns)) {
+        Task newTask = replacePatternCombinations(task, combination);
+        ExecutePlugin buildExecutePlugin(runCommand.get());
+        if(!buildExecutePlugin.apply(newTask, variables, patterns)) {
             return false;
         }
-
-        auto tool = variables.get<Tool>(TOOL_KEY);
-        if(tool) {
-            task.append(string("--tool=").append(tool.get()));
-        }
-
-        if(variables.get<Verbosity>(VERBOSITY_KEY).get()) {
-            task.append("--verbose");
-        }
-
-        ensures(variables.get<CommandLineArgs>(COMMAND_LINE_KEY) != boost::none);
-        task.append(variables.get<CommandLineArgs>(COMMAND_LINE_KEY).get());
-
-        for(const auto& combination : makePatternPermutator(patterns)) {
-            Task newTask = replacePatternCombinations(task, combination);
-            ExecutePlugin buildExecutePlugin(runCommand.get());
-            if(! buildExecutePlugin.apply(newTask, variables, patterns)) {
-                return false;
-            }
-        }
-        return true;
     }
+    return true;
+}
 } // namespace plugins
 } // namespace execHelper

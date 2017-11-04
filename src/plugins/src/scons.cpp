@@ -25,45 +25,47 @@ using execHelper::config::VariablesMap;
 using execHelper::core::Task;
 
 namespace {
-    const czstring<> PLUGIN_NAME = "scons";
+const czstring<> PLUGIN_NAME = "scons";
 } // namespace
 
-namespace execHelper { namespace plugins {
-    std::string Scons::getPluginName() const noexcept {
-        return "scons";
+namespace execHelper {
+namespace plugins {
+std::string Scons::getPluginName() const noexcept { return "scons"; }
+
+VariablesMap
+Scons::getVariablesMap(const FleetingOptionsInterface& fleetingOptions) const
+    noexcept {
+    VariablesMap defaults(PLUGIN_NAME);
+    defaults.add(getBuildDirKey(), ".");
+    defaults.add(COMMAND_LINE_KEY);
+    const auto verbosity = fleetingOptions.getVerbosity() ? "yes" : "no";
+    defaults.add(VERBOSITY_KEY, verbosity);
+    defaults.add(JOBS_KEY, to_string(fleetingOptions.getJobs()));
+    return defaults;
+}
+
+bool Scons::apply(Task task, const VariablesMap& variables,
+                  const Patterns& patterns) const noexcept {
+    task.append(PLUGIN_NAME);
+
+    ensures(variables.get<Verbosity>(VERBOSITY_KEY) != boost::none);
+    if(variables.get<Verbosity>(VERBOSITY_KEY).get()) {
+        task.append("--debug=explain");
     }
 
-    VariablesMap Scons::getVariablesMap(const FleetingOptionsInterface& fleetingOptions) const noexcept {
-        VariablesMap defaults(PLUGIN_NAME);
-        defaults.add(getBuildDirKey(), ".");
-        defaults.add(COMMAND_LINE_KEY);
-        const auto verbosity = fleetingOptions.getVerbosity() ? "yes" : "no";
-        defaults.add(VERBOSITY_KEY, verbosity);
-        defaults.add(JOBS_KEY, to_string(fleetingOptions.getJobs()));
-        return defaults;
-    }
+    ensures(variables.get<Jobs>(JOBS_KEY) != boost::none);
+    task.append({"--jobs", to_string(variables.get<Jobs>(JOBS_KEY).get())});
 
-    bool Scons::apply(Task task, const VariablesMap& variables, const Patterns& patterns) const noexcept {
-        task.append(PLUGIN_NAME);
+    ensures(variables.get<CommandLineArgs>(COMMAND_LINE_KEY) != boost::none);
+    task.append(variables.get<CommandLineArgs>(COMMAND_LINE_KEY).get());
 
-        ensures(variables.get<Verbosity>(VERBOSITY_KEY) != boost::none);
-        if(variables.get<Verbosity>(VERBOSITY_KEY).get()) {
-            task.append("--debug=explain");
+    for(const auto& combination : makePatternPermutator(patterns)) {
+        Task newTask = replacePatternCombinations(task, combination);
+        if(!registerTask(newTask)) {
+            return false;
         }
-
-        ensures(variables.get<Jobs>(JOBS_KEY) != boost::none);
-        task.append({"--jobs", to_string(variables.get<Jobs>(JOBS_KEY).get())});
-
-        ensures(variables.get<CommandLineArgs>(COMMAND_LINE_KEY) != boost::none);
-        task.append(variables.get<CommandLineArgs>(COMMAND_LINE_KEY).get());
-
-        for(const auto& combination : makePatternPermutator(patterns)) {
-            Task newTask = replacePatternCombinations(task, combination);
-            if(! registerTask(newTask)) {
-                return false;
-            }
-        }
-        return true;
     }
+    return true;
+}
 } // namespace plugins
 } // namespace execHelper
