@@ -22,19 +22,19 @@ namespace {
     const czstring<> SHORT_OPTION_KEY = "short-option";
     const czstring<> LONG_OPTION_KEY = "long-option";
 
-    inline void checkContainsPatterns(const PatternsHandler& handler, const Patterns& expectedPatterns) noexcept {
+    inline void checkContainsPatterns(const PatternsHandler& handler, const Patterns& expectedPatterns) {
         for(const auto& expectedPattern : expectedPatterns) {
             REQUIRE(handler.contains(expectedPattern.getKey()));
         }
     } 
 
-    inline void checkReturnsPatterns(const PatternsHandler& handler, const Patterns& expectedPatterns) noexcept {
+    inline void checkReturnsPatterns(const PatternsHandler& handler, const Patterns& expectedPatterns) {
         for(const auto& expectedPattern : expectedPatterns) {
             REQUIRE(handler.getPattern(expectedPattern.getKey()) == expectedPattern);
         }
     }
 
-    inline void checkNotContainsPatterns(const PatternsHandler& handler, const Patterns& /*expectedPatterns*/) noexcept {
+    inline void checkNotContainsPatterns(const PatternsHandler& handler, const Patterns& /*expectedPatterns*/) {
         const Pattern notAddedPattern("not-added-pattern");
         REQUIRE_FALSE(handler.contains(notAddedPattern.getKey()));
     }

@@ -9,12 +9,23 @@
 using std::thread;
 
 using boost::lexical_cast;
+using boost::bad_lexical_cast;
 
 using execHelper::log::LogLevel;
 
+namespace {
+    inline uint32_t getAutoConcurrency() noexcept {
+        uint32_t concurrency = thread::hardware_concurrency();
+        if(concurrency == 0U) {
+            concurrency = 1U;
+        }
+        return concurrency;
+    } 
+} // namespace 
+
 namespace execHelper {
     namespace config {
-        FleetingOptions::FleetingOptions(const VariablesMap& optionsMap) :
+        FleetingOptions::FleetingOptions(const VariablesMap& optionsMap) noexcept :
             m_help(optionsMap.get<HelpOption_t>(HELP_KEY).get()),
             m_verbose(optionsMap.get<VerboseOption_t>(VERBOSE_KEY).get()),
             m_dryRun(optionsMap.get<DryRunOption_t>(DRY_RUN_KEY).get()),
@@ -24,9 +35,14 @@ namespace execHelper {
         {
             auto jobs = optionsMap.get<JobsOption_t>(JOBS_KEY).get();
             if(jobs == "auto") {
-                m_jobs = thread::hardware_concurrency();
+                m_jobs = getAutoConcurrency();
             } else {
-                m_jobs = lexical_cast<Jobs_t>(jobs);
+                try {
+                    m_jobs = lexical_cast<Jobs_t>(jobs);
+                } catch(const bad_lexical_cast& e) {
+                    LOG(warning) << "Failed reading the number of jobs with error: '" << e.what() << "'. Falling back to auto";
+                    m_jobs = getAutoConcurrency();
+                }
             }
         }
 
@@ -65,7 +81,12 @@ namespace execHelper {
         }
 
         LogLevel FleetingOptions::getLogLevel() const noexcept {
-            return log::toLogLevel(m_logLevel);
+            try {
+                return log::toLogLevel(m_logLevel);
+            } catch(const log::InvalidLogLevel& e) {
+                LOG(warning) << "Invalid log level: '" << m_logLevel << "'. Continuing with the log level set to 'none'";
+            }
+            return log::none;
         }
 
         VariablesMap FleetingOptions::getDefault() noexcept {

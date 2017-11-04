@@ -22,7 +22,7 @@ namespace execHelper {
                  *
                  * \param[in] optionsMap   The variables map to get the fleeting options from
                  */
-                explicit FleetingOptions(const VariablesMap& optionsMap);
+                explicit FleetingOptions(const VariablesMap& optionsMap) noexcept;
 
                 /*! @copydoc config::Argv::Argv(const config::Argv& other)
                  */

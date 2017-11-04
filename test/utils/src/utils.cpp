@@ -14,6 +14,8 @@
 #include "base-utils/configFileWriter.h"
 #include "base-utils/yaml.h"
 
+#include "logger.h"
+
 using std::initializer_list;
 using std::endl;
 using std::map;
@@ -186,7 +188,12 @@ namespace execHelper { namespace test { namespace utils {
                     yaml.push_back(subKey);
                 }
             } else {
-                yaml[subKey] = toYaml(settings[subKey], Patterns());
+                try {
+                    yaml[subKey] = toYaml(settings[subKey], Patterns());
+                } catch(const YAML::InvalidNode& e) {
+                    LOG(error) << "Somehow the used YAML node is invalid";
+                    assert(false);
+                }
             }
         }
         return yaml;

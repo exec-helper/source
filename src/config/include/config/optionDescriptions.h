@@ -161,8 +161,13 @@ namespace execHelper {
 
                 virtual bool toMap(config::VariablesMap& variablesMap, const boost::program_options::variables_map& optionsMap) const noexcept override {
                     if(optionsMap.count(m_identifyingOption) > 0) {
-                        if(optionsMap[m_identifyingOption].as<bool>()) {
-                            return variablesMap.replace(m_identifyingOption, "1");
+                        try {
+                            if(optionsMap[m_identifyingOption].as<bool>()) {
+                                return variablesMap.replace(m_identifyingOption, "1");
+                            }
+                        } catch(const boost::bad_any_cast& e) {
+                            LOG(warning) << "Failed to interpret the value associated with identifying option '" << m_identifyingOption << "' with error '" << e.what() << "'. Continuing with the option set to false.";
+                            return variablesMap.replace(m_identifyingOption, "0");
                         }
                     }
                     return variablesMap.replace(m_identifyingOption, "0");
