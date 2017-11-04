@@ -94,6 +94,16 @@ variables:
         - export PATH=$(pwd)/build/clang++/undefined-behaviour/install/bin:$PATH
         - exec-helper init-build build run-test --compiler clang++ --mode undefined-behaviour --run-target ${RUN_TARGET}
 
+.code_format: &code_format
+    stage: analyze
+    image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-analyze
+    dependencies: []
+    variables:
+        MODULES: $ALL_MODULES
+        SOURCE_TYPE: $ALL_SOURCE_TYPES
+    script:
+        - exec-helper analyze -a format
+
 build-image:build:
     stage: build-image
     image: docker:latest
@@ -353,6 +363,9 @@ cross-compilation:
         - for DEB in $(find sysroot_arm64/var/cache/apt/archives -not -path sysroot_arm64/var/cache/apt/archives/partial -type f); do echo "Extracting ${DEB}..."; dpkg -x ${DEB} sysroot_arm64; done   # Unpack all downloaded debian packages, since debootstrap does not seem to unpack the additional included ones and their dependencies
         - find ./sysroot_arm64 -name pthread.h
         - exec-helper init-build build --compiler aarch64-linux-gnu-g++ --mode release --sysroot $(pwd)/sysroot_arm64
+
+code-format:
+    <<: *code_format
 
 pages:
     stage: deploy

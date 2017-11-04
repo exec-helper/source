@@ -46,6 +46,7 @@ patterns:
             - lcov
             - clang-tidy
             - coverity
+            - format
         short-option: a
         long-option: analyze
     DOCSTYPE:
@@ -138,6 +139,9 @@ coverage:
     - command-line-command
 
 memory-check:
+    - command-line-command
+
+format:
     - command-line-command
 
 docs:
@@ -287,6 +291,14 @@ command-line-command:
             - cov-build: [ cov-build, --dir, cov-int, exec-helper, build-only, --compiler, "{COMPILER}", --mode, "{MODE}" ]
             - archive: [tar, --create, --auto-compress, --file, "{COVERITY_ARCHIVE_NAME}", cov-int]
             - upload: [ echo, "{COVERITY_ARCHIVE_NAME} is now ready to get uploaded to coverity scan"]
+    format:
+        patterns:
+            - SOURCE_TYPE
+            - MODULE
+        command-line:
+            - rewrite-headers: [ clang-format, -i, "{SOURCE_TYPE}/{MODULE}/**/**/*.h"]
+            - rewrite-sources: [ clang-format, -i, "{SOURCE_TYPE}/{MODULE}/**/*.cpp"]
+            - check-rewritten: [ git, diff-index, --quiet, HEAD, --]
     changelog:
         patterns:
             - COMPILER
