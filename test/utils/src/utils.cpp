@@ -185,7 +185,11 @@ namespace execHelper { namespace test { namespace utils {
                 if(settings.values().size() == 1U) {
                     yaml = subKey;
                 } else {
-                    yaml.push_back(subKey);
+                    try {
+                        yaml.push_back(subKey);
+                    } catch(const YAML::InvalidNode&) {
+                        assert(false);
+                    }
                 }
             } else {
                 try {

@@ -135,7 +135,12 @@ namespace execHelper {
                 virtual ~Option() {}
 
                 virtual bool toMap(config::VariablesMap& variablesMap, const boost::program_options::variables_map& optionsMap) const noexcept override {
-                    return variablesMap.replace(m_identifyingOption, optionsMap[m_identifyingOption].template as<T>());
+                    try {
+                        return variablesMap.replace(m_identifyingOption, optionsMap[m_identifyingOption].template as<T>());
+                    } catch(const boost::bad_any_cast& e) {
+                        LOG(warning) << "Failed to interpret the value associated with identifying option '" << m_identifyingOption << "' with error '" << e.what() << "'. Continuing with the option not set.";
+                        return false;
+                    }
                 }
 
                 virtual const boost::program_options::value_semantic* getTypeValue() const noexcept override {
@@ -166,8 +171,8 @@ namespace execHelper {
                                 return variablesMap.replace(m_identifyingOption, "1");
                             }
                         } catch(const boost::bad_any_cast& e) {
-                            LOG(warning) << "Failed to interpret the value associated with identifying option '" << m_identifyingOption << "' with error '" << e.what() << "'. Continuing with the option set to false.";
-                            return variablesMap.replace(m_identifyingOption, "0");
+                            LOG(warning) << "Failed to interpret the value associated with identifying option '" << m_identifyingOption << "' with error '" << e.what() << "'. Continuing with the option not set.";
+                            return false;
                         }
                     }
                     return variablesMap.replace(m_identifyingOption, "0");
@@ -195,8 +200,12 @@ namespace execHelper {
                 virtual ~Option() {}
 
                 virtual bool toMap(config::VariablesMap& variablesMap, const boost::program_options::variables_map& optionsMap) const noexcept override {
-                    auto tmp = optionsMap[m_identifyingOption].template as<std::vector<T>>();
-                    return variablesMap.replace(m_identifyingOption, optionsMap[m_identifyingOption].template as<std::vector<T>>());
+                    try {
+                        return variablesMap.replace(m_identifyingOption, optionsMap[m_identifyingOption].template as<std::vector<T>>());
+                    } catch(const boost::bad_any_cast& e) {
+                        LOG(warning) << "Failed to interpret the value associated with identifying option '" << m_identifyingOption << "' with error '" << e.what() << "'. Continuing with the option not set";
+                        return false;
+                    }
                 }
 
                 virtual const boost::program_options::value_semantic* getTypeValue() const noexcept override {
