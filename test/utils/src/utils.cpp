@@ -198,6 +198,7 @@ namespace execHelper { namespace test { namespace utils {
                     }
                 }
             } else {
+                try {
                     yaml[subKey] = toYaml(settings[subKey], Patterns());
                 } catch(const YAML::InvalidNode& e) {
                     LOG(error) << "Somehow the used YAML node is invalid";
