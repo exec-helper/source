@@ -182,18 +182,22 @@ namespace execHelper { namespace test { namespace utils {
         }
         for(const auto& subKey : settings.values()) {
             if(settings[subKey].values().empty()) {
-                assert(yaml.isValid());
                 if(settings.values().size() == 1U) {
                     try {
                         yaml = subKey;
                     } catch(const YAML::InvalidNode&) {
+                        LOG(error) << "Somehow the used YAML node is invalid";
                         assert(false);
                     }
                 } else {
-                    yaml.push_back(subKey);
+                    try {
+                        yaml.push_back(subKey);
+                    } catch(const YAML::InvalidNode&) {
+                        LOG(error) << "Somehow the used YAML node is invalid";
+                        assert(false);
+                    }
                 }
             } else {
-                try {
                     yaml[subKey] = toYaml(settings[subKey], Patterns());
                 } catch(const YAML::InvalidNode& e) {
                     LOG(error) << "Somehow the used YAML node is invalid";
