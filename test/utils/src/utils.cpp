@@ -169,42 +169,32 @@ namespace execHelper { namespace test { namespace utils {
     YamlWriter toYaml(const SettingsNode& settings, const Patterns& patterns) noexcept {
         static string patternKey("patterns");
         YamlWriter yaml;
-        for(const auto& pattern : patterns) {
-            const auto longOption = pattern.getLongOption();
-            if(longOption) {
-                yaml[patternKey][pattern.getKey()]["long-option"] = longOption.get();
+        try {
+            for(const auto& pattern : patterns) {
+                const auto longOption = pattern.getLongOption();
+                if(longOption) {
+                    yaml[patternKey][pattern.getKey()]["long-option"] = longOption.get();
+                }
+                yaml[patternKey][pattern.getKey()]["default-values"] = pattern.getValues();
+                const auto shortOption = pattern.getShortOption();
+                if(shortOption) {
+                    yaml[patternKey][pattern.getKey()]["short-option"] = shortOption.get();
+                }
             }
-            yaml[patternKey][pattern.getKey()]["default-values"] = pattern.getValues();
-            const auto shortOption = pattern.getShortOption();
-            if(shortOption) {
-                yaml[patternKey][pattern.getKey()]["short-option"] = shortOption.get();
-            }
-        }
-        for(const auto& subKey : settings.values()) {
-            if(settings[subKey].values().empty()) {
-                if(settings.values().size() == 1U) {
-                    try {
+            for(const auto& subKey : settings.values()) {
+                if(settings[subKey].values().empty()) {
+                    if(settings.values().size() == 1U) {
                         yaml = subKey;
-                    } catch(const YAML::InvalidNode&) {
-                        LOG(error) << "Somehow the used YAML node is invalid";
-                        assert(false);
+                    } else {
+                        yaml.push_back(subKey);
                     }
                 } else {
-                    try {
-                        yaml.push_back(subKey);
-                    } catch(const YAML::InvalidNode&) {
-                        LOG(error) << "Somehow the used YAML node is invalid";
-                        assert(false);
-                    }
-                }
-            } else {
-                try {
                     yaml[subKey] = toYaml(settings[subKey], Patterns());
-                } catch(const YAML::InvalidNode& e) {
-                    LOG(error) << "Somehow the used YAML node is invalid";
-                    assert(false);
-                }
+               }
             }
+        } catch(const YAML::InvalidNode&) {
+            LOG(error) << "Somehow the used YAML node is invalid";
+            assert(false);
         }
         return yaml;
     }
