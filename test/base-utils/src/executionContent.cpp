@@ -1,6 +1,5 @@
 #include "executionContent.h" 
 
-#include <exception>
 #include <iostream>
 #include <string>
 #include <utility>
@@ -26,6 +25,7 @@ using boost::asio::io_service;
 using boost::asio::local::stream_protocol;
 using boost::filesystem::ofstream;
 using boost::system::error_code;
+using boost::system::system_error;
 using gsl::not_null;
 
 using execHelper::test::baseUtils::ExecutionContentData;
@@ -91,7 +91,12 @@ namespace execHelper {
 
             void IoService::start() noexcept {
                 m_isRunning = true;
-                m_service.run();
+                error_code ec;
+                m_service.run(ec);
+                if(ec) {
+                    cerr << "Received an unexpected system error: " << ec << ":" << ec.message() << endl;
+                    assert(false);
+                }
                 m_service.reset();
                 m_isRunning = false;
             }
@@ -116,24 +121,34 @@ namespace execHelper {
 
             IoService* ExecutionContentServer::m_ioService = nullptr;
 
-            ExecutionContentServer::ExecutionContentServer(ReturnCode returnCode) noexcept :
-                m_returnCode(returnCode),
-                m_file("exec-helper.unix-socket.%%%%"),
-                m_endpoint(m_file.getPath().native()),
-                m_socket(m_ioService->get()),
-                m_acceptor(m_ioService->get(), m_endpoint)
+            ExecutionContentServer::ExecutionContentServer(ReturnCode returnCode) noexcept
+                try :
+                    m_returnCode(returnCode),
+                    m_file("exec-helper.unix-socket.%%%%"),
+                    m_endpoint(m_file.getPath().native()),
+                    m_socket(m_ioService->get()),
+                    m_acceptor(m_ioService->get(), m_endpoint)
             {
                 init();
             }
+            catch(const system_error& e) {
+                cerr << "Unexpected exception caught: " << e.what() << endl;
+                assert(false);
+            }
 
-            ExecutionContentServer::ExecutionContentServer(ExecutionContentServer&& other) noexcept :
-                m_numberOfExecutions(other.m_numberOfExecutions),
-                m_returnCode(other.m_returnCode),
-                m_endpoint(move(other.m_endpoint)),
-                m_socket(move(other.m_socket)),
-                m_acceptor(move(other.m_acceptor))
+            ExecutionContentServer::ExecutionContentServer(ExecutionContentServer&& other) noexcept
+                try:
+                    m_numberOfExecutions(other.m_numberOfExecutions),
+                    m_returnCode(other.m_returnCode),
+                    m_endpoint(move(other.m_endpoint)),
+                    m_socket(move(other.m_socket)),
+                    m_acceptor(move(other.m_acceptor))
             {
                 ;
+            }
+            catch(const system_error& e) {
+                cerr << "Unexpected exception caught: " << e.what() << endl;
+                assert(false);
             }
 
             ExecutionContentServer::~ExecutionContentServer() noexcept {
@@ -149,8 +164,13 @@ namespace execHelper {
                 std::swap(m_numberOfExecutions, other.m_numberOfExecutions);
                 std::swap(m_returnCode, other.m_returnCode);
 
-                boost::swap(m_endpoint, other.m_endpoint);
-                boost::swap(m_acceptor, other.m_acceptor);
+                try {
+                    boost::swap(m_endpoint, other.m_endpoint);
+                    boost::swap(m_acceptor, other.m_acceptor);
+                } catch(const system_error& e) {
+                    cerr << "Unexpected exception caught: " << e.what() << endl;
+                    assert(false);
+                }
             }
 
             void ExecutionContentServer::registerIoService(gsl::not_null<IoService*> ioService) noexcept {
@@ -199,13 +219,13 @@ namespace execHelper {
             }
 
 
-            ExecutionContentClient::ExecutionContentClient(const Path& file) noexcept :
+            ExecutionContentClient::ExecutionContentClient(const Path& file) :
                 m_endpoint(file.native())
             {
                 ;
             }
 
-            ReturnCode ExecutionContentClient::addExecution() noexcept {
+            ReturnCode ExecutionContentClient::addExecution() {
                 io_service ioService;
 
                 stream_protocol::socket socket(ioService);

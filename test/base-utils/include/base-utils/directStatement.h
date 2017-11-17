@@ -1,7 +1,11 @@
 #ifndef DIRECT_STATEMENT_INCLUDE
 #define DIRECT_STATEMENT_INCLUDE
 
+#include <iostream>
+
 #include "plugins.h"
+
+#include "yaml.h"
 
 namespace execHelper {
     namespace test {
@@ -22,7 +26,12 @@ namespace execHelper {
                     }
 
                     void write(gsl::not_null<YamlWriter*> yaml, const std::string& command) const noexcept override {
-                        (*yaml)[getKey()][command][getStatementKey()] = getStatement();
+                        try {
+                            (*yaml)[getKey()][command][getStatementKey()] = getStatement();
+                        } catch(const YAML::InvalidNode&) {
+                            std::cerr << "Somehow the used YAML node is invalid" << std::endl;
+                            assert(false);
+                        }
                     };
 
                 private:

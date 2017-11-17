@@ -7,7 +7,7 @@ using gsl::not_null;
 namespace execHelper {
     namespace test {
         namespace baseUtils {
-            ConfigBuilder::ConfigBuilder() noexcept {
+            ConfigBuilder::ConfigBuilder() {
                 ExecutionContent::registerIoService(&m_ioService);
             }
 

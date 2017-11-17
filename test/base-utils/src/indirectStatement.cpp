@@ -1,5 +1,9 @@
 #include "indirectStatement.h"
 
+#include <iostream>
+
+using std::cerr;
+using std::endl;
 using std::shared_ptr;
 
 using gsl::not_null;
@@ -35,11 +39,16 @@ namespace execHelper {
             }
 
             void IndirectStatement::write(not_null<YamlWriter*> yaml, const std::string& /*command*/) const noexcept {
-                if(! (*yaml)[m_key]) {
-                    for(const auto& statement : m_statements) {
-                        (*yaml)[m_key].push_back(statement->getKey());
-                        statement->write(yaml, m_key);
+                try {
+                    if(! (*yaml)[m_key]) {
+                        for(const auto& statement : m_statements) {
+                            (*yaml)[m_key].push_back(statement->getKey());
+                            statement->write(yaml, m_key);
+                        }
                     }
+                } catch(const YAML::InvalidNode&) {
+                    cerr << "The given YAML node is invalid" << endl;
+                    assert(false);
                 }
             };
         } // namespace baseUtils

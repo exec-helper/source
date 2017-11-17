@@ -25,7 +25,7 @@ namespace execHelper {
 
 
                 public:
-                    ConfigBuilder() noexcept;
+                    ConfigBuilder();
 
                     Commands::const_iterator begin() const noexcept;
                     Commands::const_iterator end() const noexcept;

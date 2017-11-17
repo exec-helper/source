@@ -1,7 +1,11 @@
 #include "testCommand.h"
 
+#include <iostream>
+
 #include "plugins.h"
 
+using std::cerr;
+using std::endl;
 using std::shared_ptr;
 
 using gsl::not_null;
@@ -56,10 +60,15 @@ namespace execHelper {
             }
 
             void TestCommand::write(not_null<YamlWriter*> yaml) const noexcept {
-                (*yaml)["commands"][m_command] = "Execute the command";
-                for(const auto& statement : m_statements) {
-                    (*yaml)[m_command].push_back(statement->getKey());
-                    statement->write(yaml, m_command);
+                try {
+                    (*yaml)["commands"][m_command] = "Execute the command";
+                    for(const auto& statement : m_statements) {
+                        (*yaml)[m_command].push_back(statement->getKey());
+                        statement->write(yaml, m_command);
+                    }
+                } catch(const YAML::InvalidNode&) {
+                    cerr << "The given YAML node is invalid" << endl;
+                    assert(false);
                 }
             }
         } // namespace baseUtils

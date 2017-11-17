@@ -91,9 +91,9 @@ namespace execHelper {
 
             class ExecutionContentClient {
                 public:
-                    ExecutionContentClient(const Path& file) noexcept;
+                    ExecutionContentClient(const Path& file);
 
-                    ReturnCode addExecution() noexcept;
+                    ReturnCode addExecution();
 
                 private:
                     boost::asio::local::stream_protocol::endpoint m_endpoint;

@@ -1,4 +1,5 @@
 #include <iostream>
+#include <exception>
 
 #include "base-utils/commandUtils.h"
 #include "base-utils/executionContent.h"
@@ -6,6 +7,7 @@
 
 using std::cerr;
 using std::endl;
+using std::exception;
 
 using execHelper::test::baseUtils::ExecutionContentClient;
 using execHelper::test::baseUtils::Path;
@@ -18,6 +20,11 @@ int main(int argc, char** argv) {
     }
 
     Path endpoint(argv[1]);
-    ExecutionContentClient client(endpoint);
-    return client.addExecution();
+    try {
+        ExecutionContentClient client(endpoint);
+        return client.addExecution();
+    } catch(const exception& e) {
+        cerr << "Caught exception: " << e.what() << endl;
+        return RUNTIME_ERROR;
+    }
 }
