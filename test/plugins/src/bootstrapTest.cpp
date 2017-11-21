@@ -5,7 +5,6 @@
 #include "config/path.h"
 #include "config/pattern.h"
 #include "config/variablesMap.h"
-#include "log/log.h"
 #include "plugins/bootstrap.h"
 #include "plugins/buildPlugin.h"
 #include "plugins/commandLine.h"
@@ -41,8 +40,6 @@ namespace execHelper {
 namespace plugins {
 namespace test {
 SCENARIO("Obtain the plugin name of the bootstrap plugin", "[bootstrap]") {
-    log::init();
-
     GIVEN("A plugin") {
         Bootstrap plugin;
 

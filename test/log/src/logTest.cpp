@@ -34,6 +34,7 @@ using execHelper::log::error;
 using execHelper::log::fatal;
 using execHelper::log::info;
 using execHelper::log::none;
+using execHelper::log::test;
 using execHelper::log::trace;
 using execHelper::log::warning;
 
@@ -47,7 +48,7 @@ namespace {
 const vector<LogLevel>& getLogLevels() {
     try {
         static const vector<LogLevel> LOG_LEVELS(
-            {none, fatal, error, warning, info, debug, trace, all});
+            {none, fatal, error, warning, info, debug, trace, test, all});
         return LOG_LEVELS;
     } catch(exception& e) {
         cout << e.what() << endl;
@@ -59,7 +60,7 @@ const vector<string>& getLogLevelStrings() {
     try {
         static const vector<string> LOG_LEVEL_STRINGS(
             {"none", "fatal", "error", "warning", "info", "debug", "trace",
-             "all"});
+             "test", "all"});
         return LOG_LEVEL_STRINGS;
     } catch(exception& e) {
         cout << e.what() << endl;

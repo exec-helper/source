@@ -8,7 +8,6 @@
 #include "config/path.h"
 #include "core/posixShell.h"
 #include "core/task.h"
-#include "log/log.h"
 #include "utils/utils.h"
 
 using std::string;
@@ -23,8 +22,6 @@ namespace core {
 namespace test {
 SCENARIO("Test the posix shell for successfull commands",
          "[shell][posixshell]") {
-    log::init();
-
     GIVEN("A posix shell and a file that can be shown in it") {
         const TmpFile file;
 

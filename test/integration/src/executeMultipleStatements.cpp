@@ -1,5 +1,3 @@
-#include "unittest/catch.h"
-
 #include <iostream>
 #include <limits>
 #include <map>
@@ -17,6 +15,7 @@
 #include "base-utils/plugins.h"
 #include "base-utils/testCommand.h"
 #include "log/assertions.h"
+#include "unittest/catch.h"
 
 using std::make_shared;
 using std::move;

@@ -7,7 +7,6 @@
 #include "config/pattern.h"
 #include "config/settingsNode.h"
 #include "config/variablesMap.h"
-#include "log/log.h"
 #include "plugins/clangStaticAnalyzer.h"
 #include "plugins/commandLine.h"
 #include "plugins/executePlugin.h"
@@ -48,8 +47,6 @@ namespace plugins {
 namespace test {
 SCENARIO("Obtain the plugin name of the clang-static-analyzer plugin",
          "[clang-static-analyzer]") {
-    log::init();
-
     GIVEN("A plugin") {
         ClangStaticAnalyzer plugin;
 

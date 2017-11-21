@@ -9,7 +9,8 @@ namespace log {
  * \brief   List of the potential log levels
  */
 enum LogLevel {
-    all, // Use this to enable all logging
+    all,  // Use this to enable all logging
+    test, // Use this for printing (debug) output in tests
     trace,
     debug,
     info,

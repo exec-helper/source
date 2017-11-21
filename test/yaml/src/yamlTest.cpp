@@ -8,7 +8,6 @@
 #include <catch.hpp>
 
 #include "config/settingsNode.h"
-#include "log/log.h"
 #include "yaml/yaml.h"
 
 #include "base-utils/configFileWriter.h"
@@ -30,8 +29,6 @@ namespace execHelper {
 namespace yaml {
 namespace test {
 SCENARIO("Yaml wrapper test", "[yaml][yamlwrapper]") {
-    execHelper::log::init();
-
     GIVEN("A yaml config string to parse") {
         const string key("commands");
         const vector<string> values = {"command1", "command2", "command3"};

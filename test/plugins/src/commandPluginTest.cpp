@@ -7,7 +7,6 @@
 #include "config/settingsNode.h"
 #include "config/variablesMap.h"
 #include "core/task.h"
-#include "log/log.h"
 #include "plugins/commandPlugin.h"
 #include "plugins/executePlugin.h"
 #include "plugins/memory.h"
@@ -40,8 +39,6 @@ namespace execHelper {
 namespace plugins {
 namespace test {
 SCENARIO("Obtain the plugin name of the command-plugin", "[command-plugin]") {
-    execHelper::log::init();
-
     GIVEN("A plugin") {
         CommandPlugin plugin;
 

@@ -12,8 +12,9 @@ using std::vector;
 
 namespace {
 inline const vector<string>& getLogLevelStrings() noexcept {
-    static const vector<string> logLevels(
-        {"all", "trace", "debug", "info", "warning", "error", "fatal", "none"});
+    static const vector<string> logLevels({"all", "test", "trace", "debug",
+                                           "info", "warning", "error", "fatal",
+                                           "none"});
     return logLevels;
 }
 } // namespace

@@ -7,7 +7,6 @@
 #include <catch.hpp>
 
 #include "config/settingsNode.h"
-#include "log/log.h"
 
 #include "utils/utils.h"
 
@@ -31,8 +30,6 @@ namespace execHelper {
 namespace config {
 namespace test {
 SCENARIO("Basic addition and getting of values", "[config][settingsNode]") {
-    execHelper::log::init();
-
     GIVEN("A basic setup") {
         const SettingsKey rootKey("root-key");
         const SettingsValue testValue1("test-value1");

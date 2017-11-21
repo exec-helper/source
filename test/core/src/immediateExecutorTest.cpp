@@ -4,7 +4,6 @@
 #include <catch.hpp>
 
 #include "core/immediateExecutor.h"
-#include "log/log.h"
 #include "shellStub.h"
 
 using std::make_shared;
@@ -25,8 +24,6 @@ namespace core {
 namespace test {
 SCENARIO("Test the execution of the immediateExecutor",
          "[ExecutorInterface][ImmediateExecutor]") {
-    log::init();
-
     GIVEN("Some tasks we want to execute and an executor") {
         Task task1;
         task1.append("task1");

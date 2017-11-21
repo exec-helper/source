@@ -2,7 +2,6 @@
 
 #include <cassert>
 #include <fcntl.h>
-#include <iostream>
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <unistd.h>
@@ -12,8 +11,7 @@
 #include "base-utils/executionContent.h"
 #include "base-utils/path.h"
 
-using std::cout;
-using std::endl;
+#include "unittest/logger.h"
 
 using boost::filesystem::current_path;
 using boost::system::error_code;
@@ -39,17 +37,18 @@ void childProcessExecute(const CommandLineRaw& line,
     assert(fd >= 0);                // Either works or fix the test
     returnCode = dup2(fd, 1);
     if(returnCode == 0) {
-        cout << "Error: could not duplicate stdout file descriptor in child "
-                "process ("
-             << returnCode << ")" << endl;
+        LOG(test)
+            << "Error: could not duplicate stdout file descriptor in child "
+               "process ("
+            << returnCode << ")";
         assert(false); // Either works or fix the test
     }
     close(fd);
 
     if((returnCode = execvp(line[0], &(line[0]))) == -1) {
-        cout << "Error (" << returnCode
-             << "): Could not execvp command: " << strerror(errno) << " ("
-             << errno << ")" << endl;
+        LOG(test) << "Error (" << returnCode
+                  << "): Could not execvp command: " << strerror(errno) << " ("
+                  << errno << ")";
     }
     // execvp replaces the process: the return code for valid execvp calls should be obtained from the parent
     assert(false); // Either works or fix the test

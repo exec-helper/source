@@ -18,6 +18,7 @@ set(DEPENDENCIES
         boost-filesystem
         boost-system
         yaml-3rd
+        unittest
         pthread
     )
 

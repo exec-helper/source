@@ -7,7 +7,6 @@
 #include "config/settingsNode.h"
 #include "config/variablesMap.h"
 #include "core/task.h"
-#include "log/log.h"
 #include "plugins/executePlugin.h"
 #include "plugins/logger.h"
 #include "plugins/memory.h"
@@ -47,8 +46,6 @@ namespace execHelper {
 namespace plugins {
 namespace test {
 SCENARIO("Obtain the plugin name of the selector plugin", "[selector]") {
-    log::init();
-
     GIVEN("A plugin") {
         Selector plugin;
 

@@ -8,7 +8,6 @@
 #include "config/environment.h"
 #include "config/path.h"
 #include "core/task.h"
-#include "log/log.h"
 #include "unittest/catch.h"
 #include "utils/utils.h"
 
@@ -48,8 +47,6 @@ namespace execHelper {
 namespace core {
 namespace test {
 SCENARIO("Test the getters and setters of a task", "[task]") {
-    log::init();
-
     GIVEN("A task") {
         MAKE_COMBINATIONS(
             "Of getting and setting different parameters of a task") {

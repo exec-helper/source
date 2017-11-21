@@ -6,7 +6,6 @@
 #include "config/commandLineOptions.h"
 #include "config/fleetingOptions.h"
 #include "config/variablesMap.h"
-#include "log/log.h"
 #include "log/logLevel.h"
 
 using std::thread;
@@ -22,8 +21,6 @@ namespace execHelper {
 namespace config {
 namespace test {
 SCENARIO("Test the fleeting options defaults", "[config][fleeting-options]") {
-    execHelper::log::init();
-
     GIVEN("The expected defaults") {
         VariablesMap expectedDefaults("exec-helper");
         expectedDefaults.add(HELP_KEY, "no");

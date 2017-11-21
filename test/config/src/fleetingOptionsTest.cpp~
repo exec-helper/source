@@ -14,8 +14,6 @@ namespace execHelper {
 namespace config {
 namespace test {
     SCENARIO("Test the fleeting options defaults", "[config][fleeting-options]") {
-        execHelper::log::init();
-
         GIVEN("The expected defaults") {
             VariablesMap expectedDefaults("exec-helper");
             expectedDefaults.add(HELP_KEY, "no");

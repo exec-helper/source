@@ -49,8 +49,6 @@ namespace execHelper {
 namespace commander {
 namespace test {
 SCENARIO("Basic test the commander", "[commander]") {
-    execHelper::log::init();
-
     MAKE_COMBINATIONS("Of different inputs for the commander") {
         FleetingOptionsStub fleetingOptions;
 

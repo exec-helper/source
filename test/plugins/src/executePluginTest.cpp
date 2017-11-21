@@ -9,7 +9,6 @@
 #include "config/variablesMap.h"
 #include "core/task.h"
 #include "log/assertions.h"
-#include "log/log.h"
 #include "plugins/bootstrap.h"
 #include "plugins/clangStaticAnalyzer.h"
 #include "plugins/clangTidy.h"
@@ -91,8 +90,6 @@ namespace execHelper {
 namespace plugins {
 namespace test {
 SCENARIO("Obtain the plugin name of the execute-plugin", "[execute-plugin]") {
-    execHelper::log::init();
-
     GIVEN("A plugin") {
         ExecutePlugin plugin({});
 
