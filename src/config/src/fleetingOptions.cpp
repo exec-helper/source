@@ -29,13 +29,13 @@ FleetingOptions::FleetingOptions(const VariablesMap& optionsMap) noexcept
     }
 }
 
-bool FleetingOptions::operator==(const FleetingOptions& other) {
+bool FleetingOptions::operator==(const FleetingOptions& other) const {
     return m_help == other.m_help && m_verbose == other.m_verbose &&
            m_dryRun == other.m_dryRun && m_jobs == other.m_jobs &&
            m_logLevel == other.m_logLevel && m_commands == other.m_commands;
 }
 
-bool FleetingOptions::operator!=(const FleetingOptions& other) {
+bool FleetingOptions::operator!=(const FleetingOptions& other) const {
     return !(*this == other);
 }
 

@@ -179,7 +179,7 @@ SCENARIO("Test the conversion of a wrong string to a log level", "[log]") {
         WHEN("We convert the string to a log level") {
             THEN("We should get an exception") {
                 REQUIRE_THROWS_AS(toLogLevel(wrongLogLevel),
-                                  const InvalidLogLevel&);
+                                  InvalidLogLevel);
             }
         }
     }

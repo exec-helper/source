@@ -222,7 +222,7 @@ SCENARIO("Yaml does not find the supplied configuration file",
 
         WHEN("We pass it to yaml") {
             THEN("We should not get here") {
-                REQUIRE_THROWS_AS(Yaml(file.getPath()), const YAML::BadFile&);
+                REQUIRE_THROWS_AS(Yaml(file.getPath()), YAML::BadFile);
             }
         }
     }

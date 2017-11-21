@@ -43,11 +43,11 @@ class FleetingOptions : public FleetingOptionsInterface {
 
     /*! @copydoc config::Argv::operator==(const config::Argv& other) const
      */
-    bool operator==(const FleetingOptions& other);
+    bool operator==(const FleetingOptions& other) const;
 
     /*! @copydoc config::Argv::operator!=(const config::Argv& other) const
      */
-    bool operator!=(const FleetingOptions& other);
+    bool operator!=(const FleetingOptions& other) const;
 
     /**
      * Get the value of the help option
