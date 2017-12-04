@@ -158,9 +158,14 @@ template <typename T> class Option : public OptionBase {
     toMap(config::VariablesMap& variablesMap,
           const boost::program_options::variables_map& optionsMap) const
         noexcept override {
-        return variablesMap.replace(
-            m_identifyingOption,
-            optionsMap[m_identifyingOption].template as<T>());
+        try {
+            return variablesMap.replace(
+                m_identifyingOption,
+                optionsMap[m_identifyingOption].template as<T>());
+        } catch(const boost::bad_any_cast& e) {
+            LOG(warning) << "Bad_any_cast exception caught: " << e.what();
+            return false; 
+        }
     }
 
     virtual const boost::program_options::value_semantic* getTypeValue() const
@@ -190,8 +195,13 @@ template <> class Option<bool> : public OptionBase {
           const boost::program_options::variables_map& optionsMap) const
         noexcept override {
         if(optionsMap.count(m_identifyingOption) > 0) {
-            if(optionsMap[m_identifyingOption].as<bool>()) {
-                return variablesMap.replace(m_identifyingOption, "1");
+            try {
+                if(optionsMap[m_identifyingOption].as<bool>()) {
+                    return variablesMap.replace(m_identifyingOption, "1");
+                }
+            } catch(const boost::bad_any_cast& e) {
+                LOG(warning) << "Bad_any_cast exception caught: " << e.what();
+                return false; 
             }
         }
         return variablesMap.replace(m_identifyingOption, "0");
@@ -224,11 +234,14 @@ template <typename T> class Option<std::vector<T>> : public OptionBase {
     toMap(config::VariablesMap& variablesMap,
           const boost::program_options::variables_map& optionsMap) const
         noexcept override {
-        auto tmp =
-            optionsMap[m_identifyingOption].template as<std::vector<T>>();
-        return variablesMap.replace(
-            m_identifyingOption,
-            optionsMap[m_identifyingOption].template as<std::vector<T>>());
+        try {
+            return variablesMap.replace(
+                m_identifyingOption,
+                optionsMap[m_identifyingOption].template as<std::vector<T>>());
+        } catch(const boost::bad_any_cast& e) {
+            LOG(warning) << "Bad_any_cast exception caught: " << e.what();
+            return false; 
+        }
     }
 
     virtual const boost::program_options::value_semantic* getTypeValue() const

@@ -25,7 +25,11 @@ FleetingOptions::FleetingOptions(const VariablesMap& optionsMap) noexcept
     if(jobs == "auto") {
         m_jobs = thread::hardware_concurrency();
     } else {
-        m_jobs = lexical_cast<Jobs_t>(jobs);
+        try {
+            m_jobs = lexical_cast<Jobs_t>(jobs);
+        } catch(const boost::bad_lexical_cast& e) {
+            LOG(warning) << "Bad lexical cast for the number of jobs. Using default.";
+        }
     }
 }
 
@@ -54,7 +58,12 @@ const CommandCollection& FleetingOptions::getCommands() const noexcept {
 }
 
 LogLevel FleetingOptions::getLogLevel() const noexcept {
-    return log::toLogLevel(m_logLevel);
+    try {
+        return log::toLogLevel(m_logLevel);
+    } catch(const log::InvalidLogLevel& e) {
+        LOG(warning) << "Invalid log level given. Using default.";
+        return log::none;
+    }
 }
 
 VariablesMap FleetingOptions::getDefault() noexcept {
