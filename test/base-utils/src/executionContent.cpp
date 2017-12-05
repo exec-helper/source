@@ -23,6 +23,7 @@ using std::thread;
 using boost::asio::buffer;
 using boost::asio::io_service;
 using boost::asio::local::stream_protocol;
+using boost::asio::socket_base;
 using boost::filesystem::ofstream;
 using boost::system::error_code;
 using boost::system::system_error;
@@ -123,33 +124,46 @@ boost::asio::io_service& IoService::get() noexcept { return m_service; }
 IoService* ExecutionContentServer::m_ioService = nullptr;
 
 ExecutionContentServer::ExecutionContentServer(
-    ReturnCode returnCode) noexcept try
+    ReturnCode returnCode) noexcept
     : m_returnCode(returnCode),
       m_file("exec-helper.unix-socket.%%%%"),
       m_endpoint(m_file.getPath().native()),
       m_socket(m_ioService->get()),
-      m_acceptor(m_ioService->get(), m_endpoint) {
-    init();
-} catch(const system_error& e) {
-    cerr << "Unexpected exception caught: " << e.what() << endl;
-    assert(false);
+      m_acceptor(m_ioService->get()) {
+        try {
+            // Explicitly open the acceptor in the constructor body: exceptions will leak out of the constructor otherwise
+            openAcceptor();
+        } catch(const system_error& e) {
+            cerr << "Unexpected exception caught: '" << e.what() << "'. The execution content server will not work" << endl;
+            assert(false);
+        }
+        init();
 }
 
 ExecutionContentServer::ExecutionContentServer(
-    ExecutionContentServer&& other) noexcept try
+    ExecutionContentServer&& other) noexcept
     : m_numberOfExecutions(other.m_numberOfExecutions),
       m_returnCode(other.m_returnCode),
       m_endpoint(move(other.m_endpoint)),
       m_socket(move(other.m_socket)),
-      m_acceptor(move(other.m_acceptor)) {
-    ;
-} catch(const system_error& e) {
-    cerr << "Unexpected exception caught: " << e.what() << endl;
-    assert(false);
+      m_acceptor(other.m_acceptor.get_io_service()) {
+        try {
+            openAcceptor();
+        } catch(const system_error& e) {
+            cerr << "Unexpected exception caught: " << e.what() << endl;
+            assert(false);
+        }
 }
 
 ExecutionContentServer::~ExecutionContentServer() noexcept {
     ::unlink(m_file.getPath().native().c_str());
+}
+
+void ExecutionContentServer::openAcceptor() {
+    m_acceptor.open(m_endpoint.protocol());
+    m_acceptor.set_option(socket_base::reuse_address(true));
+    m_acceptor.bind(m_endpoint);
+    m_acceptor.listen(socket_base::max_connections);
 }
 
 ExecutionContentServer& ExecutionContentServer::

@@ -74,6 +74,13 @@ class ExecutionContentServer {
     static void registerIoService(gsl::not_null<IoService*> ioService) noexcept;
 
   private:
+    /**
+     * Opens the acceptor explicitly rather than using the appropriate constructor for it. This is to work around
+     * the fact that the appropriate constructor will throw, causing an exception to leak out of the interface
+     *
+     * \throws boost::system::system_error  If the acceptor can not be opened
+     */
+    void openAcceptor();
     void init() noexcept;
     void accept() noexcept;
     ExecutionContentDataReply
