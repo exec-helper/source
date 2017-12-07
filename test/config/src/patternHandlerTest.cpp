@@ -37,9 +37,8 @@ inline void checkReturnsPatterns(const PatternsHandler& handler,
     }
 }
 
-inline void
-checkNotContainsPatterns(const PatternsHandler& handler,
-                         const Patterns& /*expectedPatterns*/) {
+inline void checkNotContainsPatterns(const PatternsHandler& handler,
+                                     const Patterns& /*expectedPatterns*/) {
     const Pattern notAddedPattern("not-added-pattern");
     REQUIRE_FALSE(handler.contains(notAddedPattern.getKey()));
 }

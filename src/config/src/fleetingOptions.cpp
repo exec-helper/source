@@ -28,7 +28,8 @@ FleetingOptions::FleetingOptions(const VariablesMap& optionsMap) noexcept
         try {
             m_jobs = lexical_cast<Jobs_t>(jobs);
         } catch(const boost::bad_lexical_cast& e) {
-            LOG(warning) << "Bad lexical cast for the number of jobs. Using default.";
+            LOG(warning)
+                << "Bad lexical cast for the number of jobs. Using default.";
         }
     }
 }

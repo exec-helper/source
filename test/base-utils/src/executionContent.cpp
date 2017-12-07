@@ -123,21 +123,21 @@ boost::asio::io_service& IoService::get() noexcept { return m_service; }
 
 IoService* ExecutionContentServer::m_ioService = nullptr;
 
-ExecutionContentServer::ExecutionContentServer(
-    ReturnCode returnCode) noexcept
+ExecutionContentServer::ExecutionContentServer(ReturnCode returnCode) noexcept
     : m_returnCode(returnCode),
       m_file("exec-helper.unix-socket.%%%%"),
       m_endpoint(m_file.getPath().native()),
       m_socket(m_ioService->get()),
       m_acceptor(m_ioService->get()) {
-        try {
-            // Explicitly open the acceptor in the constructor body: exceptions will leak out of the constructor otherwise
-            openAcceptor();
-        } catch(const system_error& e) {
-            cerr << "Unexpected exception caught: '" << e.what() << "'. The execution content server will not work" << endl;
-            assert(false);
-        }
-        init();
+    try {
+        // Explicitly open the acceptor in the constructor body: exceptions will leak out of the constructor otherwise
+        openAcceptor();
+    } catch(const system_error& e) {
+        cerr << "Unexpected exception caught: '" << e.what()
+             << "'. The execution content server will not work" << endl;
+        assert(false);
+    }
+    init();
 }
 
 ExecutionContentServer::ExecutionContentServer(
@@ -147,12 +147,12 @@ ExecutionContentServer::ExecutionContentServer(
       m_endpoint(move(other.m_endpoint)),
       m_socket(move(other.m_socket)),
       m_acceptor(other.m_acceptor.get_io_service()) {
-        try {
-            openAcceptor();
-        } catch(const system_error& e) {
-            cerr << "Unexpected exception caught: " << e.what() << endl;
-            assert(false);
-        }
+    try {
+        openAcceptor();
+    } catch(const system_error& e) {
+        cerr << "Unexpected exception caught: " << e.what() << endl;
+        assert(false);
+    }
 }
 
 ExecutionContentServer::~ExecutionContentServer() noexcept {

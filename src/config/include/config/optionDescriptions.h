@@ -164,7 +164,7 @@ template <typename T> class Option : public OptionBase {
                 optionsMap[m_identifyingOption].template as<T>());
         } catch(const boost::bad_any_cast& e) {
             LOG(warning) << "Bad_any_cast exception caught: " << e.what();
-            return false; 
+            return false;
         }
     }
 
@@ -201,7 +201,7 @@ template <> class Option<bool> : public OptionBase {
                 }
             } catch(const boost::bad_any_cast& e) {
                 LOG(warning) << "Bad_any_cast exception caught: " << e.what();
-                return false; 
+                return false;
             }
         }
         return variablesMap.replace(m_identifyingOption, "0");
@@ -240,7 +240,7 @@ template <typename T> class Option<std::vector<T>> : public OptionBase {
                 optionsMap[m_identifyingOption].template as<std::vector<T>>());
         } catch(const boost::bad_any_cast& e) {
             LOG(warning) << "Bad_any_cast exception caught: " << e.what();
-            return false; 
+            return false;
         }
     }
 
