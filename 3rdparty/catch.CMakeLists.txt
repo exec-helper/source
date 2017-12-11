@@ -27,6 +27,7 @@ endif()
 
 add_library(catch INTERFACE)
 target_include_directories(catch SYSTEM INTERFACE ${Catch_INCLUDE_DIRS})
+target_link_libraries(catch INTERFACE ${Catch_LIBRARIES})
 
 if(NOT ${USE_SYSTEM_CATCH})
     add_dependencies(catch Catch)

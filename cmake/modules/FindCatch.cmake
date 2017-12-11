@@ -13,4 +13,5 @@ find_package_handle_standard_args(${MODULE_NAME}  DEFAULT_MSG
 mark_as_advanced(${MODULE_NAME}_INCLUDE_DIR)
 
 set(${MODULE_NAME}_INCLUDE_DIRS ${${MODULE_NAME}_INCLUDE_DIR} )
+set(${MODULE_NAME}_LIBRARIES dl)
 set(${MODULE_NAME}_LIBRARY_DIRS  ${${MODULE_NAME}_LIBRARY})

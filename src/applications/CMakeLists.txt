@@ -5,6 +5,7 @@ set(SRCS
    )
 
 set(DEPENDENCIES
+        dl
         boost-filesystem
         boost-optional
         log
