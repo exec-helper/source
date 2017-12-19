@@ -28,7 +28,11 @@ Enable the verbose flag for the command if available.
 Execute one or more configured COMMANDs. This is an alias for the \em \<commands\> mandatory option above.
 
 \par -s, -\-settings-file[=FILE]
-Use FILE as the settings file for the exec-helper configuration. By default exec-helper searches for a \em \.exec-helper file in the current directory and the _$HOME_ directory of the caller.
+Use FILE as the settings file for the exec-helper configuration. Default: \em \.exec-helper.
+Exec-helper will use the first file it finds with the given FILE name. It will search in order in the following locations:
+1. The current working directory
+2. The parent directories of the working directory. The parent directories are searched in _reversed_ order, meaning that the direct parent of the current working directory is searched first, next the direct parent of the direct parent of the current working directory and so-forth until the root directory is reached.
+3. The _HOME_ directory of the caller.
 
 \par -j, -\-jobs[=JOBS]
 Use the specified number of JOBS for each task (if supported). Use _auto_ to let exec-helper determine an appropriate number. Use a value of _1_ for running jobs single-threaded. Default: _auto_.

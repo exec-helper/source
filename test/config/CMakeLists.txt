@@ -9,6 +9,7 @@ set(SRCS    src/settingsNodeTest.cpp
             src/commandLineOptionsTest.cpp
             src/argvTest.cpp
             src/envpTest.cpp
+            src/pathManipulationTest.cpp
    )
 
 set(DEPENDENCIES

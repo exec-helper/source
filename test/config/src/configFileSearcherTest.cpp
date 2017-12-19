@@ -3,9 +3,8 @@
 #include <boost/optional/optional.hpp>
 #include <boost/optional/optional_io.hpp>
 
-#include <catch.hpp>
-
 #include "config/configFileSearcher.h"
+#include "unittest/catch.h"
 
 using std::string;
 

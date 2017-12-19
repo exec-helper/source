@@ -12,6 +12,7 @@ set(SRCS    src/settingsNode.cpp
             src/argv.cpp
             src/envp.cpp
             src/cast.cpp
+            src/pathManipulation.cpp
 )
 
 set(DEPENDENCIES

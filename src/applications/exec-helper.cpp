@@ -17,6 +17,7 @@
 #include "config/envp.h"
 #include "config/fleetingOptions.h"
 #include "config/optionDescriptions.h"
+#include "config/pathManipulation.h"
 #include "config/pattern.h"
 #include "config/settingsNode.h"
 #include "config/variablesMap.h"
@@ -63,6 +64,8 @@ using execHelper::config::Option;
 using execHelper::config::OptionDescriptions;
 using execHelper::config::Path;
 using execHelper::config::Paths;
+using execHelper::config::getAllParentDirectories;
+using execHelper::config::getHomeDirectory;
 using execHelper::config::PatternValues;
 using execHelper::config::Patterns;
 using execHelper::config::SETTINGS_FILE_KEY;
@@ -121,11 +124,11 @@ inline EnvironmentCollection toEnvCollection(char** envp) {
     return result;
 }
 
-inline Paths getSearchPaths(const EnvironmentCollection& env) {
-    Paths searchPaths({current_path()});
-    const string HOME_DIR_KEY("HOME");
-    if(env.count(HOME_DIR_KEY) > 0) {
-        searchPaths.push_back(env.at(HOME_DIR_KEY));
+inline Paths getSearchPaths(const EnvironmentCollection& env) noexcept {
+    Paths searchPaths = getAllParentDirectories(current_path());
+    auto homeDir = getHomeDirectory(env);
+    if(homeDir) {
+        searchPaths.emplace_back(homeDir.get());
     }
     return searchPaths;
 }
