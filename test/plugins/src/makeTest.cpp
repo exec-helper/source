@@ -6,6 +6,7 @@
 #include "config/environment.h"
 #include "config/pattern.h"
 #include "config/variablesMap.h"
+#include "config/workingDirectory.h"
 #include "plugins/commandLine.h"
 #include "plugins/make.h"
 #include "plugins/pluginUtils.h"
@@ -29,6 +30,7 @@ using execHelper::config::Path;
 using execHelper::config::Pattern;
 using execHelper::config::Patterns;
 using execHelper::config::VariablesMap;
+using execHelper::config::WORKING_DIR_KEY;
 using execHelper::core::Task;
 
 using execHelper::core::test::ExecutorStub;
@@ -104,6 +106,7 @@ SCENARIO("Testing the configuration settings of the make plugin", "[make]") {
         bool verbosity = false;
         CommandLineArgs commandLine;
         EnvironmentCollection env;
+        Path workingDirectory(current_path());
 
         ExecutorStub executor;
         ExecuteCallback executeCallback = [&executor](const Task& task) {
@@ -141,6 +144,16 @@ SCENARIO("Testing the configuration settings of the make plugin", "[make]") {
             }
         }
 
+        COMBINATIONS("Set the working directory") {
+            workingDirectory = "1234{" + pattern2.getKey() + "}/4321/{HELLO}";
+            variables.replace(WORKING_DIR_KEY, workingDirectory.native());
+        }
+
+        COMBINATIONS("Set the working directory to the current directory") {
+            workingDirectory = ".";
+            variables.replace(WORKING_DIR_KEY, workingDirectory.native());
+        }
+
         Task expectedTask({PLUGIN_NAME});
         expectedTask.append({"--directory", buildDir.native()});
         expectedTask.append({"--jobs", to_string(jobs)});
@@ -149,6 +162,7 @@ SCENARIO("Testing the configuration settings of the make plugin", "[make]") {
         }
         expectedTask.append(commandLine);
         expectedTask.setEnvironment(env);
+        expectedTask.setWorkingDirectory(workingDirectory);
 
         ExecutorStub::TaskQueue expectedTasks =
             getExpectedTasks(expectedTask, patterns);

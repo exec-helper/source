@@ -23,6 +23,9 @@ The path to the Makefile. This is either an absolute path are a path relative to
 ## command-line
 Additional command line parameters to pass to make as a list of separate arguments. By default no additional arguments are added.
 
+## working-dir
+The working directory of the command. Can be an absolute path are a relative one w.r.t. the path to the considered configuration file. Commands that should be executed relative to the current working dir can use the _current dir_ operator ('.' on NIX systems).
+
 # EXAMPLE
 ## Configuration
 \include make.example

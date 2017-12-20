@@ -6,6 +6,7 @@
 
 #include "config/environment.h"
 #include "config/variablesMap.h"
+#include "config/workingDirectory.h"
 #include "core/patterns.h"
 #include "core/task.h"
 
@@ -26,13 +27,13 @@ using execHelper::config::Path;
 using execHelper::config::Patterns;
 using execHelper::config::SettingsKeys;
 using execHelper::config::VariablesMap;
+using execHelper::config::WORKING_DIR_KEY;
+using execHelper::config::WorkingDir;
 using execHelper::core::Task;
 using execHelper::core::Tasks;
 
 namespace {
 const czstring<> PLUGIN_NAME = "command-line-command";
-using WorkingDir = string;
-const czstring<> WORKING_DIR_KEY = "working-dir";
 } // namespace
 
 namespace execHelper {

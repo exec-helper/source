@@ -7,6 +7,7 @@
 #include "config/environment.h"
 #include "config/fleetingOptionsInterface.h"
 #include "config/variablesMap.h"
+#include "config/workingDirectory.h"
 #include "core/patterns.h"
 #include "core/task.h"
 
@@ -26,6 +27,8 @@ using execHelper::config::FleetingOptionsInterface;
 using execHelper::config::Path;
 using execHelper::config::PatternKeys;
 using execHelper::config::VariablesMap;
+using execHelper::config::WORKING_DIR_KEY;
+using execHelper::config::WorkingDir;
 using execHelper::core::Task;
 
 namespace {
@@ -62,6 +65,11 @@ bool Make::apply(core::Task task, const config::VariablesMap& variables,
     }
     task.append(variables.get<CommandLineArgs>(COMMAND_LINE_KEY).get());
     task.appendToEnvironment(getEnvironment(variables));
+
+    auto workingDir = variables.get<WorkingDir>(WORKING_DIR_KEY);
+    if(workingDir) {
+        task.setWorkingDirectory(workingDir.get());
+    }
 
     for(const auto& combination : makePatternPermutator(patterns)) {
         Task newTask = replacePatternCombinations(task, combination);
