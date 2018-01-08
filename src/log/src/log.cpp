@@ -25,13 +25,12 @@ using execHelper::log::Channel;
 using execHelper::log::LogLevel;
 using execHelper::log::none;
 
-BOOST_LOG_ATTRIBUTE_KEYWORD(
-    timestamp, "TimeStamp",
-    boost::posix_time::ptime) // NOLINT(modernize-use-using)
-BOOST_LOG_ATTRIBUTE_KEYWORD(severity, "Severity",
-                            LogLevel) // NOLINT(modernize-use-using)
-BOOST_LOG_ATTRIBUTE_KEYWORD(channel, "Channel",
-                            Channel) // NOLINT(modernize-use-using)
+BOOST_LOG_ATTRIBUTE_KEYWORD( // NOLINT(modernize-use-using)
+    timestamp, "TimeStamp", boost::posix_time::ptime)
+BOOST_LOG_ATTRIBUTE_KEYWORD(severity, "Severity", // NOLINT(modernize-use-using)
+                            LogLevel)
+BOOST_LOG_ATTRIBUTE_KEYWORD(channel, "Channel", // NOLINT(modernize-use-using)
+                            Channel)
 
 namespace {
 class ConsoleLogger {

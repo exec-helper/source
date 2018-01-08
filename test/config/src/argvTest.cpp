@@ -34,16 +34,18 @@ SCENARIO("Test argv construction", "[config][argv]") {
                 char** returnedArgv = args.getArgv();
                 for(int i = 0U; i < argc; ++i) {
                     REQUIRE(
-                        returnedArgv[i] ==
-                        args[i]); // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                        returnedArgv
+                            [i] == // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                        args[i]);
                 }
             }
 
             THEN("argv[argc] should be a nullptr") {
                 char** returnedArgv = args.getArgv();
                 REQUIRE(
-                    returnedArgv[argc] ==
-                    nullptr); // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                    returnedArgv
+                        [argc] == // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                    nullptr);
             }
 
             THEN(
@@ -68,16 +70,19 @@ SCENARIO("Test argv construction", "[config][argv]") {
                 const char* const* returnedArgv = args.getArgv();
                 for(int i = 0U; i < argc; ++i) {
                     REQUIRE(
-                        returnedArgv[i] ==
-                        args[i]); // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                        returnedArgv
+                            [i] == // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+
+                        args[i]);
                 }
             }
 
             THEN("argv[argc] should be a nullptr") {
                 const char* const* returnedArgv = args.getArgv();
                 REQUIRE(
-                    returnedArgv[argc] ==
-                    nullptr); // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                    returnedArgv
+                        [argc] == // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                    nullptr);
             }
 
             THEN(
@@ -105,16 +110,18 @@ SCENARIO("Test argv construction", "[config][argv]") {
                 char** returnedArgv = argv.getArgv();
                 for(size_t i = 0U; i < args.size(); ++i) {
                     REQUIRE(
-                        returnedArgv[i] ==
-                        args[i]); // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                        returnedArgv
+                            [i] == // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                        args[i]);
                 }
             }
 
             THEN("argv[argc] should be a nullptr") {
                 char** returnedArgv = argv.getArgv();
                 REQUIRE(
-                    returnedArgv[args.size()] ==
-                    nullptr); // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                    returnedArgv
+                        [args.size()] == // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                    nullptr);
             }
 
             THEN(
@@ -135,16 +142,19 @@ SCENARIO("Test argv construction", "[config][argv]") {
                 const char* const* returnedArgv = argv.getArgv();
                 for(size_t i = 0U; i < args.size(); ++i) {
                     REQUIRE(
-                        returnedArgv[i] ==
-                        args[i]); // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                        returnedArgv
+                            [i] == // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+
+                        args[i]);
                 }
             }
 
             THEN("argv[argc] should be a nullptr") {
                 const char* const* returnedArgv = argv.getArgv();
                 REQUIRE(
-                    returnedArgv[args.size()] ==
-                    nullptr); // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                    returnedArgv
+                        [args.size()] == // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                    nullptr);
             }
 
             THEN(
@@ -165,8 +175,8 @@ SCENARIO("Test the argv copy and move constructor, assignment operators and "
         Argv argv(args);
 
         WHEN("We copy the given object") {
-            Argv copy(
-                argv); // NOLINT(performance-unnecessary-copy-initialization)
+            Argv copy( // NOLINT(performance-unnecessary-copy-initialization)
+                argv);
 
             // Save the pointers to the arguments
             vector<char*> argvAddresses;
@@ -265,8 +275,9 @@ SCENARIO("Test the argv equality operators", "[config][argv]") {
         }
 
         WHEN("We copy the object and compare") {
-            const Argv copy(
-                argv); // NOLINT(performance-unnecessary-copy-initialization)
+            const Argv
+                copy( // NOLINT(performance-unnecessary-copy-initialization)
+                    argv);
 
             THEN("They should not be equal") {
                 // Note: this is due to the fact that we expect the copy

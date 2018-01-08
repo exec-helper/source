@@ -124,8 +124,9 @@ SCENARIO("Test copy constructor and assignment", "[patterns][Pattern]") {
         FleetingOptions originalFleetingOptions(variables);
 
         WHEN("We copy the fleeting options") {
-            FleetingOptions copied(
-                originalFleetingOptions); // NOLINT(performance-unnecessary-copy-initialization)
+            FleetingOptions
+                copied( // NOLINT(performance-unnecessary-copy-initialization)
+                    originalFleetingOptions);
 
             THEN("We should get the same fleeting options") {
                 REQUIRE(originalFleetingOptions == copied);
@@ -134,7 +135,9 @@ SCENARIO("Test copy constructor and assignment", "[patterns][Pattern]") {
         }
 
         WHEN("We assign the pattern") {
-            FleetingOptions copied = originalFleetingOptions;
+            FleetingOptions
+                copied = // NOLINT(performance-unnecessary-copy-initialization)
+                originalFleetingOptions;
 
             THEN("We should get the same pattern") {
                 REQUIRE(originalFleetingOptions == copied);

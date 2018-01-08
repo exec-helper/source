@@ -44,10 +44,11 @@ command-line-command:           # Configure the command-line-command
     clean:                      # Configure the execution of the build command
         patterns:               # Overwrite the parent patterns
             - MODE
+            - EH_WORKING_DIR    # Use the EH_WORKING_DIR pattern
         command-line:
             - echo
             - cleaning
             - mode.
             - "{MODE}"          # This value will be replaced by the MODE pattern value
             - wd=$(pwd)
-        working-dir: /tmp       # The command will be executed from the /tmp directory rather than from the directory of this configuration file
+        working-dir: "{EH_WORKING_DIR}" # The command will be executed from the current working directory rather than from the directory of this configuration file

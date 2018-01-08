@@ -306,11 +306,10 @@ command-line-command:
 
 valgrind:
     run-command: run-test
-    analyze:
-        tool: memcheck
-        command-line:
-            - --leak-check=full
-            - --error-exitcode=1
+    tool: memcheck
+    command-line:
+        - --leak-check=full
+        - --error-exitcode=1
 
 pmd:
     patterns:
@@ -342,12 +341,11 @@ lcov:
         - 4
 
 clang-tidy:
-    analyze:
-        patterns:
-            - SOURCE_TYPE
-            - MODULE
-        sources:
-            - "{SOURCE_TYPE}/{MODULE}/src/*.cpp"
+    patterns:
+        - SOURCE_TYPE
+        - MODULE
+    sources:
+        - "{SOURCE_TYPE}/{MODULE}/src/*.cpp"
 
 coverity:
     - command-line-command

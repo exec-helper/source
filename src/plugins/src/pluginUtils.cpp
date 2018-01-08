@@ -26,8 +26,6 @@ using std::pair;
 using std::string;
 using std::vector;
 
-using boost::filesystem::current_path;
-
 using execHelper::config::Command;
 using execHelper::config::ENVIRONMENT_KEY;
 using execHelper::config::EnvironmentCollection;

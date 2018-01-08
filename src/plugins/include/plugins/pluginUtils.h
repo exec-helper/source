@@ -7,6 +7,7 @@
 #include <boost/optional/optional.hpp>
 
 #include "config/commandLineOptions.h"
+#include "config/path.h"
 #include "config/pattern.h"
 #include "config/variablesMap.h"
 #include "core/mapPermutator.h"

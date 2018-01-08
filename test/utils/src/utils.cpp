@@ -28,6 +28,7 @@ using std::vector;
 using boost::filesystem::ifstream;
 using boost::filesystem::ofstream;
 using boost::filesystem::path;
+using boost::filesystem::current_path;
 using gsl::not_null;
 
 using execHelper::config::EnvironmentCollection;
@@ -306,6 +307,15 @@ string toString(const SettingsNode& settings, unsigned int nbOfTabs) noexcept {
         result += toString(settings[value], nbOfTabs + 1);
     }
     return result;
+}
+
+std::string inheritWorkingDirKey() noexcept { return "EH_WORKING_DIR"; }
+
+Patterns getPredefinedPatterns() noexcept {
+    Patterns predefined;
+    predefined.emplace_back(
+        Pattern(inheritWorkingDirKey(), {current_path().native()}));
+    return predefined;
 }
 } // namespace utils
 } // namespace test

@@ -17,7 +17,7 @@ namespace execHelper {
 namespace config {
 Argv::Argv(int argc, const char* const* const argv) noexcept {
     span<const czstring<>> spanArgv(argv, argc);
-    m_argv.reserve(argc + 1U);
+    m_argv.reserve(argc + 1UL);
     for(const auto& arg : spanArgv) {
         const auto argLength = strnlen(arg, 256U) + 1U;
         auto newArg = new char[argLength];

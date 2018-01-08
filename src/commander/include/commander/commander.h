@@ -45,7 +45,7 @@ class Commander {
      *          False   Otherwise
      */
     bool run(const config::FleetingOptionsInterface& fleetingOptions,
-             config::SettingsNode&& settings, config::Patterns&& patterns,
+             config::SettingsNode settings, config::Patterns patterns,
              const config::Path& workingDirectory,
              const config::EnvironmentCollection& env) noexcept;
 

@@ -20,7 +20,6 @@ using execHelper::config::FleetingOptionsInterface;
 using execHelper::config::PatternKeys;
 using execHelper::config::PatternValues;
 using execHelper::config::Patterns;
-using execHelper::config::PatternsHandler;
 using execHelper::config::VariablesMap;
 using execHelper::core::Task;
 

@@ -21,6 +21,10 @@ The short option on the command line associated with this pattern
 ## long-option
 The long option on the command line associated with this pattern
 
+# PREDEFINED PATTERNS
+Exec-helper predefines some specific patterns for convenience:
+- EH\_WORKING\_DIR: contains the working directory from where the exec-helper executable is called.
+
 # EXAMPLE CONFIGURATION
 \include exec-helper-config.example
 

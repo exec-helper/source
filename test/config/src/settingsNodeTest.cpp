@@ -537,8 +537,9 @@ SCENARIO("Testing the copy and move constructor", "[config][settingsNode]") {
         settings.add(key3, value3);
 
         WHEN("We copy the settings") {
-            SettingsNode copy(
-                settings); // NOLINT(performance-unnecessary-copy-initialization)
+            SettingsNode
+                copy( // NOLINT(performance-unnecessary-copy-initialization)
+                    settings);
 
             THEN("We should find back the values") {
                 REQUIRE(copy.key() == rootKey);

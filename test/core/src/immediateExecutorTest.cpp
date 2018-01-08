@@ -61,10 +61,8 @@ SCENARIO("Test the failing of the execution",
         const Shell::ShellReturnCode actualReturnCode = 42U;
         Shell::ShellReturnCode realReturnCode = 0U;
 
-        ImmediateExecutor::Callback callback =
-            [&realReturnCode](Shell::ShellReturnCode returnCode) {
-                realReturnCode = returnCode;
-            };
+        ImmediateExecutor::Callback callback = [&realReturnCode](
+            Shell::ShellReturnCode returnCode) { realReturnCode = returnCode; };
         auto shell = make_shared<ShellStub>(actualReturnCode);
         ImmediateExecutor executor(static_pointer_cast<Shell>(shell), callback);
 

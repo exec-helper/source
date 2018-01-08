@@ -25,7 +25,7 @@ A list of _patterns_ to apply on the command line. See [exec-helper-config-patte
 A list of _environment variables_ that should be set before the commands are executed. See [exec-helper-config-environment](@ref exec-helper-config-environment)(5).
 
 ## working-dir
-The working directory of the command. Can be an absolute path are a relative one w.r.t. the path to the considered configuration file. Commands that should be executed relative to the current working dir can use the _current dir_ operator ('.' on NIX systems).
+The working directory of the command. Can be an absolute path are a relative one w.r.t. the path to the considered configuration file. Commands that should be executed relative to the current working dir can use the {EH\_WORKING\_DIR} pattern.
 
 # EXAMPLE
 ## Configuration

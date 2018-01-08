@@ -312,7 +312,7 @@ int execHelperMain(int argc, char** argv, char** envp) {
     execHelper::plugins::registerExecuteCallback(executeCallback);
 
     Commander commander;
-    if(commander.run(fleetingOptions, move(settings), move(patterns),
+    if(commander.run(fleetingOptions, settings, patterns,
                      settingsFile.parent_path(), move(env))) {
         return EXIT_SUCCESS;
     } else {

@@ -6,7 +6,6 @@
 
 #include <boost/optional/optional_io.hpp>
 
-using boost::optional;
 using std::move;
 using std::ostream;
 using std::regex;

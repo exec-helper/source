@@ -44,13 +44,14 @@ SCENARIO("Test envp construction", "[config][envp]") {
                 char** returnedEnvp = envp.getEnvp();
                 size_t index = 0U;
                 while(
-                    returnedEnvp[index] !=
-                    nullptr) { // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                    returnedEnvp
+                        [index] != // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                    nullptr) {
                     REQUIRE(index < env.size());
                     REQUIRE(
-                        returnedEnvp[index] ==
-                        expectedEnv
-                            [index]); // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                        returnedEnvp
+                            [index] == // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                        expectedEnv[index]);
                     ++index;
                 }
             }
@@ -66,13 +67,14 @@ SCENARIO("Test envp construction", "[config][envp]") {
                 const char* const* returnedEnvp = envp.getEnvp();
                 size_t index = 0U;
                 while(
-                    returnedEnvp[index] !=
-                    nullptr) { // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                    returnedEnvp
+                        [index] != // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                    nullptr) {
                     REQUIRE(index < expectedEnv.size());
                     REQUIRE(
-                        returnedEnvp[index] ==
-                        expectedEnv
-                            [index]); // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                        returnedEnvp
+                            [index] == // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                        expectedEnv[index]);
                     ++index;
                 }
             }
@@ -103,11 +105,12 @@ SCENARIO("Test the envp copy and move constructor, assignment operators and "
             const char* const* returnedEnvp = envp.getEnvp();
             size_t index = 0U;
             while(
-                returnedEnvp[index] !=
-                nullptr) { // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                returnedEnvp
+                    [index] != // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                nullptr) {
                 envpAddresses.push_back(
-                    returnedEnvp
-                        [index]); // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                    returnedEnvp // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                        [index]);
                 ++index;
             }
 
@@ -115,12 +118,13 @@ SCENARIO("Test the envp copy and move constructor, assignment operators and "
                 const char* const* copiedEnvp = copy.getEnvp();
                 size_t index = 0U;
                 while(
-                    copiedEnvp[index] !=
-                    nullptr) { // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                    copiedEnvp
+                        [index] != // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                    nullptr) {
                     REQUIRE(
                         expectedEnv[index] ==
-                        copiedEnvp
-                            [index]); // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                        copiedEnvp // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                            [index]);
                     ++index;
                 }
                 REQUIRE(index == expectedEnv.size());
@@ -131,12 +135,13 @@ SCENARIO("Test the envp copy and move constructor, assignment operators and "
                 const char* const* copiedEnvp = copy.getEnvp();
                 size_t index = 0U;
                 while(
-                    copiedEnvp[index] !=
-                    nullptr) { // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                    copiedEnvp
+                        [index] != // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                    nullptr) {
                     REQUIRE(
                         envpAddresses[index] !=
-                        copiedEnvp
-                            [index]); // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                        copiedEnvp // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                            [index]);
                     ++index;
                 }
                 REQUIRE(index == expectedEnv.size());
@@ -152,11 +157,12 @@ SCENARIO("Test the envp copy and move constructor, assignment operators and "
             const char* const* returnedEnvp = envp.getEnvp();
             size_t index = 0U;
             while(
-                returnedEnvp[index] !=
-                nullptr) { // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                returnedEnvp
+                    [index] != // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                nullptr) {
                 envpAddresses.push_back(
-                    returnedEnvp
-                        [index]); // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                    returnedEnvp // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                        [index]);
                 ++index;
             }
 
@@ -200,12 +206,13 @@ SCENARIO("Test the envp copy and move constructor, assignment operators and "
                 const char* const* movedEnvp = moved.getEnvp();
                 size_t index = 0U;
                 while(
-                    movedEnvp[index] !=
-                    nullptr) { // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                    movedEnvp
+                        [index] != // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                    nullptr) {
                     REQUIRE(
                         expectedEnv[index] ==
-                        movedEnvp
-                            [index]); // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                        movedEnvp // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                            [index]);
                     ++index;
                 }
                 REQUIRE(index == expectedEnv.size());
@@ -220,12 +227,13 @@ SCENARIO("Test the envp copy and move constructor, assignment operators and "
                 const char* const* movedEnvp = assign.getEnvp();
                 size_t index = 0U;
                 while(
-                    movedEnvp[index] !=
-                    nullptr) { // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                    movedEnvp
+                        [index] != // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                    nullptr) {
                     REQUIRE(
                         expectedEnv[index] ==
-                        movedEnvp
-                            [index]); // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                        movedEnvp // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                            [index]);
                     ++index;
                 }
                 REQUIRE(index == expectedEnv.size());
@@ -248,12 +256,13 @@ SCENARIO("Test the envp copy and move constructor, assignment operators and "
                 const char* const* swappedEnvp = envp.getEnvp();
                 size_t index = 0U;
                 while(
-                    swappedEnvp[index] !=
-                    nullptr) { // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                    swappedEnvp
+                        [index] != // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                    nullptr) {
                     REQUIRE(
-                        swappedEnvp[index] ==
-                        expectedSwapEnv
-                            [index]); // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                        swappedEnvp
+                            [index] == // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                        expectedSwapEnv[index]);
                     ++index;
                 }
                 REQUIRE(index == expectedSwapEnv.size());
@@ -262,12 +271,13 @@ SCENARIO("Test the envp copy and move constructor, assignment operators and "
                 const char* const* swappedEnvp = swapped.getEnvp();
                 size_t index = 0U;
                 while(
-                    swappedEnvp[index] !=
-                    nullptr) { // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                    swappedEnvp
+                        [index] != // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                    nullptr) {
                     REQUIRE(
-                        swappedEnvp[index] ==
-                        expectedEnv
-                            [index]); // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                        swappedEnvp
+                            [index] == // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                        expectedEnv[index]);
                     ++index;
                 }
                 REQUIRE(index == expectedEnv.size());

@@ -39,6 +39,7 @@ using execHelper::plugins::COMMAND_LINE_KEY;
 using execHelper::core::test::ExecutorStub;
 using execHelper::test::FleetingOptionsStub;
 using execHelper::test::utils::getExpectedTasks;
+using execHelper::test::utils::inheritWorkingDirKey;
 
 namespace {
 const czstring<> PLUGIN_NAME("command-line-command");
@@ -128,8 +129,8 @@ SCENARIO(
         }
 
         COMBINATIONS("Set environment") {
-            EnvironmentValue ENV1("VAR1", "environmentValue{" +
-                                              pattern1.getKey() + "}");
+            EnvironmentValue ENV1(
+                "VAR1", "environmentValue{" + pattern1.getKey() + "}");
             EnvironmentValue ENV2("VAR2", "environmentValue2");
             variables.add({ENVIRONMENT_KEY, ENV1.first}, ENV1.second);
             variables.add({ENVIRONMENT_KEY, ENV2.first}, ENV2.second);
@@ -138,14 +139,9 @@ SCENARIO(
         }
 
         COMBINATIONS("Set the working directory") {
-            variables.replace(WORKING_DIR_KEY, "{" + pattern2.getKey() + "}/{" +
-                                                   pattern3.getKey() + "}");
-            expectedTask.setWorkingDirectory(
-                variables.get<Path>(WORKING_DIR_KEY).get());
-        }
-
-        COMBINATIONS("Set the working directory to the current directory") {
-            variables.replace(WORKING_DIR_KEY, ".");
+            variables.replace(WORKING_DIR_KEY,
+                              "{" + pattern2.getKey() + "}/{" +
+                                  pattern3.getKey() + "}");
             expectedTask.setWorkingDirectory(
                 variables.get<Path>(WORKING_DIR_KEY).get());
         }

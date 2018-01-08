@@ -6,7 +6,6 @@
 #include "logger.h"
 
 using std::string;
-using std::vector;
 
 using boost::optional;
 

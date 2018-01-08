@@ -6,6 +6,7 @@
 
 #include "commandLineOptions.h"
 #include "optionDescriptions.h"
+#include "pattern.h"
 #include "patternsHandler.h"
 #include "variablesMap.h"
 

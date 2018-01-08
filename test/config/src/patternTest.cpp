@@ -81,8 +81,9 @@ SCENARIO("Test the pattern facilities", "[patterns][Pattern]") {
         Pattern pattern(key, values, shortOption, longOption);
 
         WHEN("We copy the pattern") {
-            Pattern other(
-                pattern); // NOLINT(performance-unnecessary-copy-initialization)
+            Pattern
+                other( // NOLINT(performance-unnecessary-copy-initialization)
+                    pattern);
 
             THEN("We should get the same pattern") {
                 REQUIRE(pattern == other);

@@ -17,7 +17,6 @@
 #include "executorStub.h"
 #include "fleetingOptionsStub.h"
 
-using std::move;
 using std::string;
 using std::vector;
 
@@ -39,6 +38,7 @@ using execHelper::plugins::getPatternsKey;
 
 using execHelper::core::test::ExecutorStub;
 using execHelper::test::FleetingOptionsStub;
+using execHelper::test::utils::getPredefinedPatterns;
 
 namespace {
 const czstring<> COMMANDS_KEY = "commands";
@@ -59,6 +59,7 @@ SCENARIO("Basic test the commander", "[commander]") {
         SettingsNode settings("test");
 
         Patterns patterns;
+        Patterns expectedPatterns = getPredefinedPatterns();
         EnvironmentCollection env;
         Path workingDirectory = current_path();
 
@@ -111,14 +112,15 @@ SCENARIO("Basic test the commander", "[commander]") {
             }
         }
 
-        for(const auto& pattern : patterns) {
+        expectedPatterns.insert(expectedPatterns.end(), patterns.begin(),
+                                patterns.end());
+        for(const auto& pattern : expectedPatterns) {
             settings.add({MEMORY_KEY, getPatternsKey()}, pattern.getKey());
         }
 
         THEN_WHEN("We apply the configuration and run the commander") {
-            bool returnCode =
-                commander.run(fleetingOptions, move(settings),
-                              Patterns(patterns), workingDirectory, env);
+            bool returnCode = commander.run(fleetingOptions, settings, patterns,
+                                            workingDirectory, env);
 
             THEN_CHECK("It must succeed") { REQUIRE(returnCode); }
 
@@ -130,7 +132,7 @@ SCENARIO("Basic test the commander", "[commander]") {
                 for(auto memory = memories.begin(); memory != memories.end();
                     ++expectedTask, ++memory) {
                     REQUIRE(memory->task == *expectedTask);
-                    REQUIRE(memory->patterns == patterns);
+                    REQUIRE(memory->patterns == expectedPatterns);
                 }
             }
         }
@@ -158,7 +160,7 @@ SCENARIO(
 
         WHEN("We apply the configuration and run the commander") {
             THEN("It should fail") {
-                REQUIRE_FALSE(commander.run(fleetingOptions, move(settings),
+                REQUIRE_FALSE(commander.run(fleetingOptions, settings,
                                             Patterns(), current_path(),
                                             EnvironmentCollection()));
             }
@@ -183,7 +185,7 @@ SCENARIO("Test when no commands are passed", "[commander]") {
 
         WHEN("We apply the configuration and run the commander") {
             THEN("It should fail") {
-                REQUIRE_FALSE(commander.run(fleetingOptions, move(settings),
+                REQUIRE_FALSE(commander.run(fleetingOptions, settings,
                                             Patterns(), current_path(),
                                             EnvironmentCollection()));
             }

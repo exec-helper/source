@@ -3,7 +3,12 @@
 #include <iostream>
 #include <utility>
 
+#include <boost/filesystem/operations.hpp>
+#include <gsl/pointers>
+#include <gsl/string_span>
+
 #include "config/fleetingOptionsInterface.h"
+#include "config/pattern.h"
 #include "config/settingsNode.h"
 #include "config/variablesMap.h"
 #include "core/task.h"
@@ -13,23 +18,38 @@
 
 using std::move;
 
+using boost::filesystem::current_path;
+using gsl::czstring;
 using gsl::not_null;
 
 using execHelper::config::EnvironmentCollection;
 using execHelper::config::FleetingOptionsInterface;
 using execHelper::config::Path;
+using execHelper::config::Pattern;
 using execHelper::config::Patterns;
 using execHelper::config::SettingsNode;
 using execHelper::config::VariablesMap;
 using execHelper::core::Task;
 using execHelper::plugins::ExecutePlugin;
 
+namespace {
+const czstring<> WORKING_DIR_PATTERN_KEY = "EH_WORKING_DIR";
+
+inline Patterns addPredefinedPatterns(Patterns patterns) {
+    patterns.emplace_back(
+        Pattern(WORKING_DIR_PATTERN_KEY, {current_path().native()}));
+    return patterns;
+}
+} // namespace
+
 namespace execHelper {
 namespace commander {
 bool Commander::run(const FleetingOptionsInterface& fleetingOptions,
-                    SettingsNode&& settings, Patterns&& patterns,
+                    SettingsNode settings, Patterns patterns,
                     const Path& workingDirectory,
                     const EnvironmentCollection& env) noexcept {
+    patterns = addPredefinedPatterns(patterns);
+
     ExecutePlugin::push(
         not_null<const FleetingOptionsInterface*>(&fleetingOptions));
     ExecutePlugin::push(move(settings));

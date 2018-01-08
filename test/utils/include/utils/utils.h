@@ -129,6 +129,9 @@ getExpectedTasks(const core::test::ExecutorStub::TaskQueue& tasks,
 
 std::string toString(const config::SettingsNode& settings,
                      unsigned int nbOfTabs = 0) noexcept;
+
+std::string inheritWorkingDirKey() noexcept;
+Patterns getPredefinedPatterns() noexcept;
 } // namespace utils
 } // namespace test
 } // namespace execHelper
