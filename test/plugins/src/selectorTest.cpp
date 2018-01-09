@@ -100,7 +100,7 @@ SCENARIO("Make combinations of configurations for the selector plugin") {
 
         COMBINATIONS("Add another select entry") {
             PatternValues newValues = patterns.front().getValues();
-            newValues.push_back(MEMORY_KEY);
+            newValues.emplace_back(MEMORY_KEY);
             patterns.front().setValues(newValues);
             expectedTasks.emplace_back(Task());
         }

@@ -8,6 +8,13 @@ RUN mkdir /.cache && sudo chown nobody:nobody /.cache/
 RUN echo 'EDITOR=false' > /etc/profile.d/editor.sh && chmod +x /etc/profile.d/editor.sh
 RUN echo 'EDITOR=false' >> /etc/bash.bashrc
 
+# Improve build times for makepkg installs
+RUN echo 'MAKEFLAGS="-j4"' >> /etc/makepkg.conf
+
 # Install actual dependencies
 RUN pacman -S --needed --noconfirm boost boost-libs yaml-cpp gcc clang clang-tools-extra cmake scons make doxygen python-pip pkg-config valgrind cppcheck java-environment unzip curl
-RUN sudo -u nobody EDITOR=false pacaur -S --needed --noconfirm --noedit microsoft-gsl-git libcatch-cpp-headers lcov pmd-bin
+RUN sudo -u nobody EDITOR=false pacaur -S --needed --noconfirm --noedit microsoft-gsl-git lcov pmd-bin
+
+# Fixes for making catch-git build properly
+RUN sed -i 's/CXXFLAGS="/CXXFLAGS="-Wno-maybe-uninitialized /' /etc/makepkg.conf
+RUN sudo -u nobody EDITOR=false pacaur -S --needed --noconfirm --noedit catch-git

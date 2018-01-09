@@ -196,8 +196,10 @@ void ExecutionContentServer::accept() noexcept {
     m_acceptor.async_accept(m_socket, [this](error_code ec) {
         switch(ec.value()) {
         case boost::system::errc::success: {
-            ExecuteContentMessageCallback callback([this](
-                const ExecutionContentData& data) { return addData(data); });
+            ExecuteContentMessageCallback callback(
+                [this](const ExecutionContentData& data) {
+                    return addData(data);
+                });
             make_shared<ExecutionSession>(std::move(m_socket), callback)
                 ->start();
             accept();

@@ -25,10 +25,10 @@ using std::string;
 using std::stringstream;
 using std::vector;
 
+using boost::filesystem::current_path;
 using boost::filesystem::ifstream;
 using boost::filesystem::ofstream;
 using boost::filesystem::path;
-using boost::filesystem::current_path;
 using gsl::not_null;
 
 using execHelper::config::EnvironmentCollection;

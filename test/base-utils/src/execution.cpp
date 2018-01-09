@@ -95,10 +95,16 @@ int execute(const CommandLine& commandLine, const Path& workingDir) noexcept {
     CommandLineRaw rawLine;
     rawLine.reserve(commandLine.size());
     for(const auto& arg : commandLine) {
-        rawLine.push_back(strdup(arg.c_str()));
+        rawLine.push_back(strndup(arg.c_str(), arg.size()));
     }
     rawLine.push_back(nullptr);
-    return execute(rawLine, workingDir);
+    bool returnCode = execute(rawLine, workingDir);
+
+    // Free the duplicated strings
+    for(auto arg : rawLine) {
+        free(arg);
+    }
+    return returnCode;
 }
 } // namespace execution
 } // namespace baseUtils

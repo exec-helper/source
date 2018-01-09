@@ -1,7 +1,6 @@
 #include <string>
 #include <vector>
 
-#include <boost/filesystem.hpp>
 #include <gsl/string_span>
 
 #include "config/path.h"
@@ -19,7 +18,6 @@
 using std::string;
 using std::vector;
 
-using boost::filesystem::current_path;
 using gsl::czstring;
 
 using execHelper::config::Command;

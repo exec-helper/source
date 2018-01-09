@@ -52,9 +52,8 @@ SCENARIO("Test the posix shell for shell expansion", "[shell][posixshell]") {
         PosixShell shell;
 
         WHEN("We apply it on a task to show the file") {
-            Task task({"touch",
-                       "$(echo '" + file.getParentDirectory() + "')/" +
-                           file.getFilename()});
+            Task task({"touch", "$(echo '" + file.getParentDirectory() + "')/" +
+                                    file.getFilename()});
             PosixShell::ShellReturnCode returnCode = shell.execute(task);
 
             THEN("The call should succeed") {

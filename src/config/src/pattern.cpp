@@ -17,7 +17,7 @@ Pattern::Pattern(PatternKey patternKey, PatternValues values,
                  ShortOption shortOption, LongOption longOption) noexcept
     : m_key(move(patternKey)),
       m_values(move(values)),
-      m_shortOption(std::move(shortOption)),
+      m_shortOption(shortOption),
       m_longOption(std::move(longOption)) {
     ;
 }

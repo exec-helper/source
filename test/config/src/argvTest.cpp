@@ -34,18 +34,16 @@ SCENARIO("Test argv construction", "[config][argv]") {
                 char** returnedArgv = args.getArgv();
                 for(int i = 0U; i < argc; ++i) {
                     REQUIRE(
-                        returnedArgv
-                            [i] == // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-                        args[i]);
+                        returnedArgv // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                            [i] == args[i]);
                 }
             }
 
             THEN("argv[argc] should be a nullptr") {
                 char** returnedArgv = args.getArgv();
                 REQUIRE(
-                    returnedArgv
-                        [argc] == // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-                    nullptr);
+                    returnedArgv // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                        [argc] == nullptr);
             }
 
             THEN(
@@ -70,19 +68,16 @@ SCENARIO("Test argv construction", "[config][argv]") {
                 const char* const* returnedArgv = args.getArgv();
                 for(int i = 0U; i < argc; ++i) {
                     REQUIRE(
-                        returnedArgv
-                            [i] == // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-
-                        args[i]);
+                        returnedArgv // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                            [i] == args[i]);
                 }
             }
 
             THEN("argv[argc] should be a nullptr") {
                 const char* const* returnedArgv = args.getArgv();
                 REQUIRE(
-                    returnedArgv
-                        [argc] == // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-                    nullptr);
+                    returnedArgv // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                        [argc] == nullptr);
             }
 
             THEN(
@@ -110,18 +105,16 @@ SCENARIO("Test argv construction", "[config][argv]") {
                 char** returnedArgv = argv.getArgv();
                 for(size_t i = 0U; i < args.size(); ++i) {
                     REQUIRE(
-                        returnedArgv
-                            [i] == // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-                        args[i]);
+                        returnedArgv // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                            [i] == args[i]);
                 }
             }
 
             THEN("argv[argc] should be a nullptr") {
                 char** returnedArgv = argv.getArgv();
                 REQUIRE(
-                    returnedArgv
-                        [args.size()] == // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-                    nullptr);
+                    returnedArgv // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                        [args.size()] == nullptr);
             }
 
             THEN(
@@ -142,8 +135,8 @@ SCENARIO("Test argv construction", "[config][argv]") {
                 const char* const* returnedArgv = argv.getArgv();
                 for(size_t i = 0U; i < args.size(); ++i) {
                     REQUIRE(
-                        returnedArgv
-                            [i] == // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                        returnedArgv // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                            [i] ==
 
                         args[i]);
                 }
@@ -152,9 +145,8 @@ SCENARIO("Test argv construction", "[config][argv]") {
             THEN("argv[argc] should be a nullptr") {
                 const char* const* returnedArgv = argv.getArgv();
                 REQUIRE(
-                    returnedArgv
-                        [args.size()] == // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-                    nullptr);
+                    returnedArgv // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                        [args.size()] == nullptr);
             }
 
             THEN(
