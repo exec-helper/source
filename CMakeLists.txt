@@ -22,14 +22,19 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ${POSITION_INDEPENDENT_CODE})
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/modules)
 
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
-    add_definitions(-Wall -Wextra -Werror)
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror")
 
     string( TOLOWER "${CMAKE_BUILD_TYPE}" BUILD_TYPE_LOWER )
     if(${BUILD_TYPE_LOWER} MATCHES debug)
         SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${COVERAGE_COMPILE_FLAGS}" )
         SET(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} ${COVERAGE_LINK_FLAGS}" )
     endif(${BUILD_TYPE_LOWER} MATCHES debug)
-endif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
+endif()
+
+# Enable modules for clang
+if("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fmodules")
+endif()
 
 option(LIMITED_OPTIMIZATION "Use only limited optimization. This is mostly interesting for certain analysis tools." OFF)
 if(LIMITED_OPTIMIZATION)
