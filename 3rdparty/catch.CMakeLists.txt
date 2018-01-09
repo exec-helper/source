@@ -9,6 +9,8 @@ if(${USE_SYSTEM_CATCH})
         MESSAGE(FATAL_ERROR "Could NOT find ${MODULE_NAME}")
     endif()
 else()
+    MESSAGE(STATUS " -> Using latest upstream version of ${PACKAGE_NAME} instead")
+
     include(ExternalProject)
 
     set(CATCH_INSTALL_DIR ${LIB_DIRECTORY}/catch)

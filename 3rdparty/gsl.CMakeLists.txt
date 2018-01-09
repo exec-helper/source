@@ -6,6 +6,8 @@ if(${USE_SYSTEM_GSL})
         MESSAGE(FATAL_ERROR "Could NOT find gsl")
     endif()
 else()
+    MESSAGE(STATUS " -> Using latest upstream version of ${PACKAGE_NAME} instead")
+
     include(ExternalProject)
 
     ExternalProject_Add(Gsl

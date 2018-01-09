@@ -9,6 +9,8 @@ if(${USE_SYSTEM_YAML_CPP})
         MESSAGE(FATAL_ERROR "Could NOT find ${MODULE_NAME}")
     endif()
 else()
+    MESSAGE(STATUS " -> Using latest upstream version of ${PACKAGE_NAME} instead")
+
     include(ExternalProject)
 
     set(YAML_INSTALL_DIR ${CMAKE_CURRENT_BINARY_DIR}/${MODULE_NAME})
