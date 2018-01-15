@@ -21,8 +21,13 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ${POSITION_INDEPENDENT_CODE})
 
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/modules)
 
+option(ENABLE_WERROR "Enable threating warnings as errors" ON)
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
+
+    if(${ENABLE_WERROR})
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
+    endif()
 
     string( TOLOWER "${CMAKE_BUILD_TYPE}" BUILD_TYPE_LOWER )
     if(${BUILD_TYPE_LOWER} MATCHES debug)
