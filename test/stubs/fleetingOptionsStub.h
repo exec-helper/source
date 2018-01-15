@@ -11,6 +11,10 @@ class FleetingOptionsStub : public config::FleetingOptionsInterface {
 
     config::HelpOption_t getHelp() const noexcept override { return m_help; }
 
+    config::VersionOption_t getVersion() const noexcept override {
+        return m_version;
+    }
+
     config::VerboseOption_t getVerbosity() const noexcept override {
         return m_verbose;
     }
@@ -26,6 +30,7 @@ class FleetingOptionsStub : public config::FleetingOptionsInterface {
     }
 
     config::HelpOption_t m_help = {false};
+    config::VersionOption_t m_version = {false};
     config::VerboseOption_t m_verbose = {false};
     config::DryRunOption_t m_dryRun = {false};
     config::Jobs_t m_jobs = 1024U;

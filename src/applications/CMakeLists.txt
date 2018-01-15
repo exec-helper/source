@@ -13,8 +13,15 @@ set(DEPENDENCIES
         commander
     )
 
-add_executable(${EXE_NAME} ${SRCS})
-target_include_directories(${EXE_NAME} PRIVATE ${DEPENDENCIES})
+set(VERSION_FILE version.h)
+set(BINARY_NAME ${PROJECT_NAME})
+set(VERSION "DEVELOPER-VERSION" CACHE STRING "Set the version to show in the version message")
+set(COPYRIGHT "COPYRIGHT (c)" CACHE STRING "Set the copyright message to show in the version message")
+configure_file(${VERSION_FILE}.in ${VERSION_FILE})
+set(VERSION_INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR})
+
+add_executable(${EXE_NAME} ${SRCS} ${VERSION_FILE})
+target_include_directories(${EXE_NAME} PRIVATE ${DEPENDENCIES} ${VERSION_INCLUDE_DIR})
 target_link_libraries(${EXE_NAME} PRIVATE ${DEPENDENCIES})
 
 set(SHORT_EXE_NAME eh)

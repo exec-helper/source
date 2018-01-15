@@ -49,32 +49,10 @@ class FleetingOptions : public FleetingOptionsInterface {
      */
     bool operator!=(const FleetingOptions& other) const;
 
-    /**
-     * Get the value of the help option
-     *
-     * \returns The value for the help option
-     */
     HelpOption_t getHelp() const noexcept override;
-
-    /**
-     * Get the value of the verbosity option
-     *
-     * \returns The value for the verbosity option
-     */
+    VersionOption_t getVersion() const noexcept override;
     VerboseOption_t getVerbosity() const noexcept override;
-
-    /**
-     * Get the value of the dry-run option
-     *
-     * \returns The value for the dry-run option
-     */
     DryRunOption_t getDryRun() const noexcept override;
-
-    /**
-     * Get the number of jobs to use
-     *
-     * \returns The value for the number of jobs
-     */
     Jobs_t getJobs() const noexcept override;
 
     /**
@@ -84,11 +62,6 @@ class FleetingOptions : public FleetingOptionsInterface {
      */
     log::LogLevel getLogLevel() const noexcept;
 
-    /**
-     * Get the value of the commands option
-     *
-     * \return The values for the command option
-     */
     const CommandCollection& getCommands() const noexcept override;
 
     /**
@@ -100,6 +73,7 @@ class FleetingOptions : public FleetingOptionsInterface {
 
   private:
     const HelpOption_t m_help;
+    const VersionOption_t m_version;
     const VerboseOption_t m_verbose;
     const DryRunOption_t m_dryRun;
     Jobs_t m_jobs;

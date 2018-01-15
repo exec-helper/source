@@ -16,6 +16,7 @@ namespace execHelper {
 namespace config {
 FleetingOptions::FleetingOptions(const VariablesMap& optionsMap) noexcept
     : m_help(optionsMap.get<HelpOption_t>(HELP_KEY).get()),
+      m_version(optionsMap.get<VersionOption_t>(VERSION_KEY).get()),
       m_verbose(optionsMap.get<VerboseOption_t>(VERBOSE_KEY).get()),
       m_dryRun(optionsMap.get<DryRunOption_t>(DRY_RUN_KEY).get()),
       m_jobs(1U),
@@ -46,6 +47,10 @@ bool FleetingOptions::operator!=(const FleetingOptions& other) const {
 
 HelpOption_t FleetingOptions::getHelp() const noexcept { return m_help; }
 
+VersionOption_t FleetingOptions::getVersion() const noexcept {
+    return m_version;
+}
+
 VerboseOption_t FleetingOptions::getVerbosity() const noexcept {
     return m_verbose;
 }
@@ -70,6 +75,7 @@ LogLevel FleetingOptions::getLogLevel() const noexcept {
 VariablesMap FleetingOptions::getDefault() noexcept {
     VariablesMap defaults("exec-helper");
     defaults.add(HELP_KEY, "no");
+    defaults.add(VERSION_KEY, "no");
     defaults.add(VERBOSE_KEY, "no");
     defaults.add(DRY_RUN_KEY, "no");
     defaults.add(JOBS_KEY, "auto");

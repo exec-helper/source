@@ -9,6 +9,9 @@ namespace config {
 const std::string HELP_KEY{"help"};
 using HelpOption_t = bool;
 
+const std::string VERSION_KEY{"version"};
+using VersionOption_t = bool;
+
 const std::string VERBOSE_KEY{"verbose"};
 using VerboseOption_t = bool;
 

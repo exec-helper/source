@@ -1,0 +1,10 @@
+#ifndef VERSION_INCLUDE
+#define VERSION_INCLUDE
+
+#include <gsl/string_span>
+
+const gsl::czstring<> BINARY_NAME = "@BINARY_NAME@";
+const gsl::czstring<> VERSION = "@VERSION@";
+const gsl::czstring<> COPYRIGHT = "@COPYRIGHT@";
+
+#endif  /* VERSION_INCLUDE */

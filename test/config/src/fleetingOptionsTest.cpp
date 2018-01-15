@@ -27,6 +27,7 @@ SCENARIO("Test the fleeting options defaults", "[config][fleeting-options]") {
     GIVEN("The expected defaults") {
         VariablesMap expectedDefaults("exec-helper");
         expectedDefaults.add(HELP_KEY, "no");
+        expectedDefaults.add(VERSION_KEY, "no");
         expectedDefaults.add(VERBOSE_KEY, "no");
         expectedDefaults.add(JOBS_KEY, "auto");
         expectedDefaults.add(DRY_RUN_KEY, "no");
@@ -50,6 +51,8 @@ SCENARIO("Test the getters of the fleeting options",
         VariablesMap variables = FleetingOptions::getDefault();
 
         auto expectedHelp = variables.get<HelpOption_t>(HELP_KEY).get();
+        auto expectedVersion =
+            variables.get<VersionOption_t>(VERSION_KEY).get();
         auto expectedVerbose =
             variables.get<VerboseOption_t>(VERBOSE_KEY).get();
         auto jobs = variables.get<JobsOption_t>(JOBS_KEY).get();
@@ -68,6 +71,11 @@ SCENARIO("Test the getters of the fleeting options",
         COMBINATIONS("Enable help") {
             expectedHelp = true;
             variables.add(HELP_KEY, "yes");
+        }
+
+        COMBINATIONS("Enable version") {
+            expectedVersion = true;
+            variables.add(VERSION_KEY, "yes");
         }
 
         COMBINATIONS("Enable verbosity") {
@@ -107,6 +115,7 @@ SCENARIO("Test the getters of the fleeting options",
 
             THEN_CHECK("The getters are as expected") {
                 REQUIRE(fleetingOptions.getHelp() == expectedHelp);
+                REQUIRE(fleetingOptions.getVersion() == expectedVersion);
                 REQUIRE(fleetingOptions.getVerbosity() == expectedVerbose);
                 REQUIRE(fleetingOptions.getJobs() == expectedJobs);
                 REQUIRE(fleetingOptions.getDryRun() == expectedDryRun);

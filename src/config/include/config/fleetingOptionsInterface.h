@@ -25,6 +25,14 @@ class FleetingOptionsInterface {
     virtual HelpOption_t getHelp() const noexcept = 0;
 
     /**
+     * Returns whether the version option has been set
+     *
+     * \returns True    If the version option was set
+     *          False   Otherwise
+     */
+    virtual VersionOption_t getVersion() const noexcept = 0;
+
+    /**
      * Returns the status of the verbose setting
      *
      * \returns True    If verbose mode is set

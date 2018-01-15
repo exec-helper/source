@@ -30,6 +30,8 @@
 #include "log/log.h"
 #include "plugins/plugin.h"
 
+#include "version.h"
+
 using std::make_pair;
 using std::make_shared;
 using std::make_unique;
@@ -71,8 +73,10 @@ using execHelper::config::SettingsFileOption_t;
 using execHelper::config::SettingsFileOption_t;
 using execHelper::config::SettingsNode;
 using execHelper::config::VERBOSE_KEY;
+using execHelper::config::VERSION_KEY;
 using execHelper::config::VariablesMap;
 using execHelper::config::VerboseOption_t;
+using execHelper::config::VersionOption_t;
 using execHelper::config::getAllParentDirectories;
 using execHelper::config::getHomeDirectory;
 using execHelper::config::parseSettingsFile;
@@ -153,6 +157,11 @@ inline void printHelp(const OptionDescriptions& options,
     }
 }
 
+inline void printVersion() noexcept {
+    user_feedback(BINARY_NAME << " " << VERSION);
+    user_feedback(COPYRIGHT);
+}
+
 inline bool verifyOptions(const FleetingOptions& options) noexcept {
     if(options.getJobs() == 0U) {
         user_feedback_error("Invalid value passed for the number of jobs (0): "
@@ -197,6 +206,8 @@ handleConfiguration(const Argv& argv,
     OptionDescriptions options;
     options.addOption(
         Option<HelpOption_t>(HELP_KEY, {"h"}, "Produce help message"));
+    options.addOption(Option<HelpOption_t>(VERSION_KEY, {},
+                                           "Print the version of this binary"));
     options.addOption(
         Option<VerboseOption_t>(VERBOSE_KEY, {"v"}, "Set verbosity"));
     options.addOption(Option<JobsOption_t>(
@@ -253,6 +264,11 @@ handleConfiguration(const Argv& argv,
     FleetingOptions fleetingOptions(optionsMap);
     if(fleetingOptions.getHelp()) {
         printHelp(options, settings);
+        return boost::none;
+    }
+
+    if(fleetingOptions.getVersion()) {
+        printVersion();
         return boost::none;
     }
 
