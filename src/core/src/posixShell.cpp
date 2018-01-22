@@ -1,120 +1,99 @@
 #include "posixShell.h"
 
-#include <cerrno>
-#include <cstring>
-#include <filesystem>
 #include <glob.h>
-#include <limits>
-#include <sys/wait.h>
-#include <system_error>
-#include <unistd.h>
 #include <vector>
 #include <wordexp.h>
 
+#include <boost/filesystem.hpp>
+#include <boost/process.hpp>
+#include <boost/process/start_dir.hpp>
 #include <gsl/span>
-#include <gsl/string_span>
 
-#include "config/argv.h"
 #include "config/envp.h"
 #include "log/assertions.h"
 
 #include "logger.h"
 #include "task.h"
 
-using std::error_code;
-using std::numeric_limits;
 using std::string;
 
 using gsl::span;
 using gsl::zstring;
 
-using execHelper::config::Argv;
 using execHelper::config::Envp;
 
-namespace filesystem = std::filesystem;
+namespace process = boost::process;
+namespace this_process = boost::this_process;
+namespace filesystem = boost::filesystem;
 
 namespace {
 const execHelper::core::PosixShell::ShellReturnCode POSIX_SUCCESS = 0U;
+
+/**
+ * This construction constructs the PATH from its parents' path and the various inputs.
+ * \note It is guaranteed that the given working directory will be the first entry in the returned path
+ *
+ * \param[in] env   The environment to consider for constructing the path
+ * \param[in] workingDir    The working directory from where the path will operate
+ * \returns The constructed PATH for the child. The first entry will be the given working directory
+ */
+inline const std::vector<filesystem::path>
+getPath(const process::environment& env,
+        const filesystem::path& workingDir) noexcept {
+    std::vector<filesystem::path> path({filesystem::absolute(workingDir)});
+    if(env.count("PATH") == 0) {
+        auto parent_path = this_process::path();
+        path.insert(path.end(), parent_path.begin(), parent_path.end());
+        return path;
+    }
+    std::vector<std::string> stringPaths = env.at("PATH").to_vector();
+    path.reserve(stringPaths.size());
+    std::copy(stringPaths.begin(), stringPaths.end(), std::back_inserter(path));
+    return path;
+}
 } // namespace
 
 namespace execHelper {
 namespace core {
-PosixShell::ShellReturnCode PosixShell::execute(const Task& task) noexcept {
-    pid_t pid = fork();
-    if(pid == -1) {
-        return std::numeric_limits<PosixShell::ShellReturnCode>::max();
+PosixShell::ShellReturnCode PosixShell::execute(const Task& task) {
+    if(task.getTask().empty()) {
+        return POSIX_SUCCESS;
     }
-    if(pid == 0) {
-        childProcessExecute(task);
+
+    process::environment env = this_process::
+        environment(); // Explicitly copy the environment so that only the child environment is modified
+    for(const auto& envPair : task.getEnvironment()) {
+        env[envPair.first] = envPair.second;
     }
-    return waitForChild(pid);
+
+    TaskCollection args = shellExpand(task);
+    filesystem::path binary = args.front();
+
+    if(binary.is_relative()) {
+        binary = process::search_path(
+            args.front(),
+            getPath(
+                env,
+                filesystem::path(
+                    task.getWorkingDirectory()))); // getPath guarantees that the given working directory is part of the PATH it returns, so there is no need to explicitly look for the binary in the considered working directory first.
+
+        binary = filesystem::absolute(binary);
+    }
+    if(!filesystem::exists(binary)) {
+        throw PathNotFoundError(std::string("Could not find binary '")
+                                    .append(args.front())
+                                    .append("' on this system"));
+    }
+    args.erase(args.begin());
+
+    return system(
+        binary, process::args = args,
+        process::start_dir = filesystem::path(task.getWorkingDirectory()), env);
 }
 
 bool PosixShell::isExecutedSuccessfully(ShellReturnCode returnCode) const
     noexcept {
     return returnCode == POSIX_SUCCESS;
-}
-
-void PosixShell::childProcessExecute(const Task& task) const noexcept {
-    int returnCode;
-
-    // Change to the correct working directory
-    error_code error;
-    LOG(trace) << "Changing to directory " << task.getWorkingDirectory()
-               << "...";
-    filesystem::current_path(task.getWorkingDirectory(), error);
-    if(error) {
-        LOG(error) << "Could not change to directory "
-                   << task.getWorkingDirectory() << " (" << error << ")";
-        _exit(127);
-    }
-
-    TaskCollection taskCollection = shellExpand(task);
-    Envp envp(task.getEnvironment());
-    LOG(trace) << R"(Environment: ")" << envp << R"(")";
-
-    Argv argv(taskCollection);
-    LOG(trace) << R"(Executing ")" << argv << R"(")";
-
-    // A full copy of m_env is not required, since it is used in a separate process
-    if((returnCode = execvpe(argv[0], argv.getArgv(), envp.getEnvp())) == -1) {
-        LOG(error) << "Could not execvpe command: " << strerror(errno) << " ("
-                   << errno << ")";
-    }
-
-    // execvp only returns if something goes wrong
-    _exit(127);
-}
-
-PosixShell::ShellReturnCode PosixShell::waitForChild(pid_t pid) const noexcept {
-    pid_t ret;
-    int status;
-    while((ret = waitpid(pid, &status, 0)) == -1) {
-        if(errno != EINTR) {
-            LOG(error) << "Child exited with error state";
-            break;
-        }
-    }
-    if(ret == -1) {
-        LOG(error) << "Error executing command";
-        return std::numeric_limits<PosixShell::ShellReturnCode>::max();
-    }
-    if(WIFEXITED(status)) {        // NOLINT(hicpp-signed-bitwise)
-        if(!WEXITSTATUS(status)) { // NOLINT(hicpp-signed-bitwise)
-            return POSIX_SUCCESS;
-        }
-        LOG(debug) << "Process terminated with return code '"
-                   << WEXITSTATUS(status) // NOLINT(hicpp-signed-bitwise)
-                   << "'";
-        return WEXITSTATUS(status); // NOLINT(hicpp-signed-bitwise)
-    }
-    if(WIFSIGNALED(status)) { // NOLINT(hicpp-signed-bitwise)
-        LOG(warning) << "Child terminated because of uncaught signal '"
-                     << WTERMSIG(status) << "'"; // NOLINT(hicpp-signed-bitwise)
-        return WTERMSIG(status);                 // NOLINT(hicpp-signed-bitwise)
-    }
-    LOG(error) << "Child exited with unexpected child status: " << status;
-    return status;
 }
 
 inline TaskCollection PosixShell::shellExpand(const Task& task) noexcept {

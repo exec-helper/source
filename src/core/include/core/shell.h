@@ -3,6 +3,8 @@
 
 #include <cstdint>
 
+#include "pathNotFoundError.h"
+
 namespace execHelper {
 namespace core {
 class Task;
@@ -23,8 +25,9 @@ class Shell {
      *
      * \param[in] task  The task to execute
      * \returns A shell return code
+     * \throws PathNotFoundError    The binary to execute was not found
      */
-    virtual ShellReturnCode execute(const Task& task) noexcept = 0;
+    virtual ShellReturnCode execute(const Task& task) = 0;
 
     /**
      * Checks whether the given shell return code can be associated with a

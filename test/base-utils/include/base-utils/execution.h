@@ -13,11 +13,8 @@ namespace execHelper {
 namespace test {
 namespace baseUtils {
 namespace execution {
-using CommandLineRaw = std::vector<gsl::zstring<>>;
 using CommandLine = std::vector<std::string>;
 
-int execute(const CommandLineRaw& commandLine,
-            const Path& workingDir = std::filesystem::current_path()) noexcept;
 int execute(const CommandLine& commandLine,
             const Path& workingDir = std::filesystem::current_path()) noexcept;
 } // namespace execution

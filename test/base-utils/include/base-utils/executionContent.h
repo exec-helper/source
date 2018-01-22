@@ -6,6 +6,7 @@
 #include <thread>
 
 #include <boost/asio.hpp>
+#include <boost/serialization/vector.hpp>
 #include <gsl/gsl>
 
 #include "base-utils/commandUtils.h"
@@ -38,7 +39,12 @@ class IoService {
 };
 
 struct ExecutionContentData {
-    uint8_t data = {0}; // Currently unused
+    std::vector<std::string> args;
+
+    template <typename Archive>
+    void serialize(Archive& ar, const unsigned int /*version*/) {
+        ar& args;
+    }
 };
 
 struct ExecutionContentDataReply {
@@ -68,6 +74,7 @@ class ExecutionContentServer {
 
     ConfigCommand getConfigCommand() const noexcept;
     unsigned int getNumberOfExecutions() const noexcept;
+    const std::vector<ExecutionContentData>& getReceivedData() const noexcept;
 
     void clear() noexcept;
 
@@ -83,9 +90,9 @@ class ExecutionContentServer {
     void openAcceptor();
     void init() noexcept;
     void accept() noexcept;
-    ExecutionContentDataReply
-    addData(const ExecutionContentData& data) noexcept;
+    ExecutionContentDataReply addData(ExecutionContentData data) noexcept;
 
+    std::vector<ExecutionContentData> m_receivedData;
     uint32_t m_numberOfExecutions = {0};
     ReturnCode m_returnCode = {SUCCESS};
     TmpFile m_file;
@@ -101,7 +108,7 @@ class ExecutionContentClient {
   public:
     ExecutionContentClient(const Path& file);
 
-    ReturnCode addExecution();
+    ReturnCode addExecution(const ExecutionContentData& data);
 
   private:
     boost::asio::local::stream_protocol::endpoint m_endpoint;

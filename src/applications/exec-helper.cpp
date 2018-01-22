@@ -63,10 +63,10 @@ using execHelper::config::LogLevelOption_t;
 using execHelper::config::Option;
 using execHelper::config::OptionDescriptions;
 using execHelper::config::parseSettingsFile;
-using execHelper::config::PatternSettingsPair;
 using execHelper::config::Path;
 using execHelper::config::Paths;
 using execHelper::config::Patterns;
+using execHelper::config::PatternSettingsPair;
 using execHelper::config::PatternValues;
 using execHelper::config::SETTINGS_FILE_KEY;
 using execHelper::config::SettingsFileOption_t;
@@ -89,57 +89,60 @@ namespace filesystem = std::filesystem;
 
 namespace {
 vector<string> logModules({"log", "yaml", "config", "core", "plugins",
-                       "commander"});
+                           "commander"});
 
-const auto settingsFileOption = Option<SettingsFileOption_t>(SETTINGS_FILE_KEY, {"s"}, "Set the settings file");
-const auto commandOption = Option<CommandCollection>(COMMAND_KEY, {"z"}, "Commands to execute");
+const auto settingsFileOption = Option<SettingsFileOption_t>(
+    SETTINGS_FILE_KEY, {"s"}, "Set the settings file");
+const auto commandOption =
+    Option<CommandCollection>(COMMAND_KEY, {"z"}, "Commands to execute");
 
 struct ConfigOptions {
-ConfigOptions(Path&& settingsFile, FleetingOptions&& fleetingOptions,
-              SettingsNode&& settings, Patterns&& patterns) noexcept
-    : settingsFile(settingsFile),
-      fleetingOptions(fleetingOptions),
-      settings(settings),
-      patterns(patterns) {
-    ;
-}
+    ConfigOptions(Path&& settingsFile, FleetingOptions&& fleetingOptions,
+                  SettingsNode&& settings, Patterns&& patterns) noexcept
+        : settingsFile(settingsFile),
+          fleetingOptions(fleetingOptions),
+          settings(settings),
+          patterns(patterns) {
+        ;
+    }
 
-Path settingsFile;
-FleetingOptions fleetingOptions;
-SettingsNode settings;
-Patterns patterns;
+    Path settingsFile;
+    FleetingOptions fleetingOptions;
+    SettingsNode settings;
+    Patterns patterns;
 };
 
 inline EnvironmentCollection toEnvCollection(char** envp) {
-static const string DELIMITER("=");
-EnvironmentCollection result;
-size_t index = 0;
-char* envValue;
-while((envValue = envp[index]) != nullptr) {
-    string newEnv(envValue);
+    static const string DELIMITER("=");
+    EnvironmentCollection result;
+    size_t index = 0;
+    char* envValue;
+    while((envValue = envp[index]) != nullptr) {
+        string newEnv(envValue);
 
-    size_t pos = newEnv.find_first_of(DELIMITER);
-    ensures(pos != newEnv.npos);
+        size_t pos = newEnv.find_first_of(DELIMITER);
+        ensures(pos != newEnv.npos);
 
-    string key = newEnv.substr(0, pos);
-    string value = newEnv.substr(pos + DELIMITER.size(), newEnv.npos);
-    result.emplace(make_pair(key, value));
-    ++index;
-}
-return result;
+        string key = newEnv.substr(0, pos);
+        string value = newEnv.substr(pos + DELIMITER.size(), newEnv.npos);
+        result.emplace(make_pair(key, value));
+        ++index;
+    }
+    return result;
 }
 
 inline Paths getSearchPaths(const EnvironmentCollection& env) noexcept {
-Paths searchPaths = getAllParentDirectories(filesystem::current_path());
-auto homeDir = getHomeDirectory(env);
-if(homeDir) {
-    searchPaths.emplace_back(homeDir.value());
-}
-return searchPaths;
+    Paths searchPaths = getAllParentDirectories(filesystem::current_path());
+    auto homeDir = getHomeDirectory(env);
+    if(homeDir) {
+        searchPaths.emplace_back(homeDir.value());
+    }
+    return searchPaths;
 }
 
-inline void printHelp(const std::string& binaryName, const OptionDescriptions& options,
-                  const SettingsNode& settings) noexcept {
+inline void printHelp(const std::string& binaryName,
+                      const OptionDescriptions& options,
+                      const SettingsNode& settings) noexcept {
     user_feedback("Usage: " + binaryName + " [Optional arguments] COMMANDS...");
     user_feedback("");
 
@@ -165,50 +168,52 @@ inline void printHelp(const std::string& binaryName, const OptionDescriptions& o
 }
 
 inline void printVersion() noexcept {
-user_feedback(BINARY_NAME << " " << VERSION);
-user_feedback(COPYRIGHT);
+    user_feedback(BINARY_NAME << " " << VERSION);
+    user_feedback(COPYRIGHT);
 }
 
 inline bool verifyOptions(const FleetingOptions& options) noexcept {
-if(options.getJobs() == 0U) {
-    user_feedback_error("Invalid value passed for the number of jobs (0): "
-                        "it must be strictly positive.");
-    return false;
-}
-return true;
+    if(options.getJobs() == 0U) {
+        user_feedback_error("Invalid value passed for the number of jobs (0): "
+                            "it must be strictly positive.");
+        return false;
+    }
+    return true;
 }
 
 inline optional<Path>
 getSettingsFile(const Argv& argv, const EnvironmentCollection& env,
-            const Option<SettingsFileOption_t>& settingsOption) noexcept {
-OptionDescriptions options;
-options.addOption(settingsOption);
+                const Option<SettingsFileOption_t>& settingsOption) noexcept {
+    OptionDescriptions options;
+    options.addOption(settingsOption);
 
-VariablesMap optionsMap = FleetingOptions::getDefault();
-if(!options.getOptionsMap(optionsMap, argv, true)) {
-    user_feedback_error(
-        "Could not properly parse the command line options");
-    return std::nullopt;
-}
-FleetingOptions fleetingOptions(optionsMap);
-
-ConfigFileSearcher configFileSearcher(getSearchPaths(env));
-SettingsFileOption_t settingsFileValue =
-    optionsMap.get<SettingsFileOption_t>(SETTINGS_FILE_KEY, ".exec-helper");
-auto settingsFile = configFileSearcher.find(settingsFileValue);
-if(settingsFile == std::nullopt) {
-    if(!fleetingOptions.getHelp()) {
-        user_feedback_error("Could not find a settings file");
+    VariablesMap optionsMap = FleetingOptions::getDefault();
+    if(!options.getOptionsMap(optionsMap, argv, true)) {
+        user_feedback_error(
+            "Could not properly parse the command line options");
+        return std::nullopt;
     }
-    return std::nullopt;
-}
-return settingsFile;
+    FleetingOptions fleetingOptions(optionsMap);
+
+    ConfigFileSearcher configFileSearcher(getSearchPaths(env));
+    SettingsFileOption_t settingsFileValue =
+        optionsMap.get<SettingsFileOption_t>(SETTINGS_FILE_KEY, ".exec-helper");
+    auto settingsFile = configFileSearcher.find(settingsFileValue);
+    if(settingsFile == std::nullopt) {
+        if(!fleetingOptions.getHelp()) {
+            user_feedback_error("Could not find a settings file");
+        }
+        return std::nullopt;
+    }
+    return settingsFile;
 }
 
-PatternSettingsPair addPatternsFromSettingsFile(const Path& settingsFile, OptionDescriptions& options) {
-auto patternSettingsPair = parseSettingsFile(settingsFile);
+PatternSettingsPair addPatternsFromSettingsFile(const Path& settingsFile,
+                                                OptionDescriptions& options) {
+    auto patternSettingsPair = parseSettingsFile(settingsFile);
     if(!patternSettingsPair) {
-        throw std::invalid_argument("Could not parse settings file '" + settingsFile.string() + "'");
+        throw std::invalid_argument("Could not parse settings file '" +
+                                    settingsFile.string() + "'");
     }
 
     auto patterns = patternSettingsPair.value().first;
@@ -251,13 +256,14 @@ inline OptionDescriptions getDefaultOptions() noexcept {
     return options;
 }
 
-inline VariablesMap
-handleConfiguration(const Argv& argv,
-                    const EnvironmentCollection& /*env*/, OptionDescriptions& options) {
+inline VariablesMap handleConfiguration(const Argv& argv,
+                                        const EnvironmentCollection& /*env*/,
+                                        OptionDescriptions& options) {
     options.setPositionalArgument(commandOption);
     VariablesMap optionsMap = FleetingOptions::getDefault();
     if(!options.getOptionsMap(optionsMap, argv, false)) {
-        throw std::invalid_argument("Could not properly parse the command line options");
+        throw std::invalid_argument(
+            "Could not properly parse the command line options");
     }
     return optionsMap;
 }
@@ -273,7 +279,8 @@ int execHelperMain(int argc, char** argv, char** envp) {
     PatternSettingsPair patternSettingsPair(Patterns(), SettingsNode("empty"));
     if(settingsFile) {
         try {
-            patternSettingsPair = addPatternsFromSettingsFile(*settingsFile, optionDescriptions);
+            patternSettingsPair =
+                addPatternsFromSettingsFile(*settingsFile, optionDescriptions);
         } catch(const std::invalid_argument& e) {
             std::cerr << e.what() << std::endl;
         }
@@ -342,7 +349,11 @@ int execHelperMain(int argc, char** argv, char** envp) {
 
     execHelper::plugins::ExecuteCallback executeCallback =
         [executor = executor.get()](const Task& task) {
-            executor->execute(task);
+            try {
+                executor->execute(task);
+            } catch(const std::runtime_error& e) {
+                user_feedback_error("Runtime error: " << e.what());
+            }
         };
     execHelper::plugins::registerExecuteCallback(executeCallback);
 

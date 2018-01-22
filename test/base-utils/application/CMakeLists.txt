@@ -6,6 +6,7 @@ set(SRCS
 
 set(DEPENDENCIES
         test-base-utils
+        boost-serialization
     )
 
 add_executable(${EXE_NAME} ${SRCS})

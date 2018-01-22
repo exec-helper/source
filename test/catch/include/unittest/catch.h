@@ -1,4 +1,4 @@
-#include <catch.hpp>
+#include <catch2/catch.hpp>
 
 #define THEN_WHEN(x)
 #define THEN_CHECK(x)

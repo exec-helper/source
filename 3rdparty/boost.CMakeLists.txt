@@ -1,10 +1,16 @@
-find_package(Boost REQUIRED COMPONENTS program_options log log_setup thread system)
+find_package(Boost 1.64.0 REQUIRED COMPONENTS program_options filesystem log log_setup thread system serialization)
 
 # Fix required since the compiler does not like -isystem /usr/include to be explicitly added to its command line
 if(Boost_INCLUDE_DIRS STREQUAL "/usr/include")
     unset(Boost_INCLUDE_DIRS)
 endif()
 link_directories(${Boost_LIBRARY_DIRS})
+
+# boost-filesystem
+set(BOOST_LIBRARY boost-filesystem)
+add_library(${BOOST_LIBRARY} INTERFACE)
+target_include_directories(${BOOST_LIBRARY} SYSTEM INTERFACE ${Boost_INCLUDE_DIRS})
+target_link_libraries(${BOOST_LIBRARY} INTERFACE ${Boost_FILESYSTEM_LIBRARY})
 
 # boost program-options
 set(BOOST_LIBRARY boost-program-options)
@@ -17,6 +23,12 @@ set(BOOST_LIBRARY boost-system)
 add_library(${BOOST_LIBRARY} INTERFACE)
 target_include_directories(${BOOST_LIBRARY} SYSTEM INTERFACE ${Boost_INCLUDE_DIRS})
 target_link_libraries(${BOOST_LIBRARY} INTERFACE ${Boost_SYSTEM_LIBRARY})
+
+# boost serialization
+set(BOOST_LIBRARY boost-serialization)
+add_library(${BOOST_LIBRARY} INTERFACE)
+target_include_directories(${BOOST_LIBRARY} SYSTEM INTERFACE ${Boost_INCLUDE_DIRS})
+target_link_libraries(${BOOST_LIBRARY} INTERFACE ${Boost_SERIALIZATION_LIBRARY})
 
 # boost thread
 set(BOOST_LIBRARY boost-thread)
@@ -34,6 +46,7 @@ target_link_libraries(${BOOST_LIBRARY} INTERFACE ${Boost_LOG_SETUP_LIBRARY})
 set(BOOST_LIBRARY boost-log)
 add_library(${BOOST_LIBRARY} INTERFACE)
 target_include_directories(${BOOST_LIBRARY} SYSTEM INTERFACE ${Boost_INCLUDE_DIRS})
+
 
 # Explicitly add dependencies on boost-thread and boost-system, since FindBoost is not doing this itself
 # Linking with pthread is requiered by Boost when multithreaded support enabled

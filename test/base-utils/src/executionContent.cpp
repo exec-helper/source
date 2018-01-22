@@ -6,6 +6,9 @@
 #include <utility>
 #include <vector>
 
+#include <boost/archive/archive_exception.hpp>
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
 #include <boost/core/swap.hpp>
 
 #include "base-utils/yaml.h"
@@ -32,6 +35,7 @@ using execHelper::test::baseUtils::ReturnCode;
 using execHelper::test::baseUtils::YamlReader;
 
 namespace {
+constexpr uint8_t HEADER_LENGTH = 8;
 using ExecuteContentMessageCallback =
     std::function<ExecutionContentDataReply(const ExecutionContentData&)>;
 class ExecutionSession : public std::enable_shared_from_this<ExecutionSession> {
@@ -42,27 +46,81 @@ class ExecutionSession : public std::enable_shared_from_this<ExecutionSession> {
         ;
     }
 
-    void start() { readStream(); }
+    void start() { readHeader(); }
 
   private:
-    void readStream() {
+    void readHeader() noexcept {
         auto self(shared_from_this());
+
         boost::asio::async_read(
-            m_socket, buffer(&m_data, sizeof(m_data)),
-            [this, self](error_code ec, std::size_t /*length*/) {
+            m_socket, buffer(&messageLength, HEADER_LENGTH),
+            [this, self](error_code ec, std::size_t length) {
                 if(ec) {
                     cerr << __FILE__ << ":" << __LINE__ << " " << this << " "
                          << "Unexpected error occurred: " << ec << ": "
                          << ec.message() << std::endl;
                     terminate();
                 }
-                auto reply = m_callback(m_data);
+                if(length != HEADER_LENGTH) {
+                    cerr << __FILE__ << ":" << __LINE__ << " " << this << " "
+                         << "Partial message received. Received length = "
+                         << length
+                         << " expected length = " << int(HEADER_LENGTH)
+                         << std::endl;
+                    terminate();
+                }
+
+                std::istringstream iss(
+                    std::string(messageLength, HEADER_LENGTH));
+                std::size_t headerLength = 0;
+                if(!(iss >> std::hex >> headerLength)) {
+                    cerr << __FILE__ << ":" << __LINE__ << " " << this << " "
+                         << "Could not stream data to length" << endl;
+                    terminate();
+                }
+
+                readMessage(headerLength);
+            });
+    }
+
+    void readMessage(uint32_t length) noexcept {
+        auto self(shared_from_this());
+
+        m_data.resize(length);
+        boost::asio::async_read(
+            m_socket, buffer(m_data),
+            [this, self](error_code ec, std::size_t length) {
+                if(ec) {
+                    cerr << __FILE__ << ":" << __LINE__ << " " << this << " "
+                         << "Unexpected error occurred: " << ec << ": "
+                         << ec.message() << std::endl;
+                    terminate();
+                }
+
+                // Deserialize the received data
+                std::string inbound_data(&m_data[0], length);
+
+                ExecutionContentData content;
+                std::istringstream deserialized_stream(inbound_data);
+                try {
+                    boost::archive::text_iarchive deserialized(
+                        deserialized_stream);
+                    deserialized >> content;
+                } catch(const boost::archive::archive_exception& e) {
+                    cerr << __FILE__ << ":" << __LINE__ << " " << this << " "
+                         << e.what() << endl;
+                    terminate();
+                }
+
+                // Process data
+                auto reply = m_callback(content);
                 sendReply(reply);
             });
     }
 
     void sendReply(const ExecutionContentDataReply& reply) {
         auto self(shared_from_this());
+
         boost::asio::async_write(
             m_socket, buffer(&reply, sizeof(reply)),
             [this, self](boost::system::error_code ec, std::size_t /*length*/) {
@@ -72,10 +130,14 @@ class ExecutionSession : public std::enable_shared_from_this<ExecutionSession> {
                          << ec.message() << std::endl;
                     terminate();
                 }
+                m_socket.shutdown(
+                    boost::asio::local::stream_protocol::socket::shutdown_both);
+                m_socket.close();
             });
     }
 
-    ExecutionContentData m_data;
+    char messageLength[HEADER_LENGTH];
+    std::vector<char> m_data;
     ExecuteContentMessageCallback m_callback;
     stream_protocol::socket m_socket;
 };
@@ -84,10 +146,7 @@ class ExecutionSession : public std::enable_shared_from_this<ExecutionSession> {
 namespace execHelper {
 namespace test {
 namespace baseUtils {
-IoService::~IoService() noexcept {
-    assert(m_thread.joinable());
-    m_thread.join();
-}
+IoService::~IoService() noexcept { stop(); }
 
 void IoService::start() noexcept {
     m_isRunning = true;
@@ -122,8 +181,8 @@ IoService* ExecutionContentServer::m_ioService = nullptr;
 
 ExecutionContentServer::ExecutionContentServer(ReturnCode returnCode) noexcept
     : m_returnCode(returnCode),
-      m_file("exec-helper.unix-socket.%%%%"),
-      m_endpoint(m_file.getPath().native()),
+      m_file("exec-helper.unix-socket.%%%%%%%%"),
+      m_endpoint(m_file.getPath().string()),
       m_socket(m_ioService->get()),
       m_acceptor(m_ioService->get()) {
     try {
@@ -153,6 +212,7 @@ ExecutionContentServer::ExecutionContentServer(
 }
 
 ExecutionContentServer::~ExecutionContentServer() noexcept {
+    m_acceptor.close();
     ::unlink(m_file.getPath().native().c_str());
 }
 
@@ -221,9 +281,15 @@ ExecutionContentServer::getConfigCommand() const noexcept {
 }
 
 ExecutionContentDataReply
-ExecutionContentServer::addData(const ExecutionContentData& /*data*/) noexcept {
+ExecutionContentServer::addData(ExecutionContentData data) noexcept {
+    m_receivedData.emplace_back(data);
     ++m_numberOfExecutions;
     return {m_returnCode};
+}
+
+const std::vector<ExecutionContentData>&
+ExecutionContentServer::getReceivedData() const noexcept {
+    return m_receivedData;
 }
 
 unsigned int ExecutionContentServer::getNumberOfExecutions() const noexcept {
@@ -237,7 +303,8 @@ ExecutionContentClient::ExecutionContentClient(const Path& file)
     ;
 }
 
-ReturnCode ExecutionContentClient::addExecution() {
+ReturnCode
+ExecutionContentClient::addExecution(const ExecutionContentData& data) {
     io_service ioService;
 
     stream_protocol::socket socket(ioService);
@@ -251,8 +318,33 @@ ReturnCode ExecutionContentClient::addExecution() {
              << ec.message() << endl;
         return RUNTIME_ERROR;
     }
-    ExecutionContentData data;
-    boost::asio::write(socket, buffer(&data, sizeof(data)), ec);
+
+    // Serialize the struct before sending
+    std::ostringstream serialized_stream;
+    try {
+        boost::archive::text_oarchive serialized(serialized_stream);
+        serialized << data;
+    } catch(const boost::archive::archive_exception& e) {
+        cerr << __FILE__ << ":" << __LINE__ << e.what() << endl;
+        return RUNTIME_ERROR;
+    }
+    auto outboundData = serialized_stream.str();
+
+    std::ostringstream header_stream;
+    header_stream << std::setw(HEADER_LENGTH) << std::hex
+                  << outboundData.size();
+    auto headerData = header_stream.str();
+    if(!header_stream || header_stream.str().size() != HEADER_LENGTH) {
+        cerr << __FILE__ << ":" << __LINE__
+             << "Could not properly construct header stream" << endl;
+        terminate();
+    }
+
+    std::vector<boost::asio::const_buffer> buffers;
+    buffers.emplace_back(buffer(headerData));
+    buffers.emplace_back(buffer(outboundData));
+
+    boost::asio::write(socket, buffers, ec);
     if(ec) {
         cerr << __FILE__ << ":" << __LINE__ << " "
              << "Client: Unexpected error occurred: " << ec << ": "

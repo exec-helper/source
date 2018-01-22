@@ -17,6 +17,8 @@ set(DEPENDENCIES
         filesystem
         gsl
         boost-system
+        boost-filesystem
+        boost-serialization
         yaml-3rd
         unittest
         pthread

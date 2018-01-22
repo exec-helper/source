@@ -12,6 +12,7 @@ set(SRCS
 
 set(DEPENDENCIES
         filesystem
+        boost-filesystem
         boost-program-options
         log
         config

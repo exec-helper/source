@@ -4,8 +4,6 @@
 #include <utility>
 #include <vector>
 
-#include <catch.hpp>
-
 #include "config/settingsNode.h"
 #include "yaml/yaml.h"
 

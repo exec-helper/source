@@ -13,7 +13,7 @@ namespace core {
  */
 class PosixShell final : public Shell {
   public:
-    ShellReturnCode execute(const Task& task) noexcept override;
+    ShellReturnCode execute(const Task& task) override;
     bool isExecutedSuccessfully(ShellReturnCode returnCode) const
         noexcept override;
 

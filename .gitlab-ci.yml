@@ -26,6 +26,7 @@ variables:
     variables:
         RUN_TARGET: $ALL_RUN_TARGETS
         MODULES: $ALL_MODULES
+        NB_RUNS: 1000
     dependencies:
         - build:native
         - build:gcc
@@ -35,7 +36,7 @@ variables:
         - export PATH=$(pwd)/build/g++/release/install/bin:$(pwd)/build/g++/release/install/test/integration:$PATH
         - echo "using run target '$RUN_TARGET'"
         - echo "using modules '$MODULES'"
-        - export RC_PARAMS="max_success=10000 max_size=1000"
+        - export RC_PARAMS="max_success=${NB_RUNS} max_size=${NB_RUNS}"
         - exec-helper run-test --run-target $RUN_TARGET --module $MODULES --compiler g++ clang++ --mode release --debug debug
 
 .memory-check: &memory_check
@@ -114,7 +115,8 @@ variables:
     script:
         - *build_tools
         - *install_exec_helper
-        - exec-helper analyze --analyze asan --module "${ALL_MODULES}"      # Note: the quotes are used to cheat exec-helper so that the binaries are only build ones rather than for each module separately
+        - export PATH=$(pwd)/build/clang++/asan/install/bin:$(pwd)/build/clang++/asan/install/test/integration:$PATH
+        - exec-helper analyze --analyze asan --module "${ALL_MODULES}"      # Note: the quotes are used to cheat exec-helper so that the binaries are only built once rather than for each module separately
 
 build-image:analyze:
     stage: build-image
@@ -269,7 +271,17 @@ unittests:
     <<: *run_test
     variables:
         RUN_TARGET: unittest
-        MODULES: $ALL_MODULES
+        MODULES: log config yaml commander plugins
+        NB_RUNS: 1000
+
+unittests-core:
+    <<: *run_test
+    variables:
+        RUN_TARGET: unittest
+        MODULES: core
+        NB_RUNS: 100
+    before_script:
+        - ulimit -n
 
 integration:
     <<: *run_test
@@ -338,6 +350,7 @@ coverage:
     script:
         - *build_tools
         - *install_exec_helper
+        - export PATH=$(pwd)/build/g++/release/install/bin:$(pwd)/build/g++/release/install/test/integration:$PATH
         - exec-helper coverage
     artifacts:
         paths:

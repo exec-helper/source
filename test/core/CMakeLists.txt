@@ -13,6 +13,7 @@ set(DEPENDENCIES
         core
         test-utils
         unittest
+        rpcheck
     )
 
 add_executable(${EXE_NAME} ${SRCS})
