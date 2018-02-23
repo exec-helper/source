@@ -307,26 +307,26 @@ coverage:
         paths:
             - test_coverage/
 
-coverity:
-    stage: analyze
-    image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-analyze
-    variables:
-        COVERITY_ARCHIVE_NAME: exec-helper_${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}.xz
-    dependencies:
-        - build:native
-    script:
-        - *build_tools
-        - *install_exec_helper
-        - curl --data "token=INxicvq4GqijG23xZzPNEA&project=bverhagen%2Fexec-helper" https://scan.coverity.com/download/linux64 -o coverity_tool.tgz
-        - tar -C /tmp -xf coverity_tool.tgz
-        - pushd /tmp/cov-analysis-linux64-*/bin
-        - export PATH=$PATH:$(pwd)
-        - popd
-        - exec-helper distclean analyze --analyze coverity --compiler g++ --mode release --coverity-archive-name $COVERITY_ARCHIVE_NAME
-        - curl --form token=${COVERITY_SCAN_TOKEN} --form email=barrie.verhagen@gmail.com --form file=@${COVERITY_ARCHIVE_NAME} --form version="${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}" --form description="Analysis scan for ${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}" https://scan.coverity.com/builds?project=bverhagen%2Fexec-helper
-    only:
-        - master
-        - dev
+#coverity:
+    #stage: analyze
+    #image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-analyze
+    #variables:
+        #COVERITY_ARCHIVE_NAME: exec-helper_${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}.xz
+    #dependencies:
+        #- build:native
+    #script:
+        #- *build_tools
+        #- *install_exec_helper
+        #- curl --data "token=INxicvq4GqijG23xZzPNEA&project=bverhagen%2Fexec-helper" https://scan.coverity.com/download/linux64 -o coverity_tool.tgz
+        #- tar -C /tmp -xf coverity_tool.tgz
+        #- pushd /tmp/cov-analysis-linux64-*/bin
+        #- export PATH=$PATH:$(pwd)
+        #- popd
+        #- exec-helper distclean analyze --analyze coverity --compiler g++ --mode release --coverity-archive-name $COVERITY_ARCHIVE_NAME
+        #- curl --form token=${COVERITY_SCAN_TOKEN} --form email=barrie.verhagen@gmail.com --form file=@${COVERITY_ARCHIVE_NAME} --form version="${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}" --form description="Analysis scan for ${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}" https://scan.coverity.com/builds?project=bverhagen%2Fexec-helper
+    #only:
+        #- master
+        #- dev
 
 examples:
     stage: analyze
