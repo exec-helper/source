@@ -10,6 +10,7 @@
         (make_combinations_index < (1U << NUMBER_OF_COMBINATIONS) ||           \
          make_combinations_index == 0U);                                       \
         ++make_combinations_index)
+
 #define COMBINATION                                                            \
     if(make_combinations_index == 0) {                                         \
         ++NUMBER_OF_COMBINATIONS;                                              \

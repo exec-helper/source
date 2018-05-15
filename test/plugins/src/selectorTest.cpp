@@ -61,16 +61,16 @@ SCENARIO("Obtain the plugin name of the selector plugin", "[selector]") {
 
 SCENARIO("Obtaining the default variables map of the selector plugin",
          "[selector]") {
-    MAKE_COMBINATIONS("of fleeting options") {
+    GIVEN("of fleeting options") {
         FleetingOptionsStub fleetingOptions;
         Selector plugin;
 
         VariablesMap actualVariables(plugin.getPluginName());
 
-        THEN_WHEN("We request the variables map") {
+        WHEN("We request the variables map") {
             VariablesMap variables = plugin.getVariablesMap(fleetingOptions);
 
-            THEN_CHECK("We should find the right one") {
+            THEN("We should find the right one") {
                 REQUIRE(variables == actualVariables);
             }
         }
@@ -106,6 +106,7 @@ SCENARIO("Make combinations of configurations for the selector plugin") {
             variables.add(PATTERN_KEY, pattern2.getKey());
             patterns.push_back(pattern2);
             for(const auto& entry : pattern2.getValues()) {
+                (void) entry;   // entry is unused, as we only want to add the same number of empty expected tasks
                 expectedTasks.emplace_back(Task());
             }
         }

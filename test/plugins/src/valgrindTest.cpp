@@ -131,6 +131,7 @@ SCENARIO("Test the variables map of the valgrind plugin", "[valgrind]") {
 
         ExecutorStub::TaskQueue expectedTasks;
         for(const auto& command : runCommands) {
+            (void) command; // Command is unused, as we only want to consider the part of the command associated with this command
             Task expectedTask({PLUGIN_NAME});
             if(!tool.empty()) {
                 expectedTask.append("--tool=" + tool);

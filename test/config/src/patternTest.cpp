@@ -32,7 +32,6 @@ SCENARIO("Test the pattern properties", "[patterns][Pattern]") {
         COMBINATIONS("Set the long option") { longOption = "long-option1"; }
 
         WHEN("We create a pattern") {
-            const char shortOption1 = '1';
             Pattern pattern(key, values, shortOption, longOption);
 
             THEN("We should find these properties") {

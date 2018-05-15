@@ -64,7 +64,7 @@ SCENARIO("Obtain the plugin name of the command-line-command plugin",
 SCENARIO(
     "Obtaining the default variables map of the command-line-command plugin",
     "[command-line-command]") {
-    MAKE_COMBINATIONS("The default fleeting options") {
+    GIVEN("The default fleeting options") {
         FleetingOptionsStub fleetingOptions;
         CommandLineCommand plugin;
 
@@ -72,10 +72,10 @@ SCENARIO(
         actualVariables.add(COMMAND_LINE_KEY);
         actualVariables.add(ENVIRONMENT_KEY);
 
-        THEN_WHEN("We request the variables map") {
+        WHEN("We request the variables map") {
             VariablesMap variables = plugin.getVariablesMap(fleetingOptions);
 
-            THEN_CHECK("We should find the same ones") {
+            THEN("We should find the same ones") {
                 REQUIRE(variables == actualVariables);
             }
         }

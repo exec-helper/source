@@ -342,7 +342,6 @@ SCENARIO("Execute multiple statements: predefined order: failing statements",
                  "the failed statements should have been executed") {
                 REQUIRE(failingCommand.getNumberOfStatementExecutions() ==
                         failIndex + 1U);
-                auto expectedNumberOfExecutions = 1U;
                 for(auto i = 0U; i <= failIndex; ++i) {
                     REQUIRE(failingCommand[i]->getNumberOfExecutions() == 1U);
                 }
