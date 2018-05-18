@@ -25,27 +25,13 @@ using execHelper::yaml::Yaml;
 namespace {
 const czstring<> PATTERNS_KEY = "patterns";
 
-bool processPattern(not_null<VariablesMap*> currentSettings,
-                    const SettingsNode& newSettings) noexcept {
-    for(const auto& key : newSettings.values()) {
-        const SettingsNode& parameter = newSettings[key];
-        if(!currentSettings->replace(parameter.key(), parameter.values())) {
-            return false;
-        }
-    }
-    return true;
-}
-
 Patterns processPatterns(const SettingsNode& settings) noexcept {
     Patterns result;
     if(settings.contains(PATTERNS_KEY)) {
         const SettingsNode& patternSettings = settings[PATTERNS_KEY];
         for(const auto& patternKey : patternSettings.values()) {
-            VariablesMap newPatternMap =
-                PatternsHandler::getDefaultPatternMap(patternKey);
-            if(!processPattern(&newPatternMap, patternSettings[patternKey])) {
-                continue;
-            }
+            VariablesMap newPatternMap = PatternsHandler::getDefaultPatternMap(patternKey);
+            newPatternMap.overwrite(patternSettings[patternKey]);
             auto newPattern =
                 PatternsHandler::toPattern(patternKey, newPatternMap);
             if(!newPattern) {

@@ -125,7 +125,7 @@ SCENARIO("Test the variables map of the valgrind plugin", "[valgrind]") {
         }
 
         FleetingOptionsStub fleetingOptions;
-        ExecutePlugin::push(&fleetingOptions);
+        ExecutePlugin::push(gsl::not_null<config::FleetingOptionsInterface*>(&fleetingOptions));
         ExecutePlugin::push(move(settings));
         ExecutePlugin::push(Patterns(patterns));
 

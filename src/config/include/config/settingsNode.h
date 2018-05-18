@@ -279,6 +279,14 @@ class SettingsNode {
      */
     void swap(SettingsNode& other) noexcept;
 
+    /**
+     * Overwrite the elements in this settings node with the key/value pairs described in the given one.
+     * New keys will be added, existing keys will be overwritten with the new content.
+     *
+     * \param[in] newSettings   The new settings to add
+     */
+    void overwrite(const SettingsNode& newSettings) noexcept;
+
   private:
     using SettingsNodeCollection =
         std::vector<SettingsNode>; //!< A collection of nodes

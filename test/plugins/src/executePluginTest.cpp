@@ -127,7 +127,7 @@ SCENARIO("Testing the default execute settings", "[execute-plugin]") {
         Task task;
 
         FleetingOptionsStub fleetingOptions;
-        plugin.push(&fleetingOptions);
+        plugin.push(gsl::not_null<config::FleetingOptionsInterface*>(&fleetingOptions));
         plugin.push(SettingsNode("test"));
         plugin.push(Patterns());
 
@@ -295,7 +295,7 @@ SCENARIO("Test the settings node to variables map mapping",
         }
 
         ExecutePlugin plugin(commands);
-        plugin.push(&fleetingOptions);
+        plugin.push(gsl::not_null<config::FleetingOptionsInterface*>(&fleetingOptions));
         plugin.push(move(settings));
         plugin.push(move(configuredPatterns));
 
@@ -338,7 +338,7 @@ SCENARIO("Test problematic cases", "[execute-plugin]") {
         FleetingOptionsStub fleetingOptions;
 
         ExecutePlugin plugin({"non-existing-plugin"});
-        plugin.push(&fleetingOptions);
+        plugin.push(gsl::not_null<config::FleetingOptionsInterface*>(&fleetingOptions));
         plugin.push(SettingsNode("test"));
         plugin.push(Patterns());
 
@@ -364,7 +364,7 @@ SCENARIO("Test problematic cases", "[execute-plugin]") {
         settings.add(command, MEMORY_KEY);
 
         ExecutePlugin plugin({"memory", "memory"});
-        plugin.push(&fleetingOptions);
+        plugin.push(gsl::not_null<config::FleetingOptionsInterface*>(&fleetingOptions));
         plugin.push(move(settings));
         plugin.push(Patterns());
 

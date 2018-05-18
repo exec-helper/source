@@ -112,7 +112,7 @@ SCENARIO("Make combinations of configurations for the selector plugin") {
         }
 
         FleetingOptionsStub fleetingOptions;
-        ExecutePlugin::push(&fleetingOptions);
+        ExecutePlugin::push(gsl::not_null<config::FleetingOptionsInterface*>(&fleetingOptions));
         ExecutePlugin::push(SettingsNode(PLUGIN_NAME));
         ExecutePlugin::push(Patterns(patterns));
 

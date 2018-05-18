@@ -124,7 +124,7 @@ SCENARIO("Test multiple configurations of the lcov plugin", "[lcov]") {
         registerExecuteCallback(executeCallback);
 
         FleetingOptionsStub fleetingOptions;
-        ExecutePlugin::push(&fleetingOptions);
+        ExecutePlugin::push(gsl::not_null<config::FleetingOptionsInterface*>(&fleetingOptions));
         ExecutePlugin::push(SettingsNode(PLUGIN_NAME));
         ExecutePlugin::push(Patterns(patterns));
 

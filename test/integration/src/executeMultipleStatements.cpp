@@ -64,7 +64,7 @@ SCENARIO("Execution order of a command consisting of one predefined statement",
             execution.add(TestCommand(
                 commandString, {createStatement<SimpleStatement>(SUCCESS)}));
         }
-        execution.write(&yaml);
+        execution.write(gsl::not_null<YamlWriter*>(&yaml));
         config.write(yaml);
 
         WHEN("we call each of these commands separately") {
@@ -134,7 +134,7 @@ SCENARIO("Scenario: Execution order of commands consisting of multiple "
             }
             execution.add(move(command));
         }
-        execution.write(&yaml);
+        execution.write(gsl::not_null<YamlWriter*>(&yaml));
         config.write(yaml);
 
         WHEN("we call each of these commands separately") {
@@ -220,7 +220,7 @@ SCENARIO("Duplicate configured statements",
         }
         execution.add(commandWithDuplicates);
 
-        execution.write(&yaml);
+        execution.write(gsl::not_null<YamlWriter*>(&yaml));
         config.write(yaml);
 
         WHEN("we call this command") {
@@ -321,7 +321,7 @@ SCENARIO("Execute multiple statements: predefined order: failing statements",
         }
         execution.add(failingCommand);
 
-        execution.write(&yaml);
+        execution.write(gsl::not_null<YamlWriter*>(&yaml));
         config.write(yaml);
 
         WHEN("we call this command") {

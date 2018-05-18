@@ -22,7 +22,7 @@ const ExecutionContent& ExecutionHandler::at(const string& key) const noexcept {
 
 ExecutionHandler::ExecutionHandlerIterationRAII
 ExecutionHandler::startIteration() noexcept {
-    return ExecutionHandlerIterationRAII(&m_outputs);
+    return ExecutionHandlerIterationRAII(gsl::not_null<ExecutionContentCollection*>(&m_outputs));
 }
 
 ExecutionHandler::ExecutionHandlerIterationRAII::ExecutionHandlerIterationRAII(

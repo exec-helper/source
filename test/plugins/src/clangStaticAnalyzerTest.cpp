@@ -106,7 +106,7 @@ SCENARIO("Successfully applying the clang-static-analyzer plugin",
         VariablesMap variables = plugin.getVariablesMap(fleetingOptions);
         variables.add(BUILD_COMMAND_KEY, MEMORY_KEY);
 
-        ExecutePlugin::push(&fleetingOptions);
+        ExecutePlugin::push(gsl::not_null<const config::FleetingOptionsInterface*>(&fleetingOptions));
         ExecutePlugin::push(SettingsNode("test"));
         ExecutePlugin::push(Patterns(patterns));
 

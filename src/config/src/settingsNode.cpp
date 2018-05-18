@@ -247,6 +247,16 @@ void SettingsNode::swap(SettingsNode& other) noexcept {
     m_values.swap(other.m_values);
 }
 
+void SettingsNode::overwrite(const SettingsNode& newSettings) noexcept {
+    for(const auto& key : newSettings.values()) {
+        const SettingsNode& newValue = newSettings[key];
+        if(!contains(key)) {
+            add(key);
+        }
+        at(key)->deepCopy(newValue); 
+    }
+}
+
 SettingsNode* SettingsNode::at(const SettingsKey& key) noexcept {
     expectsMessage(contains(key), "Key must exist");
     for(SettingsNode& value : *m_values) {
