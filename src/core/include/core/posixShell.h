@@ -11,7 +11,7 @@ namespace core {
 /**
  * \brief Implementation for Shell that represents a posix shell
  */
-class PosixShell : public Shell {
+class PosixShell final : public Shell {
   public:
     ShellReturnCode execute(const Task& task) noexcept override;
     bool isExecutedSuccessfully(ShellReturnCode returnCode) const

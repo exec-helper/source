@@ -11,7 +11,7 @@ namespace core {
 namespace test {
 const Shell::ShellReturnCode RETURN_CODE_SUCCESS = 0U;
 
-class ShellStub : public Shell {
+class ShellStub final : public Shell {
   public:
     using TaskQueue = std::vector<Task>;
 
