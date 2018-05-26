@@ -14,7 +14,6 @@ using std::string;
 
 using boost::optional;
 using gsl::czstring;
-using gsl::not_null;
 
 using execHelper::config::Patterns;
 using execHelper::config::PatternsHandler;

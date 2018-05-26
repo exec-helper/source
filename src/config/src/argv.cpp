@@ -20,7 +20,7 @@ Argv::Argv(int argc, const char* const* const argv) noexcept {
     m_argv.reserve(argc + 1UL);
     for(const auto& arg : spanArgv) {
         const auto argLength = strnlen(arg, 256U) + 1U;
-        auto newArg = new char[argLength];
+        auto newArg = new char[argLength];  // NOLINT(cppcoreguidelines-owning-memory)
         strncpy(newArg, arg, argLength);
         m_argv.emplace_back(newArg);
     }
@@ -31,7 +31,7 @@ Argv::Argv(const vector<string>& task) noexcept {
     m_argv.reserve(task.size() + 1);
 
     for(const auto& arg : task) {
-        auto newArg = new char[arg.size() + 1U];
+        auto newArg = new char[arg.size() + 1U];    // NOLINT(cppcoreguidelines-owning-memory)
         strncpy(newArg, arg.c_str(), arg.size() + 1U);
         m_argv.emplace_back(newArg);
     }
@@ -54,7 +54,7 @@ void Argv::deepCopy(const Argv& other) noexcept {
             break;
         }
         size_t length = strlen(otherElement) + 1U;
-        auto* newArg = new char[length];
+        auto* newArg = new char[length];    // NOLINT(cppcoreguidelines-owning-memory)
         strncpy(newArg, otherElement, length);
         m_argv.emplace_back(newArg);
     }
@@ -93,7 +93,7 @@ void Argv::swap(Argv& other) noexcept { m_argv.swap(other.m_argv); }
 
 void Argv::clear() noexcept {
     for(const auto& arg : m_argv) {
-        delete[] arg;
+        delete[] arg;   // NOLINT(cppcoreguidelines-owning-memory)
     }
     m_argv.clear();
 }

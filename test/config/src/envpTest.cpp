@@ -192,7 +192,8 @@ SCENARIO("Test the envp copy and move constructor, assignment operators and "
             }
         }
         WHEN("We move the given object") {
-            Envp moved(move(envp));
+            Envp copied(envp); // Copy so we can move the copy
+            Envp moved(move(copied));
 
             THEN("We must find the expected content") {
                 const char* const* movedEnvp = moved.getEnvp();
@@ -210,10 +211,11 @@ SCENARIO("Test the envp copy and move constructor, assignment operators and "
             }
         }
         WHEN("We move assign the given object") {
+            Envp copied(envp); // Copy so we can move the copy
             Envp assign(
                 EnvironmentCollection({{"move-assign-key1", "move-assign1"},
                                        {"move-assign-key2", "move-assign2"}}));
-            assign = move(envp); // NOLINT(hicpp-invalid-access-moved)
+            assign = move(copied); // NOLINT(hicpp-invalid-access-moved)
             THEN("We must find the expected content") {
                 const char* const* movedEnvp = assign.getEnvp();
                 size_t index = 0U;
