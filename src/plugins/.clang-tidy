@@ -1,5 +1,5 @@
 ---
-Checks: 'clang-diagnostic-*,clang-analyzer-*,*,-llvm-header-guard'
+Checks: 'clang-diagnostic-*,clang-analyzer-*,*,-llvm-header-guard,-fuchsia-default-arguments'
 
 WarningsAsErrors: '*'
 HeaderFilterRegex: '^(?!gsl).*'

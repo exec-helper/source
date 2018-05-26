@@ -127,9 +127,9 @@ SCENARIO("Testing the default execute settings", "[execute-plugin]") {
         Task task;
 
         FleetingOptionsStub fleetingOptions;
-        plugin.push(gsl::not_null<config::FleetingOptionsInterface*>(&fleetingOptions));
-        plugin.push(SettingsNode("test"));
-        plugin.push(Patterns());
+        ExecutePlugin::push(gsl::not_null<config::FleetingOptionsInterface*>(&fleetingOptions));
+        ExecutePlugin::push(SettingsNode("test"));
+        ExecutePlugin::push(Patterns());
 
         WHEN("We apply the selector plugin") {
             bool success =
@@ -138,9 +138,9 @@ SCENARIO("Testing the default execute settings", "[execute-plugin]") {
             THEN("It should succeed") { REQUIRE(success); }
         }
 
-        plugin.popFleetingOptions();
-        plugin.popSettingsNode();
-        plugin.popPatterns();
+        ExecutePlugin::popFleetingOptions();
+        ExecutePlugin::popSettingsNode();
+        ExecutePlugin::popPatterns();
     }
 }
 
@@ -295,9 +295,9 @@ SCENARIO("Test the settings node to variables map mapping",
         }
 
         ExecutePlugin plugin(commands);
-        plugin.push(gsl::not_null<config::FleetingOptionsInterface*>(&fleetingOptions));
-        plugin.push(move(settings));
-        plugin.push(move(configuredPatterns));
+        ExecutePlugin::push(gsl::not_null<config::FleetingOptionsInterface*>(&fleetingOptions));
+        ExecutePlugin::push(move(settings));
+        ExecutePlugin::push(move(configuredPatterns));
 
         THEN_WHEN("We apply the execute plugin") {
             Task task;
@@ -327,9 +327,9 @@ SCENARIO("Test the settings node to variables map mapping",
             }
         }
 
-        plugin.popFleetingOptions();
-        plugin.popSettingsNode();
-        plugin.popPatterns();
+        ExecutePlugin::popFleetingOptions();
+        ExecutePlugin::popSettingsNode();
+        ExecutePlugin::popPatterns();
     }
 }
 
@@ -338,9 +338,9 @@ SCENARIO("Test problematic cases", "[execute-plugin]") {
         FleetingOptionsStub fleetingOptions;
 
         ExecutePlugin plugin({"non-existing-plugin"});
-        plugin.push(gsl::not_null<config::FleetingOptionsInterface*>(&fleetingOptions));
-        plugin.push(SettingsNode("test"));
-        plugin.push(Patterns());
+        ExecutePlugin::push(gsl::not_null<config::FleetingOptionsInterface*>(&fleetingOptions));
+        ExecutePlugin::push(SettingsNode("test"));
+        ExecutePlugin::push(Patterns());
 
         WHEN("We execute the plugin") {
             Task task;
@@ -350,9 +350,9 @@ SCENARIO("Test problematic cases", "[execute-plugin]") {
             THEN("It should not succeed") { REQUIRE_FALSE(returnCode); }
         }
 
-        plugin.popFleetingOptions();
-        plugin.popSettingsNode();
-        plugin.popPatterns();
+        ExecutePlugin::popFleetingOptions();
+        ExecutePlugin::popSettingsNode();
+        ExecutePlugin::popPatterns();
     }
     GIVEN("A plugin that fails to execute") {
         const Command command("command");
@@ -364,9 +364,9 @@ SCENARIO("Test problematic cases", "[execute-plugin]") {
         settings.add(command, MEMORY_KEY);
 
         ExecutePlugin plugin({"memory", "memory"});
-        plugin.push(gsl::not_null<config::FleetingOptionsInterface*>(&fleetingOptions));
-        plugin.push(move(settings));
-        plugin.push(Patterns());
+        ExecutePlugin::push(gsl::not_null<config::FleetingOptionsInterface*>(&fleetingOptions));
+        ExecutePlugin::push(move(settings));
+        ExecutePlugin::push(Patterns());
 
         MemoryHandler memory;
         memory.setReturnCode(false);
@@ -382,9 +382,9 @@ SCENARIO("Test problematic cases", "[execute-plugin]") {
             }
         }
 
-        plugin.popFleetingOptions();
-        plugin.popSettingsNode();
-        plugin.popPatterns();
+        ExecutePlugin::popFleetingOptions();
+        ExecutePlugin::popSettingsNode();
+        ExecutePlugin::popPatterns();
     }
 }
 
