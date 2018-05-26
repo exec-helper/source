@@ -84,19 +84,16 @@ ClangTidy::getWarningAsError(const WarningAsError& warningAsError,
                              const Checks& checks) noexcept {
     // Check if we are in the special case where we inherit the values from
     // checksCollection
-    string result("-warnings-as-errors=");
+    string listedChecks;
     if(warningAsError.size() == 1U && warningAsError.front() == "all") {
-        if(checks.empty()) {
-            return TaskCollection();
-        }
-        result += listChecks(checks);
+        listedChecks = listChecks(checks);
     } else {
-        if(warningAsError.empty()) {
-            return TaskCollection();
-        }
-        result += listChecks(warningAsError);
+        listedChecks = listChecks(warningAsError);
     }
-    return TaskCollection({result});
+    if(listedChecks.empty()) {
+        return TaskCollection();
+    }
+    return TaskCollection({"-warnings-as-errors=" + listedChecks});
 }
 
 string ClangTidy::listChecks(const Checks& checks) noexcept {
