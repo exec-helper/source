@@ -98,18 +98,18 @@ PosixShell::ShellReturnCode PosixShell::waitForChild(pid_t pid) const noexcept {
         LOG(error) << "Error executing command";
         return std::numeric_limits<PosixShell::ShellReturnCode>::max();
     }
-    if(WIFEXITED(status)) {
-        if(!WEXITSTATUS(status)) {
+    if(WIFEXITED(status)) {     // NOLINT(hicpp-signed-bitwise)
+        if(!WEXITSTATUS(status)) {  // NOLINT(hicpp-signed-bitwise)
             return POSIX_SUCCESS;
         }
         LOG(debug) << "Process terminated with return code '"
-                   << WEXITSTATUS(status) << "'";
-        return WEXITSTATUS(status);
+                   << WEXITSTATUS(status) << "'";   // NOLINT(hicpp-signed-bitwise)
+        return WEXITSTATUS(status);     // NOLINT(hicpp-signed-bitwise)
     }
-    if(WIFSIGNALED(status)) {
+    if(WIFSIGNALED(status)) {   // NOLINT(hicpp-signed-bitwise)
         LOG(warning) << "Child terminated because of uncaught signal '"
-                     << WTERMSIG(status) << "'";
-        return WTERMSIG(status);
+                     << WTERMSIG(status) << "'";    // NOLINT(hicpp-signed-bitwise)
+        return WTERMSIG(status);    // NOLINT(hicpp-signed-bitwise)
     }
     LOG(error) << "Child exited with unexpected child status: " << status;
     return status;
