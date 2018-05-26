@@ -316,7 +316,7 @@ pmd:
     patterns:
         - SOURCE_TYPE
         - MODULE
-    exec: ""
+    exec: pmd
     tool:
         - cpd
     language: cpp

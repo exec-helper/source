@@ -162,8 +162,9 @@ SCENARIO("Make combinations of different configurations for the pmd plugin",
             verbosity.emplace_back("-verbose");
         }
 
-        expectedTask.append(variables.get<Exec>(EXEC_KEY).get());
-        expectedTask.append(variables.get<Tool>(TOOL_KEY).get());
+        string binaryName(variables.get<Exec>(EXEC_KEY).get());
+        binaryName.append("-").append(variables.get<Tool>(TOOL_KEY).get());
+        expectedTask.append(binaryName);
         expectedTask.append(language);
         expectedTask.append(verbosity);
         expectedTask.append(minimumTokens);

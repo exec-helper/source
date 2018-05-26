@@ -56,9 +56,10 @@ Pmd::getVariablesMap(const FleetingOptionsInterface& fleetingOptions) const
 
 bool Pmd::apply(Task task, const VariablesMap& variables,
                 const Patterns& patterns) const noexcept {
-    task.append(variables.get<string>(EXEC_KEY).get());
+    auto binaryName = variables.get<string>(EXEC_KEY).get();
     auto tool = variables.get<string>(TOOL_KEY).get();
-    task.append(tool);
+    binaryName.append("-").append(tool);
+    task.append(binaryName);
 
     auto language = variables.get<string>(LANGUAGE_KEY);
     if(language) {
