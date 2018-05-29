@@ -169,7 +169,7 @@ build:native:
     script:
         - *build_tools
         - make
-        - suto make install
+        - sudo make install
     artifacts:
         expire_in: 1 day
         paths:
