@@ -169,7 +169,7 @@ build:native:
     script:
         - *build_tools
         - make
-        - make install
+        - suto make install
     artifacts:
         expire_in: 1 day
         paths:
@@ -181,7 +181,7 @@ build:debian:
     dependencies: []
     script:
         - make USE_SYSTEM_GSL=OFF 
-        - sudo make install-bin
+        - make install-bin
     artifacts:
         expire_in: 1 day
         paths:
