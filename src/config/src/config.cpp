@@ -29,7 +29,8 @@ Patterns processPatterns(const SettingsNode& settings) noexcept {
     if(settings.contains(PATTERNS_KEY)) {
         const SettingsNode& patternSettings = settings[PATTERNS_KEY];
         for(const auto& patternKey : patternSettings.values()) {
-            VariablesMap newPatternMap = PatternsHandler::getDefaultPatternMap(patternKey);
+            VariablesMap newPatternMap =
+                PatternsHandler::getDefaultPatternMap(patternKey);
             newPatternMap.overwrite(patternSettings[patternKey]);
             auto newPattern =
                 PatternsHandler::toPattern(patternKey, newPatternMap);

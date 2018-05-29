@@ -17,8 +17,8 @@ using std::string;
 using std::stringstream;
 using std::vector;
 
-using boost::filesystem::current_path;
 using boost::trim_right;
+using boost::filesystem::current_path;
 
 using execHelper::config::EnvironmentCollection;
 using execHelper::config::EnvironmentValue;

@@ -41,8 +41,8 @@ using std::string;
 using std::stringstream;
 using std::vector;
 
-using boost::filesystem::current_path;
 using boost::optional;
+using boost::filesystem::current_path;
 
 using execHelper::commander::Commander;
 using execHelper::config::ArgumentOption;
@@ -56,6 +56,8 @@ using execHelper::config::DryRunOption_t;
 using execHelper::config::EnvironmentCollection;
 using execHelper::config::Envp;
 using execHelper::config::FleetingOptions;
+using execHelper::config::getAllParentDirectories;
+using execHelper::config::getHomeDirectory;
 using execHelper::config::HELP_KEY;
 using execHelper::config::HelpOption_t;
 using execHelper::config::JOBS_KEY;
@@ -64,22 +66,19 @@ using execHelper::config::LOG_LEVEL_KEY;
 using execHelper::config::LogLevelOption_t;
 using execHelper::config::Option;
 using execHelper::config::OptionDescriptions;
+using execHelper::config::parseSettingsFile;
 using execHelper::config::Path;
 using execHelper::config::Paths;
-using execHelper::config::PatternValues;
 using execHelper::config::Patterns;
+using execHelper::config::PatternValues;
 using execHelper::config::SETTINGS_FILE_KEY;
 using execHelper::config::SettingsFileOption_t;
-using execHelper::config::SettingsFileOption_t;
 using execHelper::config::SettingsNode;
-using execHelper::config::VERBOSE_KEY;
-using execHelper::config::VERSION_KEY;
 using execHelper::config::VariablesMap;
+using execHelper::config::VERBOSE_KEY;
 using execHelper::config::VerboseOption_t;
+using execHelper::config::VERSION_KEY;
 using execHelper::config::VersionOption_t;
-using execHelper::config::getAllParentDirectories;
-using execHelper::config::getHomeDirectory;
-using execHelper::config::parseSettingsFile;
 using execHelper::core::ExecutorInterface;
 using execHelper::core::ImmediateExecutor;
 using execHelper::core::PosixShell;
@@ -320,11 +319,10 @@ int execHelperMain(int argc, char** argv, char** envp) {
         executor = make_unique<ImmediateExecutor>(shell, callback);
     }
 
-    execHelper::plugins::ExecuteCallback executeCallback = [executor =
-                                                                executor.get()](
-        const Task& task) {
-        executor->execute(task);
-    };
+    execHelper::plugins::ExecuteCallback executeCallback =
+        [executor = executor.get()](const Task& task) {
+            executor->execute(task);
+        };
     execHelper::plugins::registerExecuteCallback(executeCallback);
 
     Commander commander;

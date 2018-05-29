@@ -13,8 +13,8 @@ using std::to_string;
 
 using boost::lexical_cast;
 
-using execHelper::log::LogLevel;
 using execHelper::log::all;
+using execHelper::log::LogLevel;
 using execHelper::log::toLogLevel;
 
 namespace execHelper {

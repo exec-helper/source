@@ -106,7 +106,8 @@ SCENARIO("Parse properly written settings files", "[config][config-config]") {
         }
 
         ConfigFileWriter configFile;
-        writeSettingsFile(gsl::not_null<ConfigFileWriter*>(&configFile), settings, patterns);
+        writeSettingsFile(gsl::not_null<ConfigFileWriter*>(&configFile),
+                          settings, patterns);
         auto parsedSettingsFile = parseSettingsFile(configFile.getPath());
 
         THEN_CHECK("It must succeed") {

@@ -216,7 +216,7 @@ SCENARIO("Test the argv copy and move constructor, assignment operators and "
             }
         }
         WHEN("We move the given object") {
-            Argv copied(argv);  // Make a copy that can be moved
+            Argv copied(argv); // Make a copy that can be moved
             Argv moved(move(copied));
             THEN("We must find the expected content") {
                 REQUIRE(args.size() == moved.getArgc());
@@ -226,7 +226,7 @@ SCENARIO("Test the argv copy and move constructor, assignment operators and "
             }
         }
         WHEN("We move assign the given object") {
-            Argv copied(argv);  // Make a copy that can be moved
+            Argv copied(argv); // Make a copy that can be moved
             Argv assign(vector<string>({"move-assign1", "move-assign2"}));
             assign = move(copied); // NOLINT(hicpp-invalid-access-moved)
             THEN("We must find the expected content") {

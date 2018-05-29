@@ -16,11 +16,11 @@ using boost::filesystem::fstream;
 using boost::filesystem::is_regular_file;
 using boost::filesystem::remove;
 using boost::filesystem::temp_directory_path;
-using boost::system::errc::success;
 using boost::system::error_code;
+using boost::system::errc::success;
 
-using execHelper::test::baseUtils::Path;
 using execHelper::test::baseUtils::generateRandomChar;
+using execHelper::test::baseUtils::Path;
 
 namespace {
 /**

@@ -34,8 +34,8 @@ using std::vector;
 
 using gsl::czstring;
 
-using execHelper::config::COMMAND_KEY;
 using execHelper::config::Command;
+using execHelper::config::COMMAND_KEY;
 using execHelper::config::CommandCollection;
 using execHelper::config::Pattern;
 using execHelper::config::Patterns;
@@ -127,7 +127,8 @@ SCENARIO("Testing the default execute settings", "[execute-plugin]") {
         Task task;
 
         FleetingOptionsStub fleetingOptions;
-        ExecutePlugin::push(gsl::not_null<config::FleetingOptionsInterface*>(&fleetingOptions));
+        ExecutePlugin::push(
+            gsl::not_null<config::FleetingOptionsInterface*>(&fleetingOptions));
         ExecutePlugin::push(SettingsNode("test"));
         ExecutePlugin::push(Patterns());
 
@@ -295,7 +296,8 @@ SCENARIO("Test the settings node to variables map mapping",
         }
 
         ExecutePlugin plugin(commands);
-        ExecutePlugin::push(gsl::not_null<config::FleetingOptionsInterface*>(&fleetingOptions));
+        ExecutePlugin::push(
+            gsl::not_null<config::FleetingOptionsInterface*>(&fleetingOptions));
         ExecutePlugin::push(move(settings));
         ExecutePlugin::push(move(configuredPatterns));
 
@@ -338,7 +340,8 @@ SCENARIO("Test problematic cases", "[execute-plugin]") {
         FleetingOptionsStub fleetingOptions;
 
         ExecutePlugin plugin({"non-existing-plugin"});
-        ExecutePlugin::push(gsl::not_null<config::FleetingOptionsInterface*>(&fleetingOptions));
+        ExecutePlugin::push(
+            gsl::not_null<config::FleetingOptionsInterface*>(&fleetingOptions));
         ExecutePlugin::push(SettingsNode("test"));
         ExecutePlugin::push(Patterns());
 
@@ -364,7 +367,8 @@ SCENARIO("Test problematic cases", "[execute-plugin]") {
         settings.add(command, MEMORY_KEY);
 
         ExecutePlugin plugin({"memory", "memory"});
-        ExecutePlugin::push(gsl::not_null<config::FleetingOptionsInterface*>(&fleetingOptions));
+        ExecutePlugin::push(
+            gsl::not_null<config::FleetingOptionsInterface*>(&fleetingOptions));
         ExecutePlugin::push(move(settings));
         ExecutePlugin::push(Patterns());
 

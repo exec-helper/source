@@ -28,8 +28,8 @@ using execHelper::core::TaskCollection;
 using execHelper::plugins::COMMAND_LINE_KEY;
 using execHelper::plugins::ExecuteCallback;
 using execHelper::plugins::Pmd;
-using execHelper::plugins::VERBOSITY_KEY;
 using execHelper::plugins::registerExecuteCallback;
+using execHelper::plugins::VERBOSITY_KEY;
 
 using execHelper::core::test::ExecutorStub;
 using execHelper::test::FleetingOptionsStub;

@@ -32,9 +32,9 @@ using execHelper::config::Patterns;
 using execHelper::config::SettingsNode;
 using execHelper::config::VariablesMap;
 using execHelper::core::Task;
+using execHelper::plugins::getPatternsKey;
 using execHelper::plugins::Memory;
 using execHelper::plugins::MemoryHandler;
-using execHelper::plugins::getPatternsKey;
 
 using execHelper::core::test::ExecutorStub;
 using execHelper::test::FleetingOptionsStub;

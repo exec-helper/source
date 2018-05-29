@@ -30,7 +30,6 @@ using boost::xpressive::sregex;
 using execHelper::log::all;
 using execHelper::log::debug;
 using execHelper::log::error;
-using execHelper::log::error;
 using execHelper::log::fatal;
 using execHelper::log::info;
 using execHelper::log::none;

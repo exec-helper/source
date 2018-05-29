@@ -8,7 +8,8 @@ namespace execHelper {
 namespace test {
 namespace baseUtils {
 ConfigBuilder::ConfigBuilder() {
-    ExecutionContent::registerIoService(gsl::not_null<IoService*>(&m_ioService));
+    ExecutionContent::registerIoService(
+        gsl::not_null<IoService*>(&m_ioService));
 }
 
 Commands::const_iterator ConfigBuilder::begin() const noexcept {

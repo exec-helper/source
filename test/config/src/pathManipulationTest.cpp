@@ -15,8 +15,8 @@ using std::string;
 using boost::filesystem::absolute;
 using boost::filesystem::current_path;
 
-using execHelper::test::baseUtils::TmpFile;
 using execHelper::test::baseUtils::generateRandomString;
+using execHelper::test::baseUtils::TmpFile;
 
 namespace execHelper {
 namespace config {

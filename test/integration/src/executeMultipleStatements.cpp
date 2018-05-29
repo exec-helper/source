@@ -30,16 +30,16 @@ using std::vector;
 
 using execHelper::test::baseUtils::ConfigBuilder;
 using execHelper::test::baseUtils::ConfigFileWriter;
+using execHelper::test::baseUtils::createStatement;
 using execHelper::test::baseUtils::EXEC_HELPER_BINARY;
 using execHelper::test::baseUtils::ExecutionContent;
 using execHelper::test::baseUtils::IndirectStatement;
 using execHelper::test::baseUtils::ReturnCode;
-using execHelper::test::baseUtils::SUCCESS;
 using execHelper::test::baseUtils::SimpleStatement;
 using execHelper::test::baseUtils::Statements;
+using execHelper::test::baseUtils::SUCCESS;
 using execHelper::test::baseUtils::TestCommand;
 using execHelper::test::baseUtils::YamlWriter;
-using execHelper::test::baseUtils::createStatement;
 using execHelper::test::baseUtils::execution::execute;
 
 namespace execHelper {

@@ -24,8 +24,8 @@ using std::numeric_limits;
 using std::string;
 
 using boost::filesystem::current_path;
-using boost::system::errc::success;
 using boost::system::error_code;
+using boost::system::errc::success;
 using gsl::span;
 using gsl::zstring;
 
@@ -98,18 +98,19 @@ PosixShell::ShellReturnCode PosixShell::waitForChild(pid_t pid) const noexcept {
         LOG(error) << "Error executing command";
         return std::numeric_limits<PosixShell::ShellReturnCode>::max();
     }
-    if(WIFEXITED(status)) {     // NOLINT(hicpp-signed-bitwise)
-        if(!WEXITSTATUS(status)) {  // NOLINT(hicpp-signed-bitwise)
+    if(WIFEXITED(status)) {        // NOLINT(hicpp-signed-bitwise)
+        if(!WEXITSTATUS(status)) { // NOLINT(hicpp-signed-bitwise)
             return POSIX_SUCCESS;
         }
         LOG(debug) << "Process terminated with return code '"
-                   << WEXITSTATUS(status) << "'";   // NOLINT(hicpp-signed-bitwise)
-        return WEXITSTATUS(status);     // NOLINT(hicpp-signed-bitwise)
+                   << WEXITSTATUS(status)
+                   << "'";          // NOLINT(hicpp-signed-bitwise)
+        return WEXITSTATUS(status); // NOLINT(hicpp-signed-bitwise)
     }
-    if(WIFSIGNALED(status)) {   // NOLINT(hicpp-signed-bitwise)
+    if(WIFSIGNALED(status)) { // NOLINT(hicpp-signed-bitwise)
         LOG(warning) << "Child terminated because of uncaught signal '"
-                     << WTERMSIG(status) << "'";    // NOLINT(hicpp-signed-bitwise)
-        return WTERMSIG(status);    // NOLINT(hicpp-signed-bitwise)
+                     << WTERMSIG(status) << "'"; // NOLINT(hicpp-signed-bitwise)
+        return WTERMSIG(status);                 // NOLINT(hicpp-signed-bitwise)
     }
     LOG(error) << "Child exited with unexpected child status: " << status;
     return status;

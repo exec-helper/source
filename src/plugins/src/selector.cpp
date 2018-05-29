@@ -18,8 +18,8 @@ using gsl::czstring;
 using execHelper::config::CommandCollection;
 using execHelper::config::FleetingOptionsInterface;
 using execHelper::config::PatternKeys;
-using execHelper::config::PatternValues;
 using execHelper::config::Patterns;
+using execHelper::config::PatternValues;
 using execHelper::config::VariablesMap;
 using execHelper::core::Task;
 

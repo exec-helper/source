@@ -20,16 +20,17 @@ using Catch::Session;
 using Catch::clara::Opt;
 
 using execHelper::log::InvalidLogLevel;
-using execHelper::log::LogLevel::none;
 using execHelper::log::setSeverity;
 using execHelper::log::toLogLevel;
+using execHelper::log::LogLevel::none;
 
 int main(int argc, char** argv) {
     Session session;
 
     std::string logLevelString("none");
     auto cli = session.cli();
-    cli |= Opt(logLevelString, "level")["-u"]["--debug"]("Set the log level of the binary");
+    cli |= Opt(logLevelString,
+               "level")["-u"]["--debug"]("Set the log level of the binary");
     session.cli(cli);
 
     int returnCode = session.applyCommandLine(argc, argv);

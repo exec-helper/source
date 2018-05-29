@@ -12,6 +12,7 @@
 using std::make_unique;
 using std::unique_ptr;
 
+using boost::shared_ptr;
 using boost::log::expressions::channel_severity_filter_actor;
 using boost::log::expressions::smessage;
 using boost::log::expressions::stream;
@@ -19,7 +20,6 @@ using boost::log::keywords::filter;
 using boost::log::keywords::format;
 using boost::log::sinks::basic_text_ostream_backend;
 using boost::log::sinks::synchronous_sink;
-using boost::shared_ptr;
 
 using execHelper::log::Channel;
 using execHelper::log::LogLevel;

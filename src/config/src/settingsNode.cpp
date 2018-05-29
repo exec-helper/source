@@ -253,7 +253,7 @@ void SettingsNode::overwrite(const SettingsNode& newSettings) noexcept {
         if(!contains(key)) {
             add(key);
         }
-        at(key)->deepCopy(newValue); 
+        at(key)->deepCopy(newValue);
     }
 }
 

@@ -33,14 +33,14 @@ using execHelper::config::Path;
 using execHelper::config::PatternCombinations;
 using execHelper::config::PatternKey;
 using execHelper::config::PatternKeys;
+using execHelper::config::Patterns;
 using execHelper::config::PatternValue;
 using execHelper::config::PatternValues;
-using execHelper::config::Patterns;
 using execHelper::config::SettingsKeys;
 using execHelper::config::VariablesMap;
+using execHelper::core::replacePatterns;
 using execHelper::core::Task;
 using execHelper::core::TaskCollection;
-using execHelper::core::replacePatterns;
 using execHelper::plugins::PatternPermutator;
 
 namespace execHelper {

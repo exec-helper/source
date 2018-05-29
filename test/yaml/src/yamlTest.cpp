@@ -85,7 +85,8 @@ SCENARIO("Extensive Yaml file wrapper test", "[yaml][yamlwrapper]") {
         correctSettings.add({"command-line", "run"}, correctRunCommandLine);
 
         ConfigFileWriter file;
-        writeSettingsFile(gsl::not_null<ConfigFileWriter*>(&file), correctSettings, {});
+        writeSettingsFile(gsl::not_null<ConfigFileWriter*>(&file),
+                          correctSettings, {});
 
         WHEN("We pass the config to the yaml wrapper") {
             Yaml yaml(file.getPath());

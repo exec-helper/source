@@ -22,8 +22,8 @@ using std::thread;
 
 using boost::asio::buffer;
 using boost::asio::io_service;
-using boost::asio::local::stream_protocol;
 using boost::asio::socket_base;
+using boost::asio::local::stream_protocol;
 using boost::filesystem::ofstream;
 using boost::system::error_code;
 using boost::system::system_error;

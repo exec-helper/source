@@ -25,8 +25,8 @@ using execHelper::config::Command;
 using execHelper::config::CommandCollection;
 using execHelper::config::Pattern;
 using execHelper::config::PatternKey;
-using execHelper::config::PatternValues;
 using execHelper::config::Patterns;
+using execHelper::config::PatternValues;
 using execHelper::config::SettingsNode;
 using execHelper::config::VariablesMap;
 using execHelper::core::Task;
@@ -106,13 +106,15 @@ SCENARIO("Make combinations of configurations for the selector plugin") {
             variables.add(PATTERN_KEY, pattern2.getKey());
             patterns.push_back(pattern2);
             for(const auto& entry : pattern2.getValues()) {
-                (void) entry;   // entry is unused, as we only want to add the same number of empty expected tasks
+                (void)
+                    entry; // entry is unused, as we only want to add the same number of empty expected tasks
                 expectedTasks.emplace_back(Task());
             }
         }
 
         FleetingOptionsStub fleetingOptions;
-        ExecutePlugin::push(gsl::not_null<config::FleetingOptionsInterface*>(&fleetingOptions));
+        ExecutePlugin::push(
+            gsl::not_null<config::FleetingOptionsInterface*>(&fleetingOptions));
         ExecutePlugin::push(SettingsNode(PLUGIN_NAME));
         ExecutePlugin::push(Patterns(patterns));
 
