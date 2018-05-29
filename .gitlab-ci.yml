@@ -18,7 +18,7 @@ variables:
         ":"           # Delegated to docker images
 
 .install_exec_helper: &install_exec_helper
-        cp build/native/release/src/applications/exec-helper /usr/local/bin/
+        sudo cp build/native/release/src/applications/exec-helper /usr/local/bin/
 
 .run_test: &run_test
     stage: test
@@ -168,7 +168,8 @@ build:native:
     dependencies: []
     script:
         - *build_tools
-        - make && make install
+        - make
+        - sudo make install
     artifacts:
         expire_in: 1 day
         paths:
@@ -179,7 +180,8 @@ build:debian:
     image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-build-debian
     dependencies: []
     script:
-        - make USE_SYSTEM_GSL=OFF && make install-bin
+        - make USE_SYSTEM_GSL=OFF 
+        - sudo make install-bin
     artifacts:
         expire_in: 1 day
         paths:
