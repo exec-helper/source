@@ -15,4 +15,4 @@ RUN echo 'BUILDENV=(!distcc color !ccache !check !sign)' >> /etc/makepkg.conf
 
 # Install actual dependencies
 RUN pacman -S --needed --noconfirm boost boost-libs yaml-cpp gcc clang clang-tools-extra cmake scons make doxygen python-pip pkg-config valgrind cppcheck java-environment unzip curl
-RUN sudo -u nobody EDITOR=false pacaur -S --needed --noconfirm --noedit microsoft-gsl-git catch2 lcov pmd-bin
+RUN sudo -u nobody EDITOR=false pacaur -S --needed --noconfirm --noedit microsoft-gsl-git catch2 lcov-git pmd-bin
