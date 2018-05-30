@@ -14,7 +14,7 @@ pmd:                            # Cppcheck configuration for the 'example' comma
     example:
         patterns:               # Define the patterns to use
             - TARGET
-        exec: ""
+        exec: pmd
         tool: cpd
         language: cpp
         minimum-tokens: 100
