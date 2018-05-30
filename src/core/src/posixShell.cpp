@@ -103,8 +103,8 @@ PosixShell::ShellReturnCode PosixShell::waitForChild(pid_t pid) const noexcept {
             return POSIX_SUCCESS;
         }
         LOG(debug) << "Process terminated with return code '"
-                   << WEXITSTATUS(status)
-                   << "'";          // NOLINT(hicpp-signed-bitwise)
+                   << WEXITSTATUS(status) // NOLINT(hicpp-signed-bitwise)
+                   << "'";
         return WEXITSTATUS(status); // NOLINT(hicpp-signed-bitwise)
     }
     if(WIFSIGNALED(status)) { // NOLINT(hicpp-signed-bitwise)
