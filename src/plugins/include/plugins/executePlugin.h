@@ -121,36 +121,27 @@ class ExecutePlugin : public Plugin {
      * Push the plugin prototypes to the stack
      *
      * \param[in] plugins   Mapping of discovered plugin prototypes
-     *
-     * \returns void
      */
     static void push(Plugins&& plugins) noexcept;
 
     /**
      * Pop the last fleeting options from the stack
      *
-     * \returns void
      */
     static void popFleetingOptions() noexcept;
 
     /**
      * Pop the last settings node from the stack
-     *
-     * \returns void
      */
     static void popSettingsNode() noexcept;
 
     /**
      * Pop the last patterns from the stack
-     *
-     * \returns void
      */
     static void popPatterns() noexcept;
 
     /**
      * Pop the last plugin prototypes from the stack
-     *
-     * \returns void
      */
     static void popPlugins() noexcept;
 

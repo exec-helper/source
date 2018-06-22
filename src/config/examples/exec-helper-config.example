@@ -35,6 +35,7 @@ command-line-command:           # Configure the command-line-command
     patterns:                   # Define the default patterns to use
         - COMPILER
         - MODE
+
     command-line:               # Configure the execution when the specific command is not listed. Will be executed from the directory of this configuration file
         - echo
         - building
@@ -44,6 +45,7 @@ command-line-command:           # Configure the command-line-command
         - "{MODE}"              # This value will be replaced by the MODE pattern value
         - mode.
         - wd=$(pwd)             # This command will be executed in a subshell and replaced by its value before the actual command is executed
+
     clean:                      # Configure the execution of the build command
         patterns:               # Overwrite the parent patterns
             - MODE

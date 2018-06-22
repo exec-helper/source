@@ -1,0 +1,13 @@
+set(HTML_SOURCES index.html)
+
+add_custom_target(docs-html
+    ${SPHINX_EXECUTABLE} -q -b html -d ${CMAKE_CURRENT_BINARY_DIR} ${PROJECT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/html
+    SOURCES conf.py
+    BYPRODUCTS ${HTML_SOURCES}
+    COMMENT "Generating HTML usage documentation..."
+    VERBATIM
+)
+
+install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html TYPE DOC COMPONENT docs-html)
+
+add_dependencies(docs docs-html)

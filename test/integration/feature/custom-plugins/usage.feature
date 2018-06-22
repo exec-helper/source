@@ -1,4 +1,4 @@
-@cmd_args @custom_plugins @custom_plugins_usage
+@custom_plugins @custom_plugins_usage
 Feature: Using custom plugins
     Scenarios for using custom plugins
 

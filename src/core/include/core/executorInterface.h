@@ -20,7 +20,6 @@ class ExecutorInterface {
      * Execute the given task
      *
      * \param[in] task  The task to execute
-     * \returns void
      *
      * \note: this does not necessarily mean that the task got executed or will
      * successfully execute.

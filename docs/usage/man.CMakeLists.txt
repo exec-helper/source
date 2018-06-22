@@ -1,0 +1,72 @@
+find_package(Gzip REQUIRED)
+
+FUNCTION(PREPEND var prefix)
+   SET(listVar "")
+   FOREACH(FILEPATH ${ARGN})
+       LIST(APPEND listVar "${prefix}/${FILEPATH}")
+   ENDFOREACH(FILEPATH)
+   SET(${var} "${listVar}" PARENT_SCOPE)
+ENDFUNCTION(PREPEND)
+
+FUNCTION(STRIP_PATHS var)
+   SET(listVar "")
+   FOREACH(FILEPATH ${ARGN})
+       get_filename_component(STRIPPED ${FILEPATH} NAME)
+      LIST(APPEND listVar ${STRIPPED})
+  ENDFOREACH(FILEPATH)
+   SET(${var} "${listVar}" PARENT_SCOPE)
+ENDFUNCTION(STRIP_PATHS)
+
+
+set(MAN1_SOURCES ../../src/applications/exec-helper.rst)
+
+set(MAN5_SOURCES 
+            ../../src/config/docs/exec-helper-config.rst
+            ../../src/config/docs/exec-helper-config-patterns.rst
+            ../../src/config/docs/exec-helper-config-environment.rst
+            ../../src/plugins/docs/exec-helper-custom-plugins.rst
+            ../../src/plugins/docs/exec-helper-plugins-pmd.rst
+            ../../src/plugins/docs/exec-helper-plugins-valgrind.rst
+            ../../src/plugins/docs/exec-helper-plugins-execute-plugin.rst
+            ../../src/plugins/docs/exec-helper-plugins-selector.rst
+            ../../src/plugins/docs/exec-helper-plugins-cppcheck.rst
+            ../../src/plugins/docs/exec-helper-plugins.rst
+            ../../src/plugins/docs/exec-helper-plugins-command-plugin.rst
+            ../../src/plugins/docs/exec-helper-plugins-bootstrap.rst
+            ../../src/plugins/docs/exec-helper-plugins-memory.rst
+            ../../src/plugins/docs/exec-helper-plugins-scons.rst
+            ../../src/plugins/docs/exec-helper-plugins-make.rst
+            ../../src/plugins/docs/exec-helper-plugins-cmake.rst
+            ../../src/plugins/docs/exec-helper-plugins-docker.rst
+            ../../src/plugins/docs/exec-helper-plugins-clang-tidy.rst
+            ../../src/plugins/docs/exec-helper-plugins-command-line-command.rst
+            ../../src/plugins/docs/exec-helper-plugins-clang-static-analyzer.rst
+            ../../src/plugins/docs/exec-helper-plugins-lcov.rst
+)
+
+# Determine output paths for MAN 1
+STRIP_PATHS(MAN1_STRIPPED ${MAN1_SOURCES})
+list(TRANSFORM MAN1_STRIPPED REPLACE "\.rst$" ".1" OUTPUT_VARIABLE MAN1_OUTPUT_TMP)
+list(TRANSFORM MAN1_STRIPPED REPLACE "\.rst$" ".1.gz" OUTPUT_VARIABLE MAN1_OUTPUT_GZ)
+PREPEND(MAN1_OUTPUT_FULL_PATH ${CMAKE_CURRENT_BINARY_DIR} ${MAN1_OUTPUT_GZ})
+
+# Determine output paths for MAN 5
+STRIP_PATHS(MAN5_STRIPPED ${MAN5_SOURCES})
+list(TRANSFORM MAN5_STRIPPED REPLACE "\.rst$" ".5" OUTPUT_VARIABLE MAN5_OUTPUT_TMP)
+list(TRANSFORM MAN5_STRIPPED REPLACE "\.rst$" ".5.gz" OUTPUT_VARIABLE MAN5_OUTPUT_GZ)
+PREPEND(MAN5_OUTPUT_FULL_PATH ${CMAKE_CURRENT_BINARY_DIR} ${MAN5_OUTPUT_GZ})
+
+add_custom_target(docs-man
+    ${SPHINX_EXECUTABLE} -q -b man ${PROJECT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
+    COMMAND ${Gzip} --keep --force --best ${MAN1_OUTPUT_TMP} ${MAN5_OUTPUT_TMP}
+    SOURCES conf.py ${MAN1_SOURCES} ${MAN5_SOURCES}
+    BYPRODUCTS ${MAN1_OUTPUT_GZ} ${MAN5_OUTPUT_GZ}
+    COMMENT "Generating MAN API documentation..."
+    VERBATIM
+)
+
+install(FILES ${MAN1_OUTPUT_FULL_PATH} DESTINATION ${CMAKE_INSTALL_MANDIR}/man1 COMPONENT docs-man)
+install(FILES ${MAN1_OUTPUT_FULL_PATH} DESTINATION ${CMAKE_INSTALL_MANDIR}/man1 RENAME eh.1.gz COMPONENT docs-man)
+install(FILES ${MAN5_OUTPUT_FULL_PATH} DESTINATION ${CMAKE_INSTALL_MANDIR}/man5 COMPONENT docs-man)
+
+add_dependencies(docs docs-man)

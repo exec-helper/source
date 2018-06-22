@@ -57,8 +57,9 @@ patterns:
     DOCSTYPE:
         default-values:
             - html
-            - xml
             - man
+            - api-html
+            - api-xml
         short-option: o
         long-option: docs-type
     COVERITY_ARCHIVE_NAME:
@@ -230,9 +231,8 @@ cmake:
         mode: generate
         defines:
             CMAKE_BUILD_TYPE: "{MODE}"
-            BUILD_HTML_DOCUMENTATION: ON
-            BUILD_XML_DOCUMENTATION: OFF
-            BUILD_MAN_DOCUMENTATION: ON
+            BUILD_USAGE_DOCUMENTATION: ON
+            BUILD_API_DOCUMENTATION: ON
             CMAKE_TOOLCHAIN_FILE: "build/{TRIPLET}{COMPILER}/{MODE}/toolchain.cmake"
             ACTUAL_PLUGINS_INSTALL_PREFIX: "build/{TRIPLET}{COMPILER}/{MODE}/install/share/exec-helper/plugins"
             TERMINATE_ON_ASSERT_FAILURE: ON
@@ -242,9 +242,9 @@ cmake:
         mode: generate
         defines:
             CMAKE_BUILD_TYPE: "{MODE}"
-            BUILD_HTML_DOCUMENTATION: OFF
-            BUILD_XML_DOCUMENTATION: OFF
-            BUILD_MAN_DOCUMENTATION: OFF
+            BUILD_USAGE_DOCUMENTATION: OFF
+            BUILD_API_DOCUMENTATION: OFF
+            BUILD_API_DOCUMENTATION: OFF
             CMAKE_TOOLCHAIN_FILE: "build/{TRIPLET}{COMPILER}/{MODE}/toolchain.cmake"
             ACTUAL_PLUGINS_INSTALL_PREFIX: "build/{TRIPLET}{COMPILER}/{MODE}/install/share/exec-helper/plugins"
             TERMINATE_ON_ASSERT_FAILURE: ON
@@ -254,9 +254,8 @@ cmake:
         mode: generate
         defines:
             CMAKE_BUILD_TYPE: "{MODE}"
-            BUILD_HTML_DOCUMENTATION: OFF
-            BUILD_XML_DOCUMENTATION: OFF
-            BUILD_MAN_DOCUMENTATION: OFF
+            BUILD_USAGE_DOCUMENTATION: OFF
+            BUILD_API_DOCUMENTATION: OFF
             CMAKE_TOOLCHAIN_FILE: "build/{TRIPLET}{COMPILER}/{MODE}/toolchain.cmake"
             ACTUAL_PLUGINS_INSTALL_PREFIX: "build/{TRIPLET}{COMPILER}/{MODE}/install/share/exec-helper/plugins"
             TERMINATE_ON_ASSERT_FAILURE: ON
@@ -272,9 +271,8 @@ cmake:
         mode: generate
         defines:
             CMAKE_BUILD_TYPE: "{MODE}"
-            BUILD_HTML_DOCUMENTATION: ON
-            BUILD_XML_DOCUMENTATION: OFF
-            BUILD_MAN_DOCUMENTATION: ON
+            BUILD_USAGE_DOCUMENTATION: ON
+            BUILD_API_DOCUMENTATION: OFF
             CMAKE_TOOLCHAIN_FILE: "build/{TRIPLET}{COMPILER}/{MODE}/toolchain.cmake"
             ACTUAL_PLUGINS_INSTALL_PREFIX: "build/{TRIPLET}{COMPILER}/{MODE}/install/share/exec-helper/plugins"
             TERMINATE_ON_ASSERT_FAILURE: ON
@@ -285,9 +283,8 @@ cmake:
         mode: generate
         defines:
             CMAKE_BUILD_TYPE: "{MODE}"
-            BUILD_HTML_DOCUMENTATION: OFF
-            BUILD_XML_DOCUMENTATION: OFF
-            BUILD_MAN_DOCUMENTATION: OFF
+            BUILD_USAGE_DOCUMENTATION: OFF
+            BUILD_API_DOCUMENTATION: OFF
             ENABLE_TESTING: OFF
             Boost_USE_STATIC_LIBS: ON
             BOOST_ROOT: '%cd%/3rdparty/bin/boost'
@@ -323,6 +320,15 @@ cmake:
         target: "docs-{DOCSTYPE}"
 
     install-docs:
+        patterns:
+            - COMPILER
+            - TRIPLET
+            - MODE
+            - DOCSTYPE
+        mode: install
+        component: "docs-{DOCSTYPE}"
+
+    changelog:
         patterns:
             - COMPILER
             - TRIPLET

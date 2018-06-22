@@ -1,0 +1,12 @@
+version: 2
+
+sphinx:
+  configuration: conf.py
+
+formats:
+  - pdf
+  - epub
+
+python:
+  install:
+    - requirements: docs/usage/requirements.txt

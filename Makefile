@@ -17,10 +17,10 @@ USE_SYSTEM_GSL?= ON## Sets whether to use the system GSL package. Default: ON
 BUILD_DOCUMENTATION?=ON## Switches the building of the documentation on or off. Default: ON
 ACTUAL_PLUGINS_INSTALL_PREFIX?=$(PREFIX)/share/exec-helper/plugins## Set the actual installation prefix: useful if the files end up on a different place than the current PLUGINS_INSTALL_PREFIX
 
-all: binary docs changelog
+all: binary docs-usage changelog
 
 init:	## Initialize native build
-	cmake -H. -B$(BUILD_DIR) -DCMAKE_INSTALL_PREFIX=$(PREFIX) -DCMAKE_BUILD_TYPE=$(CMAKE_BUILD_TYPE) -DENABLE_WERROR=OFF -DENABLE_TESTING=OFF -DUSE_SYSTEM_GSL=$(USE_SYSTEM_GSL) -DCMAKE_EXPORT_COMPILE_COMMANDS=OFF -DBUILD_HTML_DOCUMENTATION=$(BUILD_DOCUMENTATION) -DBUILD_XML_DOCUMENTATION=$(BUILD_DOCUMENTATION) -DBUILD_MAN_DOCUMENTATION=$(BUILD_DOCUMENTATION) -DVERSION=$(shell git describe --long --dirty)-MANUAL -DCOPYRIGHT="Copyright (c) $(shell date +'%Y') Bart Verhagen" -DACTUAL_PLUGINS_INSTALL_PREFIX=$(ACTUAL_PLUGINS_INSTALL_PREFIX)
+	cmake -H. -B$(BUILD_DIR) -DCMAKE_INSTALL_PREFIX=$(PREFIX) -DCMAKE_BUILD_TYPE=$(CMAKE_BUILD_TYPE) -DENABLE_WERROR=OFF -DENABLE_TESTING=OFF -DUSE_SYSTEM_GSL=$(USE_SYSTEM_GSL) -DCMAKE_EXPORT_COMPILE_COMMANDS=OFF -DBUILD_USAGE_DOCUMENTATION=$(BUILD_DOCUMENTATION) -DVERSION=$(shell git describe --long --dirty)-MANUAL -DCOPYRIGHT="Copyright (c) $(shell date +'%Y') Bart Verhagen" -DACTUAL_PLUGINS_INSTALL_PREFIX=$(ACTUAL_PLUGINS_INSTALL_PREFIX)
 
 binary: init ## Build the exec-helper binary
 	make -C $(BUILD_DIR) --jobs $(JOBS) exec-helper
@@ -28,11 +28,10 @@ binary: init ## Build the exec-helper binary
 docs-html: init 	## Build the HTML documentation
 	make -C $(BUILD_DIR) --jobs $(JOBS) docs-html
 
-docs-xml: init		## Build the XML documentation
-	make -C $(BUILD_DIR) --jobs $(JOBS) docs-xml
-
 docs-man: init		## Build the man-page documentation
 	make -C $(BUILD_DIR) --jobs $(JOBS) docs-man
+
+docs-usage: docs-html docs-man
 
 changelog: init		## Create the associated changelog file
 	make -C $(BUILD_DIR) --jobs $(JOBS) changelog
@@ -40,7 +39,7 @@ changelog: init		## Create the associated changelog file
 print-changelog:	## Print the changelog to CHANGELOG_OUTPUT (default: stdout)
 	GITCHANGELOG_CONFIG_FILENAME=$(CHANGELOG_CONFIG) gitchangelog >$(CHANGELOG_OUTPUT)
 
-docs: init docs-html docs-man
+docs: init docs-usage
 
 install-bin:		## Install the exec-helper binary
 	cmake -DCOMPONENT=runtime -P $(BUILD_DIR)/cmake_install.cmake
