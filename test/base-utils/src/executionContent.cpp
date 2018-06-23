@@ -15,7 +15,6 @@ using std::cerr;
 using std::endl;
 using std::make_shared;
 using std::move;
-using std::shared_ptr;
 using std::string;
 using std::terminate;
 using std::thread;
@@ -53,7 +52,7 @@ class ExecutionSession : public std::enable_shared_from_this<ExecutionSession> {
         boost::asio::async_read(
             m_socket, buffer(&m_data, sizeof(m_data)),
             [this, self](error_code ec, std::size_t /*length*/) {
-                if(ec != nullptr) {
+                if(ec) {
                     cerr << __FILE__ << ":" << __LINE__ << " " << this << " "
                          << "Unexpected error occurred: " << ec << ": "
                          << ec.message() << std::endl;
@@ -69,7 +68,7 @@ class ExecutionSession : public std::enable_shared_from_this<ExecutionSession> {
         boost::asio::async_write(
             m_socket, buffer(&reply, sizeof(reply)),
             [this, self](boost::system::error_code ec, std::size_t /*length*/) {
-                if(ec != nullptr) {
+                if(ec) {
                     cerr << __FILE__ << ":" << __LINE__ << " " << this << " "
                          << "Unexpected error occurred: " << ec << ": "
                          << ec.message() << std::endl;
@@ -226,7 +225,7 @@ ExecutionContentServer::getConfigCommand() const noexcept {
 ExecutionContentDataReply
 ExecutionContentServer::addData(const ExecutionContentData& /*data*/) noexcept {
     ++m_numberOfExecutions;
-    return ExecutionContentDataReply(m_returnCode);
+    return {m_returnCode};
 }
 
 unsigned int ExecutionContentServer::getNumberOfExecutions() const noexcept {
@@ -248,7 +247,7 @@ ReturnCode ExecutionContentClient::addExecution() {
 
     error_code ec;
     socket.connect(m_endpoint, ec);
-    if(ec != nullptr) {
+    if(ec) {
         cerr << __FILE__ << ":" << __LINE__ << " "
              << "Client: Unexpected error occurred: " << ec << ": "
              << ec.message() << endl;
@@ -256,7 +255,7 @@ ReturnCode ExecutionContentClient::addExecution() {
     }
     ExecutionContentData data;
     boost::asio::write(socket, buffer(&data, sizeof(data)), ec);
-    if(ec != nullptr) {
+    if(ec) {
         cerr << __FILE__ << ":" << __LINE__ << " "
              << "Client: Unexpected error occurred: " << ec << ": "
              << ec.message() << endl;
@@ -266,7 +265,7 @@ ReturnCode ExecutionContentClient::addExecution() {
     ExecutionContentDataReply reply(RUNTIME_ERROR);
     size_t replyLength =
         boost::asio::read(socket, buffer(&reply, sizeof(reply)), ec);
-    if(ec != nullptr) {
+    if(ec) {
         cerr << __FILE__ << ":" << __LINE__ << " "
              << "Client: Unexpected error occurred: " << ec << ": "
              << ec.message() << endl;

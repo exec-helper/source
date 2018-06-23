@@ -1,6 +1,6 @@
 #include "executionHandler.h"
 
-#include <assert.h>
+#include <cassert>
 
 using std::move;
 using std::string;

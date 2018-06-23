@@ -19,8 +19,8 @@ using Statements = std::vector<std::shared_ptr<Statement>>;
 
 class TestCommand {
   public:
-    TestCommand(const CommandKey& commandKey,
-                const Statements& initialStatements = {}) noexcept;
+    TestCommand(CommandKey commandKey,
+                Statements initialStatements = {}) noexcept;
 
     std::shared_ptr<Statement> operator[](size_t index) const noexcept;
 

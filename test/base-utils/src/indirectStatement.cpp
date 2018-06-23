@@ -11,9 +11,9 @@ using gsl::not_null;
 namespace execHelper {
 namespace test {
 namespace baseUtils {
-IndirectStatement::IndirectStatement(const StatementKey& key,
-                                     const Statements& initialStatements)
-    : Statement(SUCCESS), m_key(key), m_statements(initialStatements) {
+IndirectStatement::IndirectStatement(StatementKey key,
+                                     Statements initialStatements)
+    : Statement(SUCCESS), m_key(std::move(key)), m_statements(std::move(initialStatements)) {
     ;
 }
 

@@ -24,10 +24,10 @@ using execHelper::test::baseUtils::Path;
 
 namespace {
 /**
- * Since valgrind reports boost::filesyste::unique_path to leak, we implement
+ * Since valgrind reports boost::filesystem::unique_path to leak, we implement
  * our own version
  */
-inline Path unique_path(Path model) {
+inline Path unique_path(const Path& model) {
     string resultPathName = model.filename().native();
     auto nbOfReplacements =
         count(resultPathName.begin(), resultPathName.end(), '%');

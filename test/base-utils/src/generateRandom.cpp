@@ -4,8 +4,6 @@
 #include <cassert>
 #include <limits>
 
-using std::generate_n;
-using std::numeric_limits;
 using std::string;
 using std::vector;
 

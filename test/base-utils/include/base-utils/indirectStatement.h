@@ -13,8 +13,8 @@ using Statements = std::vector<std::shared_ptr<Statement>>;
 
 class IndirectStatement : public Statement {
   public:
-    IndirectStatement(const StatementKey& key,
-                      const Statements& initialStatements = {});
+    IndirectStatement(StatementKey key,
+                      Statements initialStatements = {});
     virtual ~IndirectStatement() = default;
 
     void add(std::shared_ptr<Statement> statement) noexcept;
