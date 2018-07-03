@@ -5,6 +5,7 @@ Or How To Get Your Coffee In Peace.
 [![build status](https://gitlab.com/bverhagen/exec-helper/badges/master/build.svg)](https://gitlab.com/bverhagen/exec-helper/commits/master)
 [![coverage report](https://gitlab.com/bverhagen/exec-helper/badges/master/coverage.svg)](https://gitlab.com/bverhagen/exec-helper/commits/master)
 [![Coverity Scan Build Status](https://scan.coverity.com/projects/exec-helper/badge.svg)](https://scan.coverity.com/projects/exec-helper)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/98d9b8174f0d4a8ba79adebda064093d)](https://www.codacy.com/app/bverhagen/exec-helper?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=bverhagen/exec-helper&amp;utm_campaign=Badge_Grade)
 
 ## Why
 Exec-helper is a meta-wrapper for executing tasks on the command line.
