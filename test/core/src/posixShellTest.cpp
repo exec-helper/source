@@ -2,12 +2,12 @@
 #include <string>
 
 #include <boost/filesystem/operations.hpp>
-#include <catch.hpp>
 
 #include "base-utils/tmpFile.h"
 #include "config/path.h"
 #include "core/posixShell.h"
 #include "core/task.h"
+#include "unittest/catch.h"
 #include "utils/utils.h"
 
 using std::string;

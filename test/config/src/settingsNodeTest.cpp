@@ -4,10 +4,10 @@
 #include <vector>
 
 #include <boost/optional/optional_io.hpp>
-#include <catch.hpp>
 
 #include "config/settingsNode.h"
 
+#include "unittest/catch.h"
 #include "utils/utils.h"
 
 using std::ostream;

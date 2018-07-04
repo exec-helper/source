@@ -2,9 +2,8 @@
 #include <string>
 #include <vector>
 
-#include <catch.hpp>
-
 #include "core/permutationIterator.h"
+#include "unittest/catch.h"
 
 using std::deque;
 using std::string;

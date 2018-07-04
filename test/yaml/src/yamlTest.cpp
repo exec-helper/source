@@ -5,12 +5,12 @@
 #include <vector>
 
 #include <boost/filesystem.hpp>
-#include <catch.hpp>
 
 #include "config/settingsNode.h"
 #include "yaml/yaml.h"
 
 #include "base-utils/configFileWriter.h"
+#include "unittest/catch.h"
 #include "utils/utils.h"
 
 using std::endl;

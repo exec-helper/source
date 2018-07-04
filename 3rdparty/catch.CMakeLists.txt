@@ -24,7 +24,7 @@ else()
         UPDATE_COMMAND ""
         )
 
-    set(${PACKAGE_NAME}_INCLUDE_DIRS ${CMAKE_CURRENT_BINARY_DIR}/catch/src/Catch/single_include)
+    set(${PACKAGE_NAME}_INCLUDE_DIRS ${CMAKE_CURRENT_BINARY_DIR}/catch/src/Catch/single_include/catch2)
 endif()
 
 add_library(catch INTERFACE)

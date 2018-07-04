@@ -4,11 +4,11 @@
 #include <vector>
 
 #include <boost/optional/optional_io.hpp>
-#include <catch.hpp>
 
 #include "config/settingsNode.h"
 
 #include "utils/utils.h"
+#include "unittest/catch.h"
 
 using std::string;
 using std::stringstream;

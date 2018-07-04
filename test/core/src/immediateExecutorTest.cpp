@@ -1,9 +1,9 @@
 #include <memory>
 #include <string>
 
-#include <catch.hpp>
-
 #include "core/immediateExecutor.h"
+#include "unittest/catch.h"
+
 #include "shellStub.h"
 
 using std::make_shared;
