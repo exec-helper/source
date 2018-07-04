@@ -117,7 +117,7 @@ build-image:build:
         - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
     script:
         - echo "Building image '$BUILD_IMAGE'"
-        - docker build -t ${BUILD_IMAGE} -f docker/build/Dockerfile .
+        - docker build -t ${BUILD_IMAGE} -f docker/build/Dockerfile --build-arg DOCKER_TAG=latest .
         - docker push ${BUILD_IMAGE}
 
 build-image:build-debian:
