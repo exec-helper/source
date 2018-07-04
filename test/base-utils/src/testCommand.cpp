@@ -15,7 +15,8 @@ namespace test {
 namespace baseUtils {
 TestCommand::TestCommand(std::string commandKey,
                          Statements initialStatements) noexcept
-    : m_command(std::move(commandKey)), m_statements(std::move(initialStatements)) {
+    : m_command(std::move(commandKey)),
+      m_statements(std::move(initialStatements)) {
     ;
 }
 

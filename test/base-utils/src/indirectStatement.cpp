@@ -13,7 +13,9 @@ namespace test {
 namespace baseUtils {
 IndirectStatement::IndirectStatement(StatementKey key,
                                      Statements initialStatements)
-    : Statement(SUCCESS), m_key(std::move(key)), m_statements(std::move(initialStatements)) {
+    : Statement(SUCCESS),
+      m_key(std::move(key)),
+      m_statements(std::move(initialStatements)) {
     ;
 }
 

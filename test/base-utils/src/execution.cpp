@@ -31,10 +31,11 @@ void childProcessExecute(const CommandLineRaw& line,
     assert(error ==
            boost::system::errc::success); // Either works or fix the test
 
-    int fd = ::open("/dev/null",     // NOLINT(cppcoreguidelines-pro-type-vararg, hicpp-vararg)
-                    O_WRONLY |       // NOLINT(hicpp-signed-bitwise)
-                        O_CLOEXEC);  // NOLINT(hicpp-signed-bitwise)
-    assert(fd >= 0);                // Either works or fix the test
+    int fd = ::open(
+        "/dev/null", // NOLINT(cppcoreguidelines-pro-type-vararg, hicpp-vararg)
+        O_WRONLY |   // NOLINT(hicpp-signed-bitwise)
+            O_CLOEXEC); // NOLINT(hicpp-signed-bitwise)
+    assert(fd >= 0);    // Either works or fix the test
     returnCode = dup2(fd, 1);
     if(returnCode == 0) {
         LOG(test)
@@ -66,11 +67,11 @@ ReturnCode waitForChild(pid_t pid) noexcept {
     if(status == 0) {
         return 0;
     }
-    if(WIFEXITED(status)) { // NOLINT(hicpp-signed-bitwise)
+    if(WIFEXITED(status)) {         // NOLINT(hicpp-signed-bitwise)
         return WEXITSTATUS(status); // NOLINT(hicpp-signed-bitwise)
     }
-    if(WIFSIGNALED(status)) {   // NOLINT(hicpp-signed-bitwise)
-        return WTERMSIG(status);    // NOLINT(hicpp-signed-bitwise)
+    if(WIFSIGNALED(status)) {    // NOLINT(hicpp-signed-bitwise)
+        return WTERMSIG(status); // NOLINT(hicpp-signed-bitwise)
     }
     return status;
 }
@@ -101,7 +102,8 @@ int execute(const CommandLine& commandLine, const Path& workingDir) noexcept {
 
     // Free the duplicated strings
     for(auto arg : rawLine) {
-        free(arg);  // NOLINT(cppcoreguidelines-no-malloc, cppcoreguidelines-owning-memory, hicpp-no-malloc)
+        free(
+            arg); // NOLINT(cppcoreguidelines-no-malloc, cppcoreguidelines-owning-memory, hicpp-no-malloc)
     }
     return returnCode;
 }
