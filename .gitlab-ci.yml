@@ -180,7 +180,7 @@ build:debian:
     image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-build-debian
     dependencies: []
     script:
-        - make USE_SYSTEM_GSL=OFF 
+        - make
         - make install-bin
     artifacts:
         expire_in: 1 day
