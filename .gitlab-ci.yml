@@ -335,7 +335,7 @@ coverity:
     script:
         - *build_tools
         - *install_exec_helper
-        - curl --data "token=${COVERITY_SCAN_TOKEN}&project=bverhagen%2Fexec-helper" https://scan.coverity.com/download/linux64 -o coverity_tool.tgz
+        - curl --data "token=${COVERITY_SCAN_TOKEN}&project=bverhagen%2Fexec-helper" https://scan.coverity.com/download/cxx/linux64 -o coverity_tool.tgz
         - tar -C /tmp -xf coverity_tool.tgz
         - pushd /tmp/cov-analysis-linux64-*/bin
         - export PATH=$PATH:$(pwd)
