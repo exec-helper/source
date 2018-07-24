@@ -64,13 +64,14 @@ Check the [Documentation](http://bverhagen.gitlab.io/exec-helper/docs/html/index
 
 ## Project analysis
 The source code of this project is continuously analyzed by multiple tools in an attempt to catch and fix issues and bugs as quickly as possible. Released versions should have passed the analysis from the following tools:
-- [valgrind](http://valgrind.org) (memcheck)
-- [cppcheck](http://cppcheck.sourceforge.net)
-- [clang-tidy](http://clang.llvm.org/extra/clang-tidy)
-- [clang-static-analyzer](https://clang-analyzer.llvm.org)
-- [UndefinedBehaviorSanitizer](https://clang.llvm.org/docs/UndefinedBehaviorSanitizer.html) (UBSan)
-- [pmd](https://pmd.github.io) (cpd)
+- [AddressSanitizer](https://clang.llvm.org/docs/AddressSanitizer.html) (ASan)
 - [coverity](https://scan.coverity.com/projects/exec-helper)
 - [clang-format](https://clang.llvm.org/docs/UndefinedBehaviorSanitizer.html)
+- [clang-static-analyzer](https://clang-analyzer.llvm.org)
+- [clang-tidy](http://clang.llvm.org/extra/clang-tidy)
+- [cppcheck](http://cppcheck.sourceforge.net)
+- [pmd](https://pmd.github.io) (cpd)
+- [valgrind](http://valgrind.org) (memcheck)
+- [UndefinedBehaviorSanitizer](https://clang.llvm.org/docs/UndefinedBehaviorSanitizer.html) (UBSan)
 
 Check the _.exec-helper_ file for detailed information about how these analysis methods are configured and used. The analysis tools can be executed locally using exec-helper with this project.
