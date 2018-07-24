@@ -42,6 +42,7 @@ using execHelper::config::PatternValue;
 using execHelper::config::PatternValues;
 using execHelper::config::SettingsKeys;
 using execHelper::config::SettingsNode;
+using execHelper::config::SettingsValues;
 using execHelper::core::Task;
 using execHelper::plugins::PatternPermutator;
 using execHelper::plugins::replacePatternCombinations;
@@ -153,19 +154,23 @@ string convertToConfig(const SettingsNode& settings,
     stringstream stream;
     const string nestedCharacter(prepend);
 
-    if(settings.values().empty()) {
+    const auto settingsValues =
+        settings.get<SettingsValues>(SettingsKeys(), SettingsValues());
+    if(settingsValues.empty()) {
         stream << prepend << YAML_CONFIG_OPTION_CHARACTER << settings.key()
                << YAML_CONFIG_DELIMITER;
-    } else if(settings.values().size() == 1 &&
-              settings[settings.values().back()].values().empty()) {
+    } else if(settingsValues.size() == 1 &&
+              settings
+                  .get<SettingsValues>(settingsValues.back(), SettingsValues())
+                  .empty()) {
         stream << prepend << settings.key() << YAML_CONFIG_KEY_DELIMITER
-               << settings.values().back() << YAML_CONFIG_DELIMITER;
+               << settingsValues.back() << YAML_CONFIG_DELIMITER;
     } else {
         string valueNestedCharacter = nestedCharacter;
         stream << nestedCharacter << settings.key() << YAML_CONFIG_KEY_DELIMITER
                << YAML_CONFIG_DELIMITER;
         valueNestedCharacter += YAML_CONFIG_NESTED_CHARACTER;
-        for(const auto& key : settings.values()) {
+        for(const auto& key : settingsValues) {
             stream << convertToConfig(settings[key], valueNestedCharacter);
         }
     }
@@ -215,9 +220,11 @@ YamlWriter toYaml(const SettingsNode& settings,
                     shortOption.get();
             }
         }
-        for(const auto& subKey : settings.values()) {
-            if(settings[subKey].values().empty()) {
-                if(settings.values().size() == 1U) {
+        const auto settingsValues =
+            settings.get<SettingsValues>(SettingsKeys(), SettingsValues());
+        for(const auto& subKey : settingsValues) {
+            if(settings.get<SettingsValues>(subKey, SettingsValues()).empty()) {
+                if(settingsValues.size() == 1U) {
                     yaml = subKey;
                 } else {
                     yaml.push_back(subKey);
@@ -297,13 +304,14 @@ string toString(const SettingsNode& settings, unsigned int nbOfTabs) noexcept {
 
     string result;
     result += prefix + "- " + settings.key();
-    if(settings.values().empty()) {
+    auto settingsValues = settings.get<SettingsValues>(SettingsKeys());
+    if(settingsValues) {
         result += "\n";
         return result;
     } else {
         result += ":\n";
     }
-    for(const auto& value : settings.values()) {
+    for(const auto& value : settingsValues.get()) {
         result += toString(settings[value], nbOfTabs + 1);
     }
     return result;

@@ -22,6 +22,7 @@ using std::to_string;
 using gsl::czstring;
 
 using execHelper::config::Command;
+using execHelper::config::EnvArgs;
 using execHelper::config::ENVIRONMENT_KEY;
 using execHelper::config::FleetingOptionsInterface;
 using execHelper::config::Path;
@@ -45,11 +46,11 @@ Make::getVariablesMap(const FleetingOptionsInterface& fleetingOptions) const
     noexcept {
     VariablesMap defaults(MAKE_KEY);
     defaults.add(getBuildDirKey(), ".");
-    defaults.add(COMMAND_LINE_KEY);
+    defaults.add(COMMAND_LINE_KEY, CommandLineArgs());
     const auto verbosity = fleetingOptions.getVerbosity() ? "yes" : "no";
     defaults.add(VERBOSITY_KEY, verbosity);
     defaults.add(JOBS_KEY, to_string(fleetingOptions.getJobs()));
-    defaults.add(ENVIRONMENT_KEY);
+    defaults.add(ENVIRONMENT_KEY, EnvArgs());
     return defaults;
 }
 

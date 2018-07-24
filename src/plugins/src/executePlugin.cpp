@@ -114,7 +114,8 @@ inline void ExecutePlugin::index(VariablesMap* variables,
     for(const auto& subkey : key) {
         currentDepth = &((*currentDepth)[subkey]);
     }
-    for(const auto& depthKey : currentDepth->values()) {
+    for(const auto& depthKey :
+        currentDepth->get<SettingsValues>(SettingsKeys(), SettingsValues())) {
         (*variables)[depthKey] = (*currentDepth)[depthKey];
     }
 }

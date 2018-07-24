@@ -2,6 +2,7 @@
 #define LOG_LEVEL_INCLUDE
 
 #include <string>
+#include <vector>
 
 namespace execHelper {
 namespace log {
@@ -29,6 +30,13 @@ enum LogLevel {
  * log level
  */
 LogLevel toLogLevel(const std::string& level);
+
+/**
+ * Get all available log levels. This is convenient for looping over all values in the enumeration.
+ *
+ * \returns A collection of all log levels, sorted from most restrictive to least restrictive
+ */
+const std::vector<LogLevel>& getLogLevels();
 
 /**
  * Convert the log level to a string

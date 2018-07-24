@@ -27,11 +27,34 @@ using LoggerType =
     boost::log::sources::severity_channel_logger_mt<LogLevel, std::string>;
 
 /**
- * Initialize logging
+ * \brief Class for initializing and destructing the logging system. Must be created and kept alive while the logging system is being used.
  *
- * \param[in] logStream   The output stream to log to
+ * RAII object for initalizing and deinitializing the logging system
  */
-void init(std::ostream& logStream = std::clog) noexcept;
+class LogInit {
+  public:
+    /**
+     * Initialize logging
+     */
+    LogInit() noexcept;
+
+    /**
+     * Initialize logging
+     *
+     * \param[in] logStream   The output stream to log to
+     */
+    explicit LogInit(std::ostream& logStream) noexcept;
+
+    ~LogInit();
+
+  private:
+    /**
+     * Common init script initializing the logging system
+     *
+     * \param[in] logStream   The output stream to log to
+     */
+    void init(std::ostream& logStream) noexcept;
+};
 
 /**
  * Set the minimum severity of each shown log message for a channel to the given

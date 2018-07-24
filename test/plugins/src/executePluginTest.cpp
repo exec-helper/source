@@ -39,7 +39,9 @@ using execHelper::config::COMMAND_KEY;
 using execHelper::config::CommandCollection;
 using execHelper::config::Pattern;
 using execHelper::config::Patterns;
+using execHelper::config::SettingsKeys;
 using execHelper::config::SettingsNode;
+using execHelper::config::SettingsValues;
 using execHelper::config::VariablesMap;
 using execHelper::core::Task;
 using execHelper::plugins::Bootstrap;
@@ -219,7 +221,9 @@ SCENARIO("Test the settings node to variables map mapping",
                         string(directCommand).append("-root-setting3"),
                         "root-setting-value3");
 
-                    for(const auto& key : expectedVariableMap.values()) {
+                    for(const auto& key :
+                        expectedVariableMap.get<SettingsValues>(
+                            SettingsKeys(), SettingsValues())) {
                         settings[MEMORY_KEY][key] = expectedVariableMap[key];
                     }
                     expectedTask.variablesMap = expectedVariableMap;
@@ -244,7 +248,9 @@ SCENARIO("Test the settings node to variables map mapping",
                         string(directCommand).append("-specific-setting3"),
                         "specific-setting-value3");
 
-                    for(const auto& key : expectedVariableMap.values()) {
+                    for(const auto& key :
+                        expectedVariableMap.get<SettingsValues>(
+                            SettingsKeys(), SettingsValues())) {
                         settings[MEMORY_KEY][directCommand][key] =
                             expectedVariableMap[key];
                     }
@@ -318,7 +324,8 @@ SCENARIO("Test the settings node to variables map mapping",
                         REQUIRE(memory->task == expectedCommand.task);
                         REQUIRE(memory->patterns == expectedCommand.patterns);
                         for(const auto& key :
-                            expectedCommand.variablesMap.values()) {
+                            expectedCommand.variablesMap.get<SettingsValues>(
+                                SettingsKeys(), SettingsValues())) {
                             REQUIRE(memory->variables.contains(key));
                             REQUIRE(memory->variables[key] ==
                                     expectedCommand.variablesMap[key]);

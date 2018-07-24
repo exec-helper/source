@@ -6,6 +6,7 @@ set(SRCS    src/logTest.cpp
 set(DEPENDENCIES
         boost-log
         log
+        rapidcheck
         unittest
    )
 

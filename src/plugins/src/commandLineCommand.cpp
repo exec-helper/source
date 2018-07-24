@@ -20,12 +20,14 @@ using std::string;
 using gsl::czstring;
 
 using execHelper::config::Command;
+using execHelper::config::EnvArgs;
 using execHelper::config::ENVIRONMENT_KEY;
 using execHelper::config::EnvironmentCollection;
 using execHelper::config::FleetingOptionsInterface;
 using execHelper::config::Path;
 using execHelper::config::Patterns;
 using execHelper::config::SettingsKeys;
+using execHelper::config::SettingsValues;
 using execHelper::config::VariablesMap;
 using execHelper::config::WORKING_DIR_KEY;
 using execHelper::config::WorkingDir;
@@ -46,8 +48,8 @@ std::string CommandLineCommand::getPluginName() const noexcept {
 config::VariablesMap CommandLineCommand::getVariablesMap(
     const FleetingOptionsInterface& /*fleetingOptions*/) const noexcept {
     VariablesMap defaults(PLUGIN_NAME);
-    defaults.add(COMMAND_LINE_KEY);
-    defaults.add(ENVIRONMENT_KEY);
+    defaults.add(COMMAND_LINE_KEY, CommandLineArgs());
+    defaults.add(ENVIRONMENT_KEY, EnvArgs());
     return defaults;
 }
 
@@ -69,12 +71,17 @@ bool CommandLineCommand::apply(Task task, const VariablesMap& variables,
     }
 
     Tasks tasks;
-    if(variables[COMMAND_LINE_KEY][commandLine.front()].values().empty()) {
+    if(variables
+           .get<SettingsValues>(
+               SettingsKeys({COMMAND_LINE_KEY, commandLine.front()}),
+               SettingsValues())
+           .empty()) {
         task.append(move(commandLine));
         tasks.emplace_back(move(task));
     } else {
         SettingsKeys keys({COMMAND_LINE_KEY});
-        for(auto commandKey : variables[COMMAND_LINE_KEY].values()) {
+        for(auto commandKey :
+            variables.get<SettingsValues>(COMMAND_LINE_KEY, SettingsValues())) {
             SettingsKeys tmpKey = keys;
             tmpKey.emplace_back(commandKey);
             Task newTask = task;

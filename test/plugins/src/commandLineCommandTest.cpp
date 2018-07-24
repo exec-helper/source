@@ -22,6 +22,7 @@ using std::vector;
 
 using gsl::czstring;
 
+using execHelper::config::EnvArgs;
 using execHelper::config::ENVIRONMENT_KEY;
 using execHelper::config::EnvironmentValue;
 using execHelper::config::Path;
@@ -69,8 +70,8 @@ SCENARIO(
         CommandLineCommand plugin;
 
         VariablesMap actualVariables(plugin.getPluginName());
-        actualVariables.add(COMMAND_LINE_KEY);
-        actualVariables.add(ENVIRONMENT_KEY);
+        actualVariables.add(COMMAND_LINE_KEY, CommandLineArgs());
+        actualVariables.add(ENVIRONMENT_KEY, EnvArgs());
 
         WHEN("We request the variables map") {
             VariablesMap variables = plugin.getVariablesMap(fleetingOptions);

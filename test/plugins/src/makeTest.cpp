@@ -24,6 +24,7 @@ using std::to_string;
 using boost::filesystem::current_path;
 using gsl::czstring;
 
+using execHelper::config::EnvArgs;
 using execHelper::config::ENVIRONMENT_KEY;
 using execHelper::config::EnvironmentCollection;
 using execHelper::config::Path;
@@ -65,11 +66,11 @@ SCENARIO("Obtaining the default variables map of the make plugin", "[make]") {
         Make plugin;
 
         VariablesMap actualVariables(plugin.getPluginName());
-        actualVariables.add(COMMAND_LINE_KEY);
+        actualVariables.add(COMMAND_LINE_KEY, CommandLineArgs());
         actualVariables.add(VERBOSITY_KEY, "no");
         actualVariables.add(JOBS_KEY, to_string(fleetingOptions.m_jobs));
         actualVariables.add(BUILD_DIR_KEY, ".");
-        actualVariables.add(ENVIRONMENT_KEY);
+        actualVariables.add(ENVIRONMENT_KEY, EnvArgs());
 
         COMBINATIONS("Switch off multithreading") {
             fleetingOptions.m_jobs = 1U;

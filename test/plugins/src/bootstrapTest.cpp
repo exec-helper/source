@@ -61,7 +61,7 @@ SCENARIO("Obtaining the default variables map of the bootstrap plugin",
 
         VariablesMap actualVariables(plugin.getPluginName());
         actualVariables.add(Bootstrap::getBuildDirKey(), ".");
-        actualVariables.add(COMMAND_LINE_KEY);
+        actualVariables.add(COMMAND_LINE_KEY, CommandLineArgs());
         actualVariables.add(FILENAME_KEY, "bootstrap.sh");
 
         WHEN("We request the variables map") {

@@ -74,7 +74,7 @@ SCENARIO("Obtaining the default variables map of the pmd plugin", "[pmd]") {
         VariablesMap actualVariables(plugin.getPluginName());
         actualVariables.add(EXEC_KEY, PLUGIN_NAME);
         actualVariables.add(TOOL_KEY, "cpd");
-        actualVariables.add(COMMAND_LINE_KEY);
+        actualVariables.add(COMMAND_LINE_KEY, CommandLineArgs());
         actualVariables.add(VERBOSITY_KEY, "no");
 
         COMBINATIONS("Switch on verbosity") {

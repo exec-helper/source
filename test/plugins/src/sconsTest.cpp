@@ -61,7 +61,7 @@ SCENARIO("Obtain the default variables map of the scons plugin", "[scons]") {
 
         VariablesMap actualVariables(plugin.getPluginName());
         actualVariables.add(BUILD_DIR_KEY, ".");
-        actualVariables.add(COMMAND_LINE_KEY);
+        actualVariables.add(COMMAND_LINE_KEY, CommandLineArgs());
         actualVariables.add(VERBOSITY_KEY, "no");
         actualVariables.add(JOBS_KEY, to_string(fleetingOptions.getJobs()));
 

@@ -13,16 +13,21 @@ using std::make_unique;
 using std::ostream;
 using std::string;
 
+using execHelper::config::SettingsKeys;
+using execHelper::config::SettingsValues;
+
 namespace {
 ostream& stream(ostream& os, const execHelper::config::SettingsNode& settings,
                 const string& prepend) noexcept {
     os << prepend << "- " << settings.key();
-    if(!settings.values().empty()) {
+    auto values =
+        settings.get<SettingsValues>(SettingsKeys(), SettingsValues());
+    if(!values.empty()) {
         os << ":";
     }
     os << std::endl;
     const string newPrepend = string(prepend).append("  ");
-    for(const auto& value : settings.values()) {
+    for(const auto& value : values) {
         stream(os, settings[value], newPrepend);
     }
     return os;
@@ -229,11 +234,12 @@ bool SettingsNode::clear(const SettingsKeys& keys) noexcept {
     return false;
 }
 
-SettingsValues SettingsNode::values() const noexcept {
+boost::optional<SettingsValues> SettingsNode::values() const noexcept {
     if(!m_values) {
-        return SettingsKeys();
+        return boost::none;
     }
     SettingsValues result;
+    result.reserve(m_values->size());
     for(const auto& value : *m_values) {
         result.push_back(value.m_key);
     }
@@ -248,7 +254,8 @@ void SettingsNode::swap(SettingsNode& other) noexcept {
 }
 
 void SettingsNode::overwrite(const SettingsNode& newSettings) noexcept {
-    for(const auto& key : newSettings.values()) {
+    std::vector<std::string> children = newSettings.values().get();
+    for(const auto& key : children) {
         const SettingsNode& newValue = newSettings[key];
         if(!contains(key)) {
             add(key);
@@ -301,26 +308,16 @@ void SettingsNode::deepCopy(const SettingsNode& other) noexcept {
     if(!other.m_values) {
         return;
     }
-    m_values = make_unique<SettingsNodeCollection>();
 
-    SettingsValues otherValues = other.values();
-    m_values->reserve(otherValues.size());
-    for(const auto& otherKey : otherValues) {
-        SettingsNode newNode = other[otherKey];
-        m_values->emplace_back(newNode);
+    m_values = make_unique<SettingsNodeCollection>();
+    m_values->reserve(other.m_values->size());
+    for(auto otherKey : *other.m_values) {
+        m_values->emplace_back(otherKey);
     }
 }
 
 ostream& operator<<(ostream& os, const SettingsNode& settings) noexcept {
-    os << settings.key();
-    if(!settings.values().empty()) {
-        os << ":";
-    }
-    os << std::endl;
-    for(const auto& value : settings.values()) {
-        stream(os, settings[value], "  ");
-    }
-    return os;
+    return stream(os, settings, "");
 }
 } // namespace config
 } // namespace execHelper

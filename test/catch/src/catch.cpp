@@ -49,7 +49,8 @@ int main(int argc, char** argv) {
 
     static vector<string> logModules(
         {"log", "yaml", "config", "core", "plugins", "commander"});
-    execHelper::log::init();
+
+    execHelper::log::LogInit logInit;
     for(const auto& logModule : logModules) {
         if(!setSeverity(logModule, logLevel)) {
             cerr << "Error settings log level '" << logLevel << "' for module '"

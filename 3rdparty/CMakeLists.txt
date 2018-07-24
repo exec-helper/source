@@ -6,4 +6,5 @@ include(gsl.CMakeLists.txt)
 
 if(${ENABLE_TESTING})
     include(catch.CMakeLists.txt)
+    include(rapidcheck.CMakeLists.txt)
 endif()

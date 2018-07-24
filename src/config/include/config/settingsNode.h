@@ -102,13 +102,6 @@ class SettingsNode {
     SettingsKey key() const noexcept;
 
     /**
-     * Get the values associated with the root of this node
-     *
-     * \returns The associated values
-     */
-    SettingsValues values() const noexcept;
-
-    /**
      * Returns whether the given key exists as a direct child of this node
      *
      * \param[in] key   The key to search for
@@ -130,11 +123,14 @@ class SettingsNode {
      */
     template <typename T>
     boost::optional<T> get(const SettingsKeys& key) const noexcept {
-        if(key.empty() || !contains(key)) {
+        if(!contains(key)) {
             return boost::none;
         }
-        const SettingsNode* settings = at(key);
-        return detail::Cast<T, SettingsValues>::cast(settings->values());
+        auto valuesOpt = at(key)->values();
+        if(!valuesOpt) {
+            return boost::none;
+        }
+        return detail::Cast<T, SettingsValues>::cast(valuesOpt.get());
     }
 
     /*! @copydoc get(const SettingsKeys&) const
@@ -313,6 +309,14 @@ class SettingsNode {
     /*! @copydoc operator[](const SettingsKey&) const
      */
     const SettingsNode* at(const SettingsKeys& key) const noexcept;
+
+    /**
+     * Get the values associated with the root of this node
+     *
+     * \returns The associated values if there are values associated with the root of this node
+     *          boost::none otherwise
+     */
+    boost::optional<SettingsValues> values() const noexcept;
 
     SettingsKey m_key; //!< The root key associated with this node
     std::unique_ptr<SettingsNodeCollection>

@@ -81,7 +81,7 @@ VariablesMap FleetingOptions::getDefault() noexcept {
     defaults.add(JOBS_KEY, "auto");
     defaults.add(SETTINGS_FILE_KEY);
     defaults.add(LOG_LEVEL_KEY, "none");
-    defaults.add(COMMAND_KEY);
+    defaults.add(COMMAND_KEY, CommandCollection());
     return defaults;
 }
 } // namespace config

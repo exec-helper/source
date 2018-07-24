@@ -60,7 +60,7 @@ VariablesMap
 Lcov::getVariablesMap(const FleetingOptionsInterface& /*fleetingOptions*/) const
     noexcept {
     VariablesMap defaults(PLUGIN_NAME);
-    defaults.add(COMMAND_LINE_KEY);
+    defaults.add(COMMAND_LINE_KEY, CommandLineArgs());
     defaults.add(INFO_FILE_KEY, "lcov-plugin.info");
     defaults.add(BASE_DIR_KEY, ".");
     defaults.add(DIR_KEY, ".");
@@ -68,8 +68,8 @@ Lcov::getVariablesMap(const FleetingOptionsInterface& /*fleetingOptions*/) const
     defaults.add(GEN_HTML_KEY, "no");
     defaults.add(GEN_HTML_OUTPUT_KEY, ".");
     defaults.add(GEN_HTML_TITLE_KEY, "Hello");
-    defaults.add(GEN_HTML_COMMAND_LINE_KEY);
-    defaults.add(EXCLUDES_KEY);
+    defaults.add(GEN_HTML_COMMAND_LINE_KEY, GenHtmlCommandLine());
+    defaults.add(EXCLUDES_KEY, Excludes());
     return defaults;
 }
 

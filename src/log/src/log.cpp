@@ -42,9 +42,21 @@ class ConsoleLogger {
               logStream, filter = severity >= none && false,
               format = (stream << timestamp << " <" << severity << "> ["
                                << channel << "] " << fileLog << ":" << lineLog
-                               << " " << smessage))) {
-        ;
+                               << " " << smessage))) {}
+
+    ConsoleLogger(const ConsoleLogger& other) = delete;
+    ConsoleLogger(ConsoleLogger&& other) = delete;
+
+    ~ConsoleLogger() {
+        if(m_consoleSink) {
+            boost::log::core::get()->remove_sink(m_consoleSink);
+            m_consoleSink->flush();
+            m_consoleSink.reset();
+        }
     }
+
+    ConsoleLogger& operator=(const ConsoleLogger& other) = delete;
+    ConsoleLogger& operator=(ConsoleLogger&& other) = delete;
 
     bool setSeverity(const Channel& channel, LogLevel severity) noexcept {
         m_logMessageFilter[channel] = severity;
@@ -59,11 +71,18 @@ class ConsoleLogger {
 };
 
 unique_ptr<ConsoleLogger> consoleLogger;
+
 } // namespace
 
 namespace execHelper {
 namespace log {
-void init(std::ostream& logStream) noexcept {
+LogInit::LogInit() noexcept { init(std::clog); }
+
+LogInit::LogInit(std::ostream& logStream) noexcept { init(logStream); }
+
+LogInit::~LogInit() { consoleLogger.reset(); }
+
+void LogInit::init(std::ostream& logStream) noexcept {
     boost::log::add_common_attributes();
     boost::log::register_simple_formatter_factory<LogLevel, char>("Severity");
 

@@ -37,7 +37,7 @@ VariablesMap Bootstrap::getVariablesMap(
     VariablesMap defaults(PLUGIN_NAME);
     defaults.add(getBuildDirKey(), ".");
     defaults.add(FILENAME_KEY, "bootstrap.sh");
-    defaults.add(COMMAND_LINE_KEY);
+    defaults.add(COMMAND_LINE_KEY, CommandLineArgs());
     return defaults;
 }
 

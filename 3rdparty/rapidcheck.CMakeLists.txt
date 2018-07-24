@@ -1,0 +1,39 @@
+set(MODULE_NAME rapidcheck)
+set(PACKAGE_NAME Rapidcheck)
+
+find_package(${PACKAGE_NAME})
+option(USE_SYSTEM_RAPIDCHECK "Use the ${MODULE_NAME} library provided by the system" ${${PACKAGE_NAME}_FOUND})
+
+if(${USE_SYSTEM_RAPIDCHECK})
+    if(NOT ${${PACKAGE_NAME}_FOUND})
+        MESSAGE(FATAL_ERROR "Could NOT find ${MODULE_NAME}")
+    endif()
+else()
+    MESSAGE(STATUS " -> Using latest upstream version of ${PACKAGE_NAME} instead")
+
+    include(ExternalProject)
+
+    set(RAPIDCHECK_SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/${MODULE_NAME}/source)
+    set(RAPIDCHECK_INSTALL_DIR ${CMAKE_CURRENT_BINARY_DIR}/${MODULE_NAME}/install)
+    set(RAPIDCHECK_LIBS librapidcheck.a)
+
+    ExternalProject_Add(${PACKAGE_NAME}
+        PREFIX ${MODULE_NAME}/source
+        GIT_REPOSITORY https://github.com/emil-e/rapidcheck.git
+        CMAKE_ARGS -DCMAKE_BUILD_TYPE=Release -DRC_ENABLE_CATCH=ON -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
+        INSTALL_COMMAND mkdir -p ${RAPIDCHECK_INSTALL_DIR}/include/rapidcheck && cp ${RAPIDCHECK_LIBS} ${RAPIDCHECK_INSTALL_DIR} && cp -r ../Rapidcheck/include/rapidcheck ${RAPIDCHECK_INSTALL_DIR}/include/ && cp ../Rapidcheck/include/rapidcheck.h ${RAPIDCHECK_INSTALL_DIR}/include/rapidcheck/ && cp ../Rapidcheck/extras/catch/include/rapidcheck/catch.h ${RAPIDCHECK_INSTALL_DIR}/include/rapidcheck/
+        UPDATE_COMMAND ""
+        )
+
+    set(${PACKAGE_NAME}_INCLUDE_DIRS ${RAPIDCHECK_INSTALL_DIR}/include ${RAPIDCHECK_INSTALL_DIR}/src/Rapidcheck/include ${RAPIDCHECK_INSTALL_DIR}/src/Rapidcheck/extras/catch/include)
+    set(${PACKAGE_NAME}_LIBRARIES ${RAPIDCHECK_INSTALL_DIR}/${RAPIDCHECK_LIBS})
+    set(${PACKAGE_NAME}_LIBRARY_DIRS ${RAPIDCHECK_INSTALL_DIR})
+endif()
+
+add_library(rapidcheck INTERFACE)
+target_include_directories(rapidcheck SYSTEM INTERFACE ${${PACKAGE_NAME}_INCLUDE_DIRS})
+target_link_libraries(rapidcheck INTERFACE ${${PACKAGE_NAME}_LIBRARIES})
+
+if(NOT ${USE_SYSTEM_RAPIDCHECK})
+    add_dependencies(rapidcheck ${PACKAGE_NAME})
+endif()

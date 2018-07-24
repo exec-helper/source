@@ -87,7 +87,7 @@ SCENARIO("Obtaining the default variables map of the clang-tidy plugin",
         ClangTidy plugin;
 
         VariablesMap actualVariables(plugin.getPluginName());
-        actualVariables.add(COMMAND_LINE_KEY);
+        actualVariables.add(COMMAND_LINE_KEY, CommandLineArgs());
         actualVariables.add(SOURCES_KEY, "*.cpp");
 
         WHEN("We request the variables map") {

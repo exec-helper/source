@@ -8,6 +8,7 @@
 #include "config/settingsNode.h"
 
 #include "unittest/catch.h"
+#include "unittest/rapidcheck.h"
 #include "utils/utils.h"
 
 using std::ostream;
@@ -15,7 +16,11 @@ using std::string;
 using std::stringstream;
 using std::to_string;
 
+using Catch::Matchers::VectorContains;
+
 using execHelper::config::SettingsNode;
+using execHelper::config::SettingsValues;
+using execHelper::test::propertyTest;
 
 namespace {
 void assertBoolSetting(const SettingsNode& settings, const string& key,
@@ -24,6 +29,9 @@ void assertBoolSetting(const SettingsNode& settings, const string& key,
     REQUIRE(settings.get<bool>(key).get() == expected);
     REQUIRE(settings.get<bool>(key, !expected) == expected);
 }
+
+const execHelper::config::SettingsValue DEFAULT_VALUE("blaat");
+const execHelper::config::SettingsValues DEFAULT_VALUES({DEFAULT_VALUE});
 } // namespace
 
 namespace execHelper {
@@ -111,46 +119,14 @@ SCENARIO("Basic addition and getting of values", "[config][settingsNode]") {
                 }
             }
 
-            THEN("We should get the values") {
-                SettingsValues firstLevelValues({testValue1, testKey2});
-                for(const auto& value : testValue3) {
-                    firstLevelValues.push_back(value);
-                }
-                for(const auto& value : testValue4) {
-                    firstLevelValues.push_back(value);
-                }
-                firstLevelValues.push_back(testKey5);
-                firstLevelValues.push_back(testKey6);
-
-                REQUIRE(settings.values() == firstLevelValues);
-                REQUIRE(settings[testValue1].values().empty());
-                REQUIRE(settings[testKey2].values() ==
-                        SettingsValues({testValue2}));
-                for(const auto& key : testValue3) {
-                    REQUIRE(settings[key].values().empty());
-                }
-
-                for(const auto& key : testValue4) {
-                    REQUIRE(settings[key].values().empty());
-                }
-
-                REQUIRE(settings[testKey5].values() == testValue5);
-                for(const auto& key : testValue5) {
-                    REQUIRE(settings[testKey5][key].values().empty());
-                }
-
-                REQUIRE(settings[testKey6].values() ==
-                        SettingsValues(testValue6));
-                for(const auto& key : testValue6) {
-                    REQUIRE(settings[testKey6][key].values().empty());
-                }
-            }
-
             THEN("We should be able to get the optional values") {
-                REQUIRE(settings.get<SettingsValues>({testValue1}) !=
+                REQUIRE(settings.get<SettingsValues>(SettingsKeys()) !=
                         boost::none);
-                REQUIRE(
-                    settings.get<SettingsValues>({testValue1}).get().empty());
+                REQUIRE_THAT(settings.get<SettingsValues>(SettingsKeys()).get(),
+                             VectorContains(testValue1));
+
+                REQUIRE(settings.get<SettingsValues>({testValue1}) ==
+                        boost::none);
 
                 REQUIRE(settings.get<SettingsValues>({testKey2}) !=
                         boost::none);
@@ -158,13 +134,17 @@ SCENARIO("Basic addition and getting of values", "[config][settingsNode]") {
                         SettingsValues({testValue2}));
 
                 for(const auto& key : testValue3) {
-                    REQUIRE(settings.get<SettingsValues>({key}) != boost::none);
-                    REQUIRE(settings.get<SettingsValues>({key}).get().empty());
+                    REQUIRE(settings.get<SettingsValues>({key}) == boost::none);
+                    REQUIRE_THAT(
+                        settings.get<SettingsValues>(SettingsKeys()).get(),
+                        VectorContains(key));
                 }
 
                 for(const auto& key : testValue4) {
-                    REQUIRE(settings.get<SettingsValues>({key}) != boost::none);
-                    REQUIRE(settings.get<SettingsValues>({key}).get().empty());
+                    REQUIRE(settings.get<SettingsValues>({key}) == boost::none);
+                    REQUIRE_THAT(
+                        settings.get<SettingsValues>(SettingsKeys()).get(),
+                        VectorContains(key));
                 }
 
                 REQUIRE(settings.get<SettingsValues>({testKey5}) !=
@@ -172,19 +152,18 @@ SCENARIO("Basic addition and getting of values", "[config][settingsNode]") {
                 REQUIRE(settings.get<SettingsValues>({testKey5}).get() ==
                         testValue5);
 
-                for(const auto& key : testValue5) {
-                    REQUIRE(settings.get<SettingsValues>({testKey5, key}) !=
-                            boost::none);
-                    REQUIRE(settings.get<SettingsValues>({testKey5, key})
-                                .get()
-                                .empty());
+                REQUIRE(settings[testKey5].get<SettingsValues>(
+                            SettingsKeys()) != boost::none);
+                REQUIRE(settings[testKey5]
+                            .get<SettingsValues>(SettingsKeys())
+                            .get() == testValue5);
 
-                    REQUIRE(settings[testKey5].get<SettingsValues>({key}) !=
+                for(const auto& key : testValue5) {
+                    REQUIRE(settings.get<SettingsValues>({testKey5, key}) ==
                             boost::none);
-                    REQUIRE(settings[testKey5]
-                                .get<SettingsValues>({key})
-                                .get()
-                                .empty());
+
+                    REQUIRE(settings[testKey5].get<SettingsValues>({key}) ==
+                            boost::none);
                 }
                 REQUIRE(settings.get<SettingsValues>(
                             {testKey5, "non-existing-key"}) == boost::none);
@@ -194,63 +173,79 @@ SCENARIO("Basic addition and getting of values", "[config][settingsNode]") {
                 REQUIRE(settings.get<SettingsValues>({testKey6}).get() ==
                         SettingsValues(testValue6));
 
-                for(const auto& key : testValue6) {
-                    REQUIRE(settings.get<SettingsValues>({testKey6, key}) !=
-                            boost::none);
-                    REQUIRE(settings.get<SettingsValues>({testKey6, key})
-                                .get()
-                                .empty());
+                REQUIRE(settings[testKey6].get<SettingsValues>(
+                            SettingsKeys()) != boost::none);
+                REQUIRE(settings[testKey6]
+                            .get<SettingsValues>(SettingsKeys())
+                            .get() == testValue6);
 
-                    REQUIRE(settings[testKey6].get<SettingsValues>({key}) !=
+                for(const auto& key : testValue6) {
+                    REQUIRE(settings.get<SettingsValues>({testKey6, key}) ==
                             boost::none);
-                    REQUIRE(settings[testKey6]
-                                .get<SettingsValues>({key})
-                                .get()
-                                .empty());
+
+                    REQUIRE(settings[testKey6].get<SettingsValues>({key}) ==
+                            boost::none);
                 }
             }
 
             THEN("We should be able to get the non-default values") {
                 const SettingsValues DEFAULT_VALUE({"blaat"});
 
+                REQUIRE_THAT(
+                    settings.get<SettingsValues>(SettingsKeys(), DEFAULT_VALUE),
+                    VectorContains(testValue1));
+
                 REQUIRE(settings.get<SettingsValues>(
-                            {testValue1}, DEFAULT_VALUE) != DEFAULT_VALUE);
+                            testValue1, DEFAULT_VALUE) == DEFAULT_VALUE);
+
                 REQUIRE(
                     settings.get<SettingsValues>({testKey2}, DEFAULT_VALUE) ==
                     SettingsValues({testValue2}));
 
                 for(const auto& key : testValue3) {
-                    REQUIRE(settings.get<SettingsValues>(
-                                {key}, DEFAULT_VALUE) != DEFAULT_VALUE);
+                    REQUIRE(settings.get<SettingsValues>(key, DEFAULT_VALUE) ==
+                            DEFAULT_VALUE);
+                    REQUIRE_THAT(settings.get<SettingsValues>(SettingsKeys(),
+                                                              DEFAULT_VALUE),
+                                 VectorContains(key));
                 }
 
                 for(const auto& key : testValue4) {
-                    REQUIRE(settings.get<SettingsValues>(
-                                {key}, DEFAULT_VALUE) != DEFAULT_VALUE);
+                    REQUIRE(settings.get<SettingsValues>(key, DEFAULT_VALUE) ==
+                            DEFAULT_VALUE);
+                    REQUIRE_THAT(settings.get<SettingsValues>(SettingsKeys(),
+                                                              DEFAULT_VALUE),
+                                 VectorContains(key));
                 }
 
                 REQUIRE(settings.get<SettingsValues>(
                             {testKey5}, DEFAULT_VALUE) == testValue5);
+
+                REQUIRE(settings[testKey5].get<SettingsValues>(
+                            SettingsKeys(), DEFAULT_VALUE) == testValue5);
                 for(const auto& key : testValue5) {
                     REQUIRE(settings.get<SettingsValues>({testKey5, key},
-                                                         DEFAULT_VALUE) !=
+                                                         DEFAULT_VALUE) ==
                             DEFAULT_VALUE);
                     REQUIRE(settings[testKey5].get<SettingsValues>(
-                                {key}, DEFAULT_VALUE) != DEFAULT_VALUE);
+                                {key}, DEFAULT_VALUE) == DEFAULT_VALUE);
                 }
                 REQUIRE(settings.get<SettingsValues>(
                             {testKey5, "non-existing-key"}, DEFAULT_VALUE) ==
                         DEFAULT_VALUE);
 
+                REQUIRE(settings.get<SettingsValues>(
+                            {testKey6}, DEFAULT_VALUE) == testValue6);
+
+                REQUIRE(settings[testKey6].get<SettingsValues>(
+                            SettingsKeys(), DEFAULT_VALUE) == testValue6);
                 REQUIRE(
                     settings.get<SettingsValues>({testKey6}, DEFAULT_VALUE) ==
                     SettingsValues(testValue6));
                 for(const auto& key : testValue6) {
                     REQUIRE(settings.get<SettingsValues>({testKey6, key},
-                                                         DEFAULT_VALUE) !=
+                                                         DEFAULT_VALUE) ==
                             DEFAULT_VALUE);
-                    REQUIRE(settings[testKey6].get<SettingsValues>(
-                                {key}, DEFAULT_VALUE) != DEFAULT_VALUE);
                 }
             }
         }
@@ -332,7 +327,8 @@ SCENARIO("Addition of multiple key values", "[config][settingsNode]") {
                 for(const auto& key : key1) {
                     stageSettings = &stageSettings->operator[](key);
                 }
-                REQUIRE(stageSettings->values() == value1);
+                REQUIRE(stageSettings->get<SettingsValues>(
+                            SettingsKeys(), SettingsValues()) == value1);
             }
             THEN("We should get the values") {
                 REQUIRE(settings.get<SettingsValues>(key1) != boost::none);
@@ -645,8 +641,8 @@ SCENARIO("Testing the removal of values", "[config][settingsNode]") {
                 const SettingsValues DEFAULT_VALUE({"blaat"});
                 REQUIRE(settings.get<SettingsValues>(key2, DEFAULT_VALUE) ==
                         value2);
-                REQUIRE(
-                    settings.get<SettingsValues>(key3, DEFAULT_VALUE).empty());
+                REQUIRE(settings.get<SettingsValues>(key3, DEFAULT_VALUE) ==
+                        DEFAULT_VALUE);
             }
         }
 
@@ -694,8 +690,8 @@ SCENARIO("Testing the removal of values", "[config][settingsNode]") {
                         value1);
                 REQUIRE(settings.get<SettingsValues>(key2, DEFAULT_VALUE) ==
                         value2);
-                REQUIRE(
-                    settings.get<SettingsValues>(key3, DEFAULT_VALUE).empty());
+                REQUIRE(settings.get<SettingsValues>(key3, DEFAULT_VALUE) ==
+                        DEFAULT_VALUE);
             }
         }
     }
@@ -726,7 +722,7 @@ SCENARIO("Test the settings node streaming operator",
 
             THEN("We should get the stream") {
                 stringstream correctStream;
-                correctStream << rootKey << ":" << std::endl;
+                correctStream << "- " << rootKey << ":" << std::endl;
                 correctStream << "  - " << key1.front() << ":" << std::endl;
                 for(const auto& value : value1) {
                     correctStream << "    - " << value << std::endl;
@@ -744,6 +740,71 @@ SCENARIO("Test the settings node streaming operator",
             }
         }
     }
+}
+
+SCENARIO("Test adding values", "[config][settingsNode][issue]") {
+    propertyTest("Add one value with a simple key",
+                 [](const SettingsKey& key, const SettingsValue& value) {
+                     SettingsNode settings("Addition test");
+                     REQUIRE(!settings.contains(key));
+                     REQUIRE(settings.get<SettingsValue>(key) == boost::none);
+                     REQUIRE(settings.get<SettingsValue>(key, DEFAULT_VALUE) ==
+                             DEFAULT_VALUE);
+
+                     REQUIRE(settings.add(key, value));
+                     REQUIRE(settings.contains(key));
+                     REQUIRE(settings.get<SettingsValue>(key) == value);
+                     REQUIRE(settings.get<SettingsValue>(key, DEFAULT_VALUE) ==
+                             value);
+                 });
+
+    propertyTest("Add one value with a key", [](const SettingsKeys& key,
+                                                const SettingsValue& value) {
+        SettingsNode settings("Addition test");
+        REQUIRE(
+            settings.contains(key) ==
+            key.empty()); // An empty key will return true, as this points to the root settings node itself
+        REQUIRE(settings.get<SettingsValue>(key) == boost::none);
+        REQUIRE(settings.get<SettingsValue>(key, DEFAULT_VALUE) ==
+                DEFAULT_VALUE);
+
+        REQUIRE(settings.add(key, value));
+        REQUIRE(settings.contains(key));
+        REQUIRE(settings.get<SettingsValue>(key) == value);
+        REQUIRE(settings.get<SettingsValue>(key, DEFAULT_VALUE) == value);
+    });
+
+    propertyTest("Add multiple values with a simple key",
+                 [](const SettingsKey& key, const SettingsValues& values) {
+                     SettingsNode settings("Addition test");
+                     REQUIRE(!settings.contains(key));
+                     REQUIRE(settings.get<SettingsValues>(key) == boost::none);
+                     REQUIRE(settings.get<SettingsValues>(
+                                 key, DEFAULT_VALUES) == DEFAULT_VALUES);
+
+                     REQUIRE(settings.add(key, values));
+                     REQUIRE(settings.contains(key));
+                     REQUIRE(settings.get<SettingsValues>(key) == values);
+                     REQUIRE(settings.get<SettingsValues>(
+                                 key, DEFAULT_VALUES) == values);
+                 });
+
+    propertyTest("Add multiple elements with a key", [](const SettingsKeys& key,
+                                                        const SettingsValues&
+                                                            values) {
+        SettingsNode settings("Addition test");
+        REQUIRE(
+            settings.contains(key) ==
+            key.empty()); // An empty key will return true, as this points to the root settings node itself
+        REQUIRE(settings.get<SettingsValues>(key) == boost::none);
+        REQUIRE(settings.get<SettingsValues>(key, DEFAULT_VALUES) ==
+                DEFAULT_VALUES);
+
+        REQUIRE(settings.add(key, values));
+        REQUIRE(settings.contains(key));
+        REQUIRE(settings.get<SettingsValues>(key) == values);
+        REQUIRE(settings.get<SettingsValues>(key, DEFAULT_VALUES) == values);
+    });
 }
 } // namespace test
 } // namespace config

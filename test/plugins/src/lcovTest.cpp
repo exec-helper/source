@@ -73,7 +73,7 @@ SCENARIO("Obtaining the default variables map of the lcov plugin", "[lcov]") {
         Lcov plugin;
 
         VariablesMap actualVariables(plugin.getPluginName());
-        actualVariables.add(COMMAND_LINE_KEY);
+        actualVariables.add(COMMAND_LINE_KEY, CommandLineArgs());
         actualVariables.add(INFO_FILE_KEY, "lcov-plugin.info");
         actualVariables.add(BASE_DIR_KEY, ".");
         actualVariables.add(DIR_KEY, ".");
@@ -81,8 +81,8 @@ SCENARIO("Obtaining the default variables map of the lcov plugin", "[lcov]") {
         actualVariables.add(GEN_HTML_KEY, "no");
         actualVariables.add(GEN_HTML_OUTPUT_KEY, ".");
         actualVariables.add(GEN_HTML_TITLE_KEY, "Hello");
-        actualVariables.add(GEN_HTML_COMMAND_LINE_KEY);
-        actualVariables.add(EXCLUDES_KEY);
+        actualVariables.add(GEN_HTML_COMMAND_LINE_KEY, vector<string>());
+        actualVariables.add(EXCLUDES_KEY, vector<string>());
 
         WHEN("We request the variables map") {
             VariablesMap variables = plugin.getVariablesMap(fleetingOptions);

@@ -48,7 +48,7 @@ Pmd::getVariablesMap(const FleetingOptionsInterface& fleetingOptions) const
     VariablesMap defaults(PLUGIN_NAME);
     defaults.add(EXEC_KEY, PLUGIN_NAME);
     defaults.add(TOOL_KEY, "cpd");
-    defaults.add(COMMAND_LINE_KEY);
+    defaults.add(COMMAND_LINE_KEY, CommandLineArgs());
     const string verbosity = fleetingOptions.getVerbosity() ? "yes" : "no";
     defaults.add(VERBOSITY_KEY, verbosity);
     return defaults;

@@ -4,6 +4,7 @@
 #include <vector>
 
 #include <boost/lexical_cast.hpp>
+#include <boost/optional.hpp>
 
 #include "log/log.h"
 

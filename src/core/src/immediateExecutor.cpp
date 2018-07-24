@@ -12,7 +12,6 @@ using std::move;
 namespace execHelper {
 namespace core {
 
-// cppcheck-suppress passedByValue
 ImmediateExecutor::ImmediateExecutor(std::shared_ptr<Shell> shell,
                                      Callback callback) noexcept
     : m_shell(move(shell)), m_callback(move(callback)) {

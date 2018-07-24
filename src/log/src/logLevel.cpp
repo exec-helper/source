@@ -32,6 +32,12 @@ LogLevel toLogLevel(const std::string& level) {
     return static_cast<LogLevel>(index);
 }
 
+const vector<LogLevel>& getLogLevels() {
+    static const vector<LogLevel> LOG_LEVELS(
+        {none, fatal, error, warning, info, debug, trace, all});
+    return LOG_LEVELS;
+}
+
 std::ostream& operator<<(std::ostream& os, LogLevel level) {
     os << toString(level);
     return os;

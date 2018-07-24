@@ -71,7 +71,7 @@ SCENARIO("Obtaining the default variables map of the valgrind plugin",
         Valgrind plugin;
 
         VariablesMap actualVariables(plugin.getPluginName());
-        actualVariables.add(COMMAND_LINE_KEY);
+        actualVariables.add(COMMAND_LINE_KEY, CommandLineArgs());
         actualVariables.add(VERBOSITY_KEY, "no");
 
         WHEN("We request the variables map") {

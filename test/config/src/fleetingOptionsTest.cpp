@@ -29,7 +29,7 @@ SCENARIO("Test the fleeting options defaults", "[config][fleeting-options]") {
         expectedDefaults.add(JOBS_KEY, "auto");
         expectedDefaults.add(DRY_RUN_KEY, "no");
         expectedDefaults.add(LOG_LEVEL_KEY, "none");
-        expectedDefaults.add(COMMAND_KEY);
+        expectedDefaults.add(COMMAND_KEY, CommandCollection());
         expectedDefaults.add(SETTINGS_FILE_KEY);
 
         WHEN("We request the defaults") {

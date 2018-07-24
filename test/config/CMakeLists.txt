@@ -17,6 +17,7 @@ set(DEPENDENCIES
         boost-filesystem
         config
         unittest
+        rapidcheck
         test-utils
     )
 

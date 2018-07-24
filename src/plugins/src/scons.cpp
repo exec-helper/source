@@ -37,7 +37,7 @@ Scons::getVariablesMap(const FleetingOptionsInterface& fleetingOptions) const
     noexcept {
     VariablesMap defaults(PLUGIN_NAME);
     defaults.add(getBuildDirKey(), ".");
-    defaults.add(COMMAND_LINE_KEY);
+    defaults.add(COMMAND_LINE_KEY, CommandLineArgs());
     const auto verbosity = fleetingOptions.getVerbosity() ? "yes" : "no";
     defaults.add(VERBOSITY_KEY, verbosity);
     defaults.add(JOBS_KEY, to_string(fleetingOptions.getJobs()));

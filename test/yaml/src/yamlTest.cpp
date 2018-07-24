@@ -5,6 +5,8 @@
 #include <vector>
 
 #include <boost/filesystem.hpp>
+#include <boost/optional/optional_io.hpp>
+#include <catch.hpp>
 
 #include "config/settingsNode.h"
 #include "yaml/yaml.h"
@@ -20,10 +22,17 @@ using std::stringstream;
 using std::vector;
 
 using execHelper::config::Path;
+using execHelper::config::SettingsKeys;
 using execHelper::config::SettingsNode;
+using execHelper::config::SettingsValues;
 using execHelper::test::baseUtils::ConfigFileWriter;
 using execHelper::test::utils::convertToConfig;
 using execHelper::test::utils::writeSettingsFile;
+
+namespace {
+const execHelper::config::SettingsValue DEFAULT_VALUE("blaat");
+const execHelper::config::SettingsValues DEFAULT_VALUES({DEFAULT_VALUE});
+} // namespace
 
 namespace execHelper {
 namespace yaml {
@@ -119,25 +128,37 @@ SCENARIO("Extensive Yaml file wrapper test", "[yaml][yamlwrapper]") {
                 SettingsNode settings(correctSettings.key());
                 yaml.getTree({}, &settings);
                 REQUIRE(settings.key() == correctSettings.key());
-                REQUIRE(settings["commands"].values() == correctCommands);
-                REQUIRE(settings["init"].values() == correctInit);
-                REQUIRE(settings["build"].values() == correctBuild);
-                REQUIRE(settings["run"].values() == correctRun);
-                REQUIRE(settings["analyze"].values() == correctAnalyze);
-                REQUIRE(settings["git-submodules"]["submodules"].values() ==
-                        correctSubmodules);
-                REQUIRE(settings["scons"]["patterns"].values() ==
-                        correctSconsPatterns);
-                REQUIRE(settings["scons"]["build-dir"].values()[0] ==
-                        correctSconsBuildDir);
-                REQUIRE(settings["scons"]["single-threaded"].values()[0] ==
-                        correctSconsSingleThreaded);
-                REQUIRE(settings["scons"]["command-line"].values()[0] ==
-                        correctSconsCommandLine);
-                REQUIRE(settings["pmd"]["auto-install"].values()[0] ==
-                        correctPmdAutoInstall);
-                REQUIRE(settings["command-line"]["run"].values()[0] ==
-                        correctRunCommandLine);
+                REQUIRE(settings.get<vector<string>>(
+                            "commands", DEFAULT_VALUES) == correctCommands);
+                REQUIRE(settings.get<vector<string>>("init", DEFAULT_VALUES) ==
+                        correctInit);
+                REQUIRE(settings.get<vector<string>>("build", DEFAULT_VALUES) ==
+                        correctBuild);
+                REQUIRE(settings.get<vector<string>>("run", DEFAULT_VALUES) ==
+                        correctRun);
+                REQUIRE(settings.get<vector<string>>(
+                            "analyze", DEFAULT_VALUES) == correctAnalyze);
+                REQUIRE(settings.get<vector<string>>(
+                            SettingsKeys({"git-submodules", "submodules"}),
+                            DEFAULT_VALUES) == correctSubmodules);
+                REQUIRE(settings.get<vector<string>>(
+                            SettingsKeys({"scons", "patterns"}),
+                            DEFAULT_VALUES) == correctSconsPatterns);
+                REQUIRE(settings.get<string>(
+                            SettingsKeys({"scons", "build-dir"}),
+                            DEFAULT_VALUE) == correctSconsBuildDir);
+                REQUIRE(settings.get<string>(
+                            SettingsKeys({"scons", "single-threaded"}),
+                            DEFAULT_VALUE) == correctSconsSingleThreaded);
+                REQUIRE(settings.get<string>(
+                            SettingsKeys({"scons", "command-line"}),
+                            DEFAULT_VALUE) == correctSconsCommandLine);
+                REQUIRE(settings.get<string>(
+                            SettingsKeys({"pmd", "auto-install"}),
+                            DEFAULT_VALUE) == correctPmdAutoInstall);
+                REQUIRE(settings.get<string>(
+                            SettingsKeys({"command-line", "run"}),
+                            DEFAULT_VALUE) == correctRunCommandLine);
                 REQUIRE(settings == correctSettings);
             }
         }
@@ -254,7 +275,8 @@ SCENARIO("Yaml got passed an invalid configuration", "[yaml][yamlwrapper]") {
 
                 // Check the strong exception guarantee
                 REQUIRE(settings.key() == settingsKey);
-                REQUIRE(settings.values().empty());
+                REQUIRE(settings.get<SettingsValues>(SettingsKeys()) ==
+                        boost::none);
             }
         }
     }
@@ -295,7 +317,8 @@ SCENARIO("Requesting invalid values", "[yaml][yamlwrapper]") {
                     yaml.getTree({"invalid-key", "invalid-subkey"}, &settings));
 
                 REQUIRE(settings.key() == settingsKey);
-                REQUIRE(settings.values().empty());
+                REQUIRE(settings.get<SettingsValues>(SettingsKeys()) ==
+                        boost::none);
             }
         }
     }

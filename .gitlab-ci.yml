@@ -63,6 +63,7 @@ variables:
         - *build_tools
         - *install_exec_helper
         - exec-helper setup init-build -c g++ -m release
+        - make -C build/g++/release/build Rapidcheck
         - exec-helper analyze --analyze clang-tidy --module $MODULES --source-type $SOURCE_TYPE
 
 .cppcheck: &cppcheck

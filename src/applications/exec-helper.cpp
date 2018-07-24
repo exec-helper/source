@@ -74,6 +74,7 @@ using execHelper::config::PatternValues;
 using execHelper::config::SETTINGS_FILE_KEY;
 using execHelper::config::SettingsFileOption_t;
 using execHelper::config::SettingsNode;
+using execHelper::config::SettingsValues;
 using execHelper::config::VariablesMap;
 using execHelper::config::VERBOSE_KEY;
 using execHelper::config::VerboseOption_t;
@@ -142,7 +143,8 @@ inline void printHelp(const OptionDescriptions& options,
     user_feedback(options.getOptionDescriptions());
     if(settings.contains(COMMANDS_KEY)) {
         user_feedback("Configured commands:");
-        for(const auto& command : settings[COMMANDS_KEY].values()) {
+        for(const auto& command :
+            settings.get<SettingsValues>(COMMANDS_KEY, SettingsValues())) {
             stringstream commandStream;
             commandStream << "  " << std::left << setw(20) << command;
             CommandCollection commmandDescription =
@@ -300,7 +302,7 @@ int execHelperMain(int argc, char** argv, char** envp) {
     Patterns patterns = config.get().patterns;
     SettingsNode settings = config.get().settings;
 
-    execHelper::log::init();
+    execHelper::log::LogInit logInit;
     auto level = fleetingOptions.getLogLevel();
     for(const auto& logModule : logModules) {
         setSeverity(logModule, level);
@@ -310,6 +312,7 @@ int execHelperMain(int argc, char** argv, char** envp) {
     execHelper::core::ImmediateExecutor::Callback callback =
         [](Shell::ShellReturnCode returnCode) {
             user_feedback_error("Error executing commands");
+            { execHelper::log::LogInit logInit; }
             exit(returnCode);
         };
     std::unique_ptr<ExecutorInterface> executor;
@@ -328,6 +331,7 @@ int execHelperMain(int argc, char** argv, char** envp) {
     Commander commander;
     if(commander.run(fleetingOptions, settings, patterns,
                      settingsFile.parent_path(), move(env))) {
+
         return EXIT_SUCCESS;
     } else {
         user_feedback_error("Error executing commands");

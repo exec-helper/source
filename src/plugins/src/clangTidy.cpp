@@ -36,7 +36,7 @@ string ClangTidy::getPluginName() const noexcept { return "clang-tidy"; }
 VariablesMap ClangTidy::getVariablesMap(
     const FleetingOptionsInterface& /*fleetingOptions*/) const noexcept {
     VariablesMap defaults(PLUGIN_NAME);
-    defaults.add(COMMAND_LINE_KEY);
+    defaults.add(COMMAND_LINE_KEY, CommandLineArgs());
     defaults.add(SOURCES_KEY, "*.cpp");
     return defaults;
 }

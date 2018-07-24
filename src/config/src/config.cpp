@@ -17,7 +17,9 @@ using gsl::czstring;
 
 using execHelper::config::Patterns;
 using execHelper::config::PatternsHandler;
+using execHelper::config::SettingsKeys;
 using execHelper::config::SettingsNode;
+using execHelper::config::SettingsValues;
 using execHelper::config::VariablesMap;
 using execHelper::yaml::Yaml;
 
@@ -28,7 +30,8 @@ Patterns processPatterns(const SettingsNode& settings) noexcept {
     Patterns result;
     if(settings.contains(PATTERNS_KEY)) {
         const SettingsNode& patternSettings = settings[PATTERNS_KEY];
-        for(const auto& patternKey : patternSettings.values()) {
+        for(const auto& patternKey :
+            settings.get<SettingsValues>(PATTERNS_KEY, SettingsValues())) {
             VariablesMap newPatternMap =
                 PatternsHandler::getDefaultPatternMap(patternKey);
             newPatternMap.overwrite(patternSettings[patternKey]);
