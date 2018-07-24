@@ -65,10 +65,10 @@ Check the [Documentation](http://bverhagen.gitlab.io/exec-helper/docs/html/index
 ## Project analysis
 The source code of this project is continuously analyzed by multiple tools in an attempt to catch and fix issues and bugs as quickly as possible. Released versions should have passed the analysis from the following tools:
 - [AddressSanitizer](https://clang.llvm.org/docs/AddressSanitizer.html) (ASan)
-- [coverity](https://scan.coverity.com/projects/exec-helper)
 - [clang-format](https://clang.llvm.org/docs/UndefinedBehaviorSanitizer.html)
 - [clang-static-analyzer](https://clang-analyzer.llvm.org)
 - [clang-tidy](http://clang.llvm.org/extra/clang-tidy)
+- [coverity](https://scan.coverity.com/projects/exec-helper)
 - [cppcheck](http://cppcheck.sourceforge.net)
 - [pmd](https://pmd.github.io) (cpd)
 - [valgrind](http://valgrind.org) (memcheck)
