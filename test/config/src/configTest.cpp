@@ -21,10 +21,6 @@ using execHelper::config::SettingsNode;
 using execHelper::test::baseUtils::ConfigFileWriter;
 using execHelper::test::utils::writeSettingsFile;
 
-namespace {
-const czstring<> PATTERNS_KEY = "patterns";
-} // namespace
-
 namespace execHelper {
 namespace config {
 namespace test {

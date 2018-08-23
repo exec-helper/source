@@ -17,7 +17,6 @@ using execHelper::config::Patterns;
 using execHelper::config::PatternsHandler;
 
 namespace {
-const czstring<> PATTERN_KEY = "patterns";
 const czstring<> DEFAULT_VALUES_KEY = "default-values";
 const czstring<> SHORT_OPTION_KEY = "short-option";
 const czstring<> LONG_OPTION_KEY = "long-option";
