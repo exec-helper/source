@@ -6,4 +6,4 @@ RUN sudo pacman -Sy --needed --noconfirm boost boost-libs yaml-cpp gcc clang cma
 RUN yay -S microsoft-gsl-git && sudo pacman -Scc --noconfirm
 
 # Install gitchangelog using the standalone installer
-RUN sudo -c 'curl -sSL https://raw.githubusercontent.com/vaab/gitchangelog/master/src/gitchangelog/gitchangelog.py > /usr/local/bin/gitchangelog' && sudo -c 'chmod +x /usr/local/bin/gitchangelog'
+RUN sudo sh -c 'curl -sSL https://raw.githubusercontent.com/vaab/gitchangelog/master/src/gitchangelog/gitchangelog.py > /usr/local/bin/gitchangelog' && sudo sh -c 'chmod +x /usr/local/bin/gitchangelog'
