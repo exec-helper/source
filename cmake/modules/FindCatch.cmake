@@ -4,7 +4,7 @@ set(MODULE_INCLUDES catch.hpp)
 find_package(PkgConfig)
 pkg_check_modules(${MODULE_NAME} QUIET ${MODULE_NAME})
 
-find_path(${MODULE_NAME}_INCLUDE_DIR NAMES ${MODULE_INCLUDES} PATH_SUFFIXES catch)
+find_path(${MODULE_NAME}_INCLUDE_DIR NAMES ${MODULE_INCLUDES} PATH_SUFFIXES catch2)
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(${MODULE_NAME}  DEFAULT_MSG
