@@ -33,7 +33,6 @@ Checkout the [Building from source](#building-from-source) section.
 - A C++ 14 compatible compiler
 - [boost-program-options](https://github.com/boostorg/program_options) development files
 - [boost-log](https://github.com/boostorg/log) development files
-- [boost-filesystem](https://github.com/boostorg/filesystem) development files
 - [yaml-cpp](https://github.com/jbeder/yaml-cpp) development files (optional, will be downloaded and compiled in statically if missing)
 - [Microsoft gsl](https://github.com/Microsoft/GSL) development files (optional, will be downloaded and compiled in statically if missing)
 - [catch](https://github.com/philsquared/Catch) unittest framework development files for building the tests (optional, for building the tests)

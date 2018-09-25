@@ -2,12 +2,7 @@
 
 #include <string>
 
-#include <boost/filesystem.hpp>
-
 using std::string;
-
-using boost::filesystem::absolute;
-using boost::filesystem::is_regular_file;
 
 namespace execHelper {
 namespace config {

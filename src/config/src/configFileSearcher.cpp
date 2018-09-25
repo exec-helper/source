@@ -1,14 +1,11 @@
 #include "configFileSearcher.h"
 
-#include <boost/filesystem.hpp>
-#include <boost/filesystem/fstream.hpp>
+#include <filesystem>
 
 using std::optional;
 using std::string;
 
-using boost::filesystem::exists;
-using boost::filesystem::ifstream;
-using boost::filesystem::path;
+namespace filesystem = std::filesystem;
 
 namespace execHelper {
 namespace config {
@@ -29,7 +26,7 @@ optional<Path> ConfigFileSearcher::find(const Path& filename) noexcept {
 }
 
 bool ConfigFileSearcher::fileExist(const Path& pathToCheck) noexcept {
-    return exists(pathToCheck);
+    return filesystem::exists(pathToCheck);
 }
 } // namespace config
 } // namespace execHelper

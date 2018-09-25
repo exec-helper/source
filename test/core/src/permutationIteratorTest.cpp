@@ -106,7 +106,7 @@ inline void
 testForeach(T& permute,
             const vector<PermuteObjectElement>& orderedCombinations) {
     size_t orderedCombinationsIndex = 0U;
-    for(auto combination : permute) {
+    for(const auto& combination : permute) {
         REQUIRE(orderedCombinationsIndex < orderedCombinations.size());
         REQUIRE((combination == orderedCombinations[orderedCombinationsIndex]));
         ++orderedCombinationsIndex;

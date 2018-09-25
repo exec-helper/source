@@ -113,7 +113,7 @@ SCENARIO("Testing the configuration settings of the clang-tidy plugin",
         VariablesMap variables = plugin.getVariablesMap(FleetingOptionsStub());
 
         TaskCollection commandLine;
-        TaskCollection sources = variables.get<TaskCollection>(SOURCES_KEY, {});
+        auto sources = variables.get<TaskCollection>(SOURCES_KEY, {});
         TaskCollection checks;
         TaskCollection warningAsError;
 
