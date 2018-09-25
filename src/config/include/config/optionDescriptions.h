@@ -2,9 +2,9 @@
 #define __OPTION_DESCRIPTIONS_H__
 
 #include <memory>
+#include <optional>
 #include <vector>
 
-#include <boost/optional/optional.hpp>
 #include <boost/program_options.hpp>
 
 #include "log/assertions.h"
@@ -318,7 +318,7 @@ class OptionDescriptions {
     boost::program_options::options_description_easy_init m_descriptions;
 
     std::map<std::string, std::unique_ptr<OptionBase>> m_options;
-    boost::optional<std::string> m_positional;
+    std::optional<std::string> m_positional;
 };
 } // namespace config
 } // namespace execHelper

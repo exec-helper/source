@@ -1,9 +1,8 @@
 #ifndef CONFIG_FILE_SEARCHER_INCLUDE
 #define CONFIG_FILE_SEARCHER_INCLUDE
 
+#include <optional>
 #include <vector>
-
-#include <boost/optional/optional.hpp>
 
 #include "path.h"
 
@@ -27,9 +26,9 @@ class ConfigFileSearcher {
      *
      * \param[in] filename The filename to look for in the given search paths
      * \returns The path in search path with the highest importance under which
-     * the filename was found. boost::none Otherwise
+     * the filename was found. std::nullopt Otherwise
      */
-    boost::optional<Path> find(const Path& filename) noexcept;
+    std::optional<Path> find(const Path& filename) noexcept;
 
   private:
     /**

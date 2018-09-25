@@ -3,8 +3,6 @@
 #include <vector>
 
 #include "unittest/catch.h"
-#include <boost/optional/optional.hpp>
-#include <boost/optional/optional_io.hpp>
 
 #include "config/environment.h"
 #include "config/variablesMap.h"

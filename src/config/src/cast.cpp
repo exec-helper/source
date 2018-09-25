@@ -3,8 +3,6 @@
 using std::string;
 using std::vector;
 
-using boost::optional;
-
 namespace execHelper {
 namespace config {
 namespace detail {

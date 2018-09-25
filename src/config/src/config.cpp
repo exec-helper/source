@@ -10,9 +10,9 @@
 #include "patternsHandler.h"
 #include "variablesMap.h"
 
+using std::optional;
 using std::string;
 
-using boost::optional;
 using gsl::czstring;
 
 using execHelper::config::Patterns;
@@ -40,7 +40,7 @@ Patterns processPatterns(const SettingsNode& settings) noexcept {
             if(!newPattern) {
                 continue;
             }
-            result.emplace_back(newPattern.get());
+            result.emplace_back(newPattern.value());
         }
     }
     return result;
@@ -55,7 +55,7 @@ optional<PatternSettingsPair> parseSettingsFile(const Path& file) noexcept {
     Yaml yaml(file);
     if(!yaml.getTree({}, &configuration)) {
         LOG(error) << "Could not get settings tree";
-        return boost::none;
+        return std::nullopt;
     }
 
     Patterns patterns = processPatterns(configuration);

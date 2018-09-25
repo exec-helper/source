@@ -107,7 +107,7 @@ inline void ExecutePlugin::index(VariablesMap* variables,
     }
 
     expects(!key.empty());
-    variables->replace(key.back(), settings.get<SettingsValues>(key).get());
+    variables->replace(key.back(), settings.get<SettingsValues>(key).value());
 
     // Get current depth to the level of the given key
     const SettingsNode* currentDepth = &settings;
@@ -186,7 +186,7 @@ ExecutePlugin::getNextStep(const Command& command,
             << command << "' command";
         return unique_ptr<Plugin>();
     }
-    auto commandsToExecute = commandToExecuteOpt.get();
+    auto commandsToExecute = commandToExecuteOpt.value();
     for(const auto& commandToExecute : commandsToExecute) {
         LOG(trace) << command << " -> " << commandToExecute;
     }

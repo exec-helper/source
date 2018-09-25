@@ -106,13 +106,13 @@ SCENARIO("Test multiple configurations of the lcov plugin", "[lcov]") {
         VariablesMap variables = plugin.getVariablesMap(FleetingOptionsStub());
 
         CommandCollection runCommands({MEMORY_KEY});
-        auto infoFile = variables.get<Path>(INFO_FILE_KEY).get();
-        auto baseDir = variables.get<Path>(BASE_DIR_KEY).get();
-        auto dir = variables.get<Path>(DIR_KEY).get();
+        auto infoFile = variables.get<Path>(INFO_FILE_KEY).value();
+        auto baseDir = variables.get<Path>(BASE_DIR_KEY).value();
+        auto dir = variables.get<Path>(DIR_KEY).value();
         CommandLineArgs commandLine;
         bool zeroCounters = false;
         bool genHtml = false;
-        Path genHtmlOutput = variables.get<Path>(GEN_HTML_OUTPUT_KEY).get();
+        Path genHtmlOutput = variables.get<Path>(GEN_HTML_OUTPUT_KEY).value();
         string genHtmlTitle("Hello");
         CommandLineArgs genHtmlCommandLine;
         vector<string> excludes;

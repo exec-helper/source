@@ -131,12 +131,12 @@ string convertToConfig(const Patterns& patterns) noexcept {
             const auto shortOption = pattern.getShortOption();
             if(shortOption) {
                 stream << convertToConfig("short-option",
-                                          string(1U, shortOption.get()),
+                                          string(1U, shortOption.value()),
                                           patternNestedCharacter);
             }
             const auto longOption = pattern.getLongOption();
             if(longOption) {
-                stream << convertToConfig("long-option", longOption.get(),
+                stream << convertToConfig("long-option", longOption.value(),
                                           patternNestedCharacter);
             }
             stream << convertToConfig("values", pattern.getValues(),
@@ -207,14 +207,14 @@ YamlWriter toYaml(const SettingsNode& settings,
             const auto longOption = pattern.getLongOption();
             if(longOption) {
                 yaml[patternKey][pattern.getKey()]["long-option"] =
-                    longOption.get();
+                    longOption.value();
             }
             yaml[patternKey][pattern.getKey()]["default-values"] =
                 pattern.getValues();
             const auto shortOption = pattern.getShortOption();
             if(shortOption) {
                 yaml[patternKey][pattern.getKey()]["short-option"] =
-                    shortOption.get();
+                    shortOption.value();
             }
         }
         const auto settingsValues =
@@ -308,7 +308,7 @@ string toString(const SettingsNode& settings, unsigned int nbOfTabs) noexcept {
     } else {
         result += ":\n";
     }
-    for(const auto& value : settingsValues.get()) {
+    for(const auto& value : settingsValues.value()) {
         result += toString(settings[value], nbOfTabs + 1);
     }
     return result;

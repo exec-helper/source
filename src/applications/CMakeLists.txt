@@ -7,7 +7,6 @@ set(SRCS
 set(DEPENDENCIES
         dl
         filesystem
-        boost-optional
         log
         core
         commander

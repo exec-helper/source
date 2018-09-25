@@ -98,7 +98,7 @@ SCENARIO("Testing the configuration settings of the scons plugin", "[scons]") {
         Path workingDir(".");
         CommandLineArgs commandLine;
         bool verbosity = false;
-        auto jobs = variables.get<Jobs>(JOBS_KEY).get();
+        auto jobs = variables.get<Jobs>(JOBS_KEY).value();
 
         ExecutorStub executor;
         ExecuteCallback executeCallback = [&executor](const Task& task) {

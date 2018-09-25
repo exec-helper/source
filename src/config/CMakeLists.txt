@@ -17,7 +17,6 @@ set(SRCS    src/settingsNode.cpp
 
 set(DEPENDENCIES
         filesystem
-        boost-optional
         log
         yaml
    )

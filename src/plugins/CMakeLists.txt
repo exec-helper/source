@@ -23,7 +23,6 @@ set(SRCS
    )
 
 set(DEPENDENCIES
-        boost-optional
         log
         config
         core

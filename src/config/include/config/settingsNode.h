@@ -2,10 +2,9 @@
 #define __SETTINGS_NODE_H__
 
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
-
-#include <boost/optional/optional.hpp>
 
 #include "cast.h"
 
@@ -122,21 +121,21 @@ class SettingsNode {
      *              boost::none otherwise
      */
     template <typename T>
-    boost::optional<T> get(const SettingsKeys& key) const noexcept {
+    std::optional<T> get(const SettingsKeys& key) const noexcept {
         if(!contains(key)) {
-            return boost::none;
+            return std::nullopt;
         }
         auto valuesOpt = at(key)->values();
         if(!valuesOpt) {
-            return boost::none;
+            return std::nullopt;
         }
-        return detail::Cast<T, SettingsValues>::cast(valuesOpt.get());
+        return detail::Cast<T, SettingsValues>::cast(valuesOpt.value());
     }
 
     /*! @copydoc get(const SettingsKeys&) const
      */
     template <typename T>
-    inline boost::optional<T> get(const SettingsKey& key) const noexcept {
+    inline std::optional<T> get(const SettingsKey& key) const noexcept {
         return get<T>(SettingsKeys({key}));
     }
 
@@ -151,11 +150,7 @@ class SettingsNode {
      */
     template <typename T>
     T get(const SettingsKeys& key, const T& defaultValue) const noexcept {
-        const auto& result = get<T>(key);
-        if(result) {
-            return result.get();
-        }
-        return defaultValue;
+        return get<T>(key).value_or(defaultValue);
     }
 
     /*! @copydoc get(const SettingsKeys&, const T& defaultValue) const
@@ -316,7 +311,7 @@ class SettingsNode {
      * \returns The associated values if there are values associated with the root of this node
      *          boost::none otherwise
      */
-    boost::optional<SettingsValues> values() const noexcept;
+    std::optional<SettingsValues> values() const noexcept;
 
     SettingsKey m_key; //!< The root key associated with this node
     std::unique_ptr<SettingsNodeCollection>

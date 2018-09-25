@@ -1,7 +1,6 @@
 #include <algorithm>
 #include <string>
 
-#include <boost/optional/optional_io.hpp>
 #include <gsl/string_span>
 
 #include "config/config.h"
@@ -97,7 +96,7 @@ SCENARIO("Parse properly written settings files", "[config][config-config]") {
                 newValue.append(to_string(i));
 
                 patterns.emplace_back(
-                    Pattern(newKey, {newValue}, boost::none, newKey));
+                    Pattern(newKey, {newValue}, std::nullopt, newKey));
             }
         }
 
@@ -107,12 +106,12 @@ SCENARIO("Parse properly written settings files", "[config][config-config]") {
         auto parsedSettingsFile = parseSettingsFile(configFile.getPath());
 
         THEN_CHECK("It must succeed") {
-            REQUIRE(parsedSettingsFile != boost::none);
+            REQUIRE(parsedSettingsFile != std::nullopt);
         }
 
         THEN_CHECK("We must find the proper settings and patterns") {
-            auto foundPatterns = parsedSettingsFile.get().first;
-            auto foundSettings = parsedSettingsFile.get().second;
+            auto foundPatterns = parsedSettingsFile.value().first;
+            auto foundSettings = parsedSettingsFile.value().second;
 
             REQUIRE(foundSettings == settings);
 

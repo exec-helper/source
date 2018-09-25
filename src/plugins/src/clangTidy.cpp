@@ -47,19 +47,19 @@ bool ClangTidy::apply(Task task, const VariablesMap& variables,
 
     auto checks = variables.get<Checks>(CHECKS_KEY);
     if(checks) {
-        task.append(getChecks(checks.get()));
+        task.append(getChecks(checks.value()));
     }
 
     auto warningAsError = variables.get<WarningAsError>(WARNING_AS_ERROR_KEY);
     if(warningAsError) {
-        task.append(getWarningAsError(warningAsError.get(),
+        task.append(getWarningAsError(warningAsError.value(),
                                       variables.get<Checks>(CHECKS_KEY, {})));
     }
 
-    task.append(variables.get<CommandLineArgs>(COMMAND_LINE_KEY).get());
+    task.append(variables.get<CommandLineArgs>(COMMAND_LINE_KEY).value());
 
-    ensures(variables.get<Sources>(SOURCES_KEY) != boost::none);
-    task.append(variables.get<Sources>(SOURCES_KEY).get());
+    ensures(variables.get<Sources>(SOURCES_KEY) != std::nullopt);
+    task.append(variables.get<Sources>(SOURCES_KEY).value());
 
     for(const auto& combination : makePatternPermutator(patterns)) {
         Task newTask = replacePatternCombinations(task, combination);

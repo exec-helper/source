@@ -39,8 +39,8 @@ VariablesMap CommandPlugin::getVariablesMap(
 
 bool CommandPlugin::apply(Task task, const VariablesMap& variables,
                           const Patterns& patterns) const noexcept {
-    ensures(variables.get<CommandCollection>(PLUGIN_NAME) != boost::none);
-    auto commands = variables.get<CommandCollection>(PLUGIN_NAME).get();
+    ensures(variables.get<CommandCollection>(PLUGIN_NAME) != std::nullopt);
+    auto commands = variables.get<CommandCollection>(PLUGIN_NAME).value();
     ExecutePlugin executePlugin(commands);
     return executePlugin.apply(task, variables, patterns);
 }

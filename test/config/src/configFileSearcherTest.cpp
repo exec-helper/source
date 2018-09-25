@@ -1,11 +1,7 @@
-#include <filesystem>
-#include <fstream>
-
-#include <boost/optional/optional.hpp>
-#include <boost/optional/optional_io.hpp>
-
 #include "config/configFileSearcher.h"
 #include "unittest/catch.h"
+#include <filesystem>
+#include <fstream>
 
 using std::ofstream;
 using std::string;
@@ -45,10 +41,9 @@ SCENARIO("Test the config file searcher", "[config][config-file-searcher]") {
                 file.close();
 
                 THEN("It should find it") {
-                    boost::optional<Path> result =
-                        configFileSearcher.find(settingsFile);
-                    REQUIRE(result != boost::none);
-                    REQUIRE(result.get() == filename);
+                    auto result = configFileSearcher.find(settingsFile);
+                    REQUIRE(result != std::nullopt);
+                    REQUIRE(result.value() == filename);
                 }
             }
 
@@ -60,9 +55,8 @@ SCENARIO("Test the config file searcher", "[config][config-file-searcher]") {
 
         WHEN("We do not write the settings file") {
             THEN("It should not find it") {
-                boost::optional<Path> result =
-                    configFileSearcher.find(settingsFile);
-                REQUIRE(result == boost::none);
+                auto result = configFileSearcher.find(settingsFile);
+                REQUIRE(result == std::nullopt);
             }
         }
     }

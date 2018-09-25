@@ -129,7 +129,7 @@ SCENARIO("Make combinations of different configurations for the pmd plugin",
             if(variables.get<Tool>(TOOL_KEY) == Tool("cpd")) {
                 minimumTokens.emplace_back("--minimum-tokens");
                 minimumTokens.emplace_back(
-                    variables.get<MinimumTokens>(MINIMUM_TOKENS_KEY).get());
+                    variables.get<MinimumTokens>(MINIMUM_TOKENS_KEY).value());
             }
         }
 
@@ -148,7 +148,7 @@ SCENARIO("Make combinations of different configurations for the pmd plugin",
         COMBINATIONS("Add a language") {
             variables.replace(LANGUAGE_KEY, "language1");
             language.emplace_back("--language");
-            language.push_back(variables.get<Language>(LANGUAGE_KEY).get());
+            language.push_back(variables.get<Language>(LANGUAGE_KEY).value());
         }
 
         COMBINATIONS("Add a command line") {
@@ -162,8 +162,8 @@ SCENARIO("Make combinations of different configurations for the pmd plugin",
             verbosity.emplace_back("-verbose");
         }
 
-        string binaryName(variables.get<Exec>(EXEC_KEY).get());
-        binaryName.append("-").append(variables.get<Tool>(TOOL_KEY).get());
+        string binaryName(variables.get<Exec>(EXEC_KEY).value());
+        binaryName.append("-").append(variables.get<Tool>(TOOL_KEY).value());
         expectedTask.append(binaryName);
         expectedTask.append(language);
         expectedTask.append(verbosity);

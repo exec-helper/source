@@ -29,11 +29,11 @@ Paths getAllParentDirectories(Path path) noexcept {
     return parentPaths;
 }
 
-boost::optional<Path>
+std::optional<Path>
 getHomeDirectory(const EnvironmentCollection& env) noexcept {
     const string HOME_DIR_KEY("HOME");
     if(env.count(HOME_DIR_KEY) == 0) {
-        return boost::none;
+        return std::nullopt;
     }
     return Path(env.at(HOME_DIR_KEY));
 }

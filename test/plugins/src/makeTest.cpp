@@ -103,8 +103,8 @@ SCENARIO("Testing the configuration settings of the make plugin", "[make]") {
         Make plugin;
         VariablesMap variables = plugin.getVariablesMap(FleetingOptionsStub());
 
-        auto jobs = variables.get<Jobs>(JOBS_KEY).get();
-        Path buildDir = variables.get<Path>(BUILD_DIR_KEY).get();
+        auto jobs = variables.get<Jobs>(JOBS_KEY).value();
+        Path buildDir = variables.get<Path>(BUILD_DIR_KEY).value();
         bool verbosity = false;
         CommandLineArgs commandLine;
         EnvironmentCollection env;

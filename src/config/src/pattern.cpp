@@ -4,8 +4,6 @@
 #include <regex>
 #include <utility>
 
-#include <boost/optional/optional_io.hpp>
-
 using std::move;
 using std::ostream;
 using std::regex;
@@ -53,11 +51,11 @@ ostream& operator<<(ostream& os, const Pattern& pattern) noexcept {
     os << "{" << pattern.getKey() << ": ";
     auto shortOption = pattern.getShortOption();
     if(shortOption) {
-        os << "short option: " << shortOption.get() << ", ";
+        os << "short option: " << shortOption.value() << ", ";
     }
     auto longOption = pattern.getLongOption();
     if(longOption) {
-        os << "long option: " << longOption.get() << ", ";
+        os << "long option: " << longOption.value() << ", ";
     }
     os << "values: {";
     for(const auto& value : pattern.getValues()) {

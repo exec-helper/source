@@ -86,8 +86,9 @@ SCENARIO("Test the combination of several settings for the bootstrap plugin",
 
         Task expectedTask;
 
-        auto runCommand = variables.get<Path>(FILENAME_KEY).get();
-        auto buildDir = variables.get<Path>(Bootstrap::getBuildDirKey()).get();
+        auto runCommand = variables.get<Path>(FILENAME_KEY).value();
+        auto buildDir =
+            variables.get<Path>(Bootstrap::getBuildDirKey()).value();
         CommandLineArgs commandLine;
 
         ExecutorStub executor;

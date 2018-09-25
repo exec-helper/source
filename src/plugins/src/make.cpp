@@ -57,19 +57,19 @@ Make::getVariablesMap(const FleetingOptionsInterface& fleetingOptions) const
 bool Make::apply(core::Task task, const config::VariablesMap& variables,
                  const config::Patterns& patterns) const noexcept {
     task.append(MAKE_KEY);
-    task.append(
-        {"--directory", variables.get<Path>(getBuildDirKey()).get().native()});
-    task.append({"--jobs", to_string(variables.get<Jobs>(JOBS_KEY).get())});
+    task.append({"--directory",
+                 variables.get<Path>(getBuildDirKey()).value().native()});
+    task.append({"--jobs", to_string(variables.get<Jobs>(JOBS_KEY).value())});
 
-    if(variables.get<Verbosity>(VERBOSITY_KEY).get()) {
+    if(variables.get<Verbosity>(VERBOSITY_KEY).value()) {
         task.append("--debug");
     }
-    task.append(variables.get<CommandLineArgs>(COMMAND_LINE_KEY).get());
+    task.append(variables.get<CommandLineArgs>(COMMAND_LINE_KEY).value());
     task.appendToEnvironment(getEnvironment(variables));
 
     auto workingDir = variables.get<WorkingDir>(WORKING_DIR_KEY);
     if(workingDir) {
-        task.setWorkingDirectory(workingDir.get());
+        task.setWorkingDirectory(workingDir.value());
     }
 
     for(const auto& combination : makePatternPermutator(patterns)) {

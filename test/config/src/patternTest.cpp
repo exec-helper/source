@@ -1,16 +1,13 @@
+#include <optional>
 #include <sstream>
 #include <string>
-
-#include <boost/optional/optional.hpp>
-#include <boost/optional/optional_io.hpp>
 
 #include "config/pattern.h"
 #include "unittest/catch.h"
 
+using std::make_optional;
 using std::string;
 using std::stringstream;
-
-using boost::optional;
 
 using execHelper::config::Pattern;
 using execHelper::config::PatternValues;
@@ -22,8 +19,8 @@ SCENARIO("Test the pattern properties", "[patterns][Pattern]") {
     MAKE_COMBINATIONS("Some pattern properties") {
         const string key("key1");
         const PatternValues values({"value1a", "value1b"});
-        optional<char> shortOption = boost::none;
-        optional<string> longOption = boost::none;
+        auto shortOption = make_optional<char>();
+        auto longOption = make_optional<string>();
 
         COMBINATIONS("Leave them as is") { ; }
 
@@ -39,13 +36,13 @@ SCENARIO("Test the pattern properties", "[patterns][Pattern]") {
                 REQUIRE(pattern.getValues() == values);
                 if(longOption) {
                     REQUIRE(pattern.getLongOption());
-                    REQUIRE(pattern.getLongOption().get() == longOption);
+                    REQUIRE(pattern.getLongOption().value() == longOption);
                 } else {
                     REQUIRE(pattern.getLongOption() == longOption);
                 }
                 if(shortOption) {
                     REQUIRE(pattern.getShortOption());
-                    REQUIRE(pattern.getShortOption().get() == shortOption);
+                    REQUIRE(pattern.getShortOption().value() == shortOption);
                 } else {
                     REQUIRE(pattern.getShortOption() == shortOption);
                 }
@@ -59,13 +56,13 @@ SCENARIO("Test the pattern properties", "[patterns][Pattern]") {
         const string longOption;
 
         WHEN("We create the pattern") {
-            Pattern pattern(key, values, boost::none, longOption);
+            Pattern pattern(key, values, std::nullopt, longOption);
 
             THEN("We should find these properties") {
                 REQUIRE(pattern.getKey() == key);
                 REQUIRE(pattern.getValues() == values);
                 REQUIRE(pattern.getLongOption() == longOption);
-                REQUIRE(pattern.getShortOption() == boost::none);
+                REQUIRE(pattern.getShortOption() == std::nullopt);
             }
         }
     }
@@ -135,10 +132,11 @@ SCENARIO("Test the pattern streaming operator", "[patterns][Pattern]") {
                 stringstream expectedStream;
                 expectedStream << "{" << pattern.getKey() << ": ";
                 expectedStream
-                    << "short option: " << pattern.getShortOption().get()
+                    << "short option: " << pattern.getShortOption().value()
                     << ", ";
                 expectedStream
-                    << "long option: " << pattern.getLongOption().get() << ", ";
+                    << "long option: " << pattern.getLongOption().value()
+                    << ", ";
                 expectedStream << "values: {";
                 for(const auto& value : pattern.getValues()) {
                     expectedStream << value << ";";
@@ -150,7 +148,7 @@ SCENARIO("Test the pattern streaming operator", "[patterns][Pattern]") {
         }
     }
     GIVEN("A configured object with no short option to stream") {
-        Pattern pattern("pattern-key", {"value1", "value2"}, boost::none,
+        Pattern pattern("pattern-key", {"value1", "value2"}, std::nullopt,
                         string("long-option"));
 
         stringstream stream;
@@ -162,7 +160,8 @@ SCENARIO("Test the pattern streaming operator", "[patterns][Pattern]") {
                 stringstream expectedStream;
                 expectedStream << "{" << pattern.getKey() << ": ";
                 expectedStream
-                    << "long option: " << pattern.getLongOption().get() << ", ";
+                    << "long option: " << pattern.getLongOption().value()
+                    << ", ";
                 expectedStream << "values: {";
                 for(const auto& value : pattern.getValues()) {
                     expectedStream << value << ";";

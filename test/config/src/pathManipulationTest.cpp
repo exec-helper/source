@@ -1,8 +1,6 @@
 #include <algorithm>
 #include <filesystem>
 
-#include <boost/optional/optional_io.hpp>
-
 #include "base-utils/generateRandom.h"
 #include "base-utils/tmpFile.h"
 #include "config/pathManipulation.h"
@@ -106,11 +104,11 @@ SCENARIO("Test getting the home directory", "[config][path-manipulation]") {
             auto result = getHomeDirectory(env);
 
             THEN("The result should not be none") {
-                REQUIRE(result != boost::none);
+                REQUIRE(result != std::nullopt);
             }
 
             THEN("The result should be equal to the chosen home directory") {
-                REQUIRE(result.get() == env.at(HOME_KEY));
+                REQUIRE(result.value() == env.at(HOME_KEY));
             }
         }
     }
@@ -122,7 +120,7 @@ SCENARIO("Test getting the home directory", "[config][path-manipulation]") {
             auto result = getHomeDirectory(env);
 
             THEN("The result should be none") {
-                REQUIRE(result == boost::none);
+                REQUIRE(result == std::nullopt);
             }
         }
     }

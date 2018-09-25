@@ -55,21 +55,21 @@ bool ClangStaticAnalyzer::apply(core::Task task,
     noexcept {
     task.append(BIN_NAME);
     auto buildCommand = variables.get<BuildCommands>(BUILD_COMMANDS_KEY);
-    if(!buildCommand || buildCommand.get().empty()) {
+    if(!buildCommand || buildCommand.value().empty()) {
         user_feedback_error(
             "You must define at least one build command for the "
             << PLUGIN_NAME << " plugin.");
         return false;
     }
 
-    ensures(variables.get<Verbosity>(VERBOSITY_KEY) != boost::none);
-    if(variables.get<Verbosity>(VERBOSITY_KEY).get()) {
+    ensures(variables.get<Verbosity>(VERBOSITY_KEY) != std::nullopt);
+    if(variables.get<Verbosity>(VERBOSITY_KEY).value()) {
         task.append("-v");
     }
-    ensures(variables.get<CommandLineArgs>(COMMAND_LINE_KEY) != boost::none);
-    task.append(variables.get<CommandLineArgs>(COMMAND_LINE_KEY).get());
+    ensures(variables.get<CommandLineArgs>(COMMAND_LINE_KEY) != std::nullopt);
+    task.append(variables.get<CommandLineArgs>(COMMAND_LINE_KEY).value());
 
-    ExecutePlugin buildExecutePlugin(buildCommand.get());
+    ExecutePlugin buildExecutePlugin(buildCommand.value());
     return buildExecutePlugin.apply(task, variables, patterns);
 }
 } // namespace plugins

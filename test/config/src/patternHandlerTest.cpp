@@ -1,7 +1,6 @@
 #include <iostream>
 #include <vector>
 
-#include <boost/optional/optional_io.hpp>
 #include <gsl/string_span>
 
 #include "config/patternsHandler.h"
@@ -183,12 +182,12 @@ SCENARIO("Test valid conversions to a pattern", "[patterns][PatternHandler]") {
 
         COMBINATIONS("Add a short option") {
             shortOption = 's';
-            variables.add({SHORT_OPTION_KEY}, string(1, shortOption.get()));
+            variables.add({SHORT_OPTION_KEY}, string(1, shortOption.value()));
         }
 
         COMBINATIONS("Add a long option") {
             longOption = "some-long-option";
-            variables.add({LONG_OPTION_KEY}, longOption.get());
+            variables.add({LONG_OPTION_KEY}, longOption.value());
         }
 
         Pattern expectedPattern(key, defaultValues, shortOption, longOption);
@@ -197,7 +196,7 @@ SCENARIO("Test valid conversions to a pattern", "[patterns][PatternHandler]") {
             auto actualPattern = PatternsHandler::toPattern(key, variables);
 
             THEN_CHECK("It should succeed") {
-                REQUIRE(actualPattern != boost::none);
+                REQUIRE(actualPattern != std::nullopt);
             }
 
             THEN_CHECK("We should find the expected pattern") {
@@ -229,7 +228,9 @@ SCENARIO("Test invalid conversions to a pattern",
         THEN_WHEN("We try to create a pattern") {
             auto returnCode = PatternsHandler::toPattern(key, variables);
 
-            THEN_CHECK("It should fail") { REQUIRE(returnCode == boost::none); }
+            THEN_CHECK("It should fail") {
+                REQUIRE(returnCode == std::nullopt);
+            }
         }
     }
 }

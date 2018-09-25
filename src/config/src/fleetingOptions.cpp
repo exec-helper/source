@@ -15,14 +15,16 @@ using execHelper::log::LogLevel;
 namespace execHelper {
 namespace config {
 FleetingOptions::FleetingOptions(const VariablesMap& optionsMap) noexcept
-    : m_help(optionsMap.get<HelpOption_t>(HELP_KEY).get()),
-      m_version(optionsMap.get<VersionOption_t>(VERSION_KEY).get()),
-      m_verbose(optionsMap.get<VerboseOption_t>(VERBOSE_KEY).get()),
-      m_dryRun(optionsMap.get<DryRunOption_t>(DRY_RUN_KEY).get()),
+    : m_help(optionsMap.get<HelpOption_t>(HELP_KEY).value_or(false)),
+      m_version(optionsMap.get<VersionOption_t>(VERSION_KEY).value_or(false)),
+      m_verbose(optionsMap.get<VerboseOption_t>(VERBOSE_KEY).value_or(false)),
+      m_dryRun(optionsMap.get<DryRunOption_t>(DRY_RUN_KEY).value_or(false)),
       m_jobs(1U),
-      m_logLevel(optionsMap.get<LogLevelOption_t>(LOG_LEVEL_KEY).get()),
-      m_commands(optionsMap.get<CommandCollection>(COMMAND_KEY).get()) {
-    auto jobs = optionsMap.get<JobsOption_t>(JOBS_KEY).get();
+      m_logLevel(
+          optionsMap.get<LogLevelOption_t>(LOG_LEVEL_KEY).value_or("warning")),
+      m_commands(optionsMap.get<CommandCollection>(COMMAND_KEY)
+                     .value_or(CommandCollection())) {
+    auto jobs = optionsMap.get<JobsOption_t>(JOBS_KEY).value_or("auto");
     if(jobs == "auto") {
         m_jobs = thread::hardware_concurrency();
     } else {

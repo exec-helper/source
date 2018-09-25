@@ -18,9 +18,6 @@ add_library(${BOOST_LIBRARY} INTERFACE)
 target_include_directories(${BOOST_LIBRARY} SYSTEM INTERFACE ${Boost_INCLUDE_DIRS})
 target_link_libraries(${BOOST_LIBRARY} INTERFACE ${Boost_SYSTEM_LIBRARY})
 
-# boost optional
-add_library(boost-optional ALIAS boost-system)
-
 # boost thread
 set(BOOST_LIBRARY boost-thread)
 add_library(${BOOST_LIBRARY} INTERFACE)

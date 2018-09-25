@@ -1,13 +1,14 @@
 #include "patternsHandler.h"
 
-#include <log/assertions.h>
 #include <string>
+
+#include <log/assertions.h>
 
 #include "logger.h"
 
 using std::string;
 
-using boost::optional;
+using std::optional;
 
 namespace execHelper {
 namespace config {
@@ -59,15 +60,15 @@ PatternsHandler::toPattern(const PatternKey& key,
     static const string LONG_OPTION_KEY("long-option");
 
     auto defaultValues = patternMap.get<PatternValues>(DEFAULT_VALUES_KEY);
-    if(defaultValues == boost::none || defaultValues.get().empty()) {
+    if(defaultValues == std::nullopt || defaultValues.value().empty()) {
         user_feedback_error(
             "The default values must be defined and can not be empty");
-        return boost::none;
+        return std::nullopt;
     }
 
     auto shortOption = patternMap.get<char>(SHORT_OPTION_KEY);
     auto longOptionOpt = patternMap.get<string>(LONG_OPTION_KEY);
-    return Pattern(key, defaultValues.get(), shortOption, longOptionOpt);
+    return Pattern(key, defaultValues.value(), shortOption, longOptionOpt);
 }
 } // namespace config
 } // namespace execHelper

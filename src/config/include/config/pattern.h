@@ -2,10 +2,9 @@
 #define __PATTERN_H__
 
 #include <map>
+#include <optional>
 #include <string>
 #include <vector>
-
-#include <boost/optional/optional.hpp>
 
 namespace execHelper {
 namespace config {
@@ -13,8 +12,8 @@ using PatternKey = std::string;
 using PatternValue = std::string;
 using PatternKeys = std::vector<PatternKey>;
 using PatternValues = std::vector<PatternValue>;
-using ShortOption = boost::optional<char>;
-using LongOption = boost::optional<std::string>;
+using ShortOption = std::optional<char>;
+using LongOption = std::optional<std::string>;
 
 using PatternCombinations = std::map<PatternKey, PatternValue>;
 
@@ -32,8 +31,8 @@ class Pattern {
      * \param[in] longOption    The long option associated with the pattern
      */
     Pattern(PatternKey patternKey, PatternValues values = {},
-            ShortOption shortOption = boost::none,
-            LongOption longOption = boost::none) noexcept;
+            ShortOption shortOption = std::nullopt,
+            LongOption longOption = std::nullopt) noexcept;
 
     /**
      * Equality operator

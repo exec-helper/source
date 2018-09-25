@@ -47,7 +47,7 @@ bool Selector::apply(Task task, const VariablesMap& variables,
                             << PLUGIN_NAME << " settings");
         return false;
     }
-    LOG(debug) << "Using the patterns '" << toString(patternKeys.get())
+    LOG(debug) << "Using the patterns '" << toString(patternKeys.value())
                << "' for selecting";
 
     CommandCollection commandsToExecute;

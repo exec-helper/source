@@ -4,8 +4,6 @@
 #include <ostream>
 #include <string>
 
-#include <boost/optional/optional.hpp>
-
 #include "config/commandLineOptions.h"
 #include "config/path.h"
 #include "config/pattern.h"

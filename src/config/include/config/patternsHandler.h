@@ -2,8 +2,7 @@
 #define __PATTERNS_HANDLER_H__
 
 #include <map>
-
-#include <boost/optional/optional.hpp>
+#include <optional>
 
 #include "config/variablesMap.h"
 
@@ -78,7 +77,7 @@ class PatternsHandler {
      * pattern to create \returns The created pattern if the variables map is
      * valid boost::none otherwise
      */
-    static boost::optional<Pattern>
+    static std::optional<Pattern>
     toPattern(const PatternKey& key,
               const config::VariablesMap& patternMap) noexcept;
 

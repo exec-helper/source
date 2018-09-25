@@ -56,34 +56,34 @@ Pmd::getVariablesMap(const FleetingOptionsInterface& fleetingOptions) const
 
 bool Pmd::apply(Task task, const VariablesMap& variables,
                 const Patterns& patterns) const noexcept {
-    auto binaryName = variables.get<string>(EXEC_KEY).get();
-    auto tool = variables.get<string>(TOOL_KEY).get();
+    auto binaryName = variables.get<string>(EXEC_KEY).value();
+    auto tool = variables.get<string>(TOOL_KEY).value();
     binaryName.append("-").append(tool);
     task.append(binaryName);
 
     auto language = variables.get<string>(LANGUAGE_KEY);
     if(language) {
-        task.append({"--language", language.get()});
+        task.append({"--language", language.value()});
     }
 
-    if(variables.get<string>(VERBOSITY_KEY).get() == "yes") {
+    if(variables.get<string>(VERBOSITY_KEY).value() == "yes") {
         task.append("-verbose");
     }
 
     if(tool == "cpd") {
         auto minimumTokens = variables.get<MinimumTokens>(MINIMUM_TOKENS_KEY);
         if(minimumTokens) {
-            task.append({"--minimum-tokens", minimumTokens.get()});
+            task.append({"--minimum-tokens", minimumTokens.value()});
         }
 
         auto files = variables.get<Files>(FILES_KEY);
         if(files) {
-            for(const auto& file : files.get()) {
+            for(const auto& file : files.value()) {
                 task.append({"--files", file});
             }
         }
     }
-    task.append(variables.get<CommandLineArgs>(COMMAND_LINE_KEY).get());
+    task.append(variables.get<CommandLineArgs>(COMMAND_LINE_KEY).value());
 
     for(const auto& combination : makePatternPermutator(patterns)) {
         Task newTask = replacePatternCombinations(task, combination);

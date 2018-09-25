@@ -91,11 +91,7 @@ EnvironmentCollection getEnvironment(const VariablesMap& variables) noexcept {
     EnvironmentCollection result;
     SettingsKeys key({ENVIRONMENT_KEY});
     auto environmentOpt = variables.get<vector<string>>(key);
-    if(!environmentOpt) {
-        return result;
-    }
-
-    for(auto variableName : environmentOpt.get()) {
+    for(auto variableName : environmentOpt.value_or(vector<string>())) {
         auto variableValueOpt =
             variables.get<string>({ENVIRONMENT_KEY, variableName});
         if(!variableValueOpt) {
@@ -103,7 +99,7 @@ EnvironmentCollection getEnvironment(const VariablesMap& variables) noexcept {
                          << "' does not have an associated value. Ignoring it.";
             continue;
         }
-        result.emplace(variableName, move(variableValueOpt.get()));
+        result.emplace(variableName, move(variableValueOpt.value()));
     }
     return result;
 }

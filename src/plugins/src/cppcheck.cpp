@@ -62,19 +62,19 @@ bool Cppcheck::apply(Task task, const VariablesMap& variables,
 
     task.append(getEnabledChecks(variables));
 
-    ensures(variables.get<Verbosity>(VERBOSITY_KEY) != boost::none);
-    if(variables.get<Verbosity>(VERBOSITY_KEY).get()) {
+    ensures(variables.get<Verbosity>(VERBOSITY_KEY) != std::nullopt);
+    if(variables.get<Verbosity>(VERBOSITY_KEY).value()) {
         task.append("--verbose");
     }
 
-    ensures(variables.get<Jobs>(JOBS_KEY) != boost::none);
-    task.append({"-j", to_string(variables.get<Jobs>(JOBS_KEY).get())});
+    ensures(variables.get<Jobs>(JOBS_KEY) != std::nullopt);
+    task.append({"-j", to_string(variables.get<Jobs>(JOBS_KEY).value())});
 
-    ensures(variables.get<CommandLineArgs>(COMMAND_LINE_KEY) != boost::none);
-    task.append(variables.get<CommandLineArgs>(COMMAND_LINE_KEY).get());
+    ensures(variables.get<CommandLineArgs>(COMMAND_LINE_KEY) != std::nullopt);
+    task.append(variables.get<CommandLineArgs>(COMMAND_LINE_KEY).value());
 
-    ensures(variables.get<SourceDir>(SRC_DIR_KEY) != boost::none);
-    task.append(variables.get<SourceDir>(SRC_DIR_KEY).get());
+    ensures(variables.get<SourceDir>(SRC_DIR_KEY) != std::nullopt);
+    task.append(variables.get<SourceDir>(SRC_DIR_KEY).value());
 
     for(const auto& combination : makePatternPermutator(patterns)) {
         Task newTask = replacePatternCombinations(task, combination);
@@ -86,8 +86,8 @@ bool Cppcheck::apply(Task task, const VariablesMap& variables,
 }
 
 string Cppcheck::getEnabledChecks(const VariablesMap& variables) noexcept {
-    ensures(variables.get<EnableChecks>(ENABLE_CHECKS_KEY) != boost::none);
-    auto enabledChecks = variables.get<EnableChecks>(ENABLE_CHECKS_KEY).get();
+    ensures(variables.get<EnableChecks>(ENABLE_CHECKS_KEY) != std::nullopt);
+    auto enabledChecks = variables.get<EnableChecks>(ENABLE_CHECKS_KEY).value();
 
     string result("--enable=");
     for(size_t i = 0; i < enabledChecks.size() - 1; ++i) {

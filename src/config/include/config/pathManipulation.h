@@ -1,7 +1,7 @@
 #ifndef PATH_MANIPULATION_INCLUDE
 #define PATH_MANIPULATION_INCLUDE
 
-#include <boost/optional/optional.hpp>
+#include <optional>
 
 #include "environment.h"
 #include "path.h"
@@ -22,8 +22,7 @@ Paths getAllParentDirectories(Path path) noexcept;
  * \returns The path to the home directory if it exists
  *          boost::none otherwise
  */
-boost::optional<Path>
-getHomeDirectory(const EnvironmentCollection& env) noexcept;
+std::optional<Path> getHomeDirectory(const EnvironmentCollection& env) noexcept;
 } // namespace config
 } // namespace execHelper
 

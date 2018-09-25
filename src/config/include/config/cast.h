@@ -1,7 +1,7 @@
 #ifndef CAST_INCLUDE
 #define CAST_INCLUDE
 
-#include <boost/optional/optional.hpp>
+#include <optional>
 
 namespace execHelper {
 namespace config {
@@ -18,7 +18,7 @@ template <typename T, typename U> class Cast {
      * \returns T if the values could be casted
      *          boost::none otherwise
      */
-    static boost::optional<T> cast(const U& values) noexcept;
+    static std::optional<T> cast(const U& values) noexcept;
 };
 } // namespace detail
 } // namespace config

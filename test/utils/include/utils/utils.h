@@ -31,7 +31,6 @@ class ConfigFileWriter;
 } // namespace test
 } // namespace execHelper
 
-// Hack required for streaming boost::optional<vector<T>> types
 namespace std {
 template <typename T>
 std::ostream& operator<<(std::ostream& os, const std::vector<T>& stream) {

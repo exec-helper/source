@@ -1,10 +1,9 @@
 #ifndef CONFIG_INCLUDE
 #define CONFIG_INCLUDE
 
+#include <optional>
 #include <string>
 #include <utility>
-
-#include <boost/optional/optional.hpp>
 
 #include "path.h"
 #include "pattern.h"
@@ -20,8 +19,7 @@ namespace execHelper {
 namespace config {
 using PatternSettingsPair = std::pair<Patterns, config::SettingsNode>;
 
-boost::optional<PatternSettingsPair>
-parseSettingsFile(const Path& file) noexcept;
+std::optional<PatternSettingsPair> parseSettingsFile(const Path& file) noexcept;
 } // namespace config
 } // namespace execHelper
 

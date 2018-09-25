@@ -3,8 +3,6 @@
 #include <string>
 #include <vector>
 
-#include <boost/optional/optional_io.hpp>
-
 #include "config/settingsNode.h"
 
 #include "unittest/catch.h"
@@ -25,8 +23,8 @@ using execHelper::test::propertyTest;
 namespace {
 void assertBoolSetting(const SettingsNode& settings, const string& key,
                        bool expected) {
-    REQUIRE(settings.get<bool>(key) != boost::none);
-    REQUIRE(settings.get<bool>(key).get() == expected);
+    REQUIRE(settings.get<bool>(key) != std::nullopt);
+    REQUIRE(settings.get<bool>(key).value() == expected);
     REQUIRE(settings.get<bool>(key, !expected) == expected);
 }
 
@@ -121,70 +119,73 @@ SCENARIO("Basic addition and getting of values", "[config][settingsNode]") {
 
             THEN("We should be able to get the optional values") {
                 REQUIRE(settings.get<SettingsValues>(SettingsKeys()) !=
-                        boost::none);
-                REQUIRE_THAT(settings.get<SettingsValues>(SettingsKeys()).get(),
-                             VectorContains(testValue1));
+                        std::nullopt);
+                REQUIRE_THAT(
+                    settings.get<SettingsValues>(SettingsKeys()).value(),
+                    VectorContains(testValue1));
 
                 REQUIRE(settings.get<SettingsValues>({testValue1}) ==
-                        boost::none);
+                        std::nullopt);
 
                 REQUIRE(settings.get<SettingsValues>({testKey2}) !=
-                        boost::none);
-                REQUIRE(settings.get<SettingsValues>({testKey2}).get() ==
+                        std::nullopt);
+                REQUIRE(settings.get<SettingsValues>({testKey2}).value() ==
                         SettingsValues({testValue2}));
 
                 for(const auto& key : testValue3) {
-                    REQUIRE(settings.get<SettingsValues>({key}) == boost::none);
+                    REQUIRE(settings.get<SettingsValues>({key}) ==
+                            std::nullopt);
                     REQUIRE_THAT(
-                        settings.get<SettingsValues>(SettingsKeys()).get(),
+                        settings.get<SettingsValues>(SettingsKeys()).value(),
                         VectorContains(key));
                 }
 
                 for(const auto& key : testValue4) {
-                    REQUIRE(settings.get<SettingsValues>({key}) == boost::none);
+                    REQUIRE(settings.get<SettingsValues>({key}) ==
+                            std::nullopt);
                     REQUIRE_THAT(
-                        settings.get<SettingsValues>(SettingsKeys()).get(),
+                        settings.get<SettingsValues>(SettingsKeys()).value(),
                         VectorContains(key));
                 }
 
                 REQUIRE(settings.get<SettingsValues>({testKey5}) !=
-                        boost::none);
-                REQUIRE(settings.get<SettingsValues>({testKey5}).get() ==
+                        std::nullopt);
+                REQUIRE(settings.get<SettingsValues>({testKey5}).value() ==
                         testValue5);
 
                 REQUIRE(settings[testKey5].get<SettingsValues>(
-                            SettingsKeys()) != boost::none);
+                            SettingsKeys()) != std::nullopt);
                 REQUIRE(settings[testKey5]
                             .get<SettingsValues>(SettingsKeys())
-                            .get() == testValue5);
+                            .value() == testValue5);
 
                 for(const auto& key : testValue5) {
                     REQUIRE(settings.get<SettingsValues>({testKey5, key}) ==
-                            boost::none);
+                            std::nullopt);
 
                     REQUIRE(settings[testKey5].get<SettingsValues>({key}) ==
-                            boost::none);
+                            std::nullopt);
                 }
                 REQUIRE(settings.get<SettingsValues>(
-                            {testKey5, "non-existing-key"}) == boost::none);
+                            {testKey5, "non-existing-key"}) == std::nullopt);
 
                 REQUIRE(settings.get<SettingsValues>({testKey6}) !=
-                        boost::none);
-                REQUIRE(settings.get<SettingsValues>({testKey6}).get() ==
+                        std::nullopt);
+                REQUIRE(settings.get<SettingsValues>({testKey6}).value() ==
                         SettingsValues(testValue6));
 
                 REQUIRE(settings[testKey6].get<SettingsValues>(
-                            SettingsKeys()) != boost::none);
+                            SettingsKeys()) != std::nullopt);
                 REQUIRE(settings[testKey6]
                             .get<SettingsValues>(SettingsKeys())
-                            .get() == testValue6);
+                            .value() == testValue6);
 
                 for(const auto& key : testValue6) {
                     REQUIRE(settings.get<SettingsValues>({testKey6, key}) ==
-                            boost::none);
+                            std::nullopt);
 
                     REQUIRE(settings[testKey6].get<SettingsValues>({key}) ==
-                            boost::none);
+                            std::nullopt);
                 }
             }
 
@@ -331,8 +332,8 @@ SCENARIO("Addition of multiple key values", "[config][settingsNode]") {
                             SettingsKeys(), SettingsValues()) == value1);
             }
             THEN("We should get the values") {
-                REQUIRE(settings.get<SettingsValues>(key1) != boost::none);
-                REQUIRE(settings.get<SettingsValues>(key1).get() == value1);
+                REQUIRE(settings.get<SettingsValues>(key1) != std::nullopt);
+                REQUIRE(settings.get<SettingsValues>(key1).value() == value1);
             }
             THEN("We should get the values, not the default ones") {
                 const SettingsValues DEFAULT_VALUE({"blaat"});
@@ -362,13 +363,13 @@ SCENARIO("Addition of multiple key values", "[config][settingsNode]") {
 
             THEN("It should contain these") {
                 REQUIRE(settings.get<SettingsValues>(veryLongKeys1) !=
-                        boost::none);
-                REQUIRE(settings.get<SettingsValues>(veryLongKeys1).get() ==
+                        std::nullopt);
+                REQUIRE(settings.get<SettingsValues>(veryLongKeys1).value() ==
                         value1);
 
                 REQUIRE(settings.get<SettingsValues>(veryLongKeys2) !=
-                        boost::none);
-                REQUIRE(settings.get<SettingsValues>(veryLongKeys2).get() ==
+                        std::nullopt);
+                REQUIRE(settings.get<SettingsValues>(veryLongKeys2).value() ==
                         value2);
             }
         }
@@ -396,11 +397,11 @@ SCENARIO("Addition of multiple key values", "[config][settingsNode]") {
             }
 
             THEN("It should contain these") {
-                REQUIRE(settings.get<SettingsValues>(key1) != boost::none);
-                REQUIRE(settings.get<SettingsValues>(key1).get() == value1);
+                REQUIRE(settings.get<SettingsValues>(key1) != std::nullopt);
+                REQUIRE(settings.get<SettingsValues>(key1).value() == value1);
 
-                REQUIRE(settings.get<SettingsValues>(key2) != boost::none);
-                REQUIRE(settings.get<SettingsValues>(key2).get() == value2);
+                REQUIRE(settings.get<SettingsValues>(key2) != std::nullopt);
+                REQUIRE(settings.get<SettingsValues>(key2).value() == value2);
             }
         }
         WHEN("We add the keys as a whole") {
@@ -419,11 +420,11 @@ SCENARIO("Addition of multiple key values", "[config][settingsNode]") {
             REQUIRE(settings.add(key2, value2));
 
             THEN("It should contain these") {
-                REQUIRE(settings.get<SettingsValues>(key1) != boost::none);
-                REQUIRE(settings.get<SettingsValues>(key1).get() == value1);
+                REQUIRE(settings.get<SettingsValues>(key1) != std::nullopt);
+                REQUIRE(settings.get<SettingsValues>(key1).value() == value1);
 
-                REQUIRE(settings.get<SettingsValues>(key2) != boost::none);
-                REQUIRE(settings.get<SettingsValues>(key2).get() == value2);
+                REQUIRE(settings.get<SettingsValues>(key2) != std::nullopt);
+                REQUIRE(settings.get<SettingsValues>(key2).value() == value2);
             }
         }
     }
@@ -536,12 +537,12 @@ SCENARIO("Testing the copy and move constructor", "[config][settingsNode]") {
 
             THEN("We should find back the values") {
                 REQUIRE(copy.key() == rootKey);
-                REQUIRE(copy.get<SettingsValues>(key1) != boost::none);
-                REQUIRE(copy.get<SettingsValues>(key1).get() == value1);
-                REQUIRE(copy.get<SettingsValues>(key2) != boost::none);
-                REQUIRE(copy.get<SettingsValues>(key2).get() == value2);
-                REQUIRE(copy.get<SettingsValues>(key3) != boost::none);
-                REQUIRE(copy.get<SettingsValues>(key3).get() == value3);
+                REQUIRE(copy.get<SettingsValues>(key1) != std::nullopt);
+                REQUIRE(copy.get<SettingsValues>(key1).value() == value1);
+                REQUIRE(copy.get<SettingsValues>(key2) != std::nullopt);
+                REQUIRE(copy.get<SettingsValues>(key2).value() == value2);
+                REQUIRE(copy.get<SettingsValues>(key3) != std::nullopt);
+                REQUIRE(copy.get<SettingsValues>(key3).value() == value3);
             }
             THEN("They should compare equal") { REQUIRE(copy == settings); }
         }
@@ -550,12 +551,12 @@ SCENARIO("Testing the copy and move constructor", "[config][settingsNode]") {
 
             THEN("We should find back the values") {
                 REQUIRE(move.key() == rootKey);
-                REQUIRE(move.get<SettingsValues>(key1) != boost::none);
-                REQUIRE(move.get<SettingsValues>(key1).get() == value1);
-                REQUIRE(move.get<SettingsValues>(key2) != boost::none);
-                REQUIRE(move.get<SettingsValues>(key2).get() == value2);
-                REQUIRE(move.get<SettingsValues>(key3) != boost::none);
-                REQUIRE(move.get<SettingsValues>(key3).get() == value3);
+                REQUIRE(move.get<SettingsValues>(key1) != std::nullopt);
+                REQUIRE(move.get<SettingsValues>(key1).value() == value1);
+                REQUIRE(move.get<SettingsValues>(key2) != std::nullopt);
+                REQUIRE(move.get<SettingsValues>(key2).value() == value2);
+                REQUIRE(move.get<SettingsValues>(key3) != std::nullopt);
+                REQUIRE(move.get<SettingsValues>(key3).value() == value3);
             }
         }
     }
@@ -586,23 +587,23 @@ SCENARIO("Test the assignment operator", "[config][settingsNode]") {
             THEN("We should find the same values as the original settings "
                  "object") {
                 REQUIRE(assigned.key() == rootKey);
-                REQUIRE(assigned.get<SettingsValues>(key1) != boost::none);
-                REQUIRE(assigned.get<SettingsValues>(key1).get() == value1);
-                REQUIRE(assigned.get<SettingsValues>(key2) != boost::none);
-                REQUIRE(assigned.get<SettingsValues>(key2).get() == value2);
-                REQUIRE(assigned.get<SettingsValues>(key3) != boost::none);
-                REQUIRE(assigned.get<SettingsValues>(key3).get() == value3);
+                REQUIRE(assigned.get<SettingsValues>(key1) != std::nullopt);
+                REQUIRE(assigned.get<SettingsValues>(key1).value() == value1);
+                REQUIRE(assigned.get<SettingsValues>(key2) != std::nullopt);
+                REQUIRE(assigned.get<SettingsValues>(key2).value() == value2);
+                REQUIRE(assigned.get<SettingsValues>(key3) != std::nullopt);
+                REQUIRE(assigned.get<SettingsValues>(key3).value() == value3);
             }
 
             THEN("The original settings object should still have the same "
                  "values") {
                 REQUIRE(settings.key() == rootKey);
-                REQUIRE(settings.get<SettingsValues>(key1) != boost::none);
-                REQUIRE(settings.get<SettingsValues>(key1).get() == value1);
-                REQUIRE(settings.get<SettingsValues>(key2) != boost::none);
-                REQUIRE(settings.get<SettingsValues>(key2).get() == value2);
-                REQUIRE(settings.get<SettingsValues>(key3) != boost::none);
-                REQUIRE(settings.get<SettingsValues>(key3).get() == value3);
+                REQUIRE(settings.get<SettingsValues>(key1) != std::nullopt);
+                REQUIRE(settings.get<SettingsValues>(key1).value() == value1);
+                REQUIRE(settings.get<SettingsValues>(key2) != std::nullopt);
+                REQUIRE(settings.get<SettingsValues>(key2).value() == value2);
+                REQUIRE(settings.get<SettingsValues>(key3) != std::nullopt);
+                REQUIRE(settings.get<SettingsValues>(key3).value() == value3);
             }
 
             THEN("They should compare equal") { REQUIRE(settings == assigned); }
@@ -630,7 +631,7 @@ SCENARIO("Testing the removal of values", "[config][settingsNode]") {
             THEN("It should succeed") { REQUIRE(returnCode); }
 
             THEN("They should be cleared") {
-                REQUIRE(settings.get<SettingsValues>(key1) == boost::none);
+                REQUIRE(settings.get<SettingsValues>(key1) == std::nullopt);
 
                 const SettingsValues DEFAULT_VALUE({"blaat"});
                 REQUIRE(settings.get<SettingsValues>(key1, DEFAULT_VALUE) ==
@@ -652,7 +653,7 @@ SCENARIO("Testing the removal of values", "[config][settingsNode]") {
             THEN("It should succeed") { REQUIRE(returnCode); }
 
             THEN("They should be cleared") {
-                REQUIRE(settings.get<SettingsValues>(key3) == boost::none);
+                REQUIRE(settings.get<SettingsValues>(key3) == std::nullopt);
 
                 const SettingsValues DEFAULT_VALUE({"blaat"});
                 REQUIRE(settings.get<SettingsValues>(key3, DEFAULT_VALUE) ==
@@ -747,7 +748,7 @@ SCENARIO("Test adding values", "[config][settingsNode][issue]") {
                  [](const SettingsKey& key, const SettingsValue& value) {
                      SettingsNode settings("Addition test");
                      REQUIRE(!settings.contains(key));
-                     REQUIRE(settings.get<SettingsValue>(key) == boost::none);
+                     REQUIRE(settings.get<SettingsValue>(key) == std::nullopt);
                      REQUIRE(settings.get<SettingsValue>(key, DEFAULT_VALUE) ==
                              DEFAULT_VALUE);
 
@@ -764,7 +765,7 @@ SCENARIO("Test adding values", "[config][settingsNode][issue]") {
         REQUIRE(
             settings.contains(key) ==
             key.empty()); // An empty key will return true, as this points to the root settings node itself
-        REQUIRE(settings.get<SettingsValue>(key) == boost::none);
+        REQUIRE(settings.get<SettingsValue>(key) == std::nullopt);
         REQUIRE(settings.get<SettingsValue>(key, DEFAULT_VALUE) ==
                 DEFAULT_VALUE);
 
@@ -778,7 +779,7 @@ SCENARIO("Test adding values", "[config][settingsNode][issue]") {
                  [](const SettingsKey& key, const SettingsValues& values) {
                      SettingsNode settings("Addition test");
                      REQUIRE(!settings.contains(key));
-                     REQUIRE(settings.get<SettingsValues>(key) == boost::none);
+                     REQUIRE(settings.get<SettingsValues>(key) == std::nullopt);
                      REQUIRE(settings.get<SettingsValues>(
                                  key, DEFAULT_VALUES) == DEFAULT_VALUES);
 
@@ -796,7 +797,7 @@ SCENARIO("Test adding values", "[config][settingsNode][issue]") {
         REQUIRE(
             settings.contains(key) ==
             key.empty()); // An empty key will return true, as this points to the root settings node itself
-        REQUIRE(settings.get<SettingsValues>(key) == boost::none);
+        REQUIRE(settings.get<SettingsValues>(key) == std::nullopt);
         REQUIRE(settings.get<SettingsValues>(key, DEFAULT_VALUES) ==
                 DEFAULT_VALUES);
 

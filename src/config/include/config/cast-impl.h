@@ -1,10 +1,10 @@
 #ifndef CAST_IMPL_INCLUDE
 #define CAST_IMPL_INCLUDE
 
+#include <optional>
 #include <vector>
 
 #include <boost/lexical_cast.hpp>
-#include <boost/optional.hpp>
 
 #include "log/log.h"
 
@@ -22,7 +22,7 @@ template <typename U> class Cast<bool, U> {
   public:
     /*! @copydoc Cast<T,U>::cast(const U& values)
      */
-    static boost::optional<bool> cast(const U& values) noexcept;
+    static std::optional<bool> cast(const U& values) noexcept;
 };
 
 /**
@@ -33,7 +33,7 @@ template <typename T, typename U> class Cast<std::vector<T>, U> {
   public:
     /*! \copydoc Cast<T,U>::cast(const U& values)
      */
-    static boost::optional<std::vector<T>> cast(const U& values) noexcept;
+    static std::optional<std::vector<T>> cast(const U& values) noexcept;
 };
 
 /**
@@ -44,33 +44,33 @@ template <typename U> class Cast<Path, U> {
   public:
     /*! \copydoc Cast<T,U>::cast(const U& values)
      */
-    static boost::optional<Path> cast(const U& values) noexcept;
+    static std::optional<Path> cast(const U& values) noexcept;
 };
 
 template <typename T, typename U>
-inline boost::optional<T> Cast<T, U>::cast(const U& values) noexcept {
+inline std::optional<T> Cast<T, U>::cast(const U& values) noexcept {
     if(values.size() == 0U) {
-        return boost::none;
+        return std::nullopt;
     }
     try {
-        return boost::lexical_cast<T>(values.back());
+        return std::make_optional(boost::lexical_cast<T>(values.back()));
     } catch(boost::bad_lexical_cast& e) {
         user_feedback_error("Internal error");
-        return boost::none;
+        return std::nullopt;
     }
 }
 
 template <typename U>
-inline boost::optional<bool> Cast<bool, U>::cast(const U& values) noexcept {
+inline std::optional<bool> Cast<bool, U>::cast(const U& values) noexcept {
     if(values.size() == 0U) {
-        return boost::none;
+        return std::nullopt;
     }
     return (values.back() == "yes" || values.back() == "1" ||
             values.back() == "true");
 }
 
 template <typename T, typename U>
-inline boost::optional<std::vector<T>>
+inline std::optional<std::vector<T>>
 Cast<std::vector<T>, U>::cast(const U& values) noexcept {
     std::vector<T> result;
     result.reserve(values.size());
@@ -81,12 +81,12 @@ Cast<std::vector<T>, U>::cast(const U& values) noexcept {
 }
 
 template <typename U>
-inline boost::optional<Path> Cast<Path, U>::cast(const U& values) noexcept {
+inline std::optional<Path> Cast<Path, U>::cast(const U& values) noexcept {
     auto stringValue = Cast<std::string, U>::cast(values);
     if(!stringValue) {
-        return boost::none;
+        return std::nullopt;
     }
-    return Path(stringValue.get());
+    return Path(stringValue.value());
 }
 } // namespace detail
 } // namespace config

@@ -3,6 +3,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 
+using std::optional;
 using std::string;
 
 using boost::filesystem::exists;
@@ -16,7 +17,7 @@ ConfigFileSearcher::ConfigFileSearcher(Paths searchPaths) noexcept
     ;
 }
 
-boost::optional<Path> ConfigFileSearcher::find(const Path& filename) noexcept {
+optional<Path> ConfigFileSearcher::find(const Path& filename) noexcept {
     for(const auto& searchPath : m_searchPaths) {
         Path pathToCheck = searchPath;
         pathToCheck /= filename;
@@ -24,7 +25,7 @@ boost::optional<Path> ConfigFileSearcher::find(const Path& filename) noexcept {
             return pathToCheck;
         }
     }
-    return boost::none;
+    return std::nullopt;
 }
 
 bool ConfigFileSearcher::fileExist(const Path& pathToCheck) noexcept {

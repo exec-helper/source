@@ -1,6 +1,7 @@
 #ifndef __PLUGIN_H__
 #define __PLUGIN_H__
 
+#include <functional>
 #include <utility>
 
 #include "config/commandLineOptions.h"

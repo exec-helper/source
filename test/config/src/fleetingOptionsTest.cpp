@@ -47,23 +47,24 @@ SCENARIO("Test the getters of the fleeting options",
     MAKE_COMBINATIONS("Of several settings") {
         VariablesMap variables = FleetingOptions::getDefault();
 
-        auto expectedHelp = variables.get<HelpOption_t>(HELP_KEY).get();
+        auto expectedHelp = variables.get<HelpOption_t>(HELP_KEY).value();
         auto expectedVersion =
-            variables.get<VersionOption_t>(VERSION_KEY).get();
+            variables.get<VersionOption_t>(VERSION_KEY).value();
         auto expectedVerbose =
-            variables.get<VerboseOption_t>(VERBOSE_KEY).get();
-        auto jobs = variables.get<JobsOption_t>(JOBS_KEY).get();
+            variables.get<VerboseOption_t>(VERBOSE_KEY).value();
+        auto jobs = variables.get<JobsOption_t>(JOBS_KEY).value();
         auto expectedJobs = 0U;
         if(jobs == "auto") {
             expectedJobs = thread::hardware_concurrency();
         } else {
             expectedJobs = lexical_cast<Jobs_t>(jobs);
         }
-        auto expectedDryRun = variables.get<DryRunOption_t>(DRY_RUN_KEY).get();
+        auto expectedDryRun =
+            variables.get<DryRunOption_t>(DRY_RUN_KEY).value();
         auto expectedLogLevel =
-            toLogLevel(variables.get<LogLevelOption_t>(LOG_LEVEL_KEY).get());
+            toLogLevel(variables.get<LogLevelOption_t>(LOG_LEVEL_KEY).value());
         auto expectedCommands =
-            variables.get<CommandCollection>(COMMAND_KEY).get();
+            variables.get<CommandCollection>(COMMAND_KEY).value();
 
         COMBINATIONS("Enable help") {
             expectedHelp = true;

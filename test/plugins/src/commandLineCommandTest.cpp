@@ -140,7 +140,7 @@ SCENARIO(
             variables.replace(WORKING_DIR_KEY, "{" + pattern2.getKey() + "}/{" +
                                                    pattern3.getKey() + "}");
             expectedTask.setWorkingDirectory(
-                variables.get<Path>(WORKING_DIR_KEY).get());
+                variables.get<Path>(WORKING_DIR_KEY).value());
         }
 
         ExecutorStub::TaskQueue unreplacedTasks;

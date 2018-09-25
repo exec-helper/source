@@ -1,7 +1,5 @@
 #include "optionDescriptions.h"
 
-#include <boost/optional/optional_io.hpp>
-
 #include "argv.h"
 
 using std::string;
@@ -43,7 +41,7 @@ bool OptionDescriptions::getOptionsMap(VariablesMap& variablesMap,
     // Assign positional arguments
     if(m_positional) {
         positional_options_description positionalOptionsDesc;
-        positionalOptionsDesc.add(m_positional.get().c_str(), -1);
+        positionalOptionsDesc.add(m_positional.value().c_str(), -1);
         commandLineParser.positional(positionalOptionsDesc);
     }
     if(allowUnregistered) {

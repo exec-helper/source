@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <memory>
+#include <optional>
 #include <ostream>
 
 #include <log/assertions.h>
@@ -234,9 +235,9 @@ bool SettingsNode::clear(const SettingsKeys& keys) noexcept {
     return false;
 }
 
-boost::optional<SettingsValues> SettingsNode::values() const noexcept {
+std::optional<SettingsValues> SettingsNode::values() const noexcept {
     if(!m_values) {
-        return boost::none;
+        return std::nullopt;
     }
     SettingsValues result;
     result.reserve(m_values->size());
@@ -254,7 +255,8 @@ void SettingsNode::swap(SettingsNode& other) noexcept {
 }
 
 void SettingsNode::overwrite(const SettingsNode& newSettings) noexcept {
-    std::vector<std::string> children = newSettings.values().get();
+    std::vector<std::string> children =
+        newSettings.values().value_or(std::vector<std::string>());
     for(const auto& key : children) {
         const SettingsNode& newValue = newSettings[key];
         if(!contains(key)) {

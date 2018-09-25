@@ -76,38 +76,38 @@ Lcov::getVariablesMap(const FleetingOptionsInterface& /*fleetingOptions*/) const
 bool Lcov::apply(Task task, const VariablesMap& variables,
                  const Patterns& patterns) const noexcept {
     auto runCommandOpt = variables.get<RunCommand>(RUN_COMMAND);
-    if(runCommandOpt == boost::none) {
+    if(runCommandOpt == std::nullopt) {
         user_feedback_error("Could not find the '"
                             << RUN_COMMAND << "' setting in the '"
                             << PLUGIN_NAME << "' settings");
         return false;
     }
-    auto runCommands = runCommandOpt.get();
+    auto runCommands = runCommandOpt.value();
 
     if(runCommands.empty()) {
         user_feedback_error("The '" << RUN_COMMAND << "' list is empty");
         return false;
     }
 
-    ensures(variables.get<InfoFile>(INFO_FILE_KEY) != boost::none);
-    auto infoFile = variables.get<InfoFile>(INFO_FILE_KEY).get();
+    ensures(variables.get<InfoFile>(INFO_FILE_KEY) != std::nullopt);
+    auto infoFile = variables.get<InfoFile>(INFO_FILE_KEY).value();
 
-    ensures(variables.get<BaseDir>(BASE_DIR_KEY) != boost::none);
-    auto baseDirectory = variables.get<BaseDir>(BASE_DIR_KEY).get();
+    ensures(variables.get<BaseDir>(BASE_DIR_KEY) != std::nullopt);
+    auto baseDirectory = variables.get<BaseDir>(BASE_DIR_KEY).value();
 
-    ensures(variables.get<Dir>(DIR_KEY) != boost::none);
-    auto directory = variables.get<Dir>(DIR_KEY).get();
+    ensures(variables.get<Dir>(DIR_KEY) != std::nullopt);
+    auto directory = variables.get<Dir>(DIR_KEY).value();
 
-    auto commandLine = variables.get<CommandLineArgs>(COMMAND_LINE_KEY).get();
+    auto commandLine = variables.get<CommandLineArgs>(COMMAND_LINE_KEY).value();
 
-    bool zeroCounters = variables.get<ZeroCounters>(ZERO_COUNTERS_KEY).get();
+    bool zeroCounters = variables.get<ZeroCounters>(ZERO_COUNTERS_KEY).value();
     Task zeroCountersTask;
     if(zeroCounters) {
         zeroCountersTask = generateZeroCountersTask(baseDirectory, directory,
                                                     commandLine, task);
     }
 
-    bool genHtml = variables.get<GenHtml>(GEN_HTML_KEY).get();
+    bool genHtml = variables.get<GenHtml>(GEN_HTML_KEY).value();
     Task genHtmlTask;
     if(genHtml) {
         genHtmlTask = generateGenHtmlTask(infoFile, variables, task);
@@ -116,7 +116,7 @@ bool Lcov::apply(Task task, const VariablesMap& variables,
     Task captureTask = generateCaptureTask(baseDirectory, directory, infoFile,
                                            commandLine, task);
 
-    auto exclude = variables.get<Excludes>(EXCLUDES_KEY).get();
+    auto exclude = variables.get<Excludes>(EXCLUDES_KEY).value();
     Task excludeTask;
     if(!exclude.empty()) {
         excludeTask =
@@ -150,19 +150,19 @@ inline Task Lcov::generateGenHtmlTask(const InfoFile& infoFile,
     Task result = task;
     result.append("genhtml");
 
-    ensures(variables.get<GenHtmlOutput>(GEN_HTML_OUTPUT_KEY) != boost::none);
+    ensures(variables.get<GenHtmlOutput>(GEN_HTML_OUTPUT_KEY) != std::nullopt);
     result.append(
         {"--output-directory",
-         variables.get<GenHtmlOutput>(GEN_HTML_OUTPUT_KEY).get().native()});
+         variables.get<GenHtmlOutput>(GEN_HTML_OUTPUT_KEY).value().native()});
 
-    ensures(variables.get<GenHtmlTitle>(GEN_HTML_TITLE_KEY) != boost::none);
+    ensures(variables.get<GenHtmlTitle>(GEN_HTML_TITLE_KEY) != std::nullopt);
     result.append(
-        {"--title", variables.get<GenHtmlTitle>(GEN_HTML_TITLE_KEY).get()});
+        {"--title", variables.get<GenHtmlTitle>(GEN_HTML_TITLE_KEY).value()});
 
     ensures(variables.get<GenHtmlCommandLine>(GEN_HTML_COMMAND_LINE_KEY) !=
-            boost::none);
+            std::nullopt);
     result.append(
-        variables.get<GenHtmlCommandLine>(GEN_HTML_COMMAND_LINE_KEY).get());
+        variables.get<GenHtmlCommandLine>(GEN_HTML_COMMAND_LINE_KEY).value());
 
     result.append(infoFile.native());
 
@@ -189,11 +189,11 @@ Lcov::getExcludes(const VariablesMap& variables) noexcept {
         return Excludes();
     }
 
-    for(auto& exclude : excludes.get()) {
+    for(auto& exclude : excludes.value()) {
         exclude.insert(0, R"(")");
         exclude.append(R"(")");
     }
-    return excludes.get();
+    return excludes.value();
 }
 
 inline Task Lcov::generateExcludeTask(const VariablesMap& variables,

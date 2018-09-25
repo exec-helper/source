@@ -2,6 +2,7 @@
 #include <filesystem>
 #include <iomanip>
 #include <memory>
+#include <optional>
 #include <string>
 #include <utility>
 #include <vector>
@@ -33,12 +34,11 @@ using std::make_pair;
 using std::make_shared;
 using std::make_unique;
 using std::move;
+using std::optional;
 using std::setw;
 using std::string;
 using std::stringstream;
 using std::vector;
-
-using boost::optional;
 
 using execHelper::commander::Commander;
 using execHelper::config::ArgumentOption;
@@ -130,7 +130,7 @@ inline Paths getSearchPaths(const EnvironmentCollection& env) noexcept {
     Paths searchPaths = getAllParentDirectories(filesystem::current_path());
     auto homeDir = getHomeDirectory(env);
     if(homeDir) {
-        searchPaths.emplace_back(homeDir.get());
+        searchPaths.emplace_back(homeDir.value());
     }
     return searchPaths;
 }
@@ -170,7 +170,7 @@ inline bool verifyOptions(const FleetingOptions& options) noexcept {
     return true;
 }
 
-inline boost::optional<Path>
+inline optional<Path>
 getSettingsFile(const Argv& argv, const EnvironmentCollection& env,
                 const Option<SettingsFileOption_t>& settingsOption) noexcept {
     OptionDescriptions options;
@@ -180,21 +180,20 @@ getSettingsFile(const Argv& argv, const EnvironmentCollection& env,
     if(!options.getOptionsMap(optionsMap, argv, true)) {
         user_feedback_error(
             "Could not properly parse the command line options");
-        return boost::none;
+        return std::nullopt;
     }
     FleetingOptions fleetingOptions(optionsMap);
 
     ConfigFileSearcher configFileSearcher(getSearchPaths(env));
     SettingsFileOption_t settingsFileValue =
         optionsMap.get<SettingsFileOption_t>(SETTINGS_FILE_KEY, ".exec-helper");
-    boost::optional<Path> settingsFile =
-        configFileSearcher.find(settingsFileValue);
-    if(settingsFile == boost::none) {
+    auto settingsFile = configFileSearcher.find(settingsFileValue);
+    if(settingsFile == std::nullopt) {
         if(!fleetingOptions.getHelp()) {
             user_feedback("Could not find a settings file");
         }
         printHelp(options, SettingsNode("empty"));
-        return boost::none;
+        return std::nullopt;
     }
     return settingsFile;
 }
@@ -224,31 +223,31 @@ handleConfiguration(const Argv& argv,
 
     auto settingsFile = getSettingsFile(argv, env, settingsFileOption);
     if(!settingsFile) {
-        return boost::none;
+        return std::nullopt;
     }
 
-    auto patternSettingsPair = parseSettingsFile(settingsFile.get());
+    auto patternSettingsPair = parseSettingsFile(settingsFile.value());
     if(!patternSettingsPair) {
-        user_feedback("Could not parse settings file '" << settingsFile.get()
+        user_feedback("Could not parse settings file '" << settingsFile.value()
                                                         << "'");
-        return boost::none;
+        return std::nullopt;
     }
 
-    auto patterns = patternSettingsPair.get().first;
-    auto settings = patternSettingsPair.get().second;
+    auto patterns = patternSettingsPair.value().first;
+    auto settings = patternSettingsPair.value().second;
 
     for(const auto& pattern : patterns) {
         ArgumentOptions additionalArguments;
         const auto shortOption = pattern.getShortOption();
         if(shortOption) {
             additionalArguments.emplace_back(
-                ArgumentOption(1, shortOption.get()));
+                ArgumentOption(1, shortOption.value()));
         }
         const auto longOption = pattern.getLongOption();
         if(longOption) {
             options.addOption(Option<PatternValues>(
-                longOption.get(), additionalArguments,
-                "Values for pattern '" + longOption.get() + "'"));
+                longOption.value(), additionalArguments,
+                "Values for pattern '" + longOption.value() + "'"));
         }
     }
 
@@ -257,33 +256,33 @@ handleConfiguration(const Argv& argv,
     if(!options.getOptionsMap(optionsMap, argv, true)) {
         user_feedback_error(
             "Could not properly parse the command line options");
-        return boost::none;
+        return std::nullopt;
     }
 
     FleetingOptions fleetingOptions(optionsMap);
     if(fleetingOptions.getHelp()) {
         printHelp(options, settings);
-        return boost::none;
+        return std::nullopt;
     }
 
     if(fleetingOptions.getVersion()) {
         printVersion();
-        return boost::none;
+        return std::nullopt;
     }
 
     if(!verifyOptions(fleetingOptions)) {
-        return boost::none;
+        return std::nullopt;
     }
 
     for(auto& pattern : patterns) {
         const auto longOption = pattern.getLongOption();
-        if(longOption && optionsMap.contains(longOption.get())) {
+        if(longOption && optionsMap.contains(longOption.value())) {
             pattern.setValues(optionsMap.get<PatternValues>(
-                longOption.get(), pattern.getValues()));
+                longOption.value(), pattern.getValues()));
         }
     }
 
-    return ConfigOptions(move(settingsFile.get()), move(fleetingOptions),
+    return ConfigOptions(move(settingsFile.value()), move(fleetingOptions),
                          move(settings), move(patterns));
 }
 } // namespace
@@ -295,10 +294,10 @@ int execHelperMain(int argc, char** argv, char** envp) {
     if(!config) {
         return EXIT_FAILURE;
     }
-    const Path& settingsFile = config.get().settingsFile;
-    const FleetingOptions& fleetingOptions = config.get().fleetingOptions;
-    Patterns patterns = config.get().patterns;
-    SettingsNode settings = config.get().settings;
+    const Path& settingsFile = config.value().settingsFile;
+    const FleetingOptions& fleetingOptions = config.value().fleetingOptions;
+    Patterns patterns = config.value().patterns;
+    SettingsNode settings = config.value().settings;
 
     execHelper::log::LogInit logInit;
     auto level = fleetingOptions.getLogLevel();

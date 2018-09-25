@@ -54,7 +54,7 @@ bool Valgrind::apply(Task task, const VariablesMap& variables,
     task.append(PLUGIN_NAME);
 
     auto runCommand = variables.get<RunCommand>(RUN_COMMAND_KEY);
-    if(runCommand == boost::none) {
+    if(runCommand == std::nullopt) {
         user_feedback_error("Could not find the '"
                             << RUN_COMMAND_KEY << "' setting in the '"
                             << PLUGIN_NAME << "' settings");
@@ -63,19 +63,19 @@ bool Valgrind::apply(Task task, const VariablesMap& variables,
 
     auto tool = variables.get<Tool>(TOOL_KEY);
     if(tool) {
-        task.append(string("--tool=").append(tool.get()));
+        task.append(string("--tool=").append(tool.value()));
     }
 
-    if(variables.get<Verbosity>(VERBOSITY_KEY).get()) {
+    if(variables.get<Verbosity>(VERBOSITY_KEY).value()) {
         task.append("--verbose");
     }
 
-    ensures(variables.get<CommandLineArgs>(COMMAND_LINE_KEY) != boost::none);
-    task.append(variables.get<CommandLineArgs>(COMMAND_LINE_KEY).get());
+    ensures(variables.get<CommandLineArgs>(COMMAND_LINE_KEY) != std::nullopt);
+    task.append(variables.get<CommandLineArgs>(COMMAND_LINE_KEY).value());
 
     for(const auto& combination : makePatternPermutator(patterns)) {
         Task newTask = replacePatternCombinations(task, combination);
-        ExecutePlugin buildExecutePlugin(runCommand.get());
+        ExecutePlugin buildExecutePlugin(runCommand.value());
         if(!buildExecutePlugin.apply(newTask, variables, patterns)) {
             return false;
         }
