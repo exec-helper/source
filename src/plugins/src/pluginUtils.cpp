@@ -4,8 +4,6 @@
 #include <utility>
 #include <vector>
 
-#include <boost/filesystem.hpp>
-
 #include "config/environment.h"
 #include "config/path.h"
 #include "config/settingsNode.h"

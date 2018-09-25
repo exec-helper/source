@@ -1,10 +1,9 @@
 #include "configFileWriter.h"
 
-#include <boost/filesystem/fstream.hpp>
+#include <fstream>
 
+using std::ofstream;
 using std::string;
-
-using boost::filesystem::ofstream;
 
 namespace execHelper {
 namespace test {

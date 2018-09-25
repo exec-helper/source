@@ -1,7 +1,7 @@
+#include <filesystem>
 #include <string>
 #include <vector>
 
-#include <boost/filesystem.hpp>
 #include <gsl/string_span>
 
 #include "commander/commander.h"
@@ -20,7 +20,6 @@
 using std::string;
 using std::vector;
 
-using boost::filesystem::current_path;
 using gsl::czstring;
 
 using execHelper::config::Command;
@@ -39,6 +38,8 @@ using execHelper::plugins::MemoryHandler;
 using execHelper::core::test::ExecutorStub;
 using execHelper::test::FleetingOptionsStub;
 using execHelper::test::utils::getPredefinedPatterns;
+
+namespace filesystem = std::filesystem;
 
 namespace {
 const czstring<> COMMANDS_KEY = "commands";
@@ -59,7 +60,7 @@ SCENARIO("Basic test the commander", "[commander]") {
         Patterns patterns;
         Patterns expectedPatterns = getPredefinedPatterns();
         EnvironmentCollection env;
-        Path workingDirectory = current_path();
+        Path workingDirectory = filesystem::current_path();
 
         MemoryHandler memory;
         Commander commander;
@@ -158,9 +159,9 @@ SCENARIO(
 
         WHEN("We apply the configuration and run the commander") {
             THEN("It should fail") {
-                REQUIRE_FALSE(commander.run(fleetingOptions, settings,
-                                            Patterns(), current_path(),
-                                            EnvironmentCollection()));
+                REQUIRE_FALSE(commander.run(
+                    fleetingOptions, settings, Patterns(),
+                    filesystem::current_path(), EnvironmentCollection()));
             }
         }
     }
@@ -183,9 +184,9 @@ SCENARIO("Test when no commands are passed", "[commander]") {
 
         WHEN("We apply the configuration and run the commander") {
             THEN("It should fail") {
-                REQUIRE_FALSE(commander.run(fleetingOptions, settings,
-                                            Patterns(), current_path(),
-                                            EnvironmentCollection()));
+                REQUIRE_FALSE(commander.run(
+                    fleetingOptions, settings, Patterns(),
+                    filesystem::current_path(), EnvironmentCollection()));
             }
         }
     }

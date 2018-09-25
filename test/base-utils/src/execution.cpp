@@ -2,34 +2,34 @@
 
 #include <cassert>
 #include <fcntl.h>
+#include <filesystem>
 #include <sys/stat.h>
 #include <sys/wait.h>
+#include <system_error>
 #include <unistd.h>
-
-#include <boost/filesystem/fstream.hpp>
 
 #include "base-utils/executionContent.h"
 #include "base-utils/path.h"
 
 #include "unittest/logger.h"
 
-using boost::filesystem::current_path;
-using boost::system::error_code;
+using std::error_code;
 
 using execHelper::test::baseUtils::Path;
 using execHelper::test::baseUtils::ReturnCode;
 using execHelper::test::baseUtils::execution::CommandLine;
 using execHelper::test::baseUtils::execution::CommandLineRaw;
 
+namespace filesystem = std::filesystem;
+
 namespace {
 void childProcessExecute(const CommandLineRaw& line,
                          const Path& workingDir) noexcept {
     ReturnCode returnCode;
 
-    error_code error;
-    current_path(workingDir, error);
-    assert(error ==
-           boost::system::errc::success); // Either works or fix the test
+    std::error_code error;
+    filesystem::current_path(workingDir, error);
+    assert(!error); // Either works or fix the test
 
     int fd = ::open(
         "/dev/null", // NOLINT(cppcoreguidelines-pro-type-vararg, hicpp-vararg)

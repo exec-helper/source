@@ -6,8 +6,8 @@ set(SRCS
    )
 
 set(DEPENDENCIES
+        filesystem
         boost-program-options
-        boost-filesystem
         log
         core
         plugins

@@ -4,8 +4,6 @@
 #include <utility>
 #include <vector>
 
-#include <boost/filesystem.hpp>
-#include <boost/optional/optional_io.hpp>
 #include <catch.hpp>
 
 #include "config/settingsNode.h"
@@ -276,7 +274,7 @@ SCENARIO("Yaml got passed an invalid configuration", "[yaml][yamlwrapper]") {
                 // Check the strong exception guarantee
                 REQUIRE(settings.key() == settingsKey);
                 REQUIRE(settings.get<SettingsValues>(SettingsKeys()) ==
-                        boost::none);
+                        std::nullopt);
             }
         }
     }
@@ -318,7 +316,7 @@ SCENARIO("Requesting invalid values", "[yaml][yamlwrapper]") {
 
                 REQUIRE(settings.key() == settingsKey);
                 REQUIRE(settings.get<SettingsValues>(SettingsKeys()) ==
-                        boost::none);
+                        std::nullopt);
             }
         }
     }

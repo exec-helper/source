@@ -1,13 +1,12 @@
 #include "executionContent.h"
 
+#include <fstream>
 #include <iostream>
 #include <string>
 #include <utility>
 #include <vector>
 
 #include <boost/core/swap.hpp>
-#include <boost/filesystem.hpp>
-#include <boost/filesystem/fstream.hpp>
 
 #include "base-utils/yaml.h"
 
@@ -23,7 +22,6 @@ using boost::asio::buffer;
 using boost::asio::io_service;
 using boost::asio::socket_base;
 using boost::asio::local::stream_protocol;
-using boost::filesystem::ofstream;
 using boost::system::error_code;
 using boost::system::system_error;
 using gsl::not_null;

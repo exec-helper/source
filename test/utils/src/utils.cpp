@@ -1,10 +1,9 @@
 #include "utils.h"
 
+#include <filesystem>
 #include <iostream>
 #include <sstream>
 
-#include <boost/filesystem.hpp>
-#include <boost/filesystem/fstream.hpp>
 #include <gsl/gsl>
 
 #include "config/pattern.h"
@@ -25,10 +24,6 @@ using std::string;
 using std::stringstream;
 using std::vector;
 
-using boost::filesystem::current_path;
-using boost::filesystem::ifstream;
-using boost::filesystem::ofstream;
-using boost::filesystem::path;
 using gsl::not_null;
 
 using execHelper::config::EnvironmentCollection;
@@ -50,6 +45,8 @@ using execHelper::plugins::replacePatternCombinations;
 using execHelper::core::test::ExecutorStub;
 using execHelper::test::baseUtils::ConfigFileWriter;
 using execHelper::test::baseUtils::YamlWriter;
+
+namespace filesystem = std::filesystem;
 
 namespace {
 const string YAML_CONFIG_KEY_DELIMITER(": ");
@@ -322,7 +319,7 @@ std::string inheritWorkingDirKey() noexcept { return "EH_WORKING_DIR"; }
 Patterns getPredefinedPatterns() noexcept {
     Patterns predefined;
     predefined.emplace_back(
-        Pattern(inheritWorkingDirKey(), {current_path().native()}));
+        Pattern(inheritWorkingDirKey(), {filesystem::current_path().native()}));
     return predefined;
 }
 } // namespace utils

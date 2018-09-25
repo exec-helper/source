@@ -25,6 +25,7 @@ Paths getAllParentDirectories(Path path) noexcept {
         parentPaths.push_back(path);
         path = path.parent_path();
     }
+    parentPaths.push_back(path.parent_path());
     return parentPaths;
 }
 

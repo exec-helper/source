@@ -1,26 +1,24 @@
 #include "tmpFile.h"
 
 #include <algorithm>
+#include <cassert>
+#include <filesystem>
+#include <fstream>
 #include <iostream>
 #include <string>
-
-#include <boost/filesystem.hpp>
-#include <boost/filesystem/fstream.hpp>
+#include <system_error>
 
 #include "base-utils/generateRandom.h"
 
 using std::count;
+using std::error_code;
+using std::fstream;
 using std::string;
-
-using boost::filesystem::fstream;
-using boost::filesystem::is_regular_file;
-using boost::filesystem::remove;
-using boost::filesystem::temp_directory_path;
-using boost::system::error_code;
-using boost::system::errc::success;
 
 using execHelper::test::baseUtils::generateRandomChar;
 using execHelper::test::baseUtils::Path;
+
+namespace filesystem = std::filesystem;
 
 namespace {
 /**
@@ -49,7 +47,7 @@ namespace execHelper {
 namespace test {
 namespace baseUtils {
 TmpFile::TmpFile(const string& model)
-    : m_path(temp_directory_path() / unique_path(model)) {
+    : m_path(filesystem::temp_directory_path() / ::unique_path(model)) {
     ;
 }
 
@@ -74,7 +72,7 @@ bool TmpFile::create(const std::string& content) const noexcept {
 bool TmpFile::createDirectories() const noexcept {
     error_code error;
     create_directories(m_path.parent_path(), error);
-    return (error == success);
+    return error.operator bool();
 }
 
 Path TmpFile::getPath() const noexcept { return m_path; }

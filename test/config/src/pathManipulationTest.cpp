@@ -1,7 +1,6 @@
 #include <algorithm>
+#include <filesystem>
 
-#include <boost/filesystem.hpp>
-#include <boost/filesystem/fstream.hpp>
 #include <boost/optional/optional_io.hpp>
 
 #include "base-utils/generateRandom.h"
@@ -12,11 +11,10 @@
 using std::reverse;
 using std::string;
 
-using boost::filesystem::absolute;
-using boost::filesystem::current_path;
-
 using execHelper::test::baseUtils::generateRandomString;
 using execHelper::test::baseUtils::TmpFile;
+
+namespace filesystem = std::filesystem;
 
 namespace execHelper {
 namespace config {
@@ -70,8 +68,10 @@ SCENARIO("Test listing the parent paths", "[config][path-manipulation]") {
 
             THEN("We should find all the parent directories of the current "
                  "path and the relative path on top of the current path") {
-                Paths actualPaths = getAllParentDirectories(current_path());
-                actualPaths.insert(actualPaths.begin(), absolute(relativePath));
+                Paths actualPaths =
+                    getAllParentDirectories(filesystem::current_path());
+                actualPaths.insert(actualPaths.begin(),
+                                   filesystem::absolute(relativePath));
 
                 REQUIRE(result == actualPaths);
             }

@@ -1,0 +1,4 @@
+# std::filesystem
+set(LIBRARY filesystem)
+add_library(${LIBRARY} INTERFACE)
+target_link_libraries(${LIBRARY} INTERFACE stdc++fs)

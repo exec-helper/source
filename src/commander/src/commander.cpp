@@ -1,9 +1,9 @@
 #include "commander.h"
 
+#include <filesystem>
 #include <iostream>
 #include <utility>
 
-#include <boost/filesystem/operations.hpp>
 #include <gsl/pointers>
 #include <gsl/string_span>
 
@@ -18,7 +18,6 @@
 
 using std::move;
 
-using boost::filesystem::current_path;
 using gsl::czstring;
 using gsl::not_null;
 
@@ -32,12 +31,14 @@ using execHelper::config::VariablesMap;
 using execHelper::core::Task;
 using execHelper::plugins::ExecutePlugin;
 
+namespace filesystem = std::filesystem;
+
 namespace {
 const czstring<> WORKING_DIR_PATTERN_KEY = "EH_WORKING_DIR";
 
 inline Patterns addPredefinedPatterns(Patterns patterns) {
-    patterns.emplace_back(
-        Pattern(WORKING_DIR_PATTERN_KEY, {current_path().native()}));
+    patterns.emplace_back(Pattern(WORKING_DIR_PATTERN_KEY,
+                                  {filesystem::current_path().native()}));
     return patterns;
 }
 } // namespace

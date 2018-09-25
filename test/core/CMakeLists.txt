@@ -9,7 +9,7 @@ set(SRCS
 
 set(DEPENDENCIES
         boost-program-options
-        boost-filesystem
+        filesystem
         core
         test-utils
         unittest

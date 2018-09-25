@@ -1,17 +1,16 @@
-#include <boost/filesystem.hpp>
-#include <boost/filesystem/fstream.hpp>
+#include <filesystem>
+#include <fstream>
+
 #include <boost/optional/optional.hpp>
 #include <boost/optional/optional_io.hpp>
 
 #include "config/configFileSearcher.h"
 #include "unittest/catch.h"
 
+using std::ofstream;
 using std::string;
 
-using boost::filesystem::create_directories;
-using boost::filesystem::ofstream;
-using boost::filesystem::path;
-using boost::filesystem::remove_all;
+namespace filesystem = std::filesystem;
 
 namespace execHelper {
 namespace config {
@@ -38,7 +37,7 @@ SCENARIO("Test the config file searcher", "[config][config-file-searcher]") {
 
             for(const auto& searchPath : searchPaths) {
                 ofstream file;
-                path filename(searchPath);
+                filesystem::path filename(searchPath);
                 filename /= settingsFile;
 
                 file.open(filename, std::ios::out | std::ios::trunc);

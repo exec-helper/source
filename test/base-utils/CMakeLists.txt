@@ -14,8 +14,8 @@ set(SRCS
    )
 
 set(DEPENDENCIES
+        filesystem
         gsl
-        boost-filesystem
         boost-system
         yaml-3rd
         unittest

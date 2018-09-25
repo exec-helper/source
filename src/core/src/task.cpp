@@ -1,12 +1,11 @@
 #include "task.h"
 
 #include <algorithm>
+#include <filesystem>
 #include <iostream>
 #include <numeric>
 #include <ostream>
 #include <utility>
-
-#include <boost/filesystem/operations.hpp>
 
 #include "logger.h"
 
@@ -19,11 +18,11 @@ using std::ostream;
 using std::string;
 using std::vector;
 
-using boost::filesystem::current_path;
-
 using execHelper::config::EnvironmentCollection;
 using execHelper::config::EnvironmentValue;
 using execHelper::config::Path;
+
+namespace filesystem = std::filesystem;
 
 namespace {
 inline string implodeVector(const vector<string>& toImplode,
@@ -43,7 +42,7 @@ namespace execHelper {
 namespace core {
 
 Task::Task(const initializer_list<string>& subtasks) noexcept
-    : m_task(subtasks), m_workingDirectory(current_path()) {
+    : m_task(subtasks), m_workingDirectory(filesystem::current_path()) {
     ;
 }
 

@@ -1,13 +1,10 @@
 #include <cstdlib>
+#include <filesystem>
 #include <iomanip>
 #include <memory>
 #include <string>
 #include <utility>
 #include <vector>
-
-#include <boost/algorithm/string.hpp>
-#include <boost/filesystem.hpp>
-#include <boost/optional/optional.hpp>
 
 #include "commander/commander.h"
 #include "config/argv.h"
@@ -42,7 +39,6 @@ using std::stringstream;
 using std::vector;
 
 using boost::optional;
-using boost::filesystem::current_path;
 
 using execHelper::commander::Commander;
 using execHelper::config::ArgumentOption;
@@ -89,6 +85,8 @@ using execHelper::core::Task;
 using execHelper::log::LogLevel;
 using execHelper::log::setSeverity;
 
+namespace filesystem = std::filesystem;
+
 namespace {
 vector<string> logModules({"log", "yaml", "config", "core", "plugins",
                            "commander"});
@@ -129,7 +127,7 @@ inline EnvironmentCollection toEnvCollection(char** envp) {
 }
 
 inline Paths getSearchPaths(const EnvironmentCollection& env) noexcept {
-    Paths searchPaths = getAllParentDirectories(current_path());
+    Paths searchPaths = getAllParentDirectories(filesystem::current_path());
     auto homeDir = getHomeDirectory(env);
     if(homeDir) {
         searchPaths.emplace_back(homeDir.get());

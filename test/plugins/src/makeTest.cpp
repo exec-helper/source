@@ -1,6 +1,6 @@
+#include <filesystem>
 #include <string>
 
-#include <boost/filesystem.hpp>
 #include <gsl/string_span>
 
 #include "config/environment.h"
@@ -21,7 +21,6 @@
 using std::string;
 using std::to_string;
 
-using boost::filesystem::current_path;
 using gsl::czstring;
 
 using execHelper::config::EnvArgs;
@@ -37,6 +36,8 @@ using execHelper::core::Task;
 using execHelper::core::test::ExecutorStub;
 using execHelper::test::FleetingOptionsStub;
 using execHelper::test::utils::getExpectedTasks;
+
+namespace filesystem = std::filesystem;
 
 namespace {
 const czstring<> PLUGIN_NAME = "make";
@@ -107,7 +108,7 @@ SCENARIO("Testing the configuration settings of the make plugin", "[make]") {
         bool verbosity = false;
         CommandLineArgs commandLine;
         EnvironmentCollection env;
-        Path workingDirectory(current_path());
+        Path workingDirectory(filesystem::current_path());
 
         ExecutorStub executor;
         ExecuteCallback executeCallback = [&executor](const Task& task) {

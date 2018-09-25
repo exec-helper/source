@@ -13,8 +13,8 @@ set(SRCS    src/settingsNodeTest.cpp
    )
 
 set(DEPENDENCIES
+        filesystem
         boost-program-options
-        boost-filesystem
         config
         unittest
         rapidcheck

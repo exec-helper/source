@@ -2,14 +2,15 @@
 
 #include <cerrno>
 #include <cstring>
+#include <filesystem>
 #include <glob.h>
 #include <limits>
 #include <sys/wait.h>
+#include <system_error>
 #include <unistd.h>
 #include <vector>
 #include <wordexp.h>
 
-#include <boost/filesystem.hpp>
 #include <gsl/span>
 #include <gsl/string_span>
 
@@ -20,17 +21,17 @@
 #include "logger.h"
 #include "task.h"
 
+using std::error_code;
 using std::numeric_limits;
 using std::string;
 
-using boost::filesystem::current_path;
-using boost::system::error_code;
-using boost::system::errc::success;
 using gsl::span;
 using gsl::zstring;
 
 using execHelper::config::Argv;
 using execHelper::config::Envp;
+
+namespace filesystem = std::filesystem;
 
 namespace {
 const execHelper::core::PosixShell::ShellReturnCode POSIX_SUCCESS = 0U;
@@ -61,8 +62,8 @@ void PosixShell::childProcessExecute(const Task& task) const noexcept {
     error_code error;
     LOG(trace) << "Changing to directory " << task.getWorkingDirectory()
                << "...";
-    current_path(task.getWorkingDirectory(), error);
-    if(error != success) {
+    filesystem::current_path(task.getWorkingDirectory(), error);
+    if(error) {
         LOG(error) << "Could not change to directory "
                    << task.getWorkingDirectory() << " (" << error << ")";
         _exit(127);

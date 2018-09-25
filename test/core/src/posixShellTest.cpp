@@ -1,8 +1,6 @@
 #include <cstdio>
 #include <string>
 
-#include <boost/filesystem/operations.hpp>
-
 #include "base-utils/tmpFile.h"
 #include "config/path.h"
 #include "core/posixShell.h"

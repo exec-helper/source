@@ -1,9 +1,9 @@
+#include <filesystem>
 #include <sstream>
 #include <string>
 #include <vector>
 
 #include <boost/algorithm/string.hpp>
-#include <boost/filesystem.hpp>
 
 #include "config/environment.h"
 #include "config/path.h"
@@ -18,7 +18,6 @@ using std::stringstream;
 using std::vector;
 
 using boost::trim_right;
-using boost::filesystem::current_path;
 
 using execHelper::config::EnvironmentCollection;
 using execHelper::config::EnvironmentValue;
@@ -26,6 +25,8 @@ using execHelper::config::Path;
 using execHelper::core::TaskCollection;
 
 using execHelper::test::utils::appendVectors;
+
+namespace filesystem = std::filesystem;
 
 namespace {
 template <typename T> inline vector<T> reverse(vector<T> toReverse) {
@@ -53,7 +54,7 @@ SCENARIO("Test the getters and setters of a task", "[task]") {
             Task task;
 
             TaskCollection actualCommands;
-            Path actualWorkingDir = current_path();
+            Path actualWorkingDir = filesystem::current_path();
             EnvironmentCollection actualEnvironment;
 
             COMBINATIONS("Append a string") {
@@ -258,8 +259,8 @@ SCENARIO("Test the comparison operators", "[task]") {
             }
 
             COMBINATIONS("Change the working directories") {
-                task1.setWorkingDirectory(current_path());
-                task2.setWorkingDirectory(current_path() / "tmp");
+                task1.setWorkingDirectory(filesystem::current_path());
+                task2.setWorkingDirectory(filesystem::current_path() / "tmp");
             }
 
             THEN_WHEN("We compare them") {
