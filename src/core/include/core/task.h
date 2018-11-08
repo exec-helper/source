@@ -1,6 +1,7 @@
 #ifndef __TASK_H__
 #define __TASK_H__
 
+#include <filesystem>
 #include <map>
 #include <string>
 #include <vector>
@@ -21,23 +22,33 @@ class Task {
      * Create a task
      *
      */
-    Task() noexcept;
+    Task() noexcept : Task(std::vector<std::string>()) {}
 
     /**
      * Create a task
      *
      * \param[in] subtasks  The task subdivided in separate arguments
      */
-    explicit Task(const TaskCollection& subtasks) noexcept;
+    explicit Task(const std::initializer_list<std::string>& subtasks) noexcept
+        : Task(std::vector<std::string>(subtasks)) {}
 
     /**
      * Create a task
      *
      * \param[in] subtasks  The task subdivided in separate arguments
-     * \param[in] env  The environment for executing the task
-     * \param[in] workingDirectory  The working directory to use for the task
      */
-    Task(TaskCollection subtasks, config::EnvironmentCollection env,
+    explicit Task(const std::vector<std::string>& subtasks) noexcept
+        : Task(subtasks, {}, std::filesystem::current_path()) {}
+
+    /**
+     * Create a task
+     *
+     * \param[in] subtasks  The dask subdivided in separate arguments
+     * \param[in] environment   The initial environment to use for the task
+     * \param[in] workingDirectory  The working directory from which to execute the task
+     */
+    Task(std::vector<std::string> subtasks,
+         config::EnvironmentCollection environment,
          config::Path workingDirectory) noexcept;
 
     /**

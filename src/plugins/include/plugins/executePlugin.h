@@ -42,9 +42,15 @@ class ExecutePlugin : public Plugin {
     config::VariablesMap getVariablesMap(
         const config::FleetingOptionsInterface& fleetingOptions) const
         noexcept override;
-    config::SettingsKey getPatternsKey() const noexcept override;
     bool apply(core::Task task, const config::VariablesMap& variables,
                const config::Patterns& patterns) const noexcept override;
+
+    /**
+     * Returns a list with the names of all known plugins
+     *
+     * @returns A list of plugin names
+     */
+    static const std::vector<std::string>& getPluginNames() noexcept;
 
     /**
      * Returns an instance of the plugin associated with the given name

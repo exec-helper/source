@@ -1,3 +1,5 @@
+include(generators.CMakeLists.txt)
+
 set(EXE_NAME ${PROJECT_NAME}-core-unittest)
 
 set(SRCS
@@ -8,6 +10,7 @@ set(SRCS
    )
 
 set(DEPENDENCIES
+        core-generators
         boost-program-options
         filesystem
         core

@@ -1,7 +1,6 @@
 #include "task.h"
 
 #include <algorithm>
-#include <filesystem>
 #include <iostream>
 #include <numeric>
 #include <ostream>
@@ -21,8 +20,6 @@ using execHelper::config::EnvironmentCollection;
 using execHelper::config::EnvironmentValue;
 using execHelper::config::Path;
 
-namespace filesystem = std::filesystem;
-
 namespace {
 inline string implodeVector(const vector<string>& toImplode,
                             const string& delimiter = string(" ")) {
@@ -38,18 +35,12 @@ inline string implodeVector(const vector<string>& toImplode,
 } // namespace
 
 namespace execHelper::core {
-Task::Task() noexcept : Task({}, {}, filesystem::current_path()) { ; }
-
-Task::Task(const TaskCollection& subtasks) noexcept
-    : Task(subtasks, {}, filesystem::current_path()) {
-    ;
-}
-
 // cppcheck-suppress passedByValue symbolName=subtasks
-Task::Task(TaskCollection subtasks, config::EnvironmentCollection env,
+Task::Task(std::vector<std::string> subtasks,
+           config::EnvironmentCollection environment,
            config::Path workingDirectory) noexcept
     : m_task(std::move(subtasks)),
-      m_env(std::move(env)),
+      m_env(std::move(environment)),
       m_workingDirectory(std::move(workingDirectory)) {
     ;
 }

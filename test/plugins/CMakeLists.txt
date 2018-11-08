@@ -1,6 +1,7 @@
 set(EXE_NAME ${PROJECT_NAME}-plugins-unittest)
 
 set(SRCS
+        src/genericPluginTest.cpp
         src/buildPluginTest.cpp
         src/clangStaticAnalyzerTest.cpp
         src/clangTidyTest.cpp
@@ -20,6 +21,7 @@ set(SRCS
    )
 
 set(DEPENDENCIES
+        core-generators
         plugins
         test-utils
         unittest
@@ -29,7 +31,7 @@ set(DEPENDENCIES
 
 
 add_executable(${EXE_NAME} ${SRCS})
-target_include_directories(${EXE_NAME} PRIVATE ${DEPENDENCIES})
+target_include_directories(${EXE_NAME} PRIVATE ${DEPENDENCIES} include/plugins)
 target_link_libraries(${EXE_NAME} PRIVATE ${DEPENDENCIES})
 add_test(${EXE_NAME} ${EXE_NAME})
 

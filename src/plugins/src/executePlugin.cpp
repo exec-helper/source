@@ -98,10 +98,6 @@ VariablesMap ExecutePlugin::getVariablesMap(
     return VariablesMap("execute-plugin");
 }
 
-SettingsKey ExecutePlugin::getPatternsKey() const noexcept {
-    return "no-patterns-allowed";
-}
-
 inline void ExecutePlugin::index(VariablesMap* variables,
                                  const SettingsNode& settings,
                                  const SettingsKeys& key) noexcept {
@@ -194,6 +190,22 @@ ExecutePlugin::getNextStep(const Command& command,
         LOG(trace) << command << " -> " << commandToExecute;
     }
     return make_unique<ExecutePlugin>(commandsToExecute, command);
+}
+
+const std::vector<std::string>& ExecutePlugin::getPluginNames() noexcept {
+    static std::vector<std::string> plugins{"command-line-command",
+                                            "scons",
+                                            "make",
+                                            "bootstrap",
+                                            "cppcheck",
+                                            "clang-static-analyzer",
+                                            "selector",
+                                            "memory",
+                                            "valgrind",
+                                            "pmd",
+                                            "lcov",
+                                            "clang-tidy"};
+    return plugins;
 }
 
 unique_ptr<Plugin> ExecutePlugin::getPlugin(const string& pluginName) noexcept {

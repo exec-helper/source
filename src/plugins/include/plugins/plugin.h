@@ -64,9 +64,7 @@ class Plugin {
      *
      * \returns The root settings key
      */
-    virtual config::SettingsKey getPatternsKey() const noexcept {
-        return "patterns";
-    }
+    static config::SettingsKey getPatternsKey() noexcept { return "patterns"; }
 
     /**
      * Apply the plugin
