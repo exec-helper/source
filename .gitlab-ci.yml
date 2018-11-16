@@ -64,7 +64,7 @@ variables:
         - *build_tools
         - *install_exec_helper
         - exec-helper setup init-build -c g++ -m release
-        - make -C build/g++/release/build Rapidcheck
+        - ninja -C build/g++/release/build Rapidcheck
         - exec-helper analyze --analyze clang-tidy --module $MODULES --source-type $SOURCE_TYPE
 
 .cppcheck: &cppcheck
@@ -230,9 +230,8 @@ build:gcc:limited-optimization:
     image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-build
     script:
         - *build_tools
-        - cmake -H. -Bbuild/g++/release/build -DCMAKE_CXX_COMPILER=g++ -DCMAKE_INSTALL_PREFIX=build/g++/release/install -DCMAKE_BUILD_TYPE=Release -DLIMITED_OPTIMIZATION=ON
-        - make -C build/g++/release/build --jobs 4
-        - make -C build/g++/release/build install
+        - cmake -G Ninja -H. -Bbuild/g++/release/build -DCMAKE_CXX_COMPILER=g++ -DCMAKE_INSTALL_PREFIX=build/g++/release/install -DCMAKE_BUILD_TYPE=Release -DLIMITED_OPTIMIZATION=ON
+        - ninja -C build/g++/release/build install
     artifacts:
         expire_in: 1 day
         paths:
@@ -375,6 +374,7 @@ examples:
         - exec-helper --settings-file selector.example example
         - exec-helper --settings-file bootstrap.example example
         - exec-helper --settings-file make.example example
+        - exec-helper --settings-file ninja.example example
         - exec-helper --settings-file scons.example example
         - exec-helper --settings-file clang-static-analyzer.example example
         - exec-helper --settings-file clang-tidy.example example
@@ -391,7 +391,7 @@ cross-compilation:
     before_script:
         - *install_exec_helper
     script:
-        - apt-get install --yes debootstrap g++-aarch64-linux-gnu cmake make pkg-config git
+        - apt-get install --yes debootstrap g++-aarch64-linux-gnu cmake ninja-build pkg-config git
         - debootstrap --arch=arm64 --foreign --variant=minbase --include=libboost-program-options-dev,libboost-filesystem-dev,libboost-log-dev,doxygen,libc6-dev testing ./sysroot_arm64 http://deb.debian.org/debian/
         - for DEB in $(find sysroot_arm64/var/cache/apt/archives -not -path sysroot_arm64/var/cache/apt/archives/partial -type f); do echo "Extracting ${DEB}..."; dpkg -x ${DEB} sysroot_arm64; done   # Unpack all downloaded debian packages, since debootstrap does not seem to unpack the additional included ones and their dependencies
         - exec-helper init-no-system build --compiler aarch64-linux-gnu-g++ --mode release --sysroot $(pwd)/sysroot_arm64

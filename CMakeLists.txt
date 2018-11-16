@@ -66,6 +66,7 @@ add_subdirectory(3rdparty)
 add_subdirectory(src)
 
 if(${ENABLE_TESTING})
+    link_directories(${rapidcheck_LIBRARY_DIRS})
     enable_testing()
     add_subdirectory(test)
 endif()

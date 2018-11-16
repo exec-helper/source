@@ -1,0 +1,42 @@
+commands:                       # Define the commands that can be run
+    example: Run the ninja example
+    clean: Clean the build
+    run: Run the files that were built
+
+patterns:                       # Define the patterns that can be used
+    TARGET:                     # Define the EXAMPLE_PATTERN.
+        default-values:         # Only define the default value
+            - hello
+            - world
+
+example:
+    - clean
+    - ninja                      # Use the ninja plugin when running the 'example' command
+    - run
+
+clean:                          # Use the ninja plugin when running the 'clean' command
+    - ninja
+
+run:
+    - command-line-command
+
+ninja:
+    environment:                # Define additional environment variables
+        WORLD: "world!"
+    build-dir: .                # Set the build dir
+    example:                    # Specific settings for the 'example' command
+        patterns:               # The patterns that are used by the ninja plugins
+            - TARGET
+        command-line:           # Define additional command line arguments
+            - -k                # An example argument passed to ninja
+            - 2
+            - "{TARGET}"   # Define the ninja target to execute
+    clean:
+        command-line:
+            - clean
+
+command-line-command:
+    patterns:
+        - TARGET
+    command-line:
+        - build/ninja/{TARGET}

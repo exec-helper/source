@@ -116,13 +116,13 @@ build:
     - install
 
 build-only:
-    - make
+    - ninja
 
 install:
     - command-line-command
 
 clean:
-    - make
+    - ninja
 
 distclean:
     - command-line-command
@@ -153,7 +153,7 @@ format:
     - command-line-command
 
 docs:
-    - make
+    - ninja
     - command-line-command
 
 selector:
@@ -169,13 +169,13 @@ asan:
     - command-line-command
 
 changelog:
-    - make
+    - ninja
     - command-line-command
 
 create-toolchain-file:
     - command-line-command
 
-make:
+ninja:
     patterns:
         - COMPILER
         - MODE
@@ -234,18 +234,19 @@ command-line-command:
             - COMPILER
             - MODE
         command-line:
-            [ cmake, -H., "-Bbuild/{COMPILER}/{MODE}/build", "-DCMAKE_CXX_COMPILER={COMPILER}", "-DCMAKE_INSTALL_PREFIX=build/{COMPILER}/{MODE}/install", -DCMAKE_EXPORT_COMPILE_COMMANDS=ON, "-DCMAKE_BUILD_TYPE={MODE}", -DBUILD_HTML_DOCUMENTATION=ON, -DBUILD_XML_DOCUMENTATION=OFF, -DBUILD_MAN_DOCUMENTATION=ON, "-DCMAKE_TOOLCHAIN_FILE=build/{COMPILER}/{MODE}/toolchain.cmake", -DTERMINATE_ON_ASSERT_FAILURE=ON]
+            [ cmake, -G, "Ninja", -H., "-Bbuild/{COMPILER}/{MODE}/build", "-DCMAKE_CXX_COMPILER={COMPILER}", "-DCMAKE_INSTALL_PREFIX=build/{COMPILER}/{MODE}/install", -DCMAKE_EXPORT_COMPILE_COMMANDS=ON, "-DCMAKE_BUILD_TYPE={MODE}", -DBUILD_HTML_DOCUMENTATION=ON, -DBUILD_XML_DOCUMENTATION=OFF, -DBUILD_MAN_DOCUMENTATION=ON, "-DCMAKE_TOOLCHAIN_FILE=build/{COMPILER}/{MODE}/toolchain.cmake", -DTERMINATE_ON_ASSERT_FAILURE=ON]
     init-build:
         patterns:
             - COMPILER
             - MODE
-        command-line: [ cmake, -H., "-Bbuild/{COMPILER}/{MODE}/build", "-DCMAKE_CXX_COMPILER={COMPILER}", "-DCMAKE_INSTALL_PREFIX=build/{COMPILER}/{MODE}/install", -DCMAKE_EXPORT_COMPILE_COMMANDS=ON, "-DCMAKE_BUILD_TYPE={MODE}", -DBUILD_HTML_DOCUMENTATION=OFF, -DBUILD_XML_DOCUMENTATION=OFF, -DBUILD_MAN_DOCUMENTATION=OFF, "-DCMAKE_TOOLCHAIN_FILE=build/{COMPILER}/{MODE}/toolchain.cmake", -DTERMINATE_ON_ASSERT_FAILURE=ON]
+        command-line: [ cmake, -G, "Ninja", -H., "-Bbuild/{COMPILER}/{MODE}/build", "-DCMAKE_CXX_COMPILER={COMPILER}", "-DCMAKE_INSTALL_PREFIX=build/{COMPILER}/{MODE}/install", -DCMAKE_EXPORT_COMPILE_COMMANDS=ON, "-DCMAKE_BUILD_TYPE={MODE}", -DBUILD_HTML_DOCUMENTATION=OFF, -DBUILD_XML_DOCUMENTATION=OFF, -DBUILD_MAN_DOCUMENTATION=OFF, "-DCMAKE_TOOLCHAIN_FILE=build/{COMPILER}/{MODE}/toolchain.cmake", -DTERMINATE_ON_ASSERT_FAILURE=ON]
+
     init-no-system:
         patterns:
             - COMPILER
             - MODE
         command-line:
-            [ cmake, -H., "-Bbuild/{COMPILER}/{MODE}/build", "-DCMAKE_CXX_COMPILER={COMPILER}", "-DCMAKE_INSTALL_PREFIX=build/{COMPILER}/{MODE}/install", -DCMAKE_EXPORT_COMPILE_COMMANDS=ON, "-DCMAKE_BUILD_TYPE={MODE}", -DBUILD_HTML_DOCUMENTATION=ON, -DBUILD_XML_DOCUMENTATION=OFF, -DBUILD_MAN_DOCUMENTATION=ON, "-DCMAKE_TOOLCHAIN_FILE=build/{COMPILER}/{MODE}/toolchain.cmake", -DTERMINATE_ON_ASSERT_FAILURE=ON, -DUSE_SYSTEM_YAML_CPP=OFF, -DUSE_SYSTEM_CATCH=OFF, -DUSE_SYSTEM_GSL=OFF, -DUSE_SYSTEM_RAPIDCHECK=OFF]
+            [ cmake,, -G, "Ninja", -H., "-Bbuild/{COMPILER}/{MODE}/build", "-DCMAKE_CXX_COMPILER={COMPILER}", "-DCMAKE_INSTALL_PREFIX=build/{COMPILER}/{MODE}/install", -DCMAKE_EXPORT_COMPILE_COMMANDS=ON, "-DCMAKE_BUILD_TYPE={MODE}", -DBUILD_HTML_DOCUMENTATION=ON, -DBUILD_XML_DOCUMENTATION=OFF, -DBUILD_MAN_DOCUMENTATION=ON, "-DCMAKE_TOOLCHAIN_FILE=build/{COMPILER}/{MODE}/toolchain.cmake", -DTERMINATE_ON_ASSERT_FAILURE=ON, -DUSE_SYSTEM_YAML_CPP=OFF, -DUSE_SYSTEM_CATCH=OFF, -DUSE_SYSTEM_GSL=OFF, -DUSE_SYSTEM_RAPIDCHECK=OFF]
 
     create-toolchain-file:
         patterns:
@@ -353,8 +354,11 @@ pmd:
         - " "
 
 lcov:
+    patterns:
+        - COMPILER
+        - MODE
     run-command: run-test
-    base-directory: .
+    base-directory: "build/{COMPILER}/{MODE}/build"
     directory: .
     zero-counters: yes
     excludes:

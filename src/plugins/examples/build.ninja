@@ -1,0 +1,23 @@
+CXX = g++
+CXXFLAGS = -Wall
+LDFLAGS = 
+BUILD_DIR = build/ninja
+
+rule cc
+    command = $CXX $CXXFLAGS $LDFLAGS -o $out $in
+
+rule rmdir
+    command = rm -rf $dir
+
+build $BUILD_DIR/hello: cc src/hello.cpp
+build hello: phony $BUILD_DIR/hello
+
+build $BUILD_DIR/world: cc src/world.cpp
+build world: phony $BUILD_DIR/world
+
+build clean: rmdir
+    dir = $BUILD_DIR
+
+build all: phony hello world
+
+default all

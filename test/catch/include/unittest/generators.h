@@ -1,9 +1,9 @@
 #ifndef GENERATORS_INCLUDE
 #define GENERATORS_INCLUDE
 
-#include <rapidcheck/rapidcheck.h>
-
 #include "log/logLevel.h"
+
+#include "rapidcheck.h"
 
 // NOTE: Must be in rc namespace!
 namespace rc {

@@ -2,7 +2,7 @@ ARG  DOCKER_TAG=latest
 FROM bverhagen/pacman-aur-wrapper:${DOCKER_TAG}
 LABEL maintainer="barrie.verhagen@gmail.com"
 
-RUN sudo pacman -Sy --needed --noconfirm boost boost-libs yaml-cpp gcc clang cmake make doxygen python3 pkg-config catch2 curl git && sudo pacman -Scc --noconfirm
+RUN sudo pacman -Sy --needed --noconfirm boost boost-libs yaml-cpp gcc clang cmake make ninja doxygen python3 pkg-config catch2 curl git && sudo pacman -Scc --noconfirm
 RUN yay -S microsoft-gsl-git && sudo pacman -Scc --noconfirm
 
 # Install gitchangelog using the standalone installer

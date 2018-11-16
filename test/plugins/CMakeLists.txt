@@ -16,6 +16,7 @@ set(SRCS
         src/sconsTest.cpp
         src/makeTest.cpp
         src/lcovTest.cpp
+        src/ninjaTest.cpp
    )
 
 set(DEPENDENCIES

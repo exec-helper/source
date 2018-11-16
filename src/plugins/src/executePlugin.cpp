@@ -17,6 +17,7 @@
 #include "logger.h"
 #include "make.h"
 #include "memory.h"
+#include "ninja.h"
 #include "plugin.h"
 #include "pluginUtils.h"
 #include "pmd.h"
@@ -232,6 +233,9 @@ unique_ptr<Plugin> ExecutePlugin::getPlugin(const string& pluginName) noexcept {
     }
     if(pluginName == "clang-tidy") {
         return make_unique<ClangTidy>();
+    }
+    if(pluginName == "ninja") {
+        return make_unique<Ninja>();
     }
     return unique_ptr<Plugin>();
 }

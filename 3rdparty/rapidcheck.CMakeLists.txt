@@ -13,14 +13,12 @@ else()
 
     include(ExternalProject)
 
-    set(RAPIDCHECK_SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/${MODULE_NAME}/source)
-    set(RAPIDCHECK_INSTALL_DIR ${CMAKE_CURRENT_BINARY_DIR}/${MODULE_NAME}/install)
-    set(RAPIDCHECK_LIBS librapidcheck.a)
+    set(INSTALL_DIR ${CMAKE_CURRENT_BINARY_DIR}/${MODULE_NAME})
 
     if(CMAKE_TOOLCHAIN_FILE)
         # Inherit settings from toolchain file
-        MESSAGE(STATUS "Toolchain file = " ${CMAKE_TOOLCHAIN_FILE})
-        set(ADDITIONAL_BUILD_ARGS -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE})
+        get_filename_component(TOOLCHAIN_FILE "${CMAKE_TOOLCHAIN_FILE}" ABSOLUTE BASE_DIR "${PROJECT_SOURCE_DIR}")
+        set(ADDITIONAL_BUILD_ARGS -DCMAKE_TOOLCHAIN_FILE=${TOOLCHAIN_FILE})
     else()
         set(ADDITIONAL_BUILD_ARGS -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER})
     endif()
@@ -28,19 +26,28 @@ else()
     ExternalProject_Add(${PACKAGE_NAME}
         PREFIX ${MODULE_NAME}/source
         GIT_REPOSITORY https://github.com/emil-e/rapidcheck.git
-        CMAKE_ARGS ${ADDITIONAL_BUILD_ARGS} -DCMAKE_BUILD_TYPE=Release -DRC_ENABLE_CATCH=ON -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER} -DBUILD_TESTING=OFF -DCATCH_BUILD_TESTING=OFF -DCATCH_ENABLE_WERROR=OFF -DCATCH_INSTALL_DOCS=OFF -DCATCH_INSTALL_HELPERS=OFF
-        INSTALL_COMMAND mkdir -p ${RAPIDCHECK_INSTALL_DIR}/include/rapidcheck && cp ${RAPIDCHECK_LIBS} ${RAPIDCHECK_INSTALL_DIR} && cp -r ../Rapidcheck/include/rapidcheck ${RAPIDCHECK_INSTALL_DIR}/include/ && cp ../Rapidcheck/include/rapidcheck.h ${RAPIDCHECK_INSTALL_DIR}/include/rapidcheck/ && cp ../Rapidcheck/extras/catch/include/rapidcheck/catch.h ${RAPIDCHECK_INSTALL_DIR}/include/rapidcheck/
+        CMAKE_GENERATOR ${CMAKE_GENERATOR}
+        CMAKE_ARGS ${ADDITIONAL_BUILD_ARGS} -DCMAKE_BUILD_TYPE=Release -DRC_ENABLE_CATCH=ON -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER} -DBUILD_TESTING=OFF -DCATCH_BUILD_TESTING=OFF -DCATCH_ENABLE_WERROR=OFF -DCATCH_INSTALL_DOCS=OFF -DCATCH_INSTALL_HELPERS=OFF -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR}
+        INSTALL_DIR ${INSTALL_DIR}
         UPDATE_COMMAND ""
         )
 
-    set(${PACKAGE_NAME}_INCLUDE_DIRS ${RAPIDCHECK_INSTALL_DIR}/include ${RAPIDCHECK_INSTALL_DIR}/src/Rapidcheck/include ${RAPIDCHECK_INSTALL_DIR}/src/Rapidcheck/extras/catch/include)
-    set(${PACKAGE_NAME}_LIBRARIES ${RAPIDCHECK_INSTALL_DIR}/${RAPIDCHECK_LIBS})
-    set(${PACKAGE_NAME}_LIBRARY_DIRS ${RAPIDCHECK_INSTALL_DIR})
+    set(${PACKAGE_NAME}_INCLUDE_DIRS ${INSTALL_DIR}/include)
+
+    if(MSVC)
+        set(${PACKAGE_NAME}_LIBRARIES rapidcheck.lib)
+    else()
+        set(${PACKAGE_NAME}_LIBRARIES librapidcheck.a)
+    endif()
+
+    set(${PACKAGE_NAME}_LIBRARY_DIRS ${INSTALL_DIR}/lib ${INSTALL_DIR}/lib64)
 endif()
 
 add_library(rapidcheck INTERFACE)
 target_include_directories(rapidcheck SYSTEM INTERFACE ${${PACKAGE_NAME}_INCLUDE_DIRS})
 target_link_libraries(rapidcheck INTERFACE ${${PACKAGE_NAME}_LIBRARIES})
+set(rapidcheck_LIBRARY_DIRS ${${PACKAGE_NAME}_LIBRARY_DIRS} CACHE PATH "Library dir for rapidcheck dependency")
+mark_as_advanced(rapidcheck_LIBRARY_DIRS)
 
 if(NOT ${USE_SYSTEM_RAPIDCHECK})
     add_dependencies(rapidcheck ${PACKAGE_NAME})

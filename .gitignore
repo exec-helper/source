@@ -103,3 +103,7 @@ compile_commands.json
 # Coverity files
 cov-int/
 exec-helper.xz
+
+# Ninja files
+.ninja_deps
+.ninja_log

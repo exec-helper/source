@@ -1,7 +1,10 @@
+#ifndef RAPIDCHECK_INCLUDE
+#define RAPIDCHECK_INCLUDE
+
 #include <string>
 #include <utility>
 
-#include <rapidcheck/rapidcheck.h>
+#include <rapidcheck.h>
 
 namespace execHelper {
 namespace test {
@@ -11,3 +14,5 @@ void propertyTest(const std::string& description, Testable&& testable) {
 }
 } // namespace test
 } // namespace execHelper
+
+#endif /* RAPIDCHECK_INCLUDE */
