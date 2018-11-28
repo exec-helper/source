@@ -93,6 +93,7 @@ commands:
     docs: Build + install the documentation
     changelog: Build the changelog
     create-toolchain-file: Create the associated toolchain file
+    format: Format and check the format of the sources
 
 setup:
     - command-line-command

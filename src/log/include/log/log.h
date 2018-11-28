@@ -5,27 +5,12 @@
 #include <ostream>
 #include <string>
 
-#define BOOST_LOG_DYN_LINK 1
-#include <boost/log/expressions.hpp>
-#include <boost/log/sources/channel_feature.hpp>
-#include <boost/log/sources/global_logger_storage.hpp>
-#include <boost/log/sources/record_ostream.hpp>
-#include <boost/log/sources/severity_channel_logger.hpp>
-#include <boost/log/utility/manipulators/add_value.hpp>
-
+#include "consoleLogger.h"
 #include "logLevel.h"
-
-BOOST_LOG_ATTRIBUTE_KEYWORD(fileLog, "File",
-                            std::string) // NOLINT(modernize-use-using)
-BOOST_LOG_ATTRIBUTE_KEYWORD(lineLog, "Line",
-                            unsigned int) // NOLINT(modernize-use-using)
+#include "logMessage.h"
 
 namespace execHelper {
 namespace log {
-using Channel = std::string;
-using LoggerType =
-    boost::log::sources::severity_channel_logger_mt<LogLevel, std::string>;
-
 /**
  * \brief Class for initializing and destructing the logging system. Must be created and kept alive while the logging system is being used.
  *
@@ -47,6 +32,17 @@ class LogInit {
 
     ~LogInit();
 
+    /**
+     * Set the minimum severity of each shown log message for a channel to the given
+     * severity
+     *
+     * \param[in] channel   The channel to set the severity from
+     * \param[in] severity  The severity to set the minimal severity to
+     * \returns True    If the severity was successfully set
+     *          False   Otherwise
+     */
+    bool setSeverity(const Channel& channel, LogLevel severity) noexcept;
+
   private:
     /**
      * Common init script initializing the logging system
@@ -54,18 +50,9 @@ class LogInit {
      * \param[in] logStream   The output stream to log to
      */
     void init(std::ostream& logStream) noexcept;
-};
 
-/**
- * Set the minimum severity of each shown log message for a channel to the given
- * severity
- *
- * \param[in] channel   The channel to set the severity from
- * \param[in] severity  The severity to set the minimal severity to
- * \returns True    If the severity was successfully set
- *          False   Otherwise
- */
-bool setSeverity(const Channel& channel, LogLevel severity) noexcept;
+    std::unique_ptr<ConsoleLogger> m_consoleLogger;
+};
 } // namespace log
 
 namespace color {

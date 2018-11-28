@@ -49,15 +49,15 @@ bool Scons::apply(Task task, const VariablesMap& variables,
     task.append(PLUGIN_NAME);
 
     ensures(variables.get<Verbosity>(VERBOSITY_KEY) != std::nullopt);
-    if(variables.get<Verbosity>(VERBOSITY_KEY).value()) {
+    if(*(variables.get<Verbosity>(VERBOSITY_KEY))) {
         task.append("--debug=explain");
     }
 
     ensures(variables.get<Jobs>(JOBS_KEY) != std::nullopt);
-    task.append({"--jobs", to_string(variables.get<Jobs>(JOBS_KEY).value())});
+    task.append({"--jobs", to_string(*(variables.get<Jobs>(JOBS_KEY)))});
 
     ensures(variables.get<CommandLineArgs>(COMMAND_LINE_KEY) != std::nullopt);
-    task.append(variables.get<CommandLineArgs>(COMMAND_LINE_KEY).value());
+    task.append(*(variables.get<CommandLineArgs>(COMMAND_LINE_KEY)));
 
     for(const auto& combination : makePatternPermutator(patterns)) {
         Task newTask = replacePatternCombinations(task, combination);

@@ -82,7 +82,7 @@ bool Lcov::apply(Task task, const VariablesMap& variables,
                             << PLUGIN_NAME << "' settings");
         return false;
     }
-    auto runCommands = runCommandOpt.value();
+    auto runCommands = *runCommandOpt;
 
     if(runCommands.empty()) {
         user_feedback_error("The '" << RUN_COMMAND << "' list is empty");
@@ -90,24 +90,24 @@ bool Lcov::apply(Task task, const VariablesMap& variables,
     }
 
     ensures(variables.get<InfoFile>(INFO_FILE_KEY) != std::nullopt);
-    auto infoFile = variables.get<InfoFile>(INFO_FILE_KEY).value();
+    auto infoFile = *(variables.get<InfoFile>(INFO_FILE_KEY));
 
     ensures(variables.get<BaseDir>(BASE_DIR_KEY) != std::nullopt);
-    auto baseDirectory = variables.get<BaseDir>(BASE_DIR_KEY).value();
+    auto baseDirectory = *(variables.get<BaseDir>(BASE_DIR_KEY));
 
     ensures(variables.get<Dir>(DIR_KEY) != std::nullopt);
-    auto directory = variables.get<Dir>(DIR_KEY).value();
+    auto directory = *(variables.get<Dir>(DIR_KEY));
 
-    auto commandLine = variables.get<CommandLineArgs>(COMMAND_LINE_KEY).value();
+    auto commandLine = *(variables.get<CommandLineArgs>(COMMAND_LINE_KEY));
 
-    bool zeroCounters = variables.get<ZeroCounters>(ZERO_COUNTERS_KEY).value();
+    bool zeroCounters = *(variables.get<ZeroCounters>(ZERO_COUNTERS_KEY));
     Task zeroCountersTask;
     if(zeroCounters) {
         zeroCountersTask = generateZeroCountersTask(baseDirectory, directory,
                                                     commandLine, task);
     }
 
-    bool genHtml = variables.get<GenHtml>(GEN_HTML_KEY).value();
+    bool genHtml = *(variables.get<GenHtml>(GEN_HTML_KEY));
     Task genHtmlTask;
     if(genHtml) {
         genHtmlTask = generateGenHtmlTask(infoFile, variables, task);
@@ -116,7 +116,7 @@ bool Lcov::apply(Task task, const VariablesMap& variables,
     Task captureTask = generateCaptureTask(baseDirectory, directory, infoFile,
                                            commandLine, task);
 
-    auto exclude = variables.get<Excludes>(EXCLUDES_KEY).value();
+    auto exclude = *(variables.get<Excludes>(EXCLUDES_KEY));
     Task excludeTask;
     if(!exclude.empty()) {
         excludeTask =
@@ -153,16 +153,16 @@ inline Task Lcov::generateGenHtmlTask(const InfoFile& infoFile,
     ensures(variables.get<GenHtmlOutput>(GEN_HTML_OUTPUT_KEY) != std::nullopt);
     result.append(
         {"--output-directory",
-         variables.get<GenHtmlOutput>(GEN_HTML_OUTPUT_KEY).value().native()});
+         variables.get<GenHtmlOutput>(GEN_HTML_OUTPUT_KEY)->native()});
 
     ensures(variables.get<GenHtmlTitle>(GEN_HTML_TITLE_KEY) != std::nullopt);
     result.append(
-        {"--title", variables.get<GenHtmlTitle>(GEN_HTML_TITLE_KEY).value()});
+        {"--title", *(variables.get<GenHtmlTitle>(GEN_HTML_TITLE_KEY))});
 
     ensures(variables.get<GenHtmlCommandLine>(GEN_HTML_COMMAND_LINE_KEY) !=
             std::nullopt);
     result.append(
-        variables.get<GenHtmlCommandLine>(GEN_HTML_COMMAND_LINE_KEY).value());
+        *(variables.get<GenHtmlCommandLine>(GEN_HTML_COMMAND_LINE_KEY)));
 
     result.append(infoFile.native());
 
@@ -189,11 +189,11 @@ Lcov::getExcludes(const VariablesMap& variables) noexcept {
         return Excludes();
     }
 
-    for(auto& exclude : excludes.value()) {
+    for(auto& exclude : *excludes) {
         exclude.insert(0, R"(")");
         exclude.append(R"(")");
     }
-    return excludes.value();
+    return *excludes;
 }
 
 inline Task Lcov::generateExcludeTask(const VariablesMap& variables,

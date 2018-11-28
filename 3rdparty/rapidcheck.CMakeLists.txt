@@ -17,10 +17,18 @@ else()
     set(RAPIDCHECK_INSTALL_DIR ${CMAKE_CURRENT_BINARY_DIR}/${MODULE_NAME}/install)
     set(RAPIDCHECK_LIBS librapidcheck.a)
 
+    if(CMAKE_TOOLCHAIN_FILE)
+        # Inherit settings from toolchain file
+        MESSAGE(STATUS "Toolchain file = " ${CMAKE_TOOLCHAIN_FILE})
+        set(ADDITIONAL_BUILD_ARGS -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE})
+    else()
+        set(ADDITIONAL_BUILD_ARGS -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER})
+    endif()
+
     ExternalProject_Add(${PACKAGE_NAME}
         PREFIX ${MODULE_NAME}/source
         GIT_REPOSITORY https://github.com/emil-e/rapidcheck.git
-        CMAKE_ARGS -DCMAKE_BUILD_TYPE=Release -DRC_ENABLE_CATCH=ON -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
+        CMAKE_ARGS ${ADDITIONAL_BUILD_ARGS} -DCMAKE_BUILD_TYPE=Release -DRC_ENABLE_CATCH=ON -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER} -DBUILD_TESTING=OFF -DCATCH_BUILD_TESTING=OFF -DCATCH_ENABLE_WERROR=OFF -DCATCH_INSTALL_DOCS=OFF -DCATCH_INSTALL_HELPERS=OFF
         INSTALL_COMMAND mkdir -p ${RAPIDCHECK_INSTALL_DIR}/include/rapidcheck && cp ${RAPIDCHECK_LIBS} ${RAPIDCHECK_INSTALL_DIR} && cp -r ../Rapidcheck/include/rapidcheck ${RAPIDCHECK_INSTALL_DIR}/include/ && cp ../Rapidcheck/include/rapidcheck.h ${RAPIDCHECK_INSTALL_DIR}/include/rapidcheck/ && cp ../Rapidcheck/extras/catch/include/rapidcheck/catch.h ${RAPIDCHECK_INSTALL_DIR}/include/rapidcheck/
         UPDATE_COMMAND ""
         )

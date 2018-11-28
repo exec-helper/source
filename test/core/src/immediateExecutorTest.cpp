@@ -14,9 +14,10 @@ using execHelper::core::ImmediateExecutor;
 using execHelper::core::Shell;
 
 namespace {
-ImmediateExecutor::Callback IGNORE_CALLBACK = [](
-    Shell::
-        ShellReturnCode /* returnCode */) noexcept {}; // NOLINT(cert-err58-cpp)
+ImmediateExecutor::Callback // NOLINT(fuchsia-statically-constructed-objects)
+    IGNORE_CALLBACK = [](
+        Shell::
+            ShellReturnCode /* returnCode */) noexcept {}; // NOLINT(cert-err58-cpp)
 } // namespace
 
 namespace execHelper {

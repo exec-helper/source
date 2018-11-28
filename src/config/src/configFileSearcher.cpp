@@ -9,6 +9,7 @@ namespace filesystem = std::filesystem;
 
 namespace execHelper {
 namespace config {
+// cppcheck-suppress passedByValue symbolName=searchPaths
 ConfigFileSearcher::ConfigFileSearcher(Paths searchPaths) noexcept
     : m_searchPaths(std::move(searchPaths)) {
     ;

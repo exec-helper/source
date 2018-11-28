@@ -420,8 +420,7 @@ SCENARIO("Testing the plugin getter", "[execute-plugin]") {
         }
         WHEN("We try to get a non-existing plugin") {
             THEN("We should not get anything") {
-                REQUIRE_FALSE(
-                    ExecutePlugin::getPlugin("non-existing-plugin").get());
+                REQUIRE_FALSE(ExecutePlugin::getPlugin("non-existing-plugin"));
             }
         }
     }

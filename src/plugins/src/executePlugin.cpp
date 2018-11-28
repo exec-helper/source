@@ -66,10 +66,13 @@ Patterns getNextPatterns(const VariablesMap& variables,
 
 } // namespace
 
-vector<gsl::not_null<const FleetingOptionsInterface*>>
+vector<gsl::not_null< // NOLINT(fuchsia-statically-constructed-objects)
+    const FleetingOptionsInterface*>>
     execHelper::plugins::ExecutePlugin::m_fleeting;
-vector<SettingsNode> execHelper::plugins::ExecutePlugin::m_settings;
-vector<PatternsHandler> execHelper::plugins::ExecutePlugin::m_patterns;
+vector<SettingsNode> // NOLINT(fuchsia-statically-constructed-objects)
+    execHelper::plugins::ExecutePlugin::m_settings;
+vector<PatternsHandler> // NOLINT(fuchsia-statically-constructed-objects)
+    execHelper::plugins::ExecutePlugin::m_patterns;
 
 namespace execHelper {
 namespace plugins {
@@ -107,16 +110,16 @@ inline void ExecutePlugin::index(VariablesMap* variables,
     }
 
     expects(!key.empty());
-    variables->replace(key.back(), settings.get<SettingsValues>(key).value());
+    variables->replace(key.back(), *(settings.get<SettingsValues>(key)));
 
     // Get current depth to the level of the given key
-    const SettingsNode* currentDepth = &settings;
-    for(const auto& subkey : key) {
-        currentDepth = &((*currentDepth)[subkey]);
-    }
+    const SettingsNode& currentDepth = std::accumulate(
+        key.begin(), key.end(), static_cast<const SettingsNode&>(settings),
+        [](const auto& node, const auto& subkey) { return node[subkey]; });
+
     for(const auto& depthKey :
-        currentDepth->get<SettingsValues>(SettingsKeys(), SettingsValues())) {
-        (*variables)[depthKey] = (*currentDepth)[depthKey];
+        currentDepth.get<SettingsValues>(SettingsKeys(), SettingsValues())) {
+        (*variables)[depthKey] = currentDepth[depthKey];
     }
 }
 
@@ -186,7 +189,7 @@ ExecutePlugin::getNextStep(const Command& command,
             << command << "' command";
         return unique_ptr<Plugin>();
     }
-    auto commandsToExecute = commandToExecuteOpt.value();
+    auto commandsToExecute = *(commandToExecuteOpt);
     for(const auto& commandToExecute : commandsToExecute) {
         LOG(trace) << command << " -> " << commandToExecute;
     }

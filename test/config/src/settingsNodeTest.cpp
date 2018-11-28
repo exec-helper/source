@@ -28,8 +28,10 @@ void assertBoolSetting(const SettingsNode& settings, const string& key,
     REQUIRE(settings.get<bool>(key, !expected) == expected);
 }
 
-const execHelper::config::SettingsValue DEFAULT_VALUE("blaat");
-const execHelper::config::SettingsValues DEFAULT_VALUES({DEFAULT_VALUE});
+const execHelper::config:: // NOLINT(fuchsia-statically-constructed-objects)
+    SettingsValue DEFAULT_VALUE("blaat");
+const execHelper::config:: // NOLINT(fuchsia-statically-constructed-objects)
+    SettingsValues DEFAULT_VALUES({DEFAULT_VALUE});
 } // namespace
 
 namespace execHelper {
@@ -577,7 +579,8 @@ SCENARIO("Test the assignment operator", "[config][settingsNode]") {
         settings.add(key1, value1);
         settings.add(key2, value2);
         settings.add(key3, value3);
-        const SettingsNode constSettings = settings;
+        const SettingsNode constSettings =
+            settings; // NOLINT(performance-unnecessary-copy-initialization)
 
         WHEN("We assign the settings object to another") {
             SettingsNode assigned(rootKey2);
@@ -714,7 +717,8 @@ SCENARIO("Test the settings node streaming operator",
         settings.add(key1, value1);
         settings.add(key2, value2);
         settings.add(key3, value3);
-        const SettingsNode constSettings = settings;
+        const SettingsNode constSettings =
+            settings; // NOLINT(performance-unnecessary-copy-initialization)
 
         stringstream stream;
 

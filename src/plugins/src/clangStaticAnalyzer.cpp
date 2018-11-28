@@ -63,13 +63,13 @@ bool ClangStaticAnalyzer::apply(core::Task task,
     }
 
     ensures(variables.get<Verbosity>(VERBOSITY_KEY) != std::nullopt);
-    if(variables.get<Verbosity>(VERBOSITY_KEY).value()) {
+    if(*(variables.get<Verbosity>(VERBOSITY_KEY))) {
         task.append("-v");
     }
     ensures(variables.get<CommandLineArgs>(COMMAND_LINE_KEY) != std::nullopt);
-    task.append(variables.get<CommandLineArgs>(COMMAND_LINE_KEY).value());
+    task.append(*(variables.get<CommandLineArgs>(COMMAND_LINE_KEY)));
 
-    ExecutePlugin buildExecutePlugin(buildCommand.value());
+    ExecutePlugin buildExecutePlugin(*(buildCommand));
     return buildExecutePlugin.apply(task, variables, patterns);
 }
 } // namespace plugins

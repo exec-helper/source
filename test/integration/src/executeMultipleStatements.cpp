@@ -290,7 +290,7 @@ SCENARIO("Execute multiple statements: predefined order: failing statements",
         ensures(
             NB_OF_STATEMENTS >=
             3); // In order to have a failing command that is not the first nor the last statement, a statement size of at least 3 statements is required
-        mt19937 gen(0);
+        mt19937 gen(0); // NOLINT(cert-msc32-c,cert-msc51-cpp)
         uniform_int_distribution<> dis(
             1,
             NB_OF_STATEMENTS -

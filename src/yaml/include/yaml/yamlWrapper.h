@@ -1,7 +1,9 @@
 #ifndef __YAML_WRAPPER_H__
 #define __YAML_WRAPPER_H__
 
+#include <algorithm>
 #include <iostream>
+#include <numeric>
 #include <string>
 
 #include <yaml-cpp/node/node.h>
@@ -60,11 +62,10 @@ class YamlWrapper {
      * \returns The associated value
      */
     template <typename T>
-    T get(const std::initializer_list<std::string>& keys) const {
-        YAML::Node node = Clone(m_node);
-        for(const auto& key : keys) {
-            node = node[key];
-        }
+    T get(const std::initializer_list<config::SettingsKey>& keys) const {
+        YAML::Node node = std::accumulate(
+            keys.begin(), keys.end(), Clone(m_node),
+            [](auto& node, const auto& key) { return node[key]; });
         return node.as<T>();
     }
 

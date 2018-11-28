@@ -160,11 +160,12 @@ SCENARIO("Test the envp copy and move constructor, assignment operators and "
                 const auto copiedEnvp = assign.getEnvp();
                 size_t index = 0U;
                 while(
-                    copiedEnvp[index] !=
+                    copiedEnvp // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                        [index] !=
                     nullptr) { // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
                     REQUIRE(
                         expectedEnv[index] ==
-                        copiedEnvp
+                        copiedEnvp // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
                             [index]); // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
                     ++index;
                 }
@@ -176,11 +177,12 @@ SCENARIO("Test the envp copy and move constructor, assignment operators and "
                 const auto copiedEnvp = assign.getEnvp();
                 size_t index = 0U;
                 while(
-                    copiedEnvp[index] !=
+                    copiedEnvp // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                        [index] !=
                     nullptr) { // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
                     REQUIRE(
                         envpAddresses[index] !=
-                        copiedEnvp
+                        copiedEnvp // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
                             [index]); // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
                     ++index;
                 }

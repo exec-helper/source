@@ -199,37 +199,37 @@ SCENARIO("Test the conversion of a wrong string to a log level", "[log]") {
 }
 
 SCENARIO("Write a log message with the severity enabled", "[log]") {
-    propertyTest(
-        "An enabled log level should give the right output",
-        [](LogLevel severity) {
-            stringbuf logBuffer;
-            ostream logStream(&logBuffer);
+    propertyTest("An enabled log level should give the right output",
+                 [](LogLevel severity) {
+                     stringbuf logBuffer;
+                     ostream logStream(&logBuffer);
 
-            execHelper::log::LogInit logInit(logStream);
+                     execHelper::log::LogInit logInit(logStream);
 
-            const string message1("Hello world!!!");
+                     const string message1("Hello world!!!");
 
-            THEN_WHEN("We switch on the right severity") {
-                execHelper::log::setSeverity(LOG_CHANNEL, severity);
-                execHelper::log::setSeverity("other-channel",
+                     THEN_WHEN("We switch on the right severity") {
+                         logInit.setSeverity(LOG_CHANNEL, severity);
+                         logInit.setSeverity("other-channel",
                                              getRelativeLogLevel(severity, 1));
 
-                // Switch off clang-format, since it will put the line assignment
-                // on a separate line, annihilating the purpose of the test
-                // clang-format off
+                         // Switch off clang-format, since it will put the line assignment
+                         // on a separate line, annihilating the purpose of the test
+                         // clang-format off
             LOG(severity) << message1; const unsigned int line = __LINE__;
-                // clang-format on
+                         // clang-format on
 
-                THEN_CHECK("We should find the message in the stream") {
-                    LogMessage result = toMessage(logBuffer.str());
-                    REQUIRE(result.channel == LOG_CHANNEL);
-                    REQUIRE(result.level == severity);
-                    REQUIRE(result.file == __FILE__);
-                    REQUIRE(result.lineNumber == line);
-                    REQUIRE(result.message == message1);
-                }
-            }
-        });
+                         THEN_CHECK(
+                             "We should find the message in the stream") {
+                             LogMessage result = toMessage(logBuffer.str());
+                             REQUIRE(result.channel == LOG_CHANNEL);
+                             REQUIRE(result.level == severity);
+                             REQUIRE(result.file == __FILE__);
+                             REQUIRE(result.lineNumber == line);
+                             REQUIRE(result.message == message1);
+                         }
+                     }
+                 });
 }
 
 SCENARIO("Write a log message with the severity disabled", "[log]") {
@@ -245,9 +245,9 @@ SCENARIO("Write a log message with the severity disabled", "[log]") {
             const string message1("Hello world!!!");
 
             THEN_WHEN("We disable the right severity") {
-                execHelper::log::setSeverity(LOG_CHANNEL,
-                                             getRelativeLogLevel(severity, 1));
-                execHelper::log::setSeverity("other-channel", severity);
+                logInit.setSeverity(LOG_CHANNEL,
+                                    getRelativeLogLevel(severity, 1));
+                logInit.setSeverity("other-channel", severity);
 
                 LOG(severity) << message1;
 

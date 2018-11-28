@@ -136,9 +136,7 @@ inline TaskCollection PosixShell::wordExpand(const Task& task) noexcept {
             wordexp(taskItem.c_str(), &p, WRDE_SHOWERR | WRDE_UNDEF);
         if(returnCode == 0) {
             span<zstring<>> w(p.we_wordv, p.we_wordc);
-            for(const auto& expandedWord : w) {
-                result.emplace_back(expandedWord);
-            }
+            std::copy(w.begin(), w.end(), std::back_inserter(result));
         } else {
             switch(returnCode) {
             case WRDE_BADVAL:

@@ -21,14 +21,12 @@ Envp::Envp(const EnvironmentCollection& env) noexcept {
     static const string DELIMITER("=");
     m_envp.reserve(env.size() + 1);
     for(const auto& envVar : env) {
-        auto newVar = new char // NOLINT(cppcoreguidelines-owning-memory)
-            [envVar.first.size() + DELIMITER.size() + envVar.second.size() +
-             1U];
-        strncpy(newVar, envVar.first.c_str(), envVar.first.size());
-        strncpy(&newVar[envVar.first.size()], DELIMITER.c_str(),
-                DELIMITER.size());
-        strncpy(&newVar[envVar.first.size() + DELIMITER.size()],
-                envVar.second.c_str(), envVar.second.size() + 1U);
+        string envVarString(envVar.first);
+        envVarString.append(DELIMITER).append(envVar.second);
+
+        auto newVar = // NOLINT(cppcoreguidelines-owning-memory)
+            new char[envVarString.size() + 1U];
+        strncpy(newVar, envVarString.c_str(), envVarString.size() + 1U);
         m_envp.emplace_back(newVar);
     }
     m_envp.emplace_back(nullptr);

@@ -1,6 +1,7 @@
 #ifndef __MAP_PERMUTATOR_H__
 #define __MAP_PERMUTATOR_H__
 
+#include <algorithm>
 #include <map>
 #include <vector>
 
@@ -90,12 +91,11 @@ template <typename T, typename U> class MapPermutator {
             if(m_end && m_end == other.m_end) {
                 return true;
             }
-            for(const auto& indexElement : m_indexes) {
-                if(indexElement.second != other.m_indexes[indexElement.first]) {
-                    return false;
-                }
-            }
-            return true;
+            return std::all_of(m_indexes.begin(), m_indexes.end(),
+                               [&other](const auto& element) {
+                                   return element.second ==
+                                          other.m_indexes[element.first];
+                               });
         }
 
         /*! @copydoc config::Argv::operator!=(const Argv&) const

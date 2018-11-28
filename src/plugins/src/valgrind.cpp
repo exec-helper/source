@@ -63,19 +63,19 @@ bool Valgrind::apply(Task task, const VariablesMap& variables,
 
     auto tool = variables.get<Tool>(TOOL_KEY);
     if(tool) {
-        task.append(string("--tool=").append(tool.value()));
+        task.append(string("--tool=").append(*tool));
     }
 
-    if(variables.get<Verbosity>(VERBOSITY_KEY).value()) {
+    if(*(variables.get<Verbosity>(VERBOSITY_KEY))) {
         task.append("--verbose");
     }
 
     ensures(variables.get<CommandLineArgs>(COMMAND_LINE_KEY) != std::nullopt);
-    task.append(variables.get<CommandLineArgs>(COMMAND_LINE_KEY).value());
+    task.append(*(variables.get<CommandLineArgs>(COMMAND_LINE_KEY)));
 
     for(const auto& combination : makePatternPermutator(patterns)) {
         Task newTask = replacePatternCombinations(task, combination);
-        ExecutePlugin buildExecutePlugin(runCommand.value());
+        ExecutePlugin buildExecutePlugin(*runCommand);
         if(!buildExecutePlugin.apply(newTask, variables, patterns)) {
             return false;
         }

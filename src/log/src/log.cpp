@@ -1,78 +1,12 @@
 #include "log.h"
 
-#include "boost/date_time/posix_time/posix_time.hpp"
-#include <boost/log/attributes.hpp>
-#include <boost/log/core.hpp>
+#define BOOST_LOG_DYN_LINK 1
 #include <boost/log/utility/setup/common_attributes.hpp>
-#include <boost/log/utility/setup/console.hpp>
-#include <boost/log/utility/value_ref.hpp>
+#include <boost/log/utility/setup/formatter_parser.hpp>
 
 #include "assertions.h"
 
 using std::make_unique;
-using std::unique_ptr;
-
-using boost::shared_ptr;
-using boost::log::expressions::channel_severity_filter_actor;
-using boost::log::expressions::smessage;
-using boost::log::expressions::stream;
-using boost::log::keywords::filter;
-using boost::log::keywords::format;
-using boost::log::sinks::basic_text_ostream_backend;
-using boost::log::sinks::synchronous_sink;
-
-using execHelper::log::Channel;
-using execHelper::log::LogLevel;
-using execHelper::log::none;
-
-BOOST_LOG_ATTRIBUTE_KEYWORD( // NOLINT(modernize-use-using)
-    timestamp, "TimeStamp", boost::posix_time::ptime)
-BOOST_LOG_ATTRIBUTE_KEYWORD(severity, "Severity", // NOLINT(modernize-use-using)
-                            LogLevel)
-BOOST_LOG_ATTRIBUTE_KEYWORD(channel, "Channel", // NOLINT(modernize-use-using)
-                            Channel)
-
-namespace {
-class ConsoleLogger {
-  public:
-    explicit ConsoleLogger(std::ostream& logStream)
-        : m_logMessageFilter(boost::log::expressions::channel_severity_filter(
-              channel, severity)),
-          m_consoleSink(add_console_log(
-              logStream, filter = severity >= none && false,
-              format = (stream << timestamp << " <" << severity << "> ["
-                               << channel << "] " << fileLog << ":" << lineLog
-                               << " " << smessage))) {}
-
-    ConsoleLogger(const ConsoleLogger& other) = delete;
-    ConsoleLogger(ConsoleLogger&& other) = delete;
-
-    ~ConsoleLogger() {
-        if(m_consoleSink) {
-            boost::log::core::get()->remove_sink(m_consoleSink);
-            m_consoleSink->flush();
-            m_consoleSink.reset();
-        }
-    }
-
-    ConsoleLogger& operator=(const ConsoleLogger& other) = delete;
-    ConsoleLogger& operator=(ConsoleLogger&& other) = delete;
-
-    bool setSeverity(const Channel& channel, LogLevel severity) noexcept {
-        m_logMessageFilter[channel] = severity;
-        m_consoleSink->set_filter(m_logMessageFilter || false);
-        return true;
-    }
-
-  private:
-    channel_severity_filter_actor<Channel, LogLevel> m_logMessageFilter;
-    shared_ptr<synchronous_sink<basic_text_ostream_backend<char>>>
-        m_consoleSink;
-};
-
-unique_ptr<ConsoleLogger> consoleLogger;
-
-} // namespace
 
 namespace execHelper {
 namespace log {
@@ -80,17 +14,17 @@ LogInit::LogInit() noexcept { init(std::clog); }
 
 LogInit::LogInit(std::ostream& logStream) noexcept { init(logStream); }
 
-LogInit::~LogInit() { consoleLogger.reset(); }
+LogInit::~LogInit() { m_consoleLogger.reset(); }
 
 void LogInit::init(std::ostream& logStream) noexcept {
     boost::log::add_common_attributes();
     boost::log::register_simple_formatter_factory<LogLevel, char>("Severity");
 
-    consoleLogger = make_unique<ConsoleLogger>(logStream);
+    m_consoleLogger = make_unique<ConsoleLogger>(logStream);
 }
 
-bool setSeverity(const Channel& channel, LogLevel severity) noexcept {
-    return consoleLogger->setSeverity(channel, severity);
+bool LogInit::setSeverity(const Channel& channel, LogLevel severity) noexcept {
+    return m_consoleLogger->setSeverity(channel, severity);
 }
 
 } // namespace log

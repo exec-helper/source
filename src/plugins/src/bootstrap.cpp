@@ -43,13 +43,13 @@ VariablesMap Bootstrap::getVariablesMap(
 
 bool Bootstrap::apply(Task task, const VariablesMap& variables,
                       const Patterns& patterns) const noexcept {
-    auto filename = variables.get<Path>(FILENAME_KEY).value();
+    auto filename = *(variables.get<Path>(FILENAME_KEY));
     if(filename.is_relative()) {
         filename = Path(".") / filename;
     }
     task.append(filename.native());
-    task.append(variables.get<CommandLineArgs>(COMMAND_LINE_KEY).value());
-    task.setWorkingDirectory(variables.get<Path>(getBuildDirKey()).value());
+    task.append(*(variables.get<CommandLineArgs>(COMMAND_LINE_KEY)));
+    task.setWorkingDirectory(*(variables.get<Path>(getBuildDirKey())));
 
     for(const auto& combination : makePatternPermutator(patterns)) {
         Task bootstrapTask = replacePatternCombinations(task, combination);

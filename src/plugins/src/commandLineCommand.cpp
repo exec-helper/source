@@ -59,10 +59,10 @@ bool CommandLineCommand::apply(Task task, const VariablesMap& variables,
 
     auto workingDir = variables.get<WorkingDir>(WORKING_DIR_KEY);
     if(workingDir) {
-        task.setWorkingDirectory(workingDir.value());
+        task.setWorkingDirectory(*(workingDir));
     }
 
-    auto commandLine = variables.get<CommandLineArgs>(COMMAND_LINE_KEY).value();
+    auto commandLine = *(variables.get<CommandLineArgs>(COMMAND_LINE_KEY));
     if(commandLine.empty()) {
         user_feedback_error("Could not find the '"
                             << COMMAND_LINE_KEY << "' setting in the '"
@@ -85,8 +85,7 @@ bool CommandLineCommand::apply(Task task, const VariablesMap& variables,
             SettingsKeys tmpKey = keys;
             tmpKey.emplace_back(commandKey);
             Task newTask = task;
-            newTask.append(
-                move(variables.get<CommandLineArgs>(tmpKey).value()));
+            newTask.append(move(*(variables.get<CommandLineArgs>(tmpKey))));
             tasks.emplace_back(newTask);
         }
     }

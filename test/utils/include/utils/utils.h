@@ -55,7 +55,7 @@ using Patterns = std::vector<config::Pattern>;
 using Arguments = std::vector<std::string>;
 struct MainVariables {
     int argc;
-    std::unique_ptr<char* []> argv;
+    std::unique_ptr<char*[]> argv;
 
     explicit MainVariables(const Arguments& arguments);
 };

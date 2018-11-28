@@ -20,7 +20,6 @@ using Catch::Session;
 using Catch::clara::Opt;
 
 using execHelper::log::InvalidLogLevel;
-using execHelper::log::setSeverity;
 using execHelper::log::toLogLevel;
 using execHelper::log::LogLevel::none;
 
@@ -52,7 +51,7 @@ int main(int argc, char** argv) {
 
     execHelper::log::LogInit logInit;
     for(const auto& logModule : logModules) {
-        if(!setSeverity(logModule, logLevel)) {
+        if(!logInit.setSeverity(logModule, logLevel)) {
             cerr << "Error settings log level '" << logLevel << "' for module '"
                  << logModule << "'" << endl;
             return EXIT_FAILURE;

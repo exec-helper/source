@@ -37,6 +37,7 @@ ostream& stream(ostream& os, const execHelper::config::SettingsNode& settings,
 
 namespace execHelper {
 namespace config {
+// cppcheck-suppress passedByValue symbolName=key
 SettingsNode::SettingsNode(SettingsKey key) noexcept : m_key(std::move(key)) {
     ;
 }
@@ -88,11 +89,11 @@ bool SettingsNode::operator!=(const SettingsNode& other) const noexcept {
 
 SettingsNode& SettingsNode::operator[](const SettingsKey& key) noexcept {
     if(contains(key)) {
-        for(auto& value : *m_values) {
-            if(value.m_key == key) {
-                return value;
-            }
-        }
+        auto value =
+            find_if(m_values->begin(), m_values->end(),
+                    [&key](const auto& value) { return value.m_key == key; });
+        ensures(value != m_values->end());
+        return *value;
     }
     add(key);
     return m_values->back();
@@ -101,25 +102,20 @@ SettingsNode& SettingsNode::operator[](const SettingsKey& key) noexcept {
 const SettingsNode& SettingsNode::operator[](const SettingsKey& key) const
     noexcept {
     expectsMessage(contains(key), "Key must exist");
-    for(const auto& value : *m_values) {
-        if(value.m_key == key) {
-            return value;
-        }
-    }
-    ensures(false);
-    return *this;
+    auto value =
+        find_if(m_values->begin(), m_values->end(),
+                [&key](const auto& value) { return value.m_key == key; });
+    ensures(value != m_values->end());
+    return *value;
 }
 
 bool SettingsNode::contains(const SettingsKey& key) const noexcept {
     if(!m_values) {
         return false;
     }
-    for(const auto& value : *m_values) {
-        if(value.m_key == key) {
-            return true;
-        }
-    }
-    return false;
+    return std::any_of(
+        m_values->begin(), m_values->end(),
+        [&key](const auto& value) { return value.m_key == key; });
 }
 
 bool SettingsNode::contains(const SettingsKeys& key) const noexcept {
@@ -197,9 +193,9 @@ bool SettingsNode::add(const SettingsValues& newValue) noexcept {
         m_values = make_unique<SettingsNodeCollection>();
     }
     m_values->reserve(m_values->size() + newValue.size());
-    for(const auto& valueToAdd : newValue) {
-        m_values->emplace_back(SettingsNode(valueToAdd));
-    }
+    std::transform(newValue.begin(), newValue.end(),
+                   std::back_inserter(*m_values),
+                   [](auto&& value) { return SettingsNode(value); });
     return true;
 }
 
@@ -241,9 +237,9 @@ std::optional<SettingsValues> SettingsNode::values() const noexcept {
     }
     SettingsValues result;
     result.reserve(m_values->size());
-    for(const auto& value : *m_values) {
-        result.push_back(value.m_key);
-    }
+    std::transform(m_values->begin(), m_values->end(),
+                   std::back_inserter(result),
+                   [](const auto& value) { return value.m_key; });
     return result;
 }
 
@@ -268,24 +264,20 @@ void SettingsNode::overwrite(const SettingsNode& newSettings) noexcept {
 
 SettingsNode* SettingsNode::at(const SettingsKey& key) noexcept {
     expectsMessage(contains(key), "Key must exist");
-    for(SettingsNode& value : *m_values) {
-        if(value.m_key == key) {
-            return &value;
-        }
-    }
-    ensures(false);
-    return this;
+    auto value =
+        std::find_if(m_values->begin(), m_values->end(),
+                     [&key](const auto& value) { return value.m_key == key; });
+    ensures(value != m_values->end());
+    return &(*value);
 }
 
 const SettingsNode* SettingsNode::at(const SettingsKey& key) const noexcept {
     expectsMessage(contains(key), "Key must exist");
-    for(const SettingsNode& value : *m_values) {
-        if(value.m_key == key) {
-            return &value;
-        }
-    }
-    ensures(false);
-    return this;
+    auto value =
+        std::find_if(m_values->begin(), m_values->end(),
+                     [&key](const auto& value) { return value.m_key == key; });
+    ensures(value != m_values->end());
+    return &(*value);
 }
 
 SettingsNode* SettingsNode::at(const SettingsKeys& key) noexcept {
@@ -313,9 +305,8 @@ void SettingsNode::deepCopy(const SettingsNode& other) noexcept {
 
     m_values = make_unique<SettingsNodeCollection>();
     m_values->reserve(other.m_values->size());
-    for(auto otherKey : *other.m_values) {
-        m_values->emplace_back(otherKey);
-    }
+    std::copy(other.m_values->begin(), other.m_values->end(),
+              std::back_inserter(*m_values));
 }
 
 ostream& operator<<(ostream& os, const SettingsNode& settings) noexcept {

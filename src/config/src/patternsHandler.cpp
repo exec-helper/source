@@ -68,7 +68,7 @@ PatternsHandler::toPattern(const PatternKey& key,
 
     auto shortOption = patternMap.get<char>(SHORT_OPTION_KEY);
     auto longOptionOpt = patternMap.get<string>(LONG_OPTION_KEY);
-    return Pattern(key, defaultValues.value(), shortOption, longOptionOpt);
+    return Pattern(key, *defaultValues, shortOption, longOptionOpt);
 }
 } // namespace config
 } // namespace execHelper

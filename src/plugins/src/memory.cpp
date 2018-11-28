@@ -18,8 +18,8 @@ const czstring<> PLUGIN_NAME = "memory";
 
 namespace execHelper {
 namespace plugins {
-Memory::Memories Memory::m_executions =
-    {};                           // NOLINT(readability-redundant-declaration)
+Memory::Memories               // NOLINT(fuchsia-statically-constructed-objects)
+    Memory::m_executions = {}; // NOLINT(readability-redundant-declaration)
 bool Memory::m_returnCode = true; // NOLINT(readability-redundant-declaration)
 
 std::string Memory::getPluginName() const noexcept { return PLUGIN_NAME; }

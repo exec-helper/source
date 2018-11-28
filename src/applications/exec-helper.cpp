@@ -83,7 +83,6 @@ using execHelper::core::ReportingExecutor;
 using execHelper::core::Shell;
 using execHelper::core::Task;
 using execHelper::log::LogLevel;
-using execHelper::log::setSeverity;
 
 namespace filesystem = std::filesystem;
 
@@ -302,7 +301,7 @@ int execHelperMain(int argc, char** argv, char** envp) {
     execHelper::log::LogInit logInit;
     auto level = fleetingOptions.getLogLevel();
     for(const auto& logModule : logModules) {
-        setSeverity(logModule, level);
+        logInit.setSeverity(logModule, level);
     }
 
     auto shell = make_shared<PosixShell>();

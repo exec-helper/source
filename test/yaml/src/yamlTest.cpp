@@ -28,8 +28,10 @@ using execHelper::test::utils::convertToConfig;
 using execHelper::test::utils::writeSettingsFile;
 
 namespace {
-const execHelper::config::SettingsValue DEFAULT_VALUE("blaat");
-const execHelper::config::SettingsValues DEFAULT_VALUES({DEFAULT_VALUE});
+const execHelper::config:: // NOLINT(fuchsia-statically-constructed-objects)
+    SettingsValue DEFAULT_VALUE("blaat");
+const execHelper::config:: // NOLINT(fuchsia-statically-constructed-objects)
+    SettingsValues DEFAULT_VALUES({DEFAULT_VALUE});
 } // namespace
 
 namespace execHelper {

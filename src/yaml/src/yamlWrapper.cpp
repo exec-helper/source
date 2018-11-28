@@ -60,11 +60,9 @@ void YamlWrapper::swap(const YamlWrapper& other) noexcept {
 
 YAML::Node
 YamlWrapper::getSubNode(const std::initializer_list<std::string>& keys) const {
-    YAML::Node node = Clone(m_node);
-    for(const auto& key : keys) {
-        node = node[key];
-    }
-    return node;
+    return std::accumulate(
+        keys.begin(), keys.end(), Clone(m_node),
+        [](auto& node, const auto& key) { return node[key]; });
 }
 
 bool YamlWrapper::getTree(const initializer_list<string>& keys,
@@ -130,10 +128,12 @@ bool YamlWrapper::getSubTree(const YAML::Node& node, SettingsNode* yamlNode,
         }
         break;
     case YAML::NodeType::Sequence:
-        for(const auto& element : node) {
-            if(!YamlWrapper::getSubTree(element, yamlNode, keys)) {
-                return false;
-            }
+        if(!std::all_of(node.begin(), node.end(),
+                        [&yamlNode, &keys](const auto& element) {
+                            return YamlWrapper::getSubTree(element, yamlNode,
+                                                           keys);
+                        })) {
+            return false;
         }
         break;
     }

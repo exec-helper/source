@@ -5,6 +5,7 @@ set(SRCS
         src/log.cpp
         src/logLevel.cpp
         src/logger.cpp
+        src/consoleLogger.cpp
    )
 
 set(DEPENDENCIES
