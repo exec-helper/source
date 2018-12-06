@@ -76,6 +76,7 @@ commands:
     setup: Setup the repository for building
     init: Initialize the build infrastructure
     init-build: Initialize the build infrastructure and switches off everything that has nothing to do with building the exec-helper binaries themselves
+    init-no-system: Initialize system and disable the use of all system packages
     build: Build-only + install
     build-only: Build only
     install: Install only
@@ -103,6 +104,10 @@ init:
     - command-line-command
 
 init-build:
+    - create-toolchain-file
+    - command-line-command
+
+init-no-system:
     - create-toolchain-file
     - command-line-command
 
@@ -235,6 +240,13 @@ command-line-command:
             - COMPILER
             - MODE
         command-line: [ cmake, -H., "-Bbuild/{COMPILER}/{MODE}/build", "-DCMAKE_CXX_COMPILER={COMPILER}", "-DCMAKE_INSTALL_PREFIX=build/{COMPILER}/{MODE}/install", -DCMAKE_EXPORT_COMPILE_COMMANDS=ON, "-DCMAKE_BUILD_TYPE={MODE}", -DBUILD_HTML_DOCUMENTATION=OFF, -DBUILD_XML_DOCUMENTATION=OFF, -DBUILD_MAN_DOCUMENTATION=OFF, "-DCMAKE_TOOLCHAIN_FILE=build/{COMPILER}/{MODE}/toolchain.cmake", -DTERMINATE_ON_ASSERT_FAILURE=ON]
+    init-no-system:
+        patterns:
+            - COMPILER
+            - MODE
+        command-line:
+            [ cmake, -H., "-Bbuild/{COMPILER}/{MODE}/build", "-DCMAKE_CXX_COMPILER={COMPILER}", "-DCMAKE_INSTALL_PREFIX=build/{COMPILER}/{MODE}/install", -DCMAKE_EXPORT_COMPILE_COMMANDS=ON, "-DCMAKE_BUILD_TYPE={MODE}", -DBUILD_HTML_DOCUMENTATION=ON, -DBUILD_XML_DOCUMENTATION=OFF, -DBUILD_MAN_DOCUMENTATION=ON, "-DCMAKE_TOOLCHAIN_FILE=build/{COMPILER}/{MODE}/toolchain.cmake", -DTERMINATE_ON_ASSERT_FAILURE=ON, -DUSE_SYSTEM_YAML_CPP=OFF, -DUSE_SYSTEM_CATCH=OFF, -DUSE_SYSTEM_GSL=OFF, -DUSE_SYSTEM_RAPIDCHECK=OFF]
+
     create-toolchain-file:
         patterns:
             - COMPILER

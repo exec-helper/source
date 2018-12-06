@@ -252,6 +252,18 @@ build:clang:
         paths:
             - build/clang++/release/install
 
+build:no-system:
+    stage: build
+    image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-run
+    dependencies:
+        - build:native
+    before_script:
+        - sudo pacman -Sy --needed --noconfirm clang cmake make doxygen git
+    script: 
+        - *build_tools
+        - *install_exec_helper
+        - exec-helper init-no-system build --compiler clang++ --mode release
+
 unittests:
     <<: *run_test
     variables:
@@ -382,7 +394,7 @@ cross-compilation:
         - apt-get install --yes debootstrap g++-aarch64-linux-gnu cmake make pkg-config git
         - debootstrap --arch=arm64 --foreign --variant=minbase --include=libboost-program-options-dev,libboost-filesystem-dev,libboost-log-dev,doxygen,libc6-dev testing ./sysroot_arm64 http://deb.debian.org/debian/
         - for DEB in $(find sysroot_arm64/var/cache/apt/archives -not -path sysroot_arm64/var/cache/apt/archives/partial -type f); do echo "Extracting ${DEB}..."; dpkg -x ${DEB} sysroot_arm64; done   # Unpack all downloaded debian packages, since debootstrap does not seem to unpack the additional included ones and their dependencies
-        - exec-helper init-build build --compiler aarch64-linux-gnu-g++ --mode release --sysroot $(pwd)/sysroot_arm64
+        - exec-helper init-no-system build --compiler aarch64-linux-gnu-g++ --mode release --sysroot $(pwd)/sysroot_arm64
 
 code-format:
     <<: *code_format
