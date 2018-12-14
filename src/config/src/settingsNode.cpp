@@ -72,6 +72,9 @@ bool SettingsNode::operator==(const SettingsNode& other) const noexcept {
     if(!m_values || !other.m_values) {
         return (!m_values && !other.m_values);
     }
+    if(m_values->size() != other.m_values->size()) {
+        return false;
+    }
     for(const auto& value : *m_values) {
         if(!other.contains(value.m_key)) {
             return false;

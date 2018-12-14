@@ -1,23 +1,31 @@
 #ifndef __MAKE_H__
 #define __MAKE_H__
 
-#include "buildPlugin.h"
-#include "core/task.h"
+#include "addEnvironment.h"
+#include "buildDir.h"
+#include "commandLine.h"
+#include "pluginStrategy.h"
+#include "threadedness.h"
+#include "verbosity.h"
+#include "workingDirectory.h"
 
 namespace execHelper {
 namespace plugins {
 /**
- * \brief   Plugin for running make
+ * \brief Provides details for the make plugin
  */
-class Make : public BuildPlugin {
-  public:
-    std::string getPluginName() const noexcept override;
-    config::VariablesMap getVariablesMap(
-        const config::FleetingOptionsInterface& fleetingOptions) const
-        noexcept override;
-    bool apply(core::Task task, const config::VariablesMap& variables,
-               const config::Patterns& patterns) const noexcept override;
+struct MakeDetails {
+    /*! @copydoc NinjaDetails::getName()
+     */
+    inline static std::string getName() { return "make"; }
+
+    /*! @copydoc NinjaDetails::getBinary()
+     */
+    inline static std::string getBinary() { return "make"; }
 };
+
+using Make = PluginStrategy<MakeDetails, BuildDirLong, JobsLong, VerbosityDebug,
+                            CommandLine, WorkingDirectory, AddEnvironment>;
 } // namespace plugins
 } // namespace execHelper
 

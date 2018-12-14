@@ -7,12 +7,12 @@
 #include "config/environment.h"
 #include "config/pattern.h"
 #include "config/variablesMap.h"
-#include "plugins/workingDirectory.h"
 #include "plugins/commandLine.h"
 #include "plugins/ninja.h"
 #include "plugins/pluginUtils.h"
 #include "plugins/threadedness.h"
 #include "plugins/verbosity.h"
+#include "plugins/workingDirectory.h"
 #include "unittest/catch.h"
 #include "utils/utils.h"
 
@@ -117,16 +117,16 @@ SCENARIO("Testing the configuration settings of the ninja plugin", "[ninja]") {
         };
         registerExecuteCallback(executeCallback);
 
-        COMBINATIONS("Switch off multi-threading") {
-            jobs = 1U;
-            variables.replace(JOBS_KEY, to_string(jobs));
-        }
-
         COMBINATIONS("Set a build directory") {
             buildDir = "{" + pattern1.getKey() + "}/{" + pattern2.getKey() +
                        "}/{HELLO}/{" + pattern2.getKey() + "}/hello{" +
                        pattern1.getKey() + " }world";
             variables.replace(BUILD_DIR_KEY, buildDir.native());
+        }
+
+        COMBINATIONS("Switch off multi-threading") {
+            jobs = 1U;
+            variables.replace(JOBS_KEY, to_string(jobs));
         }
 
         COMBINATIONS("Set environment") {

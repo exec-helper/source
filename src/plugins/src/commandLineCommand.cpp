@@ -6,9 +6,9 @@
 
 #include "config/environment.h"
 #include "config/variablesMap.h"
-#include "config/workingDirectory.h"
 #include "core/patterns.h"
 #include "core/task.h"
+#include "plugins/workingDirectory.h"
 
 #include "commandLine.h"
 #include "logger.h"
@@ -29,8 +29,6 @@ using execHelper::config::Patterns;
 using execHelper::config::SettingsKeys;
 using execHelper::config::SettingsValues;
 using execHelper::config::VariablesMap;
-using execHelper::config::WORKING_DIR_KEY;
-using execHelper::config::WorkingDir;
 using execHelper::core::Task;
 using execHelper::core::Tasks;
 

@@ -6,12 +6,12 @@
 #include "config/environment.h"
 #include "config/pattern.h"
 #include "config/variablesMap.h"
-#include "config/workingDirectory.h"
 #include "plugins/commandLine.h"
 #include "plugins/make.h"
 #include "plugins/pluginUtils.h"
 #include "plugins/threadedness.h"
 #include "plugins/verbosity.h"
+#include "plugins/workingDirectory.h"
 #include "unittest/catch.h"
 #include "utils/utils.h"
 
@@ -30,7 +30,6 @@ using execHelper::config::Path;
 using execHelper::config::Pattern;
 using execHelper::config::Patterns;
 using execHelper::config::VariablesMap;
-using execHelper::config::WORKING_DIR_KEY;
 using execHelper::core::Task;
 
 using execHelper::core::test::ExecutorStub;

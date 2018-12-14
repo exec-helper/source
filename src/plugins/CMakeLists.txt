@@ -5,8 +5,6 @@ set(SRCS
         src/bootstrap.cpp
         src/pmd.cpp
         src/selector.cpp
-        src/make.cpp
-        src/ninja.cpp
         src/pluginUtils.cpp
         src/memory.cpp
         src/commandPlugin.cpp
