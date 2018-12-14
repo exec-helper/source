@@ -109,13 +109,14 @@ SCENARIO("Testing the configuration settings of the ninja plugin", "[ninja]") {
         bool verbosity = false;
         CommandLineArgs commandLine;
         EnvironmentCollection env;
-        Path workingDirectory(filesystem::current_path());
 
         ExecutorStub executor;
         ExecuteCallback executeCallback = [&executor](const Task& task) {
             executor.execute(task);
         };
         registerExecuteCallback(executeCallback);
+
+        Path workingDirectory(filesystem::current_path());
 
         COMBINATIONS("Set a build directory") {
             buildDir = "{" + pattern1.getKey() + "}/{" + pattern2.getKey() +

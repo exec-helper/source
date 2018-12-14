@@ -118,7 +118,7 @@ variables:
     script:
         - *build_tools
         - *install_exec_helper
-        - exec-helper analyze --analyze asan --module ${ALL_MODULES}
+        - exec-helper analyze --analyze asan --module "${ALL_MODULES}"      # Note: the quotes are used to cheat exec-helper so that the binaries are only build ones rather than for each module separately
 
 build-image:build:
     stage: build-image
