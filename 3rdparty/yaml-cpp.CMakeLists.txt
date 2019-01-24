@@ -33,11 +33,8 @@ else()
         )
 
     set(${PACKAGE_NAME}_INCLUDE_DIRS ${YAML_INSTALL_DIR}/include)
-    set(${PACKAGE_NAME}_LIBRARIES ${YAML_INSTALL_DIR}/lib/libyaml-cpp.a)
+    set(${PACKAGE_NAME}_LIBRARIES libyaml-cpp.a)
     set(${PACKAGE_NAME}_LIBRARY_DIRS ${YAML_INSTALL_DIR}/lib)
-
-    file(MAKE_DIRECTORY ${YAML_INSTALL_DIR}/include)
-    file(WRITE ${YAML_INSTALL_DIR}/lib/libyaml-cpp.a)
 endif()
 
 add_library(yaml-3rd INTERFACE)
@@ -47,3 +44,5 @@ endif()
 
 target_include_directories(yaml-3rd SYSTEM INTERFACE ${${PACKAGE_NAME}_INCLUDE_DIRS})
 target_link_libraries(yaml-3rd INTERFACE ${${PACKAGE_NAME}_LIBRARIES})
+set(yaml-3rd_LIBRARY_DIRS ${${PACKAGE_NAME}_LIBRARY_DIRS} CACHE PATH "Library dir for YAML dependency")
+mark_as_advanced(yaml-3rd_LIBRARY_DIRS)

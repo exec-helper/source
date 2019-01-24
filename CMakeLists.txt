@@ -63,6 +63,9 @@ set(LIB_DIRECTORY ${CMAKE_INSTALL_LIBDIR})
 option(ENABLE_TESTING "Enable building tests" ON)
 
 add_subdirectory(3rdparty)
+link_directories(${yaml-3rd_LIBRARY_DIRS})
+link_directories(${rpcheck_LIBRARY_DIRS})
+
 add_subdirectory(src)
 
 if(${ENABLE_TESTING})

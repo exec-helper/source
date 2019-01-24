@@ -1,12 +1,15 @@
-find_package(Gsl)
+set(THIS_MODULE_NAME gsl)
+set(THIS_PACKAGE_NAME Gsl)
+
+find_package(${THIS_PACKAGE_NAME})
 option(USE_SYSTEM_GSL "Use the gsl library provided by the system" ${Gsl_FOUND})
 
 if(${USE_SYSTEM_GSL})
     if(NOT ${Gsl_FOUND})
-        MESSAGE(FATAL_ERROR "Could NOT find gsl")
+        MESSAGE(FATAL_ERROR "Could NOT find " ${THIS_MODULE_NAME})
     endif()
 else()
-    MESSAGE(STATUS " -> Using latest upstream version of ${PACKAGE_NAME} instead")
+    MESSAGE(STATUS " -> Using latest upstream version of ${THIS_PACKAGE_NAME} instead")
 
     include(ExternalProject)
 

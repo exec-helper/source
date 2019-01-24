@@ -17,7 +17,7 @@ set(DEPENDENCIES
         boost-program-options
         config
         unittest
-        rapidcheck
+        rpcheck
         test-utils
     )
 

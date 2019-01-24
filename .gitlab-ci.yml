@@ -49,8 +49,8 @@ variables:
         - build:gcc:limited-optimization
     script:
         - *install_exec_helper
-        - export PATH=$(pwd)/build/g++/release/install/bin:$PATH
-        - exec-helper analyze --analyze valgrind --run-target $RUN_TARGET --compiler g++ --mode release --module $MODULES
+        - export PATH=$(pwd)/build/g++/limited/install/bin:$PATH
+        - exec-helper analyze --analyze valgrind --run-target $RUN_TARGET --compiler g++ --mode limited --module $MODULES
 
 .clang_tidy: &clang_tidy
     stage: analyze
@@ -64,7 +64,6 @@ variables:
         - *build_tools
         - *install_exec_helper
         - exec-helper setup init-build -c g++ -m release
-        - ninja -C build/g++/release/build Rapidcheck
         - exec-helper analyze --analyze clang-tidy --module $MODULES --source-type $SOURCE_TYPE
 
 .cppcheck: &cppcheck
@@ -90,11 +89,8 @@ variables:
     script:
         - *build_tools
         - *install_exec_helper
-        - export CXXFLAGS="-g -fsanitize=undefined -fno-omit-frame-pointer -fno-sanitize-recover=undefined -fsanitize-blacklist=\"$(pwd)/suppressions/ubsan.blacklist\""
-        - export LDFLAGS="-g -fsanitize=undefined -fno-omit-frame-pointer -fno-sanitize-recover=undefined -fsanitize-blacklist=\"$(pwd)/suppressions/ubsan.blacklist\""
-        - export UBSAN_OPTIONS="print_stacktrace=1"
         - export PATH=$(pwd)/build/clang++/undefined-behaviour/install/bin:$PATH
-        - exec-helper init-build build run-test --compiler clang++ --mode undefined-behaviour --run-target ${RUN_TARGET}
+        - exec-helper undefined-behaviour
 
 .code_format: &code_format
     stage: analyze
@@ -240,14 +236,16 @@ build:gcc:debug:
 build:gcc:limited-optimization:
     stage: build
     image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-build
+    dependencies:
+        - build:native
     script:
         - *build_tools
-        - cmake -G Ninja -H. -Bbuild/g++/release/build -DCMAKE_CXX_COMPILER=g++ -DCMAKE_INSTALL_PREFIX=build/g++/release/install -DCMAKE_BUILD_TYPE=Release -DLIMITED_OPTIMIZATION=ON
-        - ninja -C build/g++/release/build install
+        - *install_exec_helper
+        - exec-helper init-limited-optimization build --compiler g++ --mode limited
     artifacts:
         expire_in: 1 day
         paths:
-            - build/g++/release/install
+            - build/g++/limited/install
 
 build:clang:
     stage: build
