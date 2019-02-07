@@ -127,7 +127,8 @@ build-image:build:
         - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
     script:
         - echo "Building image '$BUILD_IMAGE'"
-        - docker build -t ${BUILD_IMAGE} -f docker/build/Dockerfile --build-arg DOCKER_TAG=latest .
+        - cd docker/build
+        - docker build -t ${BUILD_IMAGE} --build-arg DOCKER_TAG=latest .
         - docker push ${BUILD_IMAGE}
 
 build-image:build-debian:
@@ -141,7 +142,8 @@ build-image:build-debian:
         - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
     script:
         - echo "Building image '$BUILD_IMAGE'"
-        - docker build -t ${BUILD_IMAGE} -f docker/build/debian.Dockerfile .
+        - cd docker/build
+        - docker build -t ${BUILD_IMAGE} -f debian.Dockerfile .
         - docker push ${BUILD_IMAGE}
 
 build-image:run:
@@ -155,7 +157,8 @@ build-image:run:
         - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
     script:
         - echo "Building image '$RUN_IMAGE'"
-        - docker build -t ${RUN_IMAGE} -f docker/run/Dockerfile .
+        - cd docker/run
+        - docker build -t ${RUN_IMAGE} .
         - docker push ${RUN_IMAGE}
 
 build-image:analyze:
@@ -169,7 +172,8 @@ build-image:analyze:
         - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
     script:
         - echo "Building image '$ANALYZE_IMAGE'"
-        - docker build -t ${ANALYZE_IMAGE} -f docker/analyze/Dockerfile .
+        - cd docker/analyze
+        - docker build -t ${ANALYZE_IMAGE} .
         - docker push ${ANALYZE_IMAGE}
 
 build:native:
