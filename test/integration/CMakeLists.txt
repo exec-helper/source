@@ -1,3 +1,7 @@
+add_custom_target(integration COMMENT "Building integration tests" )
+
+add_subdirectory(feature)
+
 set(EXE_NAME ${PROJECT_NAME}-integration-test)
 
 set(SRCS
@@ -19,5 +23,4 @@ add_test(${EXE_NAME} ${EXE_NAME})
 add_dependencies(${EXE_NAME} execution-content)
 
 install(TARGETS ${EXE_NAME} DESTINATION ${INTEGRATION_TEST_BIN_DIR} COMPONENT integration)
-add_custom_target(integration COMMENT "Building integration tests" )
 add_dependencies(integration ${EXE_NAME})

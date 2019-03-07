@@ -1,0 +1,5 @@
+Short Option            -h
+Long Option             --help
+More Options First      --help  --version   --debug     debug
+More Options Middle     --help  --debug     debug   --version
+More Options Last       --version   --debug     debug   --help

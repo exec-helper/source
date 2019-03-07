@@ -1,5 +1,6 @@
-set(UNITTEST_BIN_DIR    ${BIN_DIRECTORY})
-set(INTEGRATION_TEST_BIN_DIR ${BIN_DIRECTORY})
+set(TEST_BIN_DIR test)
+set(UNITTEST_BIN_DIR    "${TEST_BIN_DIR}/unittest")
+set(INTEGRATION_TEST_BIN_DIR "${TEST_BIN_DIR}/integration")
 
 add_subdirectory(catch)
 add_subdirectory(base-utils)

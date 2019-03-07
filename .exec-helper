@@ -146,6 +146,13 @@ unittest:
     - command-line-command
 
 integration:
+    - integration-old
+    - integration-new
+
+integration-old:
+    - command-line-command
+
+integration-new:
     - command-line-command
 
 coverage:
@@ -287,12 +294,24 @@ command-line-command:
             - COMPILER
             - MODE
             - MODULE
-        command-line: build/{COMPILER}/{MODE}/install/bin/exec-helper-{MODULE}-unittest
-    integration:
+        command-line: build/{COMPILER}/{MODE}/install/test/unittest/exec-helper-{MODULE}-unittest
+
+    integration-new:
         patterns:
             - COMPILER
             - MODE
-        command-line: build/{COMPILER}/{MODE}/install/bin/exec-helper-integration-test
+            - EH_WORKING_DIR
+        environment:
+            - PYTHONHOME: ""
+            #- PATH: "${EH_WORKING_DIR}/env/bin:${EH_WORKING_DIRECTORY}/build/{COMPILER}/{MODE}/install/bin"
+        command-line:
+            test: [robot, "--outputdir", "build/{COMPILER}/{MODE}", "build/{COMPILER}/{MODE}/install/test/integration/*.robot"]
+
+    integration-old:
+        patterns:
+            - COMPILER
+            - MODE
+        command-line: build/{COMPILER}/{MODE}/install/test/integration/exec-helper-integration-test
     coverage:
         environment:
             CXXFLAGS: -g --coverage -fprofile-arcs -ftest-coverage
