@@ -198,7 +198,7 @@ SettingsFileOption_t settingsFileValue =
 auto settingsFile = configFileSearcher.find(settingsFileValue);
 if(settingsFile == std::nullopt) {
     if(!fleetingOptions.getHelp()) {
-        user_feedback("Could not find a settings file");
+        user_feedback_error("Could not find a settings file");
     }
     return std::nullopt;
 }
@@ -256,9 +256,7 @@ handleConfiguration(const Argv& argv,
                     const EnvironmentCollection& /*env*/, OptionDescriptions& options) {
     options.setPositionalArgument(commandOption);
     VariablesMap optionsMap = FleetingOptions::getDefault();
-    if(!options.getOptionsMap(optionsMap, argv, true)) {
-        user_feedback_error(
-            "Could not properly parse the command line options");
+    if(!options.getOptionsMap(optionsMap, argv, false)) {
         throw std::invalid_argument("Could not properly parse the command line options");
     }
     return optionsMap;
@@ -283,7 +281,16 @@ int execHelperMain(int argc, char** argv, char** envp) {
     auto patterns = patternSettingsPair.first;
     auto settings = patternSettingsPair.second;
 
-    auto optionsMap = handleConfiguration(args, env, optionDescriptions);
+    VariablesMap optionsMap("options");
+
+    try {
+        optionsMap = handleConfiguration(args, env, optionDescriptions);
+    } catch(const std::invalid_argument&) {
+        user_feedback_error(
+            "Could not properly parse the command line options");
+        printHelp(args[0], optionDescriptions, settings);
+        return EXIT_FAILURE;
+    }
 
     const FleetingOptions fleetingOptions(optionsMap);
     if(fleetingOptions.getHelp()) {

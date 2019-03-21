@@ -1,0 +1,11 @@
+Scenario: The application is called with no command line arguments and no valid configuration file
+    Given a test environment with no config
+    When we call the application without command line arguments
+    Then the call should fail with return code  1
+    And stderr must contain  Could not find a settings file
+
+Scenario: The application is called with no command line arguments and a valid configuration file
+    Given a test environment with a valid config
+    When we call the application without command line arguments
+    Then the call should fail with return code  1
+    And stderr must contain  must define at least one command

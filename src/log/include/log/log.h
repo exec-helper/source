@@ -95,7 +95,7 @@ static Modifier red(FG_RED);
     (std::cout << execHelper::color::blue << x << execHelper::color::def       \
                << std::endl); // NOLINT(misc-macro-parentheses)
 #define user_feedback_error(x)                                                 \
-    (std::cout << execHelper::color::red << x << execHelper::color::def        \
+    (std::cerr << execHelper::color::red << x << execHelper::color::def        \
                << std::endl); // NOLINT(misc-macro-parentheses)
 
 #endif /* __LOG_H__ */

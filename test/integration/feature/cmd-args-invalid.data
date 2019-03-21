@@ -1,0 +1,4 @@
+Short flag              -b
+Long flag               --blaat
+Short Option            -b      blaat
+Long Option             --blaat     blaat

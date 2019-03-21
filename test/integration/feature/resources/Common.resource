@@ -5,8 +5,13 @@ Library     TestEnvironment.py
 a test environment with a valid config
     add_valid_config
 
-A test environment with no config
+a test environment with no config
     no_config
+
+we call the application without command line arguments
+    run_application
+    print_stdout
+    print_stderr
 
 we call the application with command line options
     [Arguments]     ${args}
@@ -14,9 +19,21 @@ we call the application with command line options
     print_stdout
     print_stderr
 
-return code should be
+the return code should be
     [Arguments]     ${expected_ret_code}
     check_return_code    ${expected_ret_code}
 
+the call should fail with return code
+    [Arguments]     ${expected_ret_code}
+    the return code should be   ${expected_ret_code}
+
 the call should succeed
-    return code should be   0
+    the return code should be   0
+
+stdout must contain
+    [Arguments]     ${message}
+    stdout_contains     ${message}
+
+stderr must contain
+    [Arguments]     ${message}
+    stderr_contains     ${message}

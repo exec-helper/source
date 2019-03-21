@@ -1,16 +1,27 @@
+install(DIRECTORY resources DESTINATION ${INTEGRATION_TEST_BIN_DIR} COMPONENT integration)
+
 set(FEATURES
+        cmd-args-empty
+    )
+
+foreach(FEATURE IN LISTS FEATURES)
+    file(READ ${FEATURE}.resources RESOURCES)
+    file(READ ${FEATURE}.scenarios SCENARIOS)
+
+    configure_file(simple-test.robot.template "${FEATURE}.robot" @ONLY)
+    install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${FEATURE}.robot" DESTINATION ${INTEGRATION_TEST_BIN_DIR} COMPONENT integration)
+endforeach()
+
+set(DATA_DRIVEN_TESTS
+        cmd-args-invalid
         help-option
         version-option
     )
 
-message("Features = " ${FEATURES})
-
-foreach(FEATURE IN LISTS FEATURES)
+foreach(FEATURE IN LISTS DATA_DRIVEN_TESTS)
     file(READ ${FEATURE}.data DATA)
     file(READ ${FEATURE}.resources RESOURCES)
     file(READ ${FEATURE}.scenarios ALL_SCENARIOS)
-
-    install(DIRECTORY resources DESTINATION ${INTEGRATION_TEST_BIN_DIR} COMPONENT integration)
 
     set(FOUND_SCENARIO "")
     set(SCENARIOS)

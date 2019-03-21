@@ -1,0 +1,17 @@
+File: cmd-args-invalid
+Scenario: Invalid command line arguments
+    [Arguments]     @{args}
+    Given a test environment with a valid config
+    When we call the application with an invalid command line       ${args}
+    Then the call should fail with return code  1
+    and stderr contains    unrecognised option
+    and the usage information should be printed to stdout
+
+File: cmd-args-invalid-no-config
+Scenario: Invalid command line arguments and no configuration file
+    [Arguments]     @{args}
+    Given a test environment with no config
+    When we call the application with an invalid command line       ${args}
+    Then the call should fail with return code  1
+    and stderr contains    unrecognised option
+    and the usage information should be printed to stdout

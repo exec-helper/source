@@ -16,7 +16,7 @@ class TestEnvironment(object):
         self._config.write()
         self._args['--settings-file'] = self._config.file
 
-    def run_application(self, arg_list):
+    def run_application(self, arg_list=[]):
         args = ['exec-helper']
 
         print(len(arg_list))
@@ -30,6 +30,10 @@ class TestEnvironment(object):
     def stdout_contains(self, needle):
         if not str.encode(needle) in self._last_run.stdout:
             raise AssertionError("'{needle}' not found in stdout: '{stdout}'".format(needle = needle, stdout = self._last_run.stdout))
+
+    def stderr_contains(self, needle):
+        if not str.encode(needle) in self._last_run.stderr:
+            raise AssertionError("'{needle}' not found in stderr: '{stderr}'".format(needle = needle, stderr = self._last_run.stderr))
 
     def print_stdout(self):
         print(self._last_run.stdout)

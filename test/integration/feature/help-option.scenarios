@@ -1,7 +1,7 @@
 File: help-option-cmd-args
 Scenario: The help option is defined on a valid command line
     [Arguments]     @{args}
-    A test environment with a valid config
+    Given a test environment with a valid config
     When we call the application with the help option and other command line options    ${args}
     Then the usage information should be printed to stdout
     and the call should succeed
@@ -9,7 +9,7 @@ Scenario: The help option is defined on a valid command line
 File: help-option-cmd-args-no-config
 Scenario: The help option is defined on a valid command line with no configuration file
     [Arguments]     @{args}
-    A test environment with no config
+    Given a test environment with no config
     When we call the application with the help option and other command line options    ${args}
     Then the usage information should be printed to stdout
     and the call should succeed

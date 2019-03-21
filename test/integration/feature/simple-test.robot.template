@@ -1,0 +1,5 @@
+*** Settings ***
+@RESOURCES@
+
+*** Test case ***
+@SCENARIOS@
