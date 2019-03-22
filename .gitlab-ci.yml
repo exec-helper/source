@@ -116,6 +116,21 @@ variables:
         - *install_exec_helper
         - exec-helper analyze --analyze asan --module "${ALL_MODULES}"      # Note: the quotes are used to cheat exec-helper so that the binaries are only build ones rather than for each module separately
 
+build-image:analyze:
+    stage: build-image
+    image: docker:latest
+    services:
+        - docker:dind
+    variables:
+        ANALYZE_IMAGE: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-analyze
+    before_script:
+        - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
+    script:
+        - echo "Building image '$ANALYZE_IMAGE'"
+        - cd docker/analyze
+        - docker build -t ${ANALYZE_IMAGE} .
+        - docker push ${ANALYZE_IMAGE}
+
 build-image:build:
     stage: build-image
     image: docker:latest
@@ -160,21 +175,6 @@ build-image:run:
         - cd docker/run
         - docker build -t ${RUN_IMAGE} .
         - docker push ${RUN_IMAGE}
-
-build-image:analyze:
-    stage: build-image
-    image: docker:latest
-    services:
-        - docker:dind
-    variables:
-        ANALYZE_IMAGE: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-analyze
-    before_script:
-        - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
-    script:
-        - echo "Building image '$ANALYZE_IMAGE'"
-        - cd docker/analyze
-        - docker build -t ${ANALYZE_IMAGE} .
-        - docker push ${ANALYZE_IMAGE}
 
 build:native:
     stage: build-native
@@ -289,12 +289,6 @@ memory-check:
         RUN_TARGET: unittest integration-old
         MODULES: $ALL_MODULES
 
-cppcheck-unittest:
-    <<: *cppcheck
-    variables:
-        SOURCE_TYPE: src
-        MODULES: $ALL_MODULES
-
 clang-tidy:
     <<: *clang_tidy
 
@@ -316,21 +310,24 @@ clang-static-analyzer:
         - echo "SET(CMAKE_C_COMPILER  clang)" >> toolchain.cmake.in
         - exec-helper analyze --analyze clang-static-analyzer --mode debug --compiler ''
 
+cross-compilation:
+    stage: analyze
+    image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-build-debian
+    dependencies:
+        - build:debian
+    before_script:
+        - *install_exec_helper
+    script:
+        - apt-get install --yes debootstrap g++-aarch64-linux-gnu cmake ninja-build pkg-config git
+        - debootstrap --arch=arm64 --foreign --variant=minbase --include=libboost-program-options-dev,libboost-filesystem-dev,libboost-log-dev,doxygen,libc6-dev testing ./sysroot_arm64 http://deb.debian.org/debian/
+        - for DEB in $(find sysroot_arm64/var/cache/apt/archives -not -path sysroot_arm64/var/cache/apt/archives/partial -type f); do echo "Extracting ${DEB}..."; dpkg -x ${DEB} sysroot_arm64; done   # Unpack all downloaded debian packages, since debootstrap does not seem to unpack the additional included ones and their dependencies
+        - exec-helper init-no-system build --compiler aarch64-linux-gnu-g++ --mode release --sysroot $(pwd)/sysroot_arm64
+
 undefined-behaviour:
     <<: *undefined_behaviour
 
 address-sanitizer:
     <<: *asan_check
-
-code-duplication-pmd-cpd:
-    stage: analyze
-    image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-analyze
-    dependencies:
-        - build:native
-    script:
-        - *install_exec_helper
-        - exec-helper analyze --analyze pmd
-        - exec-helper analyze --analyze pmd --module integration --source-type test
 
 coverage:
     stage: analyze
@@ -345,6 +342,22 @@ coverage:
     artifacts:
         paths:
             - test_coverage/
+
+cppcheck-unittest:
+    <<: *cppcheck
+    variables:
+        SOURCE_TYPE: src
+        MODULES: $ALL_MODULES
+
+code-duplication-pmd-cpd:
+    stage: analyze
+    image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-analyze
+    dependencies:
+        - build:native
+    script:
+        - *install_exec_helper
+        - exec-helper analyze --analyze pmd
+        - exec-helper analyze --analyze pmd --module integration --source-type test
 
 #coverity:
     #stage: analyze
@@ -391,19 +404,6 @@ examples:
         - exec-helper --settings-file lcov.example example
         - exec-helper --settings-file pmd.example example
         - exec-helper --settings-file valgrind.example example
-
-cross-compilation:
-    stage: analyze
-    image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-build-debian
-    dependencies:
-        - build:debian
-    before_script:
-        - *install_exec_helper
-    script:
-        - apt-get install --yes debootstrap g++-aarch64-linux-gnu cmake ninja-build pkg-config git
-        - debootstrap --arch=arm64 --foreign --variant=minbase --include=libboost-program-options-dev,libboost-filesystem-dev,libboost-log-dev,doxygen,libc6-dev testing ./sysroot_arm64 http://deb.debian.org/debian/
-        - for DEB in $(find sysroot_arm64/var/cache/apt/archives -not -path sysroot_arm64/var/cache/apt/archives/partial -type f); do echo "Extracting ${DEB}..."; dpkg -x ${DEB} sysroot_arm64; done   # Unpack all downloaded debian packages, since debootstrap does not seem to unpack the additional included ones and their dependencies
-        - exec-helper init-no-system build --compiler aarch64-linux-gnu-g++ --mode release --sysroot $(pwd)/sysroot_arm64
 
 code-format:
     <<: *code_format
