@@ -305,7 +305,7 @@ command-line-command:
             - PYTHONHOME: ""
             #- PATH: "${EH_WORKING_DIR}/env/bin:${EH_WORKING_DIRECTORY}/build/{COMPILER}/{MODE}/install/bin"
         command-line:
-            test: [robot, "--outputdir", "build/{COMPILER}/{MODE}", "build/{COMPILER}/{MODE}/install/test/integration/"]
+            test: [robot, "--outputdir", "build/{COMPILER}/{MODE}", --suitestatlevel, 3, "build/{COMPILER}/{MODE}/install/test/integration/"]
 
     integration-old:
         patterns:

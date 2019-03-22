@@ -1,2 +1,2 @@
-Resource    resources/Common.resource
+Resource    ../../resources/Common.resource
 Resource    resources/VersionOption.resource

@@ -1,27 +1,15 @@
-install(DIRECTORY resources DESTINATION ${INTEGRATION_TEST_BIN_DIR} COMPONENT integration)
+function(GenerateSimpleRobotTest TEST_NAME SUB_DIR)
+    file(READ ${TEST_NAME}.resources RESOURCES)
+    file(READ ${TEST_NAME}.scenarios SCENARIOS)
 
-set(FEATURES
-        cmd-args-empty
-    )
+    configure_file("${PROJECT_SOURCE_DIR}/test/integration/feature/simple-test.robot.template" "${TEST_NAME}.robot" @ONLY)
+    install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${TEST_NAME}.robot" DESTINATION "${INTEGRATION_TEST_BIN_DIR}/${SUB_DIR}" COMPONENT integration)
+endfunction()
 
-foreach(FEATURE IN LISTS FEATURES)
-    file(READ ${FEATURE}.resources RESOURCES)
-    file(READ ${FEATURE}.scenarios SCENARIOS)
-
-    configure_file(simple-test.robot.template "${FEATURE}.robot" @ONLY)
-    install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${FEATURE}.robot" DESTINATION ${INTEGRATION_TEST_BIN_DIR} COMPONENT integration)
-endforeach()
-
-set(DATA_DRIVEN_TESTS
-        cmd-args-invalid
-        help-option
-        version-option
-    )
-
-foreach(FEATURE IN LISTS DATA_DRIVEN_TESTS)
-    file(READ ${FEATURE}.data DATA)
-    file(READ ${FEATURE}.resources RESOURCES)
-    file(READ ${FEATURE}.scenarios ALL_SCENARIOS)
+function(GenerateDataDrivenRobotTest TEST_NAME SUB_DIR)
+    file(READ ${TEST_NAME}.data DATA)
+    file(READ ${TEST_NAME}.resources RESOURCES)
+    file(READ ${TEST_NAME}.scenarios ALL_SCENARIOS)
 
     set(FOUND_SCENARIO "")
     set(SCENARIOS)
@@ -52,7 +40,17 @@ foreach(FEATURE IN LISTS DATA_DRIVEN_TESTS)
         # Get scenario name
         string(REGEX MATCH "Scenario:[A-Za-z0-9 ]*" SCENARIO_NAME ${SCENARIO})
 
-        configure_file(data-driven-test.robot.template "${SCENARIO_FILE}.robot" @ONLY)
-        install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${SCENARIO_FILE}.robot" DESTINATION ${INTEGRATION_TEST_BIN_DIR} COMPONENT integration)
+        configure_file("${PROJECT_SOURCE_DIR}/test/integration/feature/data-driven-test.robot.template" "${SCENARIO_FILE}.robot" @ONLY)
+        install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${SCENARIO_FILE}.robot" DESTINATION "${INTEGRATION_TEST_BIN_DIR}/${SUB_DIR}" COMPONENT integration)
     endforeach()
-endforeach()
+endfunction()
+
+set(RESOURCES
+    resources/Common.resource
+    resources/Config.py
+    resources/TestEnvironment.py
+    resources/WorkingDir.py
+)
+install(FILES ${RESOURCES} DESTINATION ${INTEGRATION_TEST_BIN_DIR}/resources COMPONENT integration)
+
+add_subdirectory(cmd-args)

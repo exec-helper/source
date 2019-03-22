@@ -8,12 +8,12 @@ The various command line options are discussed on their own pages:
 
 # No command line arguments {#feature-cmd-args-empty}
 ## Scenarios {#scenario-cmd-args-emtpy}
-\include cmd-args-empty.scenarios
+\include no-args.scenarios
 
 # Invalid command lines {#feature-cmd-args-invalid}
 ## Scenarios {#scenario-cmd-args-invalid}
-\include cmd-args-invalid.scenarios
+\include invalid-args.scenarios
 
 ## Test data
 The following data is currently used for testing the scenario's:
-\include cmd-args-invalid.data
+\include invalid-args.data

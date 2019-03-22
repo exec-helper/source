@@ -2,3 +2,4 @@ Short flag              -b
 Long flag               --blaat
 Short Option            -b      blaat
 Long Option             --blaat     blaat
+Multiple Option         --blaat     blaat   --foo   bar
