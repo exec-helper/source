@@ -1,5 +1,5 @@
 *** Settings ***
-Resource     ../../Resources/Common.resource
+Resource     ../../../resources/Common.resource
 
 *** Keywords ***
 the version information should be printed to stdout

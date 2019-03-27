@@ -8,14 +8,31 @@ a test environment with a valid config
 a test environment with no config
     no_config
 
+an executable command
+    [Arguments]     ${command}
+    Create command  ${command}
+
+the environment set in the config
+    [Arguments]     ${command}     ${envs}
+    Set environment     ${command}      ${envs}
+
 we call the application without command line arguments
+    write_config
     run_application
     print_stdout
     print_stderr
 
 we call the application with command line options
     [Arguments]     ${args}
+    write_config
     run_application     ${args}
+    print_stdout
+    print_stderr
+
+When we call the application with the command
+    [Arguments]     @{command}
+    write_config
+    run_application     ${command}
     print_stdout
     print_stderr
 

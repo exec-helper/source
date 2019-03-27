@@ -13,13 +13,22 @@ class TestEnvironment(object):
         self._config.remove()
 
     def add_valid_config(self):
-        self._config.write()
         self._args['--settings-file'] = self._config.file
+
+    def write_config(self):
+        self._config.write()
+
+    def create_command(self, command):
+        """ Create a command in the given config """
+        self._config.create_command(command)
+
+    def set_environment(self, command, envs):
+        """ Set the environment for the given command """
+        envs = TestEnvironment.list2dict(envs)
+        self._config.set_environment(command, envs)
 
     def run_application(self, arg_list=[]):
         args = ['exec-helper']
-
-        print(len(arg_list))
 
         for cmd_option,value in self._args.items():
             args.extend([cmd_option, value])
@@ -45,3 +54,29 @@ class TestEnvironment(object):
         expected = int(expected)
         if self._last_run.returncode != expected:
             raise AssertionError("Return code was '{actual}' but expected '{expected}'".format(actual = self._last_run.returncode, expected = expected))
+
+    @staticmethod
+    def list2dict(input):
+        result = dict()
+        for value in input:
+            parts = value.split(":")
+            if len(parts) != 2:
+                raise AssertionError("Cannot parse '{value}' to dict".format(value = value))
+            result[parts[0]] = parts[1]
+        return result
+
+    def environment_contains(self, command, envs):
+        envs = TestEnvironment.list2dict(envs)
+
+        runs = self._config.commands[command].runs
+
+        if not runs:
+           raise AssertionError("Command '{command}' was not executed".format(command = command)) 
+
+        for key,value in envs.items():
+            for run in runs:
+                if key not in run.environment:
+                    raise AssertionError("{key} is expected to occur in the environment".format(key = key))
+
+                if not value == run.environment[key]:
+                    raise AssertionError("Actual value '{value}' is not the expected value '{expected}'".format(actual = value, expected = value))

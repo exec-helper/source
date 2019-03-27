@@ -54,3 +54,4 @@ set(RESOURCES
 install(FILES ${RESOURCES} DESTINATION ${INTEGRATION_TEST_BIN_DIR}/resources COMPONENT integration)
 
 add_subdirectory(cmd-args)
+add_subdirectory(config)
