@@ -275,9 +275,12 @@ integration:
     <<: *run_test
     variables:
         RUN_TARGET: integration
+    before_script:
+        - sudo pacman -Sy --needed --noconfirm python python-pip
+        - sudo pip install -r test/integration/requirements.txt
     after_script:
-         - mkdir -p integration
-         - mv build/g++/release/*.{xml,html} integration/
+        - mkdir -p integration
+        - mv build/g++/release/*.{xml,html} integration/
     artifacts:
         expire_in: 1 day
         paths:
