@@ -1,7 +1,5 @@
 #include "executePlugin.h"
 
-#include <gsl/string_span>
-
 #include "config/fleetingOptionsInterface.h"
 #include "config/settingsNode.h"
 #include "config/variablesMap.h"
@@ -29,9 +27,6 @@ using std::string;
 using std::unique_ptr;
 using std::vector;
 
-using gsl::czstring;
-using gsl::not_null;
-
 using execHelper::config::Command;
 using execHelper::config::CommandCollection;
 using execHelper::config::FleetingOptionsInterface;
@@ -46,7 +41,7 @@ using execHelper::config::VariablesMap;
 using execHelper::core::Task;
 
 namespace {
-const czstring<> EXECUTE_PLUGIN_KEY = "execute-plugin";
+const std::string EXECUTE_PLUGIN_KEY = "execute-plugin";
 
 Patterns getNextPatterns(const VariablesMap& variables,
                          const PatternsHandler& patterns) {
@@ -66,7 +61,7 @@ Patterns getNextPatterns(const VariablesMap& variables,
 
 } // namespace
 
-vector<gsl::not_null<const FleetingOptionsInterface*>>
+vector<const FleetingOptionsInterface*>
     execHelper::plugins::ExecutePlugin::m_fleeting;
 vector<SettingsNode> execHelper::plugins::ExecutePlugin::m_settings;
 vector<PatternsHandler> execHelper::plugins::ExecutePlugin::m_patterns;
@@ -233,7 +228,7 @@ unique_ptr<Plugin> ExecutePlugin::getPlugin(const string& pluginName) noexcept {
     return unique_ptr<Plugin>();
 }
 
-bool ExecutePlugin::push(not_null<const config::FleetingOptionsInterface*>
+bool ExecutePlugin::push(const config::FleetingOptionsInterface*
                              fleetingOptions) noexcept {
     m_fleeting.push_back(fleetingOptions);
     return true;

@@ -3,17 +3,9 @@
 #include <cstring>
 #include <string>
 
-#include <gsl/pointers>
-#include <gsl/span>
-#include <gsl/string_span>
-
 #include "log/assertions.h"
 
 using std::string;
-
-using gsl::czstring;
-using gsl::owner;
-using gsl::span;
 
 namespace execHelper {
 namespace config {
@@ -88,15 +80,14 @@ void Envp::deepCopy(const Envp& other) noexcept {
 }
 
 std::ostream& operator<<(std::ostream& os, const Envp& envp) noexcept {
-    const span<const czstring<>> envs(envp.getEnvp(), envp.size());
     bool firstIteration = true;
-    for(const auto& env : envs) {
+    for(unsigned int i = 0; i < envp.size(); ++i) {
         if(!firstIteration) {
-            os << ", ";
+            os << std::string(", ");
         } else {
             firstIteration = false;
         }
-        os << env;
+        os << std::string(envp.getEnvp()[i]);
     }
     return os;
 }

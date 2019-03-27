@@ -3,8 +3,6 @@
 #include <string>
 #include <vector>
 
-#include <gsl/string_span>
-
 #include "config/fleetingOptionsInterface.h"
 #include "config/settingsNode.h"
 #include "core/patterns.h"
@@ -18,8 +16,6 @@
 using std::string;
 using std::vector;
 
-using gsl::czstring;
-
 using execHelper::config::Command;
 using execHelper::config::FleetingOptionsInterface;
 using execHelper::config::PatternKeys;
@@ -28,14 +24,14 @@ using execHelper::config::VariablesMap;
 using execHelper::core::Task;
 
 namespace {
-const czstring<> PLUGIN_NAME = "pmd";
-const czstring<> EXEC_KEY = "exec";
-const czstring<> TOOL_KEY = "tool";
+const std::string PLUGIN_NAME = "pmd";
+const std::string EXEC_KEY = "exec";
+const std::string TOOL_KEY = "tool";
 using MinimumTokens = string;
-const czstring<> MINIMUM_TOKENS_KEY = "minimum-tokens";
+const std::string MINIMUM_TOKENS_KEY = "minimum-tokens";
 using Files = vector<string>;
-const czstring<> FILES_KEY = "files";
-const czstring<> LANGUAGE_KEY = "language";
+const std::string FILES_KEY = "files";
+const std::string LANGUAGE_KEY = "language";
 } // namespace
 
 namespace execHelper {

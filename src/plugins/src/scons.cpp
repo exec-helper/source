@@ -2,8 +2,6 @@
 
 #include <string>
 
-#include <gsl/string_span>
-
 #include "config/fleetingOptionsInterface.h"
 #include "config/variablesMap.h"
 #include "core/patterns.h"
@@ -17,15 +15,13 @@
 using std::string;
 using std::to_string;
 
-using gsl::czstring;
-
 using execHelper::config::FleetingOptionsInterface;
 using execHelper::config::Patterns;
 using execHelper::config::VariablesMap;
 using execHelper::core::Task;
 
 namespace {
-const czstring<> PLUGIN_NAME = "scons";
+const std::string PLUGIN_NAME = "scons";
 } // namespace
 
 namespace execHelper {

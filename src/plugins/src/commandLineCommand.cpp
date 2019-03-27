@@ -2,8 +2,6 @@
 
 #include <string>
 
-#include <gsl/string_span>
-
 #include "config/environment.h"
 #include "config/variablesMap.h"
 #include "config/workingDirectory.h"
@@ -16,8 +14,6 @@
 
 using std::move;
 using std::string;
-
-using gsl::czstring;
 
 using execHelper::config::Command;
 using execHelper::config::EnvArgs;
@@ -35,7 +31,7 @@ using execHelper::core::Task;
 using execHelper::core::Tasks;
 
 namespace {
-const czstring<> PLUGIN_NAME = "command-line-command";
+const std::string PLUGIN_NAME = "command-line-command";
 } // namespace
 
 namespace execHelper {

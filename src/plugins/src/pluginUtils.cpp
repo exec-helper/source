@@ -99,7 +99,7 @@ EnvironmentCollection getEnvironment(const VariablesMap& variables) noexcept {
 
     for(auto variableName : environmentOpt.get()) {
         auto variableValueOpt =
-            variables.get<string>({ENVIRONMENT_KEY, variableName});
+            variables.get<string>(SettingsKeys({ENVIRONMENT_KEY, variableName}));
         if(!variableValueOpt) {
             LOG(warning) << "Environment variable '" << variableName
                          << "' does not have an associated value. Ignoring it.";

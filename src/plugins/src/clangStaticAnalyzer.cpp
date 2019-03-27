@@ -3,8 +3,6 @@
 #include <string>
 #include <vector>
 
-#include <gsl/string_span>
-
 #include "config/fleetingOptionsInterface.h"
 #include "config/variablesMap.h"
 #include "core/patterns.h"
@@ -19,17 +17,15 @@
 using std::string;
 using std::vector;
 
-using gsl::czstring;
-
 using execHelper::config::FleetingOptionsInterface;
 using execHelper::config::VariablesMap;
 using execHelper::core::Task;
 
 namespace {
-const czstring<> PLUGIN_NAME = "clang-static-analyzer";
-const czstring<> BIN_NAME = "scan-build";
+const std::string PLUGIN_NAME = "clang-static-analyzer";
+const std::string BIN_NAME = "scan-build";
 using BuildCommands = vector<string>;
-const czstring<> BUILD_COMMANDS_KEY = "build-command";
+const std::string BUILD_COMMANDS_KEY = "build-command";
 } // namespace
 
 namespace execHelper {

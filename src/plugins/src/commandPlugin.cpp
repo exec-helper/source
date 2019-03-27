@@ -1,7 +1,5 @@
 #include "commandPlugin.h"
 
-#include <gsl/string_span>
-
 #include "config/variablesMap.h"
 #include "log/assertions.h"
 
@@ -12,8 +10,6 @@
 
 using std::string;
 
-using gsl::czstring;
-
 using execHelper::config::CommandCollection;
 using execHelper::config::FleetingOptionsInterface;
 using execHelper::config::Patterns;
@@ -21,7 +17,7 @@ using execHelper::config::VariablesMap;
 using execHelper::core::Task;
 
 namespace {
-const czstring<> PLUGIN_NAME = "commands";
+const std::string PLUGIN_NAME = "commands";
 } // namespace
 
 namespace execHelper {

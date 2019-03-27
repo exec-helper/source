@@ -2,8 +2,6 @@
 
 #include <string>
 
-#include <gsl/string_span>
-
 #include "config/pattern.h"
 #include "config/variablesMap.h"
 #include "core/task.h"
@@ -15,8 +13,7 @@
 
 using std::string;
 
-using gsl::czstring;
-
+using execHelper::config::SettingsKeys;
 using execHelper::config::CommandCollection;
 using execHelper::config::FleetingOptionsInterface;
 using execHelper::config::Path;
@@ -28,23 +25,23 @@ using execHelper::plugins::registerTask;
 using execHelper::plugins::replacePatternCombinations;
 
 namespace {
-const czstring<> PLUGIN_NAME = "lcov";
+const std::string PLUGIN_NAME = "lcov";
 using RunCommand = CommandCollection;
-const czstring<> RUN_COMMAND = "run-command";
-const czstring<> INFO_FILE_KEY = "info-file";
-const czstring<> BASE_DIR_KEY = "base-directory";
-const czstring<> DIR_KEY = "directory";
+const std::string RUN_COMMAND = "run-command";
+const std::string INFO_FILE_KEY = "info-file";
+const std::string BASE_DIR_KEY = "base-directory";
+const std::string DIR_KEY = "directory";
 using ZeroCounters = bool;
-const czstring<> ZERO_COUNTERS_KEY = "zero-counters";
+const std::string ZERO_COUNTERS_KEY = "zero-counters";
 using GenHtml = bool;
-const czstring<> GEN_HTML_KEY = "gen-html";
+const std::string GEN_HTML_KEY = "gen-html";
 using GenHtmlOutput = Path;
-const czstring<> GEN_HTML_OUTPUT_KEY = "gen-html-output";
+const std::string GEN_HTML_OUTPUT_KEY = "gen-html-output";
 using GenHtmlTitle = string;
-const czstring<> GEN_HTML_TITLE_KEY = "gen-html-title";
+const std::string GEN_HTML_TITLE_KEY = "gen-html-title";
 using GenHtmlCommandLine = execHelper::plugins::CommandLineArgs;
-const czstring<> GEN_HTML_COMMAND_LINE_KEY = "gen-html-command-line";
-const czstring<> EXCLUDES_KEY = "excludes";
+const std::string GEN_HTML_COMMAND_LINE_KEY = "gen-html-command-line";
+const std::string EXCLUDES_KEY = "excludes";
 
 void runTask(const Task& task, const PatternCombinations& combination) {
     Task replacedTask = replacePatternCombinations(task, combination);
@@ -175,8 +172,8 @@ inline Task Lcov::generateZeroCountersTask(const BaseDir& baseDirectory,
                                            const Task& task) noexcept {
     Task result = task;
     result.append(PLUGIN_NAME);
-    result.append({string("--").append(BASE_DIR_KEY), baseDirectory.native()});
-    result.append({string("--").append(DIR_KEY), directory.native()});
+    result.append(SettingsKeys({string("--").append(BASE_DIR_KEY), baseDirectory.native()}));
+    result.append(SettingsKeys({string("--").append(DIR_KEY), directory.native()}));
     result.append("--zerocounters");
     result.append(commandLine);
     return result;
@@ -220,8 +217,8 @@ inline Task Lcov::generateCaptureTask(const BaseDir& baseDirectory,
                                       const Task& task) noexcept {
     Task result = task;
     result.append(PLUGIN_NAME);
-    result.append({string("--").append(BASE_DIR_KEY), baseDirectory.native()});
-    result.append({string("--").append(DIR_KEY), directory.native()});
+    result.append(SettingsKeys({string("--").append(BASE_DIR_KEY), baseDirectory.native()}));
+    result.append(SettingsKeys({string("--").append(DIR_KEY), directory.native()}));
     result.append("--capture");
     result.append({"--output", infoFile.native()});
     result.append(commandLine);

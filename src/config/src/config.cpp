@@ -1,7 +1,5 @@
 #include "config.h"
 
-#include <gsl/gsl>
-
 #include "yaml/yaml.h"
 
 #include "commandLineOptions.h"
@@ -13,7 +11,6 @@
 using std::string;
 
 using boost::optional;
-using gsl::czstring;
 
 using execHelper::config::Patterns;
 using execHelper::config::PatternsHandler;
@@ -24,7 +21,7 @@ using execHelper::config::VariablesMap;
 using execHelper::yaml::Yaml;
 
 namespace {
-const czstring<> PATTERNS_KEY = "patterns";
+const std::string PATTERNS_KEY = "patterns";
 
 Patterns processPatterns(const SettingsNode& settings) noexcept {
     Patterns result;

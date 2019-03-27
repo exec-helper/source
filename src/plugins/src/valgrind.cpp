@@ -2,8 +2,6 @@
 
 #include <string>
 
-#include <gsl/string_span>
-
 #include "config/commandLineOptions.h"
 #include "config/fleetingOptionsInterface.h"
 #include "config/variablesMap.h"
@@ -19,8 +17,6 @@
 
 using std::string;
 
-using gsl::czstring;
-
 using execHelper::config::CommandCollection;
 using execHelper::config::FleetingOptionsInterface;
 using execHelper::config::Patterns;
@@ -28,11 +24,11 @@ using execHelper::config::VariablesMap;
 using execHelper::core::Task;
 
 namespace {
-const czstring<> PLUGIN_NAME = "valgrind";
+const std::string PLUGIN_NAME = "valgrind";
 using RunCommand = CommandCollection;
-const czstring<> RUN_COMMAND_KEY = "run-command";
+const std::string RUN_COMMAND_KEY = "run-command";
 using Tool = string;
-const czstring<> TOOL_KEY = "tool";
+const std::string TOOL_KEY = "tool";
 } // namespace
 
 namespace execHelper {

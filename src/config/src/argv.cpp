@@ -2,27 +2,21 @@
 
 #include <cstring>
 
-#include <gsl/span>
-#include <gsl/string_span>
-
 #include "log/assertions.h"
 
 using std::string;
 using std::vector;
 
-using gsl::czstring;
-using gsl::span;
-
 namespace execHelper {
 namespace config {
 Argv::Argv(int argc, const char* const* const argv) noexcept {
-    span<const czstring<>> spanArgv(argv, argc);
     m_argv.reserve(argc + 1UL);
-    for(const auto& arg : spanArgv) {
-        const auto argLength = strnlen(arg, 256U) + 1U;
+
+    for(int i = 0; i < argc; ++i) {
+        const auto argLength = strnlen(argv[i], 256U) + 1U;
         auto newArg = // NOLINT(cppcoreguidelines-owning-memory)
             new char[argLength];
-        strncpy(newArg, arg, argLength);
+        strncpy(newArg, argv[i], argLength);
         m_argv.emplace_back(newArg);
     }
     m_argv.emplace_back(nullptr);
@@ -108,15 +102,14 @@ char** Argv::getArgv() noexcept { return &m_argv.at(0); }
 const char* const* Argv::getArgv() const noexcept { return &m_argv.at(0); }
 
 std::ostream& operator<<(std::ostream& os, const Argv& argv) noexcept {
-    const span<const czstring<>> args(argv.getArgv(), argv.getArgc());
     bool firstIteration = true;
-    for(const auto& arg : args) {
+    for(unsigned int i = 0; i < argv.getArgc(); ++i) {
         if(!firstIteration) {
-            os << ", ";
+            os << std::string(", ");
         } else {
             firstIteration = false;
         }
-        os << arg;
+        os << std::string(argv.getArgv()[i]);
     }
     return os;
 }

@@ -3,8 +3,6 @@
 #include <iostream>
 #include <string>
 
-#include <gsl/string_span>
-
 #include "config/path.h"
 #include "core/task.h"
 
@@ -14,8 +12,6 @@
 
 using std::string;
 
-using gsl::czstring;
-
 using execHelper::config::Command;
 using execHelper::config::FleetingOptionsInterface;
 using execHelper::config::Path;
@@ -24,8 +20,8 @@ using execHelper::config::VariablesMap;
 using execHelper::core::Task;
 
 namespace {
-const czstring<> PLUGIN_NAME = "bootstrap";
-const czstring<> FILENAME_KEY = "filename";
+const std::string PLUGIN_NAME = "bootstrap";
+const std::string FILENAME_KEY = "filename";
 } // namespace
 
 namespace execHelper {

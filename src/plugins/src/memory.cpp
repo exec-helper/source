@@ -1,11 +1,7 @@
 #include "memory.h"
 
-#include <gsl/string_span>
-
 #include "config/fleetingOptionsInterface.h"
 #include "config/variablesMap.h"
-
-using gsl::czstring;
 
 using execHelper::config::FleetingOptionsInterface;
 using execHelper::config::Patterns;
@@ -13,7 +9,7 @@ using execHelper::config::VariablesMap;
 using execHelper::core::Task;
 
 namespace {
-const czstring<> PLUGIN_NAME = "memory";
+const std::string PLUGIN_NAME = "memory";
 } // namespace
 
 namespace execHelper {

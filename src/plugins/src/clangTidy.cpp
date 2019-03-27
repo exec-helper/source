@@ -1,7 +1,5 @@
 #include "clangTidy.h"
 
-#include <gsl/string_span>
-
 #include "config/pattern.h"
 #include "config/variablesMap.h"
 #include "log/assertions.h"
@@ -13,8 +11,6 @@
 using std::string;
 using std::vector;
 
-using gsl::czstring;
-
 using execHelper::config::FleetingOptionsInterface;
 using execHelper::config::Patterns;
 using execHelper::config::VariablesMap;
@@ -22,11 +18,11 @@ using execHelper::core::Task;
 using execHelper::core::TaskCollection;
 
 namespace {
-const czstring<> PLUGIN_NAME = "clang-tidy";
+const std::string PLUGIN_NAME = "clang-tidy";
 using Sources = vector<string>;
-const czstring<> SOURCES_KEY = "sources";
-const czstring<> CHECKS_KEY = "checks";
-const czstring<> WARNING_AS_ERROR_KEY = "warning-as-errors";
+const std::string SOURCES_KEY = "sources";
+const std::string CHECKS_KEY = "checks";
+const std::string WARNING_AS_ERROR_KEY = "warning-as-errors";
 } // namespace
 
 namespace execHelper {

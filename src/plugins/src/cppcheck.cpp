@@ -3,8 +3,6 @@
 #include <string>
 #include <vector>
 
-#include <gsl/string_span>
-
 #include "config/fleetingOptionsInterface.h"
 #include "config/pattern.h"
 #include "config/variablesMap.h"
@@ -22,8 +20,6 @@ using std::string;
 using std::to_string;
 using std::vector;
 
-using gsl::czstring;
-
 using execHelper::config::FleetingOptionsInterface;
 using execHelper::config::PatternCombinations;
 using execHelper::config::Patterns;
@@ -31,11 +27,11 @@ using execHelper::config::VariablesMap;
 using execHelper::core::Task;
 
 namespace {
-const czstring<> PLUGIN_NAME = "cppcheck";
+const std::string PLUGIN_NAME = "cppcheck";
 using EnableChecks = vector<string>;
-const czstring<> ENABLE_CHECKS_KEY = "enable-checks";
+const std::string ENABLE_CHECKS_KEY = "enable-checks";
 using SourceDir = vector<string>;
-const czstring<> SRC_DIR_KEY = "src-dir";
+const std::string SRC_DIR_KEY = "src-dir";
 } // namespace
 
 namespace execHelper {

@@ -10,8 +10,6 @@
 #include <wordexp.h>
 
 #include <boost/filesystem.hpp>
-#include <gsl/span>
-#include <gsl/string_span>
 
 #include "config/argv.h"
 #include "config/envp.h"
@@ -26,8 +24,6 @@ using std::string;
 using boost::filesystem::current_path;
 using boost::system::error_code;
 using boost::system::errc::success;
-using gsl::span;
-using gsl::zstring;
 
 using execHelper::config::Argv;
 using execHelper::config::Envp;
@@ -134,9 +130,8 @@ inline TaskCollection PosixShell::wordExpand(const Task& task) noexcept {
         size_t returnCode =
             wordexp(taskItem.c_str(), &p, WRDE_SHOWERR | WRDE_UNDEF);
         if(returnCode == 0) {
-            span<zstring<>> w(p.we_wordv, p.we_wordc);
-            for(const auto& expandedWord : w) {
-                result.emplace_back(expandedWord);
+	    for(unsigned int i = 0; i < p.we_wordc; ++i) {
+                result.emplace_back(p.we_wordv[i]);
             }
         } else {
             switch(returnCode) {

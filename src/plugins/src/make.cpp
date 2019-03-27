@@ -2,8 +2,6 @@
 
 #include <string>
 
-#include <gsl/string_span>
-
 #include "config/environment.h"
 #include "config/fleetingOptionsInterface.h"
 #include "config/variablesMap.h"
@@ -19,8 +17,6 @@
 using std::string;
 using std::to_string;
 
-using gsl::czstring;
-
 using execHelper::config::Command;
 using execHelper::config::EnvArgs;
 using execHelper::config::ENVIRONMENT_KEY;
@@ -33,7 +29,7 @@ using execHelper::config::WorkingDir;
 using execHelper::core::Task;
 
 namespace {
-const czstring<> MAKE_KEY = "make";
+const std::string MAKE_KEY = "make";
 using BuildDir = string;
 } // namespace
 

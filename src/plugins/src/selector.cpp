@@ -1,7 +1,5 @@
 #include "selector.h"
 
-#include <gsl/string_span>
-
 #include "config/fleetingOptionsInterface.h"
 #include "config/pattern.h"
 #include "config/variablesMap.h"
@@ -13,8 +11,6 @@
 
 using std::string;
 
-using gsl::czstring;
-
 using execHelper::config::CommandCollection;
 using execHelper::config::FleetingOptionsInterface;
 using execHelper::config::PatternKeys;
@@ -24,8 +20,8 @@ using execHelper::config::VariablesMap;
 using execHelper::core::Task;
 
 namespace {
-const czstring<> PLUGIN_NAME = "selector";
-const czstring<> PATTERN_KEY = "patterns";
+const std::string PLUGIN_NAME = "selector";
+const std::string PATTERN_KEY = "patterns";
 } // namespace
 
 namespace execHelper {

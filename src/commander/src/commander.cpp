@@ -4,8 +4,6 @@
 #include <utility>
 
 #include <boost/filesystem/operations.hpp>
-#include <gsl/pointers>
-#include <gsl/string_span>
 
 #include "config/fleetingOptionsInterface.h"
 #include "config/pattern.h"
@@ -19,8 +17,6 @@
 using std::move;
 
 using boost::filesystem::current_path;
-using gsl::czstring;
-using gsl::not_null;
 
 using execHelper::config::EnvironmentCollection;
 using execHelper::config::FleetingOptionsInterface;
@@ -33,7 +29,7 @@ using execHelper::core::Task;
 using execHelper::plugins::ExecutePlugin;
 
 namespace {
-const czstring<> WORKING_DIR_PATTERN_KEY = "EH_WORKING_DIR";
+const std::string WORKING_DIR_PATTERN_KEY = "EH_WORKING_DIR";
 
 inline Patterns addPredefinedPatterns(Patterns patterns) {
     patterns.emplace_back(
@@ -50,8 +46,7 @@ bool Commander::run(const FleetingOptionsInterface& fleetingOptions,
                     const EnvironmentCollection& env) noexcept {
     patterns = addPredefinedPatterns(patterns);
 
-    ExecutePlugin::push(
-        not_null<const FleetingOptionsInterface*>(&fleetingOptions));
+    ExecutePlugin::push(&fleetingOptions);
     ExecutePlugin::push(move(settings));
     ExecutePlugin::push(move(patterns));
     Task task;

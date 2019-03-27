@@ -5,8 +5,6 @@
 #include <string>
 #include <vector>
 
-#include <gsl/gsl>
-
 #include "config/commandLineOptions.h"
 #include "config/fleetingOptionsInterface.h"
 #include "config/pattern.h"
@@ -62,7 +60,7 @@ class ExecutePlugin : public Plugin {
      * on the stack will be used for calling the commands. \returns True    if
      * the options were successfully pushed False   otherwise
      */
-    static bool push(gsl::not_null<const config::FleetingOptionsInterface*>
+    static bool push(const config::FleetingOptionsInterface*
                          fleetingOptions) noexcept;
 
     /**
@@ -113,7 +111,7 @@ class ExecutePlugin : public Plugin {
     const config::CommandCollection m_commands;
     const config::CommandCollection m_initialCommands;
 
-    static std::vector<gsl::not_null<const config::FleetingOptionsInterface*>>
+    static std::vector<const config::FleetingOptionsInterface*>
         m_fleeting;
     static std::vector<config::SettingsNode> m_settings;
     static std::vector<config::PatternsHandler> m_patterns;

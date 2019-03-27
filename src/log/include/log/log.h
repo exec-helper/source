@@ -20,6 +20,17 @@ BOOST_LOG_ATTRIBUTE_KEYWORD(fileLog, "File",
 BOOST_LOG_ATTRIBUTE_KEYWORD(lineLog, "Line",
                             unsigned int) // NOLINT(modernize-use-using)
 
+namespace std {
+template<typename T, typename... Args>
+std::unique_ptr<T> make_unique(Args&&... args)
+{
+    return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
+}
+
+template< bool B, class T = void >
+using enable_if_t = typename enable_if<B,T>::type;
+}
+
 namespace execHelper {
 namespace log {
 using Channel = std::string;

@@ -13,12 +13,12 @@ BUILD_DIR?=build/native/release## Sets the build folder. Default: build/native/r
 CHANGELOG_CONFIG?= .gitchangelog.rc## Sets the changelog config to use. Default: .gitchangelog.rc
 CHANGELOG_OUTPUT?= &1## Sets the changelog output redirection for print-changelog. Default: stdout
 CMAKE_BUILD_TYPE?=Release	## Sets the cmake build type. Default: Release
-USE_SYSTEM_GSL?= ON## Sets whether to use the system GSL package. Default: ON
+USE_SYSTEM_GSL?= OFF## Sets whether to use the system GSL package. Default: ON
 
-all: binary docs changelog
+all: binary
 
 init:	## Initialize native build
-	cmake -H. -B$(BUILD_DIR) -DCMAKE_INSTALL_PREFIX=$(PREFIX) -DCMAKE_BUILD_TYPE=$(CMAKE_BUILD_TYPE) -DENABLE_WERROR=OFF -DENABLE_TESTING=OFF -DUSE_SYSTEM_GSL=$(USE_SYSTEM_GSL) -DCMAKE_EXPORT_COMPILE_COMMANDS=OFF -DBUILD_HTML_DOCUMENTATION=ON -DBUILD_XML_DOCUMENTATION=ON -DBUILD_MAN_DOCUMENTATION=ON -DVERSION=$(shell git describe --long --dirty)-MANUAL -DCOPYRIGHT="Copyright (c) $(shell date +'%Y') Bart Verhagen"
+	cmake -H. -B$(BUILD_DIR) -DCMAKE_INSTALL_PREFIX=$(PREFIX) -DCMAKE_BUILD_TYPE=$(CMAKE_BUILD_TYPE) -DENABLE_WERROR=OFF -DENABLE_TESTING=OFF -DUSE_SYSTEM_GSL=$(USE_SYSTEM_GSL) -DCMAKE_EXPORT_COMPILE_COMMANDS=OFF -DBUILD_HTML_DOCUMENTATION=OFF -DBUILD_XML_DOCUMENTATION=OFF -DBUILD_MAN_DOCUMENTATION=OFF -DVERSION=$(shell git describe --long --dirty)-MANUAL -DCOPYRIGHT="Copyright (c) $(shell date +'%Y') Bart Verhagen"
 
 binary: init ## Build the exec-helper binary
 	make -C $(BUILD_DIR) --jobs $(JOBS) exec-helper
@@ -38,7 +38,7 @@ changelog: init		## Create the associated changelog file
 print-changelog:	## Print the changelog to CHANGELOG_OUTPUT (default: stdout)
 	GITCHANGELOG_CONFIG_FILENAME=$(CHANGELOG_CONFIG) gitchangelog >$(CHANGELOG_OUTPUT)
 
-docs: init docs-html docs-man
+docs: init
 
 install-bin:		## Install the exec-helper binary
 	cmake -DCOMPONENT=runtime -P $(BUILD_DIR)/cmake_install.cmake
@@ -51,7 +51,7 @@ install-docs:		## Install what was build from the HTML and pman-page documentati
 install-changelog:	## Install the changelog
 	cmake -DCOMPONENT=changelog -P $(BUILD_DIR)/cmake_install.cmake
 
-install: install-bin install-docs install-changelog
+install: install-bin install-changelog
 
 clean:				## Clean the build directory
 	make -C $(BUILD_DIR) --jobs $(JOBS) clean

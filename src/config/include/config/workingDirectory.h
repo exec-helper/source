@@ -3,12 +3,10 @@
 
 #include <string>
 
-#include <gsl/string_span>
-
 namespace execHelper {
 namespace config {
 using WorkingDir = std::string;
-const gsl::czstring<> WORKING_DIR_KEY = "working-dir";
+const std::string WORKING_DIR_KEY = "working-dir";
 } // namespace config
 } // namespace execHelper
 

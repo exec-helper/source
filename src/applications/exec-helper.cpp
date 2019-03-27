@@ -75,6 +75,7 @@ using execHelper::config::SETTINGS_FILE_KEY;
 using execHelper::config::SettingsFileOption_t;
 using execHelper::config::SettingsNode;
 using execHelper::config::SettingsValues;
+using execHelper::config::SettingsKeys;
 using execHelper::config::VariablesMap;
 using execHelper::config::VERBOSE_KEY;
 using execHelper::config::VerboseOption_t;
@@ -148,7 +149,7 @@ inline void printHelp(const OptionDescriptions& options,
             stringstream commandStream;
             commandStream << "  " << std::left << setw(20) << command;
             CommandCollection commmandDescription =
-                settings[COMMANDS_KEY].get<CommandCollection>({command}, {});
+                settings[COMMANDS_KEY].get<CommandCollection>(SettingsKeys({command}, {})).get();
             if(!commmandDescription.empty()) {
                 // Add an extra whitespace in case the key is longer than the minimum width that was set
                 commandStream << " " << commmandDescription.back();

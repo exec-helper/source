@@ -3,15 +3,13 @@
 
 #include <string>
 
-#include <gsl/string_span>
-
 #include "config/commandLineOptions.h"
 
 namespace execHelper {
 namespace plugins {
 using Jobs = config::Jobs_t;
 
-const gsl::czstring<> JOBS_KEY = "jobs";
+const std::string JOBS_KEY = "jobs";
 } // namespace plugins
 } // namespace execHelper
 
