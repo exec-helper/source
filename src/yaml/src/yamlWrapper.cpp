@@ -20,7 +20,7 @@ using execHelper::config::SettingsValue;
 namespace execHelper {
 namespace yaml {
 YamlWrapper::YamlWrapper(const Path& file)
-    : m_node(YAML::LoadFile(file.native())) {
+    : m_node(YAML::LoadFile(file.string())) {
     ;
 }
 

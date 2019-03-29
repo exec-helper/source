@@ -41,6 +41,11 @@ inline string implodeVector(const vector<string>& toImplode,
 namespace execHelper {
 namespace core {
 
+Task::Task() noexcept :
+    m_workingDirectory(filesystem::current_path()) {
+    ;
+}
+
 Task::Task(const initializer_list<string>& subtasks) noexcept
     : m_task(subtasks), m_workingDirectory(filesystem::current_path()) {
     ;
@@ -138,7 +143,7 @@ ostream& operator<<(ostream& os, const Task& task) noexcept {
         os << string(" ") << subTask;
     }
     os << string("} ");
-    os << string("Working-dir: {") << task.getWorkingDirectory().native()
+    os << string("Working-dir: {") << task.getWorkingDirectory().string()
        << "}";
     os << string("}");
     os << endl;

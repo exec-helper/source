@@ -54,7 +54,7 @@ using execHelper::config::Envp;
 using execHelper::config::FleetingOptions;
 using execHelper::config::getAllParentDirectories;
 using execHelper::config::getHomeDirectory;
-using execHelper::config::HELP_KEY;
+using execHelper::config::HELP_OPTION_KEY;
 using execHelper::config::HelpOption_t;
 using execHelper::config::JOBS_KEY;
 using execHelper::config::JobsOption_t;
@@ -196,8 +196,14 @@ getSettingsFile(const Argv& argv, const EnvironmentCollection& env,
     FleetingOptions fleetingOptions(optionsMap);
 
     ConfigFileSearcher configFileSearcher(getSearchPaths(env));
+
+#ifdef _WIN32
+    SettingsFileOption_t settingsFileValue =
+        optionsMap.get<SettingsFileOption_t>(SETTINGS_FILE_KEY, ".windows.exec-helper");
+#else
     SettingsFileOption_t settingsFileValue =
         optionsMap.get<SettingsFileOption_t>(SETTINGS_FILE_KEY, ".exec-helper");
+#endif
     auto settingsFile = configFileSearcher.find(settingsFileValue);
     if(settingsFile == std::nullopt) {
         if(!fleetingOptions.getHelp()) {
@@ -239,7 +245,7 @@ PatternSettingsPair addPatternsFromSettingsFile(const Path& settingsFile,
 inline OptionDescriptions getDefaultOptions() noexcept {
     OptionDescriptions options;
     options.addOption(
-        Option<HelpOption_t>(HELP_KEY, {"h"}, "Produce help message"));
+        Option<HelpOption_t>(HELP_OPTION_KEY, {"h"}, "Produce help message"));
     options.addOption(Option<HelpOption_t>(VERSION_KEY, {},
                                            "Print the version of this binary"));
     options.addOption(

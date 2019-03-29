@@ -5,6 +5,7 @@
 #include <boost/lexical_cast.hpp>
 
 #include "logger.h"
+#include "commandLineOptions.h"
 
 using std::thread;
 
@@ -15,7 +16,7 @@ using execHelper::log::LogLevel;
 namespace execHelper {
 namespace config {
 FleetingOptions::FleetingOptions(const VariablesMap& optionsMap) noexcept
-    : m_help(optionsMap.get<HelpOption_t>(HELP_KEY).value_or(false)),
+    : m_help(optionsMap.get<HelpOption_t>(HELP_OPTION_KEY).value_or(false)),
       m_version(optionsMap.get<VersionOption_t>(VERSION_KEY).value_or(false)),
       m_verbose(optionsMap.get<VerboseOption_t>(VERBOSE_KEY).value_or(false)),
       m_dryRun(optionsMap.get<DryRunOption_t>(DRY_RUN_KEY).value_or(false)),
@@ -30,7 +31,7 @@ FleetingOptions::FleetingOptions(const VariablesMap& optionsMap) noexcept
     } else {
         try {
             m_jobs = lexical_cast<Jobs_t>(jobs);
-        } catch(const boost::bad_lexical_cast& e) {
+        } catch(const boost::bad_lexical_cast&) {
             LOG(warning)
                 << "Bad lexical cast for the number of jobs. Using default.";
         }
@@ -68,7 +69,7 @@ const CommandCollection& FleetingOptions::getCommands() const noexcept {
 LogLevel FleetingOptions::getLogLevel() const noexcept {
     try {
         return log::toLogLevel(m_logLevel);
-    } catch(const log::InvalidLogLevel& e) {
+    } catch(const log::InvalidLogLevel&) {
         LOG(warning) << "Invalid log level given. Using default.";
         return log::none;
     }
@@ -76,7 +77,7 @@ LogLevel FleetingOptions::getLogLevel() const noexcept {
 
 VariablesMap FleetingOptions::getDefault() noexcept {
     VariablesMap defaults("exec-helper");
-    defaults.add(HELP_KEY, "no");
+    defaults.add(HELP_OPTION_KEY, "no");
     defaults.add(VERSION_KEY, "no");
     defaults.add(VERBOSE_KEY, "no");
     defaults.add(DRY_RUN_KEY, "no");

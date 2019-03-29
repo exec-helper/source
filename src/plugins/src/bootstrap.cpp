@@ -47,7 +47,7 @@ bool Bootstrap::apply(Task task, const VariablesMap& variables,
     if(filename.is_relative()) {
         filename = Path(".") / filename;
     }
-    task.append(filename.native());
+    task.append(filename.string());
     task.append(*(variables.get<CommandLineArgs>(COMMAND_LINE_KEY)));
     task.setWorkingDirectory(*(variables.get<Path>(getBuildDirKey())));
 

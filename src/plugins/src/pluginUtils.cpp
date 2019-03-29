@@ -72,7 +72,7 @@ Task replacePatternCombinations(
         }
         replacedTask.appendToEnvironment(std::move(environment));
     }
-    string newWorkingDir = task.getWorkingDirectory().native();
+    string newWorkingDir = task.getWorkingDirectory().string();
     for(const auto& pattern : patternCombinations) {
         newWorkingDir =
             replacePatterns(newWorkingDir, pattern.first, pattern.second);

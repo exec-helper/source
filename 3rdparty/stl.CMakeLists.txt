@@ -1,4 +1,10 @@
 # std::filesystem
 set(LIBRARY filesystem)
 add_library(${LIBRARY} INTERFACE)
-target_link_libraries(${LIBRARY} INTERFACE stdc++fs)
+
+if(MSVC)
+    # MSVC filesystem TS not yet C++ 17 compliant
+    target_link_libraries(${LIBRARY} INTERFACE)
+else()
+    target_link_libraries(${LIBRARY} INTERFACE stdc++fs)
+endif()

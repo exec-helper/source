@@ -1,7 +1,6 @@
 #ifndef LOG_MESSAGE_INCLUDE
 #define LOG_MESSAGE_INCLUDE
 
-#define BOOST_LOG_DYN_LINK 1
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/log/expressions.hpp>
 #include <boost/log/sources/channel_feature.hpp>

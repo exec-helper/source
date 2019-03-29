@@ -1,6 +1,5 @@
 #include "log.h"
 
-#define BOOST_LOG_DYN_LINK 1
 #include <boost/log/utility/setup/common_attributes.hpp>
 #include <boost/log/utility/setup/formatter_parser.hpp>
 
@@ -31,6 +30,10 @@ bool LogInit::setSeverity(const Channel& channel, LogLevel severity) noexcept {
 
 namespace color {
 std::ostream& operator<<(std::ostream& os, const Modifier& mod) {
+    return os << "\033[" << mod.code << "m";
+}
+
+std::wostream& operator<<(std::wostream& os, const Modifier& mod) {
     return os << "\033[" << mod.code << "m";
 }
 } // namespace color

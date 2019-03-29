@@ -78,9 +78,11 @@ commands:
     init-build: Initialize the build infrastructure and switches off everything that has nothing to do with building the exec-helper binaries themselves
     init-no-system: Initialize system and disable the use of all system packages
     init-limited-optimization: Initialize system and build using a sensible trade-off between speed and useful backtraces
+    init-windows: Initialize windows build
     build: Build-only + install
     build-only: Build only
     install: Install only
+    create-installer: Create Windows installer
     clean: Clean build
     distclean: Distclean build
     rebuild: Clean + build
@@ -116,6 +118,9 @@ init-limited-optimization:
     - create-toolchain-file
     - command-line-command
 
+init-windows:
+    - command-line-command
+
 build:
     - build-only
     - install
@@ -124,6 +129,9 @@ build-only:
     - ninja
 
 install:
+    - command-line-command
+
+create-installer:
     - command-line-command
 
 clean:
@@ -267,6 +275,13 @@ command-line-command:
         command-line:
             [ cmake, -G, "Ninja", -H., "-Bbuild/{COMPILER}/{MODE}/build", "-DCMAKE_CXX_COMPILER={COMPILER}", "-DCMAKE_INSTALL_PREFIX=build/{COMPILER}/{MODE}/install", -DCMAKE_EXPORT_COMPILE_COMMANDS=ON, "-DCMAKE_BUILD_TYPE=RelWithDebInfo", -DBUILD_HTML_DOCUMENTATION=ON, -DBUILD_XML_DOCUMENTATION=OFF, -DBUILD_MAN_DOCUMENTATION=ON, "-DCMAKE_TOOLCHAIN_FILE=build/{COMPILER}/{MODE}/toolchain.cmake", -DTERMINATE_ON_ASSERT_FAILURE=ON]
 
+    init-windows:
+        patterns:
+            - COMPILER
+            - MODE
+            - EH_WORKING_DIR
+        command-line: [cmake, -G, "Ninja", "-H.", "-Bbuild/{COMPILER}/{MODE}/build", "-DCMAKE_INSTALL_PREFIX=build/{COMPILER}/{MODE}/install", "-DCMAKE_BUILD_TYPE={MODE}", -DBUILD_HTML_DOCUMENTATION=OFF, -DBUILD_XML_DOCUMENTATION=OFF, -DBUILD_MAN_DOCUMENTATION=OFF, -DTERMINATE_ON_ASSERT_FAILURE=ON, "-DBOOST_ROOT=%cd%/3rdparty/bin/boost", "-DBOOST_INCLUDEDIR=%cd%/3rdparty/bin/boost/include/boost-1_69", -DBoost_USE_STATIC_LIBS=ON, -DBUILD_MAN_DOCUMENTATION=OFF, -DENABLE_TESTING=OFF, -DBoost_NO_SYSTEM_PATHS=ON, -DBoost_USE_STATIC_RUNTIME=OFF]
+
     create-toolchain-file:
         patterns:
             - COMPILER
@@ -289,6 +304,11 @@ command-line-command:
             - MODE
             - COMPONENT
         command-line: [ cmake, "-DCOMPONENT={COMPONENT}", -P, "build/{COMPILER}/{MODE}/build/cmake_install.cmake"]
+    create-installer:
+        patterns:
+            - COMPILER
+            - MODE
+#        command-line: [ C:\Program Files (x86)\NSIS\Bin\makensis.exe, "build\{COMPILER}\{MODE}\install\bin"]
     unittest:
         patterns:
             - COMPILER

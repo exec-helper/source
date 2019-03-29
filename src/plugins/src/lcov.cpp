@@ -153,7 +153,7 @@ inline Task Lcov::generateGenHtmlTask(const InfoFile& infoFile,
     ensures(variables.get<GenHtmlOutput>(GEN_HTML_OUTPUT_KEY) != std::nullopt);
     result.append(
         {"--output-directory",
-         variables.get<GenHtmlOutput>(GEN_HTML_OUTPUT_KEY)->native()});
+         variables.get<GenHtmlOutput>(GEN_HTML_OUTPUT_KEY)->string()});
 
     ensures(variables.get<GenHtmlTitle>(GEN_HTML_TITLE_KEY) != std::nullopt);
     result.append(
@@ -164,7 +164,7 @@ inline Task Lcov::generateGenHtmlTask(const InfoFile& infoFile,
     result.append(
         *(variables.get<GenHtmlCommandLine>(GEN_HTML_COMMAND_LINE_KEY)));
 
-    result.append(infoFile.native());
+    result.append(infoFile.string());
 
     return result;
 }
@@ -175,8 +175,8 @@ inline Task Lcov::generateZeroCountersTask(const BaseDir& baseDirectory,
                                            const Task& task) noexcept {
     Task result = task;
     result.append(PLUGIN_NAME);
-    result.append({string("--").append(BASE_DIR_KEY), baseDirectory.native()});
-    result.append({string("--").append(DIR_KEY), directory.native()});
+    result.append({string("--").append(BASE_DIR_KEY), baseDirectory.string()});
+    result.append({string("--").append(DIR_KEY), directory.string()});
     result.append("--zerocounters");
     result.append(commandLine);
     return result;
@@ -206,9 +206,9 @@ inline Task Lcov::generateExcludeTask(const VariablesMap& variables,
         return result;
     }
     result.append(PLUGIN_NAME);
-    result.append({"--remove", infoFile.native()});
+    result.append({"--remove", infoFile.string()});
     result.append(excludes);
-    result.append({"--output-file", infoFile.native()});
+    result.append({"--output-file", infoFile.string()});
     result.append(commandLine);
     return result;
 }
@@ -220,10 +220,10 @@ inline Task Lcov::generateCaptureTask(const BaseDir& baseDirectory,
                                       const Task& task) noexcept {
     Task result = task;
     result.append(PLUGIN_NAME);
-    result.append({string("--").append(BASE_DIR_KEY), baseDirectory.native()});
-    result.append({string("--").append(DIR_KEY), directory.native()});
+    result.append({string("--").append(BASE_DIR_KEY), baseDirectory.string()});
+    result.append({string("--").append(DIR_KEY), directory.string()});
     result.append("--capture");
-    result.append({"--output", infoFile.native()});
+    result.append({"--output", infoFile.string()});
     result.append(commandLine);
     return result;
 }

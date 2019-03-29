@@ -2,7 +2,6 @@
 #include <sstream>
 #include <string>
 
-#define BOOST_LOG_DYN_LINK 1
 #include <boost/core/null_deleter.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/log/sinks/sync_frontend.hpp>

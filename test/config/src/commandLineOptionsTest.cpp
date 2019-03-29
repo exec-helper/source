@@ -6,7 +6,7 @@ namespace execHelper {
 namespace config {
 namespace test {
 SCENARIO("Test the command line keys", "[config][command-line-options]") {
-    REQUIRE(HELP_KEY == "help");
+    REQUIRE(HELP_OPTION_KEY == "help");
     REQUIRE(VERBOSE_KEY == "verbose");
     REQUIRE(DRY_RUN_KEY == "dry-run");
     REQUIRE(JOBS_KEY == "jobs");

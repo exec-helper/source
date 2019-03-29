@@ -1,4 +1,7 @@
 find_package(Boost 1.64.0 REQUIRED COMPONENTS program_options filesystem log log_setup thread system serialization)
+if(MSVC)
+    find_package(Boost 1.64.0 REQUIRED COMPONENTS filesystem date_time chrono atomic)
+endif()
 
 # Fix required since the compiler does not like -isystem /usr/include to be explicitly added to its command line
 if(Boost_INCLUDE_DIRS STREQUAL "/usr/include")
@@ -23,6 +26,23 @@ set(BOOST_LIBRARY boost-system)
 add_library(${BOOST_LIBRARY} INTERFACE)
 target_include_directories(${BOOST_LIBRARY} SYSTEM INTERFACE ${Boost_INCLUDE_DIRS})
 target_link_libraries(${BOOST_LIBRARY} INTERFACE ${Boost_SYSTEM_LIBRARY})
+
+# Attach generic boost settings to boost system
+if(MSVC)
+    target_compile_definitions(${BOOST_LIBRARY} INTERFACE ${Boost_LIB_DIAGNOSTIC_DEFINITIONS})
+    target_compile_definitions(${BOOST_LIBRARY} INTERFACE _WIN32_WINNT=0x0600)   # Only support windows Vista feature set and up
+    target_compile_definitions(${BOOST_LIBRARY} INTERFACE WINVER=0x0600)   # Only support windows Vista feature set and up
+    target_compile_definitions(${BOOST_LIBRARY} INTERFACE BOOST_USE_WINDOWS_H)
+    target_compile_definitions(${BOOST_LIBRARY} INTERFACE WIN32_LEAN_AND_MEAN)
+    target_compile_definitions(${BOOST_LIBRARY} INTERFACE _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS)
+endif()
+
+if(NOT Boost_USE_STATIC_LIBS)
+    message(STATUS "Linking to boost dynamically")
+    target_compile_definitions(${BOOST_LIBRARY} INTERFACE BOOST_LOG_DYN_LINK=1)
+else()
+    message(STATUS "Linking to boost statically")
+endif()
 
 # boost serialization
 set(BOOST_LIBRARY boost-serialization)
@@ -49,5 +69,10 @@ target_include_directories(${BOOST_LIBRARY} SYSTEM INTERFACE ${Boost_INCLUDE_DIR
 
 
 # Explicitly add dependencies on boost-thread and boost-system, since FindBoost is not doing this itself
-# Linking with pthread is requiered by Boost when multithreaded support enabled
-target_link_libraries(${BOOST_LIBRARY} INTERFACE ${Boost_LOG_LIBRARY} boost-log-setup boost-thread boost-system pthread)
+target_link_libraries(${BOOST_LIBRARY} INTERFACE ${Boost_LOG_LIBRARY} boost-log-setup boost-thread boost-system ${Boost_FILESYSTEM_LIBRARY} ${Boost_DATE_TIME_LIBRARY} ${Boost_CHRONO_LIBRARY} ${Boost_ATOMIC_LIBRARY})
+
+if(NOT MSVC)
+    # Linking with pthread is requiered by Boost when multithreaded support enabled
+    # Explicitly add pthread as a dependency on POSIX based systems
+    target_link_libraries(${BOOST_LIBRARY} INTERFACE pthread)
+endif()

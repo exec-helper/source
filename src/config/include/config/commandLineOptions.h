@@ -6,7 +6,7 @@
 
 namespace execHelper {
 namespace config {
-const std::string HELP_KEY{"help"};
+const std::string HELP_OPTION_KEY{"help"};
 using HelpOption_t = bool;
 
 const std::string VERSION_KEY{"version"};

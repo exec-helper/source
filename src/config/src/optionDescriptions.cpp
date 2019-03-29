@@ -39,8 +39,8 @@ bool OptionDescriptions::getOptionsMap(VariablesMap& variablesMap,
     commandLineParser.options(m_optionDescription);
 
     // Assign positional arguments
+    positional_options_description positionalOptionsDesc;
     if(m_positional) {
-        positional_options_description positionalOptionsDesc;
         positionalOptionsDesc.add(m_positional.value().c_str(), -1);
         commandLineParser.positional(positionalOptionsDesc);
     }

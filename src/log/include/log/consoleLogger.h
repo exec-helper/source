@@ -1,7 +1,6 @@
 #ifndef CONSOLE_LOGGER_INCLUDE
 #define CONSOLE_LOGGER_INCLUDE
 
-#define BOOST_LOG_DYN_LINK 1
 #include <boost/log/sinks/sync_frontend.hpp>
 #include <boost/log/sinks/text_ostream_backend.hpp>
 #include <boost/shared_ptr.hpp>

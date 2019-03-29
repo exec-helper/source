@@ -28,7 +28,7 @@ struct BuildDirLong {
                              const config::VariablesMap& variables) noexcept {
         task.append({"--directory",
                      variables.get<config::Path>(BuildPlugin::getBuildDirKey())
-                         ->native()});
+                         ->string()});
     }
 };
 
@@ -50,7 +50,7 @@ struct BuildDirShort {
                              const config::VariablesMap& variables) noexcept {
         task.append(
             {"-C", variables.get<config::Path>(BuildPlugin::getBuildDirKey())
-                       ->native()});
+                       ->string()});
     }
 };
 } // namespace plugins

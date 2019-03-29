@@ -38,7 +38,7 @@ const czstring<> WORKING_DIR_PATTERN_KEY = "EH_WORKING_DIR";
 
 inline Patterns addPredefinedPatterns(Patterns patterns) {
     patterns.emplace_back(Pattern(WORKING_DIR_PATTERN_KEY,
-                                  {filesystem::current_path().native()}));
+                                  {filesystem::current_path().string()}));
     return patterns;
 }
 } // namespace

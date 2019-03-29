@@ -1,8 +1,13 @@
 #include "posixShell.h"
 
-#include <glob.h>
 #include <vector>
+
+#ifdef _WIN32
+#include <boost/algorithm/string.hpp>
+#else
+#include <glob.h>
 #include <wordexp.h>
+#endif
 
 #include <boost/filesystem.hpp>
 #include <boost/process.hpp>
@@ -15,7 +20,12 @@
 #include "logger.h"
 #include "task.h"
 
+#ifdef _WIN32
+using boost::replace_all;
+#endif
+
 using std::string;
+
 
 using gsl::span;
 using gsl::zstring;
@@ -101,6 +111,25 @@ inline TaskCollection PosixShell::shellExpand(const Task& task) noexcept {
 }
 
 inline TaskCollection PosixShell::wordExpand(const Task& task) noexcept {
+#ifdef _WIN32
+    TaskCollection result;
+
+    auto environment = task.getEnvironment();
+
+    // Windows has some 'special' environment variables
+    environment["cd"] = task.getWorkingDirectory().string();
+    environment["CD"] = task.getWorkingDirectory().string();
+
+    for(auto arg : task.getTask()) {
+        for(const auto& env : environment) {
+            auto pattern = std::string("%").append(env.first).append("%");
+            replace_all(arg, pattern, env.second);
+        }
+        result.emplace_back(arg);
+    }
+    return result;
+
+#else
     // Cache envp pointer
     char** cached_environ = environ;
 
@@ -140,6 +169,7 @@ inline TaskCollection PosixShell::wordExpand(const Task& task) noexcept {
     }
     environ = cached_environ;
     return result;
+#endif
 }
 } // namespace core
 } // namespace execHelper

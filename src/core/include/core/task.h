@@ -20,10 +20,16 @@ class Task {
     /**
      * Create a task
      *
+     */
+    explicit Task() noexcept;
+
+    /**
+     * Create a task
+     *
      * \param[in] subtasks  The task subdivided in separate arguments
      */
     explicit Task(
-        const std::initializer_list<std::string>& subtasks = {}) noexcept;
+        const std::initializer_list<std::string>& subtasks) noexcept;
 
     /**
      * Returns the task

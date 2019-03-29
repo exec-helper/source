@@ -23,7 +23,7 @@ namespace test {
 SCENARIO("Test the fleeting options defaults", "[config][fleeting-options]") {
     GIVEN("The expected defaults") {
         VariablesMap expectedDefaults("exec-helper");
-        expectedDefaults.add(HELP_KEY, "no");
+        expectedDefaults.add(HELP_OPTION_KEY, "no");
         expectedDefaults.add(VERSION_KEY, "no");
         expectedDefaults.add(VERBOSE_KEY, "no");
         expectedDefaults.add(JOBS_KEY, "auto");
@@ -47,7 +47,7 @@ SCENARIO("Test the getters of the fleeting options",
     MAKE_COMBINATIONS("Of several settings") {
         VariablesMap variables = FleetingOptions::getDefault();
 
-        auto expectedHelp = variables.get<HelpOption_t>(HELP_KEY).value();
+        auto expectedHelp = variables.get<HelpOption_t>(HELP_OPTION_KEY).value();
         auto expectedVersion =
             variables.get<VersionOption_t>(VERSION_KEY).value();
         auto expectedVerbose =
@@ -68,7 +68,7 @@ SCENARIO("Test the getters of the fleeting options",
 
         COMBINATIONS("Enable help") {
             expectedHelp = true;
-            variables.add(HELP_KEY, "yes");
+            variables.add(HELP_OPTION_KEY, "yes");
         }
 
         COMBINATIONS("Enable version") {

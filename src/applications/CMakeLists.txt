@@ -5,7 +5,7 @@ set(SRCS
    )
 
 set(DEPENDENCIES
-        dl
+        #dl
         filesystem
         log
         core
@@ -23,19 +23,30 @@ add_executable(${EXE_NAME} ${SRCS} ${VERSION_FILE})
 target_include_directories(${EXE_NAME} PRIVATE ${DEPENDENCIES} ${VERSION_INCLUDE_DIR})
 target_link_libraries(${EXE_NAME} PRIVATE ${DEPENDENCIES})
 
-set(SHORT_EXE_NAME eh)
-add_custom_command(TARGET ${EXE_NAME} POST_BUILD
+if(MSVC)
+    set(SHORT_EXE_NAME eh.exe)
+
+    add_custom_command(TARGET ${EXE_NAME} POST_BUILD
+        COMMAND cmake -E copy ${EXE_NAME}.exe ${SHORT_EXE_NAME}
+        MAIN_DEPENDENCY ${EXE_NAME}
+        COMMENT "Linking ${SHORT_EXE_NAME} -> ${EXE_NAME}"
+    )
+else()
+    set(SHORT_EXE_NAME eh)
+
+    add_custom_command(TARGET ${EXE_NAME} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E create_symlink ${EXE_NAME} ${SHORT_EXE_NAME}
         MAIN_DEPENDENCY ${EXE_NAME}
         COMMENT "Linking ${SHORT_EXE_NAME} -> ${EXE_NAME}"
     )
+endif()
 
 install(TARGETS ${EXE_NAME}
         DESTINATION ${BIN_DIRECTORY}
         COMPONENT runtime
-       )
+    )
 
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${SHORT_EXE_NAME}
         DESTINATION ${BIN_DIRECTORY}
         COMPONENT runtime
-       )
+    )
