@@ -66,6 +66,7 @@ const map<LogLevel, string>& getLogLevelStringMapping() {
 }
 
 class LogMessage {
+<<<<<<< HEAD
   public:
     LogMessage(string date, string time, Channel channel, LogLevel level,
                string file, unsigned int lineNumber, string message)

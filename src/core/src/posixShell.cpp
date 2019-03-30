@@ -26,7 +26,6 @@ using boost::replace_all;
 
 using std::string;
 
-
 using gsl::span;
 using gsl::zstring;
 

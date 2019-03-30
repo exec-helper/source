@@ -6,7 +6,6 @@
 
 #include "commandLineOptions.h"
 #include "logger.h"
-#include "commandLineOptions.h"
 
 using std::thread;
 
