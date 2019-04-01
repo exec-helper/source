@@ -4,8 +4,8 @@
 
 #include <boost/lexical_cast.hpp>
 
-#include "logger.h"
 #include "commandLineOptions.h"
+#include "logger.h"
 
 using std::thread;
 
@@ -13,8 +13,7 @@ using boost::lexical_cast;
 
 using execHelper::log::LogLevel;
 
-namespace execHelper {
-namespace config {
+namespace execHelper::config {
 FleetingOptions::FleetingOptions(const VariablesMap& optionsMap) noexcept
     : m_help(optionsMap.get<HelpOption_t>(HELP_OPTION_KEY).value_or(false)),
       m_version(optionsMap.get<VersionOption_t>(VERSION_KEY).value_or(false)),
@@ -87,5 +86,4 @@ VariablesMap FleetingOptions::getDefault() noexcept {
     defaults.add(COMMAND_KEY, CommandCollection());
     return defaults;
 }
-} // namespace config
-} // namespace execHelper
+} // namespace execHelper::config

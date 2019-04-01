@@ -38,8 +38,7 @@ using SourceDir = vector<string>;
 const czstring<> SRC_DIR_KEY = "src-dir";
 } // namespace
 
-namespace execHelper {
-namespace plugins {
+namespace execHelper::plugins {
 
 std::string Cppcheck::getPluginName() const noexcept { return PLUGIN_NAME; }
 
@@ -96,5 +95,4 @@ string Cppcheck::getEnabledChecks(const VariablesMap& variables) noexcept {
     result += enabledChecks.back();
     return result;
 }
-} // namespace plugins
-} // namespace execHelper
+} // namespace execHelper::plugins

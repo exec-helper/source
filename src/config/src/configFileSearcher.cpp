@@ -7,8 +7,7 @@ using std::string;
 
 namespace filesystem = std::filesystem;
 
-namespace execHelper {
-namespace config {
+namespace execHelper::config {
 // cppcheck-suppress passedByValue symbolName=searchPaths
 ConfigFileSearcher::ConfigFileSearcher(Paths searchPaths) noexcept
     : m_searchPaths(std::move(searchPaths)) {
@@ -29,5 +28,4 @@ optional<Path> ConfigFileSearcher::find(const Path& filename) noexcept {
 bool ConfigFileSearcher::fileExist(const Path& pathToCheck) noexcept {
     return filesystem::exists(pathToCheck);
 }
-} // namespace config
-} // namespace execHelper
+} // namespace execHelper::config

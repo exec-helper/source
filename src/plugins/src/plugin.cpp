@@ -19,8 +19,7 @@ execHelper::plugins::ExecuteCallback& getExecuteCallback() noexcept {
 }
 } // namespace
 
-namespace execHelper {
-namespace plugins {
+namespace execHelper::plugins {
 void registerExecuteCallback(const ExecuteCallback& callback) noexcept {
     getExecuteCallback() = callback;
 }
@@ -29,5 +28,4 @@ bool registerTask(const Task& task) noexcept {
     getExecuteCallback()(task);
     return true;
 }
-} // namespace plugins
-} // namespace execHelper
+} // namespace execHelper::plugins

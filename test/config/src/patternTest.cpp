@@ -12,9 +12,7 @@ using std::stringstream;
 using execHelper::config::Pattern;
 using execHelper::config::PatternValues;
 
-namespace execHelper {
-namespace core {
-namespace test {
+namespace execHelper::core::test {
 SCENARIO("Test the pattern properties", "[patterns][Pattern]") {
     MAKE_COMBINATIONS("Some pattern properties") {
         const string key("key1");
@@ -173,6 +171,4 @@ SCENARIO("Test the pattern streaming operator", "[patterns][Pattern]") {
         }
     }
 }
-} // namespace test
-} // namespace core
-} // namespace execHelper
+} // namespace execHelper::core::test

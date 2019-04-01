@@ -15,9 +15,7 @@ using std::vector;
 
 using gsl::czstring;
 
-namespace execHelper {
-namespace config {
-namespace test {
+namespace execHelper::config::test {
 SCENARIO("Test argv construction", "[config][argv]") {
     GIVEN("An array of string literals") {
         const int argc = 3U;
@@ -328,6 +326,4 @@ SCENARIO("Error conditions for the access operator", "[config][argv]") {
         }
     }
 }
-} // namespace test
-} // namespace config
-} // namespace execHelper
+} // namespace execHelper::config::test

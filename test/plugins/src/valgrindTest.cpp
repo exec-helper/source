@@ -47,9 +47,7 @@ const czstring<> TOOL_KEY = "tool";
 const czstring<> RUN_COMMAND_KEY = "run-command";
 } // namespace
 
-namespace execHelper {
-namespace plugins {
-namespace test {
+namespace execHelper::plugins::test {
 SCENARIO("Obtain the plugin name of the valgrind plugin", "[valgrind]") {
     GIVEN("A plugin") {
         Valgrind plugin;
@@ -181,6 +179,4 @@ SCENARIO("Test erroneous scenarios", "[valgrind]") {
         }
     }
 }
-} // namespace test
-} // namespace plugins
-} // namespace execHelper
+} // namespace execHelper::plugins::test

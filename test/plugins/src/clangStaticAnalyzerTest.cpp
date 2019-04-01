@@ -42,9 +42,7 @@ const czstring<> BUILD_DIR_KEY = "build-dir";
 const czstring<> MEMORY_KEY = "memory";
 } // namespace
 
-namespace execHelper {
-namespace plugins {
-namespace test {
+namespace execHelper::plugins::test {
 SCENARIO("Obtain the plugin name of the clang-static-analyzer plugin",
          "[clang-static-analyzer]") {
     GIVEN("A plugin") {
@@ -172,6 +170,4 @@ SCENARIO("Testing the invalid configurations", "[clang-static-analyzer]") {
         }
     }
 }
-} // namespace test
-} // namespace plugins
-} // namespace execHelper
+} // namespace execHelper::plugins::test

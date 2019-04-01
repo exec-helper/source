@@ -50,9 +50,7 @@ const czstring<> EXCLUDES_KEY = "excludes";
 const czstring<> MEMORY_KEY = "memory";
 } // namespace
 
-namespace execHelper {
-namespace plugins {
-namespace test {
+namespace execHelper::plugins::test {
 SCENARIO("Obtain the plugin name of the lcov plugin", "[lcov]") {
     GIVEN("A plugin") {
         Lcov plugin;
@@ -234,6 +232,4 @@ SCENARIO("Test multiple configurations of the lcov plugin", "[lcov]") {
         ExecutePlugin::popPatterns();
     }
 }
-} // namespace test
-} // namespace plugins
-} // namespace execHelper
+} // namespace execHelper::plugins::test

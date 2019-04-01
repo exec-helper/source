@@ -36,8 +36,7 @@ namespace {
 const czstring<> PLUGIN_NAME = "command-line-command";
 } // namespace
 
-namespace execHelper {
-namespace plugins {
+namespace execHelper::plugins {
 
 std::string CommandLineCommand::getPluginName() const noexcept {
     return PLUGIN_NAME;
@@ -78,7 +77,7 @@ bool CommandLineCommand::apply(Task task, const VariablesMap& variables,
         tasks.emplace_back(move(task));
     } else {
         SettingsKeys keys({COMMAND_LINE_KEY});
-        for(auto commandKey :
+        for(const auto& commandKey :
             variables.get<SettingsValues>(COMMAND_LINE_KEY, SettingsValues())) {
             SettingsKeys tmpKey = keys;
             tmpKey.emplace_back(commandKey);
@@ -98,5 +97,4 @@ bool CommandLineCommand::apply(Task task, const VariablesMap& variables,
     }
     return true;
 }
-} // namespace plugins
-} // namespace execHelper
+} // namespace execHelper::plugins

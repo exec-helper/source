@@ -15,8 +15,7 @@ using gsl::czstring;
 using gsl::owner;
 using gsl::span;
 
-namespace execHelper {
-namespace config {
+namespace execHelper::config {
 Envp::Envp(const EnvironmentCollection& env) noexcept {
     static const string DELIMITER("=");
     m_envp.reserve(env.size() + 1);
@@ -98,5 +97,4 @@ std::ostream& operator<<(std::ostream& os, const Envp& envp) noexcept {
     }
     return os;
 }
-} // namespace config
-} // namespace execHelper
+} // namespace execHelper::config

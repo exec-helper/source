@@ -26,7 +26,6 @@ using boost::replace_all;
 
 using std::string;
 
-
 using gsl::span;
 using gsl::zstring;
 
@@ -47,7 +46,7 @@ const execHelper::core::PosixShell::ShellReturnCode POSIX_SUCCESS = 0U;
  * \param[in] workingDir    The working directory from where the path will operate
  * \returns The constructed PATH for the child. The first entry will be the given working directory
  */
-inline const std::vector<filesystem::path>
+inline std::vector<filesystem::path>
 getPath(const process::environment& env,
         const filesystem::path& workingDir) noexcept {
     std::vector<filesystem::path> path({filesystem::absolute(workingDir)});
@@ -63,8 +62,7 @@ getPath(const process::environment& env,
 }
 } // namespace
 
-namespace execHelper {
-namespace core {
+namespace execHelper::core {
 PosixShell::ShellReturnCode PosixShell::execute(const Task& task) {
     if(task.getTask().empty()) {
         return POSIX_SUCCESS;
@@ -171,5 +169,4 @@ inline TaskCollection PosixShell::wordExpand(const Task& task) noexcept {
     return result;
 #endif
 }
-} // namespace core
-} // namespace execHelper
+} // namespace execHelper::core

@@ -49,9 +49,7 @@ using Language = string;
 const czstring<> LANGUAGE_KEY = "language";
 } // namespace
 
-namespace execHelper {
-namespace plugins {
-namespace test {
+namespace execHelper::plugins::test {
 SCENARIO("Obtain the plugin name of the pmd plugin", "[pmd]") {
     GIVEN("A plugin") {
         Pmd plugin;
@@ -138,7 +136,7 @@ SCENARIO("Make combinations of different configurations for the pmd plugin",
             variables.replace(FILES_KEY, newFiles);
 
             if(variables.get<Tool>(TOOL_KEY) == Tool("cpd")) {
-                for(auto file : newFiles) {
+                for(const auto& file : newFiles) {
                     files.emplace_back("--files");
                     files.emplace_back(file);
                 }
@@ -182,6 +180,4 @@ SCENARIO("Make combinations of different configurations for the pmd plugin",
         }
     }
 }
-} // namespace test
-} // namespace plugins
-} // namespace execHelper
+} // namespace execHelper::plugins::test

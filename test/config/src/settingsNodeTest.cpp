@@ -34,9 +34,7 @@ const execHelper::config:: // NOLINT(fuchsia-statically-constructed-objects)
     SettingsValues DEFAULT_VALUES({DEFAULT_VALUE});
 } // namespace
 
-namespace execHelper {
-namespace config {
-namespace test {
+namespace execHelper::config::test {
 SCENARIO("Basic addition and getting of values", "[config][settingsNode]") {
     GIVEN("A basic setup") {
         const SettingsKey rootKey("root-key");
@@ -319,7 +317,7 @@ SCENARIO("Addition of multiple key values", "[config][settingsNode]") {
 
             THEN("It should contain it") {
                 SettingsKeys searchKeys;
-                for(auto key : key1) {
+                for(const auto& key : key1) {
                     searchKeys.emplace_back(key);
                     REQUIRE(settings.contains(searchKeys));
                 }
@@ -811,6 +809,4 @@ SCENARIO("Test adding values", "[config][settingsNode][issue]") {
         REQUIRE(settings.get<SettingsValues>(key, DEFAULT_VALUES) == values);
     });
 }
-} // namespace test
-} // namespace config
-} // namespace execHelper
+} // namespace execHelper::config::test

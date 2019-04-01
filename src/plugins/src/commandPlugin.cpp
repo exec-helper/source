@@ -24,8 +24,7 @@ namespace {
 const czstring<> PLUGIN_NAME = "commands";
 } // namespace
 
-namespace execHelper {
-namespace plugins {
+namespace execHelper::plugins {
 std::string CommandPlugin::getPluginName() const noexcept {
     return PLUGIN_NAME;
 }
@@ -44,5 +43,4 @@ bool CommandPlugin::apply(Task task, const VariablesMap& variables,
     ExecutePlugin executePlugin(commands);
     return executePlugin.apply(task, variables, patterns);
 }
-} // namespace plugins
-} // namespace execHelper
+} // namespace execHelper::plugins

@@ -28,8 +28,7 @@ namespace {
 const czstring<> PLUGIN_NAME = "scons";
 } // namespace
 
-namespace execHelper {
-namespace plugins {
+namespace execHelper::plugins {
 std::string Scons::getPluginName() const noexcept { return "scons"; }
 
 VariablesMap
@@ -67,5 +66,4 @@ bool Scons::apply(Task task, const VariablesMap& variables,
     }
     return true;
 }
-} // namespace plugins
-} // namespace execHelper
+} // namespace execHelper::plugins

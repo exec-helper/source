@@ -32,9 +32,7 @@ const execHelper::config:: // NOLINT(fuchsia-statically-constructed-objects)
     SettingsValues DEFAULT_VALUES({DEFAULT_VALUE});
 } // namespace
 
-namespace execHelper {
-namespace yaml {
-namespace test {
+namespace execHelper::yaml::test {
 SCENARIO("Yaml wrapper test", "[yaml][yamlwrapper]") {
     GIVEN("A yaml config string to parse") {
         const string key("commands");
@@ -321,6 +319,4 @@ SCENARIO("Requesting invalid values", "[yaml][yamlwrapper]") {
         }
     }
 }
-} // namespace test
-} // namespace yaml
-} // namespace execHelper
+} // namespace execHelper::yaml::test

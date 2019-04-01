@@ -2,9 +2,7 @@
 
 #include "config/commandLineOptions.h"
 
-namespace execHelper {
-namespace config {
-namespace test {
+namespace execHelper::config::test {
 SCENARIO("Test the command line keys", "[config][command-line-options]") {
     REQUIRE(HELP_OPTION_KEY == "help");
     REQUIRE(VERBOSE_KEY == "verbose");
@@ -14,6 +12,4 @@ SCENARIO("Test the command line keys", "[config][command-line-options]") {
     REQUIRE(COMMAND_KEY == "command");
     REQUIRE(LOG_LEVEL_KEY == "debug");
 }
-} // namespace test
-} // namespace config
-} // namespace execHelper
+} // namespace execHelper::config::test

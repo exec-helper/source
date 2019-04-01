@@ -9,8 +9,7 @@ using std::regex_error;
 using std::regex_replace;
 using std::string;
 
-namespace execHelper {
-namespace core {
+namespace execHelper::core {
 string replacePatterns(const string& subject, const string& pattern,
                        const string& replacement) noexcept {
     const string PATTERN_PREFIX(R"(\{)");
@@ -24,5 +23,4 @@ string replacePatterns(const string& subject, const string& pattern,
         return subject;
     }
 }
-} // namespace core
-} // namespace execHelper
+} // namespace execHelper::core

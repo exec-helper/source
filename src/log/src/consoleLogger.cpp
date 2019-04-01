@@ -8,8 +8,7 @@ using boost::log::expressions::stream;
 using boost::log::keywords::filter;
 using boost::log::keywords::format;
 
-namespace execHelper {
-namespace log {
+namespace execHelper::log {
 ConsoleLogger::ConsoleLogger(std::ostream& logStream)
     : m_logMessageFilter(
           boost::log::expressions::channel_severity_filter(channel, severity)),
@@ -33,5 +32,4 @@ bool ConsoleLogger::setSeverity(const Channel& channel,
     m_consoleSink->set_filter(m_logMessageFilter || false);
     return true;
 }
-} // namespace log
-} // namespace execHelper
+} // namespace execHelper::log

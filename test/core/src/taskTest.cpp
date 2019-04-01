@@ -44,9 +44,7 @@ string toString(const TaskCollection& task) {
 }
 } // namespace
 
-namespace execHelper {
-namespace core {
-namespace test {
+namespace execHelper::core::test {
 SCENARIO("Test the getters and setters of a task", "[task]") {
     GIVEN("A task") {
         MAKE_COMBINATIONS(
@@ -314,6 +312,4 @@ SCENARIO("Test the streaming operator", "[task]") {
         }
     }
 }
-} // namespace test
-} // namespace core
-} // namespace execHelper
+} // namespace execHelper::core::test

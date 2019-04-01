@@ -13,8 +13,7 @@ using boost::program_options::variables_map;
 
 using execHelper::config::VariablesMap;
 
-namespace execHelper {
-namespace config {
+namespace execHelper::config {
 OptionDescriptions::OptionDescriptions() noexcept
     : m_descriptions(m_optionDescription.add_options()) {
     ;
@@ -72,5 +71,4 @@ void OptionDescriptions::toMap(VariablesMap& variablesMap,
         }
     }
 }
-} // namespace config
-} // namespace execHelper
+} // namespace execHelper::config

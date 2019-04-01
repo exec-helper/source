@@ -16,8 +16,7 @@ namespace {
 const czstring<> PLUGIN_NAME = "memory";
 } // namespace
 
-namespace execHelper {
-namespace plugins {
+namespace execHelper::plugins {
 Memory::Memories               // NOLINT(fuchsia-statically-constructed-objects)
     Memory::m_executions = {}; // NOLINT(readability-redundant-declaration)
 bool Memory::m_returnCode = true; // NOLINT(readability-redundant-declaration)
@@ -65,5 +64,4 @@ void MemoryHandler::reset() noexcept { Memory::reset(); }
 void MemoryHandler::setReturnCode(bool returnCode) noexcept {
     Memory::setReturnCode(returnCode);
 }
-} // namespace plugins
-} // namespace execHelper
+} // namespace execHelper::plugins

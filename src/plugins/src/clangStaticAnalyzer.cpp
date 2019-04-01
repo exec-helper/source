@@ -32,8 +32,7 @@ using BuildCommands = vector<string>;
 const czstring<> BUILD_COMMANDS_KEY = "build-command";
 } // namespace
 
-namespace execHelper {
-namespace plugins {
+namespace execHelper::plugins {
 
 std::string ClangStaticAnalyzer::getPluginName() const noexcept {
     return PLUGIN_NAME;
@@ -72,5 +71,4 @@ bool ClangStaticAnalyzer::apply(core::Task task,
     ExecutePlugin buildExecutePlugin(*(buildCommand));
     return buildExecutePlugin.apply(task, variables, patterns);
 }
-} // namespace plugins
-} // namespace execHelper
+} // namespace execHelper::plugins

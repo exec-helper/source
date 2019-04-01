@@ -36,9 +36,7 @@ const czstring<> PLUGIN_NAME = "bootstrap";
 const czstring<> FILENAME_KEY = "filename";
 } // namespace
 
-namespace execHelper {
-namespace plugins {
-namespace test {
+namespace execHelper::plugins::test {
 SCENARIO("Obtain the plugin name of the bootstrap plugin", "[bootstrap]") {
     GIVEN("A plugin") {
         Bootstrap plugin;
@@ -138,6 +136,4 @@ SCENARIO("Test the combination of several settings for the bootstrap plugin",
         }
     }
 }
-} // namespace test
-} // namespace plugins
-} // namespace execHelper
+} // namespace execHelper::plugins::test

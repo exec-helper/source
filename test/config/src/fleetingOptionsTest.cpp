@@ -1,25 +1,27 @@
 #include "unittest/catch.h"
 
-#include <boost/lexical_cast.hpp>
-#include <thread>
-
 #include "config/commandLineOptions.h"
 #include "config/fleetingOptions.h"
 #include "config/variablesMap.h"
 #include "log/logLevel.h"
 
-using std::thread;
-using std::to_string;
+#include "config/generators.h"
+#include "log/generators.h"
+#include "unittest/rapidcheck.h"
+#include "utils/testValue.h"
 
-using boost::lexical_cast;
-
-using execHelper::log::all;
 using execHelper::log::LogLevel;
-using execHelper::log::toLogLevel;
+using execHelper::log::toString;
 
-namespace execHelper {
-namespace config {
-namespace test {
+using execHelper::test::propertyTest;
+
+using rc::DryRunValue;
+using rc::HelpValue;
+using rc::JobsValue;
+using rc::VerbosityValue;
+using rc::VersionValue;
+
+namespace execHelper::config::test {
 SCENARIO("Test the fleeting options defaults", "[config][fleeting-options]") {
     GIVEN("The expected defaults") {
         VariablesMap expectedDefaults("exec-helper");
@@ -44,84 +46,36 @@ SCENARIO("Test the fleeting options defaults", "[config][fleeting-options]") {
 
 SCENARIO("Test the getters of the fleeting options",
          "[config][fleeting-options]") {
-    MAKE_COMBINATIONS("Of several settings") {
-        VariablesMap variables = FleetingOptions::getDefault();
+    propertyTest(
+        "Test multiple configurations",
+        [](const HelpValue& help, const VersionValue& version,
+           const VerbosityValue& verbosity, const JobsValue& jobs,
+           const DryRunValue& dryRun, const LogLevel& logLevel,
+           const CommandCollection& commands) {
+            VariablesMap variables = FleetingOptions::getDefault();
 
-        auto expectedHelp = variables.get<HelpOption_t>(HELP_OPTION_KEY).value();
-        auto expectedVersion =
-            variables.get<VersionOption_t>(VERSION_KEY).value();
-        auto expectedVerbose =
-            variables.get<VerboseOption_t>(VERBOSE_KEY).value();
-        auto jobs = variables.get<JobsOption_t>(JOBS_KEY).value();
-        auto expectedJobs = 0U;
-        if(jobs == "auto") {
-            expectedJobs = thread::hardware_concurrency();
-        } else {
-            expectedJobs = lexical_cast<Jobs_t>(jobs);
-        }
-        auto expectedDryRun =
-            variables.get<DryRunOption_t>(DRY_RUN_KEY).value();
-        auto expectedLogLevel =
-            toLogLevel(variables.get<LogLevelOption_t>(LOG_LEVEL_KEY).value());
-        auto expectedCommands =
-            variables.get<CommandCollection>(COMMAND_KEY).value();
+            variables.replace(HELP_OPTION_KEY, help.config());
+            variables.replace(VERSION_KEY, version.config());
+            variables.replace(VERBOSE_KEY, verbosity.config());
+            variables.replace(JOBS_KEY, jobs.config());
+            variables.replace(DRY_RUN_KEY, dryRun.config());
+            variables.replace(LOG_LEVEL_KEY, toString(logLevel));
+            variables.replace(COMMAND_KEY, commands);
 
-        COMBINATIONS("Enable help") {
-            expectedHelp = true;
-            variables.add(HELP_OPTION_KEY, "yes");
-        }
+            THEN_WHEN("We create fleeting options based on the variables map") {
+                FleetingOptions fleetingOptions(variables);
 
-        COMBINATIONS("Enable version") {
-            expectedVersion = true;
-            variables.add(VERSION_KEY, "yes");
-        }
-
-        COMBINATIONS("Enable verbosity") {
-            expectedVerbose = true;
-            variables.add(VERBOSE_KEY, "yes");
-        }
-
-        COMBINATIONS("Enable single threaded") {
-            expectedJobs = 1U;
-            variables.add(JOBS_KEY, to_string(expectedJobs));
-        }
-
-        COMBINATIONS("Enable number of jobs") {
-            expectedJobs = 6U;
-            variables.replace(JOBS_KEY, to_string(expectedJobs));
-        }
-
-        COMBINATIONS("Enable dry run") {
-            expectedDryRun = true;
-            variables.add(DRY_RUN_KEY, "yes");
-        }
-
-        COMBINATIONS("Disable logging") {
-            expectedLogLevel = all;
-            variables.add(LOG_LEVEL_KEY, "all");
-        }
-
-        COMBINATIONS("Add commands") {
-            expectedCommands.emplace_back("command1");
-            expectedCommands.emplace_back("command2");
-        }
-
-        variables.add(COMMAND_KEY, expectedCommands);
-
-        THEN_WHEN("We create fleeting options based on the variables map") {
-            FleetingOptions fleetingOptions(variables);
-
-            THEN_CHECK("The getters are as expected") {
-                REQUIRE(fleetingOptions.getHelp() == expectedHelp);
-                REQUIRE(fleetingOptions.getVersion() == expectedVersion);
-                REQUIRE(fleetingOptions.getVerbosity() == expectedVerbose);
-                REQUIRE(fleetingOptions.getJobs() == expectedJobs);
-                REQUIRE(fleetingOptions.getDryRun() == expectedDryRun);
-                REQUIRE(fleetingOptions.getLogLevel() == expectedLogLevel);
-                REQUIRE(fleetingOptions.getCommands() == expectedCommands);
+                THEN_CHECK("The getters are as expected") {
+                    REQUIRE(help == fleetingOptions.getHelp());
+                    REQUIRE(version == fleetingOptions.getVersion());
+                    REQUIRE(verbosity == fleetingOptions.getVerbosity());
+                    REQUIRE(jobs == fleetingOptions.getJobs());
+                    REQUIRE(dryRun == fleetingOptions.getDryRun());
+                    REQUIRE(logLevel == fleetingOptions.getLogLevel());
+                    REQUIRE(commands == fleetingOptions.getCommands());
+                }
             }
-        }
-    }
+        });
 }
 
 SCENARIO("Test copy constructor and assignment", "[patterns][Pattern]") {
@@ -153,6 +107,4 @@ SCENARIO("Test copy constructor and assignment", "[patterns][Pattern]") {
         }
     }
 }
-} // namespace test
-} // namespace config
-} // namespace execHelper
+} // namespace execHelper::config::test

@@ -35,8 +35,7 @@ using Tool = string;
 const czstring<> TOOL_KEY = "tool";
 } // namespace
 
-namespace execHelper {
-namespace plugins {
+namespace execHelper::plugins {
 std::string Valgrind::getPluginName() const noexcept { return PLUGIN_NAME; }
 
 VariablesMap
@@ -82,5 +81,4 @@ bool Valgrind::apply(Task task, const VariablesMap& variables,
     }
     return true;
 }
-} // namespace plugins
-} // namespace execHelper
+} // namespace execHelper::plugins

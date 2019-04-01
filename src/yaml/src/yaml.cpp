@@ -11,8 +11,7 @@ using std::vector;
 using execHelper::config::Path;
 using execHelper::config::SettingsNode;
 
-namespace execHelper {
-namespace yaml {
+namespace execHelper::yaml {
 Yaml::Yaml(const Path& file) : m_yaml(file) { ; }
 
 Yaml::Yaml(const string& yamlConfig) : m_yaml(yamlConfig) { ; }
@@ -39,5 +38,4 @@ bool Yaml::getTree(const initializer_list<string>& keys,
                    SettingsNode* settings) const noexcept {
     return m_yaml.getTree(keys, settings);
 }
-} // namespace yaml
-} // namespace execHelper
+} // namespace execHelper::yaml

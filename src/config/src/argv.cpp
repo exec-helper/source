@@ -13,8 +13,7 @@ using std::vector;
 using gsl::czstring;
 using gsl::span;
 
-namespace execHelper {
-namespace config {
+namespace execHelper::config {
 Argv::Argv(int argc, const char* const* const argv) noexcept {
     span<const czstring<>> spanArgv(argv, argc);
     m_argv.reserve(argc + 1UL);
@@ -120,5 +119,4 @@ std::ostream& operator<<(std::ostream& os, const Argv& argv) noexcept {
     }
     return os;
 }
-} // namespace config
-} // namespace execHelper
+} // namespace execHelper::config

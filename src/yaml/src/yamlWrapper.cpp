@@ -17,8 +17,7 @@ using execHelper::config::SettingsKeys;
 using execHelper::config::SettingsNode;
 using execHelper::config::SettingsValue;
 
-namespace execHelper {
-namespace yaml {
+namespace execHelper::yaml {
 YamlWrapper::YamlWrapper(const Path& file)
     : m_node(YAML::LoadFile(file.string())) {
     ;
@@ -139,5 +138,4 @@ bool YamlWrapper::getSubTree(const YAML::Node& node, SettingsNode* yamlNode,
     }
     return true;
 }
-} // namespace yaml
-} // namespace execHelper
+} // namespace execHelper::yaml

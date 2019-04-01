@@ -19,8 +19,7 @@ inline const vector<string>& getLogLevelStrings() noexcept {
 }
 } // namespace
 
-namespace execHelper {
-namespace log {
+namespace execHelper::log {
 LogLevel toLogLevel(const std::string& level) {
     const auto& logLevelStrings = getLogLevelStrings();
     const auto& element =
@@ -48,5 +47,4 @@ string toString(LogLevel level) noexcept {
                    "Level must be a log level value");
     return getLogLevelStrings()[level];
 }
-} // namespace log
-} // namespace execHelper
+} // namespace execHelper::log

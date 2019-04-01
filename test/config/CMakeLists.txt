@@ -1,3 +1,7 @@
+set(LIB_NAME config-generators)
+add_library(${LIB_NAME} INTERFACE)
+target_include_directories(${LIB_NAME} INTERFACE include)
+
 set(EXE_NAME ${PROJECT_NAME}-config-unittest)
 
 set(SRCS    src/settingsNodeTest.cpp
@@ -19,10 +23,12 @@ set(DEPENDENCIES
         unittest
         rpcheck
         test-utils
+        log-generators
+        config-generators
     )
 
 add_executable(${EXE_NAME} ${SRCS})
-target_include_directories(${EXE_NAME} PRIVATE ${DEPENDENCIES})
+target_include_directories(${EXE_NAME} PRIVATE ${DEPENDENCIES} include)
 target_link_libraries(${EXE_NAME} PRIVATE ${DEPENDENCIES})
 add_test(${EXE_NAME} ${EXE_NAME})
 

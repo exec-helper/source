@@ -63,9 +63,7 @@ TaskCollection toWarningAsError(const TaskCollection& taskCollection) noexcept {
 }
 } // namespace
 
-namespace execHelper {
-namespace plugins {
-namespace test {
+namespace execHelper::plugins::test {
 SCENARIO("Obtain the plugin name of the clang-tidy plugin", "[clang-tidy]") {
     GIVEN("A plugin") {
         ClangTidy plugin;
@@ -172,6 +170,4 @@ SCENARIO("Testing the configuration settings of the clang-tidy plugin",
         }
     }
 }
-} // namespace test
-} // namespace plugins
-} // namespace execHelper
+} // namespace execHelper::plugins::test

@@ -38,13 +38,9 @@ inline string implodeVector(const vector<string>& toImplode,
 }
 } // namespace
 
-namespace execHelper {
-namespace core {
+namespace execHelper::core {
 
-Task::Task() noexcept :
-    m_workingDirectory(filesystem::current_path()) {
-    ;
-}
+Task::Task() noexcept : m_workingDirectory(filesystem::current_path()) { ; }
 
 Task::Task(const initializer_list<string>& subtasks) noexcept
     : m_task(subtasks), m_workingDirectory(filesystem::current_path()) {
@@ -149,5 +145,4 @@ ostream& operator<<(ostream& os, const Task& task) noexcept {
     os << endl;
     return os;
 }
-} // namespace core
-} // namespace execHelper
+} // namespace execHelper::core

@@ -8,9 +8,7 @@ using std::string;
 
 namespace filesystem = std::filesystem;
 
-namespace execHelper {
-namespace config {
-namespace test {
+namespace execHelper::config::test {
 SCENARIO("Test the config file searcher", "[config][config-file-searcher]") {
     GIVEN("A few search paths and a file to search") {
         const Paths searchPaths({"dir1", "dir1/dir2", "dir1/dir2//dir3",
@@ -61,6 +59,4 @@ SCENARIO("Test the config file searcher", "[config][config-file-searcher]") {
         }
     }
 }
-} // namespace test
-} // namespace config
-} // namespace execHelper
+} // namespace execHelper::config::test

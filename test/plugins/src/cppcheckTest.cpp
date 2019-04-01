@@ -37,9 +37,7 @@ const czstring<> ENABLE_CHECKS_KEY = "enable-checks";
 const czstring<> SRC_DIR_KEY = "src-dir";
 } // namespace
 
-namespace execHelper {
-namespace plugins {
-namespace test {
+namespace execHelper::plugins::test {
 SCENARIO("Obtain the plugin name of the cppcheck plugin", "[cppcheck]") {
     GIVEN("A plugin") {
         Cppcheck plugin;
@@ -73,7 +71,8 @@ SCENARIO("Obtain the default variables map of the cppcheck plugin",
         }
 
         COMBINATIONS("Switch on threadedness") {
-            fleetingOptions.m_jobs = 6U;
+            const uint8_t NB_OF_JOBS = 6U;
+            fleetingOptions.m_jobs = NB_OF_JOBS;
             actualVariables.replace(JOBS_KEY,
                                     to_string(fleetingOptions.m_jobs));
         }
@@ -161,6 +160,4 @@ SCENARIO("Testing the configuration settings of the cppcheck plugin",
         }
     }
 }
-} // namespace test
-} // namespace plugins
-} // namespace execHelper
+} // namespace execHelper::plugins::test

@@ -1,5 +1,5 @@
-#ifndef GENERATORS_INCLUDE
-#define GENERATORS_INCLUDE
+#ifndef LOG_GENERATORS_INCLUDE
+#define LOG_GENERATORS_INCLUDE
 
 #include "log/logLevel.h"
 
@@ -16,4 +16,4 @@ template <> struct Arbitrary<execHelper::log::LogLevel> {
 
 } // namespace rc
 
-#endif /* GENERATORS_INCLUDE */
+#endif /* LOG_GENERATORS_INCLUDE */

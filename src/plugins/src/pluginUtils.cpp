@@ -41,8 +41,7 @@ using execHelper::core::Task;
 using execHelper::core::TaskCollection;
 using execHelper::plugins::PatternPermutator;
 
-namespace execHelper {
-namespace plugins {
+namespace execHelper::plugins {
 const PatternKey& getPatternsKey() noexcept {
     static const PatternKey key("patterns");
     return key;
@@ -120,5 +119,4 @@ string toString(const PatternKeys& values) noexcept {
     }
     return result;
 }
-} // namespace plugins
-} // namespace execHelper
+} // namespace execHelper::plugins

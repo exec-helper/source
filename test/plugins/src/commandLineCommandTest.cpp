@@ -44,9 +44,7 @@ const czstring<> PLUGIN_NAME("command-line-command");
 const czstring<> WORKING_DIR_KEY("working-dir");
 } // namespace
 
-namespace execHelper {
-namespace plugins {
-namespace test {
+namespace execHelper::plugins::test {
 SCENARIO("Obtain the plugin name of the command-line-command plugin",
          "[command-line-command]") {
     GIVEN("A plugin") {
@@ -184,6 +182,4 @@ SCENARIO("Testing erroneous configuration conditions for the "
         }
     }
 }
-} // namespace test
-} // namespace plugins
-} // namespace execHelper
+} // namespace execHelper::plugins::test

@@ -20,9 +20,7 @@ ImmediateExecutor::Callback // NOLINT(fuchsia-statically-constructed-objects)
             ShellReturnCode /* returnCode */) noexcept {}; // NOLINT(cert-err58-cpp)
 } // namespace
 
-namespace execHelper {
-namespace core {
-namespace test {
+namespace execHelper::core::test {
 SCENARIO("Test the execution of the immediateExecutor",
          "[ExecutorInterface][ImmediateExecutor]") {
     GIVEN("Some tasks we want to execute and an executor") {
@@ -75,6 +73,4 @@ SCENARIO("Test the failing of the execution",
         }
     }
 }
-} // namespace test
-} // namespace core
-} // namespace execHelper
+} // namespace execHelper::core::test

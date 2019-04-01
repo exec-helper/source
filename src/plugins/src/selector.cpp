@@ -28,8 +28,7 @@ const czstring<> PLUGIN_NAME = "selector";
 const czstring<> PATTERN_KEY = "patterns";
 } // namespace
 
-namespace execHelper {
-namespace plugins {
+namespace execHelper::plugins {
 string Selector::getPluginName() const noexcept { return PLUGIN_NAME; }
 
 VariablesMap Selector::getVariablesMap(
@@ -60,5 +59,4 @@ bool Selector::apply(Task task, const VariablesMap& variables,
     ExecutePlugin executePlugin(commandsToExecute);
     return executePlugin.apply(task, variables, patterns);
 }
-} // namespace plugins
-} // namespace execHelper
+} // namespace execHelper::plugins

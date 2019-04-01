@@ -38,8 +38,7 @@ const czstring<> FILES_KEY = "files";
 const czstring<> LANGUAGE_KEY = "language";
 } // namespace
 
-namespace execHelper {
-namespace plugins {
+namespace execHelper::plugins {
 string Pmd::getPluginName() const noexcept { return PLUGIN_NAME; }
 
 VariablesMap
@@ -93,5 +92,4 @@ bool Pmd::apply(Task task, const VariablesMap& variables,
     }
     return true;
 }
-} // namespace plugins
-} // namespace execHelper
+} // namespace execHelper::plugins

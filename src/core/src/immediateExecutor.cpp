@@ -9,8 +9,7 @@
 
 using std::move;
 
-namespace execHelper {
-namespace core {
+namespace execHelper::core {
 
 ImmediateExecutor::ImmediateExecutor(std::shared_ptr<Shell> shell,
                                      Callback callback) noexcept
@@ -25,5 +24,4 @@ void ImmediateExecutor::execute(const Task& task) noexcept {
         m_callback(returnCode);
     }
 }
-} // namespace core
-} // namespace execHelper
+} // namespace execHelper::core

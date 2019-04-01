@@ -46,9 +46,7 @@ const czstring<> COMMANDS_KEY = "commands";
 const czstring<> MEMORY_KEY = "memory";
 } // namespace
 
-namespace execHelper {
-namespace commander {
-namespace test {
+namespace execHelper::commander::test {
 SCENARIO("Basic test the commander", "[commander]") {
     MAKE_COMBINATIONS("Of different inputs for the commander") {
         FleetingOptionsStub fleetingOptions;
@@ -191,6 +189,4 @@ SCENARIO("Test when no commands are passed", "[commander]") {
         }
     }
 }
-} // namespace test
-} // namespace commander
-} // namespace execHelper
+} // namespace execHelper::commander::test

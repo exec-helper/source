@@ -199,7 +199,8 @@ getSettingsFile(const Argv& argv, const EnvironmentCollection& env,
 
 #ifdef _WIN32
     SettingsFileOption_t settingsFileValue =
-        optionsMap.get<SettingsFileOption_t>(SETTINGS_FILE_KEY, ".windows.exec-helper");
+        optionsMap.get<SettingsFileOption_t>(SETTINGS_FILE_KEY,
+                                             ".windows.exec-helper");
 #else
     SettingsFileOption_t settingsFileValue =
         optionsMap.get<SettingsFileOption_t>(SETTINGS_FILE_KEY, ".exec-helper");

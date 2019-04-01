@@ -47,8 +47,7 @@ Patterns processPatterns(const SettingsNode& settings) noexcept {
 }
 } // namespace
 
-namespace execHelper {
-namespace config {
+namespace execHelper::config {
 optional<PatternSettingsPair> parseSettingsFile(const Path& file) noexcept {
     SettingsNode configuration("exec-helper");
 
@@ -62,5 +61,4 @@ optional<PatternSettingsPair> parseSettingsFile(const Path& file) noexcept {
     configuration.clear(PATTERNS_KEY);
     return make_pair(patterns, configuration);
 }
-} // namespace config
-} // namespace execHelper
+} // namespace execHelper::config

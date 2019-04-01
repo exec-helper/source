@@ -43,9 +43,7 @@ const czstring<> PLUGIN_NAME = "make";
 const czstring<> BUILD_DIR_KEY = "build-dir";
 } // namespace
 
-namespace execHelper {
-namespace plugins {
-namespace test {
+namespace execHelper::plugins::test {
 SCENARIO("Obtain the plugin name of the make plugin", "[make]") {
     GIVEN("A plugin") {
         Make plugin;
@@ -177,6 +175,4 @@ SCENARIO("Testing the configuration settings of the make plugin", "[make]") {
         }
     }
 }
-} // namespace test
-} // namespace plugins
-} // namespace execHelper
+} // namespace execHelper::plugins::test

@@ -42,9 +42,7 @@ using execHelper::test::baseUtils::TestCommand;
 using execHelper::test::baseUtils::YamlWriter;
 using execHelper::test::baseUtils::execution::execute;
 
-namespace execHelper {
-namespace test {
-namespace integration {
+namespace execHelper::test::integration {
 /**
  * Implements @ref execute-multiple-statements-predefined-order
  */
@@ -346,7 +344,8 @@ SCENARIO("Execute multiple statements: predefined order: failing statements",
                     REQUIRE(failingCommand[i]->getNumberOfExecutions() == 1U);
                 }
 
-                for(auto i = failIndex + 1U; i < failingCommand.size(); ++i) {
+                for(size_t i = failIndex + 1UL; i < failingCommand.size();
+                    ++i) {
                     REQUIRE(failingCommand[i]->getNumberOfExecutions() == 0U);
                 }
             }
@@ -363,6 +362,4 @@ SCENARIO("Execute multiple statements: predefined order: failing statements",
         }
     }
 }
-} // namespace integration
-} // namespace test
-} // namespace execHelper
+} // namespace execHelper::test::integration

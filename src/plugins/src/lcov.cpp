@@ -52,8 +52,7 @@ void runTask(const Task& task, const PatternCombinations& combination) {
 }
 } // namespace
 
-namespace execHelper {
-namespace plugins {
+namespace execHelper::plugins {
 string Lcov::getPluginName() const noexcept { return PLUGIN_NAME; }
 
 VariablesMap
@@ -227,5 +226,4 @@ inline Task Lcov::generateCaptureTask(const BaseDir& baseDirectory,
     result.append(commandLine);
     return result;
 }
-} // namespace plugins
-} // namespace execHelper
+} // namespace execHelper::plugins

@@ -57,9 +57,7 @@ optional<filesystem::path> searchBinary(
 }
 } // namespace
 
-namespace execHelper {
-namespace core {
-namespace test {
+namespace execHelper::core::test {
 SCENARIO("Test that the right return code is returned", "[shell][posixshell]") {
     propertyTest("An execution engine and a shell",
                  [](PosixShell::ShellReturnCode expectedReturnCode) {
@@ -368,6 +366,4 @@ SCENARIO("Test the shell for binaries found in the working directory but not "
         }
     });
 }
-} // namespace test
-} // namespace core
-} // namespace execHelper
+} // namespace execHelper::core::test

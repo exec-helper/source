@@ -14,9 +14,7 @@ using execHelper::test::baseUtils::TmpFile;
 
 namespace filesystem = std::filesystem;
 
-namespace execHelper {
-namespace config {
-namespace test {
+namespace execHelper::config::test {
 SCENARIO("Test listing the parent paths", "[config][path-manipulation]") {
     GIVEN("A list of parent paths ordered from the root directory to the "
           "longest path") {
@@ -59,7 +57,8 @@ SCENARIO("Test listing the parent paths", "[config][path-manipulation]") {
     }
 
     GIVEN("A relative path") {
-        Path relativePath(generateRandomString(6U));
+        constexpr uint8_t stringLength = 6U;
+        Path relativePath(generateRandomString(stringLength));
 
         WHEN("We request the parent paths") {
             auto result = getAllParentDirectories(relativePath);
@@ -98,7 +97,8 @@ SCENARIO("Test getting the home directory", "[config][path-manipulation]") {
         const std::string HOME_KEY("HOME");
 
         EnvironmentCollection env;
-        env.emplace(HOME_KEY, generateRandomString(6U));
+        constexpr uint8_t stringLength = 6U;
+        env.emplace(HOME_KEY, generateRandomString(stringLength));
 
         WHEN("We request the home directory") {
             auto result = getHomeDirectory(env);
@@ -125,6 +125,4 @@ SCENARIO("Test getting the home directory", "[config][path-manipulation]") {
         }
     }
 }
-} // namespace test
-} // namespace config
-} // namespace execHelper
+} // namespace execHelper::config::test

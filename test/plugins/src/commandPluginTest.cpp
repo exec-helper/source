@@ -35,9 +35,7 @@ const czstring<> PLUGIN_NAME = "commands";
 const czstring<> MEMORY_KEY = "memory";
 } // namespace
 
-namespace execHelper {
-namespace plugins {
-namespace test {
+namespace execHelper::plugins::test {
 SCENARIO("Obtain the plugin name of the command-plugin", "[command-plugin]") {
     GIVEN("A plugin") {
         CommandPlugin plugin;
@@ -140,6 +138,4 @@ SCENARIO("Test the commandPlugin plugin", "[command-plugin]") {
         ExecutePlugin::popPatterns();
     }
 }
-} // namespace test
-} // namespace plugins
-} // namespace execHelper
+} // namespace execHelper::plugins::test

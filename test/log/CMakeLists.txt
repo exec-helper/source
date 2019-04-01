@@ -1,3 +1,7 @@
+set(LIB_NAME log-generators)
+add_library(${LIB_NAME} INTERFACE)
+target_include_directories(${LIB_NAME} INTERFACE include)
+
 set(EXE_NAME ${PROJECT_NAME}-log-unittest)
 
 set(SRCS    src/logTest.cpp
@@ -8,6 +12,7 @@ set(DEPENDENCIES
         log
         rpcheck
         unittest
+        log-generators
    )
 
 add_executable(${EXE_NAME} ${SRCS})

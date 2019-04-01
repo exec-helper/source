@@ -6,9 +6,7 @@
 
 using std::string;
 
-namespace execHelper {
-namespace plugins {
-namespace test {
+namespace execHelper::plugins::test {
 SCENARIO("Test build dir key getter", "[build-plugin]") {
     GIVEN("Nothing in particular") {
         WHEN("We get the build dir key") {
@@ -20,6 +18,4 @@ SCENARIO("Test build dir key getter", "[build-plugin]") {
         }
     }
 }
-} // namespace test
-} // namespace plugins
-} // namespace execHelper
+} // namespace execHelper::plugins::test

@@ -21,9 +21,7 @@ using execHelper::config::PatternCombinations;
 using execHelper::config::VariablesMap;
 using execHelper::core::TaskCollection;
 
-namespace execHelper {
-namespace plugins {
-namespace test {
+namespace execHelper::plugins::test {
 SCENARIO("Test the patterns key", "[plugin-utils]") {
     GIVEN("The correct patterns key") {
         string correctPatternsKey("patterns");
@@ -75,6 +73,4 @@ SCENARIO("Test the working directory key", "[plugin-utils]") {
         }
     }
 }
-} // namespace test
-} // namespace plugins
-} // namespace execHelper
+} // namespace execHelper::plugins::test

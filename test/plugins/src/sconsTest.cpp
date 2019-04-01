@@ -37,9 +37,7 @@ const czstring<> PLUGIN_NAME = "scons";
 const czstring<> BUILD_DIR_KEY = "build-dir";
 } // namespace
 
-namespace execHelper {
-namespace plugins {
-namespace test {
+namespace execHelper::plugins::test {
 SCENARIO("Obtain the plugin name of the scons plugin", "[scons]") {
     GIVEN("A plugin") {
         Scons plugin;
@@ -144,6 +142,4 @@ SCENARIO("Testing the configuration settings of the scons plugin", "[scons]") {
         }
     }
 }
-} // namespace test
-} // namespace plugins
-} // namespace execHelper
+} // namespace execHelper::plugins::test

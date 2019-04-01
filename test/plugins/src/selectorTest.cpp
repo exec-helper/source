@@ -42,9 +42,7 @@ const czstring<> PATTERN_KEY = "patterns";
 const czstring<> MEMORY_KEY = "memory";
 } // namespace
 
-namespace execHelper {
-namespace plugins {
-namespace test {
+namespace execHelper::plugins::test {
 SCENARIO("Obtain the plugin name of the selector plugin", "[selector]") {
     GIVEN("A plugin") {
         Selector plugin;
@@ -153,6 +151,4 @@ SCENARIO("Erroneous situations", "[selector]") {
         }
     }
 }
-} // namespace test
-} // namespace plugins
-} // namespace execHelper
+} // namespace execHelper::plugins::test

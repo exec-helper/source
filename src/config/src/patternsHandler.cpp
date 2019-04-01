@@ -10,10 +10,9 @@ using std::string;
 
 using std::optional;
 
-namespace execHelper {
-namespace config {
+namespace execHelper::config {
 PatternsHandler::PatternsHandler(const Patterns& other) {
-    for(auto pattern : other) {
+    for(const auto& pattern : other) {
         m_patterns.emplace(pattern.getKey(), pattern);
     }
 }
@@ -70,5 +69,4 @@ PatternsHandler::toPattern(const PatternKey& key,
     auto longOptionOpt = patternMap.get<string>(LONG_OPTION_KEY);
     return Pattern(key, *defaultValues, shortOption, longOptionOpt);
 }
-} // namespace config
-} // namespace execHelper
+} // namespace execHelper::config

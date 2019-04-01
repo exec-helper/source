@@ -75,8 +75,7 @@ vector<SettingsNode> // NOLINT(fuchsia-statically-constructed-objects)
 vector<PatternsHandler> // NOLINT(fuchsia-statically-constructed-objects)
     execHelper::plugins::ExecutePlugin::m_patterns;
 
-namespace execHelper {
-namespace plugins {
+namespace execHelper::plugins {
 ExecutePlugin::ExecutePlugin(
     const CommandCollection& commandsToExecute) noexcept
     : m_commands(commandsToExecute), m_initialCommands(commandsToExecute) {
@@ -261,5 +260,4 @@ void ExecutePlugin::popFleetingOptions() noexcept { m_fleeting.pop_back(); }
 void ExecutePlugin::popSettingsNode() noexcept { m_settings.pop_back(); }
 
 void ExecutePlugin::popPatterns() noexcept { m_patterns.pop_back(); }
-} // namespace plugins
-} // namespace execHelper
+} // namespace execHelper::plugins

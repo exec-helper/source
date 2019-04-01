@@ -28,8 +28,7 @@ const czstring<> PLUGIN_NAME = "bootstrap";
 const czstring<> FILENAME_KEY = "filename";
 } // namespace
 
-namespace execHelper {
-namespace plugins {
+namespace execHelper::plugins {
 string Bootstrap::getPluginName() const noexcept { return PLUGIN_NAME; }
 
 VariablesMap Bootstrap::getVariablesMap(
@@ -57,5 +56,4 @@ bool Bootstrap::apply(Task task, const VariablesMap& variables,
     }
     return true;
 }
-} // namespace plugins
-} // namespace execHelper
+} // namespace execHelper::plugins

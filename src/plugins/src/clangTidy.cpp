@@ -29,8 +29,7 @@ const czstring<> CHECKS_KEY = "checks";
 const czstring<> WARNING_AS_ERROR_KEY = "warning-as-errors";
 } // namespace
 
-namespace execHelper {
-namespace plugins {
+namespace execHelper::plugins {
 string ClangTidy::getPluginName() const noexcept { return "clang-tidy"; }
 
 VariablesMap ClangTidy::getVariablesMap(
@@ -107,5 +106,4 @@ string ClangTidy::listChecks(const Checks& checks) noexcept {
     result += checks.back();
     return result;
 }
-} // namespace plugins
-} // namespace execHelper
+} // namespace execHelper::plugins

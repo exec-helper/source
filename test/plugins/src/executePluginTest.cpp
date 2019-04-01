@@ -70,27 +70,53 @@ template <typename T> bool checkGetPlugin(const string& pluginName) {
     return (derived != nullptr);
 }
 
-struct Expected {
-    Command directCommand;
-    Task task;
-    VariablesMap variablesMap;
-    Patterns patterns;
-
+class Expected {
+  public:
     explicit Expected(Command directCommand, Task task = Task(),
                       VariablesMap variablesMap = VariablesMap(MEMORY_KEY),
                       Patterns patterns = Patterns())
-        : directCommand(move(directCommand)),
-          task(move(task)),
-          variablesMap(move(variablesMap)),
-          patterns(move(patterns)) {
+        : m_directCommand(move(directCommand)),
+          m_task(move(task)),
+          m_variablesMap(move(variablesMap)),
+          m_patterns(move(patterns)) {
         ;
     }
+
+    [[nodiscard]] inline const Command& getCommand() const noexcept {
+        return m_directCommand;
+    }
+
+    [[nodiscard]] inline const Task& getTask() const noexcept { return m_task; }
+
+    [[nodiscard]] inline const VariablesMap& getVariables() const noexcept {
+        return m_variablesMap;
+    }
+
+    inline void setVariables(const VariablesMap& variables) noexcept {
+        m_variablesMap = variables;
+    }
+
+    [[nodiscard]] inline const Patterns& getPatterns() const noexcept {
+        return m_patterns;
+    }
+
+    inline void addPattern(const Pattern& pattern) noexcept {
+        m_patterns.push_back(pattern);
+    }
+
+    inline void setPatterns(const Patterns& patterns) noexcept {
+        m_patterns = patterns;
+    }
+
+  private:
+    Command m_directCommand;
+    Task m_task;
+    VariablesMap m_variablesMap;
+    Patterns m_patterns;
 };
 } // namespace
 
-namespace execHelper {
-namespace plugins {
-namespace test {
+namespace execHelper::plugins::test {
 SCENARIO("Obtain the plugin name of the execute-plugin", "[execute-plugin]") {
     GIVEN("A plugin") {
         ExecutePlugin plugin({});
@@ -208,7 +234,7 @@ SCENARIO("Test the settings node to variables map mapping",
             for(const auto& command : commands) {
                 ensures(expected.count(command) > 0U);
                 for(auto& expectedTask : expected.at(command)) {
-                    const Command directCommand = expectedTask.directCommand;
+                    const auto& directCommand = expectedTask.getCommand();
 
                     VariablesMap expectedVariableMap(MEMORY_KEY);
                     expectedVariableMap.add(
@@ -226,7 +252,7 @@ SCENARIO("Test the settings node to variables map mapping",
                             SettingsKeys(), SettingsValues())) {
                         settings[MEMORY_KEY][key] = expectedVariableMap[key];
                     }
-                    expectedTask.variablesMap = expectedVariableMap;
+                    expectedTask.setVariables(expectedVariableMap);
                 }
             }
         }
@@ -235,7 +261,7 @@ SCENARIO("Test the settings node to variables map mapping",
             for(const auto& command : commands) {
                 ensures(expected.count(command) > 0U);
                 for(auto& expectedTask : expected.at(command)) {
-                    const Command directCommand = expectedTask.directCommand;
+                    const auto& directCommand = expectedTask.getCommand();
 
                     VariablesMap expectedVariableMap(MEMORY_KEY);
                     expectedVariableMap.add(
@@ -254,7 +280,7 @@ SCENARIO("Test the settings node to variables map mapping",
                         settings[MEMORY_KEY][directCommand][key] =
                             expectedVariableMap[key];
                     }
-                    expectedTask.variablesMap = expectedVariableMap;
+                    expectedTask.setVariables(expectedVariableMap);
                 }
             }
         }
@@ -272,7 +298,7 @@ SCENARIO("Test the settings node to variables map mapping",
                     for(const auto& command : commands) {
                         ensures(expected.count(command) > 0U);
                         for(auto& expectedCommand : expected.at(command)) {
-                            expectedCommand.patterns.push_back(pattern);
+                            expectedCommand.addPattern(pattern);
                         }
                     }
                 }
@@ -289,13 +315,13 @@ SCENARIO("Test the settings node to variables map mapping",
 
                 ensures(expected.count(command) > 0U);
                 for(auto& expectedCommand : expected.at(command)) {
-                    expectedCommand.patterns.clear();
+                    expectedCommand.setPatterns({});
                     for(const auto& pattern : patterns) {
                         configuredPatterns.push_back(pattern);
-                        settings.add({MEMORY_KEY, expectedCommand.directCommand,
+                        settings.add({MEMORY_KEY, expectedCommand.getCommand(),
                                       PATTERN_KEY},
                                      pattern.getKey());
-                        expectedCommand.patterns.push_back(pattern);
+                        expectedCommand.addPattern(pattern);
                     }
                 }
             }
@@ -321,14 +347,15 @@ SCENARIO("Test the settings node to variables map mapping",
                     REQUIRE(expected.count(command) > 0U);
                     for(const auto& expectedCommand : expected.at(command)) {
                         REQUIRE(memory != memories.end());
-                        REQUIRE(memory->task == expectedCommand.task);
-                        REQUIRE(memory->patterns == expectedCommand.patterns);
+                        REQUIRE(memory->task == expectedCommand.getTask());
+                        REQUIRE(memory->patterns ==
+                                expectedCommand.getPatterns());
                         for(const auto& key :
-                            expectedCommand.variablesMap.get<SettingsValues>(
+                            expectedCommand.getVariables().get<SettingsValues>(
                                 SettingsKeys(), SettingsValues())) {
                             REQUIRE(memory->variables.contains(key));
                             REQUIRE(memory->variables[key] ==
-                                    expectedCommand.variablesMap[key]);
+                                    expectedCommand.getVariables()[key]);
                         }
                         ++memory;
                     }
@@ -425,6 +452,4 @@ SCENARIO("Testing the plugin getter", "[execute-plugin]") {
         }
     }
 }
-} // namespace test
-} // namespace plugins
-} // namespace execHelper
+} // namespace execHelper::plugins::test

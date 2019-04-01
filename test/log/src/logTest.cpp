@@ -2,6 +2,7 @@
 #include <sstream>
 #include <string>
 
+#define BOOST_LOG_DYN_LINK 1 // NOLINT(cppcoreguidelines-macro-usage)
 #include <boost/core/null_deleter.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/log/sinks/sync_frontend.hpp>
@@ -9,9 +10,9 @@
 #include <boost/log/sources/logger.hpp>
 #include <boost/xpressive/xpressive.hpp>
 
+#include "log/generators.h"
 #include "log/logger.h"
 #include "unittest/catch.h"
-#include "unittest/generators.h"
 #include "unittest/rapidcheck.h"
 
 using std::cout;
@@ -65,26 +66,48 @@ const map<LogLevel, string>& getLogLevelStringMapping() {
     terminate();
 }
 
-struct LogMessage {
-    string date;
-    string time;
-    Channel channel;
-    LogLevel level;
-    string file;
-    unsigned int lineNumber;
-    string message;
-
+class LogMessage {
+  public:
     LogMessage(string date, string time, Channel channel, LogLevel level,
                string file, unsigned int lineNumber, string message)
-        : date(move(date)),
-          time(move(time)),
-          channel(move(channel)),
-          level(level),
-          file(move(file)),
-          lineNumber(lineNumber),
-          message(move(message)) {
+        : m_date(move(date)),
+          m_time(move(time)),
+          m_channel(move(channel)),
+          m_level(level),
+          m_file(move(file)),
+          m_lineNumber(lineNumber),
+          m_message(move(message)) {
         ;
     }
+
+    [[nodiscard]] const string& getDate() const noexcept { return m_date; }
+
+    [[nodiscard]] const string& getTime() const noexcept { return m_time; }
+
+    [[nodiscard]] const Channel& getChannel() const noexcept {
+        return m_channel;
+    }
+
+    [[nodiscard]] const LogLevel& getLevel() const noexcept { return m_level; }
+
+    [[nodiscard]] const string& getFile() const noexcept { return m_file; }
+
+    [[nodiscard]] unsigned int getLineNumber() const noexcept {
+        return m_lineNumber;
+    }
+
+    [[nodiscard]] const string& getMessage() const noexcept {
+        return m_message;
+    }
+
+  private:
+    string m_date;
+    string m_time;
+    Channel m_channel;
+    LogLevel m_level;
+    string m_file;
+    unsigned int m_lineNumber;
+    string m_message;
 };
 
 LogMessage toMessage(const string& message) {
@@ -121,9 +144,7 @@ LogLevel getRelativeLogLevel(LogLevel currentLogLevel,
 }
 } // namespace
 
-namespace execHelper {
-namespace config {
-namespace test {
+namespace execHelper::config::test {
 SCENARIO("Test the conversion of correct a log level to a string", "[log]") {
     REQUIRE(
         getLogLevels().size() ==
@@ -221,11 +242,11 @@ SCENARIO("Write a log message with the severity enabled", "[log]") {
                          THEN_CHECK(
                              "We should find the message in the stream") {
                              LogMessage result = toMessage(logBuffer.str());
-                             REQUIRE(result.channel == LOG_CHANNEL);
-                             REQUIRE(result.level == severity);
-                             REQUIRE(result.file == __FILE__);
-                             REQUIRE(result.lineNumber == line);
-                             REQUIRE(result.message == message1);
+                             REQUIRE(result.getChannel() == LOG_CHANNEL);
+                             REQUIRE(result.getLevel() == severity);
+                             REQUIRE(result.getFile() == __FILE__);
+                             REQUIRE(result.getLineNumber() == line);
+                             REQUIRE(result.getMessage() == message1);
                          }
                      }
                  });
@@ -257,6 +278,4 @@ SCENARIO("Write a log message with the severity disabled", "[log]") {
             }
         });
 }
-} // namespace test
-} // namespace config
-} // namespace execHelper
+} // namespace execHelper::config::test

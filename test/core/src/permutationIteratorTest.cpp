@@ -60,16 +60,20 @@ class PermuteObject {
         return !(*this == other);
     }
 
-    const Collection1& getCollection1() const noexcept { return m_collection1; }
+    [[nodiscard]] const Collection1& getCollection1() const noexcept {
+        return m_collection1;
+    }
 
-    const Collection2& getCollection2() const noexcept { return m_collection2; }
+    [[nodiscard]] const Collection2& getCollection2() const noexcept {
+        return m_collection2;
+    }
 
     iterator begin() noexcept {
         return {m_collection1.begin(), m_collection2.begin(),
                 m_collection1.end(), m_collection2.end()};
     }
 
-    const_iterator begin() const noexcept {
+    [[nodiscard]] const_iterator begin() const noexcept {
         return {m_collection1.begin(), m_collection2.begin(),
                 m_collection1.end(), m_collection2.end()};
     }
@@ -79,7 +83,7 @@ class PermuteObject {
                 m_collection2.end()};
     }
 
-    const_iterator end() const noexcept {
+    [[nodiscard]] const_iterator end() const noexcept {
         return {m_collection1.end(), m_collection2.end(), m_collection1.end(),
                 m_collection2.end()};
     }
@@ -129,9 +133,7 @@ testIterators(T& permute,
 }
 } // namespace
 
-namespace execHelper {
-namespace core {
-namespace test {
+namespace execHelper::core::test {
 SCENARIO(
     "Test the permutation iterators when looping over the entire collection",
     "[permutationiterator]") {
@@ -192,8 +194,10 @@ SCENARIO("Test the permutation iterators for partial iteration",
          "[permutationiterator]") {
     GIVEN("Some non-const collections to partially iterate over using "
           "permutations of its content and the ordered combinations") {
-        PermuteObject permute({"object1", "object2", "object3", "object4"},
-                              {1, 2, 3, 4, 5, 6, 7, 8});
+        const PermuteObject::Collection1 collection1{"object1", "object2",
+                                                     "object3", "object4"};
+        const PermuteObject::Collection2 collection2{1, 2, 3, 4, 5, 6, 7, 8};
+        const PermuteObject permute(collection1, collection2);
 
         vector<PermuteObjectElement> orderedCombinations;
         const size_t beginIndexObject1 = 1U;
@@ -240,9 +244,9 @@ SCENARIO("Test the permutation iterators for partial iteration",
     }
     GIVEN("Some const collections to partially iterate over using permutations "
           "of its content and the ordered combinations") {
-        PermuteObject::Collection1 collection1(
-            {"object1", "object2", "object3", "object4"});
-        PermuteObject::Collection2 collection2({1, 2, 3, 4, 5, 6, 7, 8});
+        const PermuteObject::Collection1 collection1{"object1", "object2",
+                                                     "object3", "object4"};
+        const PermuteObject::Collection2 collection2{1, 2, 3, 4, 5, 6, 7, 8};
         const PermuteObject permute(collection1, collection2);
 
         vector<PermuteObjectElement> orderedCombinations;
@@ -292,6 +296,4 @@ SCENARIO("Test the permutation iterators for partial iteration",
         }
     }
 }
-} // namespace test
-} // namespace core
-} // namespace execHelper
+} // namespace execHelper::core::test

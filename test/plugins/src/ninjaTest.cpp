@@ -45,9 +45,7 @@ const czstring<> PLUGIN_NAME = "ninja";
 const czstring<> BUILD_DIR_KEY = "build-dir";
 } // namespace
 
-namespace execHelper {
-namespace plugins {
-namespace test {
+namespace execHelper::plugins::test {
 SCENARIO("Obtain the plugin name of the ninja plugin", "[ninja]") {
     GIVEN("A plugin") {
         Ninja plugin;
@@ -180,6 +178,4 @@ SCENARIO("Testing the configuration settings of the ninja plugin", "[ninja]") {
         }
     }
 }
-} // namespace test
-} // namespace plugins
-} // namespace execHelper
+} // namespace execHelper::plugins::test

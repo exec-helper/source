@@ -20,9 +20,7 @@ using execHelper::config::SettingsNode;
 using execHelper::test::baseUtils::ConfigFileWriter;
 using execHelper::test::utils::writeSettingsFile;
 
-namespace execHelper {
-namespace config {
-namespace test {
+namespace execHelper::config::test {
 SCENARIO("Parse properly written settings files", "[config][config-config]") {
     MAKE_COMBINATIONS("Of several settings") {
         SettingsNode settings("exec-helper");
@@ -126,6 +124,4 @@ SCENARIO("Parse properly written settings files", "[config][config-config]") {
         }
     }
 }
-} // namespace test
-} // namespace config
-} // namespace execHelper
+} // namespace execHelper::config::test

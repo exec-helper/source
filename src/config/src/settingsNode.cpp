@@ -35,8 +35,7 @@ ostream& stream(ostream& os, const execHelper::config::SettingsNode& settings,
 }
 } // namespace
 
-namespace execHelper {
-namespace config {
+namespace execHelper::config {
 // cppcheck-suppress passedByValue symbolName=key
 SettingsNode::SettingsNode(SettingsKey key) noexcept : m_key(std::move(key)) {
     ;
@@ -315,5 +314,4 @@ void SettingsNode::deepCopy(const SettingsNode& other) noexcept {
 ostream& operator<<(ostream& os, const SettingsNode& settings) noexcept {
     return stream(os, settings, "");
 }
-} // namespace config
-} // namespace execHelper
+} // namespace execHelper::config

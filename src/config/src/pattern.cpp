@@ -9,8 +9,7 @@ using std::ostream;
 using std::regex;
 using std::string;
 
-namespace execHelper {
-namespace config {
+namespace execHelper::config {
 // cppcheck-suppress passedByValue symbolName=patternKey
 // cppcheck-suppress passedByValue symbolName=values
 Pattern::Pattern(PatternKey patternKey, PatternValues values,
@@ -67,5 +66,4 @@ ostream& operator<<(ostream& os, const Pattern& pattern) noexcept {
     os << "}";
     return os;
 }
-} // namespace config
-} // namespace execHelper
+} // namespace execHelper::config

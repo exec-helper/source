@@ -42,9 +42,7 @@ inline void checkNotContainsPatterns(const PatternsHandler& handler,
 }
 } // namespace
 
-namespace execHelper {
-namespace config {
-namespace test {
+namespace execHelper::config::test {
 SCENARIO("Test the patterns the handler is holding",
          "[patterns][PatternsHandler]") {
     GIVEN("A patternshandler and some patterns to hold") {
@@ -234,6 +232,4 @@ SCENARIO("Test invalid conversions to a pattern",
         }
     }
 }
-} // namespace test
-} // namespace config
-} // namespace execHelper
+} // namespace execHelper::config::test

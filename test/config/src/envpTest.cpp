@@ -15,9 +15,7 @@ using std::string;
 using std::stringstream;
 using std::vector;
 
-namespace execHelper {
-namespace config {
-namespace test {
+namespace execHelper::config::test {
 SCENARIO("Test envp construction", "[config][envp]") {
     GIVEN("A taskcollection to take the arguments from") {
         const EnvironmentCollection env(
@@ -299,6 +297,4 @@ SCENARIO("Test the envp streaming operator", "[config][envp]") {
         }
     }
 }
-} // namespace test
-} // namespace config
-} // namespace execHelper
+} // namespace execHelper::config::test
