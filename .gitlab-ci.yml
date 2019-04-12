@@ -130,7 +130,7 @@ variables:
         - docker login -u gitlab-ci-token -p "${CI_BUILD_TOKEN}" "${CI_REGISTRY}"
         - echo "Building image '${IMAGE}'"
         - cd ${WORKDIR}
-        - docker build -t ${IMAGE} .
+        - docker build --compress=true --force-rm=true --pull=true --no-cache=true --rm=true --tag="${IMAGE}" .
         - docker push ${IMAGE}
 
 build-image:analyze:
