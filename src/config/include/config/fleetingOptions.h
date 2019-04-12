@@ -35,11 +35,11 @@ class FleetingOptions : public FleetingOptionsInterface {
 
     /*! @copydoc config::Argv::operator=(const config::Argv& other)
      */
-    FleetingOptions& operator=(const FleetingOptions& other) = default;
+    FleetingOptions& operator=(const FleetingOptions& other) = delete;
 
     /*! @copydoc config::Argv::operator=(config::Argv&& other)
      */
-    FleetingOptions& operator=(FleetingOptions&& other) = default;
+    FleetingOptions& operator=(FleetingOptions&& other) = delete;
 
     /*! @copydoc config::Argv::operator==(const config::Argv& other) const
      */

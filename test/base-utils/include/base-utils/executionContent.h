@@ -20,11 +20,11 @@ class IoService {
   public:
     IoService() = default;
     IoService(const IoService& other) = delete;
-    IoService(IoService&& other) = default;
+    IoService(IoService&& other) = delete;
     ~IoService() noexcept;
 
     IoService& operator=(const IoService& other) = delete;
-    IoService& operator=(IoService&& other) = default;
+    IoService& operator=(IoService&& other) = delete;
 
     void start() noexcept;
     void stop() noexcept;

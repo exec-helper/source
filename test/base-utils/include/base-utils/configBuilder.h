@@ -16,9 +16,9 @@ class ConfigBuilder {
         ConfigBuilderRAII(ConfigBuilderRAII&& other) = default;
         ~ConfigBuilderRAII();
 
-        ConfigBuilderRAII& operator=(const ConfigBuilderRAII& other) = default;
+        ConfigBuilderRAII& operator=(const ConfigBuilderRAII& other) = delete;
         ConfigBuilderRAII& operator=(ConfigBuilderRAII&& other) =
-            default; // NOLINT(misc-noexcept-move-constructor)
+            delete; // NOLINT(misc-noexcept-move-constructor)
 
       private:
         Commands& m_commands;
