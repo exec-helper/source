@@ -118,35 +118,32 @@ variables:
         - export PATH=$(pwd)/build/clang++/asan/install/bin:$(pwd)/build/clang++/asan/install/test/integration:$PATH
         - exec-helper analyze --analyze asan --module "${ALL_MODULES}"      # Note: the quotes are used to cheat exec-helper so that the binaries are only built once rather than for each module separately
 
-build-image:analyze:
+.build_image: &build_image
     stage: build-image
     image: docker:latest
     services:
         - docker:dind
     variables:
-        ANALYZE_IMAGE: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-analyze
-    before_script:
-        - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
+        IMAGE: blaat
+        WORKDIR: docker
     script:
-        - echo "Building image '$ANALYZE_IMAGE'"
-        - cd docker/analyze
-        - docker build -t ${ANALYZE_IMAGE} .
-        - docker push ${ANALYZE_IMAGE}
+        - docker login -u gitlab-ci-token -p "${CI_BUILD_TOKEN}" "${CI_REGISTRY}"
+        - echo "Building image '${IMAGE}'"
+        - cd ${WORKDIR}
+        - docker build -t ${IMAGE} .
+        - docker push ${IMAGE}
+
+build-image:analyze:
+    <<: *build_image
+    variables:
+        IMAGE: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-analyze
+        WORKDIR: docker/analyze
 
 build-image:build:
-    stage: build-image
-    image: docker:latest
-    services:
-        - docker:dind
+    <<: *build_image
     variables:
-        BUILD_IMAGE: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-build
-    before_script:
-        - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
-    script:
-        - echo "Building image '$BUILD_IMAGE'"
-        - cd docker/build
-        - docker build -t ${BUILD_IMAGE} --build-arg DOCKER_TAG=latest .
-        - docker push ${BUILD_IMAGE}
+        IMAGE: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-build
+        WORKDIR: docker/build
 
 build-image:build-debian:
     stage: build-image
@@ -164,19 +161,10 @@ build-image:build-debian:
         - docker push ${BUILD_IMAGE}
 
 build-image:run:
-    stage: build-image
-    image: docker:latest
-    services:
-        - docker:dind
+    <<: *build_image
     variables:
-        RUN_IMAGE: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-run
-    before_script:
-        - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
-    script:
-        - echo "Building image '$RUN_IMAGE'"
-        - cd docker/run
-        - docker build -t ${RUN_IMAGE} .
-        - docker push ${RUN_IMAGE}
+        IMAGE: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-run
+        WORKDIR: docker/run
 
 build:native:
     stage: build-native
