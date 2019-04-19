@@ -2,6 +2,7 @@ set(MODULE "${MODULE}/environment")
 
 set(DATA_DRIVEN_TESTS
         fixed-value
+        replace-patterns
     )
 
 foreach(FEATURE IN LISTS DATA_DRIVEN_TESTS)

@@ -71,7 +71,8 @@ SCENARIO("Test that the right return code is returned", "[shell][posixshell]") {
 
                      ioService.run();
 
-                     WHEN("We execute the command of the execution engine") {
+                     THEN_WHEN(
+                         "We execute the command of the execution engine") {
                          Task task;
                          task.append(executionEngine.getConfigCommand());
                          auto actualReturnCode = shell.execute(task);

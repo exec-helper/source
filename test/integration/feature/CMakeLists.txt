@@ -51,6 +51,7 @@ set(RESOURCES
     resources/TestEnvironment.py
     resources/WorkingDir.py
     resources/command.py
+    resources/pattern.py
 )
 install(FILES ${RESOURCES} DESTINATION ${INTEGRATION_TEST_BIN_DIR}/resources COMPONENT integration)
 

@@ -18,7 +18,7 @@ namespace core {
  */
 class Shell {
   public:
-    using ShellReturnCode = uint32_t; //!< brief Shell return code abstraction
+    using ShellReturnCode = uint8_t; //!< brief Shell return code abstraction
 
     /**
      * Executes the given task

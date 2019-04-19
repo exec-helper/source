@@ -55,9 +55,7 @@ bool Commander::run(const FleetingOptionsInterface& fleetingOptions,
         not_null<const FleetingOptionsInterface*>(&fleetingOptions));
     ExecutePlugin::push(move(settings));
     ExecutePlugin::push(move(patterns));
-    Task task;
-    task.setWorkingDirectory(workingDirectory);
-    task.setEnvironment(env);
+    Task task({}, env, workingDirectory);
 
     auto commands = fleetingOptions.getCommands();
     if(commands.empty()) {

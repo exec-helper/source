@@ -12,6 +12,10 @@ an executable command
     [Arguments]     ${command}
     Create command  ${command}
 
+a pattern
+    [Arguments]     ${command}    ${pattern}
+    add_pattern     ${command}    ${pattern}
+
 the environment set in the config
     [Arguments]     ${command}     ${envs}
     Set environment     ${command}      ${envs}

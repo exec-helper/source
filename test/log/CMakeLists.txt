@@ -10,6 +10,7 @@ set(SRCS    src/logTest.cpp
 set(DEPENDENCIES
         boost-log
         log
+        core
         rpcheck
         unittest
         log-generators

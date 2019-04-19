@@ -1,0 +1,5 @@
+Replace value                       Command1      PATTERN:blaat         KEY:{PATTERN}
+Replace Key                         Command1      PATTERN:blaat         {PATTERN}:KEY
+Replace Key and value               Command1      PATTERN:blaat         {PATTERN}:{PATTERN}
+Replace Key and value in context    Command1      {PATTERN}:blaaat      this-{PATTERN}-key:this-{PATTERN}-value
+Space in pattern                    Command1      SPA CE:bla a at       {SPA CE}:{SPA CE}

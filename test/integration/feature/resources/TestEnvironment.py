@@ -2,6 +2,7 @@ import subprocess
 
 import WorkingDir
 import Config
+from pattern import Pattern
 
 class TestEnvironment(object):
     def __init__(self):
@@ -21,6 +22,16 @@ class TestEnvironment(object):
     def create_command(self, command):
         """ Create a command in the given config """
         self._config.create_command(command)
+
+    def add_pattern(self, command, pattern_string):
+        """ Add the list of patterns to the given command """
+        parts = pattern_string.split(":")
+        if len(parts) != 2:
+            raise AssertionError("Cannot parse '{value}' to pattern".format(value = value))
+        pattern_id = parts[0]
+        pattern_values = parts[1].split(',')
+        pattern = Pattern(pattern_id, pattern_values)
+        self._config.add_pattern(command, pattern)
 
     def set_environment(self, command, envs):
         """ Set the environment for the given command """
@@ -65,6 +76,28 @@ class TestEnvironment(object):
             result[parts[0]] = parts[1]
         return result
 
+    @staticmethod
+    def permutate_patterns(patterns):
+        if not patterns:
+            yield dict()
+            return
+
+        pattern = patterns[0]
+        if not pattern.values:
+            for permutation in TestEnvironment.permutate_patterns(patterns[1:]):
+                yield permutation
+
+        for value in pattern.values:
+            for permutation in TestEnvironment.permutate_patterns(patterns[1:]):
+                permutation[pattern.id] = value
+                yield permutation
+
+    def pattern_generator(self, command):
+        patterns = self._config.commands[command].patterns
+        
+        for permutation in TestEnvironment.permutate_patterns(patterns):
+            yield permutation
+
     def environment_contains(self, command, envs):
         envs = TestEnvironment.list2dict(envs)
 
@@ -73,10 +106,29 @@ class TestEnvironment(object):
         if not runs:
            raise AssertionError("Command '{command}' was not executed".format(command = command)) 
 
-        for key,value in envs.items():
-            for run in runs:
-                if key not in run.environment:
-                    raise AssertionError("{key} is expected to occur in the environment".format(key = key))
+        # Replace patterns and require it to occur in at least one of the runs
+        for env_key, env_value in envs.items():
+            for pattern_values in self.pattern_generator(command):
+                key = env_key
+                value = env_value
 
-                if not value == run.environment[key]:
-                    raise AssertionError("Actual value '{value}' is not the expected value '{expected}'".format(actual = value, expected = value))
+                for pattern_key,pattern_value in pattern_values.items():
+                    pattern_signature = "{" + pattern_key + "}"
+                    key = key.replace(pattern_signature, pattern_value)
+                    value = value.replace(pattern_signature, pattern_value)
+
+                environment_found = False
+                for run in runs:
+                    if key not in run.environment:
+                        print("INFO: Key '{key}' not found in the environment of this run".format(key = key))
+                        continue
+
+                    if value == run.environment[key]:
+                        environment_found = True
+                        break
+                    else:
+                        print("INFO: Value '{actual}' does not match expected value '{expected}' for key '{key}'".format(key = key, actual = run.environment[key], expected = value))
+                        print("Continuing search")
+
+                if not environment_found:
+                    raise AssertionError("Expected environment value '{expected}' was not found in any environment".format(expected = value))

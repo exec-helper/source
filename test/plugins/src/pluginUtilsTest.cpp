@@ -1,6 +1,9 @@
+#include <locale>
 #include <string>
 #include <utility>
 #include <vector>
+
+#include <boost/algorithm/string/replace.hpp>
 
 #include "unittest/catch.h"
 
@@ -9,6 +12,9 @@
 #include "core/task.h"
 #include "plugins/pluginUtils.h"
 
+#include "base-utils/nonEmptyString.h"
+#include "log/generators.h"
+#include "unittest/rapidcheck.h"
 #include "utils/utils.h"
 
 using std::make_pair;
@@ -20,6 +26,17 @@ using execHelper::config::EnvironmentValue;
 using execHelper::config::PatternCombinations;
 using execHelper::config::VariablesMap;
 using execHelper::core::TaskCollection;
+
+using execHelper::test::NonEmptyString;
+using execHelper::test::propertyTest;
+
+using NonEmptyPatternCombinations = std::map<NonEmptyString, std::string>;
+
+namespace {
+inline std::string toReplacementPattern(const std::string& pattern) noexcept {
+    return std::string("{").append(pattern).append("}");
+}
+} // namespace
 
 namespace execHelper::plugins::test {
 SCENARIO("Test the patterns key", "[plugin-utils]") {
@@ -72,5 +89,75 @@ SCENARIO("Test the working directory key", "[plugin-utils]") {
             }
         }
     }
+}
+
+SCENARIO("Test replacing patterns in the environment", "[plugin-utils]") {
+    propertyTest(
+        "Replace a pattern in the environment",
+        [](const NonEmptyPatternCombinations& nonEmptyPatternCombinations,
+           const EnvironmentCollection& startEnvironment) {
+            // Replace '{' and '}' with '%'
+            PatternCombinations patternCombinations;
+            std::transform(
+                nonEmptyPatternCombinations.begin(),
+                nonEmptyPatternCombinations.end(),
+                std::inserter(patternCombinations, patternCombinations.end()),
+                [](const auto& combination) {
+                    auto key = boost::algorithm::replace_all_copy(
+                        *(combination.first), "{", "%");
+                    boost::algorithm::replace_all(key, "}", "%");
+
+                    auto value = boost::algorithm::replace_all_copy(
+                        combination.second, "{", "%");
+                    boost::algorithm::replace_all(value, "}", "%");
+                    return make_pair(key, value);
+                });
+
+            // Replace '{' and '}' with '%'
+            EnvironmentCollection replacedEnvironment;
+            std::transform(
+                startEnvironment.begin(), startEnvironment.end(),
+                std::inserter(replacedEnvironment, replacedEnvironment.end()),
+                [](const auto& env) {
+                    auto key =
+                        boost::algorithm::replace_all_copy(env.first, "{", "%");
+                    boost::algorithm::replace_all(key, "}", "%");
+
+                    auto value = boost::algorithm::replace_all_copy(env.second,
+                                                                    "{", "%");
+                    boost::algorithm::replace_all(value, "}", "%");
+                    return make_pair(key, value);
+                });
+
+            EnvironmentCollection inputEnvironment(replacedEnvironment);
+            EnvironmentCollection expected(replacedEnvironment);
+
+            for(const auto& combination : patternCombinations) {
+                auto replacementPattern =
+                    toReplacementPattern(combination.first);
+                inputEnvironment.emplace(
+                    make_pair("key-" + replacementPattern,
+                              "value-" + replacementPattern));
+                expected.emplace(make_pair("key-" + combination.second,
+                                           "value-" + combination.second));
+            }
+
+            THEN_WHEN("We replace the patterns") {
+                auto actual = replacePatternsInEnvironment(inputEnvironment,
+                                                           patternCombinations);
+
+                THEN_CHECK("The actual task equals the expected task") {
+                    if(actual != expected) {
+                        std::for_each(patternCombinations.begin(),
+                                      patternCombinations.end(),
+                                      [](const auto& combination) {
+                                          std::cout << combination.first
+                                                    << std::endl;
+                                      });
+                    }
+                    REQUIRE(actual == expected);
+                }
+            }
+        });
 }
 } // namespace execHelper::plugins::test

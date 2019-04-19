@@ -1,12 +1,10 @@
 #include "pattern.h"
 
 #include <ostream>
-#include <regex>
 #include <utility>
 
 using std::move;
 using std::ostream;
-using std::regex;
 using std::string;
 
 namespace execHelper::config {

@@ -20,7 +20,6 @@
 
 using std::map;
 using std::ostream;
-using std::pair;
 using std::string;
 using std::vector;
 
@@ -59,24 +58,37 @@ PatternPermutator makePatternPermutator(const Patterns& patterns) noexcept {
     return plugins::PatternPermutator(patternValuesMap);
 }
 
+EnvironmentCollection replacePatternsInEnvironment(
+    const EnvironmentCollection& env,
+    const PatternCombinations& patternCombinations) noexcept {
+    EnvironmentCollection replaced;
+
+    for(const auto& keyValue : env) {
+        auto key = keyValue.first;
+        auto value = keyValue.second;
+
+        for(const auto& pattern : patternCombinations) {
+            key = replacePatterns(key, pattern.first, pattern.second);
+            value = replacePatterns(value, pattern.first, pattern.second);
+        }
+        replaced.emplace(std::make_pair(key, value));
+    }
+    return replaced;
+}
+
 Task replacePatternCombinations(
     const Task& task, const PatternCombinations& patternCombinations) noexcept {
     Task replacedTask;
-    for(pair<std::string, std::string> environment : task.getEnvironment()) {
-        for(const auto& pattern : patternCombinations) {
-            environment.first = replacePatterns(environment.first,
-                                                pattern.first, pattern.second);
-            environment.second = replacePatterns(environment.second,
-                                                 pattern.first, pattern.second);
-        }
-        replacedTask.appendToEnvironment(std::move(environment));
-    }
+    replacedTask.setEnvironment(replacePatternsInEnvironment(
+        task.getEnvironment(), patternCombinations));
+
     string newWorkingDir = task.getWorkingDirectory().string();
     for(const auto& pattern : patternCombinations) {
         newWorkingDir =
             replacePatterns(newWorkingDir, pattern.first, pattern.second);
     }
     replacedTask.setWorkingDirectory(newWorkingDir);
+
     for(auto argument : task.getTask()) {
         for(const auto& pattern : patternCombinations) {
             argument = replacePatterns(argument, pattern.first, pattern.second);

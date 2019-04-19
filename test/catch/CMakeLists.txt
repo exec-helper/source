@@ -7,6 +7,7 @@ set(SRCS    src/catch.cpp
 set(DEPENDENCIES
         catch
         log
+        #core
     )
 
 add_library(${LIBRARY_NAME} ${SRCS})

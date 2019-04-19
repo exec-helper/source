@@ -23,6 +23,8 @@ set(DEPENDENCIES
         plugins
         test-utils
         unittest
+        log-generators
+        rpcheck
     )
 
 

@@ -56,7 +56,7 @@ getPath(const process::environment& env,
         return path;
     }
     std::vector<std::string> stringPaths = env.at("PATH").to_vector();
-    path.reserve(stringPaths.size());
+    path.reserve(stringPaths.size() + stringPaths.size());
     std::copy(stringPaths.begin(), stringPaths.end(), std::back_inserter(path));
     return path;
 }

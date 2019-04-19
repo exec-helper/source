@@ -34,6 +34,11 @@ getEnvironment(const config::VariablesMap& variables) noexcept;
 
 PatternPermutator
 makePatternPermutator(const config::Patterns& patterns) noexcept;
+
+config::EnvironmentCollection replacePatternsInEnvironment(
+    const config::EnvironmentCollection& env,
+    const config::PatternCombinations& patternCombinations) noexcept;
+
 core::Task replacePatternCombinations(
     const core::Task& task,
     const config::PatternCombinations& patternCombinations) noexcept;

@@ -12,7 +12,6 @@
 using std::accumulate;
 using std::back_inserter;
 using std::endl;
-using std::initializer_list;
 using std::move;
 using std::ostream;
 using std::string;
@@ -39,11 +38,19 @@ inline string implodeVector(const vector<string>& toImplode,
 } // namespace
 
 namespace execHelper::core {
+Task::Task() noexcept : Task({}, {}, filesystem::current_path()) { ; }
 
-Task::Task() noexcept : m_workingDirectory(filesystem::current_path()) { ; }
+Task::Task(const TaskCollection& subtasks) noexcept
+    : Task(subtasks, {}, filesystem::current_path()) {
+    ;
+}
 
-Task::Task(const initializer_list<string>& subtasks) noexcept
-    : m_task(subtasks), m_workingDirectory(filesystem::current_path()) {
+// cppcheck-suppress passedByValue symbolName=subtasks
+Task::Task(TaskCollection subtasks, config::EnvironmentCollection env,
+           config::Path workingDirectory) noexcept
+    : m_task(std::move(subtasks)),
+      m_env(std::move(env)),
+      m_workingDirectory(std::move(workingDirectory)) {
     ;
 }
 

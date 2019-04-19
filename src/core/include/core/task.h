@@ -21,14 +21,24 @@ class Task {
      * Create a task
      *
      */
-    explicit Task() noexcept;
+    Task() noexcept;
 
     /**
      * Create a task
      *
      * \param[in] subtasks  The task subdivided in separate arguments
      */
-    explicit Task(const std::initializer_list<std::string>& subtasks) noexcept;
+    explicit Task(const TaskCollection& subtasks) noexcept;
+
+    /**
+     * Create a task
+     *
+     * \param[in] subtasks  The task subdivided in separate arguments
+     * \param[in] env  The environment for executing the task
+     * \param[in] workingDirectory  The working directory to use for the task
+     */
+    Task(TaskCollection subtasks, config::EnvironmentCollection env,
+         config::Path workingDirectory) noexcept;
 
     /**
      * Returns the task
@@ -88,7 +98,7 @@ class Task {
     bool append(TaskCollection&& taskPart) noexcept;
 
     /**
-     * Set the environment of the task
+     * Set the environment of the task. Replaces the existing environment for the task.
      *
      * \param[in] env  The environment to set for the task
      * \returns True    If the new environment was successfully set

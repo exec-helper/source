@@ -1,26 +1,17 @@
 #include "patterns.h"
 
-#include <regex>
+#include <string>
+
+#include <boost/algorithm/string/replace.hpp>
 
 #include "logger.h"
 
-using std::regex;
-using std::regex_error;
-using std::regex_replace;
 using std::string;
 
 namespace execHelper::core {
 string replacePatterns(const string& subject, const string& pattern,
                        const string& replacement) noexcept {
-    const string PATTERN_PREFIX(R"(\{)");
-    const string PATTERN_POSTFIX(R"(\})");
-    try {
-        return regex_replace(subject,
-                             regex(PATTERN_PREFIX + pattern + PATTERN_POSTFIX),
-                             replacement);
-    } catch(regex_error&) {
-        user_feedback("System warning: invalid regex for " << pattern);
-        return subject;
-    }
+    const auto needle = std::string("{").append(pattern).append("}");
+    return boost::algorithm::replace_all_copy(subject, needle, replacement);
 }
 } // namespace execHelper::core

@@ -1,0 +1,10 @@
+File: replace-patterns
+Scenario: Set the environment to include a pattern that should be replaced
+    [Arguments]     ${command}  ${pattern}     @{envs}
+    Given a test environment with a valid config
+    and an executable command   ${command}
+    and a pattern   ${command}      ${pattern}
+    and the environment set in the config   ${command}   ${envs}
+    When we call the application with the command   ${command}
+    Then the call should succeed
+    and the call is executed within the given environment   ${command}      ${envs}

@@ -73,6 +73,7 @@ class Command(object):
         self._id = id
         self._binary = directory + '/' + self._prefix + str(uuid.uuid4()) + self._suffix
         self._env = dict()
+        self._patterns = []
 
         port = random.randint(49152,65535)
         self._server = Server('localhost', port)
@@ -89,8 +90,15 @@ class Command(object):
     def runs(self):
         return self._server.runs
 
+    @property
+    def patterns(self):
+        return self._patterns
+
     def set_environment(self, envs):
         self._env = envs
+
+    def add_pattern(self, pattern):
+        self._patterns.append(pattern)
 
     def to_dict(self):
         result = dict()
@@ -100,6 +108,8 @@ class Command(object):
         result['command-line-command'][self._id]['command-line'] = [self._binary]
         if self._env:
             result['command-line-command'][self._id]['environment'] = self._env
+        if self._patterns:
+            result['command-line-command'][self._id]['patterns'] = [pattern.id for pattern in self._patterns]
         return result
 
     def write_binary(self):
@@ -133,5 +143,6 @@ class Command(object):
             os.remove(self._binary)
 
     def stop(self):
-        self._server.stop()
-        self._server.join()
+        if self._server.is_alive():
+            self._server.stop()
+            self._server.join()
