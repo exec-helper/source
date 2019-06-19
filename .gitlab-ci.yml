@@ -184,7 +184,7 @@ build:debian:
     image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-build-debian
     dependencies: []
     script:
-        - make
+        - make BUILD_DOCUMENTATION=OFF binary
         - make install-bin
     artifacts:
         expire_in: 1 day
@@ -259,14 +259,14 @@ unittests:
     <<: *run_test
     variables:
         RUN_TARGET: unittest
-        MODULES: log config yaml commander plugins
+        MODULES: log config yaml commander
         NB_RUNS: 1000
 
 unittests-core:
     <<: *run_test
     variables:
         RUN_TARGET: unittest
-        MODULES: core
+        MODULES: core plugins
         NB_RUNS: 100
     before_script:
         - ulimit -n

@@ -27,8 +27,8 @@ run:
 lcov:                           # Configure lcov
     run-command: run            # Execute the 'build' command for building, running and analyzing the project
     info-file: build/coverage.info  # Create and use the coverage.info file in the build dir
-    base-directory: src         # Use the src directory as the base directory
-    directory: $(pwd)           # Put and use the coverage data files in the build directory
+    base-directory: .           # LCOV's base-directory functionality
+    directory: .                # LCOV's directory functionality
     zero-counters: yes          # Zero the counters before executing the analysis
     gen-html: yes               # Generate a HTML coverage report
     gen-html-output: build/coverage # Output the HTML coverage report to build/coverage

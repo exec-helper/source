@@ -14,11 +14,12 @@ CHANGELOG_CONFIG?= .gitchangelog.rc## Sets the changelog config to use. Default:
 CHANGELOG_OUTPUT?= &1## Sets the changelog output redirection for print-changelog. Default: stdout
 CMAKE_BUILD_TYPE?=Release	## Sets the cmake build type. Default: Release
 USE_SYSTEM_GSL?= ON## Sets whether to use the system GSL package. Default: ON
+BUILD_DOCUMENTATION?=ON
 
 all: binary docs changelog
 
 init:	## Initialize native build
-	cmake -H. -B$(BUILD_DIR) -DCMAKE_INSTALL_PREFIX=$(PREFIX) -DCMAKE_BUILD_TYPE=$(CMAKE_BUILD_TYPE) -DENABLE_WERROR=OFF -DENABLE_TESTING=OFF -DUSE_SYSTEM_GSL=$(USE_SYSTEM_GSL) -DCMAKE_EXPORT_COMPILE_COMMANDS=OFF -DBUILD_HTML_DOCUMENTATION=ON -DBUILD_XML_DOCUMENTATION=ON -DBUILD_MAN_DOCUMENTATION=ON -DVERSION=$(shell git describe --long --dirty)-MANUAL -DCOPYRIGHT="Copyright (c) $(shell date +'%Y') Bart Verhagen"
+	cmake -H. -B$(BUILD_DIR) -DCMAKE_INSTALL_PREFIX=$(PREFIX) -DCMAKE_BUILD_TYPE=$(CMAKE_BUILD_TYPE) -DENABLE_WERROR=OFF -DENABLE_TESTING=OFF -DUSE_SYSTEM_GSL=$(USE_SYSTEM_GSL) -DCMAKE_EXPORT_COMPILE_COMMANDS=OFF -DBUILD_HTML_DOCUMENTATION=$(BUILD_DOCUMENTATION) -DBUILD_XML_DOCUMENTATION=$(BUILD_DOCUMENTATION) -DBUILD_MAN_DOCUMENTATION=$(BUILD_DOCUMENTATION) -DVERSION=$(shell git describe --long --dirty)-MANUAL -DCOPYRIGHT="Copyright (c) $(shell date +'%Y') Bart Verhagen"
 
 binary: init ## Build the exec-helper binary
 	make -C $(BUILD_DIR) --jobs $(JOBS) exec-helper
