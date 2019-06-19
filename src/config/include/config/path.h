@@ -2,6 +2,7 @@
 #define PATH_INCLUDE
 
 #include <filesystem>
+#include <vector>
 
 namespace execHelper {
 namespace config {
