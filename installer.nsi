@@ -19,9 +19,10 @@ InstallDir '$PROGRAMFILES64\exec-helper'
 Section
     SetOutPath $INSTDIR
 
-    # File to install
-    File exec-helper.exe
-    File eh.exe
+    # Files to install
+    File /a bin\exec-helper.exe
+    File /a bin\eh.exe
+    File /a LICENSE
 
     # define uninstaller name
     WriteUninstaller "$INSTDIR\uninstaller.exe"
@@ -47,6 +48,7 @@ Section "Uninstall"
     # now delete installed files
     Delete '$INSTDIR\exec-helper.exe'
     Delete '$INSTDIR\eh.exe'
+    Delete '$INSTDIR\LICENSE'
 
     # Delete the install folder
     RMDir '$INSTDIR'

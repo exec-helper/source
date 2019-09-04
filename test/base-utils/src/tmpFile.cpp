@@ -26,7 +26,7 @@ namespace {
  * our own version
  */
 inline Path unique_path(const Path& model) {
-    string resultPathName = model.filename().native();
+    string resultPathName = model.filename().string();
     auto nbOfReplacements =
         count(resultPathName.begin(), resultPathName.end(), '%');
     auto replacements = generateRandomChar(nbOfReplacements);
@@ -77,14 +77,14 @@ bool TmpFile::createDirectories() const noexcept {
 
 Path TmpFile::getPath() const noexcept { return m_path; }
 
-std::string TmpFile::toString() const noexcept { return m_path.native(); }
+std::string TmpFile::toString() const noexcept { return m_path.string(); }
 
 std::string TmpFile::getFilename() const noexcept {
-    return m_path.filename().native();
+    return m_path.filename().string();
 }
 
 std::string TmpFile::getParentDirectory() const noexcept {
-    return m_path.parent_path().native();
+    return m_path.parent_path().string();
 }
 
 void TmpFile::clear() noexcept { m_path.clear(); }

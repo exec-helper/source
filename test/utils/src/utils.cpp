@@ -194,7 +194,7 @@ string convertToConfig(const string& key,
 }
 
 string basename(const string& file) {
-    unsigned int found = file.find_last_of("/\\");
+    auto found = file.find_last_of("/\\");
     return file.substr(0, found);
 }
 
@@ -319,7 +319,7 @@ std::string inheritWorkingDirKey() noexcept { return "EH_WORKING_DIR"; }
 Patterns getPredefinedPatterns() noexcept {
     Patterns predefined;
     predefined.emplace_back(
-        Pattern(inheritWorkingDirKey(), {filesystem::current_path().native()}));
+        Pattern{inheritWorkingDirKey(), {filesystem::current_path().string()}});
     return predefined;
 }
 } // namespace utils

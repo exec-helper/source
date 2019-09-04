@@ -1,0 +1,49 @@
+version: 1.0.{build}
+
+os:
+    - Visual Studio 2017
+
+platform:
+    - x64
+    - x86
+
+configuration:
+    - Release
+    - Debug
+
+environment:
+    APPVEYOR_RDP_PASSWORD: Blaat0
+
+install:
+    # - cmake   # Pre-installed by app veyor
+    # - git     # Pre-installed by app veyor
+    # - boost   # Pre-installed by app veyor
+    - cinst ninja
+    - cinst nsis
+    - ps: (new-object System.Net.WebClient).DownloadFile('https://nsis.sourceforge.io/mediawiki/images/7/7f/EnVar_plugin.zip', "$($pwd)/envar.zip")     # Retrieve NSIS EnVar plugin
+    - ps: Expand-Archive "$($pwd)/envar.zip" -DestinationPath "${Env:ProgramFiles(x86)}/NSIS"   # Install NSIS EnVar plugin
+
+build_script:
+    - echo %CONFIGURATION%
+    - "\"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\VC\\Auxiliary\\Build\\vcvarsall.bat\" %PLATFORM%"
+    - cmake -G Ninja -H. -Bbuild -DCMAKE_INSTALL_PREFIX=install -DCMAKE_BUILD_TYPE=%CONFIGURATION% -DBOOST_ROOT=C:\Libraries\boost_1_69_0 -DBoost_USE_STATIC_LIBS=ON -DBoost_NO_SYSTEM_PATHS=ON -DENABLE_TESTING=OFF -DBUILD_MAN_DOCUMENTATION=OFF -DBUILD_HTML_DOCUMENTATION=OFF -DVERSION="0.4.1" -DCOPYRIGHT="Copyright (c) 2019 Bart Verhagen"
+    - ninja -C build 
+    - ninja -C build install
+    - copy installer.nsi install
+    - copy LICENSE install
+    - cd install
+    - makensis installer.nsi
+    #- ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+    - cd ..
+
+on_failure:
+    - appveyor PushArtifact build
+
+artifacts:
+    - path: install\installer.exe
+      name: installer
+
+    - path: install
+      name: install
+      type: zip
+
