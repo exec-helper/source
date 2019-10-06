@@ -13,6 +13,9 @@ variables:
     ALL_MODULES: log config yaml core commander plugins
     ALL_SOURCE_TYPES: src test
     DOCKER_DRIVER: overlay2         # Overwrite default docker driver
+    SAST_DISABLE_DIND: "true"
+    SAST_DEFAULT_ANALYZERS: "flawfinder,gitleaks,trufflehog,pmd"
+
 
 .build_tools: &build_tools
         ":"           # Delegated to docker images
@@ -411,6 +414,9 @@ examples:
 
 code-format:
     <<: *code_format
+
+include:
+    template: SAST.gitlab-ci.yml
 
 pages:
     stage: deploy
