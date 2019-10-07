@@ -65,7 +65,7 @@ class YamlWrapper {
     T get(const std::initializer_list<config::SettingsKey>& keys) const {
         YAML::Node node = std::accumulate(
             keys.begin(), keys.end(), Clone(m_node),
-            [](auto& node, const auto& key) { return node[key]; });
+            [](const auto& node, const auto& key) { return node[key]; });
         return node.as<T>();
     }
 

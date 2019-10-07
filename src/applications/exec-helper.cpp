@@ -224,7 +224,6 @@ PatternSettingsPair addPatternsFromSettingsFile(const Path& settingsFile,
     }
 
     auto patterns = patternSettingsPair.value().first;
-    auto settings = patternSettingsPair.value().second;
 
     for(const auto& pattern : patterns) {
         ArgumentOptions additionalArguments;

@@ -61,7 +61,7 @@ YAML::Node
 YamlWrapper::getSubNode(const std::initializer_list<std::string>& keys) const {
     return std::accumulate(
         keys.begin(), keys.end(), Clone(m_node),
-        [](auto& node, const auto& key) { return node[key]; });
+        [](const auto& node, const auto& key) { return node[key]; });
 }
 
 bool YamlWrapper::getTree(const initializer_list<string>& keys,

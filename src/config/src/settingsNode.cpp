@@ -36,7 +36,6 @@ ostream& stream(ostream& os, const execHelper::config::SettingsNode& settings,
 } // namespace
 
 namespace execHelper::config {
-// cppcheck-suppress passedByValue symbolName=key
 SettingsNode::SettingsNode(SettingsKey key) noexcept : m_key(std::move(key)) {
     ;
 }

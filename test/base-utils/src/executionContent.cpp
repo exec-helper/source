@@ -202,7 +202,11 @@ ExecutionContentServer::ExecutionContentServer(
       m_returnCode(other.m_returnCode),
       m_endpoint(move(other.m_endpoint)),
       m_socket(move(other.m_socket)),
+#if BOOST_VERSION < 107000
       m_acceptor(other.m_acceptor.get_io_service()) {
+#else
+      m_acceptor(other.m_acceptor.get_executor()) {
+#endif
     try {
         openAcceptor();
     } catch(const system_error& e) {

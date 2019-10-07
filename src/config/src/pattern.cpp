@@ -8,8 +8,6 @@ using std::ostream;
 using std::string;
 
 namespace execHelper::config {
-// cppcheck-suppress passedByValue symbolName=patternKey
-// cppcheck-suppress passedByValue symbolName=values
 Pattern::Pattern(PatternKey patternKey, PatternValues values,
                  ShortOption shortOption, LongOption longOption) noexcept
     : m_key(move(patternKey)),

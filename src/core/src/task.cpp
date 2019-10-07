@@ -37,6 +37,7 @@ inline string implodeVector(const vector<string>& toImplode,
 namespace execHelper::core {
 // cppcheck-suppress passedByValue symbolName=subtasks
 Task::Task(std::vector<std::string> subtasks,
+           // cppcheck-suppress passedByValue symbolName=environment
            config::EnvironmentCollection environment,
            config::Path workingDirectory) noexcept
     : m_task(std::move(subtasks)),

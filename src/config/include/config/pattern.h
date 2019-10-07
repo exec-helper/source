@@ -30,9 +30,9 @@ class Pattern {
      * \param[in] shortOption   The short option associated with the pattern
      * \param[in] longOption    The long option associated with the pattern
      */
-    Pattern(PatternKey patternKey, PatternValues values = {},
-            ShortOption shortOption = std::nullopt,
-            LongOption longOption = std::nullopt) noexcept;
+    explicit Pattern(PatternKey patternKey, PatternValues values = {},
+                     ShortOption shortOption = std::nullopt,
+                     LongOption longOption = std::nullopt) noexcept;
 
     /**
      * Equality operator

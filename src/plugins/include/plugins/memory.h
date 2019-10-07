@@ -28,6 +28,7 @@ struct Memory_t {
      * \param[in] patterns  The patterns to remember
      */
     Memory_t(core::Task aTask, config::VariablesMap variables,
+             // cppcheck-suppress passedByValue symbolName=patterns
              config::Patterns patterns)
         : task(std::move(aTask)),
           variables(std::move(variables)),

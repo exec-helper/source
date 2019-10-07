@@ -226,7 +226,7 @@ cppcheck:
     src-dir: "{SOURCE_TYPE}/{MODULE}"
     target-path: "{TARGET}"
     command-line:
-        - --std=c++11
+        - --std=c++17
         - --error-exitcode=1
         - --includes-file=suppressions/includesfile.cppcheck
         - --inline-suppr
@@ -266,7 +266,7 @@ command-line-command:
             - COMPILER
             - MODE
         command-line:
-            [ cmake,, -G, "Ninja", -H., "-Bbuild/{COMPILER}/{MODE}/build", "-DCMAKE_CXX_COMPILER={COMPILER}", "-DCMAKE_INSTALL_PREFIX=build/{COMPILER}/{MODE}/install", -DCMAKE_EXPORT_COMPILE_COMMANDS=ON, "-DCMAKE_BUILD_TYPE={MODE}", -DBUILD_HTML_DOCUMENTATION=OFF, -DBUILD_XML_DOCUMENTATION=OFF, -DBUILD_MAN_DOCUMENTATION=OFF, "-DCMAKE_TOOLCHAIN_FILE=build/{COMPILER}/{MODE}/toolchain.cmake", -DTERMINATE_ON_ASSERT_FAILURE=ON, -DUSE_SYSTEM_YAML_CPP=OFF, -DUSE_SYSTEM_CATCH=OFF, -DUSE_SYSTEM_GSL=OFF, -DUSE_SYSTEM_RAPIDCHECK=OFF]
+            [ cmake, -G, "Ninja", -H., "-Bbuild/{COMPILER}/{MODE}/build", "-DCMAKE_CXX_COMPILER={COMPILER}", "-DCMAKE_INSTALL_PREFIX=build/{COMPILER}/{MODE}/install", -DCMAKE_EXPORT_COMPILE_COMMANDS=ON, "-DCMAKE_BUILD_TYPE={MODE}", -DBUILD_HTML_DOCUMENTATION=OFF, -DBUILD_XML_DOCUMENTATION=OFF, -DBUILD_MAN_DOCUMENTATION=OFF, "-DCMAKE_TOOLCHAIN_FILE=build/{COMPILER}/{MODE}/toolchain.cmake", -DTERMINATE_ON_ASSERT_FAILURE=ON, -DUSE_SYSTEM_YAML_CPP=OFF, -DUSE_SYSTEM_CATCH=OFF, -DUSE_SYSTEM_GSL=OFF, -DUSE_SYSTEM_RAPIDCHECK=OFF]
 
     init-limited-optimization:
         patterns:
