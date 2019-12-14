@@ -42,11 +42,11 @@ auto ClangStaticAnalyzer::getVariablesMap(
     const config::FleetingOptionsInterface& fleetingOptions) const noexcept
     -> VariablesMap {
     VariablesMap defaults(PLUGIN_NAME);
-    if(!defaults.add(getBuildDirKey(), ".")) {
-        LOG(error) << "Failed to add key '" << getBuildDirKey() << "'";
-    }
     if(!defaults.add(COMMAND_LINE_KEY, CommandLineArgs())) {
         LOG(error) << "Failed to add key '" << COMMAND_LINE_KEY << "'";
+    }
+    if(!defaults.add(getBuildDirKey(), ".")) {
+        LOG(error) << "Failed to add key '" << getBuildDirKey() << "'";
     }
     const auto verbosity = fleetingOptions.getVerbosity() ? "yes" : "no";
     if(!defaults.add(VERBOSITY_KEY, verbosity)) {

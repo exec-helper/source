@@ -253,7 +253,7 @@ auto SettingsNode::values() const noexcept -> std::optional<SettingsValues> {
     return result;
 }
 
-auto SettingsNode::key() const noexcept -> SettingsKey { return m_key; }
+auto SettingsNode::key() const noexcept -> const SettingsKey& { return m_key; }
 
 void SettingsNode::swap(SettingsNode& other) noexcept {
     m_key.swap(other.m_key);

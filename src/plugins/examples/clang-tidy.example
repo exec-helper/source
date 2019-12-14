@@ -21,5 +21,6 @@ clang-tidy:
         - "modernize-*"
         - "performance-*"
         - "readability-*"
+        - "-fuchsia-*"
     command-line:
         - -fix

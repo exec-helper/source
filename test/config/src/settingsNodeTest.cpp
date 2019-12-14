@@ -1,14 +1,20 @@
+#include <catch.hpp>
 #include <iostream>
+#include <optional>
 #include <sstream>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "config/settingsNode.h"
 
+#include "config/generators.h"
 #include "unittest/catch.h"
 #include "unittest/rapidcheck.h"
 #include "utils/utils.h"
 
+using std::move;
+using std::nullopt;
 using std::ostream;
 using std::string;
 using std::stringstream;
@@ -60,7 +66,7 @@ SCENARIO("Basic addition and getting of values", "[config][settingsNode]") {
         SettingsNode settings(rootKey);
 
         WHEN("We get the key") {
-            const SettingsKey resultRootKey = settings.key();
+            const auto& resultRootKey = settings.key();
 
             THEN("It should match") { REQUIRE(resultRootKey == rootKey); }
         }
@@ -515,101 +521,91 @@ SCENARIO("Testing the (in)equality operator", "[config][settingsNode]") {
     }
 }
 
-SCENARIO("Testing the copy and move constructor", "[config][settingsNode]") {
-    GIVEN("A settings node to copy and move") {
-        const SettingsKey rootKey("root-key");
-        const SettingsKeys key1({"key1"});
-        const SettingsValues value1({"value1a", "value1b"});
-        const SettingsKeys key2({"key2"});
-        const SettingsValues value2({"value2a", "value2b"});
-        const SettingsKeys key3({"key3"});
-        const SettingsValues value3({"value3"});
-
-        SettingsNode settings(rootKey);
-        REQUIRE(settings.add(key1, value1));
-        REQUIRE(settings.add(key2, value2));
-        REQUIRE(settings.add(key3, value3));
-
-        WHEN("We copy the settings") {
+SCENARIO("Test the copy constructor", "[settingsNode][wip]") {
+    propertyTest("A settings node to copy", [](const SettingsNode& expected) {
+        THEN_WHEN("We copy the settings") {
             SettingsNode
-                copy( // NOLINT(performance-unnecessary-copy-initialization)
-                    settings);
+                actual( // NOLINT(performance-unnecessary-copy-initialization)
+                    expected);
 
-            THEN("We should find back the values") {
-                REQUIRE(copy.key() == rootKey);
-                REQUIRE(copy.get<SettingsValues>(key1) != std::nullopt);
-                REQUIRE(copy.get<SettingsValues>(key1).value() == value1);
-                REQUIRE(copy.get<SettingsValues>(key2) != std::nullopt);
-                REQUIRE(copy.get<SettingsValues>(key2).value() == value2);
-                REQUIRE(copy.get<SettingsValues>(key3) != std::nullopt);
-                REQUIRE(copy.get<SettingsValues>(key3).value() == value3);
+            THEN_CHECK("The objects must be equal") {
+                REQUIRE(actual == expected);
             }
-            THEN("They should compare equal") { REQUIRE(copy == settings); }
-        }
-        WHEN("We move the settings") {
-            SettingsNode move(std::move(settings));
 
-            THEN("We should find back the values") {
-                REQUIRE(move.key() == rootKey);
-                REQUIRE(move.get<SettingsValues>(key1) != std::nullopt);
-                REQUIRE(move.get<SettingsValues>(key1).value() == value1);
-                REQUIRE(move.get<SettingsValues>(key2) != std::nullopt);
-                REQUIRE(move.get<SettingsValues>(key2).value() == value2);
-                REQUIRE(move.get<SettingsValues>(key3) != std::nullopt);
-                REQUIRE(move.get<SettingsValues>(key3).value() == value3);
+            THEN_CHECK(
+                "The objects must exist on a different place in memory") {
+                REQUIRE(&expected != &actual);
+                REQUIRE(&(expected.key()) != &(actual.key()));
             }
         }
-    }
+    });
 }
 
-SCENARIO("Test the assignment operator", "[config][settingsNode]") {
-    GIVEN("A configured settings object to assign") {
-        const SettingsKey rootKey("root-key");
-        const SettingsKey rootKey2("root-key2");
-        const SettingsKeys key1({"key1"});
-        const SettingsValues value1({"value1a", "value1b"});
-        const SettingsKeys key2({"key2"});
-        const SettingsValues value2({"value2a", "value2b"});
-        const SettingsKeys key3({"key3"});
-        const SettingsValues value3({"value3"});
+SCENARIO("Test the copy assignment operator", "[settingsNode]") {
+    propertyTest("A settings node to copy", [](const SettingsNode& expected,
+                                               std::string&& key) {
+        THEN_WHEN("We copy the settings") {
+            SettingsNode actual(
+                key); // NOLINT(performance-unnecessary-copy-initialization)
+            actual =
+                expected; // NOLINT(performance-unnecessary-copy-initialization)
 
-        SettingsNode settings(rootKey);
-        REQUIRE(settings.add(key1, value1));
-        REQUIRE(settings.add(key2, value2));
-        REQUIRE(settings.add(key3, value3));
-        const SettingsNode constSettings =
-            settings; // NOLINT(performance-unnecessary-copy-initialization)
-
-        WHEN("We assign the settings object to another") {
-            SettingsNode assigned(rootKey2);
-            REQUIRE(assigned.add(key2, value1));
-            assigned = constSettings;
-
-            THEN("We should find the same values as the original settings "
-                 "object") {
-                REQUIRE(assigned.key() == rootKey);
-                REQUIRE(assigned.get<SettingsValues>(key1) != std::nullopt);
-                REQUIRE(assigned.get<SettingsValues>(key1).value() == value1);
-                REQUIRE(assigned.get<SettingsValues>(key2) != std::nullopt);
-                REQUIRE(assigned.get<SettingsValues>(key2).value() == value2);
-                REQUIRE(assigned.get<SettingsValues>(key3) != std::nullopt);
-                REQUIRE(assigned.get<SettingsValues>(key3).value() == value3);
+            AND_THEN("The objects must be equal") {
+                REQUIRE(actual == expected);
             }
 
-            THEN("The original settings object should still have the same "
-                 "values") {
-                REQUIRE(settings.key() == rootKey);
-                REQUIRE(settings.get<SettingsValues>(key1) != std::nullopt);
-                REQUIRE(settings.get<SettingsValues>(key1).value() == value1);
-                REQUIRE(settings.get<SettingsValues>(key2) != std::nullopt);
-                REQUIRE(settings.get<SettingsValues>(key2).value() == value2);
-                REQUIRE(settings.get<SettingsValues>(key3) != std::nullopt);
-                REQUIRE(settings.get<SettingsValues>(key3).value() == value3);
+            AND_THEN("The objects must exist on a different place in memory") {
+                REQUIRE(&expected != &actual);
+                REQUIRE(&(expected.key()) != &(actual.key()));
             }
-
-            THEN("They should compare equal") { REQUIRE(settings == assigned); }
         }
-    }
+    });
+}
+
+SCENARIO("Test the move constructor", "[settingsNode]") {
+    propertyTest("A settings node to move", [](const SettingsNode& expected) {
+        THEN_WHEN("We copy the settings") {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpessimizing-move"
+            SettingsNode
+                actual(   // NOLINT(performance-unnecessary-copy-initialization)
+                    move( // NOLINT(clang-diagnostic-pessimizing-move)
+                        SettingsNode(expected)));
+#pragma GCC diagnostic pop
+
+            AND_THEN("The objects must be equal") {
+                REQUIRE(actual == expected);
+            }
+
+            AND_THEN("The objects must exist on a different place in memory") {
+                REQUIRE(&expected != &actual);
+                REQUIRE(&(expected.key()) != &(actual.key()));
+            }
+        }
+    });
+}
+
+SCENARIO("Test the move assignment operator", "[settingsNode]") {
+    propertyTest("A settings node to move", [](const SettingsNode& expected,
+                                               std::string&& key) {
+        THEN_WHEN("We copy the settings") {
+            SettingsNode
+                intermediateCopy( // NOLINT(performance-unnecessary-copy-initialization)
+                    expected);
+            SettingsNode actual(key);
+            actual = move(
+                intermediateCopy); // NOLINT(performance-unnecessary-copy-initialization)
+
+            AND_THEN("The objects must be equal") {
+                REQUIRE(actual == expected);
+            }
+
+            AND_THEN("The objects must exist on a different place in memory") {
+                REQUIRE(&expected != &actual);
+                REQUIRE(&(expected.key()) != &(actual.key()));
+            }
+        }
+    });
 }
 
 SCENARIO("Testing the removal of values", "[config][settingsNode]") {
@@ -745,7 +741,7 @@ SCENARIO("Test the settings node streaming operator",
     }
 }
 
-SCENARIO("Test adding values", "[config][settingsNode][issue]") {
+SCENARIO("Test adding values", "[config][settingsNode]") {
     propertyTest("Add one value with a simple key",
                  [](const SettingsKey& key, const SettingsValue& value) {
                      SettingsNode settings("Addition test");

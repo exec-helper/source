@@ -314,7 +314,7 @@ command-line-command:
             - COMPILER
             - MODE
             - MODULE
-        command-line: build/{COMPILER}/{MODE}/install/test/unittest/exec-helper-{MODULE}-unittest
+        command-line: [ "build/{COMPILER}/{MODE}/install/test/unittest/exec-helper-{MODULE}-unittest"]
 
     integration-new:
         patterns:

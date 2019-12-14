@@ -1,9 +1,12 @@
 #ifndef CONFIG_GENERATORS_INCLUDE
 #define CONFIG_GENERATORS_INCLUDE
 
+#include <array>
+#include <map>
 #include <thread>
 
 #include "config/commandLineOptions.h"
+#include "config/settingsNode.h"
 
 #include "unittest/rapidcheck.h"
 #include "utils/testValue.h"
@@ -89,6 +92,31 @@ template <> struct Arbitrary<DryRunValue> {
     static Gen<DryRunValue> arbitrary() {
         return gen::construct<DryRunValue>(
             gen::arbitrary<DryRunValue::Value>());
+    };
+};
+
+// TODO: further extend this. Currently generates settings nodes of exactly 2 levels deep + root level
+template <> struct Arbitrary<execHelper::config::SettingsNode> {
+    static Gen<execHelper::config::SettingsNode> arbitrary() {
+        const auto levelSize = *gen::inRange(0U, 1000U);
+        return gen::apply(
+            [](const std::string& root,
+               const std::map<std::string, std::vector<std::string>>& content) {
+                execHelper::config::SettingsNode settings(root);
+                std::for_each(content.begin(), content.end(),
+                              [&settings](const auto& entry) {
+                                  if(!settings.add(std::move(entry.first),
+                                                   std::move(entry.second))) {
+                                      std::cerr << "Failed to add key"
+                                                << std::endl;
+                                  }
+                              });
+                return settings;
+            },
+            gen::arbitrary<std::string>(),
+            gen::container<std::map<std::string, std::vector<std::string>>>(
+                levelSize, gen::arbitrary<std::string>(),
+                gen::arbitrary<std::vector<std::string>>()));
     };
 };
 } // namespace rc

@@ -45,14 +45,14 @@ auto Cppcheck::getPluginName() const noexcept -> string { return PLUGIN_NAME; }
 auto Cppcheck::getVariablesMap(const FleetingOptionsInterface& fleetingOptions)
     const noexcept -> VariablesMap {
     VariablesMap defaults(PLUGIN_NAME);
-    if(!defaults.add(ENABLE_CHECKS_KEY, "all")) {
-        LOG(error) << "Failed to add key '" << ENABLE_CHECKS_KEY << "'";
-    }
     if(!defaults.add(SRC_DIR_KEY, ".")) {
         LOG(error) << "Failed to add key '" << SRC_DIR_KEY << "'";
     }
     if(!defaults.add(COMMAND_LINE_KEY, CommandLineArgs())) {
         LOG(error) << "Failed to add key '" << COMMAND_LINE_KEY << "'";
+    }
+    if(!defaults.add(ENABLE_CHECKS_KEY, "all")) {
+        LOG(error) << "Failed to add key '" << ENABLE_CHECKS_KEY << "'";
     }
     const auto verbosity = fleetingOptions.getVerbosity() ? "yes" : "no";
     if(!defaults.add(VERBOSITY_KEY, verbosity)) {

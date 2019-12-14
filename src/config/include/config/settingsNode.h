@@ -99,7 +99,7 @@ class SettingsNode {
      *
      * \returns The associated key
      */
-    [[nodiscard]] auto key() const noexcept -> SettingsKey;
+    [[nodiscard]] auto key() const noexcept -> const SettingsKey&;
 
     /**
      * Returns whether the given key exists as a direct child of this node
