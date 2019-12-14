@@ -8,8 +8,7 @@
 
 #include "pattern.h"
 
-namespace execHelper {
-namespace config {
+namespace execHelper::config {
 /**
  * \brief Handles the patterns it is given
  */
@@ -30,11 +29,11 @@ class PatternsHandler {
 
     /*! @copydoc config::Argv::operator==(const config::Argv& other) const
      */
-    bool operator==(const PatternsHandler& other) const noexcept;
+    auto operator==(const PatternsHandler& other) const noexcept -> bool;
 
     /*! @copydoc config::Argv::operator!=(const config::Argv& other) const
      */
-    bool operator!=(const PatternsHandler& other) const noexcept;
+    auto operator!=(const PatternsHandler& other) const noexcept -> bool;
 
     /**
      * Returns whether the pattern associated with the given key is registered
@@ -43,7 +42,7 @@ class PatternsHandler {
      * \returns True    If the handler handles the pattern
      *          False   Otherwise
      */
-    bool contains(const PatternKey& key) const noexcept;
+    [[nodiscard]] auto contains(const PatternKey& key) const noexcept -> bool;
 
     /**
      * Registers a pattern with the handler
@@ -55,10 +54,11 @@ class PatternsHandler {
     /**
      * Returns the pattern associated with the given key
      *
-     * \pre \ref contains(const PatternKey&) const for the given key returns
-     * true \param[in] key   The key of the pattern \returns The found pattern
+     * \pre \ref contains(const PatternKey&) const for the given key returns true
+     *
+     * \param[in] key   The key of the pattern \returns The found pattern
      */
-    const Pattern& getPattern(const PatternKey& key) const noexcept;
+    auto getPattern(const PatternKey& key) const noexcept -> const Pattern&;
 
     /**
      * Returns the default pattern map for a pattern
@@ -66,8 +66,8 @@ class PatternsHandler {
      * \param[in] key   The root key to use for the newly created variables map
      * \returns The default variables map
      */
-    static config::VariablesMap
-    getDefaultPatternMap(const PatternKey& key) noexcept;
+    static auto getDefaultPatternMap(const PatternKey& key) noexcept
+        -> config::VariablesMap;
 
     /**
      * Converts the given patternMap to a pattern
@@ -77,14 +77,13 @@ class PatternsHandler {
      * pattern to create \returns The created pattern if the variables map is
      * valid boost::none otherwise
      */
-    static std::optional<Pattern>
-    toPattern(const PatternKey& key,
-              const config::VariablesMap& patternMap) noexcept;
+    static auto toPattern(const PatternKey& key,
+                          const config::VariablesMap& patternMap) noexcept
+        -> std::optional<Pattern>;
 
   private:
     PatternCollection m_patterns;
 };
-} // namespace config
-} // namespace execHelper
+} // namespace execHelper::config
 
 #endif /* __PATTERNS_HANDLER_H__ */

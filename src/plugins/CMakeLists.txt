@@ -19,6 +19,12 @@ set(SRCS
         src/clangTidy.cpp
         src/lcov.cpp
         src/logger.cpp
+        src/commandLine.cpp
+        src/verbosity.cpp
+        src/addEnvironment.cpp
+        src/buildDir.cpp
+        src/threadedness.cpp
+        src/buildDir.cpp
    )
 
 set(DEPENDENCIES

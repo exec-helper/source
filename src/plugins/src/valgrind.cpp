@@ -36,20 +36,23 @@ const czstring<> TOOL_KEY = "tool";
 } // namespace
 
 namespace execHelper::plugins {
-std::string Valgrind::getPluginName() const noexcept { return PLUGIN_NAME; }
+auto Valgrind::getPluginName() const noexcept -> string { return PLUGIN_NAME; }
 
-VariablesMap
-Valgrind::getVariablesMap(const FleetingOptionsInterface& fleetingOptions) const
-    noexcept {
+auto Valgrind::getVariablesMap(const FleetingOptionsInterface& fleetingOptions)
+    const noexcept -> VariablesMap {
     VariablesMap defaults(PLUGIN_NAME);
-    defaults.add(COMMAND_LINE_KEY, CommandLineArgs());
+    if(!defaults.add(COMMAND_LINE_KEY, CommandLineArgs())) {
+        LOG(error) << "Failed to add key '" << COMMAND_LINE_KEY << "'";
+    }
     const auto verbosity = fleetingOptions.getVerbosity() ? "yes" : "no";
-    defaults.add(VERBOSITY_KEY, verbosity);
+    if(!defaults.add(VERBOSITY_KEY, verbosity)) {
+        LOG(error) << "Failed to add key '" << VERBOSITY_KEY << "'";
+    }
     return defaults;
 }
 
-bool Valgrind::apply(Task task, const VariablesMap& variables,
-                     const Patterns& patterns) const noexcept {
+auto Valgrind::apply(Task task, const VariablesMap& variables,
+                     const Patterns& patterns) const noexcept -> bool {
     task.append(PLUGIN_NAME);
 
     auto runCommand = variables.get<RunCommand>(RUN_COMMAND_KEY);

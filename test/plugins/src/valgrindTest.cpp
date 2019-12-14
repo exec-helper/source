@@ -69,8 +69,8 @@ SCENARIO("Obtaining the default variables map of the valgrind plugin",
         Valgrind plugin;
 
         VariablesMap actualVariables(plugin.getPluginName());
-        actualVariables.add(COMMAND_LINE_KEY, CommandLineArgs());
-        actualVariables.add(VERBOSITY_KEY, "no");
+        REQUIRE(actualVariables.add(COMMAND_LINE_KEY, CommandLineArgs()));
+        REQUIRE(actualVariables.add(VERBOSITY_KEY, "no"));
 
         WHEN("We request the variables map") {
             VariablesMap variables = plugin.getVariablesMap(fleetingOptions);
@@ -92,7 +92,7 @@ SCENARIO("Test the variables map of the valgrind plugin", "[valgrind]") {
         VariablesMap variables = plugin.getVariablesMap(FleetingOptionsStub());
 
         CommandCollection runCommands({MEMORY_KEY});
-        variables.add(RUN_COMMAND_KEY, MEMORY_KEY);
+        REQUIRE(variables.add(RUN_COMMAND_KEY, MEMORY_KEY));
 
         CommandLineArgs commandLine;
         string tool;
@@ -108,18 +108,18 @@ SCENARIO("Test the variables map of the valgrind plugin", "[valgrind]") {
 
         COMBINATIONS("Add an additional run command") {
             runCommands.emplace_back(MEMORY_KEY);
-            variables.add(RUN_COMMAND_KEY, MEMORY_KEY);
+            REQUIRE(variables.add(RUN_COMMAND_KEY, MEMORY_KEY));
         }
 
         COMBINATIONS("Set the tool") {
             tool = "tool1";
-            variables.replace(TOOL_KEY, tool);
+            REQUIRE(variables.replace(TOOL_KEY, tool));
         }
 
         COMBINATIONS("Set the command line") {
             commandLine = {"{" + pattern1.getKey() + "}",
                            "{" + pattern2.getKey() + "}"};
-            variables.add(COMMAND_LINE_KEY, commandLine);
+            REQUIRE(variables.add(COMMAND_LINE_KEY, commandLine));
         }
 
         FleetingOptionsStub fleetingOptions;
@@ -150,7 +150,8 @@ SCENARIO("Test the variables map of the valgrind plugin", "[valgrind]") {
             THEN_CHECK("It should succeed") { REQUIRE(returnCode); }
 
             THEN_CHECK("It called the right commands") {
-                const Memory::Memories& memories = memory.getExecutions();
+                const Memory::Memories& memories =
+                    MemoryHandler::getExecutions();
                 REQUIRE(memories.size() == replacedTasks.size());
                 auto replacedTask = replacedTasks.begin();
                 for(auto memory = memories.begin(); memory != memories.end();

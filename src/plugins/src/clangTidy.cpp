@@ -4,6 +4,7 @@
 
 #include "config/pattern.h"
 #include "config/variablesMap.h"
+#include "core/task.h"
 #include "log/assertions.h"
 
 #include "commandLine.h"
@@ -30,18 +31,25 @@ const czstring<> WARNING_AS_ERROR_KEY = "warning-as-errors";
 } // namespace
 
 namespace execHelper::plugins {
-string ClangTidy::getPluginName() const noexcept { return "clang-tidy"; }
+auto ClangTidy::getPluginName() const noexcept -> string {
+    return "clang-tidy";
+}
 
-VariablesMap ClangTidy::getVariablesMap(
-    const FleetingOptionsInterface& /*fleetingOptions*/) const noexcept {
+auto ClangTidy::getVariablesMap(
+    const FleetingOptionsInterface& /*fleetingOptions*/) const noexcept
+    -> VariablesMap {
     VariablesMap defaults(PLUGIN_NAME);
-    defaults.add(COMMAND_LINE_KEY, CommandLineArgs());
-    defaults.add(SOURCES_KEY, "*.cpp");
+    if(!defaults.add(COMMAND_LINE_KEY, CommandLineArgs())) {
+        LOG(error) << "Failed to add key '" << COMMAND_LINE_KEY << "'";
+    }
+    if(!defaults.add(SOURCES_KEY, "*.cpp")) {
+        LOG(error) << "Failed to add key '" << SOURCES_KEY << "'";
+    }
     return defaults;
 }
 
-bool ClangTidy::apply(Task task, const VariablesMap& variables,
-                      const Patterns& patterns) const noexcept {
+auto ClangTidy::apply(Task task, const VariablesMap& variables,
+                      const Patterns& patterns) const noexcept -> bool {
     task.append(PLUGIN_NAME);
 
     auto checks = variables.get<Checks>(CHECKS_KEY);
@@ -69,7 +77,7 @@ bool ClangTidy::apply(Task task, const VariablesMap& variables,
     return true;
 }
 
-TaskCollection ClangTidy::getChecks(const Checks& checks) noexcept {
+auto ClangTidy::getChecks(const Checks& checks) noexcept -> TaskCollection {
     if(checks.empty()) {
         return TaskCollection();
     }
@@ -78,9 +86,9 @@ TaskCollection ClangTidy::getChecks(const Checks& checks) noexcept {
     return TaskCollection({result});
 }
 
-TaskCollection
-ClangTidy::getWarningAsError(const WarningAsError& warningAsError,
-                             const Checks& checks) noexcept {
+auto ClangTidy::getWarningAsError(const WarningAsError& warningAsError,
+                                  const Checks& checks) noexcept
+    -> TaskCollection {
     // Check if we are in the special case where we inherit the values from
     // checksCollection
     string listedChecks;
@@ -95,7 +103,7 @@ ClangTidy::getWarningAsError(const WarningAsError& warningAsError,
     return TaskCollection({"-warnings-as-errors=" + listedChecks});
 }
 
-string ClangTidy::listChecks(const Checks& checks) noexcept {
+auto ClangTidy::listChecks(const Checks& checks) noexcept -> string {
     string result;
     if(checks.empty()) {
         return "";

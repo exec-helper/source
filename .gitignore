@@ -90,10 +90,6 @@ ENV/
 .sconsign.dblite
 3rdparty/*.commit
 
-# Vim temporary files
-*.swp
-output/*
-
 # Test files
 test_coverage/
 test*.exec-helper

@@ -157,8 +157,8 @@ void IoService::start() noexcept {
              << ec.message() << endl;
         assert(false);
     }
-    m_service.reset();
     m_isRunning = false;
+    m_service.stop();
 }
 
 void IoService::stop() noexcept {
@@ -227,8 +227,8 @@ void ExecutionContentServer::openAcceptor() {
     m_acceptor.listen(socket_base::max_connections);
 }
 
-ExecutionContentServer& ExecutionContentServer::
-operator=(ExecutionContentServer&& other) noexcept {
+ExecutionContentServer&
+ExecutionContentServer::operator=(ExecutionContentServer&& other) noexcept {
     swap(other);
     return *this;
 }

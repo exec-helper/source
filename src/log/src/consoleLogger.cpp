@@ -20,14 +20,15 @@ ConsoleLogger::ConsoleLogger(std::ostream& logStream)
 
 ConsoleLogger::~ConsoleLogger() {
     if(m_consoleSink) {
-        boost::log::core::get()->remove_sink(m_consoleSink);
+        boost::log::core::get()->remove_sink(
+            m_consoleSink); // NOLINT(fuchsia-default-arguments-calls)
         m_consoleSink->flush();
         m_consoleSink.reset();
     }
 }
 
-bool ConsoleLogger::setSeverity(const Channel& channel,
-                                LogLevel severity) noexcept {
+auto ConsoleLogger::setSeverity(const Channel& channel,
+                                LogLevel severity) noexcept -> bool {
     m_logMessageFilter[channel] = severity;
     m_consoleSink->set_filter(m_logMessageFilter || false);
     return true;

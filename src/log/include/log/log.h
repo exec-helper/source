@@ -38,10 +38,8 @@ class LogInit {
      *
      * \param[in] channel   The channel to set the severity from
      * \param[in] severity  The severity to set the minimal severity to
-     * \returns True    If the severity was successfully set
-     *          False   Otherwise
      */
-    bool setSeverity(const Channel& channel, LogLevel severity) noexcept;
+    void setSeverity(const Channel& channel, LogLevel severity);
 
   private:
     /**

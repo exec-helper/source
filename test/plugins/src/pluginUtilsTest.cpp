@@ -33,7 +33,8 @@ using execHelper::test::propertyTest;
 using NonEmptyPatternCombinations = std::map<NonEmptyString, std::string>;
 
 namespace {
-inline std::string toReplacementPattern(const std::string& pattern) noexcept {
+inline auto toReplacementPattern(const std::string& pattern) noexcept
+    -> std::string {
     return std::string("{").append(pattern).append("}");
 }
 } // namespace
@@ -64,7 +65,7 @@ SCENARIO("Test getting the environment", "[plugin-utils]") {
 
         VariablesMap variables("test");
         for(const auto& env : ENVIRONMENT_VALUES) {
-            variables.add({ENVIRONMENT_KEY, env.first}, env.second);
+            REQUIRE(variables.add({ENVIRONMENT_KEY, env.first}, env.second));
         }
 
         WHEN("We get the environment") {

@@ -21,12 +21,9 @@ const gsl::czstring<> VERBOSITY_KEY = "verbose";
 struct VerbosityLong {
     /*! @copydoc JobsLong::getVariables(config::VariablesMap&, const config::FleetingOptionsInterface&)
      */
-    inline static void
+    static void
     getVariables(config::VariablesMap& variables,
-                 const config::FleetingOptionsInterface& options) noexcept {
-        const auto verbosity = options.getVerbosity() ? "yes" : "no";
-        variables.add(VERBOSITY_KEY, verbosity);
-    }
+                 const config::FleetingOptionsInterface& options) noexcept;
 
     /*! @copydoc JobsLong::apply(core::Task&, const config::VariablesMap&)
      */

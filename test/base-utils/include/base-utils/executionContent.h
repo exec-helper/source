@@ -33,7 +33,7 @@ class IoService {
     boost::asio::io_service& get() noexcept;
 
   private:
-    boost::asio::io_service m_service;
+    boost::asio::io_context m_service;
     std::atomic<bool> m_isRunning = {false};
     std::thread m_thread;
 };

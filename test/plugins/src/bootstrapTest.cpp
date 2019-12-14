@@ -58,9 +58,9 @@ SCENARIO("Obtaining the default variables map of the bootstrap plugin",
         Bootstrap plugin;
 
         VariablesMap actualVariables(plugin.getPluginName());
-        actualVariables.add(Bootstrap::getBuildDirKey(), ".");
-        actualVariables.add(COMMAND_LINE_KEY, CommandLineArgs());
-        actualVariables.add(FILENAME_KEY, "bootstrap.sh");
+        REQUIRE(actualVariables.add(Bootstrap::getBuildDirKey(), "."));
+        REQUIRE(actualVariables.add(COMMAND_LINE_KEY, CommandLineArgs()));
+        REQUIRE(actualVariables.add(FILENAME_KEY, "bootstrap.sh"));
 
         WHEN("We request the variables map") {
             VariablesMap variables = plugin.getVariablesMap(fleetingOptions);
@@ -99,23 +99,24 @@ SCENARIO("Test the combination of several settings for the bootstrap plugin",
             buildDir = "{" + pattern1.getKey() + "}/{" + pattern2.getKey() +
                        "}/{HELLO}/{" + pattern2.getKey() + "}/hello{" +
                        pattern1.getKey() + " }world";
-            variables.replace(Bootstrap::getBuildDirKey(), buildDir.native());
+            REQUIRE(variables.replace(Bootstrap::getBuildDirKey(),
+                                      buildDir.native()));
         }
 
         COMBINATIONS("Set a different file name") {
             runCommand = "other-file-name.sh";
-            variables.replace(FILENAME_KEY, runCommand.native());
+            REQUIRE(variables.replace(FILENAME_KEY, runCommand.native()));
         }
 
         COMBINATIONS("Set a different absolute file name") {
             runCommand = "/other/abosolute/filename.sh";
-            variables.replace(FILENAME_KEY, runCommand.native());
+            REQUIRE(variables.replace(FILENAME_KEY, runCommand.native()));
         }
 
         COMBINATIONS("Add a command line") {
             commandLine = {"{" + pattern2.getKey() + "}{" + pattern1.getKey() +
                            "}"};
-            variables.replace(COMMAND_LINE_KEY, commandLine);
+            REQUIRE(variables.replace(COMMAND_LINE_KEY, commandLine));
         }
 
         expectedTask.setWorkingDirectory(buildDir);

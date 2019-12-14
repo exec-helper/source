@@ -23,11 +23,9 @@ static const gsl::czstring<> COMMAND_LINE_KEY = "command-line";
 struct CommandLine {
     /*! @copydoc AddEnvironment::getVariables(config::VariablesMap&, const config::FleetingOptionsInterface&)
      */
-    inline static void
+    static void
     getVariables(config::VariablesMap& variables,
-                 const config::FleetingOptionsInterface& /*options*/) noexcept {
-        variables.add(COMMAND_LINE_KEY, CommandLineArgs());
-    }
+                 const config::FleetingOptionsInterface& options) noexcept;
 
     /*! @copydoc JobsLong::apply(core::Task&, const config::VariablesMap&)
      */

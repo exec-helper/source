@@ -38,12 +38,14 @@ YamlWrapper::YamlWrapper(YamlWrapper&& other) noexcept
     ;
 }
 
-YamlWrapper& YamlWrapper::operator=(const YamlWrapper& other) {
-    m_node = Clone(other.m_node);
+auto YamlWrapper::operator=(const YamlWrapper& other) -> YamlWrapper& {
+    if(this != &other) {
+        m_node = Clone(other.m_node);
+    }
     return *this;
 }
 
-YamlWrapper& YamlWrapper::operator=(YamlWrapper&& other) noexcept {
+auto YamlWrapper::operator=(YamlWrapper&& other) noexcept -> YamlWrapper& {
     swap(other);
     return *this;
 }
@@ -57,15 +59,15 @@ void YamlWrapper::swap(const YamlWrapper& other) noexcept {
     }
 }
 
-YAML::Node
-YamlWrapper::getSubNode(const std::initializer_list<std::string>& keys) const {
+auto YamlWrapper::getSubNode(
+    const std::initializer_list<std::string>& keys) const -> YAML::Node {
     return std::accumulate(
         keys.begin(), keys.end(), Clone(m_node),
         [](const auto& node, const auto& key) { return node[key]; });
 }
 
-bool YamlWrapper::getTree(const initializer_list<string>& keys,
-                          SettingsNode* settings) const noexcept {
+auto YamlWrapper::getTree(const initializer_list<string>& keys,
+                          SettingsNode* settings) const noexcept -> bool {
     try {
         const YAML::Node& node = getSubNode(keys);
         if(node.size() == 0 || node.IsNull()) {
@@ -78,14 +80,14 @@ bool YamlWrapper::getTree(const initializer_list<string>& keys,
     }
 }
 
-bool YamlWrapper::getTree(const YAML::Node& rootNode,
-                          SettingsNode* settings) noexcept {
+auto YamlWrapper::getTree(const YAML::Node& rootNode,
+                          SettingsNode* settings) noexcept -> bool {
     YAML::Node node = Clone(rootNode);
     return getSubTree(node, settings, {});
 }
 
-bool YamlWrapper::getSubTree(const YAML::Node& node, SettingsNode* yamlNode,
-                             const SettingsKeys& keys) noexcept {
+auto YamlWrapper::getSubTree(const YAML::Node& node, SettingsNode* yamlNode,
+                             const SettingsKeys& keys) noexcept -> bool {
     YAML::NodeType::value type = YAML::NodeType::Null;
     try {
         type = node.Type();
@@ -100,7 +102,9 @@ bool YamlWrapper::getSubTree(const YAML::Node& node, SettingsNode* yamlNode,
         break;
     case YAML::NodeType::Scalar:
         try {
-            yamlNode->add(keys, node.as<string>());
+            if(!yamlNode->add(keys, node.as<string>())) {
+                LOG(warning) << "Failed to add key '" << keys.back() << "'";
+            }
         } catch(const YAML::TypedBadConversion<string>&) {
             return false;
         } catch(const YAML::InvalidNode&) {
@@ -118,7 +122,9 @@ bool YamlWrapper::getSubTree(const YAML::Node& node, SettingsNode* yamlNode,
                 return false;
             }
 
-            yamlNode->add(keys, key);
+            if(!yamlNode->add(keys, key)) {
+                LOG(warning) << "Failed to add key '" << key << "'";
+            }
             SettingsKeys newKeys = keys;
             newKeys.push_back(key);
             if(!YamlWrapper::getSubTree(element.second, yamlNode, newKeys)) {

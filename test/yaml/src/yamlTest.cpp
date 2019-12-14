@@ -74,20 +74,25 @@ SCENARIO("Extensive Yaml file wrapper test", "[yaml][yamlwrapper]") {
         string correctRunCommandLine("command-line");
 
         SettingsNode correctSettings("YamlTest");
-        correctSettings.add({"commands"}, correctCommands);
-        correctSettings.add({"init"}, correctInit);
-        correctSettings.add({"build"}, correctBuild);
-        correctSettings.add({"run"}, correctRun);
-        correctSettings.add({"analyze"}, correctAnalyze);
-        correctSettings.add({"git-submodules", "submodules"},
-                            correctSubmodules);
-        correctSettings.add({"scons", "patterns"}, correctSconsPatterns);
-        correctSettings.add({"scons", "build-dir"}, correctSconsBuildDir);
-        correctSettings.add({"scons", "single-threaded"},
-                            correctSconsSingleThreaded);
-        correctSettings.add({"scons", "command-line"}, correctSconsCommandLine);
-        correctSettings.add({"pmd", "auto-install"}, correctPmdAutoInstall);
-        correctSettings.add({"command-line", "run"}, correctRunCommandLine);
+        REQUIRE(correctSettings.add({"commands"}, correctCommands));
+        REQUIRE(correctSettings.add({"init"}, correctInit));
+        REQUIRE(correctSettings.add({"build"}, correctBuild));
+        REQUIRE(correctSettings.add({"run"}, correctRun));
+        REQUIRE(correctSettings.add({"analyze"}, correctAnalyze));
+        REQUIRE(correctSettings.add({"git-submodules", "submodules"},
+                                    correctSubmodules));
+        REQUIRE(
+            correctSettings.add({"scons", "patterns"}, correctSconsPatterns));
+        REQUIRE(
+            correctSettings.add({"scons", "build-dir"}, correctSconsBuildDir));
+        REQUIRE(correctSettings.add({"scons", "single-threaded"},
+                                    correctSconsSingleThreaded));
+        REQUIRE(correctSettings.add({"scons", "command-line"},
+                                    correctSconsCommandLine));
+        REQUIRE(correctSettings.add({"pmd", "auto-install"},
+                                    correctPmdAutoInstall));
+        REQUIRE(correctSettings.add({"command-line", "run"},
+                                    correctRunCommandLine));
 
         ConfigFileWriter file;
         writeSettingsFile(gsl::not_null<ConfigFileWriter*>(&file),

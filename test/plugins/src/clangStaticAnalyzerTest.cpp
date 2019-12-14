@@ -65,13 +65,13 @@ SCENARIO("Obtain the default variables map of the clang-static-analyzer plugin",
         ClangStaticAnalyzer plugin;
 
         VariablesMap actualVariables(plugin.getPluginName());
-        actualVariables.add(BUILD_DIR_KEY, ".");
-        actualVariables.add(COMMAND_LINE_KEY, CommandLineArgs());
-        actualVariables.add(VERBOSITY_KEY, "no");
+        REQUIRE(actualVariables.add(BUILD_DIR_KEY, "."));
+        REQUIRE(actualVariables.add(COMMAND_LINE_KEY, CommandLineArgs()));
+        REQUIRE(actualVariables.add(VERBOSITY_KEY, "no"));
 
         COMBINATIONS("Switch on verbosity") {
             fleetingOptions.m_verbose = true;
-            actualVariables.replace(VERBOSITY_KEY, "yes");
+            REQUIRE(actualVariables.replace(VERBOSITY_KEY, "yes"));
         }
 
         THEN_WHEN("We request the variables map") {
@@ -102,7 +102,7 @@ SCENARIO("Successfully applying the clang-static-analyzer plugin",
 
         FleetingOptionsStub fleetingOptions;
         VariablesMap variables = plugin.getVariablesMap(fleetingOptions);
-        variables.add(BUILD_COMMAND_KEY, MEMORY_KEY);
+        REQUIRE(variables.add(BUILD_COMMAND_KEY, MEMORY_KEY));
 
         ExecutePlugin::push(
             gsl::not_null<const config::FleetingOptionsInterface*>(
@@ -111,7 +111,7 @@ SCENARIO("Successfully applying the clang-static-analyzer plugin",
         ExecutePlugin::push(Patterns(patterns));
 
         COMBINATIONS("Switch on verbosity") {
-            variables.replace(VERBOSITY_KEY, "yes");
+            REQUIRE(variables.replace(VERBOSITY_KEY, "yes"));
             verbosity.emplace_back("-v");
         }
 
@@ -119,7 +119,7 @@ SCENARIO("Successfully applying the clang-static-analyzer plugin",
             commandLine = {"{" + pattern1.getKey() + "}{" + pattern2.getKey() +
                                "}",
                            "blaat/{HELLO}/{" + pattern1.getKey() + "}"};
-            variables.replace(COMMAND_LINE_KEY, commandLine);
+            REQUIRE(variables.replace(COMMAND_LINE_KEY, commandLine));
         }
 
         expectedTask.append(verbosity);
@@ -130,7 +130,8 @@ SCENARIO("Successfully applying the clang-static-analyzer plugin",
             THEN_CHECK("It should succeed") { REQUIRE(returnCode); }
 
             THEN_CHECK("It called the right commands") {
-                const Memory::Memories& memories = memory.getExecutions();
+                const Memory::Memories& memories =
+                    MemoryHandler::getExecutions();
                 REQUIRE(memories.size() == 1U);
                 REQUIRE(memories[0].task == expectedTask);
             }
@@ -156,14 +157,15 @@ SCENARIO("Testing the invalid configurations", "[clang-static-analyzer]") {
             THEN("It should fail") { REQUIRE_FALSE(returnCode); }
 
             THEN("Nothing should have been executed") {
-                const Memory::Memories& memories = memory.getExecutions();
+                const Memory::Memories& memories =
+                    MemoryHandler::getExecutions();
                 REQUIRE(memories.empty());
             }
         }
 
         WHEN("We add the build-command as a specific config key without a "
              "value") {
-            variables.add(BUILD_COMMAND_KEY);
+            REQUIRE(variables.add(BUILD_COMMAND_KEY));
 
             bool returnCode = plugin.apply(task, variables, Patterns());
             THEN("It should fail") { REQUIRE_FALSE(returnCode); }

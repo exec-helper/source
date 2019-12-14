@@ -13,7 +13,9 @@ LogInit::LogInit() noexcept { init(std::clog); }
 
 LogInit::LogInit(std::ostream& logStream) noexcept { init(logStream); }
 
-LogInit::~LogInit() { m_consoleLogger.reset(); }
+LogInit::~LogInit() {
+    m_consoleLogger.reset();
+} // NOLINT(fuchsia-default-arguments-calls)
 
 void LogInit::init(std::ostream& logStream) noexcept {
     boost::log::add_common_attributes();
@@ -22,18 +24,18 @@ void LogInit::init(std::ostream& logStream) noexcept {
     m_consoleLogger = make_unique<ConsoleLogger>(logStream);
 }
 
-bool LogInit::setSeverity(const Channel& channel, LogLevel severity) noexcept {
-    return m_consoleLogger->setSeverity(channel, severity);
+void LogInit::setSeverity(const Channel& channel, LogLevel severity) {
+    m_consoleLogger->setSeverity(channel, severity);
 }
 
 } // namespace log
 
 namespace color {
-std::ostream& operator<<(std::ostream& os, const Modifier& mod) {
+auto operator<<(std::ostream& os, const Modifier& mod) -> std::ostream& {
     return os << "\033[" << mod.code << "m";
 }
 
-std::wostream& operator<<(std::wostream& os, const Modifier& mod) {
+auto operator<<(std::wostream& os, const Modifier& mod) -> std::wostream& {
     return os << "\033[" << mod.code << "m";
 }
 } // namespace color

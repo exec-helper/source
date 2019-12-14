@@ -18,8 +18,8 @@ using execHelper::config::SettingsKeys;
 using execHelper::config::SettingsValues;
 
 namespace {
-ostream& stream(ostream& os, const execHelper::config::SettingsNode& settings,
-                const string& prepend) noexcept {
+auto stream(ostream& os, const execHelper::config::SettingsNode& settings,
+            const string& prepend) noexcept -> ostream& {
     os << prepend << "- " << settings.key();
     auto values =
         settings.get<SettingsValues>(SettingsKeys(), SettingsValues());
@@ -52,18 +52,22 @@ SettingsNode::SettingsNode(SettingsNode&& other) noexcept
 
 SettingsNode::~SettingsNode() noexcept { ; }
 
-SettingsNode& SettingsNode::operator=(const SettingsNode& other) noexcept {
-    m_key = other.m_key;
-    deepCopy(other);
+auto SettingsNode::operator=(const SettingsNode& other) noexcept
+    -> SettingsNode& {
+    if(this != &other) {
+        m_key = other.m_key;
+        deepCopy(other);
+    }
     return *this;
 }
 
-SettingsNode& SettingsNode::operator=(SettingsNode&& other) noexcept {
+auto SettingsNode::operator=(SettingsNode&& other) noexcept -> SettingsNode& {
     swap(other);
     return *this;
 }
 
-bool SettingsNode::operator==(const SettingsNode& other) const noexcept {
+auto SettingsNode::operator==(const SettingsNode& other) const noexcept
+    -> bool {
     if(m_key != other.m_key) {
         return false;
     }
@@ -84,11 +88,13 @@ bool SettingsNode::operator==(const SettingsNode& other) const noexcept {
     return true;
 }
 
-bool SettingsNode::operator!=(const SettingsNode& other) const noexcept {
+auto SettingsNode::operator!=(const SettingsNode& other) const noexcept
+    -> bool {
     return !(*this == other);
 }
 
-SettingsNode& SettingsNode::operator[](const SettingsKey& key) noexcept {
+auto SettingsNode::operator[](const SettingsKey& key) noexcept
+    -> SettingsNode& {
     if(contains(key)) {
         auto value =
             find_if(m_values->begin(), m_values->end(),
@@ -96,12 +102,14 @@ SettingsNode& SettingsNode::operator[](const SettingsKey& key) noexcept {
         ensures(value != m_values->end());
         return *value;
     }
-    add(key);
+    if(!add(key)) {
+        LOG(warning) << "Failed to add key '" << key << "'";
+    }
     return m_values->back();
 }
 
-const SettingsNode& SettingsNode::operator[](const SettingsKey& key) const
-    noexcept {
+auto SettingsNode::operator[](const SettingsKey& key) const noexcept
+    -> const SettingsNode& {
     expectsMessage(contains(key), "Key must exist");
     auto value =
         find_if(m_values->begin(), m_values->end(),
@@ -110,7 +118,7 @@ const SettingsNode& SettingsNode::operator[](const SettingsKey& key) const
     return *value;
 }
 
-bool SettingsNode::contains(const SettingsKey& key) const noexcept {
+auto SettingsNode::contains(const SettingsKey& key) const noexcept -> bool {
     if(!m_values) {
         return false;
     }
@@ -119,7 +127,7 @@ bool SettingsNode::contains(const SettingsKey& key) const noexcept {
         [&key](const auto& value) { return value.m_key == key; });
 }
 
-bool SettingsNode::contains(const SettingsKeys& key) const noexcept {
+auto SettingsNode::contains(const SettingsKeys& key) const noexcept -> bool {
     const SettingsNode* settings = this;
     for(const auto& keyPart : key) {
         if(settings->contains(keyPart)) {
@@ -131,7 +139,7 @@ bool SettingsNode::contains(const SettingsKeys& key) const noexcept {
     return true;
 }
 
-bool SettingsNode::add(const SettingsValue& newValue) noexcept {
+auto SettingsNode::add(const SettingsValue& newValue) noexcept -> bool {
     if(!m_values) {
         m_values = make_unique<SettingsNodeCollection>();
     }
@@ -139,57 +147,58 @@ bool SettingsNode::add(const SettingsValue& newValue) noexcept {
     return true;
 }
 
-bool SettingsNode::add(const SettingsKeys& key,
-                       const SettingsValue& newValue) noexcept {
+auto SettingsNode::add(const SettingsKeys& key,
+                       const SettingsValue& newValue) noexcept -> bool {
     return add(key, SettingsValues({newValue}));
 }
 
-bool SettingsNode::add(
-    const initializer_list<SettingsValue>& newValue) noexcept {
+auto SettingsNode::add(const initializer_list<SettingsValue>& newValue) noexcept
+    -> bool {
     return add(SettingsValues(newValue));
 }
 
-bool SettingsNode::add(
-    const SettingsKeys& key,
-    const initializer_list<SettingsValue>& newValue) noexcept {
+auto SettingsNode::add(const SettingsKeys& key,
+                       const initializer_list<SettingsValue>& newValue) noexcept
+    -> bool {
     return add(key, SettingsValues(newValue));
 }
 
-bool SettingsNode::add(
+auto SettingsNode::add(
     const std::initializer_list<SettingsKey>& key,
-    const std::initializer_list<SettingsValue>& newValue) noexcept {
+    const std::initializer_list<SettingsValue>& newValue) noexcept -> bool {
     return add(SettingsKeys(key), SettingsValues(newValue));
 }
 
-bool SettingsNode::add(const std::initializer_list<SettingsKey>& key,
-                       const SettingsValues& newValue) noexcept {
+auto SettingsNode::add(const std::initializer_list<SettingsKey>& key,
+                       const SettingsValues& newValue) noexcept -> bool {
     return add(SettingsKeys(key), newValue);
 }
 
-bool SettingsNode::add(const std::initializer_list<SettingsKey>& key,
-                       const SettingsValue& newValue) noexcept {
+auto SettingsNode::add(const std::initializer_list<SettingsKey>& key,
+                       const SettingsValue& newValue) noexcept -> bool {
     return add(SettingsKeys(key), SettingsValues({newValue}));
 }
 
-bool SettingsNode::add(const SettingsKeys& key,
-                       const SettingsValues& newValue) noexcept {
+auto SettingsNode::add(const SettingsKeys& key,
+                       const SettingsValues& newValue) noexcept -> bool {
     SettingsNode* settings = this;
     for(const auto& parentKey : key) {
         if(!settings->contains(parentKey)) {
-            settings->add(parentKey);
+            if(!settings->add(parentKey)) {
+                LOG(warning) << "Failed to add key '" << parentKey << "'";
+            }
         }
         settings = settings->at(parentKey);
     }
-    bool retCode = settings->add(newValue);
-    return retCode;
+    return settings->add(newValue);
 }
 
-bool SettingsNode::add(const SettingsKey& key,
-                       const SettingsValue& newValue) noexcept {
+auto SettingsNode::add(const SettingsKey& key,
+                       const SettingsValue& newValue) noexcept -> bool {
     return add(SettingsKeys({key}), {newValue});
 }
 
-bool SettingsNode::add(const SettingsValues& newValue) noexcept {
+auto SettingsNode::add(const SettingsValues& newValue) noexcept -> bool {
     if(!m_values) {
         m_values = make_unique<SettingsNodeCollection>();
     }
@@ -200,16 +209,16 @@ bool SettingsNode::add(const SettingsValues& newValue) noexcept {
     return true;
 }
 
-bool SettingsNode::add(const SettingsKey& key,
-                       const SettingsValues& newValue) noexcept {
+auto SettingsNode::add(const SettingsKey& key,
+                       const SettingsValues& newValue) noexcept -> bool {
     return add(SettingsKeys({key}), newValue);
 }
 
-bool SettingsNode::clear(const SettingsKey& key) noexcept {
+auto SettingsNode::clear(const SettingsKey& key) noexcept -> bool {
     return clear(SettingsKeys({key}));
 }
 
-bool SettingsNode::clear(const SettingsKeys& keys) noexcept {
+auto SettingsNode::clear(const SettingsKeys& keys) noexcept -> bool {
     if(keys.empty()) {
         LOG(debug) << "Cannot clear the settingsnode itself";
         return false;
@@ -232,7 +241,7 @@ bool SettingsNode::clear(const SettingsKeys& keys) noexcept {
     return false;
 }
 
-std::optional<SettingsValues> SettingsNode::values() const noexcept {
+auto SettingsNode::values() const noexcept -> std::optional<SettingsValues> {
     if(!m_values) {
         return std::nullopt;
     }
@@ -244,7 +253,7 @@ std::optional<SettingsValues> SettingsNode::values() const noexcept {
     return result;
 }
 
-SettingsKey SettingsNode::key() const noexcept { return m_key; }
+auto SettingsNode::key() const noexcept -> SettingsKey { return m_key; }
 
 void SettingsNode::swap(SettingsNode& other) noexcept {
     m_key.swap(other.m_key);
@@ -257,13 +266,15 @@ void SettingsNode::overwrite(const SettingsNode& newSettings) noexcept {
     for(const auto& key : children) {
         const SettingsNode& newValue = newSettings[key];
         if(!contains(key)) {
-            add(key);
+            if(!add(key)) {
+                LOG(warning) << "Failed to add key '" << key << "'";
+            }
         }
         at(key)->deepCopy(newValue);
     }
 }
 
-SettingsNode* SettingsNode::at(const SettingsKey& key) noexcept {
+auto SettingsNode::at(const SettingsKey& key) noexcept -> SettingsNode* {
     expectsMessage(contains(key), "Key must exist");
     auto value =
         std::find_if(m_values->begin(), m_values->end(),
@@ -272,7 +283,8 @@ SettingsNode* SettingsNode::at(const SettingsKey& key) noexcept {
     return &(*value);
 }
 
-const SettingsNode* SettingsNode::at(const SettingsKey& key) const noexcept {
+auto SettingsNode::at(const SettingsKey& key) const noexcept
+    -> const SettingsNode* {
     expectsMessage(contains(key), "Key must exist");
     auto value =
         std::find_if(m_values->begin(), m_values->end(),
@@ -281,7 +293,7 @@ const SettingsNode* SettingsNode::at(const SettingsKey& key) const noexcept {
     return &(*value);
 }
 
-SettingsNode* SettingsNode::at(const SettingsKeys& key) noexcept {
+auto SettingsNode::at(const SettingsKeys& key) noexcept -> SettingsNode* {
     expectsMessage(contains(key), "Key must exist");
     SettingsNode* settings = this;
     for(const auto& keyPart : key) {
@@ -290,7 +302,8 @@ SettingsNode* SettingsNode::at(const SettingsKeys& key) noexcept {
     return settings;
 }
 
-const SettingsNode* SettingsNode::at(const SettingsKeys& key) const noexcept {
+auto SettingsNode::at(const SettingsKeys& key) const noexcept
+    -> const SettingsNode* {
     expectsMessage(contains(key), "Key must exist");
     const SettingsNode* settings = this;
     for(const auto& keyPart : key) {
@@ -310,7 +323,8 @@ void SettingsNode::deepCopy(const SettingsNode& other) noexcept {
               std::back_inserter(*m_values));
 }
 
-ostream& operator<<(ostream& os, const SettingsNode& settings) noexcept {
+auto operator<<(ostream& os, const SettingsNode& settings) noexcept
+    -> ostream& {
     return stream(os, settings, "");
 }
 } // namespace execHelper::config

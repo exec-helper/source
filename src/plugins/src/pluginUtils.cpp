@@ -6,6 +6,7 @@
 
 #include "config/environment.h"
 #include "config/path.h"
+#include "config/pattern.h"
 #include "config/settingsNode.h"
 #include "config/variablesMap.h"
 #include "core/patterns.h"
@@ -41,12 +42,13 @@ using execHelper::core::TaskCollection;
 using execHelper::plugins::PatternPermutator;
 
 namespace execHelper::plugins {
-const PatternKey& getPatternsKey() noexcept {
+auto getPatternsKey() noexcept -> const PatternKey& {
     static const PatternKey key("patterns");
     return key;
 }
 
-PatternPermutator makePatternPermutator(const Patterns& patterns) noexcept {
+auto makePatternPermutator(const Patterns& patterns) noexcept
+    -> PatternPermutator {
     std::map<PatternKey, PatternValues> patternValuesMap;
     if(patterns.empty()) {
         // If no patterns were given, iterate once
@@ -58,9 +60,10 @@ PatternPermutator makePatternPermutator(const Patterns& patterns) noexcept {
     return plugins::PatternPermutator(patternValuesMap);
 }
 
-EnvironmentCollection replacePatternsInEnvironment(
+auto replacePatternsInEnvironment(
     const EnvironmentCollection& env,
-    const PatternCombinations& patternCombinations) noexcept {
+    const PatternCombinations& patternCombinations) noexcept
+    -> EnvironmentCollection {
     EnvironmentCollection replaced;
 
     for(const auto& keyValue : env) {
@@ -76,8 +79,9 @@ EnvironmentCollection replacePatternsInEnvironment(
     return replaced;
 }
 
-Task replacePatternCombinations(
-    const Task& task, const PatternCombinations& patternCombinations) noexcept {
+auto replacePatternCombinations(
+    const Task& task, const PatternCombinations& patternCombinations) noexcept
+    -> Task {
     Task replacedTask;
     replacedTask.setEnvironment(replacePatternsInEnvironment(
         task.getEnvironment(), patternCombinations));
@@ -98,7 +102,8 @@ Task replacePatternCombinations(
     return replacedTask;
 }
 
-EnvironmentCollection getEnvironment(const VariablesMap& variables) noexcept {
+auto getEnvironment(const VariablesMap& variables) noexcept
+    -> EnvironmentCollection {
     EnvironmentCollection result;
     SettingsKeys key({ENVIRONMENT_KEY});
     auto environmentOpt = variables.get<vector<string>>(key);
@@ -115,12 +120,12 @@ EnvironmentCollection getEnvironment(const VariablesMap& variables) noexcept {
     return result;
 }
 
-const string& getWorkingDirKey() noexcept {
+auto getWorkingDirKey() noexcept -> const string& {
     static const string workingDirKey("working-dir");
     return workingDirKey;
 }
 
-string toString(const PatternKeys& values) noexcept {
+auto toString(const PatternKeys& values) noexcept -> string {
     string result;
     if(values.empty()) {
         return result;

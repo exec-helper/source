@@ -45,10 +45,10 @@ class PluginPreparation {
         m_patterns.emplace_back(Pattern(std::string(patternKey), {"memory"}));
 
         m_variablesMap = plugin.getVariablesMap(FleetingOptionsStub());
-        m_variablesMap.add("command-line", "blaat");
-        m_variablesMap.add("build-command", "memory");
-        m_variablesMap.add("run-command", "memory");
-        m_variablesMap.add("patterns", std::string(patternKey));
+        REQUIRE(m_variablesMap.add("command-line", "blaat"));
+        REQUIRE(m_variablesMap.add("build-command", "memory"));
+        REQUIRE(m_variablesMap.add("run-command", "memory"));
+        REQUIRE(m_variablesMap.add("patterns", std::string(patternKey)));
 
         execHelper::plugins::ExecutePlugin::push(
             gsl::not_null<FleetingOptionsInterface*>(&m_options));
@@ -59,8 +59,9 @@ class PluginPreparation {
     PluginPreparation(const PluginPreparation& other) = delete;
     PluginPreparation(PluginPreparation&& other) = default;
 
-    PluginPreparation& operator=(const PluginPreparation& other) = delete;
-    PluginPreparation& operator=(PluginPreparation&& other) = default;
+    auto operator=(const PluginPreparation& other)
+        -> PluginPreparation& = delete;
+    auto operator=(PluginPreparation&& other) -> PluginPreparation& = default;
 
     ~PluginPreparation() {
         execHelper::plugins::ExecutePlugin::popFleetingOptions();
@@ -68,11 +69,13 @@ class PluginPreparation {
         execHelper::plugins::ExecutePlugin::popPatterns();
     }
 
-    [[nodiscard]] inline const VariablesMap& variablesMap() const {
+    [[nodiscard]] inline auto variablesMap() const -> const VariablesMap& {
         return m_variablesMap;
     }
 
-    [[nodiscard]] inline const Patterns& patterns() const { return m_patterns; }
+    [[nodiscard]] inline auto patterns() const -> const Patterns& {
+        return m_patterns;
+    }
 
   private:
     FleetingOptionsStub m_options;
@@ -157,7 +160,7 @@ SCENARIO("A plugin must not alter the arguments before a given task") {
                 THEN_CHECK("The call must succeed") { REQUIRE(result); }
 
                 Tasks executedTasks = executor.getExecutedTasks();
-                auto memories = memory.getExecutions();
+                auto memories = MemoryHandler::getExecutions();
                 std::transform(memories.begin(), memories.end(),
                                std::back_inserter(executedTasks),
                                [](const auto& mem) { return mem.task; });

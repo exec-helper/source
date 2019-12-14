@@ -51,11 +51,7 @@ int main(int argc, char** argv) {
 
     execHelper::log::LogInit logInit;
     for(const auto& logModule : logModules) {
-        if(!logInit.setSeverity(logModule, logLevel)) {
-            cerr << "Error settings log level '" << logLevel << "' for module '"
-                 << logModule << "'" << endl;
-            return EXIT_FAILURE;
-        }
+        logInit.setSeverity(logModule, logLevel);
     }
 
     return session.run();

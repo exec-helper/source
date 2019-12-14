@@ -5,7 +5,7 @@
 using std::string;
 
 namespace execHelper::config {
-Paths getAllParentDirectories(Path path) noexcept {
+auto getAllParentDirectories(Path path) noexcept -> Paths {
     if(path.is_relative()) {
         path = absolute(path);
     }
@@ -23,8 +23,8 @@ Paths getAllParentDirectories(Path path) noexcept {
     return parentPaths;
 }
 
-std::optional<Path>
-getHomeDirectory(const EnvironmentCollection& env) noexcept {
+auto getHomeDirectory(const EnvironmentCollection& env) noexcept
+    -> std::optional<Path> {
     const string HOME_DIR_KEY("HOME");
     if(env.count(HOME_DIR_KEY) == 0) {
         return std::nullopt;

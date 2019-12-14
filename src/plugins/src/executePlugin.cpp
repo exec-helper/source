@@ -49,8 +49,8 @@ using execHelper::core::Task;
 namespace {
 const czstring<> EXECUTE_PLUGIN_KEY = "execute-plugin";
 
-Patterns getNextPatterns(const VariablesMap& variables,
-                         const PatternsHandler& patterns) {
+auto getNextPatterns(const VariablesMap& variables,
+                     const PatternsHandler& patterns) -> Patterns {
     auto newPatternKeys =
         variables.get<PatternKeys>(execHelper::plugins::getPatternsKey(), {});
     Patterns newPatterns;
@@ -89,12 +89,13 @@ ExecutePlugin::ExecutePlugin(const CommandCollection& commandsToExecute,
     ensures(m_commands.size() == m_initialCommands.size());
 }
 
-std::string ExecutePlugin::getPluginName() const noexcept {
+auto ExecutePlugin::getPluginName() const noexcept -> string {
     return EXECUTE_PLUGIN_KEY;
 }
 
-VariablesMap ExecutePlugin::getVariablesMap(
-    const FleetingOptionsInterface& /*fleetingOptions*/) const noexcept {
+auto ExecutePlugin::getVariablesMap(
+    const FleetingOptionsInterface& /*fleetingOptions*/) const noexcept
+    -> VariablesMap {
     return VariablesMap("execute-plugin");
 }
 
@@ -106,7 +107,9 @@ inline void ExecutePlugin::index(VariablesMap* variables,
     }
 
     expects(!key.empty());
-    variables->replace(key.back(), *(settings.get<SettingsValues>(key)));
+    if(!variables->replace(key.back(), *(settings.get<SettingsValues>(key)))) {
+        LOG(error) << "Failed to replace key '" << key.back() << "'";
+    }
 
     // Get current depth to the level of the given key
     const SettingsNode& currentDepth = std::accumulate(
@@ -119,10 +122,9 @@ inline void ExecutePlugin::index(VariablesMap* variables,
     }
 }
 
-inline bool
-ExecutePlugin::getVariablesMap(VariablesMap* variables,
-                               const vector<SettingsKeys>& keys,
-                               const SettingsNode& rootSettings) noexcept {
+inline auto ExecutePlugin::getVariablesMap(
+    VariablesMap* variables, const vector<SettingsKeys>& keys,
+    const SettingsNode& rootSettings) noexcept -> bool {
     for(const auto& key : keys) {
         if(rootSettings.contains(key)) {
             index(variables, rootSettings, key);
@@ -131,8 +133,8 @@ ExecutePlugin::getVariablesMap(VariablesMap* variables,
     return true;
 }
 
-bool ExecutePlugin::apply(Task task, const VariablesMap& /*variables*/,
-                          const Patterns& /*patterns*/) const noexcept {
+auto ExecutePlugin::apply(Task task, const VariablesMap& /*variables*/,
+                          const Patterns& /*patterns*/) const noexcept -> bool {
     if(m_commands.empty()) {
         user_feedback_error("No commands configured to execute");
         LOG(warning) << "No commands configured to execute";
@@ -167,9 +169,9 @@ bool ExecutePlugin::apply(Task task, const VariablesMap& /*variables*/,
     return true;
 }
 
-unique_ptr<Plugin>
-ExecutePlugin::getNextStep(const Command& command,
-                           const Command& /*originalCommand*/) noexcept {
+auto ExecutePlugin::getNextStep(const Command& command,
+                                const Command& /*originalCommand*/) noexcept
+    -> unique_ptr<Plugin> {
     unique_ptr<Plugin> plugin = getPlugin(command);
     if(plugin) {
         return plugin;
@@ -192,7 +194,8 @@ ExecutePlugin::getNextStep(const Command& command,
     return make_unique<ExecutePlugin>(commandsToExecute, command);
 }
 
-const std::vector<std::string>& ExecutePlugin::getPluginNames() noexcept {
+auto ExecutePlugin::getPluginNames() noexcept
+    -> const std::vector<std::string>& {
     static std::vector<std::string> plugins{"command-line-command",
                                             "scons",
                                             "make",
@@ -208,7 +211,8 @@ const std::vector<std::string>& ExecutePlugin::getPluginNames() noexcept {
     return plugins;
 }
 
-unique_ptr<Plugin> ExecutePlugin::getPlugin(const string& pluginName) noexcept {
+auto ExecutePlugin::getPlugin(const string& pluginName) noexcept
+    -> unique_ptr<Plugin> {
     if(pluginName == "command-line-command") {
         return make_unique<CommandLineCommand>();
     }
@@ -251,18 +255,19 @@ unique_ptr<Plugin> ExecutePlugin::getPlugin(const string& pluginName) noexcept {
     return unique_ptr<Plugin>();
 }
 
-bool ExecutePlugin::push(not_null<const config::FleetingOptionsInterface*>
-                             fleetingOptions) noexcept {
+auto ExecutePlugin::push(
+    not_null<const config::FleetingOptionsInterface*> fleetingOptions) noexcept
+    -> bool {
     m_fleeting.push_back(fleetingOptions);
     return true;
 }
 
-bool ExecutePlugin::push(config::SettingsNode&& settings) noexcept {
+auto ExecutePlugin::push(config::SettingsNode&& settings) noexcept -> bool {
     m_settings.emplace_back(settings);
     return true;
 }
 
-bool ExecutePlugin::push(config::Patterns&& patterns) noexcept {
+auto ExecutePlugin::push(config::Patterns&& patterns) noexcept -> bool {
     m_patterns.emplace_back(patterns);
     return true;
 }

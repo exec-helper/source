@@ -40,23 +40,32 @@ const czstring<> SRC_DIR_KEY = "src-dir";
 
 namespace execHelper::plugins {
 
-std::string Cppcheck::getPluginName() const noexcept { return PLUGIN_NAME; }
+auto Cppcheck::getPluginName() const noexcept -> string { return PLUGIN_NAME; }
 
-VariablesMap
-Cppcheck::getVariablesMap(const FleetingOptionsInterface& fleetingOptions) const
-    noexcept {
+auto Cppcheck::getVariablesMap(const FleetingOptionsInterface& fleetingOptions)
+    const noexcept -> VariablesMap {
     VariablesMap defaults(PLUGIN_NAME);
-    defaults.add(ENABLE_CHECKS_KEY, "all");
-    defaults.add(SRC_DIR_KEY, ".");
-    defaults.add(COMMAND_LINE_KEY, CommandLineArgs());
+    if(!defaults.add(ENABLE_CHECKS_KEY, "all")) {
+        LOG(error) << "Failed to add key '" << ENABLE_CHECKS_KEY << "'";
+    }
+    if(!defaults.add(SRC_DIR_KEY, ".")) {
+        LOG(error) << "Failed to add key '" << SRC_DIR_KEY << "'";
+    }
+    if(!defaults.add(COMMAND_LINE_KEY, CommandLineArgs())) {
+        LOG(error) << "Failed to add key '" << COMMAND_LINE_KEY << "'";
+    }
     const auto verbosity = fleetingOptions.getVerbosity() ? "yes" : "no";
-    defaults.add(VERBOSITY_KEY, verbosity);
-    defaults.add(JOBS_KEY, to_string(fleetingOptions.getJobs()));
+    if(!defaults.add(VERBOSITY_KEY, verbosity)) {
+        LOG(error) << "Failed to add key '" << VERBOSITY_KEY << "'";
+    }
+    if(!defaults.add(JOBS_KEY, to_string(fleetingOptions.getJobs()))) {
+        LOG(error) << "Failed to add key '" << JOBS_KEY << "'";
+    }
     return defaults;
 }
 
-bool Cppcheck::apply(Task task, const VariablesMap& variables,
-                     const Patterns& patterns) const noexcept {
+auto Cppcheck::apply(Task task, const VariablesMap& variables,
+                     const Patterns& patterns) const noexcept -> bool {
     task.append(PLUGIN_NAME);
 
     task.append(getEnabledChecks(variables));
@@ -84,7 +93,8 @@ bool Cppcheck::apply(Task task, const VariablesMap& variables,
     return true;
 }
 
-string Cppcheck::getEnabledChecks(const VariablesMap& variables) noexcept {
+auto Cppcheck::getEnabledChecks(const VariablesMap& variables) noexcept
+    -> string {
     ensures(variables.get<EnableChecks>(ENABLE_CHECKS_KEY) != std::nullopt);
     auto enabledChecks = *(variables.get<EnableChecks>(ENABLE_CHECKS_KEY));
 

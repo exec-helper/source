@@ -14,7 +14,7 @@ using gsl::czstring;
 using gsl::span;
 
 namespace execHelper::config {
-Argv::Argv(int argc, const char* const* const argv) noexcept {
+Argv::Argv(int argc, const char* const* argv) noexcept {
     span<const czstring<>> spanArgv(argv, argc);
     m_argv.reserve(argc + 1UL);
     for(const auto& arg : spanArgv) {
@@ -63,26 +63,28 @@ void Argv::deepCopy(const Argv& other) noexcept {
     m_argv.emplace_back(nullptr);
 }
 
-Argv& Argv::operator=(const Argv& other) noexcept {
-    m_argv.reserve(other.m_argv.size());
-    deepCopy(other);
+auto Argv::operator=(const Argv& other) noexcept -> Argv& {
+    if(this != &other) {
+        m_argv.reserve(other.m_argv.size());
+        deepCopy(other);
+    }
     return *this;
 }
 
-Argv& Argv::operator=(Argv&& other) noexcept {
+auto Argv::operator=(Argv&& other) noexcept -> Argv& {
     swap(other);
     return *this;
 }
 
-bool Argv::operator==(const Argv& other) const noexcept {
+auto Argv::operator==(const Argv& other) const noexcept -> bool {
     return m_argv == other.m_argv;
 }
 
-bool Argv::operator!=(const Argv& other) const noexcept {
+auto Argv::operator!=(const Argv& other) const noexcept -> bool {
     return !(*this == other);
 }
 
-char* Argv::operator[](size_t index) const noexcept {
+auto Argv::operator[](size_t index) const noexcept -> char* {
     if(index >=
        m_argv.size() -
            1U) { // Accessing the last nullptr element is considered an error
@@ -100,13 +102,15 @@ void Argv::clear() noexcept {
     m_argv.clear();
 }
 
-size_t Argv::getArgc() const noexcept { return m_argv.size() - 1U; }
+auto Argv::getArgc() const noexcept -> size_t { return m_argv.size() - 1U; }
 
-char** Argv::getArgv() noexcept { return &m_argv.at(0); }
+auto Argv::getArgv() noexcept -> char** { return &m_argv.at(0); }
 
-const char* const* Argv::getArgv() const noexcept { return &m_argv.at(0); }
+auto Argv::getArgv() const noexcept -> const char* const* {
+    return &m_argv.at(0);
+}
 
-std::ostream& operator<<(std::ostream& os, const Argv& argv) noexcept {
+auto operator<<(std::ostream& os, const Argv& argv) noexcept -> std::ostream& {
     const span<const czstring<>> args(argv.getArgv(), argv.getArgc());
     bool firstIteration = true;
     for(const auto& arg : args) {

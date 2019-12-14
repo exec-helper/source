@@ -57,18 +57,18 @@ SCENARIO("Obtaining the default variables map of the command-plugin",
         CommandPlugin plugin;
 
         VariablesMap actualVariables(plugin.getPluginName());
-        actualVariables.add(PLUGIN_NAME, CommandCollection());
+        REQUIRE(actualVariables.add(PLUGIN_NAME, CommandCollection()));
 
         COMBINATIONS("Add a command") {
             const Command command = "command1";
             fleetingOptions.m_commands = {command};
-            actualVariables.replace(PLUGIN_NAME, command);
+            REQUIRE(actualVariables.replace(PLUGIN_NAME, command));
         }
 
         COMBINATIONS("Add multiple commands") {
             const CommandCollection commands = {"command1a", "command1b"};
             fleetingOptions.m_commands = commands;
-            actualVariables.replace(PLUGIN_NAME, commands);
+            REQUIRE(actualVariables.replace(PLUGIN_NAME, commands));
         }
 
         THEN_WHEN("We request the variables map") {
@@ -104,14 +104,14 @@ SCENARIO("Test the commandPlugin plugin", "[command-plugin]") {
         ExecutePlugin::push(Patterns());
 
         COMBINATIONS("Add a command to execute") {
-            variables.add(PLUGIN_NAME, MEMORY_KEY);
+            REQUIRE(variables.add(PLUGIN_NAME, MEMORY_KEY));
             expectedTasks.emplace_back(Task());
         }
 
         COMBINATIONS("Add multiple commands to execute") {
             const unsigned int NB_OF_COMMANDS = 5U;
             for(unsigned int i = 0U; i < NB_OF_COMMANDS; ++i) {
-                variables.add(PLUGIN_NAME, MEMORY_KEY);
+                REQUIRE(variables.add(PLUGIN_NAME, MEMORY_KEY));
                 expectedTasks.emplace_back(Task());
             }
         }
@@ -122,7 +122,8 @@ SCENARIO("Test the commandPlugin plugin", "[command-plugin]") {
             THEN_CHECK("The call should succeed") { REQUIRE(return_code); }
 
             THEN_CHECK("All expected actions should be executed") {
-                const Memory::Memories& memories = memory.getExecutions();
+                const Memory::Memories& memories =
+                    MemoryHandler::getExecutions();
                 REQUIRE(memories.size() == expectedTasks.size());
                 auto taskIterator = expectedTasks.begin();
                 for(auto memoryIterator = memories.begin();

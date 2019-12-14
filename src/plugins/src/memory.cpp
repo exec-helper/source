@@ -5,6 +5,8 @@
 #include "config/fleetingOptionsInterface.h"
 #include "config/variablesMap.h"
 
+using std::string;
+
 using gsl::czstring;
 
 using execHelper::config::FleetingOptionsInterface;
@@ -21,21 +23,22 @@ Memory::Memories               // NOLINT(fuchsia-statically-constructed-objects)
     Memory::m_executions = {}; // NOLINT(readability-redundant-declaration)
 bool Memory::m_returnCode = true; // NOLINT(readability-redundant-declaration)
 
-std::string Memory::getPluginName() const noexcept { return PLUGIN_NAME; }
+auto Memory::getPluginName() const noexcept -> string { return PLUGIN_NAME; }
 
-VariablesMap Memory::getVariablesMap(
-    const FleetingOptionsInterface& /*fleetingOptions*/) const noexcept {
+auto Memory::getVariablesMap(
+    const FleetingOptionsInterface& /*fleetingOptions*/) const noexcept
+    -> VariablesMap {
     return VariablesMap(PLUGIN_NAME);
 }
 
-bool Memory::apply(Task task, const VariablesMap& variables,
-                   const Patterns& patterns) const noexcept {
+auto Memory::apply(Task task, const VariablesMap& variables,
+                   const Patterns& patterns) const noexcept -> bool {
     Memory_t newElement(task, variables, patterns);
     m_executions.emplace_back(newElement);
     return m_returnCode;
 }
 
-const Memory::Memories& Memory::getExecutions() noexcept {
+auto Memory::getExecutions() noexcept -> const Memory::Memories& {
     return m_executions;
 }
 
@@ -55,7 +58,7 @@ MemoryHandler::MemoryHandler() {
 
 MemoryHandler::~MemoryHandler() { Memory::reset(); }
 
-const Memory::Memories& MemoryHandler::getExecutions() const noexcept {
+auto MemoryHandler::getExecutions() noexcept -> const Memory::Memories& {
     return Memory::getExecutions();
 }
 

@@ -323,8 +323,11 @@ int execHelperMain(int argc, char** argv, char** envp) {
     for(auto& pattern : patterns) {
         const auto longOption = pattern.getLongOption();
         if(longOption && optionsMap.contains(longOption.value())) {
-            pattern.setValues(optionsMap.get<PatternValues>(
-                longOption.value(), pattern.getValues()));
+            if(!pattern.setValues(optionsMap.get<PatternValues>(
+                   longOption.value(), pattern.getValues()))) {
+                LOG(error) << "Failed to add long options for '"
+                           << longOption.value() << "'";
+            }
         }
     }
 

@@ -124,15 +124,15 @@ class MemoryHandler : public Memory {
 
     /*! @copydoc Memory::getExecutions()
      */
-    const Memories& getExecutions() const noexcept;
+    static const Memories& getExecutions() noexcept;
 
     /*! @copydoc Memory::reset()
      */
-    void reset() noexcept;
+    static void reset() noexcept;
 
     /*! @copydoc Memory::setReturnCode(bool)
      */
-    void setReturnCode(bool returnCode) noexcept;
+    static void setReturnCode(bool returnCode) noexcept;
 };
 } // namespace plugins
 } // namespace execHelper

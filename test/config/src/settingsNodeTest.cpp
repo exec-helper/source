@@ -261,8 +261,8 @@ SCENARIO("Test various ways to set a boolean value", "[config][settingsNode]") {
         WHEN("We set the boolean value as an integer") {
             const SettingsKey falseInt("false-int");
             const SettingsKey trueInt("true-int");
-            settings.add(falseInt, "0");
-            settings.add(trueInt, "1");
+            REQUIRE(settings.add(falseInt, "0"));
+            REQUIRE(settings.add(trueInt, "1"));
 
             THEN("The false int must map to false") {
                 assertBoolSetting(settings, falseInt, false);
@@ -276,8 +276,8 @@ SCENARIO("Test various ways to set a boolean value", "[config][settingsNode]") {
         WHEN("We set the boolean values as true or false") {
             const SettingsKey falseKey("false-key");
             const SettingsKey trueKey("true-key");
-            settings.add(falseKey, "false");
-            settings.add(trueKey, "true");
+            REQUIRE(settings.add(falseKey, "false"));
+            REQUIRE(settings.add(trueKey, "true"));
 
             THEN("The false key must map to false") {
                 assertBoolSetting(settings, falseKey, false);
@@ -291,8 +291,8 @@ SCENARIO("Test various ways to set a boolean value", "[config][settingsNode]") {
         WHEN("We set the boolean values as yes or no") {
             const SettingsKey falseKey("false-key");
             const SettingsKey trueKey("true-key");
-            settings.add(falseKey, "no");
-            settings.add(trueKey, "yes");
+            REQUIRE(settings.add(falseKey, "no"));
+            REQUIRE(settings.add(trueKey, "yes"));
 
             THEN("The false key must map to false") {
                 assertBoolSetting(settings, falseKey, false);
@@ -441,13 +441,13 @@ SCENARIO("Testing the (in)equality operator", "[config][settingsNode]") {
             {"value2a", "value2b", "value2c", "value2d"});
 
         SettingsNode settings(rootKey);
-        settings.add(key1, value1);
-        settings.add(key2, value2);
+        REQUIRE(settings.add(key1, value1));
+        REQUIRE(settings.add(key2, value2));
 
         WHEN("We create a similar settings node") {
             SettingsNode similarSettings(rootKey);
-            similarSettings.add(key1, value1);
-            similarSettings.add(key2, value2);
+            REQUIRE(similarSettings.add(key1, value1));
+            REQUIRE(similarSettings.add(key2, value2));
 
             THEN("They should be equal") {
                 REQUIRE(settings == similarSettings);
@@ -456,8 +456,8 @@ SCENARIO("Testing the (in)equality operator", "[config][settingsNode]") {
         }
         WHEN("We create a similar settings node with a different root key") {
             SettingsNode similarSettings("other-root-key");
-            similarSettings.add(key1, value1);
-            similarSettings.add(key2, value2);
+            REQUIRE(similarSettings.add(key1, value1));
+            REQUIRE(similarSettings.add(key2, value2));
 
             THEN("They should not be equal") {
                 REQUIRE_FALSE(settings == similarSettings);
@@ -466,7 +466,7 @@ SCENARIO("Testing the (in)equality operator", "[config][settingsNode]") {
         }
         WHEN("We create a similar settings node with a different value") {
             SettingsNode similarSettings("root-key");
-            similarSettings.add(key1, value2);
+            REQUIRE(similarSettings.add(key1, value2));
 
             THEN("They should not be equal") {
                 REQUIRE_FALSE(settings == similarSettings);
@@ -475,7 +475,7 @@ SCENARIO("Testing the (in)equality operator", "[config][settingsNode]") {
         }
         WHEN("We create an almost similar settings node") {
             SettingsNode similarSettings(rootKey);
-            similarSettings.add(key1, value1);
+            REQUIRE(similarSettings.add(key1, value1));
 
             THEN("They should not be equal") {
                 REQUIRE_FALSE(settings == similarSettings);
@@ -484,7 +484,7 @@ SCENARIO("Testing the (in)equality operator", "[config][settingsNode]") {
         }
         WHEN("We create an almost similar settings node") {
             SettingsNode similarSettings(rootKey);
-            similarSettings.add(key2, value2);
+            REQUIRE(similarSettings.add(key2, value2));
 
             THEN("They should not be equal") {
                 REQUIRE_FALSE(settings == similarSettings);
@@ -526,9 +526,9 @@ SCENARIO("Testing the copy and move constructor", "[config][settingsNode]") {
         const SettingsValues value3({"value3"});
 
         SettingsNode settings(rootKey);
-        settings.add(key1, value1);
-        settings.add(key2, value2);
-        settings.add(key3, value3);
+        REQUIRE(settings.add(key1, value1));
+        REQUIRE(settings.add(key2, value2));
+        REQUIRE(settings.add(key3, value3));
 
         WHEN("We copy the settings") {
             SettingsNode
@@ -574,15 +574,15 @@ SCENARIO("Test the assignment operator", "[config][settingsNode]") {
         const SettingsValues value3({"value3"});
 
         SettingsNode settings(rootKey);
-        settings.add(key1, value1);
-        settings.add(key2, value2);
-        settings.add(key3, value3);
+        REQUIRE(settings.add(key1, value1));
+        REQUIRE(settings.add(key2, value2));
+        REQUIRE(settings.add(key3, value3));
         const SettingsNode constSettings =
             settings; // NOLINT(performance-unnecessary-copy-initialization)
 
         WHEN("We assign the settings object to another") {
             SettingsNode assigned(rootKey2);
-            assigned.add(key2, value1);
+            REQUIRE(assigned.add(key2, value1));
             assigned = constSettings;
 
             THEN("We should find the same values as the original settings "
@@ -622,9 +622,9 @@ SCENARIO("Testing the removal of values", "[config][settingsNode]") {
         const SettingsValues value2({"value2a", "value2b"});
 
         SettingsNode settings(rootKey);
-        settings.add(key1, value1);
-        settings.add(key2, value2);
-        settings.add(key3);
+        REQUIRE(settings.add(key1, value1));
+        REQUIRE(settings.add(key2, value2));
+        REQUIRE(settings.add(key3));
 
         WHEN("We clear a key with values") {
             bool returnCode = settings.clear(key1);
@@ -712,9 +712,9 @@ SCENARIO("Test the settings node streaming operator",
         const SettingsValues value3({"value3"});
 
         SettingsNode settings(rootKey);
-        settings.add(key1, value1);
-        settings.add(key2, value2);
-        settings.add(key3, value3);
+        REQUIRE(settings.add(key1, value1));
+        REQUIRE(settings.add(key2, value2));
+        REQUIRE(settings.add(key3, value3));
         const SettingsNode constSettings =
             settings; // NOLINT(performance-unnecessary-copy-initialization)
 

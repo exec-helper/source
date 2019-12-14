@@ -25,19 +25,22 @@ const czstring<> PLUGIN_NAME = "commands";
 } // namespace
 
 namespace execHelper::plugins {
-std::string CommandPlugin::getPluginName() const noexcept {
+auto CommandPlugin::getPluginName() const noexcept -> string {
     return PLUGIN_NAME;
 }
 
-VariablesMap CommandPlugin::getVariablesMap(
-    const FleetingOptionsInterface& fleetingOptions) const noexcept {
+auto CommandPlugin::getVariablesMap(
+    const FleetingOptionsInterface& fleetingOptions) const noexcept
+    -> VariablesMap {
     VariablesMap defaults(PLUGIN_NAME);
-    defaults.add(PLUGIN_NAME, fleetingOptions.getCommands());
+    if(!defaults.add(PLUGIN_NAME, fleetingOptions.getCommands())) {
+        LOG(error) << "Failed to add key '" << PLUGIN_NAME << "'";
+    }
     return defaults;
 }
 
-bool CommandPlugin::apply(Task task, const VariablesMap& variables,
-                          const Patterns& patterns) const noexcept {
+auto CommandPlugin::apply(Task task, const VariablesMap& variables,
+                          const Patterns& patterns) const noexcept -> bool {
     ensures(variables.get<CommandCollection>(PLUGIN_NAME) != std::nullopt);
     auto commands = *(variables.get<CommandCollection>(PLUGIN_NAME));
     ExecutePlugin executePlugin(commands);

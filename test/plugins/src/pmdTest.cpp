@@ -70,14 +70,14 @@ SCENARIO("Obtaining the default variables map of the pmd plugin", "[pmd]") {
         Pmd plugin;
 
         VariablesMap actualVariables(plugin.getPluginName());
-        actualVariables.add(EXEC_KEY, PLUGIN_NAME);
-        actualVariables.add(TOOL_KEY, "cpd");
-        actualVariables.add(COMMAND_LINE_KEY, CommandLineArgs());
-        actualVariables.add(VERBOSITY_KEY, "no");
+        REQUIRE(actualVariables.add(EXEC_KEY, PLUGIN_NAME));
+        REQUIRE(actualVariables.add(TOOL_KEY, "cpd"));
+        REQUIRE(actualVariables.add(COMMAND_LINE_KEY, CommandLineArgs()));
+        REQUIRE(actualVariables.add(VERBOSITY_KEY, "no"));
 
         COMBINATIONS("Switch on verbosity") {
             fleetingOptions.m_verbose = true;
-            actualVariables.replace(VERBOSITY_KEY, "yes");
+            REQUIRE(actualVariables.replace(VERBOSITY_KEY, "yes"));
         }
 
         THEN_WHEN("We request the variables map") {
@@ -115,14 +115,16 @@ SCENARIO("Make combinations of different configurations for the pmd plugin",
         };
         registerExecuteCallback(executeCallback);
 
-        COMBINATIONS("Switch exec") { variables.replace(EXEC_KEY, "exec.sh"); }
+        COMBINATIONS("Switch exec") {
+            REQUIRE(variables.replace(EXEC_KEY, "exec.sh"));
+        }
 
         COMBINATIONS("Switch the tool") {
-            variables.replace(TOOL_KEY, "tool1");
+            REQUIRE(variables.replace(TOOL_KEY, "tool1"));
         }
 
         COMBINATIONS("Switch on minimum tokens") {
-            variables.replace(MINIMUM_TOKENS_KEY, "100");
+            REQUIRE(variables.replace(MINIMUM_TOKENS_KEY, "100"));
 
             if(variables.get<Tool>(TOOL_KEY) == Tool("cpd")) {
                 minimumTokens.emplace_back("--minimum-tokens");
@@ -133,7 +135,7 @@ SCENARIO("Make combinations of different configurations for the pmd plugin",
 
         COMBINATIONS("Switch on files") {
             const Files newFiles({"file1", "file2", "file*"});
-            variables.replace(FILES_KEY, newFiles);
+            REQUIRE(variables.replace(FILES_KEY, newFiles));
 
             if(variables.get<Tool>(TOOL_KEY) == Tool("cpd")) {
                 for(const auto& file : newFiles) {
@@ -144,7 +146,7 @@ SCENARIO("Make combinations of different configurations for the pmd plugin",
         }
 
         COMBINATIONS("Add a language") {
-            variables.replace(LANGUAGE_KEY, "language1");
+            REQUIRE(variables.replace(LANGUAGE_KEY, "language1"));
             language.emplace_back("--language");
             language.push_back(variables.get<Language>(LANGUAGE_KEY).value());
         }
@@ -152,11 +154,11 @@ SCENARIO("Make combinations of different configurations for the pmd plugin",
         COMBINATIONS("Add a command line") {
             commandLine = {"{" + pattern1.getKey() + "}",
                            "{" + pattern2.getKey() + "}"};
-            variables.replace(COMMAND_LINE_KEY, commandLine);
+            REQUIRE(variables.replace(COMMAND_LINE_KEY, commandLine));
         }
 
         COMBINATIONS("Switch on verbosity") {
-            variables.replace(VERBOSITY_KEY, "yes");
+            REQUIRE(variables.replace(VERBOSITY_KEY, "yes"));
             verbosity.emplace_back("-verbose");
         }
 

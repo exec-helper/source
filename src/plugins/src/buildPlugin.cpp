@@ -5,7 +5,7 @@
 using std::string;
 
 namespace execHelper::plugins {
-const std::string& BuildPlugin::getBuildDirKey() noexcept {
+auto BuildPlugin::getBuildDirKey() noexcept -> const std::string& {
     static const string buildDirKey("build-dir");
     return buildDirKey;
 }

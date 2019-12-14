@@ -29,12 +29,12 @@ using execHelper::test::utils::appendVectors;
 namespace filesystem = std::filesystem;
 
 namespace {
-template <typename T> inline vector<T> reverse(vector<T> toReverse) {
+template <typename T> inline auto reverse(vector<T> toReverse) -> vector<T> {
     std::reverse(toReverse.begin(), toReverse.end());
     return toReverse;
 }
 
-string toString(const TaskCollection& task) {
+auto toString(const TaskCollection& task) -> string {
     string result;
     for(const auto& taskPart : task) {
         result.append(taskPart).append(" ");

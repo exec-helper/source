@@ -1,6 +1,7 @@
 #include <map>
 #include <sstream>
 #include <string>
+#include <string_view>
 
 #include <boost/core/null_deleter.hpp>
 #include <boost/lexical_cast.hpp>
@@ -10,6 +11,7 @@
 #include <boost/xpressive/xpressive.hpp>
 
 #include "log/generators.h"
+#include "log/logLevel.h"
 #include "log/logger.h"
 #include "unittest/catch.h"
 #include "unittest/rapidcheck.h"
@@ -21,6 +23,7 @@ using std::map;
 using std::move;
 using std::ostream;
 using std::string;
+using std::string_view;
 using std::stringbuf;
 using std::stringstream;
 using std::terminate;
@@ -47,17 +50,18 @@ using execHelper::log::toString;
 using execHelper::test::propertyTest;
 
 namespace {
-const map<LogLevel, string>& getLogLevelStringMapping() {
+auto getLogLevelStringMapping() -> const map<LogLevel, string_view>& {
     try {
-        static const map<LogLevel, string> LOG_LEVEL_STRINGS(
-            {{none, "none"},
-             {fatal, "fatal"},
-             {error, "error"},
-             {warning, "warning"},
-             {info, "info"},
-             {debug, "debug"},
-             {trace, "trace"},
-             {all, "all"}});
+        using namespace std::literals;
+        static const map<LogLevel, string_view> LOG_LEVEL_STRINGS(
+            {{none, "none"sv},
+             {fatal, "fatal"sv},
+             {error, "error"sv},
+             {warning, "warning"sv},
+             {info, "info"sv},
+             {debug, "debug"sv},
+             {trace, "trace"sv},
+             {all, "all"sv}});
         return LOG_LEVEL_STRINGS;
     } catch(exception& e) {
         cout << e.what() << endl;
@@ -79,23 +83,31 @@ class LogMessage {
         ;
     }
 
-    [[nodiscard]] const string& getDate() const noexcept { return m_date; }
+    [[nodiscard]] auto getDate() const noexcept -> const string& {
+        return m_date;
+    }
 
-    [[nodiscard]] const string& getTime() const noexcept { return m_time; }
+    [[nodiscard]] auto getTime() const noexcept -> const string& {
+        return m_time;
+    }
 
-    [[nodiscard]] const Channel& getChannel() const noexcept {
+    [[nodiscard]] auto getChannel() const noexcept -> const Channel& {
         return m_channel;
     }
 
-    [[nodiscard]] const LogLevel& getLevel() const noexcept { return m_level; }
+    [[nodiscard]] auto getLevel() const noexcept -> const LogLevel& {
+        return m_level;
+    }
 
-    [[nodiscard]] const string& getFile() const noexcept { return m_file; }
+    [[nodiscard]] auto getFile() const noexcept -> const string& {
+        return m_file;
+    }
 
-    [[nodiscard]] unsigned int getLineNumber() const noexcept {
+    [[nodiscard]] auto getLineNumber() const noexcept -> unsigned int {
         return m_lineNumber;
     }
 
-    [[nodiscard]] const string& getMessage() const noexcept {
+    [[nodiscard]] auto getMessage() const noexcept -> const string& {
         return m_message;
     }
 
@@ -109,7 +121,7 @@ class LogMessage {
     string m_message;
 };
 
-LogMessage toMessage(const string& message) {
+auto toMessage(const string& message) -> LogMessage {
     sregex regex = sregex::compile(
         R"((?P<date>\S*)\s(?P<time>\S*)\s<(?P<severity>\S*)>\s\[(?P<channel>\S*)\]\s(?P<file>.*):(?P<lineNumber>\d*)\s(?P<message>.*)\s$)");
     smatch parsedResult;
@@ -120,17 +132,19 @@ LogMessage toMessage(const string& message) {
                                         // results in undefined behaviour. so
                                         // convert it to an intermediate string
                                         // first.
-        return LogMessage(
-            parsedResult["date"], parsedResult["time"], parsedResult["channel"],
-            toLogLevel(parsedResult["severity"]), parsedResult["file"],
-            boost::lexical_cast<unsigned int>(lineNumberString),
-            parsedResult["message"]);
+        string logLevelString = parsedResult["severity"];
+        LogLevel logLevel = toLogLevel(logLevelString);
+        return LogMessage(parsedResult["date"], parsedResult["time"],
+                          parsedResult["channel"], logLevel,
+                          parsedResult["file"],
+                          boost::lexical_cast<unsigned int>(lineNumberString),
+                          parsedResult["message"]);
     }
     return LogMessage("", "", "", none, "", 0U, "");
 }
 
-LogLevel getRelativeLogLevel(LogLevel currentLogLevel,
-                             int relativeLevel) noexcept {
+auto getRelativeLogLevel(LogLevel currentLogLevel, int relativeLevel) noexcept
+    -> LogLevel {
     int newLogLevel = static_cast<int>(currentLogLevel) + relativeLevel;
     // Saturate at the edges
     if(newLogLevel < all) {

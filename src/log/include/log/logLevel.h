@@ -1,7 +1,7 @@
 #ifndef LOG_LEVEL_INCLUDE
 #define LOG_LEVEL_INCLUDE
 
-#include <string>
+#include <string_view>
 #include <vector>
 
 namespace execHelper {
@@ -29,7 +29,7 @@ enum LogLevel {
  * \throws  InvalidLogLevel If the given level string is not associated with any
  * log level
  */
-LogLevel toLogLevel(const std::string& level);
+LogLevel toLogLevel(std::string_view level);
 
 /**
  * Get all available log levels. This is convenient for looping over all values in the enumeration.
@@ -44,9 +44,9 @@ const std::vector<LogLevel>& getLogLevels();
  * \param[in] level The level to convert
  * \returns The string associated with the log level
  */
-std::string toString(LogLevel level) noexcept;
+std::string_view toString(LogLevel level) noexcept;
 
-std::ostream& operator<<(std::ostream& os, LogLevel level);
+std::ostream& operator<<(std::ostream& os, LogLevel level) noexcept;
 
 /**
  * \brief   Thrown if an unknown log level is used

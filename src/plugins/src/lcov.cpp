@@ -53,27 +53,46 @@ void runTask(const Task& task, const PatternCombinations& combination) {
 } // namespace
 
 namespace execHelper::plugins {
-string Lcov::getPluginName() const noexcept { return PLUGIN_NAME; }
+auto Lcov::getPluginName() const noexcept -> string { return PLUGIN_NAME; }
 
-VariablesMap
-Lcov::getVariablesMap(const FleetingOptionsInterface& /*fleetingOptions*/) const
-    noexcept {
+auto Lcov::getVariablesMap(const FleetingOptionsInterface& /*fleetingOptions*/)
+    const noexcept -> VariablesMap {
     VariablesMap defaults(PLUGIN_NAME);
-    defaults.add(COMMAND_LINE_KEY, CommandLineArgs());
-    defaults.add(INFO_FILE_KEY, "lcov-plugin.info");
-    defaults.add(BASE_DIR_KEY, ".");
-    defaults.add(DIR_KEY, ".");
-    defaults.add(ZERO_COUNTERS_KEY, "no");
-    defaults.add(GEN_HTML_KEY, "no");
-    defaults.add(GEN_HTML_OUTPUT_KEY, ".");
-    defaults.add(GEN_HTML_TITLE_KEY, "Hello");
-    defaults.add(GEN_HTML_COMMAND_LINE_KEY, GenHtmlCommandLine());
-    defaults.add(EXCLUDES_KEY, Excludes());
+    if(!defaults.add(COMMAND_LINE_KEY, CommandLineArgs())) {
+        LOG(error) << "Failed to add key '" << COMMAND_LINE_KEY << "'";
+    }
+    if(!defaults.add(INFO_FILE_KEY, "lcov-plugin.info")) {
+        LOG(error) << "Failed to add key '" << INFO_FILE_KEY << "'";
+    }
+    if(!defaults.add(BASE_DIR_KEY, ".")) {
+        LOG(error) << "Failed to add key '" << BASE_DIR_KEY << "'";
+    }
+    if(!defaults.add(DIR_KEY, ".")) {
+        LOG(error) << "Failed to add key '" << DIR_KEY << "'";
+    }
+    if(!defaults.add(ZERO_COUNTERS_KEY, "no")) {
+        LOG(error) << "Failed to add key '" << ZERO_COUNTERS_KEY << "'";
+    }
+    if(!defaults.add(GEN_HTML_KEY, "no")) {
+        LOG(error) << "Failed to add key '" << GEN_HTML_KEY << "'";
+    }
+    if(!defaults.add(GEN_HTML_OUTPUT_KEY, ".")) {
+        LOG(error) << "Failed to add key '" << GEN_HTML_OUTPUT_KEY << "'";
+    }
+    if(!defaults.add(GEN_HTML_TITLE_KEY, "Hello")) {
+        LOG(error) << "Failed to add key '" << GEN_HTML_TITLE_KEY << "'";
+    }
+    if(!defaults.add(GEN_HTML_COMMAND_LINE_KEY, GenHtmlCommandLine())) {
+        LOG(error) << "Failed to add key '" << GEN_HTML_COMMAND_LINE_KEY << "'";
+    }
+    if(!defaults.add(EXCLUDES_KEY, Excludes())) {
+        LOG(error) << "Failed to add key '" << EXCLUDES_KEY << "'";
+    }
     return defaults;
 }
 
-bool Lcov::apply(Task task, const VariablesMap& variables,
-                 const Patterns& patterns) const noexcept {
+auto Lcov::apply(Task task, const VariablesMap& variables,
+                 const Patterns& patterns) const noexcept -> bool {
     auto runCommandOpt = variables.get<RunCommand>(RUN_COMMAND);
     if(runCommandOpt == std::nullopt) {
         user_feedback_error("Could not find the '"
@@ -143,9 +162,9 @@ bool Lcov::apply(Task task, const VariablesMap& variables,
     return true;
 }
 
-inline Task Lcov::generateGenHtmlTask(const InfoFile& infoFile,
+inline auto Lcov::generateGenHtmlTask(const InfoFile& infoFile,
                                       const VariablesMap& variables,
-                                      const Task& task) noexcept {
+                                      const Task& task) noexcept -> Task {
     Task result = task;
     result.append("genhtml");
 
@@ -168,10 +187,10 @@ inline Task Lcov::generateGenHtmlTask(const InfoFile& infoFile,
     return result;
 }
 
-inline Task Lcov::generateZeroCountersTask(const BaseDir& baseDirectory,
+inline auto Lcov::generateZeroCountersTask(const BaseDir& baseDirectory,
                                            const Dir& directory,
                                            const CommandLineArgs& commandLine,
-                                           const Task& task) noexcept {
+                                           const Task& task) noexcept -> Task {
     Task result = task;
     result.append(PLUGIN_NAME);
     result.append({string("--").append(BASE_DIR_KEY), baseDirectory.string()});
@@ -181,8 +200,8 @@ inline Task Lcov::generateZeroCountersTask(const BaseDir& baseDirectory,
     return result;
 }
 
-inline Lcov::Excludes
-Lcov::getExcludes(const VariablesMap& variables) noexcept {
+inline auto Lcov::getExcludes(const VariablesMap& variables) noexcept
+    -> Lcov::Excludes {
     auto excludes = variables.get<Excludes>(EXCLUDES_KEY);
     if(!excludes) {
         return Excludes();
@@ -195,10 +214,10 @@ Lcov::getExcludes(const VariablesMap& variables) noexcept {
     return *excludes;
 }
 
-inline Task Lcov::generateExcludeTask(const VariablesMap& variables,
+inline auto Lcov::generateExcludeTask(const VariablesMap& variables,
                                       const InfoFile& infoFile,
                                       const CommandLineArgs& commandLine,
-                                      const Task& task) noexcept {
+                                      const Task& task) noexcept -> Task {
     Task result = task;
     auto excludes = getExcludes(variables);
     if(excludes.empty()) {
@@ -212,11 +231,11 @@ inline Task Lcov::generateExcludeTask(const VariablesMap& variables,
     return result;
 }
 
-inline Task Lcov::generateCaptureTask(const BaseDir& baseDirectory,
+inline auto Lcov::generateCaptureTask(const BaseDir& baseDirectory,
                                       const Dir& directory,
                                       const InfoFile& infoFile,
                                       const CommandLineArgs& commandLine,
-                                      const Task& task) noexcept {
+                                      const Task& task) noexcept -> Task {
     Task result = task;
     result.append(PLUGIN_NAME);
     result.append({string("--").append(BASE_DIR_KEY), baseDirectory.string()});

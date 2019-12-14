@@ -21,8 +21,8 @@ using execHelper::config::EnvironmentValue;
 using execHelper::config::Path;
 
 namespace {
-inline string implodeVector(const vector<string>& toImplode,
-                            const string& delimiter = string(" ")) {
+inline auto implodeVector(const vector<string>& toImplode,
+                          const string& delimiter) -> string {
     string result;
     return accumulate(toImplode.begin(), toImplode.end(), string(),
                       [&delimiter](std::string& a, const std::string& b) {
@@ -31,6 +31,10 @@ inline string implodeVector(const vector<string>& toImplode,
                           }
                           return a.append(delimiter).append(b);
                       });
+}
+
+inline auto implodeVector(const vector<string>& toImplode) -> string {
+    return implodeVector(toImplode, " ");
 }
 } // namespace
 
@@ -46,13 +50,13 @@ Task::Task(std::vector<std::string> subtasks,
     ;
 }
 
-const execHelper::core::TaskCollection& Task::getTask() const noexcept {
+auto Task::getTask() const noexcept -> const execHelper::core::TaskCollection& {
     return m_task;
 }
 
-string Task::toString() const { return implodeVector(m_task); }
+auto Task::toString() const -> string { return implodeVector(m_task); }
 
-const EnvironmentCollection& Task::getEnvironment() const noexcept {
+auto Task::getEnvironment() const noexcept -> const EnvironmentCollection& {
     return m_env;
 }
 
@@ -61,43 +65,43 @@ void Task::setWorkingDirectory(const Path& workingDirectory) noexcept {
     m_workingDirectory = workingDirectory;
 }
 
-const Path& Task::getWorkingDirectory() const noexcept {
+auto Task::getWorkingDirectory() const noexcept -> const Path& {
     return m_workingDirectory;
 }
 
-bool Task::append(const string& taskPart) noexcept {
+auto Task::append(const string& taskPart) noexcept -> bool {
     m_task.push_back(taskPart);
     return true;
 }
 
-bool Task::append(string&& taskPart) noexcept {
+auto Task::append(string&& taskPart) noexcept -> bool {
     m_task.push_back(move(taskPart));
     return true;
 }
 
-bool Task::append(const TaskCollection& taskPart) noexcept {
+auto Task::append(const TaskCollection& taskPart) noexcept -> bool {
     m_task.reserve(m_task.size() + taskPart.size());
     m_task.insert(std::end(m_task), std::begin(taskPart), std::end(taskPart));
     return true;
 }
 
-bool Task::append(TaskCollection&& taskPart) noexcept {
+auto Task::append(TaskCollection&& taskPart) noexcept -> bool {
     m_task.reserve(m_task.size() + taskPart.size());
     move(taskPart.begin(), taskPart.end(), back_inserter(m_task));
     return true;
 }
 
-bool Task::setEnvironment(const EnvironmentCollection& env) noexcept {
+auto Task::setEnvironment(const EnvironmentCollection& env) noexcept -> bool {
     m_env = env;
     return true;
 }
 
-bool Task::setEnvironment(EnvironmentCollection&& env) noexcept {
+auto Task::setEnvironment(EnvironmentCollection&& env) noexcept -> bool {
     m_env = move(env);
     return true;
 }
 
-bool Task::appendToEnvironment(EnvironmentValue&& newValue) noexcept {
+auto Task::appendToEnvironment(EnvironmentValue&& newValue) noexcept -> bool {
     if(m_env.count(newValue.first) > 0U) {
         m_env.erase(newValue.first);
     }
@@ -105,24 +109,25 @@ bool Task::appendToEnvironment(EnvironmentValue&& newValue) noexcept {
     return true;
 }
 
-bool Task::appendToEnvironment(EnvironmentCollection&& newValue) noexcept {
+auto Task::appendToEnvironment(EnvironmentCollection&& newValue) noexcept
+    -> bool {
     for(auto&& value : newValue) {
         appendToEnvironment(value);
     }
     return true;
 }
 
-bool Task::operator==(const Task& other) const noexcept {
+auto Task::operator==(const Task& other) const noexcept -> bool {
     return (m_task == other.m_task &&
             m_workingDirectory == other.m_workingDirectory &&
             m_env == other.m_env);
 }
 
-bool Task::operator!=(const Task& other) const noexcept {
+auto Task::operator!=(const Task& other) const noexcept -> bool {
     return !(*this == other);
 }
 
-ostream& operator<<(ostream& os, const Task& task) noexcept {
+auto operator<<(ostream& os, const Task& task) noexcept -> ostream& {
     TaskCollection subtasks = task.getTask();
     EnvironmentCollection environment = task.getEnvironment();
     os << string("Task {");

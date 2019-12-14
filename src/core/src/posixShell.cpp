@@ -46,9 +46,9 @@ const execHelper::core::PosixShell::ShellReturnCode POSIX_SUCCESS = 0U;
  * \param[in] workingDir    The working directory from where the path will operate
  * \returns The constructed PATH for the child. The first entry will be the given working directory
  */
-inline std::vector<filesystem::path>
-getPath(const process::environment& env,
-        const filesystem::path& workingDir) noexcept {
+inline auto getPath(const process::environment& env,
+                    const filesystem::path& workingDir) noexcept
+    -> std::vector<filesystem::path> {
     std::vector<filesystem::path> path({filesystem::absolute(workingDir)});
     if(env.count("PATH") == 0) {
         auto parent_path = this_process::path();
@@ -63,7 +63,7 @@ getPath(const process::environment& env,
 } // namespace
 
 namespace execHelper::core {
-PosixShell::ShellReturnCode PosixShell::execute(const Task& task) {
+auto PosixShell::execute(const Task& task) -> PosixShell::ShellReturnCode {
     if(task.getTask().empty()) {
         return POSIX_SUCCESS;
     }
@@ -99,16 +99,18 @@ PosixShell::ShellReturnCode PosixShell::execute(const Task& task) {
         process::start_dir = filesystem::path(task.getWorkingDirectory()), env);
 }
 
-bool PosixShell::isExecutedSuccessfully(ShellReturnCode returnCode) const
-    noexcept {
+auto PosixShell::isExecutedSuccessfully(ShellReturnCode returnCode) const
+    noexcept -> bool {
     return returnCode == POSIX_SUCCESS;
 }
 
-inline TaskCollection PosixShell::shellExpand(const Task& task) noexcept {
+inline auto PosixShell::shellExpand(const Task& task) noexcept
+    -> TaskCollection {
     return wordExpand(task);
 }
 
-inline TaskCollection PosixShell::wordExpand(const Task& task) noexcept {
+inline auto PosixShell::wordExpand(const Task& task) noexcept
+    -> TaskCollection {
 #ifdef _WIN32
     TaskCollection result;
 

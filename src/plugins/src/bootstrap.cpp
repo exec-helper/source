@@ -6,6 +6,7 @@
 #include <gsl/string_span>
 
 #include "config/path.h"
+#include "config/variablesMap.h"
 #include "core/task.h"
 
 #include "commandLine.h"
@@ -29,19 +30,26 @@ const czstring<> FILENAME_KEY = "filename";
 } // namespace
 
 namespace execHelper::plugins {
-string Bootstrap::getPluginName() const noexcept { return PLUGIN_NAME; }
+auto Bootstrap::getPluginName() const noexcept -> string { return PLUGIN_NAME; }
 
-VariablesMap Bootstrap::getVariablesMap(
-    const FleetingOptionsInterface& /*fleetingOptions*/) const noexcept {
+auto Bootstrap::getVariablesMap(
+    const FleetingOptionsInterface& /*fleetingOptions*/) const noexcept
+    -> VariablesMap {
     VariablesMap defaults(PLUGIN_NAME);
-    defaults.add(getBuildDirKey(), ".");
-    defaults.add(FILENAME_KEY, "bootstrap.sh");
-    defaults.add(COMMAND_LINE_KEY, CommandLineArgs());
+    if(!defaults.add(getBuildDirKey(), ".")) {
+        LOG(error) << "Failed to add key '" << getBuildDirKey() << "'";
+    }
+    if(!defaults.add(FILENAME_KEY, "bootstrap.sh")) {
+        LOG(error) << "Failed to add key '" << FILENAME_KEY << "'";
+    }
+    if(!defaults.add(COMMAND_LINE_KEY, CommandLineArgs())) {
+        LOG(error) << "Failed to add key '" << COMMAND_LINE_KEY << "'";
+    }
     return defaults;
 }
 
-bool Bootstrap::apply(Task task, const VariablesMap& variables,
-                      const Patterns& patterns) const noexcept {
+auto Bootstrap::apply(Task task, const VariablesMap& variables,
+                      const Patterns& patterns) const noexcept -> bool {
     auto filename = *(variables.get<Path>(FILENAME_KEY));
     if(filename.is_relative()) {
         filename = Path(".") / filename;

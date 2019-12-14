@@ -176,16 +176,17 @@ SCENARIO("Test valid conversions to a pattern", "[patterns][PatternHandler]") {
         VariablesMap variables("test");
 
         // Add mandatory variable settings
-        variables.add({DEFAULT_VALUES_KEY}, defaultValues);
+        REQUIRE(variables.add({DEFAULT_VALUES_KEY}, defaultValues));
 
         COMBINATIONS("Add a short option") {
             shortOption = 's';
-            variables.add({SHORT_OPTION_KEY}, string(1, shortOption.value()));
+            REQUIRE(variables.add({SHORT_OPTION_KEY},
+                                  string(1, shortOption.value())));
         }
 
         COMBINATIONS("Add a long option") {
             longOption = "some-long-option";
-            variables.add({LONG_OPTION_KEY}, longOption.value());
+            REQUIRE(variables.add({LONG_OPTION_KEY}, longOption.value()));
         }
 
         Pattern expectedPattern(key, defaultValues, shortOption, longOption);
@@ -212,15 +213,15 @@ SCENARIO("Test invalid conversions to a pattern",
         VariablesMap variables("test");
 
         COMBINATIONS("Add empty default values") {
-            variables.add(DEFAULT_VALUES_KEY);
+            REQUIRE(variables.add(DEFAULT_VALUES_KEY));
         }
 
         COMBINATIONS("Add a short option") {
-            variables.add({SHORT_OPTION_KEY}, "some-short-option");
+            REQUIRE(variables.add({SHORT_OPTION_KEY}, "some-short-option"));
         }
 
         COMBINATIONS("Add a long option") {
-            variables.add({LONG_OPTION_KEY}, "some-long-option");
+            REQUIRE(variables.add({LONG_OPTION_KEY}, "some-long-option"));
         }
 
         THEN_WHEN("We try to create a pattern") {

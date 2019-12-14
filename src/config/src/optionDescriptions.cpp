@@ -19,19 +19,21 @@ OptionDescriptions::OptionDescriptions() noexcept
     ;
 }
 
-options_description OptionDescriptions::getOptionDescriptions() const noexcept {
+auto OptionDescriptions::getOptionDescriptions() const noexcept
+    -> options_description {
     return m_optionDescription;
 }
 
-bool OptionDescriptions::setPositionalArgument(
-    const OptionInterface& option) noexcept {
+auto OptionDescriptions::setPositionalArgument(
+    const OptionInterface& option) noexcept -> bool {
     m_positional = option.getId();
     return true;
 }
 
-bool OptionDescriptions::getOptionsMap(VariablesMap& variablesMap,
+auto OptionDescriptions::getOptionsMap(VariablesMap& variablesMap,
                                        const Argv& argv,
-                                       bool allowUnregistered) const noexcept {
+                                       bool allowUnregistered) const noexcept
+    -> bool {
     variables_map optionsMap;
     auto commandLineParser =
         command_line_parser(argv.getArgc(), argv.getArgv());

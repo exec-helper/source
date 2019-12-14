@@ -36,7 +36,7 @@ class OptionInterface {
      *
      * \returns The unique id associated with this option
      */
-    virtual std::string getId() const noexcept = 0;
+    [[nodiscard]] virtual auto getId() const noexcept -> std::string = 0;
 
     /**
      * Extract the value(s) associated with this option from the optionsMap
@@ -46,10 +46,10 @@ class OptionInterface {
      * \returns True    if the associated value(s) were successfully extracted
      *          False   otherwise
      */
-    virtual bool
+    virtual auto
     toMap(config::VariablesMap& variablesMap,
           const boost::program_options::variables_map& optionsMap) const
-        noexcept = 0;
+        noexcept -> bool = 0;
 
     /**
      * Return the associated type value of this options in order to be able to
@@ -58,8 +58,8 @@ class OptionInterface {
      * \returns The implementation-specific semantic to be used by the
      * optionparser.
      */
-    virtual const boost::program_options::value_semantic* getTypeValue() const
-        noexcept = 0;
+    virtual auto getTypeValue() const noexcept
+        -> const boost::program_options::value_semantic* = 0;
 
   protected:
     OptionInterface() {}
@@ -72,7 +72,9 @@ class OptionBase : public OptionInterface {
   public:
     virtual ~OptionBase() {}
 
-    std::string getId() const noexcept override { return m_identifyingOption; }
+    [[nodiscard]] auto getId() const noexcept -> std::string override {
+        return m_identifyingOption;
+    }
 
     /**
      * Returns the argument options for this option, in addition to the one
@@ -81,7 +83,7 @@ class OptionBase : public OptionInterface {
      * \returns A collection of additional option keys associated with this
      * option
      */
-    virtual const ArgumentOptions& getArgumentOptions() const noexcept {
+    virtual auto getArgumentOptions() const noexcept -> const ArgumentOptions& {
         return m_argumentOptions;
     }
 
@@ -90,21 +92,21 @@ class OptionBase : public OptionInterface {
      *
      * \returns The explanation
      */
-    virtual const std::string& getExplanation() const noexcept {
+    virtual auto getExplanation() const noexcept -> const std::string& {
         return m_explanation;
     }
 
-    bool
+    auto
     toMap(config::VariablesMap& /*variablesMap*/,
           const boost::program_options::variables_map& /*optionsMap*/) const
-        noexcept override {
+        noexcept -> bool override {
         ensuresMessage(false, "We should not get here: all children should "
                               "implement this function");
         return false;
     }
 
-    const boost::program_options::value_semantic* getTypeValue() const
-        noexcept override {
+    auto getTypeValue() const noexcept
+        -> const boost::program_options::value_semantic* override {
         ensuresMessage(false, "We should not get here: all children should "
                               "implement this function");
         return boost::program_options::value<char>();
@@ -154,10 +156,10 @@ template <typename T> class Option : public OptionBase {
 
     virtual ~Option() {}
 
-    virtual bool
+    virtual auto
     toMap(config::VariablesMap& variablesMap,
           const boost::program_options::variables_map& optionsMap) const
-        noexcept override {
+        noexcept -> bool override {
         try {
             return variablesMap.replace(
                 m_identifyingOption,
@@ -168,8 +170,8 @@ template <typename T> class Option : public OptionBase {
         }
     }
 
-    virtual const boost::program_options::value_semantic* getTypeValue() const
-        noexcept override {
+    virtual auto getTypeValue() const noexcept
+        -> const boost::program_options::value_semantic* override {
         return boost::program_options::value<T>();
     }
 };
@@ -190,10 +192,10 @@ template <> class Option<bool> : public OptionBase {
 
     virtual ~Option() {}
 
-    virtual bool
+    virtual auto
     toMap(config::VariablesMap& variablesMap,
           const boost::program_options::variables_map& optionsMap) const
-        noexcept override {
+        noexcept -> bool override {
         if(optionsMap.count(m_identifyingOption) > 0) {
             try {
                 if(optionsMap[m_identifyingOption].as<bool>()) {
@@ -207,8 +209,8 @@ template <> class Option<bool> : public OptionBase {
         return variablesMap.replace(m_identifyingOption, "0");
     }
 
-    virtual const boost::program_options::value_semantic* getTypeValue() const
-        noexcept override {
+    virtual auto getTypeValue() const noexcept
+        -> const boost::program_options::value_semantic* override {
         return boost::program_options::bool_switch();
     }
 };
@@ -230,10 +232,10 @@ template <typename T> class Option<std::vector<T>> : public OptionBase {
 
     virtual ~Option() {}
 
-    virtual bool
+    virtual auto
     toMap(config::VariablesMap& variablesMap,
           const boost::program_options::variables_map& optionsMap) const
-        noexcept override {
+        noexcept -> bool override {
         try {
             return variablesMap.replace(
                 m_identifyingOption,
@@ -244,8 +246,8 @@ template <typename T> class Option<std::vector<T>> : public OptionBase {
         }
     }
 
-    virtual const boost::program_options::value_semantic* getTypeValue() const
-        noexcept override {
+    virtual auto getTypeValue() const noexcept
+        -> boost::program_options::value_semantic* override {
         return boost::program_options::value<std::vector<T>>()->multitoken();
     }
 };
@@ -263,8 +265,8 @@ class OptionDescriptions {
      *
      * \returns A collection of the registered option descriptions
      */
-    boost::program_options::options_description getOptionDescriptions() const
-        noexcept;
+    [[nodiscard]] auto getOptionDescriptions() const noexcept
+        -> boost::program_options::options_description;
 
     /**
      * Add an option description
@@ -294,7 +296,7 @@ class OptionDescriptions {
      * \returns true    if the positional argument was successfully set
      *          false   otherwise
      */
-    bool setPositionalArgument(const OptionInterface& option) noexcept;
+    auto setPositionalArgument(const OptionInterface& option) noexcept -> bool;
 
     /**
      * Returns a map containing the parsed option descriptions for the given
@@ -306,8 +308,8 @@ class OptionDescriptions {
      * not described in this option description \returns True    if the options
      * map was successfully constructed False   otherwise
      */
-    bool getOptionsMap(config::VariablesMap& variablesMap, const Argv& argv,
-                       bool allowUnregistered = false) const noexcept;
+    auto getOptionsMap(config::VariablesMap& variablesMap, const Argv& argv,
+                       bool allowUnregistered = false) const noexcept -> bool;
 
   private:
     void toMap(config::VariablesMap& variablesMap,

@@ -19,12 +19,11 @@ struct AddEnvironment {
      * Adds the variables for this functionality to the given variables map
      *
      * @param[out] variables    The variables map to add the variables to
+     * @param[in] options       The fleeting options to consider
      */
-    inline static void
+    static void
     getVariables(config::VariablesMap& variables,
-                 const config::FleetingOptionsInterface& /*options*/) noexcept {
-        variables.add(config::ENVIRONMENT_KEY, config::EnvArgs());
-    }
+                 const config::FleetingOptionsInterface& options) noexcept;
 
     /*! @copydoc JobsLong::apply(core::Task&, const config::VariablesMap&)
      */

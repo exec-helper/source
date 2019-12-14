@@ -3,8 +3,7 @@
 
 #include "environment.h"
 
-namespace execHelper {
-namespace config {
+namespace execHelper::config {
 /**
  * \brief Wrapper for the envp argument
  */
@@ -28,11 +27,11 @@ class Envp {
 
     /*! @copydoc Argv::operator=(const Argv&)
      */
-    Envp& operator=(const Envp& other) noexcept;
+    auto operator=(const Envp& other) noexcept -> Envp&;
 
     /*! @copydoc Argv::operator=(Argv&&)
      */
-    Envp& operator=(Envp&& other) noexcept;
+    auto operator=(Envp&& other) noexcept -> Envp&;
 
     /*! @copydoc Argv::swap(Argv&)
      */
@@ -43,7 +42,7 @@ class Envp {
      *
      * \returns The size of the collection
      */
-    size_t size() const noexcept;
+    [[nodiscard]] auto size() const noexcept -> size_t;
 
     /**
      * Clears the current content of the collection
@@ -56,11 +55,11 @@ class Envp {
      *
      * \returns A pointer to an array of pointers to environment variables
      */
-    char** getEnvp() noexcept;
+    [[nodiscard]] auto getEnvp() noexcept -> char**;
 
     /*! @copydoc getEnvp()
      */
-    const char* const* getEnvp() const noexcept;
+    [[nodiscard]] auto getEnvp() const noexcept -> const char* const*;
 
   private:
     using Envp_t = std::vector<char*>;
@@ -75,8 +74,7 @@ class Envp {
     Envp_t m_envp;
 };
 
-std::ostream& operator<<(std::ostream& os, const Envp& envp) noexcept;
-} // namespace config
-} // namespace execHelper
+auto operator<<(std::ostream& os, const Envp& envp) noexcept -> std::ostream&;
+} // namespace execHelper::config
 
 #endif /* ENVP_INCLUDES */

@@ -6,8 +6,7 @@
 #include <string>
 #include <vector>
 
-namespace execHelper {
-namespace config {
+namespace execHelper::config {
 using PatternKey = std::string;
 using PatternValue = std::string;
 using PatternKeys = std::vector<PatternKey>;
@@ -41,7 +40,7 @@ class Pattern {
      * \returns True    If the other object is considered equal
      *          False   Otherwise
      */
-    bool operator==(const Pattern& other) const noexcept;
+    auto operator==(const Pattern& other) const noexcept -> bool;
 
     /**
      * Inequality operator
@@ -50,21 +49,21 @@ class Pattern {
      * \returns ! \ref operator==(const Pattern& other) const
      *
      */
-    bool operator!=(const Pattern& other) const noexcept;
+    auto operator!=(const Pattern& other) const noexcept -> bool;
 
     /**
      * Getter for the key
      *
      * \returns The key
      */
-    const PatternKey& getKey() const noexcept;
+    [[nodiscard]] auto getKey() const noexcept -> const PatternKey&;
 
     /**
      * Getter for the values
      *
      * \returns The values
      */
-    const PatternValues& getValues() const noexcept;
+    [[nodiscard]] auto getValues() const noexcept -> const PatternValues&;
 
     /**
      * Set the values for this pattern
@@ -73,21 +72,21 @@ class Pattern {
      * \returns True    if the values were successfully set
      *          False   otherwise
      */
-    bool setValues(PatternValues values) noexcept;
+    [[nodiscard]] auto setValues(PatternValues values) noexcept -> bool;
 
     /**
      * Getter for the short option
      *
      * \returns The short option
      */
-    const ShortOption& getShortOption() const noexcept;
+    [[nodiscard]] auto getShortOption() const noexcept -> const ShortOption&;
 
     /**
      * Getter for the long option
      *
      * \returns The long option
      */
-    const LongOption& getLongOption() const noexcept;
+    [[nodiscard]] auto getLongOption() const noexcept -> const LongOption&;
 
   private:
     PatternKey m_key;
@@ -104,9 +103,8 @@ using Patterns = std::vector<Pattern>;
  * \param pattern  The pattern to stream
  * \returns os
  */
-std::ostream& operator<<(std::ostream& os, const Pattern& pattern) noexcept;
-
-} // namespace config
-} // namespace execHelper
+auto operator<<(std::ostream& os, const Pattern& pattern) noexcept
+    -> std::ostream&;
+} // namespace execHelper::config
 
 #endif /* __PATTERN__H__ */

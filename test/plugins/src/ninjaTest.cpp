@@ -66,21 +66,22 @@ SCENARIO("Obtaining the default variables map of the ninja plugin", "[ninja]") {
         Ninja plugin;
 
         VariablesMap actualVariables(plugin.getPluginName());
-        actualVariables.add(COMMAND_LINE_KEY, CommandLineArgs());
-        actualVariables.add(VERBOSITY_KEY, "no");
-        actualVariables.add(JOBS_KEY, to_string(fleetingOptions.m_jobs));
-        actualVariables.add(BUILD_DIR_KEY, ".");
-        actualVariables.add(ENVIRONMENT_KEY, EnvArgs());
+        REQUIRE(actualVariables.add(COMMAND_LINE_KEY, CommandLineArgs()));
+        REQUIRE(actualVariables.add(VERBOSITY_KEY, "no"));
+        REQUIRE(
+            actualVariables.add(JOBS_KEY, to_string(fleetingOptions.m_jobs)));
+        REQUIRE(actualVariables.add(BUILD_DIR_KEY, "."));
+        REQUIRE(actualVariables.add(ENVIRONMENT_KEY, EnvArgs()));
 
         COMBINATIONS("Switch on verbosity") {
             fleetingOptions.m_verbose = true;
-            actualVariables.replace(VERBOSITY_KEY, "yes");
+            REQUIRE(actualVariables.replace(VERBOSITY_KEY, "yes"));
         }
 
         COMBINATIONS("Switch off multithreading") {
             fleetingOptions.m_jobs = 1U;
-            actualVariables.replace(JOBS_KEY,
-                                    to_string(fleetingOptions.m_jobs));
+            REQUIRE(actualVariables.replace(JOBS_KEY,
+                                            to_string(fleetingOptions.m_jobs)));
         }
 
         THEN_WHEN("We request the variables map") {
@@ -120,40 +121,43 @@ SCENARIO("Testing the configuration settings of the ninja plugin", "[ninja]") {
             buildDir = "{" + pattern1.getKey() + "}/{" + pattern2.getKey() +
                        "}/{HELLO}/{" + pattern2.getKey() + "}/hello{" +
                        pattern1.getKey() + " }world";
-            variables.replace(BUILD_DIR_KEY, buildDir.native());
+            REQUIRE(variables.replace(BUILD_DIR_KEY, buildDir.native()));
         }
 
         COMBINATIONS("Switch off multi-threading") {
             jobs = 1U;
-            variables.replace(JOBS_KEY, to_string(jobs));
+            REQUIRE(variables.replace(JOBS_KEY, to_string(jobs)));
         }
 
         COMBINATIONS("Set environment") {
             env = {{"VAR1", "value1"}, {"VAR2", "value2"}};
             for(const auto& value : env) {
-                variables.replace({ENVIRONMENT_KEY, value.first}, value.second);
+                REQUIRE(variables.replace({ENVIRONMENT_KEY, value.first},
+                                          value.second));
             }
         }
 
         COMBINATIONS("Set the working directory") {
             workingDirectory = "1234{" + pattern2.getKey() + "}/4321/{HELLO}";
-            variables.replace(WORKING_DIR_KEY, workingDirectory.native());
+            REQUIRE(
+                variables.replace(WORKING_DIR_KEY, workingDirectory.native()));
         }
 
         COMBINATIONS("Switch on verbosity") {
             verbosity = true;
-            variables.replace(VERBOSITY_KEY, "yes");
+            REQUIRE(variables.replace(VERBOSITY_KEY, "yes"));
         }
 
         COMBINATIONS("Add a command line") {
             commandLine = {"{" + pattern2.getKey() + "}",
                            "{" + pattern1.getKey() + "}"};
-            variables.replace(COMMAND_LINE_KEY, commandLine);
+            REQUIRE(variables.replace(COMMAND_LINE_KEY, commandLine));
         }
 
         COMBINATIONS("Set the working directory to the current directory") {
             workingDirectory = ".";
-            variables.replace(WORKING_DIR_KEY, workingDirectory.native());
+            REQUIRE(
+                variables.replace(WORKING_DIR_KEY, workingDirectory.native()));
         }
 
         Task expectedTask({PLUGIN_NAME});

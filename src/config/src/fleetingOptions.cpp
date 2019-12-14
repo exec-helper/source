@@ -5,6 +5,7 @@
 #include <boost/lexical_cast.hpp>
 
 #include "commandLineOptions.h"
+#include "log/logLevel.h"
 #include "logger.h"
 
 using std::thread;
@@ -37,35 +38,39 @@ FleetingOptions::FleetingOptions(const VariablesMap& optionsMap) noexcept
     }
 }
 
-bool FleetingOptions::operator==(const FleetingOptions& other) const {
+auto FleetingOptions::operator==(const FleetingOptions& other) const -> bool {
     return m_help == other.m_help && m_verbose == other.m_verbose &&
            m_dryRun == other.m_dryRun && m_jobs == other.m_jobs &&
            m_logLevel == other.m_logLevel && m_commands == other.m_commands;
 }
 
-bool FleetingOptions::operator!=(const FleetingOptions& other) const {
+auto FleetingOptions::operator!=(const FleetingOptions& other) const -> bool {
     return !(*this == other);
 }
 
-HelpOption_t FleetingOptions::getHelp() const noexcept { return m_help; }
+auto FleetingOptions::getHelp() const noexcept -> HelpOption_t {
+    return m_help;
+}
 
-VersionOption_t FleetingOptions::getVersion() const noexcept {
+auto FleetingOptions::getVersion() const noexcept -> VersionOption_t {
     return m_version;
 }
 
-VerboseOption_t FleetingOptions::getVerbosity() const noexcept {
+auto FleetingOptions::getVerbosity() const noexcept -> VerboseOption_t {
     return m_verbose;
 }
 
-DryRunOption_t FleetingOptions::getDryRun() const noexcept { return m_dryRun; }
+auto FleetingOptions::getDryRun() const noexcept -> DryRunOption_t {
+    return m_dryRun;
+}
 
-Jobs_t FleetingOptions::getJobs() const noexcept { return m_jobs; }
+auto FleetingOptions::getJobs() const noexcept -> Jobs_t { return m_jobs; }
 
-const CommandCollection& FleetingOptions::getCommands() const noexcept {
+auto FleetingOptions::getCommands() const noexcept -> const CommandCollection& {
     return m_commands;
 }
 
-LogLevel FleetingOptions::getLogLevel() const noexcept {
+auto FleetingOptions::getLogLevel() const noexcept -> LogLevel {
     try {
         return log::toLogLevel(m_logLevel);
     } catch(const log::InvalidLogLevel&) {
@@ -74,16 +79,32 @@ LogLevel FleetingOptions::getLogLevel() const noexcept {
     }
 }
 
-VariablesMap FleetingOptions::getDefault() noexcept {
+auto FleetingOptions::getDefault() noexcept -> VariablesMap {
     VariablesMap defaults("exec-helper");
-    defaults.add(HELP_OPTION_KEY, "no");
-    defaults.add(VERSION_KEY, "no");
-    defaults.add(VERBOSE_KEY, "no");
-    defaults.add(DRY_RUN_KEY, "no");
-    defaults.add(JOBS_KEY, "auto");
-    defaults.add(SETTINGS_FILE_KEY);
-    defaults.add(LOG_LEVEL_KEY, "none");
-    defaults.add(COMMAND_KEY, CommandCollection());
+    if(!defaults.add(HELP_OPTION_KEY, "no")) {
+        LOG(error) << "Failed to add help default option value";
+    }
+    if(!defaults.add(VERSION_KEY, "no")) {
+        LOG(error) << "Failed to add version default option value";
+    }
+    if(!defaults.add(VERBOSE_KEY, "no")) {
+        LOG(error) << "Failed to add verbose default option value";
+    }
+    if(!defaults.add(DRY_RUN_KEY, "no")) {
+        LOG(error) << "Failed to add dry run default option value";
+    }
+    if(!defaults.add(JOBS_KEY, "auto")) {
+        LOG(error) << "Failed to add jobs default option value";
+    }
+    if(!defaults.add(SETTINGS_FILE_KEY)) {
+        LOG(error) << "Failed to add settings file default option value";
+    }
+    if(!defaults.add(LOG_LEVEL_KEY, "none")) {
+        LOG(error) << "Failed to add log level default option value";
+    }
+    if(!defaults.add(COMMAND_KEY, CommandCollection())) {
+        LOG(error) << "Failed to add commands default option value";
+    }
     return defaults;
 }
 } // namespace execHelper::config

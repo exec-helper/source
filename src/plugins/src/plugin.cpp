@@ -12,7 +12,7 @@ void noExecuteCallback(const Task& /*task*/) noexcept {
                     "registered";
 }
 
-execHelper::plugins::ExecuteCallback& getExecuteCallback() noexcept {
+auto getExecuteCallback() noexcept -> execHelper::plugins::ExecuteCallback& {
     static execHelper::plugins::ExecuteCallback executeCallback(
         noExecuteCallback);
     return executeCallback;
@@ -24,7 +24,7 @@ void registerExecuteCallback(const ExecuteCallback& callback) noexcept {
     getExecuteCallback() = callback;
 }
 
-bool registerTask(const Task& task) noexcept {
+auto registerTask(const Task& task) noexcept -> bool {
     getExecuteCallback()(task);
     return true;
 }

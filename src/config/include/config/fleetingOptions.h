@@ -43,33 +43,33 @@ class FleetingOptions : public FleetingOptionsInterface {
 
     /*! @copydoc config::Argv::operator==(const config::Argv& other) const
      */
-    bool operator==(const FleetingOptions& other) const;
+    auto operator==(const FleetingOptions& other) const -> bool;
 
     /*! @copydoc config::Argv::operator!=(const config::Argv& other) const
      */
-    bool operator!=(const FleetingOptions& other) const;
+    auto operator!=(const FleetingOptions& other) const -> bool;
 
-    HelpOption_t getHelp() const noexcept override;
-    VersionOption_t getVersion() const noexcept override;
-    VerboseOption_t getVerbosity() const noexcept override;
-    DryRunOption_t getDryRun() const noexcept override;
-    Jobs_t getJobs() const noexcept override;
+    auto getHelp() const noexcept -> HelpOption_t override;
+    auto getVersion() const noexcept -> VersionOption_t override;
+    auto getVerbosity() const noexcept -> VerboseOption_t override;
+    auto getDryRun() const noexcept -> DryRunOption_t override;
+    auto getJobs() const noexcept -> Jobs_t override;
 
     /**
      * Get the value of the log level option
      *
      * \returns The log level associated with the log level option
      */
-    log::LogLevel getLogLevel() const noexcept;
+    auto getLogLevel() const noexcept -> log::LogLevel;
 
-    const CommandCollection& getCommands() const noexcept override;
+    auto getCommands() const noexcept -> const CommandCollection& override;
 
     /**
      * Returns the default variables for the fleeting options
      *
      * \returns The default variables
      */
-    static VariablesMap getDefault() noexcept;
+    static auto getDefault() noexcept -> VariablesMap;
 
   private:
     const HelpOption_t m_help;

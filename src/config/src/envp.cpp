@@ -40,27 +40,31 @@ Envp::Envp(Envp&& other) noexcept { swap(other); }
 
 Envp::~Envp() noexcept { clear(); }
 
-Envp& Envp::operator=(const Envp& other) noexcept {
-    m_envp.reserve(other.m_envp.size());
-    deepCopy(other);
+auto Envp::operator=(const Envp& other) noexcept -> Envp& {
+    if(this != &other) {
+        m_envp.reserve(other.m_envp.size());
+        deepCopy(other);
+    }
     return *this;
 }
 
-Envp& Envp::operator=(Envp&& other) noexcept {
+auto Envp::operator=(Envp&& other) noexcept -> Envp& {
     swap(other);
     return *this;
 }
 
 void Envp::swap(Envp& other) noexcept { m_envp.swap(other.m_envp); }
 
-size_t Envp::size() const noexcept {
+auto Envp::size() const noexcept -> size_t {
     ensures(!m_envp.empty());
     return m_envp.size() - 1U;
 }
 
-char** Envp::getEnvp() noexcept { return &m_envp.at(0); }
+auto Envp::getEnvp() noexcept -> char** { return &m_envp.at(0); }
 
-const char* const* Envp::getEnvp() const noexcept { return &m_envp.at(0); }
+auto Envp::getEnvp() const noexcept -> const char* const* {
+    return &m_envp.at(0);
+}
 
 void Envp::clear() noexcept {
     for(const auto& arg : m_envp) {
@@ -84,7 +88,7 @@ void Envp::deepCopy(const Envp& other) noexcept {
     m_envp.emplace_back(nullptr);
 }
 
-std::ostream& operator<<(std::ostream& os, const Envp& envp) noexcept {
+auto operator<<(std::ostream& os, const Envp& envp) noexcept -> std::ostream& {
     const span<const czstring<>> envs(envp.getEnvp(), envp.size());
     bool firstIteration = true;
     for(const auto& env : envs) {

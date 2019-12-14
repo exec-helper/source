@@ -24,7 +24,7 @@ namespace execHelper::config::test {
 SCENARIO("Parse properly written settings files", "[config][config-config]") {
     MAKE_COMBINATIONS("Of several settings") {
         SettingsNode settings("exec-helper");
-        settings.add("dummy-key", "dummy-value");
+        REQUIRE(settings.add("dummy-key", "dummy-value"));
         Patterns patterns;
 
         COMBINATIONS("Add multiple keys") {
@@ -36,7 +36,7 @@ SCENARIO("Parse properly written settings files", "[config][config-config]") {
 
                 SettingsValue value("key-value-value");
                 value.append(to_string(i));
-                settings.add(key, value);
+                REQUIRE(settings.add(key, value));
             }
         }
 
@@ -55,7 +55,7 @@ SCENARIO("Parse properly written settings files", "[config][config-config]") {
                     newValue.append(to_string(j));
                     values.emplace_back(newValue);
                 }
-                settings.add(key, values);
+                REQUIRE(settings.add(key, values));
             }
         }
 

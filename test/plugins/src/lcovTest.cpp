@@ -71,16 +71,17 @@ SCENARIO("Obtaining the default variables map of the lcov plugin", "[lcov]") {
         Lcov plugin;
 
         VariablesMap actualVariables(plugin.getPluginName());
-        actualVariables.add(COMMAND_LINE_KEY, CommandLineArgs());
-        actualVariables.add(INFO_FILE_KEY, "lcov-plugin.info");
-        actualVariables.add(BASE_DIR_KEY, ".");
-        actualVariables.add(DIR_KEY, ".");
-        actualVariables.add(ZERO_COUNTERS_KEY, "no");
-        actualVariables.add(GEN_HTML_KEY, "no");
-        actualVariables.add(GEN_HTML_OUTPUT_KEY, ".");
-        actualVariables.add(GEN_HTML_TITLE_KEY, "Hello");
-        actualVariables.add(GEN_HTML_COMMAND_LINE_KEY, vector<string>());
-        actualVariables.add(EXCLUDES_KEY, vector<string>());
+        REQUIRE(actualVariables.add(COMMAND_LINE_KEY, CommandLineArgs()));
+        REQUIRE(actualVariables.add(INFO_FILE_KEY, "lcov-plugin.info"));
+        REQUIRE(actualVariables.add(BASE_DIR_KEY, "."));
+        REQUIRE(actualVariables.add(DIR_KEY, "."));
+        REQUIRE(actualVariables.add(ZERO_COUNTERS_KEY, "no"));
+        REQUIRE(actualVariables.add(GEN_HTML_KEY, "no"));
+        REQUIRE(actualVariables.add(GEN_HTML_OUTPUT_KEY, "."));
+        REQUIRE(actualVariables.add(GEN_HTML_TITLE_KEY, "Hello"));
+        REQUIRE(
+            actualVariables.add(GEN_HTML_COMMAND_LINE_KEY, vector<string>()));
+        REQUIRE(actualVariables.add(EXCLUDES_KEY, vector<string>()));
 
         WHEN("We request the variables map") {
             VariablesMap variables = plugin.getVariablesMap(fleetingOptions);
@@ -129,54 +130,56 @@ SCENARIO("Test multiple configurations of the lcov plugin", "[lcov]") {
 
         COMBINATIONS("Change the info file") {
             infoFile = "/tmp";
-            variables.replace(INFO_FILE_KEY, infoFile.native());
+            REQUIRE(variables.replace(INFO_FILE_KEY, infoFile.native()));
         }
 
         COMBINATIONS("Change the base directory") {
             baseDir /= "tmp";
-            variables.replace(BASE_DIR_KEY, baseDir.native());
+            REQUIRE(variables.replace(BASE_DIR_KEY, baseDir.native()));
         }
 
         COMBINATIONS("Change the directory") {
             dir /= "..";
-            variables.replace(DIR_KEY, dir.native());
+            REQUIRE(variables.replace(DIR_KEY, dir.native()));
         }
 
         COMBINATIONS("Add a command line") {
             commandLine = {"{" + pattern1.getKey() + "}",
                            "{" + pattern2.getKey() + "}"};
-            variables.add(COMMAND_LINE_KEY, commandLine);
+            REQUIRE(variables.add(COMMAND_LINE_KEY, commandLine));
         }
 
         COMBINATIONS("Switch on zero counters") {
             zeroCounters = true;
-            variables.replace(ZERO_COUNTERS_KEY, "yes");
+            REQUIRE(variables.replace(ZERO_COUNTERS_KEY, "yes"));
         }
 
         COMBINATIONS("Switch on html generation") {
             genHtml = true;
-            variables.replace(GEN_HTML_KEY, "yes");
+            REQUIRE(variables.replace(GEN_HTML_KEY, "yes"));
         }
 
         COMBINATIONS("Set html output") {
             genHtmlOutput = "/tmp/blaat";
-            variables.replace(GEN_HTML_OUTPUT_KEY, genHtmlOutput.native());
+            REQUIRE(
+                variables.replace(GEN_HTML_OUTPUT_KEY, genHtmlOutput.native()));
         }
 
         COMBINATIONS("Set html title") {
             genHtmlTitle = "World!";
-            variables.replace(GEN_HTML_TITLE_KEY, genHtmlTitle);
+            REQUIRE(variables.replace(GEN_HTML_TITLE_KEY, genHtmlTitle));
         }
 
         COMBINATIONS("Set gen html command line") {
             genHtmlCommandLine = {"{" + pattern1.getKey() + "}",
                                   "{" + pattern2.getKey() + "}"};
-            variables.replace(GEN_HTML_COMMAND_LINE_KEY, genHtmlCommandLine);
+            REQUIRE(variables.replace(GEN_HTML_COMMAND_LINE_KEY,
+                                      genHtmlCommandLine));
         }
 
         COMBINATIONS("Set excludes") {
             excludes = {"exclude1", "{" + pattern1.getKey() + "}"};
-            variables.replace(EXCLUDES_KEY, excludes);
+            REQUIRE(variables.replace(EXCLUDES_KEY, excludes));
         }
 
         ExecutorStub::TaskQueue expectedTasks;
@@ -188,7 +191,7 @@ SCENARIO("Test multiple configurations of the lcov plugin", "[lcov]") {
             expectedTasks.emplace_back(zeroCountersTask);
         }
         for(const auto& command : runCommands) {
-            variables.add(RUN_COMMAND, command);
+            REQUIRE(variables.add(RUN_COMMAND, command));
         }
         Task captureTask({PLUGIN_NAME, "--base-directory", baseDir.native(),
                           "--directory", dir.native(), "--capture", "--output",

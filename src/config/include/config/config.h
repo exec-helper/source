@@ -19,7 +19,8 @@ namespace execHelper {
 namespace config {
 using PatternSettingsPair = std::pair<Patterns, config::SettingsNode>;
 
-std::optional<PatternSettingsPair> parseSettingsFile(const Path& file) noexcept;
+auto parseSettingsFile(const Path& file) noexcept
+    -> std::optional<PatternSettingsPair>;
 } // namespace config
 } // namespace execHelper
 

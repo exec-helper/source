@@ -1,6 +1,7 @@
 #include "config.h"
 
-#include <gsl/gsl>
+#include <string>
+#include <string_view>
 
 #include "yaml/yaml.h"
 
@@ -12,8 +13,7 @@
 
 using std::optional;
 using std::string;
-
-using gsl::czstring;
+using std::string_view;
 
 using execHelper::config::Patterns;
 using execHelper::config::PatternsHandler;
@@ -24,14 +24,15 @@ using execHelper::config::VariablesMap;
 using execHelper::yaml::Yaml;
 
 namespace {
-const czstring<> PATTERNS_KEY = "patterns";
+using namespace std::literals;
+const string_view patternsKey = "patterns"sv;
 
-Patterns processPatterns(const SettingsNode& settings) noexcept {
+auto processPatterns(const SettingsNode& settings) noexcept -> Patterns {
     Patterns result;
-    if(settings.contains(PATTERNS_KEY)) {
-        const SettingsNode& patternSettings = settings[PATTERNS_KEY];
-        for(const auto& patternKey :
-            settings.get<SettingsValues>(PATTERNS_KEY, SettingsValues())) {
+    if(settings.contains(string(patternsKey))) {
+        const SettingsNode& patternSettings = settings[string(patternsKey)];
+        for(const auto& patternKey : settings.get<SettingsValues>(
+                string(patternsKey), SettingsValues())) {
             VariablesMap newPatternMap =
                 PatternsHandler::getDefaultPatternMap(patternKey);
             newPatternMap.overwrite(patternSettings[patternKey]);
@@ -48,7 +49,8 @@ Patterns processPatterns(const SettingsNode& settings) noexcept {
 } // namespace
 
 namespace execHelper::config {
-optional<PatternSettingsPair> parseSettingsFile(const Path& file) noexcept {
+auto parseSettingsFile(const Path& file) noexcept
+    -> optional<PatternSettingsPair> {
     SettingsNode configuration("exec-helper");
 
     Yaml yaml(file);
@@ -58,7 +60,7 @@ optional<PatternSettingsPair> parseSettingsFile(const Path& file) noexcept {
     }
 
     Patterns patterns = processPatterns(configuration);
-    configuration.clear(PATTERNS_KEY);
+    configuration.clear(string(patternsKey));
     return make_pair(patterns, configuration);
 }
 } // namespace execHelper::config

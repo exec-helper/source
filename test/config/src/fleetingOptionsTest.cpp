@@ -1,5 +1,7 @@
 #include "unittest/catch.h"
 
+#include <string>
+
 #include "config/commandLineOptions.h"
 #include "config/fleetingOptions.h"
 #include "config/variablesMap.h"
@@ -9,6 +11,8 @@
 #include "log/generators.h"
 #include "unittest/rapidcheck.h"
 #include "utils/testValue.h"
+
+using std::string;
 
 using execHelper::log::LogLevel;
 using execHelper::log::toString;
@@ -25,14 +29,14 @@ namespace execHelper::config::test {
 SCENARIO("Test the fleeting options defaults", "[config][fleeting-options]") {
     GIVEN("The expected defaults") {
         VariablesMap expectedDefaults("exec-helper");
-        expectedDefaults.add(HELP_OPTION_KEY, "no");
-        expectedDefaults.add(VERSION_KEY, "no");
-        expectedDefaults.add(VERBOSE_KEY, "no");
-        expectedDefaults.add(JOBS_KEY, "auto");
-        expectedDefaults.add(DRY_RUN_KEY, "no");
-        expectedDefaults.add(LOG_LEVEL_KEY, "none");
-        expectedDefaults.add(COMMAND_KEY, CommandCollection());
-        expectedDefaults.add(SETTINGS_FILE_KEY);
+        REQUIRE(expectedDefaults.add(HELP_OPTION_KEY, "no"));
+        REQUIRE(expectedDefaults.add(VERSION_KEY, "no"));
+        REQUIRE(expectedDefaults.add(VERBOSE_KEY, "no"));
+        REQUIRE(expectedDefaults.add(JOBS_KEY, "auto"));
+        REQUIRE(expectedDefaults.add(DRY_RUN_KEY, "no"));
+        REQUIRE(expectedDefaults.add(LOG_LEVEL_KEY, "none"));
+        REQUIRE(expectedDefaults.add(COMMAND_KEY, CommandCollection()));
+        REQUIRE(expectedDefaults.add(SETTINGS_FILE_KEY));
 
         WHEN("We request the defaults") {
             VariablesMap defaults = FleetingOptions::getDefault();
@@ -54,13 +58,14 @@ SCENARIO("Test the getters of the fleeting options",
            const CommandCollection& commands) {
             VariablesMap variables = FleetingOptions::getDefault();
 
-            variables.replace(HELP_OPTION_KEY, help.config());
-            variables.replace(VERSION_KEY, version.config());
-            variables.replace(VERBOSE_KEY, verbosity.config());
-            variables.replace(JOBS_KEY, jobs.config());
-            variables.replace(DRY_RUN_KEY, dryRun.config());
-            variables.replace(LOG_LEVEL_KEY, toString(logLevel));
-            variables.replace(COMMAND_KEY, commands);
+            REQUIRE(variables.replace(HELP_OPTION_KEY, help.config()));
+            REQUIRE(variables.replace(VERSION_KEY, version.config()));
+            REQUIRE(variables.replace(VERBOSE_KEY, verbosity.config()));
+            REQUIRE(variables.replace(JOBS_KEY, jobs.config()));
+            REQUIRE(variables.replace(DRY_RUN_KEY, dryRun.config()));
+            REQUIRE(
+                variables.replace(LOG_LEVEL_KEY, string{toString(logLevel)}));
+            REQUIRE(variables.replace(COMMAND_KEY, commands));
 
             THEN_WHEN("We create fleeting options based on the variables map") {
                 FleetingOptions fleetingOptions(variables);
@@ -81,7 +86,7 @@ SCENARIO("Test the getters of the fleeting options",
 SCENARIO("Test copy constructor and assignment", "[patterns][Pattern]") {
     GIVEN("An object to copy") {
         VariablesMap variables = FleetingOptions::getDefault();
-        variables.replace(COMMAND_KEY, "command");
+        REQUIRE(variables.replace(COMMAND_KEY, "command"));
         FleetingOptions originalFleetingOptions(variables);
 
         WHEN("We copy the fleeting options") {

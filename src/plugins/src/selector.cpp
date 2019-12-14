@@ -29,15 +29,16 @@ const czstring<> PATTERN_KEY = "patterns";
 } // namespace
 
 namespace execHelper::plugins {
-string Selector::getPluginName() const noexcept { return PLUGIN_NAME; }
+auto Selector::getPluginName() const noexcept -> string { return PLUGIN_NAME; }
 
-VariablesMap Selector::getVariablesMap(
-    const FleetingOptionsInterface& /*fleetingOptions*/) const noexcept {
+auto Selector::getVariablesMap(
+    const FleetingOptionsInterface& /*fleetingOptions*/) const noexcept
+    -> VariablesMap {
     return VariablesMap("selector");
 }
 
-bool Selector::apply(Task task, const VariablesMap& variables,
-                     const Patterns& patterns) const noexcept {
+auto Selector::apply(Task task, const VariablesMap& variables,
+                     const Patterns& patterns) const noexcept -> bool {
     auto patternKeys = variables.get<PatternKeys>(PATTERN_KEY);
     if(!patternKeys) {
         user_feedback_error("Missing the '"

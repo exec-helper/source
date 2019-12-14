@@ -17,34 +17,36 @@ Pattern::Pattern(PatternKey patternKey, PatternValues values,
     ;
 }
 
-bool Pattern::operator==(const Pattern& other) const noexcept {
+auto Pattern::operator==(const Pattern& other) const noexcept -> bool {
     return (m_key == other.m_key && m_values == other.m_values &&
             m_shortOption == other.m_shortOption &&
             m_longOption == other.m_longOption);
 }
 
-bool Pattern::operator!=(const Pattern& other) const noexcept {
+auto Pattern::operator!=(const Pattern& other) const noexcept -> bool {
     return !(*this == other);
 }
 
-const PatternKey& Pattern::getKey() const noexcept { return m_key; }
+auto Pattern::getKey() const noexcept -> const PatternKey& { return m_key; }
 
-const PatternValues& Pattern::getValues() const noexcept { return m_values; }
+auto Pattern::getValues() const noexcept -> const PatternValues& {
+    return m_values;
+}
 
-bool Pattern::setValues(PatternValues values) noexcept {
+auto Pattern::setValues(PatternValues values) noexcept -> bool {
     m_values = std::move(values);
     return true;
 }
 
-const ShortOption& Pattern::getShortOption() const noexcept {
+auto Pattern::getShortOption() const noexcept -> const ShortOption& {
     return m_shortOption;
 }
 
-const LongOption& Pattern::getLongOption() const noexcept {
+auto Pattern::getLongOption() const noexcept -> const LongOption& {
     return m_longOption;
 }
 
-ostream& operator<<(ostream& os, const Pattern& pattern) noexcept {
+auto operator<<(ostream& os, const Pattern& pattern) noexcept -> ostream& {
     os << "{" << pattern.getKey() << ": ";
     auto shortOption = pattern.getShortOption();
     if(shortOption) {

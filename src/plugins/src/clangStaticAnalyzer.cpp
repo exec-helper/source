@@ -34,24 +34,31 @@ const czstring<> BUILD_COMMANDS_KEY = "build-command";
 
 namespace execHelper::plugins {
 
-std::string ClangStaticAnalyzer::getPluginName() const noexcept {
+auto ClangStaticAnalyzer::getPluginName() const noexcept -> string {
     return PLUGIN_NAME;
 }
 
-config::VariablesMap ClangStaticAnalyzer::getVariablesMap(
-    const config::FleetingOptionsInterface& fleetingOptions) const noexcept {
+auto ClangStaticAnalyzer::getVariablesMap(
+    const config::FleetingOptionsInterface& fleetingOptions) const noexcept
+    -> VariablesMap {
     VariablesMap defaults(PLUGIN_NAME);
-    defaults.add(getBuildDirKey(), ".");
-    defaults.add(COMMAND_LINE_KEY, CommandLineArgs());
+    if(!defaults.add(getBuildDirKey(), ".")) {
+        LOG(error) << "Failed to add key '" << getBuildDirKey() << "'";
+    }
+    if(!defaults.add(COMMAND_LINE_KEY, CommandLineArgs())) {
+        LOG(error) << "Failed to add key '" << COMMAND_LINE_KEY << "'";
+    }
     const auto verbosity = fleetingOptions.getVerbosity() ? "yes" : "no";
-    defaults.add(VERBOSITY_KEY, verbosity);
+    if(!defaults.add(VERBOSITY_KEY, verbosity)) {
+        LOG(error) << "Failed to add key '" << VERBOSITY_KEY << "'";
+    }
     return defaults;
 }
 
-bool ClangStaticAnalyzer::apply(core::Task task,
+auto ClangStaticAnalyzer::apply(core::Task task,
                                 const config::VariablesMap& variables,
-                                const config::Patterns& patterns) const
-    noexcept {
+                                const config::Patterns& patterns) const noexcept
+    -> bool {
     task.append(BIN_NAME);
     auto buildCommand = variables.get<BuildCommands>(BUILD_COMMANDS_KEY);
     if(!buildCommand || buildCommand.value().empty()) {

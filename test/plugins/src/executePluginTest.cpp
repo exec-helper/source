@@ -63,7 +63,7 @@ const czstring<> PLUGIN_NAME = "execute-plugin";
 const czstring<> MEMORY_KEY = "memory";
 const czstring<> PATTERN_KEY = "patterns";
 
-template <typename T> bool checkGetPlugin(const string& pluginName) {
+template <typename T> auto checkGetPlugin(const string& pluginName) -> bool {
     auto plugin = ExecutePlugin::getPlugin(pluginName);
     auto* derived = dynamic_cast<T*>(
         plugin.get()); // derived will be a nullptr if the cast fails
@@ -82,13 +82,16 @@ class Expected {
         ;
     }
 
-    [[nodiscard]] inline const Command& getCommand() const noexcept {
+    [[nodiscard]] inline auto getCommand() const noexcept -> const Command& {
         return m_directCommand;
     }
 
-    [[nodiscard]] inline const Task& getTask() const noexcept { return m_task; }
+    [[nodiscard]] inline auto getTask() const noexcept -> const Task& {
+        return m_task;
+    }
 
-    [[nodiscard]] inline const VariablesMap& getVariables() const noexcept {
+    [[nodiscard]] inline auto getVariables() const noexcept
+        -> const VariablesMap& {
         return m_variablesMap;
     }
 
@@ -96,7 +99,7 @@ class Expected {
         m_variablesMap = variables;
     }
 
-    [[nodiscard]] inline const Patterns& getPatterns() const noexcept {
+    [[nodiscard]] inline auto getPatterns() const noexcept -> const Patterns& {
         return m_patterns;
     }
 
@@ -189,7 +192,7 @@ SCENARIO("Test the settings node to variables map mapping",
         COMBINATIONS("Add a plugin command directly") {
             const Command command = MEMORY_KEY;
             commands.push_back(command);
-            settings.add(COMMAND_KEY, command);
+            REQUIRE(settings.add(COMMAND_KEY, command));
             expected.emplace(command, vector<Expected>({Expected(command)}));
         }
 
@@ -197,8 +200,8 @@ SCENARIO("Test the settings node to variables map mapping",
             const Command command("a-command");
             commands.push_back(command);
 
-            settings.add(COMMAND_KEY, command);
-            settings.add(command, MEMORY_KEY);
+            REQUIRE(settings.add(COMMAND_KEY, command));
+            REQUIRE(settings.add(command, MEMORY_KEY));
 
             expected.emplace(command, vector<Expected>({Expected(command)}));
         }
@@ -206,11 +209,11 @@ SCENARIO("Test the settings node to variables map mapping",
         COMBINATIONS("Add multiple commands") {
             commands = {"multiple-command1", "multiple-command2"};
 
-            settings.replace(COMMAND_KEY, commands);
+            REQUIRE(settings.replace(COMMAND_KEY, commands));
             for(const auto& command : commands) {
                 expected.emplace(command,
                                  vector<Expected>({Expected(command)}));
-                settings.add(command, MEMORY_KEY);
+                REQUIRE(settings.add(command, MEMORY_KEY));
             }
         }
 
@@ -221,10 +224,10 @@ SCENARIO("Test the settings node to variables map mapping",
             const vector<string> directCommands(
                 {"direct-command1", "direct-command2"});
 
-            settings.add(COMMAND_KEY, command);
-            settings.add(command, directCommands);
+            REQUIRE(settings.add(COMMAND_KEY, command));
+            REQUIRE(settings.add(command, directCommands));
             for(const auto& directCommand : directCommands) {
-                settings.add(directCommand, MEMORY_KEY);
+                REQUIRE(settings.add(directCommand, MEMORY_KEY));
                 expected.emplace(command,
                                  vector<Expected>({Expected(directCommand)}));
             }
@@ -237,15 +240,15 @@ SCENARIO("Test the settings node to variables map mapping",
                     const auto& directCommand = expectedTask.getCommand();
 
                     VariablesMap expectedVariableMap(MEMORY_KEY);
-                    expectedVariableMap.add(
+                    REQUIRE(expectedVariableMap.add(
                         string(directCommand).append("-root-setting1"),
-                        "root-setting-value1");
-                    expectedVariableMap.add(
+                        "root-setting-value1"));
+                    REQUIRE(expectedVariableMap.add(
                         string(directCommand).append("-root-setting2"),
-                        "root-setting-value2");
-                    expectedVariableMap.add(
+                        "root-setting-value2"));
+                    REQUIRE(expectedVariableMap.add(
                         string(directCommand).append("-root-setting3"),
-                        "root-setting-value3");
+                        "root-setting-value3"));
 
                     for(const auto& key :
                         expectedVariableMap.get<SettingsValues>(
@@ -264,15 +267,15 @@ SCENARIO("Test the settings node to variables map mapping",
                     const auto& directCommand = expectedTask.getCommand();
 
                     VariablesMap expectedVariableMap(MEMORY_KEY);
-                    expectedVariableMap.add(
+                    REQUIRE(expectedVariableMap.add(
                         string(directCommand).append("-specific-setting1"),
-                        "specific-setting-value1");
-                    expectedVariableMap.add(
+                        "specific-setting-value1"));
+                    REQUIRE(expectedVariableMap.add(
                         string(directCommand).append("-specific-setting2"),
-                        "specific-setting-value2");
-                    expectedVariableMap.add(
+                        "specific-setting-value2"));
+                    REQUIRE(expectedVariableMap.add(
                         string(directCommand).append("-specific-setting3"),
-                        "specific-setting-value3");
+                        "specific-setting-value3"));
 
                     for(const auto& key :
                         expectedVariableMap.get<SettingsValues>(
@@ -293,7 +296,8 @@ SCENARIO("Test the settings node to variables map mapping",
 
                 for(const auto& pattern : patterns) {
                     configuredPatterns.push_back(pattern);
-                    settings.add({MEMORY_KEY, PATTERN_KEY}, pattern.getKey());
+                    REQUIRE(settings.add({MEMORY_KEY, PATTERN_KEY},
+                                         pattern.getKey()));
 
                     for(const auto& command : commands) {
                         ensures(expected.count(command) > 0U);
@@ -318,9 +322,10 @@ SCENARIO("Test the settings node to variables map mapping",
                     expectedCommand.setPatterns({});
                     for(const auto& pattern : patterns) {
                         configuredPatterns.push_back(pattern);
-                        settings.add({MEMORY_KEY, expectedCommand.getCommand(),
-                                      PATTERN_KEY},
-                                     pattern.getKey());
+                        REQUIRE(settings.add({MEMORY_KEY,
+                                              expectedCommand.getCommand(),
+                                              PATTERN_KEY},
+                                             pattern.getKey()));
                         expectedCommand.addPattern(pattern);
                     }
                 }
@@ -341,7 +346,8 @@ SCENARIO("Test the settings node to variables map mapping",
             THEN_CHECK("It should succeed") { REQUIRE(returnCode); }
 
             THEN_CHECK("It called the right commands") {
-                const Memory::Memories& memories = memory.getExecutions();
+                const Memory::Memories& memories =
+                    MemoryHandler::getExecutions();
                 auto memory = memories.begin();
                 for(const auto& command : commands) {
                     REQUIRE(expected.count(command) > 0U);
@@ -397,8 +403,8 @@ SCENARIO("Test problematic cases", "[execute-plugin]") {
         fleetingOptions.m_commands = {command};
 
         SettingsNode settings("test");
-        settings.add(COMMAND_KEY, command);
-        settings.add(command, MEMORY_KEY);
+        REQUIRE(settings.add(COMMAND_KEY, command));
+        REQUIRE(settings.add(command, MEMORY_KEY));
 
         ExecutePlugin plugin({"memory", "memory"});
         ExecutePlugin::push(
@@ -407,7 +413,7 @@ SCENARIO("Test problematic cases", "[execute-plugin]") {
         ExecutePlugin::push(Patterns());
 
         MemoryHandler memory;
-        memory.setReturnCode(false);
+        MemoryHandler::setReturnCode(false);
 
         WHEN("We execute the plugin") {
             Task task;

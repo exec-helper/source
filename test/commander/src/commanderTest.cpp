@@ -65,8 +65,8 @@ SCENARIO("Basic test the commander", "[commander]") {
 
         const Command command1("command1");
         fleetingOptions.m_commands.push_back(command1);
-        settings.add(COMMANDS_KEY, command1);
-        settings.add(command1, MEMORY_KEY);
+        REQUIRE(settings.add(COMMANDS_KEY, command1));
+        REQUIRE(settings.add(command1, MEMORY_KEY));
 
         Task expectedTask;
         expectedTask.setWorkingDirectory(workingDirectory);
@@ -77,8 +77,8 @@ SCENARIO("Basic test the commander", "[commander]") {
                 {"multiple-command1", "multiple-command2"});
             for(const auto& command : commands) {
                 fleetingOptions.m_commands.push_back(command);
-                settings.add(COMMANDS_KEY, command);
-                settings.add(command, MEMORY_KEY);
+                REQUIRE(settings.add(COMMANDS_KEY, command));
+                REQUIRE(settings.add(command, MEMORY_KEY));
 
                 Task expectedTask;
                 expectedTask.setWorkingDirectory(workingDirectory);
@@ -112,7 +112,8 @@ SCENARIO("Basic test the commander", "[commander]") {
         expectedPatterns.insert(expectedPatterns.end(), patterns.begin(),
                                 patterns.end());
         for(const auto& pattern : expectedPatterns) {
-            settings.add({MEMORY_KEY, getPatternsKey()}, pattern.getKey());
+            REQUIRE(
+                settings.add({MEMORY_KEY, getPatternsKey()}, pattern.getKey()));
         }
 
         THEN_WHEN("We apply the configuration and run the commander") {
@@ -122,7 +123,8 @@ SCENARIO("Basic test the commander", "[commander]") {
             THEN_CHECK("It must succeed") { REQUIRE(returnCode); }
 
             THEN_CHECK("We should get the tasks executed") {
-                const Memory::Memories& memories = memory.getExecutions();
+                const Memory::Memories& memories =
+                    plugins::MemoryHandler::getExecutions();
                 REQUIRE(memories.size() == expectedTasks.size());
 
                 auto expectedTask = expectedTasks.begin();
@@ -149,9 +151,9 @@ SCENARIO(
         fleetingOptions.m_commands = {"command3"};
 
         SettingsNode settings("test");
-        settings.add(COMMANDS_KEY, commands);
-        settings.add(command1, MEMORY_KEY);
-        settings.add(command2, MEMORY_KEY);
+        REQUIRE(settings.add(COMMANDS_KEY, commands));
+        REQUIRE(settings.add(command1, MEMORY_KEY));
+        REQUIRE(settings.add(command2, MEMORY_KEY));
 
         Commander commander;
 
@@ -174,9 +176,9 @@ SCENARIO("Test when no commands are passed", "[commander]") {
         FleetingOptionsStub fleetingOptions;
 
         SettingsNode settings("test");
-        settings.add(COMMANDS_KEY, commands);
-        settings.add(command1, MEMORY_KEY);
-        settings.add(command2, MEMORY_KEY);
+        REQUIRE(settings.add(COMMANDS_KEY, commands));
+        REQUIRE(settings.add(command1, MEMORY_KEY));
+        REQUIRE(settings.add(command2, MEMORY_KEY));
 
         Commander commander;
 

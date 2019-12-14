@@ -5,8 +5,7 @@
 #include <string>
 #include <vector>
 
-namespace execHelper {
-namespace config {
+namespace execHelper::config {
 /**
  * \brief   Wraps the default arguments when calling other programs
  */
@@ -20,7 +19,7 @@ class Argv {
      * \param[in] argv  An array of input arguments. Each array element is
      * considered a separate argument.
      */
-    Argv(int argc, const char* const* const argv) noexcept;
+    Argv(int argc, const char* const* argv) noexcept;
 
     /**
      * Convert task to the argv/argc structure
@@ -50,7 +49,7 @@ class Argv {
      * \param[in] other The other object to assign from
      * \returns A reference to this object
      */
-    Argv& operator=(const Argv& other) noexcept;
+    auto operator=(const Argv& other) noexcept -> Argv&;
 
     /**
      * Move assignment operator
@@ -58,7 +57,7 @@ class Argv {
      * \param[in] other The other object to assign from
      * \returns A reference to this object
      */
-    Argv& operator=(Argv&& other) noexcept;
+    auto operator=(Argv&& other) noexcept -> Argv&;
 
     /**
      * Equality operator
@@ -67,7 +66,7 @@ class Argv {
      * \returns True    If the objects are considered equal
      *          False   Otherwise
      */
-    bool operator==(const Argv& other) const noexcept;
+    auto operator==(const Argv& other) const noexcept -> bool;
 
     /**
      * Inequality operator
@@ -75,7 +74,7 @@ class Argv {
      * \param[in] other The other object to compare with
      * \returns !operator==(other)
      */
-    bool operator!=(const Argv& other) const noexcept;
+    auto operator!=(const Argv& other) const noexcept -> bool;
 
     /**
      * Access operator
@@ -83,7 +82,7 @@ class Argv {
      * \param[in] index The index of the element to access
      * \returns A C-style string
      */
-    char* operator[](size_t index) const noexcept;
+    auto operator[](size_t index) const noexcept -> char*;
 
     /**
      * Swap contents
@@ -103,18 +102,18 @@ class Argv {
      * \returns The total number of arguments
      */
 
-    size_t getArgc() const noexcept;
+    [[nodiscard]] auto getArgc() const noexcept -> size_t;
 
     /**
      * Getter for the argv argument
      *
      * \returns An array of pointers to C-style strings of length \ref getArgc()
      */
-    char** getArgv() noexcept;
+    [[nodiscard]] auto getArgv() noexcept -> char**;
 
     /*! @copydoc getArgv()
      */
-    const char* const* getArgv() const noexcept;
+    [[nodiscard]] auto getArgv() const noexcept -> const char* const*;
 
   private:
     using Argv_t = std::vector<char*>;
@@ -136,8 +135,7 @@ class Argv {
  * \param[in] argv  The object to stream
  * \returns The stream that was streamed to
  */
-std::ostream& operator<<(std::ostream& os, const Argv& argv) noexcept;
-} // namespace config
-} // namespace execHelper
+auto operator<<(std::ostream& os, const Argv& argv) noexcept -> std::ostream&;
+} // namespace execHelper::config
 
 #endif /* __ARGV_H__ */

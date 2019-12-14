@@ -28,18 +28,9 @@ class ConfigFileSearcher {
      * \returns The path in search path with the highest importance under which
      * the filename was found. std::nullopt Otherwise
      */
-    std::optional<Path> find(const Path& filename) noexcept;
+    auto find(const Path& filename) noexcept -> std::optional<Path>;
 
   private:
-    /**
-     * Checks whether the given path exists
-     *
-     * \param[in] pathToCheck The path to check
-     * \returns True    If the path exists on the current system
-     *          False   Otherwise
-     */
-    bool fileExist(const Path& pathToCheck) noexcept;
-
     const Paths m_searchPaths;
 };
 } // namespace config

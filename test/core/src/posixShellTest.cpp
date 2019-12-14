@@ -44,9 +44,9 @@ namespace {
  * @param[in]   paths   The current paths to search in
  * @returns The full path to the binary
  */
-optional<filesystem::path> searchBinary(
-    const std::string& binary,
-    std::vector<boost::filesystem::path> paths = this_process::path()) {
+auto searchBinary(const std::string& binary,
+                  std::vector<boost::filesystem::path> paths)
+    -> optional<filesystem::path> {
     paths.emplace_back(".");
 
     auto result = process::search_path(binary, paths).native();
@@ -54,6 +54,16 @@ optional<filesystem::path> searchBinary(
         return std::nullopt;
     }
     return result;
+}
+
+/**
+ * Searches for the given binary file in the current directory and the given path
+ *
+ * @param[in]   binary  The binary to search for
+ * @returns The full path to the binary
+ */
+auto searchBinary(const std::string& binary) -> optional<filesystem::path> {
+    return searchBinary(binary, this_process::path());
 }
 } // namespace
 

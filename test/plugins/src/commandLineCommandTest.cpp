@@ -68,8 +68,8 @@ SCENARIO(
         CommandLineCommand plugin;
 
         VariablesMap actualVariables(plugin.getPluginName());
-        actualVariables.add(COMMAND_LINE_KEY, CommandLineArgs());
-        actualVariables.add(ENVIRONMENT_KEY, EnvArgs());
+        REQUIRE(actualVariables.add(COMMAND_LINE_KEY, CommandLineArgs()));
+        REQUIRE(actualVariables.add(ENVIRONMENT_KEY, EnvArgs()));
 
         WHEN("We request the variables map") {
             VariablesMap variables = plugin.getVariablesMap(fleetingOptions);
@@ -98,7 +98,7 @@ SCENARIO(
         Task expectedTask;
         std::vector<TaskCollection> commandLines;
 
-        variables.add(COMMAND_LINE_KEY, command1);
+        REQUIRE(variables.add(COMMAND_LINE_KEY, command1));
         commandLines.push_back(command1);
 
         ExecutorStub executor;
@@ -114,10 +114,11 @@ SCENARIO(
                  "{" + pattern3.getKey() + "}/{" + pattern1.getKey() + "}"});
 
             variables.clear(COMMAND_LINE_KEY);
-            variables.add(SettingsKeys({COMMAND_LINE_KEY, "multiple-commandA"}),
-                          multipleCommand1);
-            variables.add({COMMAND_LINE_KEY, "multiple-commandB"},
-                          multipleCommand2);
+            REQUIRE(variables.add(
+                SettingsKeys({COMMAND_LINE_KEY, "multiple-commandA"}),
+                multipleCommand1));
+            REQUIRE(variables.add({COMMAND_LINE_KEY, "multiple-commandB"},
+                                  multipleCommand2));
 
             commandLines.clear();
             commandLines.push_back(multipleCommand1);
@@ -128,15 +129,16 @@ SCENARIO(
             EnvironmentValue ENV1("VAR1", "environmentValue{" +
                                               pattern1.getKey() + "}");
             EnvironmentValue ENV2("VAR2", "environmentValue2");
-            variables.add({ENVIRONMENT_KEY, ENV1.first}, ENV1.second);
-            variables.add({ENVIRONMENT_KEY, ENV2.first}, ENV2.second);
+            REQUIRE(variables.add({ENVIRONMENT_KEY, ENV1.first}, ENV1.second));
+            REQUIRE(variables.add({ENVIRONMENT_KEY, ENV2.first}, ENV2.second));
             expectedTask.appendToEnvironment(move(ENV1));
             expectedTask.appendToEnvironment(move(ENV2));
         }
 
         COMBINATIONS("Set the working directory") {
-            variables.replace(WORKING_DIR_KEY, "{" + pattern2.getKey() + "}/{" +
-                                                   pattern3.getKey() + "}");
+            REQUIRE(variables.replace(WORKING_DIR_KEY,
+                                      "{" + pattern2.getKey() + "}/{" +
+                                          pattern3.getKey() + "}"));
             expectedTask.setWorkingDirectory(
                 variables.get<Path>(WORKING_DIR_KEY).value());
         }
@@ -170,7 +172,7 @@ SCENARIO("Testing erroneous configuration conditions for the "
         VariablesMap variables = plugin.getVariablesMap(FleetingOptionsStub());
 
         COMBINATIONS("Add command line key without value") {
-            variables.add(COMMAND_LINE_KEY);
+            REQUIRE(variables.add(COMMAND_LINE_KEY));
         }
 
         THEN_WHEN("We add no parameter and apply") {

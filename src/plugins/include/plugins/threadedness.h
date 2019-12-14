@@ -26,11 +26,9 @@ struct JobsLong {
      * @param[in] options       The fleeting options to take into account
      * @param[out] variables    The variables map to add the variables to
      */
-    inline static void
+    static void
     getVariables(config::VariablesMap& variables,
-                 const config::FleetingOptionsInterface& options) noexcept {
-        variables.add(JOBS_KEY, std::to_string(options.getJobs()));
-    }
+                 const config::FleetingOptionsInterface& options) noexcept;
 
     /**
      * Applies the given variables to the task

@@ -59,22 +59,23 @@ SCENARIO("Obtain the default variables map of the cppcheck plugin",
         Cppcheck plugin;
 
         VariablesMap actualVariables(plugin.getPluginName());
-        actualVariables.add(ENABLE_CHECKS_KEY, "all");
-        actualVariables.add(COMMAND_LINE_KEY, CommandLineArgs());
-        actualVariables.add(SRC_DIR_KEY, ".");
-        actualVariables.add(VERBOSITY_KEY, "no");
-        actualVariables.add(JOBS_KEY, to_string(fleetingOptions.m_jobs));
+        REQUIRE(actualVariables.add(ENABLE_CHECKS_KEY, "all"));
+        REQUIRE(actualVariables.add(COMMAND_LINE_KEY, CommandLineArgs()));
+        REQUIRE(actualVariables.add(SRC_DIR_KEY, "."));
+        REQUIRE(actualVariables.add(VERBOSITY_KEY, "no"));
+        REQUIRE(
+            actualVariables.add(JOBS_KEY, to_string(fleetingOptions.m_jobs)));
 
         COMBINATIONS("Switch on verbosity") {
             fleetingOptions.m_verbose = true;
-            actualVariables.replace(VERBOSITY_KEY, "yes");
+            REQUIRE(actualVariables.replace(VERBOSITY_KEY, "yes"));
         }
 
         COMBINATIONS("Switch on threadedness") {
             const uint8_t NB_OF_JOBS = 6U;
             fleetingOptions.m_jobs = NB_OF_JOBS;
-            actualVariables.replace(JOBS_KEY,
-                                    to_string(fleetingOptions.m_jobs));
+            REQUIRE(actualVariables.replace(JOBS_KEY,
+                                            to_string(fleetingOptions.m_jobs)));
         }
 
         THEN_WHEN("We request the variables map") {
@@ -115,30 +116,30 @@ SCENARIO("Testing the configuration settings of the cppcheck plugin",
         COMBINATIONS("Change the enabled checks") {
             TaskCollection enabledChecksValue = {"warning", "style",
                                                  "performance"};
-            variables.replace(ENABLE_CHECKS_KEY, enabledChecksValue);
+            REQUIRE(variables.replace(ENABLE_CHECKS_KEY, enabledChecksValue));
             enabledChecks = "--enable=warning,style,performance";
         }
 
         COMBINATIONS("Change the source dir") {
             srcDir = "{" + pattern1.getKey() + "}/{HELLO}/{" +
                      pattern2.getKey() + "}";
-            variables.replace(SRC_DIR_KEY, srcDir);
+            REQUIRE(variables.replace(SRC_DIR_KEY, srcDir));
         }
 
         COMBINATIONS("Switch on verbosity") {
-            variables.replace(VERBOSITY_KEY, "yes");
+            REQUIRE(variables.replace(VERBOSITY_KEY, "yes"));
             verbosity = {"--verbose"};
         }
 
         COMBINATIONS("Add a command line") {
             commandLine = {"{" + pattern1.getKey() + "}",
                            "{" + pattern2.getKey() + "}"};
-            variables.replace(COMMAND_LINE_KEY, commandLine);
+            REQUIRE(variables.replace(COMMAND_LINE_KEY, commandLine));
         }
 
         COMBINATIONS("Switch on single threaded") {
             jobs = 1U;
-            variables.replace(JOBS_KEY, to_string(jobs));
+            REQUIRE(variables.replace(JOBS_KEY, to_string(jobs)));
         }
 
         Task expectedTask({PLUGIN_NAME});

@@ -38,7 +38,7 @@ const czstring<> CHECKS_KEY = "checks";
 const czstring<> WARNING_AS_ERROR_KEY = "warning-as-errors";
 const czstring<> WARNING_AS_ERROR_INHERIT_KEY = "all";
 
-TaskCollection toChecks(const TaskCollection& taskCollection) noexcept {
+auto toChecks(const TaskCollection& taskCollection) noexcept -> TaskCollection {
     if(taskCollection.empty()) {
         return TaskCollection();
     }
@@ -50,7 +50,8 @@ TaskCollection toChecks(const TaskCollection& taskCollection) noexcept {
     return TaskCollection({result});
 }
 
-TaskCollection toWarningAsError(const TaskCollection& taskCollection) noexcept {
+auto toWarningAsError(const TaskCollection& taskCollection) noexcept
+    -> TaskCollection {
     if(taskCollection.empty()) {
         return TaskCollection();
     }
@@ -85,8 +86,8 @@ SCENARIO("Obtaining the default variables map of the clang-tidy plugin",
         ClangTidy plugin;
 
         VariablesMap actualVariables(plugin.getPluginName());
-        actualVariables.add(COMMAND_LINE_KEY, CommandLineArgs());
-        actualVariables.add(SOURCES_KEY, "*.cpp");
+        REQUIRE(actualVariables.add(COMMAND_LINE_KEY, CommandLineArgs()));
+        REQUIRE(actualVariables.add(SOURCES_KEY, "*.cpp"));
 
         WHEN("We request the variables map") {
             VariablesMap variables = plugin.getVariablesMap(fleetingOptions);
@@ -124,31 +125,32 @@ SCENARIO("Testing the configuration settings of the clang-tidy plugin",
         COMBINATIONS("Add sources") {
             sources = {"source1/{" + pattern1.getKey() + "}", "source2",
                        "source3/{" + pattern2.getKey() + "}"};
-            variables.replace(SOURCES_KEY, sources);
+            REQUIRE(variables.replace(SOURCES_KEY, sources));
         }
 
         COMBINATIONS("Add a command line") {
             commandLine = {"{" + pattern1.getKey() + "}",
                            "{" + pattern2.getKey() + "}"};
-            variables.add(COMMAND_LINE_KEY, commandLine);
+            REQUIRE(variables.add(COMMAND_LINE_KEY, commandLine));
         }
 
         COMBINATIONS("Add checks") {
             checks = {"check1", "check2-{" + pattern1.getKey() + "}"};
-            variables.replace(CHECKS_KEY, checks);
+            REQUIRE(variables.replace(CHECKS_KEY, checks));
         }
 
         COMBINATIONS("Add warning as error") {
             const TaskCollection warningAsErrorValue = {
                 "warningAsError1", "warningAsError2", "warningAsError3"};
-            variables.replace(WARNING_AS_ERROR_KEY, warningAsErrorValue);
+            REQUIRE(
+                variables.replace(WARNING_AS_ERROR_KEY, warningAsErrorValue));
             warningAsError.emplace_back(
                 "warningAsError1,warningAsError2,warningAsError3");
         }
 
         COMBINATIONS("Inherit warning as error") {
-            variables.replace(WARNING_AS_ERROR_KEY,
-                              WARNING_AS_ERROR_INHERIT_KEY);
+            REQUIRE(variables.replace(WARNING_AS_ERROR_KEY,
+                                      WARNING_AS_ERROR_INHERIT_KEY));
             warningAsError = checks;
         }
 

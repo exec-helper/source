@@ -21,11 +21,11 @@ class PermuteObjectElement {
         ;
     }
 
-    bool operator==(const PermuteObjectElement& other) const noexcept {
+    auto operator==(const PermuteObjectElement& other) const noexcept -> bool {
         return m_object1 == other.m_object1 && m_object2 == other.m_object2;
     }
 
-    bool operator!=(const PermuteObjectElement& other) const noexcept {
+    auto operator!=(const PermuteObjectElement& other) const noexcept -> bool {
         return !(*this == other);
     }
 
@@ -51,39 +51,39 @@ class PermuteObject {
         ;
     }
 
-    bool operator==(const PermuteObject& other) const noexcept {
+    auto operator==(const PermuteObject& other) const noexcept -> bool {
         return m_collection1 == other.m_collection1 &&
                m_collection2 == other.m_collection2;
     }
 
-    bool operator!=(const PermuteObject& other) const noexcept {
+    auto operator!=(const PermuteObject& other) const noexcept -> bool {
         return !(*this == other);
     }
 
-    [[nodiscard]] const Collection1& getCollection1() const noexcept {
+    [[nodiscard]] auto getCollection1() const noexcept -> const Collection1& {
         return m_collection1;
     }
 
-    [[nodiscard]] const Collection2& getCollection2() const noexcept {
+    [[nodiscard]] auto getCollection2() const noexcept -> const Collection2& {
         return m_collection2;
     }
 
-    iterator begin() noexcept {
+    [[nodiscard]] auto begin() noexcept -> iterator {
         return {m_collection1.begin(), m_collection2.begin(),
                 m_collection1.end(), m_collection2.end()};
     }
 
-    [[nodiscard]] const_iterator begin() const noexcept {
+    [[nodiscard]] auto begin() const noexcept -> const_iterator {
         return {m_collection1.begin(), m_collection2.begin(),
                 m_collection1.end(), m_collection2.end()};
     }
 
-    iterator end() noexcept {
+    [[nodiscard]] auto end() noexcept -> iterator {
         return {m_collection1.end(), m_collection2.end(), m_collection1.end(),
                 m_collection2.end()};
     }
 
-    [[nodiscard]] const_iterator end() const noexcept {
+    [[nodiscard]] auto end() const noexcept -> const_iterator {
         return {m_collection1.end(), m_collection2.end(), m_collection1.end(),
                 m_collection2.end()};
     }
@@ -93,8 +93,8 @@ class PermuteObject {
     Collection2 m_collection2;
 };
 
-vector<PermuteObjectElement>
-getOrderedCombinations(const PermuteObject& permute) {
+auto getOrderedCombinations(const PermuteObject& permute)
+    -> vector<PermuteObjectElement> {
     vector<PermuteObjectElement> orderedCombinations;
     for(const auto& object1 : permute.getCollection1()) {
         for(const auto& object2 : permute.getCollection2()) {

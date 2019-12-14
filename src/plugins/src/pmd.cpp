@@ -7,6 +7,7 @@
 
 #include "config/fleetingOptionsInterface.h"
 #include "config/settingsNode.h"
+#include "config/variablesMap.h"
 #include "core/patterns.h"
 #include "core/task.h"
 
@@ -39,22 +40,29 @@ const czstring<> LANGUAGE_KEY = "language";
 } // namespace
 
 namespace execHelper::plugins {
-string Pmd::getPluginName() const noexcept { return PLUGIN_NAME; }
+auto Pmd::getPluginName() const noexcept -> string { return PLUGIN_NAME; }
 
-VariablesMap
-Pmd::getVariablesMap(const FleetingOptionsInterface& fleetingOptions) const
-    noexcept {
+auto Pmd::getVariablesMap(const FleetingOptionsInterface& fleetingOptions) const
+    noexcept -> VariablesMap {
     VariablesMap defaults(PLUGIN_NAME);
-    defaults.add(EXEC_KEY, PLUGIN_NAME);
-    defaults.add(TOOL_KEY, "cpd");
-    defaults.add(COMMAND_LINE_KEY, CommandLineArgs());
+    if(!defaults.add(EXEC_KEY, PLUGIN_NAME)) {
+        LOG(error) << "Failed to add key '" << EXEC_KEY << "'";
+    }
+    if(!defaults.add(TOOL_KEY, "cpd")) {
+        LOG(error) << "Failed to add key '" << TOOL_KEY << "'";
+    }
+    if(!defaults.add(COMMAND_LINE_KEY, CommandLineArgs())) {
+        LOG(error) << "Failed to add key '" << COMMAND_LINE_KEY << "'";
+    }
     const string verbosity = fleetingOptions.getVerbosity() ? "yes" : "no";
-    defaults.add(VERBOSITY_KEY, verbosity);
+    if(!defaults.add(VERBOSITY_KEY, verbosity)) {
+        LOG(error) << "Failed to add key '" << VERBOSITY_KEY << "'";
+    }
     return defaults;
 }
 
-bool Pmd::apply(Task task, const VariablesMap& variables,
-                const Patterns& patterns) const noexcept {
+auto Pmd::apply(Task task, const VariablesMap& variables,
+                const Patterns& patterns) const noexcept -> bool {
     auto binaryName = *(variables.get<string>(EXEC_KEY));
     auto tool = *(variables.get<string>(TOOL_KEY));
     binaryName.append("-").append(tool);

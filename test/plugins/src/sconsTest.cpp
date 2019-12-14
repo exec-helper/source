@@ -58,20 +58,21 @@ SCENARIO("Obtain the default variables map of the scons plugin", "[scons]") {
         Scons plugin;
 
         VariablesMap actualVariables(plugin.getPluginName());
-        actualVariables.add(BUILD_DIR_KEY, ".");
-        actualVariables.add(COMMAND_LINE_KEY, CommandLineArgs());
-        actualVariables.add(VERBOSITY_KEY, "no");
-        actualVariables.add(JOBS_KEY, to_string(fleetingOptions.getJobs()));
+        REQUIRE(actualVariables.add(BUILD_DIR_KEY, "."));
+        REQUIRE(actualVariables.add(COMMAND_LINE_KEY, CommandLineArgs()));
+        REQUIRE(actualVariables.add(VERBOSITY_KEY, "no"));
+        REQUIRE(actualVariables.add(JOBS_KEY,
+                                    to_string(fleetingOptions.getJobs())));
 
         COMBINATIONS("Switch on verbosity") {
             fleetingOptions.m_verbose = true;
-            actualVariables.replace(VERBOSITY_KEY, "yes");
+            REQUIRE(actualVariables.replace(VERBOSITY_KEY, "yes"));
         }
 
         COMBINATIONS("Switch on single threaded") {
             fleetingOptions.m_jobs = 1U;
-            actualVariables.replace(JOBS_KEY,
-                                    to_string(fleetingOptions.m_jobs));
+            REQUIRE(actualVariables.replace(JOBS_KEY,
+                                            to_string(fleetingOptions.m_jobs)));
         }
 
         THEN_WHEN("We request the variables map") {
@@ -106,19 +107,19 @@ SCENARIO("Testing the configuration settings of the scons plugin", "[scons]") {
 
         COMBINATIONS("Switch off threading") {
             jobs = 1U;
-            variables.replace(JOBS_KEY, to_string(jobs));
+            REQUIRE(variables.replace(JOBS_KEY, to_string(jobs)));
         }
 
         COMBINATIONS("Switch on verbosity") {
             verbosity = true;
-            variables.replace(VERBOSITY_KEY, "yes");
+            REQUIRE(variables.replace(VERBOSITY_KEY, "yes"));
         }
 
         COMBINATIONS("Add a command line") {
             commandLine = {"{" + pattern1.getKey() + "}{" + pattern2.getKey() +
                                "}",
                            "blaat/{HELLO}/{" + pattern1.getKey() + "}"};
-            variables.replace(COMMAND_LINE_KEY, commandLine);
+            REQUIRE(variables.replace(COMMAND_LINE_KEY, commandLine));
         }
 
         Task expectedTask({PLUGIN_NAME});

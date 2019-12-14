@@ -51,11 +51,11 @@ class SettingsNode {
      * \param[in] other The other node to copy from
      * \returns A reference to this
      */
-    SettingsNode& operator=(const SettingsNode& other) noexcept;
+    auto operator=(const SettingsNode& other) noexcept -> SettingsNode&;
 
     /*! @copydoc operator=(const SettingsNode&)
      */
-    SettingsNode& operator=(SettingsNode&& other) noexcept;
+    auto operator=(SettingsNode&& other) noexcept -> SettingsNode&;
 
     /**
      * Returns whether the given node equals this node
@@ -64,7 +64,7 @@ class SettingsNode {
      * \returns True if the nodes are equal
      *          False otherwise
      */
-    bool operator==(const SettingsNode& other) const noexcept;
+    auto operator==(const SettingsNode& other) const noexcept -> bool;
 
     /**
      *
@@ -72,7 +72,7 @@ class SettingsNode {
      * \param[in] other The other node to compare with
      * \returns ! #operator=="()"
      */
-    bool operator!=(const SettingsNode& other) const noexcept;
+    auto operator!=(const SettingsNode& other) const noexcept -> bool;
 
     /**
      * Get the node associated with the given key. If the key does not exist, it
@@ -81,7 +81,7 @@ class SettingsNode {
      * \param[in] key   The key
      * \return  The node associated with the given key
      */
-    SettingsNode& operator[](const SettingsKey& key) noexcept;
+    auto operator[](const SettingsKey& key) noexcept -> SettingsNode&;
 
     /**
      * Get the node associated with the given key
@@ -91,14 +91,15 @@ class SettingsNode {
      * \param[in] key   The key
      * \return  The node associated with the given key
      */
-    const SettingsNode& operator[](const SettingsKey& key) const noexcept;
+    auto operator[](const SettingsKey& key) const noexcept
+        -> const SettingsNode&;
 
     /**
      * Gets the key associated with the root of this node
      *
      * \returns The associated key
      */
-    SettingsKey key() const noexcept;
+    [[nodiscard]] auto key() const noexcept -> SettingsKey;
 
     /**
      * Returns whether the given key exists as a direct child of this node
@@ -107,11 +108,11 @@ class SettingsNode {
      * \returns True if the key is a value of this node
      *          False otherwise
      */
-    bool contains(const SettingsKey& key) const noexcept;
+    [[nodiscard]] auto contains(const SettingsKey& key) const noexcept -> bool;
 
     /*! @copydoc contains(const SettingsKey&) const
      */
-    bool contains(const SettingsKeys& key) const noexcept;
+    [[nodiscard]] auto contains(const SettingsKeys& key) const noexcept -> bool;
 
     /**
      * Get the direct values associated with the given key path
@@ -121,7 +122,8 @@ class SettingsNode {
      *              boost::none otherwise
      */
     template <typename T>
-    std::optional<T> get(const SettingsKeys& key) const noexcept {
+    [[nodiscard]] auto get(const SettingsKeys& key) const noexcept
+        -> std::optional<T> {
         if(!contains(key)) {
             return std::nullopt;
         }
@@ -135,7 +137,8 @@ class SettingsNode {
     /*! @copydoc get(const SettingsKeys&) const
      */
     template <typename T>
-    inline std::optional<T> get(const SettingsKey& key) const noexcept {
+    [[nodiscard]] inline auto get(const SettingsKey& key) const noexcept
+        -> std::optional<T> {
         return get<T>(SettingsKeys({key}));
     }
 
@@ -149,14 +152,16 @@ class SettingsNode {
      *              boost::none otherwise
      */
     template <typename T>
-    T get(const SettingsKeys& key, const T& defaultValue) const noexcept {
+    [[nodiscard]] auto get(const SettingsKeys& key, const T& defaultValue) const
+        noexcept -> T {
         return get<T>(key).value_or(defaultValue);
     }
 
     /*! @copydoc get(const SettingsKeys&, const T& defaultValue) const
      */
     template <typename T>
-    inline T get(const SettingsKey& key, const T& defaultValue) const noexcept {
+    [[nodiscard]] inline auto get(const SettingsKey& key,
+                                  const T& defaultValue) const noexcept -> T {
         return get<T>(SettingsKeys({key}), defaultValue);
     }
 
@@ -169,7 +174,8 @@ class SettingsNode {
      * there is no guarantee that the previous values are still present.
      */
     template <typename T>
-    inline bool replace(const SettingsKeys& key, const T& values) noexcept {
+    [[nodiscard]] inline auto replace(const SettingsKeys& key,
+                                      const T& values) noexcept -> bool {
         if(contains(key)) {
             clear(key);
         }
@@ -179,7 +185,8 @@ class SettingsNode {
     /*! @copydoc replace(const SettingsKeys&, const T&)
      */
     template <typename T>
-    inline bool replace(const SettingsKey& key, const T& values) noexcept {
+    [[nodiscard]] inline auto replace(const SettingsKey& key,
+                                      const T& values) noexcept -> bool {
         return replace(SettingsKeys({key}), values);
     }
 
@@ -191,15 +198,16 @@ class SettingsNode {
      * \returns True if the value was added successfully
      *          False otherwise
      */
-    bool add(const SettingsValue& newValue) noexcept;
+    [[nodiscard]] auto add(const SettingsValue& newValue) noexcept -> bool;
 
     /*! @copydoc add(const SettingsValue&)
      */
-    bool add(const SettingsValues& newValue) noexcept;
+    [[nodiscard]] auto add(const SettingsValues& newValue) noexcept -> bool;
 
     /*! @copydoc add(const SettingsValue&)
      */
-    bool add(const std::initializer_list<SettingsValue>& newValue) noexcept;
+    [[nodiscard]] auto
+    add(const std::initializer_list<SettingsValue>& newValue) noexcept -> bool;
 
     /**
      * Add the given value in the given hierarchy key path. The hierarchy key
@@ -211,39 +219,45 @@ class SettingsNode {
      * \returns True if the value was added successfully
      *          False otherwise
      */
-    bool add(const SettingsKeys& key, const SettingsValue& newValue) noexcept;
+    [[nodiscard]] auto add(const SettingsKeys& key,
+                           const SettingsValue& newValue) noexcept -> bool;
 
     /*! @copydoc add(const SettingsKeys&, const SettingsValue&)
      */
-    bool add(const SettingsKey& key, const SettingsValue& newValue) noexcept;
+    [[nodiscard]] auto add(const SettingsKey& key,
+                           const SettingsValue& newValue) noexcept -> bool;
 
     /*! @copydoc add(const SettingsKeys&, const SettingsValue&)
      */
-    bool add(const SettingsKeys& key,
-             const std::initializer_list<SettingsValue>& newValue) noexcept;
+    [[nodiscard]] auto
+    add(const SettingsKeys& key,
+        const std::initializer_list<SettingsValue>& newValue) noexcept -> bool;
 
     /*! @copydoc add(const SettingsKeys&, const SettingsValue&)
      */
-    bool add(const std::initializer_list<SettingsKey>& key,
-             const std::initializer_list<SettingsValue>& newValue) noexcept;
+    [[nodiscard]] auto
+    add(const std::initializer_list<SettingsKey>& key,
+        const std::initializer_list<SettingsValue>& newValue) noexcept -> bool;
 
     /*! @copydoc add(const SettingsKeys&, const SettingsValue&)
      */
-    bool add(const SettingsKeys& key, const SettingsValues& newValue) noexcept;
+    [[nodiscard]] auto add(const SettingsKeys& key,
+                           const SettingsValues& newValue) noexcept -> bool;
 
     /*! @copydoc add(const SettingsKey&, const SettingsValue&)
      */
-    bool add(const SettingsKey& key, const SettingsValues& newValue) noexcept;
+    [[nodiscard]] auto add(const SettingsKey& key,
+                           const SettingsValues& newValue) noexcept -> bool;
 
     /*! @copydoc add(const SettingsKey&, const SettingsValue&)
      */
-    bool add(const std::initializer_list<SettingsKey>& key,
-             const SettingsValues& newValue) noexcept;
+    [[nodiscard]] auto add(const std::initializer_list<SettingsKey>& key,
+                           const SettingsValues& newValue) noexcept -> bool;
 
     /*! @copydoc add(const SettingsKey&, const SettingsValue&)
      */
-    bool add(const std::initializer_list<SettingsKey>& key,
-             const SettingsValue& newValue) noexcept;
+    [[nodiscard]] auto add(const std::initializer_list<SettingsKey>& key,
+                           const SettingsValue& newValue) noexcept -> bool;
 
     /**
      * Remove the direct child associated with the given key
@@ -252,7 +266,7 @@ class SettingsNode {
      * \returns True if the key was successfully removed. Note: if the key does
      * not exist, it is considered to be removed successfully False otherwise
      */
-    bool clear(const SettingsKey& key) noexcept;
+    auto clear(const SettingsKey& key) noexcept -> bool;
 
     /**
      * Remove the child at the end of the given hierarchy key path
@@ -261,7 +275,7 @@ class SettingsNode {
      * \returns True if the key was successfully remove. Note: if the key does
      * not exist, it is considered to be removed successfully False otherwise
      */
-    bool clear(const SettingsKeys& keys) noexcept;
+    auto clear(const SettingsKeys& keys) noexcept -> bool;
 
     /**
      * Swap the other element with this one
@@ -291,19 +305,19 @@ class SettingsNode {
 
     /*! @copydoc operator[](const SettingsKey&) const
      */
-    SettingsNode* at(const SettingsKey& key) noexcept;
+    auto at(const SettingsKey& key) noexcept -> SettingsNode*;
 
     /*! @copydoc operator[](const SettingsKey&) const
      */
-    const SettingsNode* at(const SettingsKey& key) const noexcept;
+    auto at(const SettingsKey& key) const noexcept -> const SettingsNode*;
 
     /*! @copydoc operator[](const SettingsKey&) const
      */
-    SettingsNode* at(const SettingsKeys& key) noexcept;
+    auto at(const SettingsKeys& key) noexcept -> SettingsNode*;
 
     /*! @copydoc operator[](const SettingsKey&) const
      */
-    const SettingsNode* at(const SettingsKeys& key) const noexcept;
+    auto at(const SettingsKeys& key) const noexcept -> const SettingsNode*;
 
     /**
      * Get the values associated with the root of this node
@@ -311,7 +325,7 @@ class SettingsNode {
      * \returns The associated values if there are values associated with the root of this node
      *          boost::none otherwise
      */
-    std::optional<SettingsValues> values() const noexcept;
+    [[nodiscard]] auto values() const noexcept -> std::optional<SettingsValues>;
 
     SettingsKey m_key; //!< The root key associated with this node
     std::unique_ptr<SettingsNodeCollection>
@@ -325,8 +339,8 @@ class SettingsNode {
  * \param[in] settings  The settings to add to the stream
  * \returns os
  */
-std::ostream& operator<<(std::ostream& os,
-                         const SettingsNode& settings) noexcept;
+auto operator<<(std::ostream& os, const SettingsNode& settings) noexcept
+    -> std::ostream&;
 } // namespace config
 } // namespace execHelper
 

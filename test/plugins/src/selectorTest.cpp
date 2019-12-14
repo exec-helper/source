@@ -88,7 +88,7 @@ SCENARIO("Make combinations of configurations for the selector plugin") {
         Selector plugin;
 
         VariablesMap variables = plugin.getVariablesMap(FleetingOptionsStub());
-        variables.add(PATTERN_KEY, pattern1.getKey());
+        REQUIRE(variables.add(PATTERN_KEY, pattern1.getKey()));
 
         ExecutorStub::TaskQueue expectedTasks;
         expectedTasks.emplace_back(Task());
@@ -96,12 +96,12 @@ SCENARIO("Make combinations of configurations for the selector plugin") {
         COMBINATIONS("Add another select entry") {
             PatternValues newValues = patterns.front().getValues();
             newValues.emplace_back(MEMORY_KEY);
-            patterns.front().setValues(newValues);
+            REQUIRE(patterns.front().setValues(newValues));
             expectedTasks.emplace_back(Task());
         }
 
         COMBINATIONS("Add another pattern entry") {
-            variables.add(PATTERN_KEY, pattern2.getKey());
+            REQUIRE(variables.add(PATTERN_KEY, pattern2.getKey()));
             patterns.push_back(pattern2);
             for(const auto& entry : pattern2.getValues()) {
                 (void)
@@ -122,7 +122,8 @@ SCENARIO("Make combinations of configurations for the selector plugin") {
             THEN_CHECK("It should succeed") { REQUIRE(returnCode); }
 
             THEN_CHECK("It called the right commands") {
-                const Memory::Memories& memories = memory.getExecutions();
+                const Memory::Memories& memories =
+                    MemoryHandler::getExecutions();
                 REQUIRE(memories.size() == expectedTasks.size());
                 auto expectedTask = expectedTasks.begin();
                 for(auto memory = memories.begin(); memory != memories.end();

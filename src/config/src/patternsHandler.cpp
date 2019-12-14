@@ -5,6 +5,7 @@
 #include <log/assertions.h>
 
 #include "logger.h"
+#include "variablesMap.h"
 
 using std::string;
 
@@ -23,11 +24,13 @@ PatternsHandler::PatternsHandler(Patterns&& other) noexcept {
     }
 }
 
-bool PatternsHandler::operator==(const PatternsHandler& other) const noexcept {
+auto PatternsHandler::operator==(const PatternsHandler& other) const noexcept
+    -> bool {
     return m_patterns == other.m_patterns;
 }
 
-bool PatternsHandler::operator!=(const PatternsHandler& other) const noexcept {
+auto PatternsHandler::operator!=(const PatternsHandler& other) const noexcept
+    -> bool {
     return !(*this == other);
 }
 
@@ -35,25 +38,25 @@ void PatternsHandler::addPattern(const Pattern& pattern) noexcept {
     m_patterns.emplace(pattern.getKey(), pattern);
 }
 
-bool PatternsHandler::contains(const PatternKey& key) const noexcept {
+auto PatternsHandler::contains(const PatternKey& key) const noexcept -> bool {
     return m_patterns.count(key) > 0U;
 }
 
-const Pattern& PatternsHandler::getPattern(const PatternKey& key) const
-    noexcept {
+auto PatternsHandler::getPattern(const PatternKey& key) const noexcept
+    -> const Pattern& {
     const PatternCollection& constPatterns = m_patterns;
     ensures(constPatterns.count(key) > 0U);
     return constPatterns.at(key);
 }
 
-config::VariablesMap
-PatternsHandler::getDefaultPatternMap(const PatternKey& key) noexcept {
+auto PatternsHandler::getDefaultPatternMap(const PatternKey& key) noexcept
+    -> config::VariablesMap {
     return VariablesMap(key);
 }
 
-optional<Pattern>
-PatternsHandler::toPattern(const PatternKey& key,
-                           const VariablesMap& patternMap) noexcept {
+auto PatternsHandler::toPattern(const PatternKey& key,
+                                const VariablesMap& patternMap) noexcept
+    -> optional<Pattern> {
     static const string DEFAULT_VALUES_KEY("default-values");
     static const string SHORT_OPTION_KEY("short-option");
     static const string LONG_OPTION_KEY("long-option");

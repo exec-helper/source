@@ -38,20 +38,26 @@ const czstring<> PLUGIN_NAME = "command-line-command";
 
 namespace execHelper::plugins {
 
-std::string CommandLineCommand::getPluginName() const noexcept {
+auto CommandLineCommand::getPluginName() const noexcept -> string {
     return PLUGIN_NAME;
 }
 
-config::VariablesMap CommandLineCommand::getVariablesMap(
-    const FleetingOptionsInterface& /*fleetingOptions*/) const noexcept {
+auto CommandLineCommand::getVariablesMap(
+    const FleetingOptionsInterface& /*fleetingOptions*/) const noexcept
+    -> VariablesMap {
     VariablesMap defaults(PLUGIN_NAME);
-    defaults.add(COMMAND_LINE_KEY, CommandLineArgs());
-    defaults.add(ENVIRONMENT_KEY, EnvArgs());
+    if(!defaults.add(COMMAND_LINE_KEY, CommandLineArgs())) {
+        LOG(error) << "Failed to add key '" << COMMAND_LINE_KEY << "'";
+    }
+    if(!defaults.add(ENVIRONMENT_KEY, EnvArgs())) {
+        LOG(error) << "Failed to add key '" << ENVIRONMENT_KEY << "'";
+    }
     return defaults;
 }
 
-bool CommandLineCommand::apply(Task task, const VariablesMap& variables,
-                               const Patterns& patterns) const noexcept {
+auto CommandLineCommand::apply(Task task, const VariablesMap& variables,
+                               const Patterns& patterns) const noexcept
+    -> bool {
     task.appendToEnvironment(getEnvironment(variables));
 
     auto workingDir = variables.get<WorkingDir>(WORKING_DIR_KEY);

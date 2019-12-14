@@ -10,6 +10,7 @@
 #include "log/assertions.h"
 
 #include "commandLine.h"
+#include "logger.h"
 #include "pluginUtils.h"
 #include "threadedness.h"
 #include "verbosity.h"
@@ -29,22 +30,29 @@ const czstring<> PLUGIN_NAME = "scons";
 } // namespace
 
 namespace execHelper::plugins {
-std::string Scons::getPluginName() const noexcept { return "scons"; }
+auto Scons::getPluginName() const noexcept -> string { return "scons"; }
 
-VariablesMap
-Scons::getVariablesMap(const FleetingOptionsInterface& fleetingOptions) const
-    noexcept {
+auto Scons::getVariablesMap(const FleetingOptionsInterface& fleetingOptions)
+    const noexcept -> VariablesMap {
     VariablesMap defaults(PLUGIN_NAME);
-    defaults.add(getBuildDirKey(), ".");
-    defaults.add(COMMAND_LINE_KEY, CommandLineArgs());
+    if(!defaults.add(getBuildDirKey(), ".")) {
+        LOG(error) << "Failed to add key '" << getBuildDirKey() << "'";
+    }
+    if(!defaults.add(COMMAND_LINE_KEY, CommandLineArgs())) {
+        LOG(error) << "Failed to add key '" << COMMAND_LINE_KEY << "'";
+    }
     const auto verbosity = fleetingOptions.getVerbosity() ? "yes" : "no";
-    defaults.add(VERBOSITY_KEY, verbosity);
-    defaults.add(JOBS_KEY, to_string(fleetingOptions.getJobs()));
+    if(!defaults.add(VERBOSITY_KEY, verbosity)) {
+        LOG(error) << "Failed to add key '" << VERBOSITY_KEY << "'";
+    }
+    if(!defaults.add(JOBS_KEY, to_string(fleetingOptions.getJobs()))) {
+        LOG(error) << "Failed to add key '" << JOBS_KEY << "'";
+    }
     return defaults;
 }
 
-bool Scons::apply(Task task, const VariablesMap& variables,
-                  const Patterns& patterns) const noexcept {
+auto Scons::apply(Task task, const VariablesMap& variables,
+                  const Patterns& patterns) const noexcept -> bool {
     task.append(PLUGIN_NAME);
 
     ensures(variables.get<Verbosity>(VERBOSITY_KEY) != std::nullopt);

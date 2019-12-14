@@ -6,15 +6,14 @@
 #include "environment.h"
 #include "path.h"
 
-namespace execHelper {
-namespace config {
+namespace execHelper::config {
 /**
  * Returns a list of the given path and all of its parents in reverse order.
  *
  * \param[in] path  The path to start listing from
  * \returns A list of the given path and its parent paths in reverse order.
  */
-Paths getAllParentDirectories(Path path) noexcept;
+[[nodiscard]] auto getAllParentDirectories(Path path) noexcept -> Paths;
 
 /**
  * Returns the path to the home directory if it exists
@@ -22,8 +21,8 @@ Paths getAllParentDirectories(Path path) noexcept;
  * \returns The path to the home directory if it exists
  *          boost::none otherwise
  */
-std::optional<Path> getHomeDirectory(const EnvironmentCollection& env) noexcept;
-} // namespace config
-} // namespace execHelper
+[[nodiscard]] auto getHomeDirectory(const EnvironmentCollection& env) noexcept
+    -> std::optional<Path>;
+} // namespace execHelper::config
 
 #endif /* PATH_MANIPULATION_INCLUDE */
