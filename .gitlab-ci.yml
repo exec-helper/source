@@ -350,11 +350,12 @@ coverage:
         paths:
             - test_coverage/
 
-cppcheck-unittest:
-    <<: *cppcheck
-    variables:
-        SOURCE_TYPE: src
-        MODULES: $ALL_MODULES
+# Cppcheck is disables until it can handle C++ 17's trailing return types
+#cppcheck-unittest:
+    #<<: *cppcheck
+    #variables:
+        #SOURCE_TYPE: src
+        #MODULES: $ALL_MODULES
 
 code-duplication-pmd-cpd:
     stage: analyze
