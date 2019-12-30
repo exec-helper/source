@@ -56,4 +56,5 @@ mark_as_advanced(rpcheck_LIBRARY_DIRS)
 
 if(NOT ${USE_SYSTEM_RAPIDCHECK})
     add_dependencies(rpcheck ${PACKAGE_NAME})
+    add_dependencies(download rpcheck)
 endif()

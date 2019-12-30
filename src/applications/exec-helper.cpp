@@ -26,7 +26,17 @@
 #include "core/task.h"
 #include "log/assertions.h"
 #include "log/log.h"
+#include "plugins/commandLineCommand.h"
+#include "plugins/commandPlugin.h"
+#include "plugins/executePlugin.h"
+#include "plugins/lcov.h"
+#include "plugins/logger.h"
+#include "plugins/luaPlugin.h"
+#include "plugins/memory.h"
 #include "plugins/plugin.h"
+#include "plugins/pluginUtils.h"
+#include "plugins/pmd.h"
+#include "plugins/valgrind.h"
 
 #include "version.h"
 
@@ -36,6 +46,7 @@ using std::make_unique;
 using std::move;
 using std::optional;
 using std::setw;
+using std::shared_ptr;
 using std::string;
 using std::stringstream;
 using std::vector;
@@ -84,6 +95,8 @@ using execHelper::core::ReportingExecutor;
 using execHelper::core::Shell;
 using execHelper::core::Task;
 using execHelper::log::LogLevel;
+using execHelper::plugins::Plugin;
+using execHelper::plugins::Plugins;
 
 namespace filesystem = std::filesystem;
 
@@ -138,6 +151,39 @@ inline Paths getSearchPaths(const EnvironmentCollection& env) noexcept {
         searchPaths.emplace_back(homeDir.value());
     }
     return searchPaths;
+}
+
+inline Plugins discoverPlugins() noexcept {
+    return {
+        {"commands",
+         shared_ptr<Plugin>(new execHelper::plugins::CommandPlugin())},
+        {"make", shared_ptr<Plugin>(new execHelper::plugins::LuaPlugin(
+                     std::string(PLUGINS_INSTALL_PATH) + "/make.lua"))},
+        {"ninja", shared_ptr<Plugin>(new execHelper::plugins::LuaPlugin(
+                      std::string(PLUGINS_INSTALL_PATH) + "/ninja.lua"))},
+        {"bootstrap",
+         shared_ptr<Plugin>(new execHelper::plugins::LuaPlugin(
+             std::string(PLUGINS_INSTALL_PATH) + "/bootstrap.lua"))},
+        {"scons", shared_ptr<Plugin>(new execHelper::plugins::LuaPlugin(
+                      std::string(PLUGINS_INSTALL_PATH) + "/scons.lua"))},
+        {"clang-tidy",
+         shared_ptr<Plugin>(new execHelper::plugins::LuaPlugin(
+             std::string(PLUGINS_INSTALL_PATH) + "/clang-tidy.lua"))},
+        {"cppcheck", shared_ptr<Plugin>(new execHelper::plugins::LuaPlugin(
+                         std::string(PLUGINS_INSTALL_PATH) + "/cppcheck.lua"))},
+        {"selector", shared_ptr<Plugin>(new execHelper::plugins::LuaPlugin(
+                         std::string(PLUGINS_INSTALL_PATH) + "/selector.lua"))},
+        {"clang-static-analyzer",
+         shared_ptr<Plugin>(new execHelper::plugins::LuaPlugin(
+             std::string(PLUGINS_INSTALL_PATH) +
+             "/clang-static-analyzer.lua"))},
+        {"command-line-command",
+         shared_ptr<Plugin>(new execHelper::plugins::CommandLineCommand())},
+        {"Memory", shared_ptr<Plugin>(new execHelper::plugins::Memory())},
+        {"valgrind", shared_ptr<Plugin>(new execHelper::plugins::Valgrind())},
+        {"pmd", shared_ptr<Plugin>(new execHelper::plugins::Pmd())},
+        {"lcov", shared_ptr<Plugin>(new execHelper::plugins::Lcov())},
+    };
 }
 
 inline void printHelp(const std::string& binaryName,
@@ -366,10 +412,11 @@ int execHelperMain(int argc, char** argv, char** envp) {
         };
     execHelper::plugins::registerExecuteCallback(executeCallback);
 
+    auto plugins = discoverPlugins();
+
     Commander commander;
     if(commander.run(fleetingOptions, settings, patterns,
-                     settingsFile->parent_path(), move(env))) {
-
+                     settingsFile->parent_path(), move(env), move(plugins))) {
         return EXIT_SUCCESS;
     } else {
         user_feedback_error("Error executing commands");

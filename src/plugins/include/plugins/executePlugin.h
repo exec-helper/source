@@ -2,6 +2,8 @@
 #define __EXECUTE_PLUGIN_H__
 
 #include <memory>
+#include <optional>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -15,10 +17,33 @@
 
 #include "plugin.h"
 
-namespace execHelper {
-namespace plugins {
+namespace execHelper::plugins {
+using Plugins = std::map<std::string, std::shared_ptr<const Plugin>>;
+
+/**
+ * \brief Exception thrown when the requested plugin is invalid
+ *
+ * Exception thrown when the requested plugin is invalid e.g. due to the fact that it can not be found
+ */
+struct InvalidPlugin : public std::runtime_error {
+  public:
+    /**
+     * Create an invalid plugin
+     *
+     * \param[in] msg   A message detailing the specifics of the exception
+     */
+    inline explicit InvalidPlugin(const std::string& msg)
+        : std::runtime_error(msg) {}
+
+    /*! @copydoc InvalidPlugin(const std::string&)
+     */
+    inline explicit InvalidPlugin(const char* msg) : std::runtime_error(msg) {}
+};
+
 /**
  * \brief Plugin for executing arbitrary configured commands and/or plugins
+ *
+ * The ExecutePlugin handles the context of and calls all plugins. It uses the prototype pattern for retrieving a map of plugins it can call.
  */
 class ExecutePlugin : public Plugin {
   public:
@@ -38,7 +63,6 @@ class ExecutePlugin : public Plugin {
     ExecutePlugin(const config::CommandCollection& commandsToExecute,
                   const config::Command& initialCommand) noexcept;
 
-    std::string getPluginName() const noexcept override;
     config::VariablesMap getVariablesMap(
         const config::FleetingOptionsInterface& fleetingOptions) const
         noexcept override;
@@ -50,16 +74,17 @@ class ExecutePlugin : public Plugin {
      *
      * @returns A list of plugin names
      */
-    static const std::vector<std::string>& getPluginNames() noexcept;
+    static auto getPluginNames() noexcept -> std::vector<std::string>;
 
     /**
      * Returns an instance of the plugin associated with the given name
      *
      * \param[in] pluginName    The plugin to get the associated instance from
      * \returns A pointer to the new instance
+     * \throws  InvalidPlugin   When no plugin associated with the given pluginName is found
      */
-    static std::unique_ptr<Plugin>
-    getPlugin(const std::string& pluginName) noexcept;
+    static std::shared_ptr<const Plugin>
+    getPlugin(const std::string& pluginName);
 
     /**
      * Push the given fleeting options on the stack
@@ -84,10 +109,18 @@ class ExecutePlugin : public Plugin {
      * Push the given patterns on the stack
      *
      * \param[in] patterns   The patterns to use. The last patterns on the stack
-     * will be used for calling the commands. \returns True    if the patters
-     * were successfully pushed False   otherwise
+     * will be used for calling the commands.
+     * \returns True    if the patterns were successfully pushed
+     *          False   otherwise
      */
     static bool push(config::Patterns&& patterns) noexcept;
+
+    /**
+     * Push the plugin prototypes to the stack
+     *
+     * \param[in] plugins   Mapping of discovered plugin prototypes
+     */
+    static void push(Plugins&& plugins) noexcept;
 
     /**
      * Pop the last fleeting options from the stack
@@ -104,10 +137,15 @@ class ExecutePlugin : public Plugin {
      */
     static void popPatterns() noexcept;
 
+    /**
+     * Pop the last plugin prototypes from the stack
+     */
+    static void popPlugins() noexcept;
+
   private:
-    static std::unique_ptr<Plugin>
-    getNextStep(const config::Command& command,
-                const config::Command& originalCommand) noexcept;
+    static auto getNextStep(const config::Command& command,
+                            const config::Command& originalCommand) noexcept
+        -> std::shared_ptr<const Plugin>;
     static bool
     getVariablesMap(config::VariablesMap* variables,
                     const std::vector<config::SettingsKeys>& keys,
@@ -123,8 +161,8 @@ class ExecutePlugin : public Plugin {
         m_fleeting;
     static std::vector<config::SettingsNode> m_settings;
     static std::vector<config::PatternsHandler> m_patterns;
+    static std::vector<Plugins> m_plugins;
 };
-} // namespace plugins
-} // namespace execHelper
+} // namespace execHelper::plugins
 
 #endif /* __EXECUTE_PLUGIN_H__ */

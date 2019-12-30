@@ -30,13 +30,14 @@ using execHelper::config::SettingsNode;
 using execHelper::config::VariablesMap;
 using execHelper::core::Task;
 using execHelper::plugins::ExecutePlugin;
+using execHelper::plugins::Plugins;
 
 namespace filesystem = std::filesystem;
 
 namespace {
 const czstring<> WORKING_DIR_PATTERN_KEY = "EH_WORKING_DIR";
 
-inline Patterns addPredefinedPatterns(Patterns patterns) {
+inline auto addPredefinedPatterns(Patterns patterns) -> Patterns {
     patterns.emplace_back(Pattern(WORKING_DIR_PATTERN_KEY,
                                   {filesystem::current_path().string()}));
     return patterns;
@@ -45,16 +46,18 @@ inline Patterns addPredefinedPatterns(Patterns patterns) {
 
 namespace execHelper {
 namespace commander {
-bool Commander::run(const FleetingOptionsInterface& fleetingOptions,
+auto Commander::run(const FleetingOptionsInterface& fleetingOptions,
                     SettingsNode settings, Patterns patterns,
                     const Path& workingDirectory,
-                    const EnvironmentCollection& env) noexcept {
+                    const EnvironmentCollection& env,
+                    Plugins&& plugins) noexcept -> bool {
     patterns = addPredefinedPatterns(patterns);
 
     ExecutePlugin::push(
         not_null<const FleetingOptionsInterface*>(&fleetingOptions));
     ExecutePlugin::push(move(settings));
     ExecutePlugin::push(move(patterns));
+    ExecutePlugin::push(move(plugins));
     Task task({}, env, workingDirectory);
 
     auto commands = fleetingOptions.getCommands();
@@ -65,6 +68,7 @@ bool Commander::run(const FleetingOptionsInterface& fleetingOptions,
     ExecutePlugin plugin(move(commands));
     auto returnCode = plugin.apply(task, VariablesMap("commands"), patterns);
 
+    ExecutePlugin::popPlugins();
     ExecutePlugin::popFleetingOptions();
     ExecutePlugin::popSettingsNode();
     ExecutePlugin::popPatterns();

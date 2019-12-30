@@ -37,11 +37,6 @@ const czstring<> PLUGIN_NAME = "command-line-command";
 } // namespace
 
 namespace execHelper::plugins {
-
-auto CommandLineCommand::getPluginName() const noexcept -> string {
-    return PLUGIN_NAME;
-}
-
 auto CommandLineCommand::getVariablesMap(
     const FleetingOptionsInterface& /*fleetingOptions*/) const noexcept
     -> VariablesMap {

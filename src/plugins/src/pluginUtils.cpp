@@ -11,13 +11,8 @@
 #include "config/variablesMap.h"
 #include "core/patterns.h"
 
-#include "bootstrap.h"
-#include "clangStaticAnalyzer.h"
 #include "commandLineCommand.h"
-#include "cppcheck.h"
 #include "logger.h"
-#include "make.h"
-#include "scons.h"
 
 using std::map;
 using std::ostream;

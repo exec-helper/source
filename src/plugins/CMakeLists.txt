@@ -2,35 +2,28 @@ set(MODULE_NAME plugins)
 set(LIBRARY_NAME ${PROJECT_NAME}-${MODULE_NAME})
 
 set(SRCS
-        src/bootstrap.cpp
+        src/luaPlugin.cpp
         src/pmd.cpp
-        src/selector.cpp
         src/pluginUtils.cpp
         src/memory.cpp
         src/commandPlugin.cpp
-        src/cppcheck.cpp
         src/valgrind.cpp
         src/executePlugin.cpp
         src/plugin.cpp
-        src/scons.cpp
         src/commandLineCommand.cpp
-        src/buildPlugin.cpp
-        src/clangStaticAnalyzer.cpp
-        src/clangTidy.cpp
         src/lcov.cpp
         src/logger.cpp
         src/commandLine.cpp
         src/verbosity.cpp
         src/addEnvironment.cpp
-        src/buildDir.cpp
         src/threadedness.cpp
-        src/buildDir.cpp
    )
 
 set(DEPENDENCIES
         log
         config
         core
+        lua-wrapper
    )
 
 add_library(${LIBRARY_NAME} ${SRCS})
@@ -40,3 +33,15 @@ target_link_libraries(${LIBRARY_NAME} PUBLIC ${DEPENDENCIES})
 
 add_library(${MODULE_NAME} ALIAS ${LIBRARY_NAME})
 install(TARGETS ${LIBRARY_NAME} DESTINATION ${LIB_DIRECTORY})
+
+set(PLUGINS
+    src/scripts/make.lua
+    src/scripts/ninja.lua
+    src/scripts/bootstrap.lua
+    src/scripts/scons.lua
+    src/scripts/clang-tidy.lua
+    src/scripts/cppcheck.lua
+    src/scripts/selector.lua
+    src/scripts/clang-static-analyzer.lua
+)
+install(FILES ${PLUGINS} DESTINATION ${PLUGINS_INSTALL_PREFIX} COMPONENT runtime)

@@ -50,6 +50,7 @@ endif()
 add_library(yaml-3rd INTERFACE)
 if(NOT ${USE_SYSTEM_YAML_CPP})
     add_dependencies(yaml-3rd Yaml-cpp)
+    add_dependencies(download Yaml-cpp)
 endif()
 
 target_include_directories(yaml-3rd SYSTEM INTERFACE ${${PACKAGE_NAME}_INCLUDE_DIRS})

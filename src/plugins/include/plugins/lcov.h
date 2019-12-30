@@ -14,7 +14,6 @@ namespace plugins {
  */
 class Lcov : public Plugin {
   public:
-    std::string getPluginName() const noexcept override;
     config::VariablesMap getVariablesMap(
         const config::FleetingOptionsInterface& fleetingOptions) const
         noexcept override;

@@ -1,111 +1,57 @@
+#include <filesystem>
 #include <string>
+#include <vector>
 
-#include <gsl/string_span>
-
+#include "config/environment.h"
 #include "config/pattern.h"
 #include "config/variablesMap.h"
-#include "plugins/commandLine.h"
-#include "plugins/cppcheck.h"
-#include "plugins/threadedness.h"
-#include "plugins/verbosity.h"
+#include "plugins/luaPlugin.h"
+
 #include "unittest/catch.h"
+#include "unittest/config.h"
+#include "unittest/rapidcheck.h"
+
+#include "utils/commonGenerators.h"
 #include "utils/utils.h"
 
 #include "executorStub.h"
 #include "fleetingOptionsStub.h"
+#include "handlers.h"
 
+using std::optional;
 using std::string;
 using std::to_string;
+using std::vector;
 
-using gsl::czstring;
-
-using execHelper::config::Pattern;
+using execHelper::config::EnvironmentCollection;
+using execHelper::config::Jobs_t;
 using execHelper::config::Patterns;
 using execHelper::config::VariablesMap;
 using execHelper::core::Task;
-using execHelper::core::TaskCollection;
-using execHelper::plugins::JOBS_KEY;
-using execHelper::plugins::VERBOSITY_KEY;
 
 using execHelper::core::test::ExecutorStub;
-using execHelper::test::FleetingOptionsStub;
+using execHelper::test::propertyTest;
 using execHelper::test::utils::getExpectedTasks;
 
-namespace {
-const czstring<> PLUGIN_NAME = "cppcheck";
-const czstring<> ENABLE_CHECKS_KEY = "enable-checks";
-const czstring<> SRC_DIR_KEY = "src-dir";
-} // namespace
+namespace filesystem = std::filesystem;
 
 namespace execHelper::plugins::test {
-SCENARIO("Obtain the plugin name of the cppcheck plugin", "[cppcheck]") {
-    GIVEN("A plugin") {
-        Cppcheck plugin;
-
-        WHEN("We request the plugin name") {
-            const string pluginName = plugin.getPluginName();
-
-            THEN("We should find the correct plugin name") {
-                REQUIRE(pluginName == PLUGIN_NAME);
-            }
-        }
-    }
-}
-
-SCENARIO("Obtain the default variables map of the cppcheck plugin",
-         "[cppcheck]") {
-    MAKE_COMBINATIONS("The default fleeting options") {
-        FleetingOptionsStub fleetingOptions;
-        Cppcheck plugin;
-
-        VariablesMap actualVariables(plugin.getPluginName());
-        REQUIRE(actualVariables.add(ENABLE_CHECKS_KEY, "all"));
-        REQUIRE(actualVariables.add(COMMAND_LINE_KEY, CommandLineArgs()));
-        REQUIRE(actualVariables.add(SRC_DIR_KEY, "."));
-        REQUIRE(actualVariables.add(VERBOSITY_KEY, "no"));
-        REQUIRE(
-            actualVariables.add(JOBS_KEY, to_string(fleetingOptions.m_jobs)));
-
-        COMBINATIONS("Switch on verbosity") {
-            fleetingOptions.m_verbose = true;
-            REQUIRE(actualVariables.replace(VERBOSITY_KEY, "yes"));
-        }
-
-        COMBINATIONS("Switch on threadedness") {
-            const uint8_t NB_OF_JOBS = 6U;
-            fleetingOptions.m_jobs = NB_OF_JOBS;
-            REQUIRE(actualVariables.replace(JOBS_KEY,
-                                            to_string(fleetingOptions.m_jobs)));
-        }
-
-        THEN_WHEN("We request the variables map") {
-            VariablesMap variables = plugin.getVariablesMap(fleetingOptions);
-
-            THEN_CHECK("We should find the same ones") {
-                REQUIRE(variables == actualVariables);
-            }
-        }
-    }
-}
-
 SCENARIO("Testing the configuration settings of the cppcheck plugin",
          "[cppcheck]") {
-    MAKE_COMBINATIONS("Of several settings") {
-        FleetingOptionsStub fleetingOptions;
+    propertyTest("", [](const optional<vector<filesystem::path>>& srcDir,
+                        const optional<vector<string>>& checks,
+                        const optional<filesystem::path>& workingDir,
+                        const optional<vector<string>>& commandLine,
+                        const optional<EnvironmentCollection>& environment,
+                        const optional<bool> verbose,
+                        const optional<Jobs_t> jobs) {
+        const Task task;
+        Task expectedTask(task);
+        Patterns patterns;
 
-        const Pattern pattern1("PATTERN1", {"value1a", "value1b"});
-        const Pattern pattern2("PATTERN2", {"value2a", "value2b"});
-        const Patterns patterns({pattern1, pattern2});
+        VariablesMap config("cppcheck-test");
 
-        Cppcheck plugin;
-
-        VariablesMap variables = plugin.getVariablesMap(FleetingOptionsStub());
-
-        std::string enabledChecks("--enable=all");
-        std::string srcDir(".");
-        Jobs jobs = fleetingOptions.m_jobs;
-        TaskCollection verbosity;
-        TaskCollection commandLine;
+        LuaPlugin plugin(std::string(PLUGINS_INSTALL_PATH) + "/cppcheck.lua");
 
         ExecutorStub executor;
         ExecuteCallback executeCallback = [&executor](const Task& task) {
@@ -113,52 +59,70 @@ SCENARIO("Testing the configuration settings of the cppcheck plugin",
         };
         registerExecuteCallback(executeCallback);
 
-        COMBINATIONS("Change the enabled checks") {
-            TaskCollection enabledChecksValue = {"warning", "style",
-                                                 "performance"};
-            REQUIRE(variables.replace(ENABLE_CHECKS_KEY, enabledChecksValue));
-            enabledChecks = "--enable=warning,style,performance";
+        expectedTask.append("cppcheck");
+
+        if(workingDir) {
+            handleWorkingDirectory(*workingDir, config, expectedTask);
         }
 
-        COMBINATIONS("Change the source dir") {
-            srcDir = "{" + pattern1.getKey() + "}/{HELLO}/{" +
-                     pattern2.getKey() + "}";
-            REQUIRE(variables.replace(SRC_DIR_KEY, srcDir));
+        if(environment) {
+            handleEnvironment(*environment, config, expectedTask);
         }
 
-        COMBINATIONS("Switch on verbosity") {
-            REQUIRE(variables.replace(VERBOSITY_KEY, "yes"));
-            verbosity = {"--verbose"};
+        string enableString("--enable=");
+        if(checks) {
+            REQUIRE(config.add("enable-checks", *checks));
+            for(auto it = checks->begin(); it != checks->end(); ++it) {
+                if(it != checks->begin()) {
+                    enableString.append(",");
+                }
+                enableString.append(*it);
+            }
+            expectedTask.append(enableString);
+        } else {
+            enableString.append("all");
+            expectedTask.append(enableString);
         }
 
-        COMBINATIONS("Add a command line") {
-            commandLine = {"{" + pattern1.getKey() + "}",
-                           "{" + pattern2.getKey() + "}"};
-            REQUIRE(variables.replace(COMMAND_LINE_KEY, commandLine));
+        if(verbose) {
+            handleVerbosity(*verbose, "--verbose", config, expectedTask);
         }
 
-        COMBINATIONS("Switch on single threaded") {
-            jobs = 1U;
-            REQUIRE(variables.replace(JOBS_KEY, to_string(jobs)));
+        if(jobs) {
+            REQUIRE(config.add("jobs", std::to_string(*jobs)));
+            expectedTask.append({"-j", std::to_string(*jobs)});
+        } else {
+            const std::string defaultNumberOfJobs{"1"};
+            expectedTask.append({"-j", defaultNumberOfJobs});
         }
 
-        Task expectedTask({PLUGIN_NAME});
-        expectedTask.append(enabledChecks);
-        expectedTask.append(verbosity);
-        expectedTask.append({"-j", to_string(jobs)});
-        expectedTask.append(commandLine);
-        expectedTask.append(srcDir);
+        if(commandLine) {
+            handleCommandLine(*commandLine, config, expectedTask);
+        }
+
+        if(srcDir) {
+            REQUIRE(config.add("src-dir"));
+            for_each(srcDir->begin(), srcDir->end(),
+                     [&config, &expectedTask](const auto& src) {
+                         REQUIRE(config.add("src-dir", src.string()));
+                         expectedTask.append(src.string());
+                     });
+        } else {
+            expectedTask.append(".");
+        }
 
         ExecutorStub::TaskQueue expectedTasks =
             getExpectedTasks(expectedTask, patterns);
 
-        Task task;
-        bool returnCode = plugin.apply(task, variables, patterns);
-        THEN_CHECK("It should succeed") { REQUIRE(returnCode); }
+        THEN_WHEN("We apply the plugin") {
+            bool returnCode = plugin.apply(task, config, patterns);
 
-        THEN_CHECK("It called the right commands") {
-            REQUIRE(expectedTasks == executor.getExecutedTasks());
+            THEN_CHECK("It should succeed") { REQUIRE(returnCode); }
+
+            THEN_CHECK("It called the right commands") {
+                REQUIRE(expectedTasks == executor.getExecutedTasks());
+            }
         }
-    }
+    });
 }
 } // namespace execHelper::plugins::test

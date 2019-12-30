@@ -9,16 +9,9 @@
 #include "config/variablesMap.h"
 #include "core/task.h"
 #include "log/assertions.h"
-#include "plugins/bootstrap.h"
-#include "plugins/clangStaticAnalyzer.h"
-#include "plugins/clangTidy.h"
 #include "plugins/commandLineCommand.h"
-#include "plugins/cppcheck.h"
 #include "plugins/executePlugin.h"
-#include "plugins/make.h"
 #include "plugins/memory.h"
-#include "plugins/scons.h"
-#include "plugins/selector.h"
 #include "plugins/valgrind.h"
 #include "unittest/catch.h"
 
@@ -29,6 +22,7 @@
 
 using std::map;
 using std::move;
+using std::shared_ptr;
 using std::string;
 using std::vector;
 
@@ -44,16 +38,10 @@ using execHelper::config::SettingsNode;
 using execHelper::config::SettingsValues;
 using execHelper::config::VariablesMap;
 using execHelper::core::Task;
-using execHelper::plugins::Bootstrap;
-using execHelper::plugins::ClangStaticAnalyzer;
 using execHelper::plugins::CommandLineCommand;
-using execHelper::plugins::Cppcheck;
 using execHelper::plugins::ExecutePlugin;
-using execHelper::plugins::Make;
 using execHelper::plugins::Memory;
 using execHelper::plugins::MemoryHandler;
-using execHelper::plugins::Scons;
-using execHelper::plugins::Selector;
 using execHelper::plugins::Valgrind;
 
 using execHelper::test::FleetingOptionsStub;
@@ -120,27 +108,13 @@ class Expected {
 } // namespace
 
 namespace execHelper::plugins::test {
-SCENARIO("Obtain the plugin name of the execute-plugin", "[execute-plugin]") {
-    GIVEN("A plugin") {
-        ExecutePlugin plugin({});
-
-        WHEN("We request the plugin name") {
-            const string pluginName = plugin.getPluginName();
-
-            THEN("We should find the correct plugin name") {
-                REQUIRE(pluginName == PLUGIN_NAME);
-            }
-        }
-    }
-}
-
 SCENARIO("Obtaining the default variables map of the execute-plugin",
          "[clang-tidy]") {
     GIVEN("The default fleeting options") {
         FleetingOptionsStub fleetingOptions;
         ExecutePlugin plugin({});
 
-        VariablesMap actualVariables(plugin.getPluginName());
+        VariablesMap actualVariables(PLUGIN_NAME);
 
         WHEN("We request the variables map") {
             VariablesMap variables = plugin.getVariablesMap(fleetingOptions);
@@ -332,11 +306,15 @@ SCENARIO("Test the settings node to variables map mapping",
             }
         }
 
-        ExecutePlugin plugin(commands);
+        ExecutePlugin::push(
+            Plugins({{"Memory",
+                      shared_ptr<Plugin>(new execHelper::plugins::Memory())}}));
         ExecutePlugin::push(
             gsl::not_null<config::FleetingOptionsInterface*>(&fleetingOptions));
         ExecutePlugin::push(move(settings));
         ExecutePlugin::push(move(configuredPatterns));
+
+        ExecutePlugin plugin(commands);
 
         THEN_WHEN("We apply the execute plugin") {
             Task task;
@@ -372,6 +350,7 @@ SCENARIO("Test the settings node to variables map mapping",
         ExecutePlugin::popFleetingOptions();
         ExecutePlugin::popSettingsNode();
         ExecutePlugin::popPatterns();
+        ExecutePlugin::popPlugins();
     }
 }
 
@@ -379,11 +358,15 @@ SCENARIO("Test problematic cases", "[execute-plugin]") {
     GIVEN("A plugin with a non-existing plugin to execute") {
         FleetingOptionsStub fleetingOptions;
 
-        ExecutePlugin plugin({"non-existing-plugin"});
+        ExecutePlugin::push(
+            Plugins({{"Memory",
+                      shared_ptr<Plugin>(new execHelper::plugins::Memory())}}));
         ExecutePlugin::push(
             gsl::not_null<config::FleetingOptionsInterface*>(&fleetingOptions));
         ExecutePlugin::push(SettingsNode("test"));
         ExecutePlugin::push(Patterns());
+
+        ExecutePlugin plugin({"non-existing-plugin"});
 
         WHEN("We execute the plugin") {
             Task task;
@@ -396,6 +379,7 @@ SCENARIO("Test problematic cases", "[execute-plugin]") {
         ExecutePlugin::popFleetingOptions();
         ExecutePlugin::popSettingsNode();
         ExecutePlugin::popPatterns();
+        ExecutePlugin::popPlugins();
     }
     GIVEN("A plugin that fails to execute") {
         const Command command("command");
@@ -406,11 +390,15 @@ SCENARIO("Test problematic cases", "[execute-plugin]") {
         REQUIRE(settings.add(COMMAND_KEY, command));
         REQUIRE(settings.add(command, MEMORY_KEY));
 
-        ExecutePlugin plugin({"memory", "memory"});
+        ExecutePlugin::push(
+            Plugins({{"Memory",
+                      shared_ptr<Plugin>(new execHelper::plugins::Memory())}}));
         ExecutePlugin::push(
             gsl::not_null<config::FleetingOptionsInterface*>(&fleetingOptions));
         ExecutePlugin::push(move(settings));
         ExecutePlugin::push(Patterns());
+
+        ExecutePlugin plugin({"memory", "memory"});
 
         MemoryHandler memory;
         MemoryHandler::setReturnCode(false);
@@ -429,6 +417,7 @@ SCENARIO("Test problematic cases", "[execute-plugin]") {
         ExecutePlugin::popFleetingOptions();
         ExecutePlugin::popSettingsNode();
         ExecutePlugin::popPatterns();
+        ExecutePlugin::popPlugins();
     }
 }
 
@@ -437,23 +426,17 @@ SCENARIO("Testing the plugin getter", "[execute-plugin]") {
     GIVEN("Nothing in particular") {
         WHEN("We request the respective plugin object") {
             THEN("We should get the appropriate ones") {
-                REQUIRE(
-                    checkGetPlugin<CommandLineCommand>("command-line-command"));
-                REQUIRE(checkGetPlugin<Scons>("scons"));
-                REQUIRE(checkGetPlugin<Make>("make"));
-                REQUIRE(checkGetPlugin<Bootstrap>("bootstrap"));
-                REQUIRE(checkGetPlugin<Cppcheck>("cppcheck"));
-                REQUIRE(checkGetPlugin<ClangStaticAnalyzer>(
-                    "clang-static-analyzer"));
-                REQUIRE(checkGetPlugin<ClangTidy>("clang-tidy"));
-                REQUIRE(checkGetPlugin<Selector>("selector"));
-                REQUIRE(checkGetPlugin<Memory>("memory"));
-                REQUIRE(checkGetPlugin<Valgrind>("valgrind"));
+                REQUIRE(checkGetPlugin<const CommandLineCommand>(
+                    "command-line-command"));
+                REQUIRE(checkGetPlugin<const Memory>("memory"));
+                REQUIRE(checkGetPlugin<const Valgrind>("valgrind"));
             }
         }
         WHEN("We try to get a non-existing plugin") {
             THEN("We should not get anything") {
-                REQUIRE_FALSE(ExecutePlugin::getPlugin("non-existing-plugin"));
+                REQUIRE_THROWS_AS(
+                    ExecutePlugin::getPlugin("non-existing-plugin"),
+                    plugins::InvalidPlugin);
             }
         }
     }

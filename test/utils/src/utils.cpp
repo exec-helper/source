@@ -266,9 +266,14 @@ createPatternCombination(const PatternKeys& keys,
 
 PatternPermutator makePatternPermutator(const Patterns& patterns) noexcept {
     map<PatternKey, PatternValues> patternValuesMatrix;
-    for(const auto& pattern : patterns) {
+    if(patterns.empty()) {
         patternValuesMatrix.emplace(
-            make_pair(pattern.getKey(), pattern.getValues()));
+            make_pair(string("BLAATBLAATBLAATBLAAT"), vector<string>({"b"})));
+    } else {
+        for(const auto& pattern : patterns) {
+            patternValuesMatrix.emplace(
+                make_pair(pattern.getKey(), pattern.getValues()));
+        }
     }
     return PatternPermutator(patternValuesMatrix);
 }

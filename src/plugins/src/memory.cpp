@@ -23,8 +23,6 @@ Memory::Memories               // NOLINT(fuchsia-statically-constructed-objects)
     Memory::m_executions = {}; // NOLINT(readability-redundant-declaration)
 bool Memory::m_returnCode = true; // NOLINT(readability-redundant-declaration)
 
-auto Memory::getPluginName() const noexcept -> string { return PLUGIN_NAME; }
-
 auto Memory::getVariablesMap(
     const FleetingOptionsInterface& /*fleetingOptions*/) const noexcept
     -> VariablesMap {

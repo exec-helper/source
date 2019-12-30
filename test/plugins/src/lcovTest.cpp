@@ -15,6 +15,7 @@
 
 #include "fleetingOptionsStub.h"
 
+using std::shared_ptr;
 using std::string;
 using std::vector;
 
@@ -51,26 +52,12 @@ const czstring<> MEMORY_KEY = "memory";
 } // namespace
 
 namespace execHelper::plugins::test {
-SCENARIO("Obtain the plugin name of the lcov plugin", "[lcov]") {
-    GIVEN("A plugin") {
-        Lcov plugin;
-
-        WHEN("We request the plugin name") {
-            const string pluginName = plugin.getPluginName();
-
-            THEN("We should find the correct plugin name") {
-                REQUIRE(pluginName == PLUGIN_NAME);
-            }
-        }
-    }
-}
-
 SCENARIO("Obtaining the default variables map of the lcov plugin", "[lcov]") {
     GIVEN("The default fleeting options") {
         FleetingOptionsStub fleetingOptions;
         Lcov plugin;
 
-        VariablesMap actualVariables(plugin.getPluginName());
+        VariablesMap actualVariables(PLUGIN_NAME);
         REQUIRE(actualVariables.add(COMMAND_LINE_KEY, CommandLineArgs()));
         REQUIRE(actualVariables.add(INFO_FILE_KEY, "lcov-plugin.info"));
         REQUIRE(actualVariables.add(BASE_DIR_KEY, "."));
@@ -127,6 +114,9 @@ SCENARIO("Test multiple configurations of the lcov plugin", "[lcov]") {
             gsl::not_null<config::FleetingOptionsInterface*>(&fleetingOptions));
         ExecutePlugin::push(SettingsNode(PLUGIN_NAME));
         ExecutePlugin::push(Patterns(patterns));
+        ExecutePlugin::push(
+            Plugins({{"Memory",
+                      shared_ptr<Plugin>(new execHelper::plugins::Memory())}}));
 
         COMBINATIONS("Change the info file") {
             infoFile = "/tmp";
@@ -230,6 +220,7 @@ SCENARIO("Test multiple configurations of the lcov plugin", "[lcov]") {
             }
         }
 
+        ExecutePlugin::popPlugins();
         ExecutePlugin::popFleetingOptions();
         ExecutePlugin::popSettingsNode();
         ExecutePlugin::popPatterns();

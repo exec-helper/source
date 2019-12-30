@@ -1,0 +1,13 @@
+#ifndef VERSION_INCLUDE
+#define VERSION_INCLUDE
+
+#include <gsl/string_span>
+
+#include <string_view>
+
+const gsl::czstring<> BINARY_NAME = "@BINARY_NAME@";
+const gsl::czstring<> VERSION = "@VERSION@";
+const gsl::czstring<> COPYRIGHT = "@COPYRIGHT@";
+const std::string_view PLUGINS_INSTALL_PATH = "@ACTUAL_PLUGINS_INSTALL_PREFIX@";
+
+#endif  /* VERSION_INCLUDE */

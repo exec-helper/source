@@ -32,7 +32,8 @@ class NonEmptyString {
     std::string m_string;
 };
 
-std::ostream& operator<<(std::ostream& os, const NonEmptyString& obj) noexcept {
+inline std::ostream& operator<<(std::ostream& os,
+                                const NonEmptyString& obj) noexcept {
     os << *obj;
     return os;
 }

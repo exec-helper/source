@@ -64,7 +64,6 @@ class Memory : public Plugin {
      */
     Memory& operator=(Memory&& other) noexcept = delete;
 
-    std::string getPluginName() const noexcept override;
     config::VariablesMap getVariablesMap(
         const config::FleetingOptionsInterface& fleetingOptions) const
         noexcept override;

@@ -50,26 +50,12 @@ const czstring<> LANGUAGE_KEY = "language";
 } // namespace
 
 namespace execHelper::plugins::test {
-SCENARIO("Obtain the plugin name of the pmd plugin", "[pmd]") {
-    GIVEN("A plugin") {
-        Pmd plugin;
-
-        WHEN("We request the plugin name") {
-            const string pluginName = plugin.getPluginName();
-
-            THEN("We should find the correct plugin name") {
-                REQUIRE(pluginName == PLUGIN_NAME);
-            }
-        }
-    }
-}
-
 SCENARIO("Obtaining the default variables map of the pmd plugin", "[pmd]") {
     MAKE_COMBINATIONS("The default fleeting options") {
         FleetingOptionsStub fleetingOptions;
         Pmd plugin;
 
-        VariablesMap actualVariables(plugin.getPluginName());
+        VariablesMap actualVariables(PLUGIN_NAME);
         REQUIRE(actualVariables.add(EXEC_KEY, PLUGIN_NAME));
         REQUIRE(actualVariables.add(TOOL_KEY, "cpd"));
         REQUIRE(actualVariables.add(COMMAND_LINE_KEY, CommandLineArgs()));

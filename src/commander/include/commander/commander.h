@@ -22,7 +22,8 @@ class Options;
 
 namespace plugins {
 class Plugin;
-}
+using Plugins = std::map<std::string, std::shared_ptr<const Plugin>>;
+} // namespace plugins
 } // namespace execHelper
 
 namespace execHelper {
@@ -41,27 +42,15 @@ class Commander {
      * \param[in] patterns           The patterns context to use
      * \param[in] workingDirectory   The working directory for the commander
      * \param[in] env       The environment to apply the plugins in
+     * \param[in] plugins   A map of plugin prototypes where each key is associated with a certain plugin
      * \returns True    If the command was run successfully
      *          False   Otherwise
      */
-    bool run(const config::FleetingOptionsInterface& fleetingOptions,
+    auto run(const config::FleetingOptionsInterface& fleetingOptions,
              config::SettingsNode settings, config::Patterns patterns,
              const config::Path& workingDirectory,
-             const config::EnvironmentCollection& env) noexcept;
-
-  private:
-    /**
-     * Applies the plugin associated with the given plugin name
-     *
-     * \param[in] pluginName    The name of the plugin to execute
-     * \param[in] command       The command that is currently being run
-     * \param[in] options       The options associated with the command being
-     * run \returns True    If the plugin was successfully applied False
-     * Otherwise
-     */
-    bool executePlugin(const std::string& pluginName,
-                       const std::string& command,
-                       const core::Options& options) noexcept;
+             const config::EnvironmentCollection& env,
+             plugins::Plugins&& plugins) noexcept -> bool;
 };
 } // namespace commander
 } // namespace execHelper

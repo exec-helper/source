@@ -16,6 +16,7 @@
 
 #include "fleetingOptionsStub.h"
 
+using std::shared_ptr;
 using std::string;
 
 using gsl::czstring;
@@ -36,27 +37,13 @@ const czstring<> MEMORY_KEY = "memory";
 } // namespace
 
 namespace execHelper::plugins::test {
-SCENARIO("Obtain the plugin name of the command-plugin", "[command-plugin]") {
-    GIVEN("A plugin") {
-        CommandPlugin plugin;
-
-        WHEN("We request the plugin name") {
-            const string pluginName = plugin.getPluginName();
-
-            THEN("We should find the correct plugin name") {
-                REQUIRE(pluginName == PLUGIN_NAME);
-            }
-        }
-    }
-}
-
 SCENARIO("Obtaining the default variables map of the command-plugin",
          "[command-plugin]") {
     MAKE_COMBINATIONS("The default fleeting options") {
         FleetingOptionsStub fleetingOptions;
         CommandPlugin plugin;
 
-        VariablesMap actualVariables(plugin.getPluginName());
+        VariablesMap actualVariables(PLUGIN_NAME);
         REQUIRE(actualVariables.add(PLUGIN_NAME, CommandCollection()));
 
         COMBINATIONS("Add a command") {
@@ -102,6 +89,9 @@ SCENARIO("Test the commandPlugin plugin", "[command-plugin]") {
             gsl::not_null<config::FleetingOptionsInterface*>(&fleetingOptions));
         ExecutePlugin::push(SettingsNode(PLUGIN_NAME));
         ExecutePlugin::push(Patterns());
+        ExecutePlugin::push(
+            Plugins({{"Memory",
+                      shared_ptr<Plugin>(new execHelper::plugins::Memory())}}));
 
         COMBINATIONS("Add a command to execute") {
             REQUIRE(variables.add(PLUGIN_NAME, MEMORY_KEY));
@@ -134,6 +124,7 @@ SCENARIO("Test the commandPlugin plugin", "[command-plugin]") {
             }
         }
 
+        ExecutePlugin::popPlugins();
         ExecutePlugin::popFleetingOptions();
         ExecutePlugin::popSettingsNode();
         ExecutePlugin::popPatterns();

@@ -53,8 +53,6 @@ void runTask(const Task& task, const PatternCombinations& combination) {
 } // namespace
 
 namespace execHelper::plugins {
-auto Lcov::getPluginName() const noexcept -> string { return PLUGIN_NAME; }
-
 auto Lcov::getVariablesMap(const FleetingOptionsInterface& /*fleetingOptions*/)
     const noexcept -> VariablesMap {
     VariablesMap defaults(PLUGIN_NAME);

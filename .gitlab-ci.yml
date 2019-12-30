@@ -17,11 +17,8 @@ variables:
     SAST_DEFAULT_ANALYZERS: "flawfinder,gitleaks,trufflehog,pmd"
 
 
-.build_tools: &build_tools
-        ":"           # Delegated to docker images
-
 .install_exec_helper: &install_exec_helper
-        sudo cp build/native/release/src/applications/exec-helper /usr/local/bin/
+        tar -cf exec-helper.tar.xz usr && sudo tar -xvf exec-helper.tar.xz --directory=/ && rm -rf exec-helper.tar.xz
 
 .run_test: &run_test
     stage: test
@@ -65,9 +62,9 @@ variables:
     dependencies:
         - build:native
     script:
-        - *build_tools
         - *install_exec_helper
         - exec-helper setup init-build -c g++ -m release
+        - ninja -C build/g++/release/build download     # Downloads and builds all non-system dependencies for clang-tidy to find them
         - exec-helper analyze --analyze clang-tidy --module $MODULES --source-type $SOURCE_TYPE
 
 .cppcheck: &cppcheck
@@ -91,7 +88,6 @@ variables:
     dependencies:
         - build:native
     script:
-        - *build_tools
         - *install_exec_helper
         - export PATH=$(pwd)/build/clang++/undefined-behaviour/install/bin:$(pwd)/build/clang++/undefined-behaviour/install/test/integration:$PATH
         - exec-helper undefined-behaviour
@@ -116,7 +112,6 @@ variables:
     dependencies:
         - build:native
     script:
-        - *build_tools
         - *install_exec_helper
         - export PATH=$(pwd)/build/clang++/asan/install/bin:$(pwd)/build/clang++/asan/install/test/integration:$PATH
         - exec-helper analyze --analyze asan --module "${ALL_MODULES}"      # Note: the quotes are used to cheat exec-helper so that the binaries are only built once rather than for each module separately
@@ -173,26 +168,37 @@ build:native:
     stage: build-native
     image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-build
     dependencies: []
+    variables:
+        INSTALL_DIR: usr
     script:
-        - *build_tools
-        - make
-        - sudo make install
+        - make PREFIX=${INSTALL_DIR} ACTUAL_PLUGINS_INSTALL_PREFIX=/usr/share/exec-helper/plugins
+        - make PREFIX=${INSTALL_DIR} ACTUAL_PLUGINS_INSTALL_PREFIX=/usr/share/exec-helper/plugins install 
     artifacts:
         expire_in: 1 day
         paths:
-            - build/native/release/src/applications/exec-helper
+            - ${INSTALL_DIR}
+
+build:local:
+    stage: build-native
+    image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-build
+    dependencies: []
+    script:
+        - make
+        - sudo make install
 
 build:debian:
     stage: build-native
     image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-build-debian
     dependencies: []
+    variables:
+        INSTALL_DIR: usr
     script:
-        - make BUILD_DOCUMENTATION=OFF binary
-        - make install-bin
+        - make BUILD_DOCUMENTATION=OFF PREFIX=${INSTALL_DIR} ACTUAL_PLUGINS_INSTALL_PREFIX=/usr/share/exec-helper/plugins binary
+        - make PREFIX=${INSTALL_DIR} ACTUAL_PLUGINS_INSTALL_PREFIX=/usr/share/exec-helper/plugins install-bin
     artifacts:
         expire_in: 1 day
         paths:
-            - build/native/release/src/applications/exec-helper
+            - ${INSTALL_DIR}
 
 build:no-system:
     stage: build
@@ -202,7 +208,6 @@ build:no-system:
     before_script:
         - sudo pacman -Sy --needed --noconfirm clang cmake make doxygen git
     script: 
-        - *build_tools
         - *install_exec_helper
         - exec-helper init-no-system build --compiler clang++ --mode release
 
@@ -212,7 +217,6 @@ build:gcc:
     dependencies:
         - build:native
     script:
-        - *build_tools
         - *install_exec_helper
         - exec-helper init build --compiler g++ --mode release
     artifacts:
@@ -226,7 +230,6 @@ build:gcc:debug:
     dependencies:
         - build:native
     script:
-        - *build_tools
         - *install_exec_helper
         - exec-helper init build --compiler g++ --mode debug
 
@@ -236,7 +239,6 @@ build:gcc:limited-optimization:
     dependencies:
         - build:native
     script:
-        - *build_tools
         - *install_exec_helper
         - exec-helper init-limited-optimization build --compiler g++ --mode limited
     artifacts:
@@ -250,7 +252,6 @@ build:clang:
     dependencies:
         - build:native
     script: 
-        - *build_tools
         - *install_exec_helper
         - exec-helper init build --compiler clang++ --mode release
     artifacts:
@@ -310,7 +311,6 @@ clang-static-analyzer:
     dependencies:
         - build:native
     script:
-        - *build_tools
         - *install_exec_helper
         # Ugly hack for circumventing issues with the (unused) scan-build c compiler.
         - echo "SET(CMAKE_C_COMPILER  clang)" >> toolchain.cmake.in
@@ -325,9 +325,10 @@ cross-compilation:
         - *install_exec_helper
     script:
         - apt-get install --yes debootstrap g++-aarch64-linux-gnu cmake ninja-build pkg-config git
-        - debootstrap --arch=arm64 --foreign --variant=minbase --include=libboost-program-options-dev,libboost-filesystem-dev,libboost-log-dev,doxygen,libc6-dev testing ./sysroot_arm64 http://deb.debian.org/debian/
+        - debootstrap --arch=arm64 --download-only --variant=minbase --include=libboost-program-options-dev,libboost-filesystem-dev,libboost-log-dev,libboost-thread-dev,doxygen,libc6-dev testing ./sysroot_arm64 http://deb.debian.org/debian/
         - for DEB in $(find sysroot_arm64/var/cache/apt/archives -not -path sysroot_arm64/var/cache/apt/archives/partial -type f); do echo "Extracting ${DEB}..."; dpkg -x ${DEB} sysroot_arm64; done   # Unpack all downloaded debian packages, since debootstrap does not seem to unpack the additional included ones and their dependencies
-        - exec-helper init-no-system build --compiler aarch64-linux-gnu-g++ --mode release --sysroot $(pwd)/sysroot_arm64
+        - cp -r /usr/aarch64-linux-gnu/* sysroot_arm64/usr/
+        - exec-helper init-build build --compiler aarch64-linux-gnu-g++ --mode release --sysroot $(pwd)/sysroot_arm64
 
 undefined-behaviour:
     <<: *undefined_behaviour
@@ -342,7 +343,6 @@ coverage:
         - build:native
         - build:gcc
     script:
-        - *build_tools
         - *install_exec_helper
         - export PATH=$(pwd)/build/g++/release/install/bin:$(pwd)/build/g++/release/install/test/integration:$PATH
         - exec-helper coverage
@@ -375,7 +375,6 @@ code-duplication-pmd-cpd:
     #dependencies:
         #- build:native
     #script:
-        #- *build_tools
         #- *install_exec_helper
         #- curl --data "token=${COVERITY_SCAN_TOKEN}&project=bverhagen%2Fexec-helper" https://scan.coverity.com/download/cxx/linux64 -o coverity_tool.tgz
         #- tar -C /tmp -xf coverity_tool.tgz

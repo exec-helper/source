@@ -36,8 +36,6 @@ const czstring<> TOOL_KEY = "tool";
 } // namespace
 
 namespace execHelper::plugins {
-auto Valgrind::getPluginName() const noexcept -> string { return PLUGIN_NAME; }
-
 auto Valgrind::getVariablesMap(const FleetingOptionsInterface& fleetingOptions)
     const noexcept -> VariablesMap {
     VariablesMap defaults(PLUGIN_NAME);

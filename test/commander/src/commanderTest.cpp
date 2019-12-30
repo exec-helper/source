@@ -1,4 +1,5 @@
 #include <filesystem>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -9,6 +10,7 @@
 #include "config/settingsNode.h"
 #include "config/variablesMap.h"
 #include "log/log.h"
+#include "plugins/commandPlugin.h"
 #include "plugins/memory.h"
 #include "plugins/pluginUtils.h"
 #include "unittest/catch.h"
@@ -17,6 +19,7 @@
 #include "executorStub.h"
 #include "fleetingOptionsStub.h"
 
+using std::shared_ptr;
 using std::string;
 using std::vector;
 
@@ -31,9 +34,12 @@ using execHelper::config::Patterns;
 using execHelper::config::SettingsNode;
 using execHelper::config::VariablesMap;
 using execHelper::core::Task;
+using execHelper::plugins::CommandPlugin;
 using execHelper::plugins::getPatternsKey;
 using execHelper::plugins::Memory;
 using execHelper::plugins::MemoryHandler;
+using execHelper::plugins::Plugin;
+using execHelper::plugins::Plugins;
 
 using execHelper::core::test::ExecutorStub;
 using execHelper::test::FleetingOptionsStub;
@@ -71,6 +77,10 @@ SCENARIO("Basic test the commander", "[commander]") {
         Task expectedTask;
         expectedTask.setWorkingDirectory(workingDirectory);
         expectedTasks.emplace_back(expectedTask);
+
+        Plugins plugins = {
+            {COMMANDS_KEY, shared_ptr<Plugin>(new CommandPlugin())},
+            {MEMORY_KEY, shared_ptr<Plugin>(new Memory())}};
 
         COMBINATIONS("Add multiple commands") {
             const CommandCollection commands(
@@ -117,8 +127,9 @@ SCENARIO("Basic test the commander", "[commander]") {
         }
 
         THEN_WHEN("We apply the configuration and run the commander") {
-            bool returnCode = commander.run(fleetingOptions, settings, patterns,
-                                            workingDirectory, env);
+            bool returnCode =
+                commander.run(fleetingOptions, settings, patterns,
+                              workingDirectory, env, Plugins{plugins});
 
             THEN_CHECK("It must succeed") { REQUIRE(returnCode); }
 
@@ -159,9 +170,10 @@ SCENARIO(
 
         WHEN("We apply the configuration and run the commander") {
             THEN("It should fail") {
-                REQUIRE_FALSE(commander.run(
-                    fleetingOptions, settings, Patterns(),
-                    filesystem::current_path(), EnvironmentCollection()));
+                REQUIRE_FALSE(
+                    commander.run(fleetingOptions, settings, Patterns(),
+                                  filesystem::current_path(),
+                                  EnvironmentCollection(), Plugins()));
             }
         }
     }
@@ -182,11 +194,16 @@ SCENARIO("Test when no commands are passed", "[commander]") {
 
         Commander commander;
 
+        Plugins plugins = {
+            {COMMANDS_KEY, shared_ptr<Plugin>(new CommandPlugin())},
+        };
+
         WHEN("We apply the configuration and run the commander") {
             THEN("It should fail") {
-                REQUIRE_FALSE(commander.run(
-                    fleetingOptions, settings, Patterns(),
-                    filesystem::current_path(), EnvironmentCollection()));
+                REQUIRE_FALSE(
+                    commander.run(fleetingOptions, settings, Patterns(),
+                                  filesystem::current_path(),
+                                  EnvironmentCollection(), Plugins{plugins}));
             }
         }
     }

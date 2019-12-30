@@ -31,4 +31,5 @@ target_include_directories(gsl SYSTEM INTERFACE ${Gsl_INCLUDE_DIRS})
 
 if(NOT ${USE_SYSTEM_GSL})
     add_dependencies(gsl Gsl)
+    add_dependencies(download Gsl)
 endif()

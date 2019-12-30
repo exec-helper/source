@@ -1,151 +1,142 @@
-#include "unittest/catch.h"
-
+#include <memory>
+#include <optional>
 #include <string>
+#include <string_view>
+#include <vector>
 
-#include <gsl/string_span>
-
+#include "config/commandLineOptions.h"
+#include "config/environment.h"
 #include "config/pattern.h"
 #include "config/settingsNode.h"
 #include "config/variablesMap.h"
-#include "plugins/clangStaticAnalyzer.h"
-#include "plugins/commandLine.h"
+#include "core/task.h"
 #include "plugins/executePlugin.h"
+#include "plugins/luaPlugin.h"
 #include "plugins/memory.h"
-#include "plugins/pluginUtils.h"
-#include "plugins/verbosity.h"
-#include "utils/utils.h"
+
+#include "base-utils/nonEmptyString.h"
+#include "unittest/catch.h"
+#include "unittest/config.h"
+#include "unittest/rapidcheck.h"
+#include "utils/commonGenerators.h"
 
 #include "executorStub.h"
 #include "fleetingOptionsStub.h"
+#include "handlers.h"
 
+using std::optional;
+using std::shared_ptr;
 using std::string;
+using std::string_view;
+using std::vector;
 
-using gsl::czstring;
-
-using execHelper::config::Pattern;
+using execHelper::config::Command;
+using execHelper::config::EnvironmentCollection;
 using execHelper::config::Patterns;
 using execHelper::config::SettingsNode;
 using execHelper::config::VariablesMap;
 using execHelper::core::Task;
-using execHelper::core::TaskCollection;
-using execHelper::plugins::COMMAND_LINE_KEY;
 using execHelper::plugins::ExecutePlugin;
-using execHelper::plugins::VERBOSITY_KEY;
+using execHelper::plugins::MemoryHandler;
 
+using execHelper::core::test::ExecutorStub;
 using execHelper::test::FleetingOptionsStub;
+using execHelper::test::NonEmptyString;
+using execHelper::test::propertyTest;
+
+namespace filesystem = std::filesystem;
 
 namespace {
-const czstring<> PLUGIN_NAME = "clang-static-analyzer";
-const czstring<> PLUGIN_COMMAND = "scan-build";
-const czstring<> BUILD_COMMAND_KEY = "build-command";
-const czstring<> BUILD_DIR_KEY = "build-dir";
-const czstring<> MEMORY_KEY = "memory";
+constexpr string_view buildCommandConfigKey{"build-command"};
+
+auto scriptPath() noexcept -> std::string {
+    return string(PLUGINS_INSTALL_PATH) + "/clang-static-analyzer.lua";
+}
 } // namespace
 
 namespace execHelper::plugins::test {
-SCENARIO("Obtain the plugin name of the clang-static-analyzer plugin",
-         "[clang-static-analyzer]") {
-    GIVEN("A plugin") {
-        ClangStaticAnalyzer plugin;
+SCENARIO(
+    "Testing the configuration settings of the clang-static-analyzer plugin",
+    "[clang-static-analyzer]") {
+    propertyTest("", [](const optional<filesystem::path>& workingDir,
+                        const optional<EnvironmentCollection>& environment,
+                        const std::vector<NonEmptyString>& buildCommand,
+                        const optional<vector<string>>& commandLine,
+                        const optional<bool> verbose) {
+        RC_PRE(!buildCommand.empty());
+        Patterns patterns;
+        const Task task;
+        Task expectedTask(task);
 
-        WHEN("We request the plugin name") {
-            const string pluginName = plugin.getPluginName();
-
-            THEN("We should find the correct plugin name") {
-                REQUIRE(pluginName == PLUGIN_NAME);
-            }
-        }
-    }
-}
-
-SCENARIO("Obtain the default variables map of the clang-static-analyzer plugin",
-         "[clang-static-analyzer]") {
-    MAKE_COMBINATIONS("of fleeting options") {
-        FleetingOptionsStub fleetingOptions;
-        ClangStaticAnalyzer plugin;
-
-        VariablesMap actualVariables(plugin.getPluginName());
-        REQUIRE(actualVariables.add(BUILD_DIR_KEY, "."));
-        REQUIRE(actualVariables.add(COMMAND_LINE_KEY, CommandLineArgs()));
-        REQUIRE(actualVariables.add(VERBOSITY_KEY, "no"));
-
-        COMBINATIONS("Switch on verbosity") {
-            fleetingOptions.m_verbose = true;
-            REQUIRE(actualVariables.replace(VERBOSITY_KEY, "yes"));
-        }
-
-        THEN_WHEN("We request the variables map") {
-            VariablesMap variables = plugin.getVariablesMap(fleetingOptions);
-
-            THEN_CHECK("We should find the right one") {
-                REQUIRE(variables == actualVariables);
-            }
-        }
-    }
-}
-
-SCENARIO("Successfully applying the clang-static-analyzer plugin",
-         "[clang-static-analyzer]") {
-    MAKE_COMBINATIONS("Of several settings") {
-        const Pattern pattern1("PATTERN1", {"value1a", "value1b"});
-        const Pattern pattern2("PATTERN2", {"value2a", "value2b"});
-        const Patterns patterns({pattern1, pattern2});
-
+        VariablesMap config("clang-static-analyzer-test");
         MemoryHandler memory;
 
-        ClangStaticAnalyzer plugin;
-        Task task;
+        LuaPlugin plugin(scriptPath());
 
-        Task expectedTask({PLUGIN_COMMAND});
-        TaskCollection verbosity;
-        TaskCollection commandLine;
+        Plugins plugins;
+        auto memoryPlugin = shared_ptr<Plugin>(new Memory());
+        for(const auto& command : buildCommand) {
+            REQUIRE(config.add(string(buildCommandConfigKey), *command));
+            plugins[*command] = memoryPlugin;
+        }
+
+        expectedTask.append("scan-build");
+
+        if(workingDir) {
+            handleWorkingDirectory(*workingDir, config, expectedTask);
+        }
+
+        if(environment) {
+            handleEnvironment(*environment, config, expectedTask);
+        }
+
+        if(verbose) {
+            handleVerbosity(*verbose, "-v", config, expectedTask);
+        }
+
+        if(commandLine) {
+            handleCommandLine(*commandLine, config, expectedTask);
+        }
+
+        ExecutorStub::TaskQueue expectedTasks(buildCommand.size(),
+                                              expectedTask);
 
         FleetingOptionsStub fleetingOptions;
-        VariablesMap variables = plugin.getVariablesMap(fleetingOptions);
-        REQUIRE(variables.add(BUILD_COMMAND_KEY, MEMORY_KEY));
 
+        ExecutePlugin::push(std::move(plugins));
         ExecutePlugin::push(
-            gsl::not_null<const config::FleetingOptionsInterface*>(
-                &fleetingOptions));
-        ExecutePlugin::push(SettingsNode("test"));
+            gsl::not_null<config::FleetingOptionsInterface*>(&fleetingOptions));
+        ExecutePlugin::push(SettingsNode("clang-static-analyzer-test"));
         ExecutePlugin::push(Patterns(patterns));
 
-        COMBINATIONS("Switch on verbosity") {
-            REQUIRE(variables.replace(VERBOSITY_KEY, "yes"));
-            verbosity.emplace_back("-v");
-        }
-
-        COMBINATIONS("Add a command line") {
-            commandLine = {"{" + pattern1.getKey() + "}{" + pattern2.getKey() +
-                               "}",
-                           "blaat/{HELLO}/{" + pattern1.getKey() + "}"};
-            REQUIRE(variables.replace(COMMAND_LINE_KEY, commandLine));
-        }
-
-        expectedTask.append(verbosity);
-        expectedTask.append(commandLine);
-
         THEN_WHEN("We apply the plugin") {
-            bool returnCode = plugin.apply(task, variables, patterns);
+            Task task;
+            bool returnCode = plugin.apply(task, config, patterns);
             THEN_CHECK("It should succeed") { REQUIRE(returnCode); }
 
             THEN_CHECK("It called the right commands") {
                 const Memory::Memories& memories =
                     MemoryHandler::getExecutions();
-                REQUIRE(memories.size() == 1U);
-                REQUIRE(memories[0].task == expectedTask);
+                REQUIRE(memories.size() == expectedTasks.size());
+                auto expectedTask = expectedTasks.begin();
+                for(auto memory = memories.begin(); memory != memories.end();
+                    ++memory, ++expectedTask) {
+                    REQUIRE(memory->task == *expectedTask);
+                    REQUIRE(memory->patterns.empty());
+                }
             }
         }
 
         ExecutePlugin::popFleetingOptions();
         ExecutePlugin::popSettingsNode();
         ExecutePlugin::popPatterns();
-    }
+        ExecutePlugin::popPlugins();
+    });
 }
 
-SCENARIO("Testing the invalid configurations", "[clang-static-analyzer]") {
+SCENARIO("Testing invalid configurations", "[clang-static-analyzer]") {
     GIVEN("An empty setup") {
-        ClangStaticAnalyzer plugin;
+        LuaPlugin plugin(scriptPath());
         VariablesMap variables = plugin.getVariablesMap(FleetingOptionsStub());
 
         Task task;
@@ -165,7 +156,7 @@ SCENARIO("Testing the invalid configurations", "[clang-static-analyzer]") {
 
         WHEN("We add the build-command as a specific config key without a "
              "value") {
-            REQUIRE(variables.add(BUILD_COMMAND_KEY));
+            REQUIRE(variables.add(string(buildCommandConfigKey)));
 
             bool returnCode = plugin.apply(task, variables, Patterns());
             THEN("It should fail") { REQUIRE_FALSE(returnCode); }

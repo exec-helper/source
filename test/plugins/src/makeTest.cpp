@@ -1,112 +1,55 @@
 #include <filesystem>
 #include <string>
-
-#include <gsl/string_span>
+#include <vector>
 
 #include "config/environment.h"
 #include "config/pattern.h"
 #include "config/variablesMap.h"
-#include "plugins/commandLine.h"
-#include "plugins/make.h"
-#include "plugins/pluginUtils.h"
-#include "plugins/threadedness.h"
-#include "plugins/verbosity.h"
-#include "plugins/workingDirectory.h"
+#include "plugins/luaPlugin.h"
+
 #include "unittest/catch.h"
+#include "unittest/config.h"
+#include "unittest/rapidcheck.h"
+
+#include "utils/commonGenerators.h"
 #include "utils/utils.h"
 
 #include "executorStub.h"
 #include "fleetingOptionsStub.h"
+#include "handlers.h"
 
+using std::optional;
 using std::string;
 using std::to_string;
+using std::vector;
 
-using gsl::czstring;
-
-using execHelper::config::EnvArgs;
-using execHelper::config::ENVIRONMENT_KEY;
 using execHelper::config::EnvironmentCollection;
-using execHelper::config::Path;
-using execHelper::config::Pattern;
+using execHelper::config::Jobs_t;
 using execHelper::config::Patterns;
 using execHelper::config::VariablesMap;
 using execHelper::core::Task;
 
 using execHelper::core::test::ExecutorStub;
-using execHelper::test::FleetingOptionsStub;
+using execHelper::test::propertyTest;
 using execHelper::test::utils::getExpectedTasks;
 
 namespace filesystem = std::filesystem;
 
-namespace {
-const czstring<> PLUGIN_NAME = "make";
-const czstring<> BUILD_DIR_KEY = "build-dir";
-} // namespace
-
 namespace execHelper::plugins::test {
-SCENARIO("Obtain the plugin name of the make plugin", "[make]") {
-    GIVEN("A plugin") {
-        Make plugin;
-
-        WHEN("We request the plugin name") {
-            const string pluginName = plugin.getPluginName();
-
-            THEN("We should find the correct plugin name") {
-                REQUIRE(pluginName == PLUGIN_NAME);
-            }
-        }
-    }
-}
-
-SCENARIO("Obtaining the default variables map of the make plugin", "[make]") {
-    MAKE_COMBINATIONS("The default fleeting options") {
-        FleetingOptionsStub fleetingOptions;
-        Make plugin;
-
-        VariablesMap actualVariables(plugin.getPluginName());
-        REQUIRE(actualVariables.add(COMMAND_LINE_KEY, CommandLineArgs()));
-        REQUIRE(actualVariables.add(VERBOSITY_KEY, "no"));
-        REQUIRE(
-            actualVariables.add(JOBS_KEY, to_string(fleetingOptions.m_jobs)));
-        REQUIRE(actualVariables.add(BUILD_DIR_KEY, "."));
-        REQUIRE(actualVariables.add(ENVIRONMENT_KEY, EnvArgs()));
-
-        COMBINATIONS("Switch off multithreading") {
-            fleetingOptions.m_jobs = 1U;
-            REQUIRE(actualVariables.replace(JOBS_KEY,
-                                            to_string(fleetingOptions.m_jobs)));
-        }
-
-        COMBINATIONS("Switch on verbosity") {
-            fleetingOptions.m_verbose = true;
-            REQUIRE(actualVariables.replace(VERBOSITY_KEY, "yes"));
-        }
-
-        THEN_WHEN("We request the variables map") {
-            VariablesMap variables = plugin.getVariablesMap(fleetingOptions);
-
-            THEN_CHECK("We should find the same ones") {
-                REQUIRE(variables == actualVariables);
-            }
-        }
-    }
-}
-
 SCENARIO("Testing the configuration settings of the make plugin", "[make]") {
-    MAKE_COMBINATIONS("Of several settings") {
-        const Pattern pattern1("PATTERN1", {"value1a", "value1b"});
-        const Pattern pattern2("PATTERN2", {"value2a", "value2b"});
-        const Patterns patterns({pattern1, pattern2});
+    propertyTest("", [](const optional<filesystem::path>& buildDir,
+                        const optional<filesystem::path>& workingDir,
+                        const optional<vector<string>>& commandLine,
+                        const optional<EnvironmentCollection>& environment,
+                        const optional<bool> verbose,
+                        const optional<Jobs_t> jobs) {
+        const Task task;
+        Task expectedTask(task);
+        Patterns patterns;
 
-        Make plugin;
-        VariablesMap variables = plugin.getVariablesMap(FleetingOptionsStub());
+        VariablesMap config("make-test");
 
-        auto jobs = variables.get<Jobs>(JOBS_KEY).value();
-        Path buildDir = variables.get<Path>(BUILD_DIR_KEY).value();
-        bool verbosity = false;
-        CommandLineArgs commandLine;
-        EnvironmentCollection env;
-        Path workingDirectory(filesystem::current_path());
+        LuaPlugin plugin(std::string(PLUGINS_INSTALL_PATH) + "/make.lua");
 
         ExecutorStub executor;
         ExecuteCallback executeCallback = [&executor](const Task& task) {
@@ -114,69 +57,52 @@ SCENARIO("Testing the configuration settings of the make plugin", "[make]") {
         };
         registerExecuteCallback(executeCallback);
 
-        COMBINATIONS("Switch off multi-threading") {
-            jobs = 1U;
-            REQUIRE(variables.replace(JOBS_KEY, to_string(jobs)));
+        expectedTask.append("make");
+
+        const string directoryOption("--directory");
+        if(buildDir) {
+            REQUIRE(config.add("build-dir", buildDir->string()));
+            expectedTask.append({directoryOption, buildDir->string()});
+        } else {
+            expectedTask.append({directoryOption, "."});
         }
 
-        COMBINATIONS("Set a build directory") {
-            buildDir = "{" + pattern1.getKey() + "}/{" + pattern2.getKey() +
-                       "}/{HELLO}/{" + pattern2.getKey() + "}/hello{" +
-                       pattern1.getKey() + " }world";
-            REQUIRE(variables.replace(BUILD_DIR_KEY, buildDir.native()));
+        if(workingDir) {
+            handleWorkingDirectory(*workingDir, config, expectedTask);
         }
 
-        COMBINATIONS("Switch on verbosity") {
-            verbosity = true;
-            REQUIRE(variables.replace(VERBOSITY_KEY, "yes"));
+        if(environment) {
+            handleEnvironment(*environment, config, expectedTask);
         }
 
-        COMBINATIONS("Add a command line") {
-            commandLine = {"{" + pattern2.getKey() + "}",
-                           "{" + pattern1.getKey() + "}"};
-            REQUIRE(variables.replace(COMMAND_LINE_KEY, commandLine));
+        if(verbose) {
+            handleVerbosity(*verbose, "--debug", config, expectedTask);
         }
 
-        COMBINATIONS("Set environment") {
-            env = {{"VAR1", "value1"}, {"VAR2", "value2"}};
-            for(const auto& value : env) {
-                REQUIRE(variables.replace({ENVIRONMENT_KEY, value.first},
-                                          value.second));
-            }
+        if(jobs) {
+            REQUIRE(config.add("jobs", std::to_string(*jobs)));
+            expectedTask.append({"--jobs", std::to_string(*jobs)});
+        } else {
+            const std::string defaultNumberOfJobs{"1"};
+            expectedTask.append({"--jobs", defaultNumberOfJobs});
         }
 
-        COMBINATIONS("Set the working directory") {
-            workingDirectory = "1234{" + pattern2.getKey() + "}/4321/{HELLO}";
-            REQUIRE(
-                variables.replace(WORKING_DIR_KEY, workingDirectory.native()));
+        if(commandLine) {
+            handleCommandLine(*commandLine, config, expectedTask);
         }
-
-        COMBINATIONS("Set the working directory to the current directory") {
-            workingDirectory = ".";
-            REQUIRE(
-                variables.replace(WORKING_DIR_KEY, workingDirectory.native()));
-        }
-
-        Task expectedTask({PLUGIN_NAME});
-        expectedTask.append({"--directory", buildDir.native()});
-        expectedTask.append({"--jobs", to_string(jobs)});
-        if(verbosity) {
-            expectedTask.append("--debug");
-        }
-        expectedTask.append(commandLine);
-        expectedTask.setEnvironment(env);
-        expectedTask.setWorkingDirectory(workingDirectory);
 
         ExecutorStub::TaskQueue expectedTasks =
             getExpectedTasks(expectedTask, patterns);
+
         THEN_WHEN("We apply the plugin") {
-            bool returnCode = plugin.apply(Task(), variables, patterns);
+            bool returnCode = plugin.apply(task, config, patterns);
+
             THEN_CHECK("It should succeed") { REQUIRE(returnCode); }
 
             THEN_CHECK("It called the right commands") {
                 REQUIRE(expectedTasks == executor.getExecutedTasks());
             }
         }
-    }
+    });
 }
 } // namespace execHelper::plugins::test

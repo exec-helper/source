@@ -2,7 +2,6 @@ set(EXE_NAME ${PROJECT_NAME}-plugins-unittest)
 
 set(SRCS
         src/genericPluginTest.cpp
-        src/buildPluginTest.cpp
         src/clangStaticAnalyzerTest.cpp
         src/clangTidyTest.cpp
         src/pmdTest.cpp
@@ -21,11 +20,12 @@ set(SRCS
    )
 
 set(DEPENDENCIES
-        core-generators
         plugins
         test-utils
         unittest
         log-generators
+        config-generators
+        core-generators
         rpcheck
     )
 

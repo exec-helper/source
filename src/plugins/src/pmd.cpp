@@ -40,8 +40,6 @@ const czstring<> LANGUAGE_KEY = "language";
 } // namespace
 
 namespace execHelper::plugins {
-auto Pmd::getPluginName() const noexcept -> string { return PLUGIN_NAME; }
-
 auto Pmd::getVariablesMap(const FleetingOptionsInterface& fleetingOptions) const
     noexcept -> VariablesMap {
     VariablesMap defaults(PLUGIN_NAME);

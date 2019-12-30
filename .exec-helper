@@ -255,6 +255,7 @@ command-line-command:
             - MODE
         command-line:
             [ cmake, -G, "Ninja", -H., "-Bbuild/{COMPILER}/{MODE}/build", "-DCMAKE_CXX_COMPILER={COMPILER}", "-DCMAKE_INSTALL_PREFIX=build/{COMPILER}/{MODE}/install", -DCMAKE_EXPORT_COMPILE_COMMANDS=ON, "-DCMAKE_BUILD_TYPE={MODE}", -DBUILD_HTML_DOCUMENTATION=ON, -DBUILD_XML_DOCUMENTATION=OFF, -DBUILD_MAN_DOCUMENTATION=ON, "-DCMAKE_TOOLCHAIN_FILE=build/{COMPILER}/{MODE}/toolchain.cmake", -DTERMINATE_ON_ASSERT_FAILURE=ON]
+
     init-build:
         patterns:
             - COMPILER
@@ -266,7 +267,7 @@ command-line-command:
             - COMPILER
             - MODE
         command-line:
-            [ cmake, -G, "Ninja", -H., "-Bbuild/{COMPILER}/{MODE}/build", "-DCMAKE_CXX_COMPILER={COMPILER}", "-DCMAKE_INSTALL_PREFIX=build/{COMPILER}/{MODE}/install", -DCMAKE_EXPORT_COMPILE_COMMANDS=ON, "-DCMAKE_BUILD_TYPE={MODE}", -DBUILD_HTML_DOCUMENTATION=OFF, -DBUILD_XML_DOCUMENTATION=OFF, -DBUILD_MAN_DOCUMENTATION=OFF, "-DCMAKE_TOOLCHAIN_FILE=build/{COMPILER}/{MODE}/toolchain.cmake", -DTERMINATE_ON_ASSERT_FAILURE=ON, -DUSE_SYSTEM_YAML_CPP=OFF, -DUSE_SYSTEM_CATCH=OFF, -DUSE_SYSTEM_GSL=OFF, -DUSE_SYSTEM_RAPIDCHECK=OFF]
+            [ cmake, -G, "Ninja", -H., "-Bbuild/{COMPILER}/{MODE}/build", "-DCMAKE_CXX_COMPILER={COMPILER}", "-DCMAKE_INSTALL_PREFIX=build/{COMPILER}/{MODE}/install", -DCMAKE_EXPORT_COMPILE_COMMANDS=ON, "-DCMAKE_BUILD_TYPE={MODE}", -DBUILD_HTML_DOCUMENTATION=OFF, -DBUILD_XML_DOCUMENTATION=OFF, -DBUILD_MAN_DOCUMENTATION=OFF, "-DCMAKE_TOOLCHAIN_FILE=build/{COMPILER}/{MODE}/toolchain.cmake", -DTERMINATE_ON_ASSERT_FAILURE=ON, -DUSE_SYSTEM_YAML_CPP=OFF, -DUSE_SYSTEM_CATCH=OFF, -DUSE_SYSTEM_GSL=OFF, -DUSE_SYSTEM_RAPIDCHECK=OFF, -DUSE_SYSTEM_LUA=OFF, -DUSE_SYSTEM_INTEGRAL=OFF]
 
     init-limited-optimization:
         patterns:
@@ -293,6 +294,7 @@ command-line-command:
             - create-toolchain-tmp: [ cp, toolchain.cmake.in, "build/{COMPILER}/{MODE}/toolchain.cmake"]
             - replace-CPP-compiler: [ sed, -i, 's%@CXX_COMPILER@%{COMPILER}%g', "build/{COMPILER}/{MODE}/toolchain.cmake"]
             - replace-sysroot: [ sed, -i, 's%@SYSROOT@%{SYSROOT}%g', "build/{COMPILER}/{MODE}/toolchain.cmake"]
+            - cat: [ cat, "build/{COMPILER}/{MODE}/toolchain.cmake"]
     distclean:
         patterns:
             - COMPILER
@@ -345,13 +347,13 @@ command-line-command:
     memory-check:
         command-line: [ exec-helper, analyze, --analyze, valgrind, --run-target, unittest, --compiler, g++, --mode, debug]
     asan:
-        patterns:
-            - MODULE
         environment:
-            CXXFLAGS: -fsanitize=address,leak -fno-omit-frame-pointer
-            LDFLAGS: -fsanitize=address,leak -fno-omit-frame-pointer
-            ASAN_OPTIONS: check_initialization_order=1 print_stacktrace=1
-        command-line: [ exec-helper, init-build, build, run-test, --compiler, clang++, --mode, asan, --run-target, unittest, --module, "{MODULE}"]
+            ASAN_OPTIONS: "check_initialization_order=1 print_stacktrace=1"
+        command-line: 
+            - init: [ exec-helper, init-build, --compiler, clang++, --mode, asan, --run-target, unittest]
+            - overwrite-init: [ cmake, -H., "-Bbuild/clang++/asan/build", "-DSANITIZER=address,leak"]
+            - build: [ exec-helper, build, --compiler, clang++, --mode, asan, --run-target, unittest]
+            - run: [ exec-helper, unittest, --compiler, clang++, --mode, asan, --run-target, unittest]
     docs:
         patterns:
             - COMPILER
@@ -382,12 +384,15 @@ command-line-command:
         command-line: [ cmake, "-DCOMPONENT=changelog", -P, "build/{COMPILER}/{MODE}/build/cmake_install.cmake"]
 
 valgrind:
+    environment:
+        CFLAGS: '-DLUAJIT_USE_VALGRIND'
     run-command: run-test
     tool: memcheck
     command-line:
         - --leak-check=full
         - --error-exitcode=1
         - --suppressions=suppressions/valgrind
+        - --suppressions=suppressions/luajit.valgrind
 
 pmd:
     patterns:

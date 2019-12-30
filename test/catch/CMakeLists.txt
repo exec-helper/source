@@ -10,9 +10,11 @@ set(DEPENDENCIES
         #core
     )
 
+configure_file(include/unittest/config.h.in include/unittest/config.h)
+
 add_library(${LIBRARY_NAME} ${SRCS})
 target_include_directories(${LIBRARY_NAME} PRIVATE include/unittest)
-target_include_directories(${LIBRARY_NAME} PUBLIC include ${DEPENDENCIES})
+target_include_directories(${LIBRARY_NAME} PUBLIC include ${CMAKE_CURRENT_BINARY_DIR}/include ${DEPENDENCIES})
 target_link_libraries(${LIBRARY_NAME} PUBLIC ${DEPENDENCIES})
 
 add_library(unittest ALIAS ${LIBRARY_NAME})

@@ -43,13 +43,6 @@ class Plugin {
     Plugin& operator=(Plugin&& other) noexcept = delete;
 
     /**
-     * Get the name of the plugin
-     *
-     * \returns The name of the plugin
-     */
-    virtual std::string getPluginName() const noexcept = 0;
-
-    /**
      * Returns the default variables map based on the given fleeting options
      *
      * \param[in] fleetingOptions   The fleeting options to base the defaults on

@@ -521,7 +521,7 @@ SCENARIO("Testing the (in)equality operator", "[config][settingsNode]") {
     }
 }
 
-SCENARIO("Test the copy constructor", "[settingsNode][wip]") {
+SCENARIO("Test the copy constructor", "[settingsNode]") {
     propertyTest("A settings node to copy", [](const SettingsNode& expected) {
         THEN_WHEN("We copy the settings") {
             SettingsNode

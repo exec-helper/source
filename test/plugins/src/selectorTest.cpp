@@ -1,28 +1,41 @@
+#include <algorithm>
+#include <filesystem>
+#include <memory>
+#include <optional>
 #include <string>
-
-#include <gsl/string_span>
+#include <string_view>
+#include <vector>
 
 #include "config/commandLineOptions.h"
+#include "config/environment.h"
 #include "config/pattern.h"
-#include "config/settingsNode.h"
 #include "config/variablesMap.h"
 #include "core/task.h"
 #include "plugins/executePlugin.h"
 #include "plugins/logger.h"
+#include "plugins/luaPlugin.h"
 #include "plugins/memory.h"
-#include "plugins/selector.h"
+
+#include "base-utils/nonEmptyString.h"
+#include "config/generators.h"
 #include "unittest/catch.h"
-#include "utils/utils.h"
+#include "unittest/config.h"
+#include "unittest/rapidcheck.h"
+#include "utils/commonGenerators.h"
 
 #include "executorStub.h"
 #include "fleetingOptionsStub.h"
+#include "handlers.h"
 
+using std::back_inserter;
+using std::fill_n;
+using std::optional;
+using std::shared_ptr;
 using std::string;
-
-using gsl::czstring;
+using std::string_view;
 
 using execHelper::config::Command;
-using execHelper::config::CommandCollection;
+using execHelper::config::EnvironmentCollection;
 using execHelper::config::Pattern;
 using execHelper::config::PatternKey;
 using execHelper::config::Patterns;
@@ -35,96 +48,71 @@ using execHelper::plugins::MemoryHandler;
 
 using execHelper::core::test::ExecutorStub;
 using execHelper::test::FleetingOptionsStub;
+using execHelper::test::NonEmptyString;
+using execHelper::test::propertyTest;
+
+namespace filesystem = std::filesystem;
 
 namespace {
-const czstring<> PLUGIN_NAME = "selector";
-const czstring<> PATTERN_KEY = "patterns";
-const czstring<> MEMORY_KEY = "memory";
+auto scriptPath() noexcept -> std::string {
+    return string(PLUGINS_INSTALL_PATH) + "/selector.lua";
+}
 } // namespace
 
 namespace execHelper::plugins::test {
-SCENARIO("Obtain the plugin name of the selector plugin", "[selector]") {
-    GIVEN("A plugin") {
-        Selector plugin;
-
-        WHEN("We request the plugin name") {
-            const string pluginName = plugin.getPluginName();
-
-            THEN("We should find the correct plugin name") {
-                REQUIRE(pluginName == PLUGIN_NAME);
-            }
-        }
-    }
-}
-
-SCENARIO("Obtaining the default variables map of the selector plugin",
+SCENARIO("Testing the configuration settings of the selector plugin",
          "[selector]") {
-    GIVEN("of fleeting options") {
-        FleetingOptionsStub fleetingOptions;
-        Selector plugin;
+    propertyTest("", [](const optional<filesystem::path>& workingDir,
+                        const optional<EnvironmentCollection>& environment,
+                        const NonEmptyString& patternKey,
+                        const uint8_t nbOfRepeats, Patterns patterns) {
+        const string patternConfigKey{"patterns"};
+        const string memoryKey{"memory"};
+        const Task task;
+        Task expectedTask(task);
 
-        VariablesMap actualVariables(plugin.getPluginName());
+        PatternValues commands;
+        commands.reserve(nbOfRepeats);
+        fill_n(back_inserter(commands), nbOfRepeats, memoryKey);
+        Pattern pattern{*patternKey, commands};
+        patterns.emplace_back(pattern);
 
-        WHEN("We request the variables map") {
-            VariablesMap variables = plugin.getVariablesMap(fleetingOptions);
-
-            THEN("We should find the right one") {
-                REQUIRE(variables == actualVariables);
-            }
-        }
-    }
-}
-
-SCENARIO("Make combinations of configurations for the selector plugin") {
-    MAKE_COMBINATIONS("Of several configurations") {
-        const Pattern pattern1("PATTERN1", {MEMORY_KEY});
-        const Pattern pattern2("PATTERN2", {MEMORY_KEY, MEMORY_KEY});
-        Patterns patterns({pattern1});
-
-        Command command = "selector-command";
-
+        VariablesMap config("selector-test");
         MemoryHandler memory;
 
-        Selector plugin;
+        LuaPlugin plugin(scriptPath());
+        REQUIRE(config.add(patternConfigKey, *patternKey));
 
-        VariablesMap variables = plugin.getVariablesMap(FleetingOptionsStub());
-        REQUIRE(variables.add(PATTERN_KEY, pattern1.getKey()));
+        if(workingDir) {
+            handleWorkingDirectory(*workingDir, config, expectedTask);
+        }
+
+        if(environment) {
+            handleEnvironment(*environment, config, expectedTask);
+        }
 
         ExecutorStub::TaskQueue expectedTasks;
-        expectedTasks.emplace_back(Task());
-
-        COMBINATIONS("Add another select entry") {
-            PatternValues newValues = patterns.front().getValues();
-            newValues.emplace_back(MEMORY_KEY);
-            REQUIRE(patterns.front().setValues(newValues));
-            expectedTasks.emplace_back(Task());
-        }
-
-        COMBINATIONS("Add another pattern entry") {
-            REQUIRE(variables.add(PATTERN_KEY, pattern2.getKey()));
-            patterns.push_back(pattern2);
-            for(const auto& entry : pattern2.getValues()) {
-                (void)
-                    entry; // entry is unused, as we only want to add the same number of empty expected tasks
-                expectedTasks.emplace_back(Task());
-            }
-        }
+        expectedTasks.reserve(nbOfRepeats);
+        fill_n(back_inserter(expectedTasks), nbOfRepeats, expectedTask);
 
         FleetingOptionsStub fleetingOptions;
+
+        ExecutePlugin::push(
+            Plugins{{string(memoryKey), shared_ptr<Plugin>(new Memory())}});
         ExecutePlugin::push(
             gsl::not_null<config::FleetingOptionsInterface*>(&fleetingOptions));
-        ExecutePlugin::push(SettingsNode(PLUGIN_NAME));
+        ExecutePlugin::push(SettingsNode("selector-test"));
         ExecutePlugin::push(Patterns(patterns));
 
         THEN_WHEN("We apply the plugin") {
             Task task;
-            bool returnCode = plugin.apply(task, variables, patterns);
+            bool returnCode = plugin.apply(task, config, patterns);
             THEN_CHECK("It should succeed") { REQUIRE(returnCode); }
 
             THEN_CHECK("It called the right commands") {
                 const Memory::Memories& memories =
                     MemoryHandler::getExecutions();
-                REQUIRE(memories.size() == expectedTasks.size());
+                REQUIRE(memories.size() == nbOfRepeats);
                 auto expectedTask = expectedTasks.begin();
                 for(auto memory = memories.begin(); memory != memories.end();
                     ++memory, ++expectedTask) {
@@ -137,19 +125,59 @@ SCENARIO("Make combinations of configurations for the selector plugin") {
         ExecutePlugin::popFleetingOptions();
         ExecutePlugin::popSettingsNode();
         ExecutePlugin::popPatterns();
-    }
+        ExecutePlugin::popPlugins();
+    });
 }
 
-SCENARIO("Erroneous situations", "[selector]") {
-    GIVEN("A config without select commands defined") {
-        Selector plugin;
-        VariablesMap variables = plugin.getVariablesMap(FleetingOptionsStub());
+SCENARIO("Undefined pattern configuration", "[selector]") {
+    GIVEN("A config without a pattern defined") {
+        LuaPlugin plugin(scriptPath());
+
+        FleetingOptionsStub fleetingOptions;
+        ExecutePlugin::push(
+            gsl::not_null<config::FleetingOptionsInterface*>(&fleetingOptions));
+        ExecutePlugin::push(SettingsNode("selector-test"));
+        ExecutePlugin::push(Patterns());
 
         WHEN("We call the plugin") {
-            bool returnCode = plugin.apply(Task(), variables, Patterns());
+            bool returnCode =
+                plugin.apply(Task(), VariablesMap("selector-test"), Patterns());
 
             THEN("It should fail") { REQUIRE_FALSE(returnCode); }
         }
+
+        ExecutePlugin::popFleetingOptions();
+        ExecutePlugin::popSettingsNode();
+        ExecutePlugin::popPatterns();
     }
+}
+
+SCENARIO("Select an unknown pattern", "[selector]") {
+    propertyTest("", [](const Patterns& patterns,
+                        const PatternKey& patternKey) {
+        const string patternConfigKey{"patterns"};
+
+        LuaPlugin plugin(scriptPath());
+
+        VariablesMap config("selector-test");
+        REQUIRE(config.add(patternConfigKey, patternKey));
+
+        FleetingOptionsStub fleetingOptions;
+        ExecutePlugin::push(
+            gsl::not_null<config::FleetingOptionsInterface*>(&fleetingOptions));
+        ExecutePlugin::push(SettingsNode("selector-test"));
+        ExecutePlugin::push(Patterns(patterns));
+
+        WHEN("We call the plugin") {
+            bool returnCode =
+                plugin.apply(Task(), VariablesMap("selector-test"), patterns);
+
+            THEN("It should fail") { REQUIRE_FALSE(returnCode); }
+        }
+
+        ExecutePlugin::popFleetingOptions();
+        ExecutePlugin::popSettingsNode();
+        ExecutePlugin::popPatterns();
+    });
 }
 } // namespace execHelper::plugins::test

@@ -1,0 +1,65 @@
+set(MODULE lua)
+set(PACKAGE luajit)
+
+find_package(${PACKAGE})
+option(USE_SYSTEM_LUA "Use the ${PACKAGE} library provided by the system" ${${PACKAGE_NAME}_FOUND})
+
+if(${USE_SYSTEM_LUA})
+    if(NOT ${${PACKAGE}_FOUND})
+        MESSAGE(FATAL_ERROR "Could NOT find ${MODULE}")
+    endif()
+
+    add_library(lua INTERFACE)
+    target_include_directories(lua SYSTEM INTERFACE ${${PACKAGE}_INCLUDE_DIRS})
+    target_link_libraries(lua INTERFACE ${${PACKAGE}_LIBRARIES})
+    set(lua_LIBRARY_DIRS ${${PACKAGE}_LIBRARY_DIRS} CACHE PATH "Library dir for lua dependency")
+    mark_as_advanced(lua_LIBRARY_DIRS)
+else()
+    MESSAGE(STATUS "Using latest upstream version of ${PACKAGE}")
+
+    include(ExternalProject)
+
+    set(EXTERNAL ${PACKAGE}-external)
+
+    set(SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/${MODULE}/src/${EXTERNAL})
+    set(INSTALL_DIR ${CMAKE_CURRENT_BINARY_DIR}/${MODULE})
+    set(INSTALL_LIB_DIR ${INSTALL_DIR}/lib)
+
+    set(ADDITIONAL_MAKE_ARGS HOST_CC=${CMAKE_C_COMPILER} CROSS=${CMAKE_C_COMPILER} PREFIX=${INSTALL_DIR})
+    if(NOT CMAKE_VERBOSE_MAKEFILE)
+        list(APPEND ADDITIONAL_MAKE_ARGS --quiet)
+    endif()
+
+    ExternalProject_Add(${EXTERNAL}
+        PREFIX ${MODULE}
+        GIT_REPOSITORY https://github.com/LuaJIT/LuaJIT.git
+        GIT_TAG v2.0.5
+        CONFIGURE_COMMAND ""
+        BUILD_COMMAND "make;${ADDITIONAL_MAKE_ARGS}"
+        BUILD_IN_SOURCE 1
+        INSTALL_COMMAND "make;--directory;${SOURCE_DIR};${ADDITIONAL_MAKE_ARGS};install"
+        UPDATE_COMMAND ""
+        )
+
+    set(INCLUDE_DIRS ${INSTALL_DIR}/include/luajit-2.0)
+    set(${PACKAGE}_INCLUDE_DIRS ${INCLUDE_DIRS})
+
+    if(MSVC)
+        set(LIBRARY ${INSTALL_LIB_DIR}/luajit-5.1.lib)
+    else()
+        set(LIBRARY ${INSTALL_LIB_DIR}/libluajit-5.1.a)
+    endif()
+
+    file(MAKE_DIRECTORY ${INSTALL_LIB_DIR})
+    file(TOUCH ${LIBRARY})
+
+    add_library(${PACKAGE} STATIC IMPORTED GLOBAL)
+    target_include_directories(${PACKAGE} SYSTEM INTERFACE ${INCLUDE_DIRS})
+    target_link_libraries(${PACKAGE} INTERFACE dl)
+    set_property(TARGET ${PACKAGE} PROPERTY IMPORTED_LOCATION ${LIBRARY})
+
+    add_dependencies(${PACKAGE} ${EXTERNAL})
+    add_dependencies(download ${PACKAGE})
+
+    add_library(${MODULE} ALIAS ${PACKAGE})
+endif()

@@ -292,6 +292,14 @@ class SettingsNode {
      */
     void overwrite(const SettingsNode& newSettings) noexcept;
 
+    /**
+     * Get the values associated with the root of this node
+     *
+     * \returns The associated values if there are values associated with the root of this node
+     *          boost::none otherwise
+     */
+    [[nodiscard]] auto values() const noexcept -> std::optional<SettingsValues>;
+
   private:
     using SettingsNodeCollection =
         std::vector<SettingsNode>; //!< A collection of nodes
@@ -318,14 +326,6 @@ class SettingsNode {
     /*! @copydoc operator[](const SettingsKey&) const
      */
     auto at(const SettingsKeys& key) const noexcept -> const SettingsNode*;
-
-    /**
-     * Get the values associated with the root of this node
-     *
-     * \returns The associated values if there are values associated with the root of this node
-     *          boost::none otherwise
-     */
-    [[nodiscard]] auto values() const noexcept -> std::optional<SettingsValues>;
 
     SettingsKey m_key; //!< The root key associated with this node
     std::unique_ptr<SettingsNodeCollection>

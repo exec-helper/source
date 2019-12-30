@@ -7,19 +7,21 @@
 #   make PREFIX=<installation root directory>
 
 # Override these on the command line if required
-PREFIX?=/usr## Sets the installation prefix. Default: /usr.
+PREFIX?=/usr/local## Sets the installation prefix. Default: /usr/local.
 JOBS?= $(shell grep -c ^processor /proc/cpuinfo)## Sets the number of jobs. Default: number of processors in /proc/cpuinfo.
 BUILD_DIR?=build/native/release## Sets the build folder. Default: build/native/release.
 CHANGELOG_CONFIG?= .gitchangelog.rc## Sets the changelog config to use. Default: .gitchangelog.rc
 CHANGELOG_OUTPUT?= &1## Sets the changelog output redirection for print-changelog. Default: stdout
 CMAKE_BUILD_TYPE?=Release	## Sets the cmake build type. Default: Release
 USE_SYSTEM_GSL?= ON## Sets whether to use the system GSL package. Default: ON
-BUILD_DOCUMENTATION?=ON
+BUILD_DOCUMENTATION?=ON## Switches the building of the documentation on or off. Default: ON
+PLUGINS_INSTALL_PREFIX?=$(PREFIX)/share/exec-helper/plugins## Set the installation prefix of the plugin scripts
+ACTUAL_PLUGINS_INSTALL_PREFIX?=$(PLUGINS_INSTALL_PREFIX)## Set the actual installation prefix: useful if the files end up on a different place than the current PLUGINS_INSTALL_PREFIX
 
 all: binary docs changelog
 
 init:	## Initialize native build
-	cmake -H. -B$(BUILD_DIR) -DCMAKE_INSTALL_PREFIX=$(PREFIX) -DCMAKE_BUILD_TYPE=$(CMAKE_BUILD_TYPE) -DENABLE_WERROR=OFF -DENABLE_TESTING=OFF -DUSE_SYSTEM_GSL=$(USE_SYSTEM_GSL) -DCMAKE_EXPORT_COMPILE_COMMANDS=OFF -DBUILD_HTML_DOCUMENTATION=$(BUILD_DOCUMENTATION) -DBUILD_XML_DOCUMENTATION=$(BUILD_DOCUMENTATION) -DBUILD_MAN_DOCUMENTATION=$(BUILD_DOCUMENTATION) -DVERSION=$(shell git describe --long --dirty)-MANUAL -DCOPYRIGHT="Copyright (c) $(shell date +'%Y') Bart Verhagen"
+	cmake -H. -B$(BUILD_DIR) -DCMAKE_INSTALL_PREFIX=$(PREFIX) -DCMAKE_BUILD_TYPE=$(CMAKE_BUILD_TYPE) -DENABLE_WERROR=OFF -DENABLE_TESTING=OFF -DUSE_SYSTEM_GSL=$(USE_SYSTEM_GSL) -DCMAKE_EXPORT_COMPILE_COMMANDS=OFF -DBUILD_HTML_DOCUMENTATION=$(BUILD_DOCUMENTATION) -DBUILD_XML_DOCUMENTATION=$(BUILD_DOCUMENTATION) -DBUILD_MAN_DOCUMENTATION=$(BUILD_DOCUMENTATION) -DVERSION=$(shell git describe --long --dirty)-MANUAL -DCOPYRIGHT="Copyright (c) $(shell date +'%Y') Bart Verhagen" -DPLUGINS_INSTALL_PREFIX=$(PLUGINS_INSTALL_PREFIX) -DACTUAL_PLUGINS_INSTALL_PREFIX=$(ACTUAL_PLUGINS_INSTALL_PREFIX)
 
 binary: init ## Build the exec-helper binary
 	make -C $(BUILD_DIR) --jobs $(JOBS) exec-helper

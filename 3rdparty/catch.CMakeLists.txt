@@ -33,4 +33,5 @@ target_link_libraries(catch INTERFACE ${Catch_LIBRARIES})
 
 if(NOT ${USE_SYSTEM_CATCH})
     add_dependencies(catch Catch)
+    add_dependencies(download Catch)
 endif()

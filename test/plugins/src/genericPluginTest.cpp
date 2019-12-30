@@ -2,6 +2,7 @@
  *@file Tests properties that each plugin should have
  */
 #include "unittest/catch.h"
+#include "unittest/config.h"
 #include "unittest/rapidcheck.h"
 
 #include "executorStub.h"
@@ -12,10 +13,21 @@
 #include "config/settingsNode.h"
 #include "config/variablesMap.h"
 #include "core/task.h"
+#include "plugins/commandLineCommand.h"
+#include "plugins/commandPlugin.h"
+#include "plugins/executePlugin.h"
+#include "plugins/lcov.h"
+#include "plugins/logger.h"
+#include "plugins/luaPlugin.h"
 #include "plugins/memory.h"
 #include "plugins/plugin.h"
+#include "plugins/pluginUtils.h"
+#include "plugins/pmd.h"
+#include "plugins/valgrind.h"
 
 #include "core/coreGenerators.h"
+
+using std::shared_ptr;
 
 using execHelper::config::FleetingOptionsInterface;
 using execHelper::config::Pattern;
@@ -27,6 +39,8 @@ using execHelper::config::VariablesMap;
 using execHelper::core::Task;
 using execHelper::core::Tasks;
 using execHelper::plugins::MemoryHandler;
+using execHelper::plugins::Plugin;
+using execHelper::plugins::Plugins;
 
 using execHelper::core::test::ExecutorStub;
 using execHelper::test::FleetingOptionsStub;
@@ -35,85 +49,62 @@ using execHelper::test::propertyTest;
 namespace {
 constexpr std::string_view patternKey{"BLAAT"};
 
-class PluginPreparation {
-  public:
-    explicit PluginPreparation(
-        const execHelper::plugins::Plugin& plugin) noexcept
-        : m_variablesMap("Prepared-variables") {
-        m_options.m_commands.push_back("memory");
-
-        m_patterns.emplace_back(Pattern(std::string(patternKey), {"memory"}));
-
-        m_variablesMap = plugin.getVariablesMap(FleetingOptionsStub());
-        REQUIRE(m_variablesMap.add("command-line", "blaat"));
-        REQUIRE(m_variablesMap.add("build-command", "memory"));
-        REQUIRE(m_variablesMap.add("run-command", "memory"));
-        REQUIRE(m_variablesMap.add("patterns", std::string(patternKey)));
-
-        execHelper::plugins::ExecutePlugin::push(
-            gsl::not_null<FleetingOptionsInterface*>(&m_options));
-        execHelper::plugins::ExecutePlugin::push(SettingsNode("Test"));
-        execHelper::plugins::ExecutePlugin::push(Patterns{m_patterns});
-    }
-
-    PluginPreparation(const PluginPreparation& other) = delete;
-    PluginPreparation(PluginPreparation&& other) = default;
-
-    auto operator=(const PluginPreparation& other)
-        -> PluginPreparation& = delete;
-    auto operator=(PluginPreparation&& other) -> PluginPreparation& = default;
-
-    ~PluginPreparation() {
-        execHelper::plugins::ExecutePlugin::popFleetingOptions();
-        execHelper::plugins::ExecutePlugin::popSettingsNode();
-        execHelper::plugins::ExecutePlugin::popPatterns();
-    }
-
-    [[nodiscard]] inline auto variablesMap() const -> const VariablesMap& {
-        return m_variablesMap;
-    }
-
-    [[nodiscard]] inline auto patterns() const -> const Patterns& {
-        return m_patterns;
-    }
-
-  private:
-    FleetingOptionsStub m_options;
-    VariablesMap m_variablesMap;
-    Patterns m_patterns;
-};
+auto getPlugins() noexcept -> Plugins {
+    return {
+        {"make", shared_ptr<Plugin>(new execHelper::plugins::LuaPlugin(
+                     std::string(PLUGINS_INSTALL_PATH) + "/make.lua"))},
+        {"ninja", shared_ptr<Plugin>(new execHelper::plugins::LuaPlugin(
+                      std::string(PLUGINS_INSTALL_PATH) + "/ninja.lua"))},
+        {"bootstrap",
+         shared_ptr<Plugin>(new execHelper::plugins::LuaPlugin(
+             std::string(PLUGINS_INSTALL_PATH) + "/bootstrap.lua"))},
+        {"scons", shared_ptr<Plugin>(new execHelper::plugins::LuaPlugin(
+                      std::string(PLUGINS_INSTALL_PATH) + "/scons.lua"))},
+        {"clang-tidy",
+         shared_ptr<Plugin>(new execHelper::plugins::LuaPlugin(
+             std::string(PLUGINS_INSTALL_PATH) + "/clang-tidy.lua"))},
+        {"cppcheck", shared_ptr<Plugin>(new execHelper::plugins::LuaPlugin(
+                         std::string(PLUGINS_INSTALL_PATH) + "/cppcheck.lua"))},
+        {"selector", shared_ptr<Plugin>(new execHelper::plugins::LuaPlugin(
+                         std::string(PLUGINS_INSTALL_PATH) + "/selector.lua"))},
+        {"clang-static-analyzer",
+         shared_ptr<Plugin>(new execHelper::plugins::LuaPlugin(
+             std::string(PLUGINS_INSTALL_PATH) +
+             "/clang-static-analyzer.lua"))},
+        {"command-line-command",
+         shared_ptr<Plugin>(new execHelper::plugins::CommandLineCommand())},
+        {"Memory", shared_ptr<Plugin>(new execHelper::plugins::Memory())},
+        {"valgrind", shared_ptr<Plugin>(new execHelper::plugins::Valgrind())},
+        {"pmd", shared_ptr<Plugin>(new execHelper::plugins::Pmd())},
+        {"lcov", shared_ptr<Plugin>(new execHelper::plugins::Lcov())},
+    };
+}
 } // namespace
 
 namespace execHelper::plugins::test {
-SCENARIO("Test retrieving the name of the plugin",
-         "[plugins][generic-plugin]") {
-    propertyTest(
-        "Test retrieving the name of the plugin",
-        [](const std::unique_ptr<Plugin>& plugin) {
-            THEN_WHEN("We request the plugin name") {
-                auto name = plugin->getPluginName();
-
-                THEN_CHECK("It should not be empty") { REQUIRE(!name.empty()); }
-
-                THEN_CHECK(
-                    "It should be in the list of returned plugin names") {
-                    const auto& pluginNames = ExecutePlugin::getPluginNames();
-                    REQUIRE(std::find(pluginNames.begin(), pluginNames.end(),
-                                      name) != pluginNames.end());
-                }
-            }
-        });
-}
-
 SCENARIO("Test the pattern keyword for each plugin") {
     REQUIRE(Plugin::getPatternsKey() == "patterns");
 }
 
 SCENARIO("Every call to a plugin must lead to at least one registered task") {
+    FleetingOptionsStub options;
+    options.m_commands.push_back("memory");
+
+    execHelper::plugins::ExecutePlugin::push(
+        gsl::not_null<FleetingOptionsInterface*>(&options));
+
+    Patterns patterns = {Pattern(std::string(patternKey), {"memory"})};
+    execHelper::plugins::ExecutePlugin::push(Patterns(patterns));
+
+    execHelper::plugins::ExecutePlugin::push(SettingsNode("test"));
+    execHelper::plugins::ExecutePlugin::push(getPlugins());
+
     propertyTest(
         "Every call to a plugin must lead to at least one registered task",
-        [](const std::unique_ptr<Plugin>& plugin) {
+        [&patterns](shared_ptr<const Plugin>&& plugin) {
             uint32_t nbOfRegisteredTasks = 0U;
+
+            REQUIRE(plugin);
 
             registerExecuteCallback(
                 [&nbOfRegisteredTasks](const core::Task& /*task*/) {
@@ -121,11 +112,15 @@ SCENARIO("Every call to a plugin must lead to at least one registered task") {
                 });
             MemoryHandler memory;
 
+            auto variablesMap = plugin->getVariablesMap(FleetingOptionsStub());
+            REQUIRE(variablesMap.add("command-line", "blaat"));
+            REQUIRE(variablesMap.add("build-command", "memory"));
+            REQUIRE(variablesMap.add("run-command", "memory"));
+            REQUIRE(variablesMap.add("patterns", std::string(patternKey)));
+
             THEN_WHEN("We apply the plugin") {
-                PluginPreparation preparation(*plugin);
                 bool result =
-                    plugin->apply(core::Task(), preparation.variablesMap(),
-                                  preparation.patterns());
+                    plugin->apply(core::Task(), variablesMap, patterns);
 
                 THEN_CHECK("The call must succeed") { REQUIRE(result); }
 
@@ -137,12 +132,29 @@ SCENARIO("Every call to a plugin must lead to at least one registered task") {
                 }
             }
         });
+
+    execHelper::plugins::ExecutePlugin::popPlugins();
+    execHelper::plugins::ExecutePlugin::popSettingsNode();
+    execHelper::plugins::ExecutePlugin::popPatterns();
+    execHelper::plugins::ExecutePlugin::popFleetingOptions();
 }
 
 SCENARIO("A plugin must not alter the arguments before a given task") {
+    FleetingOptionsStub options;
+    options.m_commands.push_back("memory");
+
+    execHelper::plugins::ExecutePlugin::push(
+        gsl::not_null<FleetingOptionsInterface*>(&options));
+
+    Patterns patterns = {Pattern(std::string(patternKey), {"memory"})};
+    execHelper::plugins::ExecutePlugin::push(Patterns(patterns));
+
+    execHelper::plugins::ExecutePlugin::push(SettingsNode("test"));
+    execHelper::plugins::ExecutePlugin::push(getPlugins());
+
     propertyTest(
         "A plugin must not alter the arguments already in a given task",
-        [](const std::unique_ptr<Plugin>& plugin, const Task& task) {
+        [&patterns](std::shared_ptr<const Plugin>&& plugin, const Task& task) {
             RC_PRE(!task.getTask().empty());
             ExecutorStub executor;
             ExecuteCallback executeCallback = [&executor](const Task& task) {
@@ -150,12 +162,16 @@ SCENARIO("A plugin must not alter the arguments before a given task") {
             };
             registerExecuteCallback(executeCallback);
 
+            auto variablesMap = plugin->getVariablesMap(FleetingOptionsStub());
+            REQUIRE(variablesMap.add("command-line", "blaat"));
+            REQUIRE(variablesMap.add("build-command", "memory"));
+            REQUIRE(variablesMap.add("run-command", "memory"));
+            REQUIRE(variablesMap.add("patterns", std::string(patternKey)));
+
             MemoryHandler memory;
 
             THEN_WHEN("We apply the plugin") {
-                PluginPreparation preparation(*plugin);
-                bool result = plugin->apply(task, preparation.variablesMap(),
-                                            preparation.patterns());
+                bool result = plugin->apply(task, variablesMap, patterns);
 
                 THEN_CHECK("The call must succeed") { REQUIRE(result); }
 
@@ -181,5 +197,10 @@ SCENARIO("A plugin must not alter the arguments before a given task") {
                 }
             }
         });
+
+    execHelper::plugins::ExecutePlugin::popPlugins();
+    execHelper::plugins::ExecutePlugin::popSettingsNode();
+    execHelper::plugins::ExecutePlugin::popPatterns();
+    execHelper::plugins::ExecutePlugin::popFleetingOptions();
 }
 } // namespace execHelper::plugins::test

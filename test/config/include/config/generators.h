@@ -6,6 +6,7 @@
 #include <thread>
 
 #include "config/commandLineOptions.h"
+#include "config/pattern.h"
 #include "config/settingsNode.h"
 
 #include "unittest/rapidcheck.h"
@@ -117,6 +118,14 @@ template <> struct Arbitrary<execHelper::config::SettingsNode> {
             gen::container<std::map<std::string, std::vector<std::string>>>(
                 levelSize, gen::arbitrary<std::string>(),
                 gen::arbitrary<std::vector<std::string>>()));
+    };
+};
+
+template <> struct Arbitrary<execHelper::config::Pattern> {
+    static Gen<execHelper::config::Pattern> arbitrary() {
+        return gen::construct<execHelper::config::Pattern>(
+            gen::arbitrary<std::string>(),
+            gen::arbitrary<std::vector<std::string>>());
     };
 };
 } // namespace rc

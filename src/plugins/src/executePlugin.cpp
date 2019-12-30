@@ -1,5 +1,8 @@
 #include "executePlugin.h"
 
+#include <algorithm>
+
+#include <gsl/gsl_assert>
 #include <gsl/string_span>
 
 #include "config/fleetingOptionsInterface.h"
@@ -8,26 +11,18 @@
 #include "core/task.h"
 #include "log/assertions.h"
 
-#include "bootstrap.h"
-#include "clangStaticAnalyzer.h"
-#include "clangTidy.h"
 #include "commandLineCommand.h"
-#include "cppcheck.h"
 #include "lcov.h"
 #include "logger.h"
-#include "make.h"
 #include "memory.h"
-#include "ninja.h"
-#include "plugin.h"
 #include "pluginUtils.h"
 #include "pmd.h"
-#include "scons.h"
-#include "selector.h"
 #include "valgrind.h"
 
-using std::make_unique;
+using std::find;
+using std::make_shared;
+using std::shared_ptr;
 using std::string;
-using std::unique_ptr;
 using std::vector;
 
 using gsl::czstring;
@@ -47,8 +42,6 @@ using execHelper::config::VariablesMap;
 using execHelper::core::Task;
 
 namespace {
-const czstring<> EXECUTE_PLUGIN_KEY = "execute-plugin";
-
 auto getNextPatterns(const VariablesMap& variables,
                      const PatternsHandler& patterns) -> Patterns {
     auto newPatternKeys =
@@ -64,7 +57,6 @@ auto getNextPatterns(const VariablesMap& variables,
     }
     return newPatterns;
 }
-
 } // namespace
 
 vector<gsl::not_null< // NOLINT(fuchsia-statically-constructed-objects)
@@ -74,6 +66,10 @@ vector<SettingsNode> // NOLINT(fuchsia-statically-constructed-objects)
     execHelper::plugins::ExecutePlugin::m_settings;
 vector<PatternsHandler> // NOLINT(fuchsia-statically-constructed-objects)
     execHelper::plugins::ExecutePlugin::m_patterns;
+vector<execHelper::plugins:: // NOLINT(fuchsia-statically-constructed-objects)
+       Plugins>
+    execHelper::plugins::ExecutePlugin::
+        m_plugins; // NOLINT(fuchsia-statically-constructed-objects)
 
 namespace execHelper::plugins {
 ExecutePlugin::ExecutePlugin(
@@ -87,10 +83,6 @@ ExecutePlugin::ExecutePlugin(const CommandCollection& commandsToExecute,
     : m_commands(commandsToExecute),
       m_initialCommands(commandsToExecute.size(), initialCommand) {
     ensures(m_commands.size() == m_initialCommands.size());
-}
-
-auto ExecutePlugin::getPluginName() const noexcept -> string {
-    return EXECUTE_PLUGIN_KEY;
 }
 
 auto ExecutePlugin::getVariablesMap(
@@ -142,7 +134,7 @@ auto ExecutePlugin::apply(Task task, const VariablesMap& /*variables*/,
     auto initialCommand = m_initialCommands.begin();
     for(auto command = m_commands.begin(); command != m_commands.end();
         ++command, ++initialCommand) {
-        unique_ptr<Plugin> plugin = getNextStep(*command, *initialCommand);
+        auto plugin = getNextStep(*command, *initialCommand);
         if(!plugin) {
             user_feedback_error("Could not find a command or plugin called '"
                                 << *command << "'");
@@ -154,8 +146,7 @@ auto ExecutePlugin::apply(Task task, const VariablesMap& /*variables*/,
         VariablesMap newVariablesMap =
             plugin->getVariablesMap(*(m_fleeting.back()));
         const vector<SettingsKeys> keys(
-            {{plugin->getPluginName()},
-             {plugin->getPluginName(), *initialCommand}});
+            {{*command}, {*command, *initialCommand}});
         getVariablesMap(&newVariablesMap, keys, m_settings.back());
 
         expects(!m_patterns.empty());
@@ -171,88 +162,74 @@ auto ExecutePlugin::apply(Task task, const VariablesMap& /*variables*/,
 
 auto ExecutePlugin::getNextStep(const Command& command,
                                 const Command& /*originalCommand*/) noexcept
-    -> unique_ptr<Plugin> {
-    unique_ptr<Plugin> plugin = getPlugin(command);
-    if(plugin) {
-        return plugin;
+    -> shared_ptr<const Plugin> {
+    const auto pluginNames = getPluginNames();
+
+    if(find(pluginNames.begin(), pluginNames.end(), command) !=
+       pluginNames.end()) {
+        LOG(trace) << "Retrieving plugin named '" << command << "'.";
+        try {
+            return getPlugin(command);
+        } catch(const InvalidPlugin& e) {
+            LOG(error) << "Unable to retrieve a plugin name '" << command
+                       << "'.";
+            return nullptr;
+        }
     }
 
-    // else assume it is another command and use the execute plugin to execute
-    // it
+    LOG(trace) << "Checking whether '" << command << "' is a known command";
     SettingsNode& settings = m_settings.back();
     auto commandToExecuteOpt = settings.get<CommandCollection>(command);
     if(!commandToExecuteOpt) {
         LOG(warning)
             << "Execute plugin found an empty value collection for the '"
             << command << "' command";
-        return unique_ptr<Plugin>();
+        return nullptr;
     }
     auto commandsToExecute = *(commandToExecuteOpt);
     for(const auto& commandToExecute : commandsToExecute) {
         LOG(trace) << command << " -> " << commandToExecute;
     }
-    return make_unique<ExecutePlugin>(commandsToExecute, command);
+    return make_shared<ExecutePlugin>(commandsToExecute, command);
 }
 
-auto ExecutePlugin::getPluginNames() noexcept
-    -> const std::vector<std::string>& {
-    static std::vector<std::string> plugins{"command-line-command",
-                                            "scons",
-                                            "make",
-                                            "bootstrap",
-                                            "cppcheck",
-                                            "clang-static-analyzer",
-                                            "selector",
-                                            "memory",
-                                            "valgrind",
-                                            "pmd",
-                                            "lcov",
-                                            "clang-tidy"};
+auto ExecutePlugin::getPluginNames() noexcept -> std::vector<std::string> {
+    Expects(!m_plugins.empty());
+    std::vector<std::string> plugins{"command-line-command", "memory",
+                                     "valgrind", "pmd", "lcov"};
+    transform(m_plugins.back().begin(), m_plugins.back().end(),
+              back_inserter(plugins),
+              [](const auto& plugin) { return plugin.first; });
     return plugins;
 }
 
-auto ExecutePlugin::getPlugin(const string& pluginName) noexcept
-    -> unique_ptr<Plugin> {
+auto ExecutePlugin::getPlugin(const string& pluginName)
+    -> shared_ptr<const Plugin> {
+    // But, since calling a plugin should not change the internal state of a plugin (see the constness), we can take a shortcut
+    // by returning the plugin directly
+    if(!m_plugins.empty() && m_plugins.back().count(pluginName) > 0) {
+        return m_plugins.back()[pluginName];
+    }
+
     if(pluginName == "command-line-command") {
-        return make_unique<CommandLineCommand>();
-    }
-    if(pluginName == "scons") {
-        return make_unique<Scons>();
-    }
-    if(pluginName == "make") {
-        return make_unique<Make>();
-    }
-    if(pluginName == "bootstrap") {
-        return make_unique<Bootstrap>();
-    }
-    if(pluginName == "cppcheck") {
-        return make_unique<Cppcheck>();
-    }
-    if(pluginName == "clang-static-analyzer") {
-        return make_unique<ClangStaticAnalyzer>();
-    }
-    if(pluginName == "selector") {
-        return make_unique<Selector>();
+        return make_shared<CommandLineCommand>();
     }
     if(pluginName == "memory") {
-        return make_unique<Memory>();
+        return make_shared<Memory>();
     }
     if(pluginName == "valgrind") {
-        return make_unique<Valgrind>();
+        return make_shared<Valgrind>();
     }
     if(pluginName == "pmd") {
-        return make_unique<Pmd>();
+        return make_shared<Pmd>();
     }
     if(pluginName == "lcov") {
-        return make_unique<Lcov>();
+        return make_shared<Lcov>();
     }
-    if(pluginName == "clang-tidy") {
-        return make_unique<ClangTidy>();
-    }
-    if(pluginName == "ninja") {
-        return make_unique<Ninja>();
-    }
-    return unique_ptr<Plugin>();
+
+    throw InvalidPlugin(string("Plugin associated with name '")
+                            .append(pluginName)
+                            .append("' not found"));
 }
 
 auto ExecutePlugin::push(
@@ -272,9 +249,27 @@ auto ExecutePlugin::push(config::Patterns&& patterns) noexcept -> bool {
     return true;
 }
 
-void ExecutePlugin::popFleetingOptions() noexcept { m_fleeting.pop_back(); }
+void ExecutePlugin::push(Plugins&& plugins) noexcept {
+    m_plugins.emplace_back(plugins);
+}
 
-void ExecutePlugin::popSettingsNode() noexcept { m_settings.pop_back(); }
+void ExecutePlugin::popFleetingOptions() noexcept {
+    Expects(!m_fleeting.empty());
+    m_fleeting.pop_back();
+}
 
-void ExecutePlugin::popPatterns() noexcept { m_patterns.pop_back(); }
+void ExecutePlugin::popSettingsNode() noexcept {
+    Expects(!m_settings.empty());
+    m_settings.pop_back();
+}
+
+void ExecutePlugin::popPatterns() noexcept {
+    Expects(!m_patterns.empty());
+    m_patterns.pop_back();
+}
+
+void ExecutePlugin::popPlugins() noexcept {
+    Expects(!m_plugins.empty());
+    m_plugins.pop_back();
+}
 } // namespace execHelper::plugins

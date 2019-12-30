@@ -45,21 +45,6 @@ const czstring<> WORKING_DIR_KEY("working-dir");
 } // namespace
 
 namespace execHelper::plugins::test {
-SCENARIO("Obtain the plugin name of the command-line-command plugin",
-         "[command-line-command]") {
-    GIVEN("A plugin") {
-        CommandLineCommand plugin;
-
-        WHEN("We request the plugin name") {
-            const string pluginName = plugin.getPluginName();
-
-            THEN("We should find the correct plugin name") {
-                REQUIRE(pluginName == PLUGIN_NAME);
-            }
-        }
-    }
-}
-
 SCENARIO(
     "Obtaining the default variables map of the command-line-command plugin",
     "[command-line-command]") {
@@ -67,7 +52,7 @@ SCENARIO(
         FleetingOptionsStub fleetingOptions;
         CommandLineCommand plugin;
 
-        VariablesMap actualVariables(plugin.getPluginName());
+        VariablesMap actualVariables(PLUGIN_NAME);
         REQUIRE(actualVariables.add(COMMAND_LINE_KEY, CommandLineArgs()));
         REQUIRE(actualVariables.add(ENVIRONMENT_KEY, EnvArgs()));
 

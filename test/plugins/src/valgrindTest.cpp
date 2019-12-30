@@ -21,6 +21,7 @@
 #include "fleetingOptionsStub.h"
 
 using std::move;
+using std::shared_ptr;
 using std::string;
 
 using gsl::czstring;
@@ -48,27 +49,13 @@ const czstring<> RUN_COMMAND_KEY = "run-command";
 } // namespace
 
 namespace execHelper::plugins::test {
-SCENARIO("Obtain the plugin name of the valgrind plugin", "[valgrind]") {
-    GIVEN("A plugin") {
-        Valgrind plugin;
-
-        WHEN("We request the plugin name") {
-            const string pluginName = plugin.getPluginName();
-
-            THEN("We should find the correct plugin name") {
-                REQUIRE(pluginName == PLUGIN_NAME);
-            }
-        }
-    }
-}
-
 SCENARIO("Obtaining the default variables map of the valgrind plugin",
          "[valgrind]") {
     GIVEN("The default fleeting options") {
         FleetingOptionsStub fleetingOptions;
         Valgrind plugin;
 
-        VariablesMap actualVariables(plugin.getPluginName());
+        VariablesMap actualVariables(PLUGIN_NAME);
         REQUIRE(actualVariables.add(COMMAND_LINE_KEY, CommandLineArgs()));
         REQUIRE(actualVariables.add(VERBOSITY_KEY, "no"));
 
@@ -127,6 +114,9 @@ SCENARIO("Test the variables map of the valgrind plugin", "[valgrind]") {
             gsl::not_null<config::FleetingOptionsInterface*>(&fleetingOptions));
         ExecutePlugin::push(move(settings));
         ExecutePlugin::push(Patterns(patterns));
+        ExecutePlugin::push(
+            Plugins({{"Memory",
+                      shared_ptr<Plugin>(new execHelper::plugins::Memory())}}));
 
         ExecutorStub::TaskQueue expectedTasks;
         for(const auto& command : runCommands) {
@@ -162,6 +152,7 @@ SCENARIO("Test the variables map of the valgrind plugin", "[valgrind]") {
             }
         }
 
+        ExecutePlugin::popPlugins();
         ExecutePlugin::popFleetingOptions();
         ExecutePlugin::popSettingsNode();
         ExecutePlugin::popPatterns();

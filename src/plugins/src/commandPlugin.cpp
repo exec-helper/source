@@ -25,10 +25,6 @@ const czstring<> PLUGIN_NAME = "commands";
 } // namespace
 
 namespace execHelper::plugins {
-auto CommandPlugin::getPluginName() const noexcept -> string {
-    return PLUGIN_NAME;
-}
-
 auto CommandPlugin::getVariablesMap(
     const FleetingOptionsInterface& fleetingOptions) const noexcept
     -> VariablesMap {
