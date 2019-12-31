@@ -2,7 +2,7 @@ set(MODULE lua)
 set(PACKAGE luajit)
 
 find_package(${PACKAGE})
-option(USE_SYSTEM_LUA "Use the ${PACKAGE} library provided by the system" ${${PACKAGE_NAME}_FOUND})
+option(USE_SYSTEM_LUA "Use the ${PACKAGE} library provided by the system" ${${PACKAGE}_FOUND})
 
 if(${USE_SYSTEM_LUA})
     if(NOT ${${PACKAGE}_FOUND})
