@@ -1,8 +1,8 @@
 patterns:
     COMPILER:
         default-values:
-            - g++
-            - clang++
+            - gcc
+            - clang
         short-option: c
         long-option: compiler
     MODE:
@@ -11,6 +11,10 @@ patterns:
             - release
         short-option: m
         long-option: mode
+    TRIPLET:
+        default-values:
+            - ""
+        long-option: triplet
     TARGET:
         default-values:
             - ""
@@ -198,8 +202,9 @@ create-toolchain-file:
 ninja:
     patterns:
         - COMPILER
+        - TRIPLET
         - MODE
-    build-dir: build/{COMPILER}/{MODE}/build
+    build-dir: build/{TRIPLET}{COMPILER}/{MODE}/build
     single-threaded: no
     clean:
         command-line:
@@ -207,6 +212,7 @@ ninja:
     docs:
         patterns:
             - COMPILER
+            - TRIPLET
             - MODE
             - DOCSTYPE
         command-line:
@@ -214,6 +220,7 @@ ninja:
     changelog:
         patterns:
             - COMPILER
+            - TRIPLET
             - MODE
         command-line:
             - changelog
@@ -247,127 +254,143 @@ command-line-command:
     setup:
         patterns:
             - COMPILER
+            - TRIPLET
             - MODE
-        command-line: [ ln, -fs, "build/{COMPILER}/{MODE}/build/compile_commands.json"]
+        command-line: [ ln, -fs, "build/{TRIPLET}{COMPILER}/{MODE}/build/compile_commands.json"]
     init:
         patterns:
             - COMPILER
+            - TRIPLET
             - MODE
         command-line:
-            [ cmake, -G, "Ninja", -H., "-Bbuild/{COMPILER}/{MODE}/build", "-DCMAKE_CXX_COMPILER={COMPILER}", "-DCMAKE_INSTALL_PREFIX=build/{COMPILER}/{MODE}/install", -DCMAKE_EXPORT_COMPILE_COMMANDS=ON, "-DCMAKE_BUILD_TYPE={MODE}", -DBUILD_HTML_DOCUMENTATION=ON, -DBUILD_XML_DOCUMENTATION=OFF, -DBUILD_MAN_DOCUMENTATION=ON, "-DCMAKE_TOOLCHAIN_FILE=build/{COMPILER}/{MODE}/toolchain.cmake", -DTERMINATE_ON_ASSERT_FAILURE=ON]
+            [ cmake, -G, "Ninja", -H., "-Bbuild/{TRIPLET}{COMPILER}/{MODE}/build", "-DCMAKE_INSTALL_PREFIX=build/{TRIPLET}{COMPILER}/{MODE}/install", -DCMAKE_EXPORT_COMPILE_COMMANDS=ON, "-DCMAKE_BUILD_TYPE={MODE}", -DBUILD_HTML_DOCUMENTATION=ON, -DBUILD_XML_DOCUMENTATION=OFF, -DBUILD_MAN_DOCUMENTATION=ON, "-DCMAKE_TOOLCHAIN_FILE=build/{TRIPLET}{COMPILER}/{MODE}/toolchain.cmake", -DTERMINATE_ON_ASSERT_FAILURE=ON]
 
     init-build:
         patterns:
             - COMPILER
+            - TRIPLET
             - MODE
-        command-line: [ cmake, -G, "Ninja", -H., "-Bbuild/{COMPILER}/{MODE}/build", "-DCMAKE_CXX_COMPILER={COMPILER}", "-DCMAKE_INSTALL_PREFIX=build/{COMPILER}/{MODE}/install", -DCMAKE_EXPORT_COMPILE_COMMANDS=ON, "-DCMAKE_BUILD_TYPE={MODE}", -DBUILD_HTML_DOCUMENTATION=OFF, -DBUILD_XML_DOCUMENTATION=OFF, -DBUILD_MAN_DOCUMENTATION=OFF, "-DCMAKE_TOOLCHAIN_FILE=build/{COMPILER}/{MODE}/toolchain.cmake", -DTERMINATE_ON_ASSERT_FAILURE=ON]
+        command-line: [ cmake, -G, "Ninja", -H., "-Bbuild/{TRIPLET}{COMPILER}/{MODE}/build", "-DCMAKE_INSTALL_PREFIX=build/{TRIPLET}{COMPILER}/{MODE}/install", -DCMAKE_EXPORT_COMPILE_COMMANDS=ON, "-DCMAKE_BUILD_TYPE={MODE}", -DBUILD_HTML_DOCUMENTATION=OFF, -DBUILD_XML_DOCUMENTATION=OFF, -DBUILD_MAN_DOCUMENTATION=OFF, "-DCMAKE_TOOLCHAIN_FILE=build/{TRIPLET}{COMPILER}/{MODE}/toolchain.cmake", -DTERMINATE_ON_ASSERT_FAILURE=ON]
 
     init-no-system:
         patterns:
             - COMPILER
+            - TRIPLET
             - MODE
         command-line:
-            [ cmake, -G, "Ninja", -H., "-Bbuild/{COMPILER}/{MODE}/build", "-DCMAKE_CXX_COMPILER={COMPILER}", "-DCMAKE_INSTALL_PREFIX=build/{COMPILER}/{MODE}/install", -DCMAKE_EXPORT_COMPILE_COMMANDS=ON, "-DCMAKE_BUILD_TYPE={MODE}", -DBUILD_HTML_DOCUMENTATION=OFF, -DBUILD_XML_DOCUMENTATION=OFF, -DBUILD_MAN_DOCUMENTATION=OFF, "-DCMAKE_TOOLCHAIN_FILE=build/{COMPILER}/{MODE}/toolchain.cmake", -DTERMINATE_ON_ASSERT_FAILURE=ON, -DUSE_SYSTEM_YAML_CPP=OFF, -DUSE_SYSTEM_CATCH=OFF, -DUSE_SYSTEM_GSL=OFF, -DUSE_SYSTEM_RAPIDCHECK=OFF, -DUSE_SYSTEM_LUA=OFF, -DUSE_SYSTEM_INTEGRAL=OFF]
+            [ cmake, -G, "Ninja", -H., "-Bbuild/{TRIPLET}{COMPILER}/{MODE}/build", "-DCMAKE_INSTALL_PREFIX=build/{TRIPLET}{COMPILER}/{MODE}/install", -DCMAKE_EXPORT_COMPILE_COMMANDS=ON, "-DCMAKE_BUILD_TYPE={MODE}", -DBUILD_HTML_DOCUMENTATION=OFF, -DBUILD_XML_DOCUMENTATION=OFF, -DBUILD_MAN_DOCUMENTATION=OFF, "-DCMAKE_TOOLCHAIN_FILE=build/{TRIPLET}{COMPILER}/{MODE}/toolchain.cmake", -DTERMINATE_ON_ASSERT_FAILURE=ON, -DUSE_SYSTEM_YAML_CPP=OFF, -DUSE_SYSTEM_CATCH=OFF, -DUSE_SYSTEM_GSL=OFF, -DUSE_SYSTEM_RAPIDCHECK=OFF, -DUSE_SYSTEM_LUA=OFF, -DUSE_SYSTEM_INTEGRAL=OFF]
 
     init-limited-optimization:
         patterns:
             - COMPILER
+            - TRIPLET
             - MODE
         command-line:
-            [ cmake, -G, "Ninja", -H., "-Bbuild/{COMPILER}/{MODE}/build", "-DCMAKE_CXX_COMPILER={COMPILER}", "-DCMAKE_INSTALL_PREFIX=build/{COMPILER}/{MODE}/install", -DCMAKE_EXPORT_COMPILE_COMMANDS=ON, "-DCMAKE_BUILD_TYPE=RelWithDebInfo", -DBUILD_HTML_DOCUMENTATION=ON, -DBUILD_XML_DOCUMENTATION=OFF, -DBUILD_MAN_DOCUMENTATION=ON, "-DCMAKE_TOOLCHAIN_FILE=build/{COMPILER}/{MODE}/toolchain.cmake", -DTERMINATE_ON_ASSERT_FAILURE=ON]
+            [ cmake, -G, "Ninja", -H., "-Bbuild/{TRIPLET}{COMPILER}/{MODE}/build", "-DCMAKE_INSTALL_PREFIX=build/{TRIPLET}{COMPILER}/{MODE}/install", -DCMAKE_EXPORT_COMPILE_COMMANDS=ON, "-DCMAKE_BUILD_TYPE=RelWithDebInfo", -DBUILD_HTML_DOCUMENTATION=ON, -DBUILD_XML_DOCUMENTATION=OFF, -DBUILD_MAN_DOCUMENTATION=ON, "-DCMAKE_TOOLCHAIN_FILE=build/{TRIPLET}{COMPILER}/{MODE}/toolchain.cmake", -DTERMINATE_ON_ASSERT_FAILURE=ON]
 
     init-windows:
         patterns:
             - COMPILER
+            - TRIPLET
             - MODE
             - EH_WORKING_DIR
-        command-line: [cmake, -G, "Ninja", "-H.", "-Bbuild/{COMPILER}/{MODE}/build", "-DCMAKE_INSTALL_PREFIX=build/{COMPILER}/{MODE}/install", "-DCMAKE_BUILD_TYPE={MODE}", -DBUILD_HTML_DOCUMENTATION=OFF, -DBUILD_XML_DOCUMENTATION=OFF, -DBUILD_MAN_DOCUMENTATION=OFF, -DTERMINATE_ON_ASSERT_FAILURE=ON, "-DBOOST_ROOT=%cd%/3rdparty/bin/boost", "-DBOOST_INCLUDEDIR=%cd%/3rdparty/bin/boost/include/boost-1_69", -DBoost_USE_STATIC_LIBS=ON, -DBUILD_MAN_DOCUMENTATION=OFF, -DENABLE_TESTING=OFF, -DBoost_NO_SYSTEM_PATHS=ON, -DBoost_USE_STATIC_RUNTIME=OFF]
+        command-line: [cmake, -G, "Ninja", "-H.", "-Bbuild/{TRIPLET}{COMPILER}/{MODE}/build", "-DCMAKE_INSTALL_PREFIX=build/{COMPILER}/{MODE}/install", "-DCMAKE_BUILD_TYPE={MODE}", -DBUILD_HTML_DOCUMENTATION=OFF, -DBUILD_XML_DOCUMENTATION=OFF, -DBUILD_MAN_DOCUMENTATION=OFF, -DTERMINATE_ON_ASSERT_FAILURE=ON, "-DBOOST_ROOT=%cd%/3rdparty/bin/boost", "-DBOOST_INCLUDEDIR=%cd%/3rdparty/bin/boost/include/boost-1_69", -DBoost_USE_STATIC_LIBS=ON, -DBUILD_MAN_DOCUMENTATION=OFF, -DENABLE_TESTING=OFF, -DBoost_NO_SYSTEM_PATHS=ON, -DBoost_USE_STATIC_RUNTIME=OFF]
 
     create-toolchain-file:
         patterns:
             - COMPILER
+            - TRIPLET
             - SYSROOT
             - MODE
         command-line:
-            - remove-toolchain-tmp: [ rm, -f, "build/{COMPILER}/{MODE}/toolchain.cmake"]
-            - create-build-dir: [ mkdir, -p, "build/{COMPILER}/{MODE}"]
-            - create-toolchain-tmp: [ cp, toolchain.cmake.in, "build/{COMPILER}/{MODE}/toolchain.cmake"]
-            - replace-CPP-compiler: [ sed, -i, 's%@CXX_COMPILER@%{COMPILER}%g', "build/{COMPILER}/{MODE}/toolchain.cmake"]
-            - replace-sysroot: [ sed, -i, 's%@SYSROOT@%{SYSROOT}%g', "build/{COMPILER}/{MODE}/toolchain.cmake"]
-            - cat: [ cat, "build/{COMPILER}/{MODE}/toolchain.cmake"]
+            - remove-toolchain-tmp: [ rm, -f, "build/{TRIPLET}{COMPILER}/{MODE}/toolchain.cmake"]
+            - create-build-dir: [ mkdir, -p, "build/{TRIPLET}{COMPILER}/{MODE}"]
+            - create-toolchain-tmp: [ cp, toolchain.cmake.in, "build/{TRIPLET}{COMPILER}/{MODE}/toolchain.cmake"]
+            - replace-triplet: [ sed, -i, 's%@TRIPLET@%{TRIPLET}%g', "build/{TRIPLET}{COMPILER}/{MODE}/toolchain.cmake"]
+            - replace-compiler-family: [ sed, -i, 's%@COMPILER_FAMILY@%{COMPILER}%g', "build/{TRIPLET}{COMPILER}/{MODE}/toolchain.cmake"]
+            - replace-sysroot: [ sed, -i, 's%@SYSROOT@%{SYSROOT}%g', "build/{TRIPLET}{COMPILER}/{MODE}/toolchain.cmake"]
+            - cat: [ cat, "build/{TRIPLET}{COMPILER}/{MODE}/toolchain.cmake"]
     distclean:
         patterns:
             - COMPILER
+            - TRIPLET
             - MODE
-        command-line: [ rm, -rf, "build/{COMPILER}/{MODE}"]
+        command-line: [ rm, -rf, "build/{TRIPLET}{COMPILER}/{MODE}"]
     install:
         patterns:
             - COMPILER
+            - TRIPLET
             - MODE
             - COMPONENT
-        command-line: [ cmake, "-DCOMPONENT={COMPONENT}", -P, "build/{COMPILER}/{MODE}/build/cmake_install.cmake"]
+        command-line: [ cmake, "-DCOMPONENT={COMPONENT}", -P, "build/{TRIPLET}{COMPILER}/{MODE}/build/cmake_install.cmake"]
     create-installer:
         patterns:
             - COMPILER
+            - TRIPLET
             - MODE
-#        command-line: [ C:\Program Files (x86)\NSIS\Bin\makensis.exe, "build\{COMPILER}\{MODE}\install\bin"]
+#        command-line: [ C:\Program Files (x86)\NSIS\Bin\makensis.exe, "build\{TRIPLET}{COMPILER}\{MODE}\install\bin"]
     unittest:
         patterns:
             - COMPILER
+            - TRIPLET
             - MODE
             - MODULE
-        command-line: [ "build/{COMPILER}/{MODE}/install/test/unittest/exec-helper-{MODULE}-unittest"]
+        command-line: [ "build/{TRIPLET}{COMPILER}/{MODE}/install/test/unittest/exec-helper-{MODULE}-unittest"]
 
     integration-new:
         patterns:
             - COMPILER
+            - TRIPLET
             - MODE
             - EH_WORKING_DIR
         environment:
             PYTHONHOME: ""
         command-line:
-            test: [robot, "--outputdir", "build/{COMPILER}/{MODE}", --suitestatlevel, 3, "build/{COMPILER}/{MODE}/install/test/integration/"]
+            test: [robot, "--outputdir", "build/{TRIPLET}{COMPILER}/{MODE}", --suitestatlevel, 3, "build/{TRIPLET}{COMPILER}/{MODE}/install/test/integration/"]
 
     integration-old:
         patterns:
             - COMPILER
+            - TRIPLET
             - MODE
-        command-line: build/{COMPILER}/{MODE}/install/test/integration/exec-helper-integration-test
+        command-line: build/{TRIPLET}{COMPILER}/{MODE}/install/test/integration/exec-helper-integration-test
     coverage:
         environment:
             CXXFLAGS: -g --coverage -fprofile-arcs -ftest-coverage
             LDFLAGS: -g --coverage -fprofile-arcs -ftest-coverage
-        command-line: [ exec-helper, init-build, build, analyze, --analyze, lcov, --compiler, g++, --mode, coverage, --run-target, unittest]
+        command-line: [ exec-helper, init-build, build, analyze, --analyze, lcov, --compiler, gcc, --mode, coverage, --run-target, unittest]
     undefined-behaviour:
         environment:
             CXXFLAGS: -g -fno-omit-frame-pointer -fno-sanitize-recover=undefined
             LDFLAGS: -g -fno-omit-frame-pointer -fno-sanitize-recover=undefined
             UBSAN_OPTIONS: "suppresions=${PWD}/suppressions/ubsan.blacklist"
-        command-line: [ exec-helper, init-limited-optimization, build, run-test, --compiler, clang++, --mode, undefined-behaviour, --run-target, unittest, integration]
+        command-line: [ exec-helper, init-limited-optimization, build, run-test, --compiler, clang, --mode, undefined-behaviour, --run-target, unittest, integration]
     memory-check:
-        command-line: [ exec-helper, analyze, --analyze, valgrind, --run-target, unittest, --compiler, g++, --mode, debug]
+        command-line: [ exec-helper, analyze, --analyze, valgrind, --run-target, unittest, --compiler, gcc, --mode, debug]
     asan:
         environment:
             ASAN_OPTIONS: "check_initialization_order=1 print_stacktrace=1"
         command-line: 
-            - init: [ exec-helper, init-build, --compiler, clang++, --mode, asan, --run-target, unittest]
-            - overwrite-init: [ cmake, -H., "-Bbuild/clang++/asan/build", "-DSANITIZER=address,leak"]
-            - build: [ exec-helper, build, --compiler, clang++, --mode, asan, --run-target, unittest]
-            - run: [ exec-helper, unittest, --compiler, clang++, --mode, asan, --run-target, unittest]
+            - init: [ exec-helper, init-build, --compiler, clang, --mode, asan, --run-target, unittest]
+            - overwrite-init: [ cmake, -H., "-Bbuild/clang/asan/build", "-DSANITIZER=address,leak"]
+            - build: [ exec-helper, build, --compiler, clang, --mode, asan, --run-target, unittest]
+            - run: [ exec-helper, unittest, --compiler, clang, --mode, asan, --run-target, unittest]
     docs:
         patterns:
             - COMPILER
+            - TRIPLET
             - MODE
             - DOCSTYPE
-        command-line: [ cmake, "-DCOMPONENT=docs-{DOCSTYPE}", -P, "build/{COMPILER}/{MODE}/build/cmake_install.cmake"]
+        command-line: [ cmake, "-DCOMPONENT=docs-{DOCSTYPE}", -P, "build/{TRIPLET}{COMPILER}/{MODE}/build/cmake_install.cmake"]
     coverity:
         patterns:
             - COMPILER
+            - TRIPLET
             - MODE
             - COVERITY_ARCHIVE_NAME
         command-line:
             - init: [ exec-helper, distclean, init-build, --compiler, "{COMPILER}", --mode, "{MODE}"]
-            - cov-build: [ cov-build, --dir, cov-int, exec-helper, build-only, --compiler, "{COMPILER}", --mode, "{MODE}" ]
+            - cov-build: [ cov-build, --dir, cov-int, exec-helper, build-only, --compiler, "{TRIPLET}{COMPILER}", --mode, "{MODE}" ]
             - archive: [tar, --create, --auto-compress, --file, "{COVERITY_ARCHIVE_NAME}", cov-int]
             - upload: [ echo, "{COVERITY_ARCHIVE_NAME} is now ready to get uploaded to coverity scan"]
     format:
@@ -380,8 +403,9 @@ command-line-command:
     changelog:
         patterns:
             - COMPILER
+            - TRIPLET
             - MODE
-        command-line: [ cmake, "-DCOMPONENT=changelog", -P, "build/{COMPILER}/{MODE}/build/cmake_install.cmake"]
+        command-line: [ cmake, "-DCOMPONENT=changelog", -P, "build/{TRIPLET}{COMPILER}/{MODE}/build/cmake_install.cmake"]
 
 valgrind:
     environment:
@@ -411,9 +435,10 @@ pmd:
 lcov:
     patterns:
         - COMPILER
+        - TRIPLET
         - MODE
     run-command: run-test
-    base-directory: "build/{COMPILER}/{MODE}/build"
+    base-directory: "build/{TRIPLET}{COMPILER}/{MODE}/build"
     directory: .
     zero-counters: yes
     excludes:

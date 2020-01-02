@@ -33,11 +33,11 @@ variables:
         - build:clang
     script:
         - *install_exec_helper
-        - export PATH=$(pwd)/build/g++/release/install/bin:$(pwd)/build/g++/release/install/test/integration:$PATH
+        - export PATH=$(pwd)/build/gcc/release/install/bin:$(pwd)/build/gcc/release/install/test/integration:$PATH
         - echo "using run target '$RUN_TARGET'"
         - echo "using modules '$MODULES'"
         - export RC_PARAMS="max_success=${NB_RUNS} max_size=${NB_RUNS}"
-        - exec-helper run-test --run-target $RUN_TARGET --module $MODULES --compiler g++ clang++ --mode release --debug debug
+        - exec-helper run-test --run-target $RUN_TARGET --module $MODULES --compiler gcc clang --mode release --debug debug
 
 .memory-check: &memory_check
     stage: analyze
@@ -50,8 +50,8 @@ variables:
         - build:gcc:limited-optimization
     script:
         - *install_exec_helper
-        - export PATH=$(pwd)/build/g++/limited/install/bin:$(pwd)/build/g++/limited/install/test/integration:$PATH
-        - exec-helper analyze --analyze valgrind --run-target $RUN_TARGET --compiler g++ --mode limited --module $MODULES
+        - export PATH=$(pwd)/build/gcc/limited/install/bin:$(pwd)/build/gcc/limited/install/test/integration:$PATH
+        - exec-helper analyze --analyze valgrind --run-target $RUN_TARGET --compiler gcc --mode limited --module $MODULES
 
 .clang_tidy: &clang_tidy
     stage: analyze
@@ -63,8 +63,8 @@ variables:
         - build:native
     script:
         - *install_exec_helper
-        - exec-helper setup init-build -c g++ -m release
-        - ninja -C build/g++/release/build download     # Downloads and builds all non-system dependencies for clang-tidy to find them
+        - exec-helper setup init-build -c gcc -m release
+        - ninja -C build/gcc/release/build download     # Downloads and builds all non-system dependencies for clang-tidy to find them
         - exec-helper analyze --analyze clang-tidy --module $MODULES --source-type $SOURCE_TYPE
 
 .cppcheck: &cppcheck
@@ -89,7 +89,7 @@ variables:
         - build:native
     script:
         - *install_exec_helper
-        - export PATH=$(pwd)/build/clang++/undefined-behaviour/install/bin:$(pwd)/build/clang++/undefined-behaviour/install/test/integration:$PATH
+        - export PATH=$(pwd)/build/clang/undefined-behaviour/install/bin:$(pwd)/build/clang/undefined-behaviour/install/test/integration:$PATH
         - exec-helper undefined-behaviour
 
 .code_format: &code_format
@@ -113,7 +113,7 @@ variables:
         - build:native
     script:
         - *install_exec_helper
-        - export PATH=$(pwd)/build/clang++/asan/install/bin:$(pwd)/build/clang++/asan/install/test/integration:$PATH
+        - export PATH=$(pwd)/build/clang/asan/install/bin:$(pwd)/build/clang/asan/install/test/integration:$PATH
         - exec-helper analyze --analyze asan --module "${ALL_MODULES}"      # Note: the quotes are used to cheat exec-helper so that the binaries are only built once rather than for each module separately
 
 .build_image: &build_image
@@ -209,7 +209,7 @@ build:no-system:
         - sudo pacman -Sy --needed --noconfirm clang cmake make doxygen git
     script: 
         - *install_exec_helper
-        - exec-helper init-no-system build --compiler clang++ --mode release
+        - exec-helper init-no-system build --compiler clang --mode release
 
 build:gcc:
     stage: build
@@ -218,11 +218,11 @@ build:gcc:
         - build:native
     script:
         - *install_exec_helper
-        - exec-helper init build --compiler g++ --mode release
+        - exec-helper init build --compiler gcc --mode release
     artifacts:
         expire_in: 1 day
         paths:
-            - build/g++/release/install
+            - build/gcc/release/install
 
 build:gcc:debug:
     stage: build
@@ -231,7 +231,7 @@ build:gcc:debug:
         - build:native
     script:
         - *install_exec_helper
-        - exec-helper init build --compiler g++ --mode debug
+        - exec-helper init build --compiler gcc --mode debug
 
 build:gcc:limited-optimization:
     stage: build
@@ -240,11 +240,11 @@ build:gcc:limited-optimization:
         - build:native
     script:
         - *install_exec_helper
-        - exec-helper init-limited-optimization build --compiler g++ --mode limited
+        - exec-helper init-limited-optimization build --compiler gcc --mode limited
     artifacts:
         expire_in: 1 day
         paths:
-            - build/g++/limited/install
+            - build/gcc/limited/install
 
 build:clang:
     stage: build
@@ -253,11 +253,11 @@ build:clang:
         - build:native
     script: 
         - *install_exec_helper
-        - exec-helper init build --compiler clang++ --mode release
+        - exec-helper init build --compiler clang --mode release
     artifacts:
         expire_in: 1 day
         paths:
-            - build/clang++/release/install
+            - build/clang/release/install
 
 unittests:
     <<: *run_test
@@ -284,7 +284,7 @@ integration:
         - sudo pip install -r test/integration/requirements.txt
     after_script:
         - mkdir -p integration
-        - mv build/g++/release/*.{xml,html} integration/
+        - mv build/gcc/release/*.{xml,html} integration/
     artifacts:
         expire_in: 1 day
         paths:
@@ -312,9 +312,7 @@ clang-static-analyzer:
         - build:native
     script:
         - *install_exec_helper
-        # Ugly hack for circumventing issues with the (unused) scan-build c compiler.
-        - echo "SET(CMAKE_C_COMPILER  clang)" >> toolchain.cmake.in
-        - exec-helper analyze --analyze clang-static-analyzer --mode debug --compiler ''
+        - exec-helper analyze --analyze clang-static-analyzer --mode debug --compiler clang
 
 cross-compilation:
     stage: analyze
@@ -325,10 +323,10 @@ cross-compilation:
         - *install_exec_helper
     script:
         - apt-get install --yes debootstrap g++-aarch64-linux-gnu cmake ninja-build pkg-config git
-        - debootstrap --arch=arm64 --download-only --variant=minbase --include=libboost-program-options-dev,libboost-filesystem-dev,libboost-log-dev,libboost-thread-dev,doxygen,libc6-dev testing ./sysroot_arm64 http://deb.debian.org/debian/
+        - debootstrap --arch=arm64 --download-only --variant=minbase --include=libboost-program-options-dev,libboost-filesystem-dev,libboost-log-dev,libboost-thread-dev,doxygen,libc6-dev,libluajit-5.1-dev testing ./sysroot_arm64 http://deb.debian.org/debian/
         - for DEB in $(find sysroot_arm64/var/cache/apt/archives -not -path sysroot_arm64/var/cache/apt/archives/partial -type f); do echo "Extracting ${DEB}..."; dpkg -x ${DEB} sysroot_arm64; done   # Unpack all downloaded debian packages, since debootstrap does not seem to unpack the additional included ones and their dependencies
         - cp -r /usr/aarch64-linux-gnu/* sysroot_arm64/usr/
-        - exec-helper init-build build --compiler aarch64-linux-gnu-g++ --mode release --sysroot $(pwd)/sysroot_arm64
+        - exec-helper init-build build --compiler gcc --triplet aarch64-linux-gnu- --mode release --sysroot $(pwd)/sysroot_arm64
 
 undefined-behaviour:
     <<: *undefined_behaviour
@@ -344,7 +342,7 @@ coverage:
         - build:gcc
     script:
         - *install_exec_helper
-        - export PATH=$(pwd)/build/g++/release/install/bin:$(pwd)/build/g++/release/install/test/integration:$PATH
+        - export PATH=$(pwd)/build/gcc/release/install/bin:$(pwd)/build/gcc/release/install/test/integration:$PATH
         - exec-helper coverage
     artifacts:
         paths:
@@ -381,7 +379,7 @@ code-duplication-pmd-cpd:
         #- pushd /tmp/cov-analysis-linux64-*/bin
         #- export PATH=$PATH:$(pwd)
         #- popd
-        #- exec-helper distclean analyze --analyze coverity --compiler g++ --mode release --coverity-archive-name $COVERITY_ARCHIVE_NAME
+        #- exec-helper distclean analyze --analyze coverity --compiler gcc --mode release --coverity-archive-name $COVERITY_ARCHIVE_NAME
         #- curl --form token=${COVERITY_SCAN_TOKEN} --form email=barrie.verhagen@gmail.com --form file=@${COVERITY_ARCHIVE_NAME} --form version="${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}" --form description="Analysis scan for ${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}" https://scan.coverity.com/builds?project=bverhagen%2Fexec-helper
     #only:
         #- master
@@ -430,7 +428,7 @@ pages:
         - mv pages/index.html public/
         - mv test_coverage/ public/coverage
         - mkdir -p public/docs
-        - mv build/g++/release/install/share/doc/exec-helper/html public/docs/
+        - mv build/gcc/release/install/share/doc/exec-helper/html public/docs/
         - mv integration public/integration
     artifacts:
         paths:

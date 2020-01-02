@@ -3,9 +3,22 @@ SET(CMAKE_SYSTEM_NAME Linux)
 #this one not so much
 SET(CMAKE_SYSTEM_VERSION 1)
 
-# specify the cross compiler
-#SET(CMAKE_C_COMPILER  @C_COMPILER@ )       # We do not use the C compiler
-SET(CMAKE_CXX_COMPILER @CXX_COMPILER@)
+set(TRIPLET @TRIPLET@)
+set(COMPILER_FAMILY @COMPILER_FAMILY@)
+
+set(CMAKE_C_COMPILER_TARGET ${TRIPLET})
+set(CMAKE_CXX_COMPILER_TARGET ${TRIPLET})
+
+# Determine C compiler from CXX compiler
+if(${COMPILER_FAMILY} STREQUAL "gcc")
+    SET(CMAKE_C_COMPILER "${TRIPLET}${COMPILER_FAMILY}")
+    SET(CMAKE_CXX_COMPILER "${TRIPLET}g++")
+elseif(${COMPILER_FAMILY} STREQUAL "clang")
+    SET(CMAKE_C_COMPILER "${TRIPLET}${COMPILER_FAMILY}")
+    SET(CMAKE_CXX_COMPILER "${TRIPLET}clang++")
+else()
+    message(ERROR "The compiler family '${COMPILER_FAMILY}' is not supported")
+endif()
 
 # where is the target environment 
 SET(CMAKE_SYSROOT	  @SYSROOT@)
