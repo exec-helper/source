@@ -14,7 +14,7 @@
 ##       'fix' is for bug fixes
 ##       'new' is for new features, big improvement
 ##
-##   AUDIENCE is optional and one of 'dev', 'usr', 'pkg', 'test', 'doc'
+##   AUDIENCE is optional and one of 'dev', 'usr', 'pkg', 'test', 'doc', 'ci'
 ##
 ##       Is WHO is concerned by the change.
 ##
@@ -23,6 +23,7 @@
 ##       'pkg'  is for packagers   (packaging changes)
 ##       'test' is for testers     (test only related changes)
 ##       'doc'  is for doc guys    (doc only changes)
+##       'ci'   is for CI fixes    (CI only changes)
 ##
 ##   COMMIT_MSG is ... well ... the commit message itself.
 ##
@@ -142,7 +143,7 @@ body_process = ReSub(r'((^|\n)[A-Z]\w+(-\w+)*: .*(\n\s+.*)*)+$', r'') | strip
 ##
 ## Available constructs are those listed in ``body_process`` doc.
 subject_process = (strip |
-    ReSub(r'^([cC]hg|[fF]ix|[nN]ew)\s*:\s*((dev|use?r|pkg|test|doc)\s*:\s*)?([^\n@]*)(@[a-z]+\s+)*$', r'\4') |
+    ReSub(r'^([cC]hg|[fF]ix|[nN]ew)\s*:\s*((dev|use?r|pkg|test|doc|ci)\s*:\s*)?([^\n@]*)(@[a-z]+\s+)*$', r'\4') |
     SetIfEmpty("No commit message.") | ucfirst | final_dot)
 
 
