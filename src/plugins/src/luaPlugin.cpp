@@ -1,12 +1,15 @@
 #include "luaPlugin.h"
 
 #include <algorithm>
+#include <fstream>
 #include <iterator>
 #include <optional>
+#include <stdexcept>
 #include <unordered_map>
 #include <utility>
 
-#include <integral/integral.hpp>
+#include <LuaContext.hpp>
+#include <boost/optional.hpp>
 
 #include "config/pattern.h"
 #include "core/task.h"
@@ -19,11 +22,15 @@
 #include "verbosity.h"
 #include "workingDirectory.h"
 
-using std::optional;
+using std::ifstream;
+using std::make_pair;
+using std::pair;
 using std::string;
 using std::to_string;
 using std::unordered_map;
 using std::vector;
+
+using boost::optional;
 
 using execHelper::config::CommandCollection;
 using execHelper::config::FleetingOptionsInterface;
@@ -41,12 +48,12 @@ class Config {
   public:
     explicit Config(const VariablesMap& config) noexcept : m_config(config) {}
 
-    auto get(const std::string& key) noexcept
-        -> optional<unordered_map<std::string, std::string>> {
+    auto get(const string& key) noexcept
+        -> optional<unordered_map<string, string>> {
         if(!m_config.contains(key)) {
             LOG(debug) << "key '" << key << "' does not exist in config"
                        << std::endl;
-            return std::nullopt;
+            return boost::none;
         }
         auto& subnode = m_config[key];
 
@@ -85,15 +92,27 @@ class PatternWrapper {
   public:
     explicit PatternWrapper(const Patterns& patterns) : m_patterns(patterns) {}
 
-    auto get(const string& key) noexcept -> optional<vector<string>> {
+    auto get(const string& key) noexcept
+        -> optional<vector<pair<int, string>>> {
         auto found = find_if(
             m_patterns.begin(), m_patterns.end(),
             [&key](const auto& pattern) { return key == pattern.getKey(); });
         if(found == m_patterns.end()) {
             // Key not found
-            return std::nullopt;
+            return boost::none;
         }
-        return found->getValues();
+
+        vector<pair<int, string>> result;
+        auto index = 1; // Lua arrays start at index 1
+
+        auto values = found->getValues();
+        transform(values.begin(), values.end(), back_inserter(result),
+                  [&index](const auto& value) {
+                      auto convertedValue = make_pair(index, value);
+                      ++index;
+                      return convertedValue;
+                  });
+        return result;
     }
 
   private:
@@ -117,116 +136,135 @@ auto LuaPlugin::getVariablesMap(const FleetingOptionsInterface& fleetingOptions)
 auto LuaPlugin::apply(Task task, const VariablesMap& config,
                       const Patterns& patterns) const noexcept -> bool {
     Tasks tasks;
-    integral::State state;
+    LuaContext lua;
 
     WorkingDirectory::apply(task, config);
     AddEnvironment::apply(task, config);
 
     try {
-        state.openLibs();
+        lua.writeVariable("verbose",
+                          config.get<Verbosity>(VERBOSITY_KEY, false));
+        lua.writeVariable("jobs", config.get<Jobs>(JOBS_KEY, 1U));
 
-        state["verbose"] = config.get<Verbosity>(VERBOSITY_KEY, false);
-        state["jobs"] = config.get<Jobs>(JOBS_KEY, 1U);
+        lua.executeCode("function get_commandline() "
+                        "return list(config['command-line']) or {} "
+                        "end");
 
-        // Add custom modules to lua's package.path
-        state.doString(
-            "package.path = package.path .. "
-            "';/home/verhagenconsultancy/workspace/exec-helper/branches/"
-            "study-embedding-lue/lua/?.lua'");
+        lua.executeCode("function get_environment() "
+                        "return config['environment'] or {} "
+                        "end");
 
-        state.doString("function get_commandline() "
-                       "return list(config['command-line']) or {} "
-                       "end");
+        lua.executeCode("function get_verbose(verbose_command)"
+                        "if one(config['verbose']) "
+                        "then "
+                        "if one(config['verbose']) == 'yes' "
+                        "then "
+                        "return {verbose_command} "
+                        "end "
+                        "else "
+                        "if verbose "
+                        "then "
+                        "return {verbose_command} "
+                        "end "
+                        "end "
+                        "return {} "
+                        "end");
 
-        state.doString("function get_environment() "
-                       "return config['environment'] or {} "
-                       "end");
-        state.doString("function get_verbose(verbose_command)"
-                       "if one(config['verbose']) "
-                       "then "
-                       "if one(config['verbose']) == 'yes' "
-                       "then "
-                       "return {verbose_command} "
-                       "end "
-                       "else "
-                       "if verbose "
-                       "then "
-                       "return {verbose_command} "
-                       "end "
-                       "end "
-                       "return {} "
-                       "end");
-
-        // Add custom modules to lua's package.path
+        // Define the Config class
         Config configWrapper(config);
 
-        state["Config"] = integral::ClassMetatable<Config>().setFunction(
-            "__index", &Config::get);
+        lua.writeVariable("config", configWrapper);
 
-        state["config"] = configWrapper;
+        lua.writeFunction<optional<unordered_map<string, string>>(
+            Config&, const std::string&)>(
+            "config", LuaContext::Metatable, "__index",
+            [](Config& config, const std::string& key) {
+                return config.get(key);
+            });
 
         // Define the Task class
-        state["Task"] =
-            integral::ClassMetatable<Task>()
-                .setConstructor<Task()>("new")
-                .setConstructor<Task(const Task&)>("copy")
-                .setFunction("add_args",
-                             [](Task& task, const TaskCollection& args) {
-                                 task.append(args);
-                             });
-
-        // Set the initial task
-        state["task"] = task;
+        lua.writeVariable("task", task);
+        lua.registerFunction<Task, Task()>(
+            "new", [](const Task& /*task*/) { return Task(); });
+        lua.registerFunction<Task, Task()>(
+            "copy", [](const Task& task) { return Task(task); });
+        lua.registerFunction<Task, void(const vector<pair<int, string>>&)>(
+            "add_args", [](Task& task, const vector<pair<int, string>>& args) {
+                std::for_each(
+                    args.begin(), args.end(),
+                    [&task](const auto& arg) { task.append(arg.second); });
+            });
 
         // Define the Pattern class
-        //state["Pattern"] = integral::ClassMetatable<Pattern>().setFunction("get_values", &Pattern::getValues);
-        state["Patterns"] =
-            integral::ClassMetatable<PatternWrapper>().setFunction(
-                "__index", &PatternWrapper::get);
-
         PatternWrapper patternWrapper(patterns);
-        state["patterns"] = patternWrapper;
+        lua.writeVariable("patterns", patternWrapper);
+        lua.writeFunction<optional<vector<pair<int, string>>>(PatternWrapper&,
+                                                              const string&)>(
+            "patterns", LuaContext::Metatable, "__index",
+            [](PatternWrapper& wrapper, const string& key) {
+                return wrapper.get(key);
+            });
 
-        state["register_task"].setFunction(
-            [&tasks](const Task& task) { tasks.push_back(task); });
+        lua.writeFunction("register_task", [&tasks](const Task& task) {
+            tasks.push_back(task);
+        });
+        lua.writeFunction<bool(const Task&, const vector<pair<int, string>>&)>(
+            "run_target",
+            [](const Task& task, const vector<pair<int, string>>& commands) {
+                CommandCollection commandsToExecute;
+                commandsToExecute.reserve(commands.size());
 
-        state["run_target"].setFunction(
-            [](const Task& task, const CommandCollection& commandsToExecute) {
+                transform(commands.begin(), commands.end(),
+                          back_inserter(commandsToExecute),
+                          [](const auto& command) { return command.second; });
+
                 ExecutePlugin executePlugin(commandsToExecute);
                 return executePlugin.apply(task, VariablesMap("subtask"),
                                            Patterns());
             });
 
-        state["one"].setFunction(
-            [](const optional<std::unordered_map<std::string, std::string>>&
-                   values) -> optional<std::string> {
+        lua.writeFunction<optional<string>(
+            const optional<unordered_map<string, string>>&)>(
+            "one",
+            [](const optional<unordered_map<string, string>>& values)
+                -> optional<string> {
                 if(!values) {
-                    return std::nullopt;
+                    return boost::none;
                 }
                 return (*values).at("0");
             });
 
-        state["user_feedback"].setFunction(
-            [](const std::string& message) { user_feedback_error(message); });
+        lua.writeFunction("input_error", [](const string& message) {
+            throw std::runtime_error(message);
+        });
 
-        state["user_feedback_error"].setFunction(
-            [](const std::string& message) { user_feedback_error(message); });
-
-        state["list"].setFunction(
-            [](const optional<std::unordered_map<std::string, std::string>>&
-                   values) -> optional<std::vector<std::string>> {
+        lua.writeFunction("user_feedback", [](const string& message) {
+            user_feedback_error(message);
+        });
+        lua.writeFunction("user_feedback_error", [](const string& message) {
+            user_feedback_error(message);
+        });
+        lua.writeFunction(
+            "list",
+            [](const optional<unordered_map<string, string>>& values)
+                -> optional<std::vector<pair<int, string>>> {
                 if(!values) {
-                    return std::nullopt;
+                    return boost::none;
                 }
-                std::vector<std::string> result;
+
+                vector<pair<int, string>> result;
                 result.reserve(values->size());
 
+                auto index = 1;
+
                 for(size_t i = 0U; i < values->size(); ++i) {
-                    result.push_back((*values).at(std::to_string(i)));
+                    auto listValue =
+                        make_pair(index, (*values).at(std::to_string(i)));
+                    result.push_back(listValue);
+                    ++index;
                 }
                 return result;
             });
-
     } catch(std::exception& e) {
         user_feedback_error("Internal error");
         LOG(error) << "Internal error: '" << e.what() << "'";
@@ -234,12 +272,32 @@ auto LuaPlugin::apply(Task task, const VariablesMap& config,
     }
 
     try {
-        state.doFile(m_script);
-    } catch(integral::StateException& e) {
-        user_feedback_error("Failed to apply lua file '" + m_script.string() +
-                            "'");
-        LOG(error) << "Failed to apply lua file '" << m_script.string()
-                   << "': " << e.what();
+        ifstream executionCode(m_script);
+        lua.executeCode(executionCode);
+    } catch(const LuaContext::SyntaxErrorException& e) {
+        user_feedback_error("Syntax error detected in lua file '" +
+                            m_script.string() + "': " + e.what());
+
+        LOG(error) << "Syntax error detected in lua file '" +
+                          m_script.string() + "': " + e.what();
+        return false;
+    } catch(const LuaContext::ExecutionErrorException& e) {
+        try {
+            std::rethrow_if_nested(e);
+        } catch(const std::runtime_error& e) {
+            user_feedback_error(e.what());
+
+            LOG(error) << e.what();
+        } catch(...) {
+            user_feedback_error("Module '" + m_script.string() +
+                                "' reported an error: " + e.what());
+
+            LOG(error) << "Module '" + m_script.string() +
+                              "': reported an error" + e.what();
+        }
+        return false;
+    } catch(const std::runtime_error& e) {
+        LOG(error) << e.what();
         return false;
     }
 

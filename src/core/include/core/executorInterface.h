@@ -20,8 +20,10 @@ class ExecutorInterface {
      * Execute the given task
      *
      * \param[in] task  The task to execute
-     * Note: this does not necessarily mean that the task got executed or will
-     * successfully execute. False   Otherwise
+     * \returns void
+     *
+     * \note: this does not necessarily mean that the task got executed or will
+     * successfully execute.
      */
     virtual void execute(const Task& task) noexcept = 0;
 

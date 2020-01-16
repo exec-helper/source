@@ -20,6 +20,7 @@ struct AddEnvironment {
      *
      * @param[out] variables    The variables map to add the variables to
      * @param[in] options       The fleeting options to consider
+     * @returns void
      */
     static void
     getVariables(config::VariablesMap& variables,

@@ -1,0 +1,48 @@
+set(MODULE lua-wrapper)
+set(PACKAGE Luawrapper)
+
+find_package(${PACKAGE})
+option(USE_SYSTEM_LUAWRAPPER "Use the ${MODULE} library provided by the system" ${${PACKAGE}_FOUND})
+
+if(${USE_SYSTEM_LUAWRAPPER})
+    if(NOT ${${PACKAGE}_FOUND})
+        MESSAGE(FATAL_ERROR "Could NOT find ${MODULE}")
+    endif()
+else()
+    MESSAGE(STATUS " -> Using latest upstream version of ${PACKAGE} instead")
+
+    include(ExternalProject)
+
+    set(LUAWRAPPER_INSTALL_DIR ${CMAKE_CURRENT_BINARY_DIR}/${MODULE}/src/Luawrapper/include)
+
+    if(CMAKE_TOOLCHAIN_FILE)
+        # Inherit settings from toolchain file
+        get_filename_component(TOOLCHAIN_FILE "${CMAKE_TOOLCHAIN_FILE}" ABSOLUTE BASE_DIR "${PROJECT_SOURCE_DIR}")
+        set(ADDITIONAL_BUILD_ARGS -DCMAKE_TOOLCHAIN_FILE=${TOOLCHAIN_FILE})
+    else()
+        set(ADDITIONAL_BUILD_ARGS -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER})
+    endif()
+
+    ExternalProject_Add(${PACKAGE}
+        PREFIX ${MODULE}
+        GIT_REPOSITORY https://github.com/ahupowerdns/luawrapper.git
+        GIT_TAG 82ae0c5411d1e35ae0055df40870aaa303512c9a
+        GIT_SHALLOW TRUE
+        # Skip their build steps: their build system only builds tests and it does not provide an install target
+        CONFIGURE_COMMAND ""
+        BUILD_COMMAND ""
+        INSTALL_COMMAND ""
+        UPDATE_COMMAND ""
+    )
+
+    set(${PACKAGE}_INCLUDE_DIRS ${LUAWRAPPER_INSTALL_DIR})
+endif()
+
+add_library(${MODULE} INTERFACE)
+target_include_directories(${MODULE} SYSTEM INTERFACE ${${PACKAGE}_INCLUDE_DIRS})
+target_link_libraries(${MODULE} INTERFACE lua)
+
+if(NOT ${USE_SYSTEM_LUAWRAPPER})
+    add_dependencies(${MODULE} ${PACKAGE})
+    add_dependencies(download ${PACKAGE})
+endif()

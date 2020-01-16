@@ -57,7 +57,7 @@ auto scriptPath() noexcept -> std::string {
 namespace execHelper::plugins::test {
 SCENARIO(
     "Testing the configuration settings of the clang-static-analyzer plugin",
-    "[clang-static-analyzer]") {
+    "[clang-static-analyzer][success]") {
     propertyTest("", [](const optional<filesystem::path>& workingDir,
                         const optional<EnvironmentCollection>& environment,
                         const std::vector<NonEmptyString>& buildCommand,
@@ -134,7 +134,7 @@ SCENARIO(
     });
 }
 
-SCENARIO("Testing invalid configurations", "[clang-static-analyzer]") {
+SCENARIO("Testing invalid configurations", "[clang-static-analyzer][error]") {
     GIVEN("An empty setup") {
         LuaPlugin plugin(scriptPath());
         VariablesMap variables = plugin.getVariablesMap(FleetingOptionsStub());

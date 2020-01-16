@@ -80,6 +80,8 @@ class Memory : public Plugin {
 
     /**
      * Reset the remembered memories
+     *
+     * @returns void
      */
     static void reset() noexcept;
 
@@ -87,6 +89,7 @@ class Memory : public Plugin {
      * Set the return code for the next invocation(s) of a Memory object
      *
      * \param[in]   returnCode  The code to return on the next invocation(s)
+     * \returns void
      */
     static void setReturnCode(bool returnCode) noexcept;
 

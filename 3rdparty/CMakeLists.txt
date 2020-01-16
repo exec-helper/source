@@ -8,7 +8,7 @@ include(boost.CMakeLists.txt)
 include(yaml-cpp.CMakeLists.txt)
 include(gsl.CMakeLists.txt)
 include(luajit.CMakeLists.txt)
-include(integral.CMakeLists.txt)
+include(luawrapper.CMakeLists.txt)
 
 if(${ENABLE_TESTING})
     include(catch.CMakeLists.txt)

@@ -26,6 +26,8 @@ const gsl::czstring<> WORKING_DIR_KEY = "working-dir";
 struct WorkingDirectory {
     /**
      * Adds the variables for this functionality to the given variables map
+     *
+     * \returns void
      */
     inline static void
     getVariables(config::VariablesMap& /*variables*/,
