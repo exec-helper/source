@@ -22,6 +22,7 @@ Section
     # Files to install
     File /a bin\exec-helper.exe
     File /a bin\eh.exe
+    File /a bin\lua51.dll
     File /a LICENSE
 
     # define uninstaller name

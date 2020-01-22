@@ -1,3 +1,17 @@
+if(Boost_USE_STATIC_LIBS)
+    message(STATUS "Linking boost statically")
+else()
+    message(STATUS "Linking boost dynamically")
+endif()
+
+if(MSVC)
+    if(Boost_USE_STATIC_RUNTIME)
+        message(STATUS "Linking boost runtime statically")
+    else()
+        message(STATUS "Linking boost runtime dynamically")
+    endif()
+endif()
+
 find_package(Boost 1.64.0 REQUIRED COMPONENTS program_options filesystem log log_setup thread system serialization)
 if(MSVC)
     find_package(Boost 1.64.0 REQUIRED COMPONENTS filesystem date_time chrono atomic)

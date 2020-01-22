@@ -9,6 +9,9 @@
 #include <utility>
 
 #include <LuaContext.hpp>
+#ifdef MSVC
+#include <misc/exception.hpp>
+#endif
 #include <boost/optional.hpp>
 
 #include "config/pattern.h"

@@ -1,4 +1,6 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.15)
+
+cmake_policy(SET CMP0091 NEW)
 
 project(exec-helper
     LANGUAGES C CXX)
@@ -37,6 +39,14 @@ if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" MATCH
 
     # Use gold linker
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fuse-ld=gold")
+endif()
+
+if(MSVC)
+    set(CMAKE_MSVC_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+    set(Boost_USE_STATIC_LIBS ON)
+
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+    set(Boost_USE_STATIC_RUNTIME OFF)
 endif()
 
 # Enable modules for clang
