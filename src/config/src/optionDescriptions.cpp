@@ -14,10 +14,7 @@ using boost::program_options::variables_map;
 using execHelper::config::VariablesMap;
 
 namespace execHelper::config {
-OptionDescriptions::OptionDescriptions() noexcept
-    : m_descriptions(m_optionDescription.add_options()) {
-    ;
-}
+OptionDescriptions::OptionDescriptions() noexcept { ; }
 
 auto OptionDescriptions::getOptionDescriptions() const noexcept
     -> options_description {
@@ -36,7 +33,7 @@ auto OptionDescriptions::getOptionsMap(VariablesMap& variablesMap,
     -> bool {
     variables_map optionsMap;
     auto commandLineParser =
-        command_line_parser(argv.getArgc(), argv.getArgv());
+        command_line_parser(static_cast<int>(argv.getArgc()), argv.getArgv());
     commandLineParser.options(m_optionDescription);
 
     // Assign positional arguments

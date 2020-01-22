@@ -281,8 +281,9 @@ class OptionDescriptions {
             option_code.append(argumentOption);
         }
 
-        m_descriptions(option_code.c_str(), option.getTypeValue(),
-                       option.getExplanation().c_str());
+        m_optionDescription.add_options()(option_code.c_str(),
+                                          option.getTypeValue(),
+                                          option.getExplanation().c_str());
         m_options.emplace(std::pair<std::string, std::unique_ptr<Option<T>>>(
             id, std::make_unique<Option<T>>(option)));
     }
@@ -317,7 +318,6 @@ class OptionDescriptions {
         noexcept;
 
     boost::program_options::options_description m_optionDescription;
-    boost::program_options::options_description_easy_init m_descriptions;
 
     std::map<std::string, std::unique_ptr<OptionBase>> m_options;
     std::optional<std::string> m_positional;
