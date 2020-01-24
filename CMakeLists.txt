@@ -1,10 +1,9 @@
 if(MSVC)
     cmake_minimum_required(VERSION 3.15)
+    cmake_policy(SET CMP0091 NEW)
 else()
     cmake_minimum_required(VERSION 3.13)
 endif()
-
-cmake_policy(SET CMP0091 NEW)
 
 project(exec-helper
     LANGUAGES C CXX)
