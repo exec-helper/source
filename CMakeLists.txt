@@ -1,4 +1,8 @@
-cmake_minimum_required(VERSION 3.15)
+if(MSVC)
+    cmake_minimum_required(VERSION 3.15)
+else()
+    cmake_minimum_required(VERSION 3.13)
+endif()
 
 cmake_policy(SET CMP0091 NEW)
 

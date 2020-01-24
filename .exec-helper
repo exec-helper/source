@@ -309,7 +309,6 @@ command-line-command:
             - replace-triplet: [ sed, -i, 's%@TRIPLET@%{TRIPLET}%g', "build/{TRIPLET}{COMPILER}/{MODE}/toolchain.cmake"]
             - replace-compiler-family: [ sed, -i, 's%@COMPILER_FAMILY@%{COMPILER}%g', "build/{TRIPLET}{COMPILER}/{MODE}/toolchain.cmake"]
             - replace-sysroot: [ sed, -i, 's%@SYSROOT@%{SYSROOT}%g', "build/{TRIPLET}{COMPILER}/{MODE}/toolchain.cmake"]
-            - cat: [ cat, "build/{TRIPLET}{COMPILER}/{MODE}/toolchain.cmake"]
     distclean:
         patterns:
             - COMPILER
