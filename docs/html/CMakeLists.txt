@@ -4,12 +4,6 @@ set(doxyfile_in ${CMAKE_CURRENT_SOURCE_DIR}/../Doxyfile.in)
 set(doxyfile ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
 set(HTML_INDEX_FILE index.html)
 
-if(CMAKE_VERBOSE_MAKEFILE)
-    set(DOXYGEN_QUIET NO)
-else()
-    set(DOXYGEN_QUIET YES)
-endif()
-
 configure_file(${doxyfile_in} ${doxyfile} @ONLY)
 
 add_custom_command(OUTPUT ${HTML_INDEX_FILE}

@@ -6,6 +6,19 @@ if(BUILD_MAN_DOCUMENTATION OR BUILD_HTML_DOCUMENTATION OR BUILD_XML_DOCUMENTATIO
     find_package(Doxygen 1.8.15 REQUIRED)
     add_custom_target(docs ALL)
 
+    if(CMAKE_VERBOSE_MAKEFILE)
+        set(DOXYGEN_QUIET NO)
+    else()
+        set(DOXYGEN_QUIET YES)
+    endif()
+
+    if(ENABLE_WERROR)
+        set(WARN_AS_ERROR YES)
+    else()
+        set(WARN_AS_ERROR NO)
+    endif()
+
+
     if(BUILD_HTML_DOCUMENTATION)
         add_subdirectory(html)
     endif()

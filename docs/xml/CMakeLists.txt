@@ -6,12 +6,6 @@ set(doxyfile_in ${CMAKE_CURRENT_SOURCE_DIR}/../Doxyfile.in)
 set(doxyfile ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
 set(XML_INDEX_FILE index.xml)
 
-if(CMAKE_VERBOSE_MAKEFILE)
-    set(DOXYGEN_QUIET NO)
-else()
-    set(DOXYGEN_QUIET YES)
-endif()
-
 configure_file(${doxyfile_in} ${doxyfile} @ONLY)
 
 add_custom_command(OUTPUT ${XML_INDEX_FILE}
