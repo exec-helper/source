@@ -416,6 +416,12 @@ code-format:
 include:
     template: SAST.gitlab-ci.yml
 
+include:
+  - template: License-Scanning.gitlab-ci.yml
+
+include:
+  - template: Container-Scanning.gitlab-ci.yml
+
 pages:
     stage: deploy
     image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-run
