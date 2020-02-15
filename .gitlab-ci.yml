@@ -414,13 +414,8 @@ code-format:
     <<: *code_format
 
 include:
-    template: SAST.gitlab-ci.yml
-
-include:
-  - template: License-Scanning.gitlab-ci.yml
-
-include:
-  - template: Container-Scanning.gitlab-ci.yml
+    - template: SAST.gitlab-ci.yml
+    - template: License-Scanning.gitlab-ci.yml
 
 pages:
     stage: deploy
