@@ -3,7 +3,6 @@
 #include <cstring>
 #include <string>
 
-#include <gsl/pointers>
 #include <gsl/span>
 #include <gsl/string_span>
 
@@ -12,7 +11,6 @@
 using std::string;
 
 using gsl::czstring;
-using gsl::owner;
 using gsl::span;
 
 namespace execHelper {

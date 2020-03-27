@@ -4,7 +4,7 @@
 #include <utility>
 
 #include <boost/filesystem/operations.hpp>
-#include <gsl/pointers>
+#include <gsl/gsl>
 #include <gsl/string_span>
 
 #include "config/fleetingOptionsInterface.h"
