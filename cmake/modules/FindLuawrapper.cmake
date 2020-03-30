@@ -1,4 +1,4 @@
-set(PKG_NAME luawrapper)
+set(PKG_NAME Luawrapper)
 
 find_package(PkgConfig QUIET)
 if(${PKG_CONFIG_FOUND})
