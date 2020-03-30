@@ -98,4 +98,6 @@ auto Pmd::apply(Task task, const VariablesMap& variables,
     }
     return true;
 }
+
+auto Pmd::summary() const noexcept -> std::string { return "Pmd (internal)"; }
 } // namespace execHelper::plugins

@@ -54,6 +54,7 @@ class FleetingOptions : public FleetingOptionsInterface {
     auto getVerbosity() const noexcept -> VerboseOption_t override;
     auto getDryRun() const noexcept -> DryRunOption_t override;
     auto getJobs() const noexcept -> Jobs_t override;
+    auto listPlugins() const noexcept -> ListPluginsOption_t override;
 
     /**
      * Get the value of the log level option
@@ -78,6 +79,7 @@ class FleetingOptions : public FleetingOptionsInterface {
     const DryRunOption_t m_dryRun;
     Jobs_t m_jobs;
     const LogLevelOption_t m_logLevel;
+    const ListPluginsOption_t m_listPlugins;
     CommandCollection m_commands;
 };
 } // namespace config

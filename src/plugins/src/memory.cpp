@@ -36,6 +36,10 @@ auto Memory::apply(Task task, const VariablesMap& variables,
     return m_returnCode;
 }
 
+auto Memory::summary() const noexcept -> std::string {
+    return "Memory (internal)";
+}
+
 auto Memory::getExecutions() noexcept -> const Memory::Memories& {
     return m_executions;
 }

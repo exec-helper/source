@@ -63,6 +63,10 @@ struct DryRunValue : public BoolValue {
     DryRunValue(bool option) noexcept : BoolValue(option) {}
 };
 
+struct ListPluginsValue : public BoolValue {
+    ListPluginsValue(bool option) noexcept : BoolValue(option) {}
+};
+
 template <> struct Arbitrary<JobsValue> {
     static Gen<JobsValue> arbitrary() {
         return gen::construct<JobsValue>(gen::arbitrary<JobsValue::Value>());
@@ -93,6 +97,13 @@ template <> struct Arbitrary<DryRunValue> {
     static Gen<DryRunValue> arbitrary() {
         return gen::construct<DryRunValue>(
             gen::arbitrary<DryRunValue::Value>());
+    };
+};
+
+template <> struct Arbitrary<ListPluginsValue> {
+    static Gen<ListPluginsValue> arbitrary() {
+        return gen::construct<ListPluginsValue>(
+            gen::arbitrary<ListPluginsValue::Value>());
     };
 };
 

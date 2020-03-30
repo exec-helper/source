@@ -20,6 +20,8 @@ class Lcov : public Plugin {
     bool apply(core::Task task, const config::VariablesMap& variables,
                const config::Patterns& patterns) const noexcept override;
 
+    std::string summary() const noexcept override;
+
   private:
     using BaseDir = config::Path;
     using Dir = config::Path;

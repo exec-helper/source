@@ -25,6 +25,10 @@ class FleetingOptionsStub : public config::FleetingOptionsInterface {
 
     config::Jobs_t getJobs() const noexcept override { return m_jobs; }
 
+    auto listPlugins() const noexcept -> config::ListPluginsOption_t override {
+        return m_listPlugins;
+    }
+
     const config::CommandCollection& getCommands() const noexcept override {
         return m_commands;
     }
@@ -34,6 +38,7 @@ class FleetingOptionsStub : public config::FleetingOptionsInterface {
     config::VerboseOption_t m_verbose = {false};
     config::DryRunOption_t m_dryRun = {false};
     config::Jobs_t m_jobs = 1024U;
+    config::ListPluginsOption_t m_listPlugins = {false};
     config::CommandCollection m_commands = {};
 };
 } // namespace test

@@ -1,4 +1,4 @@
 ---
-Checks: 'clang-diagnostic-*,clang-analyzer-*,*,-llvm-header-guard,-hicpp-no-assembler,-cert-err58-cpp,-google-readability-function-size,-hicpp-function-size,-readability-function-size,-fuchsia-default-arguments*,-fuchsia-overloaded-operator,-clang-analyzer-core.CallAndMessage,-fuchsia-trailing-return'
+Checks: 'clang-diagnostic-*,clang-analyzer-*,*,-llvm-header-guard,-hicpp-no-assembler,-cert-err58-cpp,-google-readability-function-size,-hicpp-function-size,-readability-function-size,-fuchsia-default-arguments*,-fuchsia-overloaded-operator,-clang-analyzer-core.CallAndMessage,-fuchsia-trailing-return,-cppcoreguidelines-pro-type-vararg,-hicpp-vararg'
 WarningsAsErrors: '*'
 HeaderFilterRegex: '^(?!gsl_).*'

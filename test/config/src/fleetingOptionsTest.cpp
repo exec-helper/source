@@ -22,6 +22,7 @@ using execHelper::test::propertyTest;
 using rc::DryRunValue;
 using rc::HelpValue;
 using rc::JobsValue;
+using rc::ListPluginsValue;
 using rc::VerbosityValue;
 using rc::VersionValue;
 
@@ -35,6 +36,7 @@ SCENARIO("Test the fleeting options defaults", "[config][fleeting-options]") {
         REQUIRE(expectedDefaults.add(JOBS_KEY, "auto"));
         REQUIRE(expectedDefaults.add(DRY_RUN_KEY, "no"));
         REQUIRE(expectedDefaults.add(LOG_LEVEL_KEY, "none"));
+        REQUIRE(expectedDefaults.add(LIST_PLUGINS_KEY, "no"));
         REQUIRE(expectedDefaults.add(COMMAND_KEY, CommandCollection()));
         REQUIRE(expectedDefaults.add(SETTINGS_FILE_KEY));
 
@@ -55,6 +57,7 @@ SCENARIO("Test the getters of the fleeting options",
         [](const HelpValue& help, const VersionValue& version,
            const VerbosityValue& verbosity, const JobsValue& jobs,
            const DryRunValue& dryRun, const LogLevel& logLevel,
+           const ListPluginsValue& listPlugins,
            const CommandCollection& commands) {
             VariablesMap variables = FleetingOptions::getDefault();
 
@@ -65,6 +68,7 @@ SCENARIO("Test the getters of the fleeting options",
             REQUIRE(variables.replace(DRY_RUN_KEY, dryRun.config()));
             REQUIRE(
                 variables.replace(LOG_LEVEL_KEY, string{toString(logLevel)}));
+            REQUIRE(variables.replace(LIST_PLUGINS_KEY, listPlugins.config()));
             REQUIRE(variables.replace(COMMAND_KEY, commands));
 
             THEN_WHEN("We create fleeting options based on the variables map") {
@@ -77,6 +81,7 @@ SCENARIO("Test the getters of the fleeting options",
                     REQUIRE(jobs == fleetingOptions.getJobs());
                     REQUIRE(dryRun == fleetingOptions.getDryRun());
                     REQUIRE(logLevel == fleetingOptions.getLogLevel());
+                    REQUIRE(listPlugins == fleetingOptions.listPlugins());
                     REQUIRE(commands == fleetingOptions.getCommands());
                 }
             }

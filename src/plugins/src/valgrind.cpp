@@ -82,4 +82,8 @@ auto Valgrind::apply(Task task, const VariablesMap& variables,
     }
     return true;
 }
+
+auto Valgrind::summary() const noexcept -> std::string {
+    return "Valgrind (internal)";
+}
 } // namespace execHelper::plugins

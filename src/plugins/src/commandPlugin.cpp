@@ -42,4 +42,8 @@ auto CommandPlugin::apply(Task task, const VariablesMap& variables,
     ExecutePlugin executePlugin(commands);
     return executePlugin.apply(task, variables, patterns);
 }
+
+auto CommandPlugin::summary() const noexcept -> std::string {
+    return "Command (internal)";
+}
 } // namespace execHelper::plugins

@@ -160,6 +160,10 @@ auto ExecutePlugin::apply(Task task, const VariablesMap& /*variables*/,
     return true;
 }
 
+auto ExecutePlugin::summary() const noexcept -> std::string {
+    return "ExecutePlugin";
+}
+
 auto ExecutePlugin::getNextStep(const Command& command,
                                 const Command& /*originalCommand*/) noexcept
     -> shared_ptr<const Plugin> {

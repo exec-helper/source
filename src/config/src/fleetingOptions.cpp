@@ -23,6 +23,8 @@ FleetingOptions::FleetingOptions(const VariablesMap& optionsMap) noexcept
       m_jobs(1U),
       m_logLevel(
           optionsMap.get<LogLevelOption_t>(LOG_LEVEL_KEY).value_or("warning")),
+      m_listPlugins(optionsMap.get<ListPluginsOption_t>(LIST_PLUGINS_KEY)
+                        .value_or(false)),
       m_commands(optionsMap.get<CommandCollection>(COMMAND_KEY)
                      .value_or(CommandCollection())) {
     auto jobs = optionsMap.get<JobsOption_t>(JOBS_KEY).value_or("auto");
@@ -79,6 +81,10 @@ auto FleetingOptions::getLogLevel() const noexcept -> LogLevel {
     }
 }
 
+auto FleetingOptions::listPlugins() const noexcept -> ListPluginsOption_t {
+    return m_listPlugins;
+}
+
 auto FleetingOptions::getDefault() noexcept -> VariablesMap {
     VariablesMap defaults("exec-helper");
     if(!defaults.add(HELP_OPTION_KEY, "no")) {
@@ -101,6 +107,9 @@ auto FleetingOptions::getDefault() noexcept -> VariablesMap {
     }
     if(!defaults.add(LOG_LEVEL_KEY, "none")) {
         LOG(error) << "Failed to add log level default option value";
+    }
+    if(!defaults.add(LIST_PLUGINS_KEY, "no")) {
+        LOG(error) << "Failed to add 'list plugins' default option value";
     }
     if(!defaults.add(COMMAND_KEY, CommandCollection())) {
         LOG(error) << "Failed to add commands default option value";

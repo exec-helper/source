@@ -98,4 +98,8 @@ auto CommandLineCommand::apply(Task task, const VariablesMap& variables,
     }
     return true;
 }
+
+auto CommandLineCommand::summary() const noexcept -> std::string {
+    return "Command-line-command (internal)";
+}
 } // namespace execHelper::plugins

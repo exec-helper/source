@@ -15,6 +15,8 @@ class Valgrind : public Plugin {
         noexcept override;
     bool apply(core::Task task, const config::VariablesMap& variables,
                const config::Patterns& patterns) const noexcept override;
+
+    std::string summary() const noexcept override;
 };
 } // namespace plugins
 } // namespace execHelper

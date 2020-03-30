@@ -70,6 +70,8 @@ class Memory : public Plugin {
     bool apply(core::Task task, const config::VariablesMap& variables,
                const config::Patterns& patterns) const noexcept override;
 
+    std::string summary() const noexcept override;
+
   protected:
     /**
      * Getter for the executions that were remembered

@@ -30,7 +30,6 @@
 #include "plugins/commandPlugin.h"
 #include "plugins/executePlugin.h"
 #include "plugins/lcov.h"
-#include "plugins/logger.h"
 #include "plugins/luaPlugin.h"
 #include "plugins/memory.h"
 #include "plugins/plugin.h"
@@ -38,6 +37,7 @@
 #include "plugins/pmd.h"
 #include "plugins/valgrind.h"
 
+#include "logger.h"
 #include "version.h"
 
 using std::make_pair;
@@ -69,6 +69,8 @@ using execHelper::config::HELP_OPTION_KEY;
 using execHelper::config::HelpOption_t;
 using execHelper::config::JOBS_KEY;
 using execHelper::config::JobsOption_t;
+using execHelper::config::LIST_PLUGINS_KEY;
+using execHelper::config::ListPluginsOption_t;
 using execHelper::config::LOG_LEVEL_KEY;
 using execHelper::config::LogLevelOption_t;
 using execHelper::config::Option;
@@ -102,7 +104,7 @@ namespace filesystem = std::filesystem;
 
 namespace {
 vector<string> logModules({"log", "yaml", "config", "core", "plugins",
-                           "commander"});
+                           "commander", "application"});
 
 const auto settingsFileOption = Option<SettingsFileOption_t>(
     SETTINGS_FILE_KEY, {"s"}, "Set the settings file");
@@ -153,37 +155,36 @@ inline Paths getSearchPaths(const EnvironmentCollection& env) noexcept {
     return searchPaths;
 }
 
-inline Plugins discoverPlugins() noexcept {
-    return {
+inline Plugins discoverPlugins(const Paths& searchPaths) noexcept {
+    Plugins plugins{
         {"commands",
          shared_ptr<Plugin>(new execHelper::plugins::CommandPlugin())},
-        {"make", shared_ptr<Plugin>(new execHelper::plugins::LuaPlugin(
-                     std::string(PLUGINS_INSTALL_PATH) + "/make.lua"))},
-        {"ninja", shared_ptr<Plugin>(new execHelper::plugins::LuaPlugin(
-                      std::string(PLUGINS_INSTALL_PATH) + "/ninja.lua"))},
-        {"bootstrap",
-         shared_ptr<Plugin>(new execHelper::plugins::LuaPlugin(
-             std::string(PLUGINS_INSTALL_PATH) + "/bootstrap.lua"))},
-        {"scons", shared_ptr<Plugin>(new execHelper::plugins::LuaPlugin(
-                      std::string(PLUGINS_INSTALL_PATH) + "/scons.lua"))},
-        {"clang-tidy",
-         shared_ptr<Plugin>(new execHelper::plugins::LuaPlugin(
-             std::string(PLUGINS_INSTALL_PATH) + "/clang-tidy.lua"))},
-        {"cppcheck", shared_ptr<Plugin>(new execHelper::plugins::LuaPlugin(
-                         std::string(PLUGINS_INSTALL_PATH) + "/cppcheck.lua"))},
-        {"selector", shared_ptr<Plugin>(new execHelper::plugins::LuaPlugin(
-                         std::string(PLUGINS_INSTALL_PATH) + "/selector.lua"))},
-        {"clang-static-analyzer",
-         shared_ptr<Plugin>(new execHelper::plugins::LuaPlugin(
-             std::string(PLUGINS_INSTALL_PATH) +
-             "/clang-static-analyzer.lua"))},
         {"command-line-command",
          shared_ptr<Plugin>(new execHelper::plugins::CommandLineCommand())},
-        {"Memory", shared_ptr<Plugin>(new execHelper::plugins::Memory())},
+        {"memory", shared_ptr<Plugin>(new execHelper::plugins::Memory())},
         {"valgrind", shared_ptr<Plugin>(new execHelper::plugins::Valgrind())},
         {"pmd", shared_ptr<Plugin>(new execHelper::plugins::Pmd())},
         {"lcov", shared_ptr<Plugin>(new execHelper::plugins::Lcov())},
     };
+
+    /**
+     * We search the searchpaths in reverse and overwrite plugins with the same name in later search paths
+     */
+    LOG(debug) << "Discovering plugins...";
+    for(const auto& path : searchPaths) {
+        LOG(trace) << "Discovering plugins for path " << path;
+        for(const auto& entry : filesystem::directory_iterator(path)) {
+            if(entry.is_regular_file() && entry.path().extension() == ".lua") {
+                LOG(trace) << "Module " << entry.path().stem() << " found at "
+                           << path;
+                plugins.emplace(std::make_pair(
+                    entry.path().stem(),
+                    shared_ptr<const Plugin>(
+                        new execHelper::plugins::LuaPlugin(entry))));
+            }
+        }
+    }
+    return plugins;
 }
 
 inline void printHelp(const std::string& binaryName,
@@ -216,6 +217,14 @@ inline void printHelp(const std::string& binaryName,
 inline void printVersion() noexcept {
     user_feedback(BINARY_NAME << " " << VERSION);
     user_feedback(COPYRIGHT);
+}
+
+inline void printPlugins(const Plugins& plugins) noexcept {
+    user_feedback("Registered plugins:");
+    for(const auto& plugin : plugins) {
+        user_feedback(std::left << std::setfill('.') << std::setw(25)
+                                << plugin.first << " " << *(plugin.second));
+    }
 }
 
 inline bool verifyOptions(const FleetingOptions& options) noexcept {
@@ -300,6 +309,8 @@ inline OptionDescriptions getDefaultOptions() noexcept {
         JOBS_KEY, {"j"}, "Set number of jobs to use. Default: auto"));
     options.addOption(
         Option<DryRunOption_t>(DRY_RUN_KEY, {"n"}, "Dry run exec-helper"));
+    options.addOption(
+        Option<ListPluginsOption_t>(LIST_PLUGINS_KEY, {}, "List all plugins"));
     options.addOption(settingsFileOption);
     options.addOption(
         Option<LogLevelOption_t>(LOG_LEVEL_KEY, {"d"}, "Set the log level"));
@@ -352,6 +363,12 @@ int execHelperMain(int argc, char** argv, char** envp) {
     }
 
     const FleetingOptions fleetingOptions(optionsMap);
+    execHelper::log::LogInit logInit;
+    auto level = fleetingOptions.getLogLevel();
+    for(const auto& logModule : logModules) {
+        logInit.setSeverity(logModule, level);
+    }
+
     if(fleetingOptions.getHelp()) {
         printHelp(args[0], optionDescriptions, settings);
         return EXIT_SUCCESS;
@@ -359,6 +376,12 @@ int execHelperMain(int argc, char** argv, char** envp) {
 
     if(fleetingOptions.getVersion()) {
         printVersion();
+        return EXIT_SUCCESS;
+    }
+
+    auto plugins = discoverPlugins({Path{PLUGINS_INSTALL_PATH}});
+    if(fleetingOptions.listPlugins()) {
+        printPlugins(plugins);
         return EXIT_SUCCESS;
     }
 
@@ -380,12 +403,6 @@ int execHelperMain(int argc, char** argv, char** envp) {
     if(!settingsFile) {
         printHelp(args[0], optionDescriptions, SettingsNode("empty"));
         return EXIT_FAILURE;
-    }
-
-    execHelper::log::LogInit logInit;
-    auto level = fleetingOptions.getLogLevel();
-    for(const auto& logModule : logModules) {
-        logInit.setSeverity(logModule, level);
     }
 
     auto shell = make_shared<PosixShell>();
@@ -411,8 +428,6 @@ int execHelperMain(int argc, char** argv, char** envp) {
             }
         };
     execHelper::plugins::registerExecuteCallback(executeCallback);
-
-    auto plugins = discoverPlugins();
 
     Commander commander;
     if(commander.run(fleetingOptions, settings, patterns,

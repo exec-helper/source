@@ -48,7 +48,7 @@ class Plugin {
      * \param[in] fleetingOptions   The fleeting options to base the defaults on
      * \returns The default constructed variables map
      */
-    virtual config::VariablesMap getVariablesMap(
+    [[nodiscard]] virtual config::VariablesMap getVariablesMap(
         const config::FleetingOptionsInterface& fleetingOptions) const
         noexcept = 0;
 
@@ -57,7 +57,9 @@ class Plugin {
      *
      * \returns The root settings key
      */
-    static config::SettingsKey getPatternsKey() noexcept { return "patterns"; }
+    [[nodiscard]] static config::SettingsKey getPatternsKey() noexcept {
+        return "patterns";
+    }
 
     /**
      * Apply the plugin
@@ -66,11 +68,22 @@ class Plugin {
      * \param[in] variables The variables map containing the values to use for
      * the executed command for this specific plugin \param[in] patterns  The
      * patterns that were configured to use for the executed command for this
-     * specific plugin \returns True    If the application was successful False
+     * specific plugin
+     *
+     * \returns True    If the application was successful False
      * Otherwise
      */
-    virtual bool apply(core::Task task, const config::VariablesMap& variables,
-                       const config::Patterns& patterns) const noexcept = 0;
+    [[nodiscard]] virtual bool apply(core::Task task,
+                                     const config::VariablesMap& variables,
+                                     const config::Patterns& patterns) const
+        noexcept = 0;
+
+    /**
+     * Returns a summary of the specific plugin
+     *
+     * \returns A short description of the plugin
+     */
+    [[nodiscard]] virtual std::string summary() const noexcept = 0;
 
   protected:
     Plugin() = default;
@@ -87,7 +100,16 @@ void registerExecuteCallback(const ExecuteCallback& callback) noexcept;
  * \returns True    If the task was successfully registered
  *          False   Otherwise
  */
-bool registerTask(const core::Task& task) noexcept;
+[[nodiscard]] auto registerTask(const core::Task& task) noexcept -> bool;
+
+/**
+ * Output specifics of the plugin
+ */
+inline auto operator<<(std::ostream& os, // NOLINT(fuchsia-overloaded-operator)
+                       const Plugin& plugin) -> std::ostream& {
+    os << plugin.summary();
+    return os;
+}
 } // namespace plugins
 } // namespace execHelper
 

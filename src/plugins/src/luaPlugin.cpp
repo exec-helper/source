@@ -314,4 +314,8 @@ auto LuaPlugin::apply(Task task, const VariablesMap& config,
     }
     return true;
 }
+
+auto LuaPlugin::summary() const noexcept -> std::string {
+    return "Lua plugin for module " + m_script.string();
+}
 } // namespace execHelper::plugins

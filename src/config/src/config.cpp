@@ -6,6 +6,7 @@
 #include "yaml/yaml.h"
 
 #include "commandLineOptions.h"
+#include "logger.h"
 #include "optionDescriptions.h"
 #include "pattern.h"
 #include "patternsHandler.h"

@@ -69,6 +69,8 @@ class ExecutePlugin : public Plugin {
     bool apply(core::Task task, const config::VariablesMap& variables,
                const config::Patterns& patterns) const noexcept override;
 
+    std::string summary() const noexcept override;
+
     /**
      * Returns a list with the names of all known plugins
      *

@@ -1,6 +1,8 @@
 /**
  *@file Tests properties that each plugin should have
  */
+#include <filesystem>
+
 #include "unittest/catch.h"
 #include "unittest/config.h"
 #include "unittest/rapidcheck.h"
@@ -46,38 +48,33 @@ using execHelper::core::test::ExecutorStub;
 using execHelper::test::FleetingOptionsStub;
 using execHelper::test::propertyTest;
 
+namespace filesystem = std::filesystem;
+
 namespace {
 constexpr std::string_view patternKey{"BLAAT"};
 
 auto getPlugins() noexcept -> Plugins {
-    return {
-        {"make", shared_ptr<Plugin>(new execHelper::plugins::LuaPlugin(
-                     std::string(PLUGINS_INSTALL_PATH) + "/make.lua"))},
-        {"ninja", shared_ptr<Plugin>(new execHelper::plugins::LuaPlugin(
-                      std::string(PLUGINS_INSTALL_PATH) + "/ninja.lua"))},
-        {"bootstrap",
-         shared_ptr<Plugin>(new execHelper::plugins::LuaPlugin(
-             std::string(PLUGINS_INSTALL_PATH) + "/bootstrap.lua"))},
-        {"scons", shared_ptr<Plugin>(new execHelper::plugins::LuaPlugin(
-                      std::string(PLUGINS_INSTALL_PATH) + "/scons.lua"))},
-        {"clang-tidy",
-         shared_ptr<Plugin>(new execHelper::plugins::LuaPlugin(
-             std::string(PLUGINS_INSTALL_PATH) + "/clang-tidy.lua"))},
-        {"cppcheck", shared_ptr<Plugin>(new execHelper::plugins::LuaPlugin(
-                         std::string(PLUGINS_INSTALL_PATH) + "/cppcheck.lua"))},
-        {"selector", shared_ptr<Plugin>(new execHelper::plugins::LuaPlugin(
-                         std::string(PLUGINS_INSTALL_PATH) + "/selector.lua"))},
-        {"clang-static-analyzer",
-         shared_ptr<Plugin>(new execHelper::plugins::LuaPlugin(
-             std::string(PLUGINS_INSTALL_PATH) +
-             "/clang-static-analyzer.lua"))},
+    Plugins plugins{
         {"command-line-command",
          shared_ptr<Plugin>(new execHelper::plugins::CommandLineCommand())},
-        {"Memory", shared_ptr<Plugin>(new execHelper::plugins::Memory())},
+        {"memory", shared_ptr<Plugin>(new execHelper::plugins::Memory())},
         {"valgrind", shared_ptr<Plugin>(new execHelper::plugins::Valgrind())},
         {"pmd", shared_ptr<Plugin>(new execHelper::plugins::Pmd())},
         {"lcov", shared_ptr<Plugin>(new execHelper::plugins::Lcov())},
     };
+
+    auto searchPaths = {PLUGINS_INSTALL_PATH};
+    for(const auto& path : searchPaths) {
+        for(const auto& entry : filesystem::directory_iterator(path)) {
+            if(entry.is_regular_file() && entry.path().extension() == ".lua") {
+                plugins.emplace(std::make_pair(
+                    entry.path().stem(),
+                    shared_ptr<const Plugin>(
+                        new execHelper::plugins::LuaPlugin(entry))));
+            }
+        }
+    }
+    return plugins;
 }
 } // namespace
 
@@ -197,6 +194,33 @@ SCENARIO("A plugin must not alter the arguments before a given task") {
                 }
             }
         });
+
+    execHelper::plugins::ExecutePlugin::popPlugins();
+    execHelper::plugins::ExecutePlugin::popSettingsNode();
+    execHelper::plugins::ExecutePlugin::popPatterns();
+    execHelper::plugins::ExecutePlugin::popFleetingOptions();
+}
+
+SCENARIO("Print the plugin summary", "[generic-plugin][success]") {
+    FleetingOptionsStub options;
+    options.m_commands.push_back("memory");
+
+    execHelper::plugins::ExecutePlugin::push(
+        gsl::not_null<FleetingOptionsInterface*>(&options));
+
+    Patterns patterns = {Pattern(std::string(patternKey), {"memory"})};
+    execHelper::plugins::ExecutePlugin::push(Patterns(patterns));
+
+    execHelper::plugins::ExecutePlugin::push(SettingsNode("test"));
+    execHelper::plugins::ExecutePlugin::push(getPlugins());
+
+    propertyTest("A plugin", [](std::shared_ptr<const Plugin>&& plugin) {
+        WHEN("We request the summary of the plugin") {
+            auto summary = plugin->summary();
+
+            THEN("The summary must not be empty") { REQUIRE(!summary.empty()); }
+        }
+    });
 
     execHelper::plugins::ExecutePlugin::popPlugins();
     execHelper::plugins::ExecutePlugin::popSettingsNode();

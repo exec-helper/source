@@ -46,9 +46,10 @@ using GenHtmlCommandLine = execHelper::plugins::CommandLineArgs;
 const czstring<> GEN_HTML_COMMAND_LINE_KEY = "gen-html-command-line";
 const czstring<> EXCLUDES_KEY = "excludes";
 
-void runTask(const Task& task, const PatternCombinations& combination) {
+[[nodiscard]] auto runTask(const Task& task,
+                           const PatternCombinations& combination) -> bool {
     Task replacedTask = replacePatternCombinations(task, combination);
-    registerTask(replacedTask);
+    return registerTask(replacedTask);
 }
 } // namespace
 
@@ -141,7 +142,9 @@ auto Lcov::apply(Task task, const VariablesMap& variables,
 
     for(const auto& combination : makePatternPermutator(patterns)) {
         if(zeroCounters) {
-            runTask(zeroCountersTask, combination);
+            if(!runTask(zeroCountersTask, combination)) {
+                return false;
+            }
         }
 
         ExecutePlugin execute(runCommands);
@@ -149,16 +152,24 @@ auto Lcov::apply(Task task, const VariablesMap& variables,
             return false;
         }
 
-        runTask(captureTask, combination);
+        if(!runTask(captureTask, combination)) {
+            return false;
+        }
         if(!exclude.empty()) {
-            runTask(excludeTask, combination);
+            if(!runTask(excludeTask, combination)) {
+                return false;
+            }
         }
         if(genHtml) {
-            runTask(genHtmlTask, combination);
+            if(!runTask(genHtmlTask, combination)) {
+                return false;
+            }
         }
     }
     return true;
 }
+
+auto Lcov::summary() const noexcept -> std::string { return "Lcov (internal)"; }
 
 inline auto Lcov::generateGenHtmlTask(const InfoFile& infoFile,
                                       const VariablesMap& variables,

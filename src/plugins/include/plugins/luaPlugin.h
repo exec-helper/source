@@ -25,6 +25,8 @@ class LuaPlugin : public Plugin {
     bool apply(core::Task task, const config::VariablesMap& config,
                const config::Patterns& patterns) const noexcept override;
 
+    std::string summary() const noexcept override;
+
   private:
     config::Path m_script; //!< Path to the lua script
 };

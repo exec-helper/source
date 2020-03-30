@@ -2,6 +2,7 @@
 #define COMMAND_LINE_OPTIONS_INCLUDE
 
 #include <string>
+#include <string_view>
 #include <vector>
 
 namespace execHelper {
@@ -29,6 +30,9 @@ using SettingsFileOption_t = std::string;
 const std::string COMMAND_KEY{"command"};
 using Command = std::string;
 using CommandCollection = std::vector<Command>;
+
+const std::string LIST_PLUGINS_KEY{"list-plugins"};
+using ListPluginsOption_t = bool;
 
 const std::string LOG_LEVEL_KEY("debug");
 using LogLevelOption_t = std::string;

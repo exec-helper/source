@@ -2,6 +2,7 @@ set(EXE_NAME exec-helper)
 
 set(SRCS
         exec-helper.cpp
+        logger.cpp
    )
 
 set(DEPENDENCIES

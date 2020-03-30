@@ -1,6 +1,7 @@
 #include "optionDescriptions.h"
 
 #include "argv.h"
+#include "logger.h"
 
 using std::string;
 

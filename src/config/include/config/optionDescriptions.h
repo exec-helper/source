@@ -9,14 +9,12 @@
 
 #include "log/assertions.h"
 
-#include "logger.h"
+#include "log/log.h"
 #include "variablesMap.h"
 
-namespace execHelper {
-namespace config {
+namespace execHelper::config {
 class Argv;
-} // namespace config
-} // namespace execHelper
+} // namespace execHelper::config
 
 namespace execHelper {
 namespace config {
@@ -165,7 +163,7 @@ template <typename T> class Option : public OptionBase {
                 m_identifyingOption,
                 optionsMap[m_identifyingOption].template as<T>());
         } catch(const boost::bad_any_cast& e) {
-            LOG(warning) << "Bad_any_cast exception caught: " << e.what();
+            user_feedback_error("Bad_any_cast exception caught: " << e.what());
             return false;
         }
     }
@@ -202,7 +200,8 @@ template <> class Option<bool> : public OptionBase {
                     return variablesMap.replace(m_identifyingOption, "1");
                 }
             } catch(const boost::bad_any_cast& e) {
-                LOG(warning) << "Bad_any_cast exception caught: " << e.what();
+                user_feedback_error(
+                    "Bad_any_cast exception caught: " << e.what());
                 return false;
             }
         }
@@ -241,7 +240,7 @@ template <typename T> class Option<std::vector<T>> : public OptionBase {
                 m_identifyingOption,
                 optionsMap[m_identifyingOption].template as<std::vector<T>>());
         } catch(const boost::bad_any_cast& e) {
-            LOG(warning) << "Bad_any_cast exception caught: " << e.what();
+            user_feedback_error("Bad_any_cast exception caught: " << e.what());
             return false;
         }
     }
