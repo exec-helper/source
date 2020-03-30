@@ -102,6 +102,7 @@ commands:
     changelog: Build the changelog
     create-toolchain-file: Create the associated toolchain file
     format: Format and check the format of the sources
+    language-server: Start and connect to the c++ language server
 
 setup:
     - command-line-command
@@ -197,6 +198,9 @@ changelog:
     - command-line-command
 
 create-toolchain-file:
+    - command-line-command
+
+language-server:
     - command-line-command
 
 ninja:
@@ -405,6 +409,9 @@ command-line-command:
             - TRIPLET
             - MODE
         command-line: [ cmake, "-DCOMPONENT=changelog", -P, "build/{TRIPLET}{COMPILER}/{MODE}/build/cmake_install.cmake"]
+
+    language-server:
+        command-line: [ clangd]
 
 valgrind:
     environment:
