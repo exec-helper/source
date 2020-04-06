@@ -27,10 +27,15 @@ variables:
         RUN_TARGET: $ALL_RUN_TARGETS
         MODULES: $ALL_MODULES
         NB_RUNS: 1000
-    dependencies:
-        - build:native
-        - build:gcc
-        - build:clang
+    needs:
+        - job: build-image:run
+          artifacts: false
+        - job: build:native
+          artifacts: true
+        - job: build:gcc
+          artifacts: true
+        - job: build:clang
+          artifacts: true
     script:
         - *install_exec_helper
         - export PATH=$(pwd)/build/gcc/release/install/bin:$(pwd)/build/gcc/release/install/test/integration:$PATH
@@ -45,9 +50,13 @@ variables:
     variables:
         MODULES: $ALL_MODULES
         RUN_TARGET: $ALL_RUN_TARGETS
-    dependencies:
-        - build:native
-        - build:gcc:limited-optimization
+    needs:
+        - job: build-image:analyze
+          artifacts: false
+        - job: build:native
+          artifacts: true
+        - job: build:gcc:limited-optimization
+          artifacts: true
     script:
         - *install_exec_helper
         - export PATH=$(pwd)/build/gcc/limited/install/bin:$(pwd)/build/gcc/limited/install/test/integration:$PATH
@@ -59,8 +68,11 @@ variables:
     variables:
         MODULES: $ALL_MODULES
         SOURCE_TYPE: $ALL_SOURCE_TYPES
-    dependencies:
-        - build:native
+    needs:
+        - job: build-image:analyze
+          artifacts: false
+        - job: build:native
+          artifacts: true
     script:
         - *install_exec_helper
         - exec-helper setup init-build -c gcc -m release
@@ -73,8 +85,11 @@ variables:
     variables:
         SOURCE_TYPE: $ALL_SOURCE_TYPES
         MODULES: $ALL_MODULES
-    dependencies:
-        - build:native
+    needs:
+        - job: build-image:analyze
+          artifacts: false
+        - job: build:native
+          artifacts: true
     script:
         - *install_exec_helper
         - exec-helper analyze --analyze cppcheck --source-type $SOURCE_TYPE --module $MODULES
@@ -85,8 +100,11 @@ variables:
     variables:
         RUN_TARGET: $ALL_RUN_TARGETS
         MODULES: $ALL_MODULES
-    dependencies:
-        - build:native
+    needs:
+        - job: build-image:analyze
+          artifacts: false
+        - job: build:native
+          artifacts: true
     script:
         - *install_exec_helper
         - export PATH=$(pwd)/build/clang/undefined-behaviour/install/bin:$(pwd)/build/clang/undefined-behaviour/install/test/integration:$PATH
@@ -95,8 +113,11 @@ variables:
 .code_format: &code_format
     stage: analyze
     image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-analyze
-    dependencies:
-        - build:native
+    needs:
+        - job: build-image:analyze
+          artifacts: false
+        - job: build:native
+          artifacts: true
     variables:
         MODULES: $ALL_MODULES
         SOURCE_TYPE: $ALL_SOURCE_TYPES
@@ -109,8 +130,11 @@ variables:
     image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-analyze
     variables:
         MODULES: $ALL_MODULES
-    dependencies:
-        - build:native
+    needs:
+        - job: build-image:analyze
+          artifacts: false
+        - job: build:native
+          artifacts: true
     script:
         - *install_exec_helper
         - export PATH=$(pwd)/build/clang/asan/install/bin:$(pwd)/build/clang/asan/install/test/integration:$PATH
@@ -131,17 +155,23 @@ variables:
         - docker build --compress=true --force-rm=true --pull=true --no-cache=true --rm=true --tag="${IMAGE}" .
         - docker push ${IMAGE}
 
+build-image:build:
+    <<: *build_image
+    variables:
+        IMAGE: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-build
+        WORKDIR: docker/build
+
 build-image:analyze:
     <<: *build_image
     variables:
         IMAGE: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-analyze
         WORKDIR: docker/analyze
 
-build-image:build:
+build-image:run:
     <<: *build_image
     variables:
-        IMAGE: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-build
-        WORKDIR: docker/build
+        IMAGE: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-run
+        WORKDIR: docker/run
 
 build-image:build-debian:
     stage: build-image
@@ -158,16 +188,12 @@ build-image:build-debian:
         - docker build -t ${BUILD_IMAGE} -f debian.Dockerfile .
         - docker push ${BUILD_IMAGE}
 
-build-image:run:
-    <<: *build_image
-    variables:
-        IMAGE: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-run
-        WORKDIR: docker/run
-
 build:native:
     stage: build-native
     image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-build
-    dependencies: []
+    needs:
+        - job: build-image:build
+          artifacts: false
     variables:
         INSTALL_DIR: usr
     script:
@@ -181,7 +207,9 @@ build:native:
 build:local:
     stage: build-native
     image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-build
-    dependencies: []
+    needs:
+        - job: build-image:build
+          artifacts: false
     script:
         - make
         - sudo make install
@@ -189,7 +217,9 @@ build:local:
 build:debian:
     stage: build-native
     image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-build-debian
-    dependencies: []
+    needs:
+        - job: build-image:build-debian
+          artifacts: false
     variables:
         INSTALL_DIR: usr
     script:
@@ -200,22 +230,14 @@ build:debian:
         paths:
             - ${INSTALL_DIR}
 
-build:no-system:
-    stage: build
-    image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-run
-    dependencies:
-        - build:native
-    before_script:
-        - sudo pacman -Sy --needed --noconfirm clang cmake make doxygen git
-    script: 
-        - *install_exec_helper
-        - exec-helper init-no-system build --compiler clang --mode release
-
 build:gcc:
     stage: build
     image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-build
-    dependencies:
-        - build:native
+    needs:
+        - job: build-image:build
+          artifacts: false
+        - job: build:native
+          artifacts: true
     script:
         - *install_exec_helper
         - exec-helper init build --compiler gcc --mode release
@@ -224,11 +246,30 @@ build:gcc:
         paths:
             - build/gcc/release/install
 
+build:clang:
+    stage: build
+    image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-build
+    needs:
+        - job: build-image:build
+          artifacts: false
+        - job: build:native
+          artifacts: true
+    script: 
+        - *install_exec_helper
+        - exec-helper init build --compiler clang --mode release
+    artifacts:
+        expire_in: 1 day
+        paths:
+            - build/clang/release/install
+
 build:gcc:debug:
     stage: build
     image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-build
-    dependencies:
-        - build:native
+    needs:
+        - job: build-image:build
+          artifacts: false
+        - job: build:native
+          artifacts: true
     script:
         - *install_exec_helper
         - exec-helper init build --compiler gcc --mode debug
@@ -236,8 +277,10 @@ build:gcc:debug:
 build:gcc:limited-optimization:
     stage: build
     image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-build
-    dependencies:
-        - build:native
+    needs:
+        - job: build-image:build
+          artifacts: false
+        - job: build:native
     script:
         - *install_exec_helper
         - exec-helper init-limited-optimization build --compiler gcc --mode limited
@@ -246,18 +289,36 @@ build:gcc:limited-optimization:
         paths:
             - build/gcc/limited/install
 
-build:clang:
+build:no-system:
     stage: build
-    image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-build
-    dependencies:
-        - build:native
+    image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-run
+    needs:
+        - job: build-image:run
+          artifacts: false
+        - job: build:native
+          artifacts: true
+    before_script:
+        - sudo pacman -Sy --needed --noconfirm clang cmake make doxygen git
     script: 
         - *install_exec_helper
-        - exec-helper init build --compiler clang --mode release
-    artifacts:
-        expire_in: 1 day
-        paths:
-            - build/clang/release/install
+        - exec-helper init-no-system build --compiler clang --mode release
+
+cross-compilation:
+    stage: build
+    image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-build-debian
+    needs:
+        - job: build-image:build-debian
+          artifacts: false
+        - job: build:debian
+          artifacts: true
+    before_script:
+        - *install_exec_helper
+    script:
+        - apt-get install --yes debootstrap g++-aarch64-linux-gnu cmake ninja-build pkg-config git
+        - debootstrap --arch=arm64 --download-only --variant=minbase --include=libboost-program-options-dev,libboost-filesystem-dev,libboost-log-dev,libboost-thread-dev,doxygen,libc6-dev,libluajit-5.1-dev testing ./sysroot_arm64 http://deb.debian.org/debian/
+        - for DEB in $(find sysroot_arm64/var/cache/apt/archives -not -path sysroot_arm64/var/cache/apt/archives/partial -type f); do echo "Extracting ${DEB}..."; dpkg -x ${DEB} sysroot_arm64; done   # Unpack all downloaded debian packages, since debootstrap does not seem to unpack the additional included ones and their dependencies
+        - cp -r /usr/aarch64-linux-gnu/* sysroot_arm64/usr/
+        - exec-helper init-build build --compiler gcc --triplet aarch64-linux-gnu- --mode release --sysroot $(pwd)/sysroot_arm64
 
 unittests:
     <<: *run_test
@@ -308,25 +369,14 @@ clang-tidy-integration:
 clang-static-analyzer:
     stage: analyze
     image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-analyze
-    dependencies:
-        - build:native
+    needs:
+        - job: build-image:analyze
+          artifacts: false
+        - job: build:native
+          artifacts: true
     script:
         - *install_exec_helper
         - exec-helper analyze --analyze clang-static-analyzer --mode debug --compiler clang
-
-cross-compilation:
-    stage: analyze
-    image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-build-debian
-    dependencies:
-        - build:debian
-    before_script:
-        - *install_exec_helper
-    script:
-        - apt-get install --yes debootstrap g++-aarch64-linux-gnu cmake ninja-build pkg-config git
-        - debootstrap --arch=arm64 --download-only --variant=minbase --include=libboost-program-options-dev,libboost-filesystem-dev,libboost-log-dev,libboost-thread-dev,doxygen,libc6-dev,libluajit-5.1-dev testing ./sysroot_arm64 http://deb.debian.org/debian/
-        - for DEB in $(find sysroot_arm64/var/cache/apt/archives -not -path sysroot_arm64/var/cache/apt/archives/partial -type f); do echo "Extracting ${DEB}..."; dpkg -x ${DEB} sysroot_arm64; done   # Unpack all downloaded debian packages, since debootstrap does not seem to unpack the additional included ones and their dependencies
-        - cp -r /usr/aarch64-linux-gnu/* sysroot_arm64/usr/
-        - exec-helper init-build build --compiler gcc --triplet aarch64-linux-gnu- --mode release --sysroot $(pwd)/sysroot_arm64
 
 undefined-behaviour:
     <<: *undefined_behaviour
@@ -337,9 +387,13 @@ address-sanitizer:
 coverage:
     stage: analyze
     image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-analyze
-    dependencies:
-        - build:native
-        - build:gcc
+    needs:
+        - job: build-image:analyze
+          artifacts: false
+        - job: build:native
+          artifacts: true
+        - job: build:gcc
+          artifacts: true
     script:
         - *install_exec_helper
         - export PATH=$(pwd)/build/gcc/release/install/bin:$(pwd)/build/gcc/release/install/test/integration:$PATH
@@ -358,8 +412,11 @@ coverage:
 code-duplication-pmd-cpd:
     stage: analyze
     image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-analyze
-    dependencies:
-        - build:native
+    needs:
+        - job: build-image:analyze
+          artifacts: false
+        - job: build:native
+          artifacts: true
     script:
         - *install_exec_helper
         - exec-helper analyze --analyze pmd
@@ -388,8 +445,11 @@ code-duplication-pmd-cpd:
 examples:
     stage: analyze
     image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-analyze
-    dependencies:
-        - build:native
+    needs:
+        - job: build-image:analyze
+          artifacts: false
+        - job: build:native
+          artifacts: true
     script:
         - *install_exec_helper
         - export ROOT_DIR=$(pwd)
