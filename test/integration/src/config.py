@@ -17,8 +17,7 @@ class Config(object):
             raise AssertionError("Temporary file '{file}' already exists!".format(file = self._settings_file))
 
     def __del__(self):
-        # self.remove()
-        pass
+        self.remove()
 
     @property
     def file(self):
@@ -35,7 +34,6 @@ class Config(object):
         self._commands[cmd].set_environment(envs)
 
     def add_pattern(self, pattern):
-        print('Pattern added!')
         self._patterns.add(pattern)
 
     def write(self):
@@ -44,13 +42,14 @@ class Config(object):
         if self._commands:
             config_file['commands'] = []
 
-        print(self._patterns)
         if self._patterns:
             config_file['patterns'] = {}
             for pattern in self._patterns:
                 config_file['patterns'][pattern.id] = {
                     'default-values': pattern.default_values
                 }
+                if pattern.long_options:
+                    config_file['patterns'][pattern.id]['long-option'] = pattern.long_options
 
         for id,cmd in self._commands.items():
             config_file['commands'].append(id)

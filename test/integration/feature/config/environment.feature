@@ -30,9 +30,9 @@ Feature: Test settings the environment for the configured commands
         And the runtime environment for <command> should contain the given <environment>
 
         Examples:
-        | command  | pattern            | environment                               |
-        | Command1 | PATTERN:blaat      | KEY:{PATTERN}                             |
-        | Command1 | PATTERN:blaat      | {PATTERN}:VALUE                           |
-        | Command1 | PATTERN:blaat      | {PATTERN}:{PATTERN}                       |
-        | Command1 | PATTERN:blaat      | this-{PATTERN}-key:this-{PATTERN}-value   |
-        | Command1 | SPA CE:bla a at    | {SPA CE}:{SPA CE}                         |
+        | command  | pattern                                             | environment                               |
+        | Command1 | { "key": "PATTERN", "default_values": ["blaat"] }   | KEY:{PATTERN}                             |
+        | Command1 | { "key": "PATTERN", "default_values": ["blaat"] }   | {PATTERN}:VALUE                           |
+        | Command1 | { "key": "PATTERN", "default_values": ["blaat"] }   | {PATTERN}:{PATTERN}                       |
+        | Command1 | { "key": "PATTERN", "default_values": ["blaat"] }   | this-{PATTERN}-key:this-{PATTERN}-value   |
+        | Command1 | { "key": "SPA CE", "default_values": ["bla a at"] } | {SPA CE}:{SPA CE}                         |

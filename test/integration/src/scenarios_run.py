@@ -1,4 +1,5 @@
 import sys
+import json
 
 import pytest
 from pytest_bdd import scenarios, given, when, then, parsers
@@ -13,10 +14,14 @@ def Environment(string):
     return { pair.split(":")[0]: pair.split(":")[1] for pair in pairs }
 
 def PatternType(string):
-    splitted = string.split(':')
-    key = splitted[0]
-    values = splitted[1].split(',')
-    return Pattern(key, values)
+    characteristics = json.loads(string)
+    key = characteristics['key']
+    default_values = characteristics['default_values']
+
+    long_options = []
+    if 'long_options' in characteristics:
+        long_options = characteristics['long_options']
+    return Pattern(key, default_values, long_options)
 
 @given('a controlled environment')
 def run_environment():
@@ -61,10 +66,19 @@ def call_fails(run_environment, expected):
         assert(False)
     assert(True)
 
+@then('stdout should contain <command>')
 @then(parsers.parse('stdout should contain {expected}'))
 def stdout_contains(run_environment, expected):
     expected = expected.strip("'")
     if not expected.encode('utf-8') in run_environment.last_run.stdout:
+        print(run_environment.last_run.stdout, file = sys.stderr)
+        assert(False)
+    assert(True)
+
+@then(parsers.parse('stdout should not contain {expected}'))
+def stdout_contains(run_environment, expected):
+    expected = expected.strip("'")
+    if expected.encode('utf-8') in run_environment.last_run.stdout:
         print(run_environment.last_run.stdout, file = sys.stderr)
         assert(False)
     assert(True)

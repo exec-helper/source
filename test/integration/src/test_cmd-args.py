@@ -8,7 +8,7 @@ from scenarios_run import *
 def ListOfStrings(string):
     return string.split(" ")
 
-scenarios('../feature/cmd-args', example_converters=dict(command_line = ListOfStrings))
+scenarios('../feature/cmd-args', example_converters=dict(command_line = ListOfStrings, command = str, pattern = PatternType))
 
 @when('we call the application with the <command_line> options')
 def call_no_command(run_environment, command_line):

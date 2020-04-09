@@ -19,15 +19,57 @@ Feature: Use the help command-line option
         When we call the application with the <command_line> options
         Then the call should succeed
         And stdout should contain 'Usage'
-        And stdout should contain '--help'
-        And stdout should contain '-h'
-        And stdout should contain '--version'
+        And stdout should contain 'Optional arguments:'
+        And stdout should not contain 'Configured commands:'
 
     @successful
     Scenario: The help option is defined on a valid command line with no configuration file
         When we call the application with the <command_line> options
         Then the call should succeed
-        And stdout should contain 'Usage'
-        And stdout should contain '--help'
-        And stdout should contain '-h'
-        And stdout should contain '--version'
+        And stdout should contain 'Usage: exec-helper [Optional arguments] COMMANDS...'
+        And stdout should contain 'Optional arguments:'
+        And stdout should not contain 'Configured commands:'
+
+    @successful
+    Scenario: The help option is defined for a configuration with a command
+        Given the <command> command
+        When we call the application with the <command_line> options
+        Then the call should succeed
+        And stdout should contain 'Usage: exec-helper [Optional arguments] COMMANDS...'
+        And stdout should contain 'Optional arguments:'
+        And stdout should contain 'Configured commands:'
+        And stdout should contain <command>
+
+        Examples:
+        | command  |
+        | Command1 |
+
+    @successful
+    Scenario: The help option is defined for a configuration with a pattern
+        Given the <pattern> pattern
+        When we call the application with the <command_line> options
+        Then the call should succeed
+        And stdout should contain 'Usage: exec-helper [Optional arguments] COMMANDS...'
+        And stdout should contain 'Optional arguments:'
+        And stdout should not contain 'Configured commands:'
+        And stdout should contain 'Values for pattern'
+
+        Examples:
+        | pattern                                                                      |
+        | { "key": "PATTERN", "long_options": ["blaat"], "default_values": ["blaat"] } |
+
+    @successful
+    Scenario: The help option is defined for a configuration with a pattern and a command
+        Given the <command> command
+        And the <pattern> pattern
+        When we call the application with the <command_line> options
+        Then the call should succeed
+        And stdout should contain 'Usage: exec-helper [Optional arguments] COMMANDS...'
+        And stdout should contain 'Optional arguments:'
+        And stdout should contain 'Configured commands:'
+        And stdout should contain 'Values for pattern'
+        And stdout should contain <command>
+
+        Examples:
+        | command  | pattern                                                                       |
+        | Command1 | { "key": "PATTERN", "long_options": ["blaat"], "default_values": ["blaat"] }  |
