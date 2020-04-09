@@ -37,6 +37,7 @@ variables:
         - job: build:clang
           artifacts: true
     script:
+        - sudo pacman -Sy --noconfirm --needed tar
         - *install_exec_helper
         - export PATH=$(pwd)/build/gcc/release/install/bin:$(pwd)/build/gcc/release/install/test/integration:$PATH
         - echo "using run target '$RUN_TARGET'"
@@ -343,13 +344,6 @@ integration:
     before_script:
         - sudo pacman -Sy --needed --noconfirm python python-pip
         - sudo pip install -r test/integration/requirements.txt
-    after_script:
-        - mkdir -p integration
-        - mv build/gcc/release/*.{xml,html} integration/
-    artifacts:
-        expire_in: 1 day
-        paths:
-            - integration/*
 
 memory-check:
     <<: *memory_check

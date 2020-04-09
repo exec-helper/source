@@ -159,13 +159,6 @@ unittest:
     - command-line-command
 
 integration:
-    - integration-old
-    - integration-new
-
-integration-old:
-    - command-line-command
-
-integration-new:
     - command-line-command
 
 coverage:
@@ -340,7 +333,7 @@ command-line-command:
             - MODULE
         command-line: [ "build/{TRIPLET}{COMPILER}/{MODE}/install/test/unittest/exec-helper-{MODULE}-unittest"]
 
-    integration-new:
+    integration:
         patterns:
             - COMPILER
             - TRIPLET
