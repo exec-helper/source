@@ -345,18 +345,14 @@ command-line-command:
             - COMPILER
             - TRIPLET
             - MODE
+            - TARGET
             - EH_WORKING_DIR
         environment:
-            PYTHONHOME: ""
+            PATH: "{EH_WORKING_DIR}/build/{TRIPLET}{COMPILER}/{MODE}/install/bin:/usr/local/bin:/usr/bin"
+        working-dir: test/integration
         command-line:
-            test: [robot, "--outputdir", "build/{TRIPLET}{COMPILER}/{MODE}", --suitestatlevel, 3, "build/{TRIPLET}{COMPILER}/{MODE}/install/test/integration/"]
+            test: [ pytest, -m, "'{TARGET}'", .]
 
-    integration-old:
-        patterns:
-            - COMPILER
-            - TRIPLET
-            - MODE
-        command-line: build/{TRIPLET}{COMPILER}/{MODE}/install/test/integration/exec-helper-integration-test
     coverage:
         environment:
             CXXFLAGS: -g --coverage -fprofile-arcs -ftest-coverage

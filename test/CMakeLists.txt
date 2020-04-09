@@ -1,6 +1,5 @@
 set(TEST_BIN_DIR test)
 set(UNITTEST_BIN_DIR    "${TEST_BIN_DIR}/unittest")
-set(INTEGRATION_TEST_BIN_DIR "${TEST_BIN_DIR}/integration")
 
 add_subdirectory(catch)
 add_subdirectory(base-utils)
@@ -11,4 +10,3 @@ add_subdirectory(yaml)
 add_subdirectory(core)
 add_subdirectory(plugins)
 add_subdirectory(commander)
-add_subdirectory(integration)

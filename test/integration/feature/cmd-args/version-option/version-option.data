@@ -1,4 +1,0 @@
-Long Option             --version
-More Options First      --version   --debug     debug
-More Options Middle     --dry-run   --debug     debug   --version
-More Options Last       --debug     debug   --dry-run   --version

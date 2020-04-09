@@ -55,5 +55,4 @@ add_custom_target(docs-man COMMENT "Building man-page API documentation" )
 add_dependencies(docs docs-man)
 
 add_subdirectory(man1)
-add_subdirectory(man1-integration)
 add_subdirectory(man5)

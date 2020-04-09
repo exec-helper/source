@@ -1,4 +1,0 @@
-Long Option             --list-plugins
-More Options First      --list-plugins   --debug     debug
-More Options Middle     --dry-run   --debug     debug   --list-plugins
-More Options Last       --debug     debug   --dry-run   --list-plugins

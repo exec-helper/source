@@ -1,9 +1,0 @@
-*** Settings ***
-@RESOURCES@
-Test template   @SCENARIO_NAME@
-
-*** Test case ***       COMMAND_LINE_ARGS
-@DATA@
-
-*** Keywords ***
-@SCENARIO@

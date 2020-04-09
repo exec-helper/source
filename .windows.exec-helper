@@ -188,18 +188,16 @@ command-line-command:
     integration-new:
         patterns:
             - COMPILER
+            - TRIPLET
             - MODE
+            - TARGET
             - EH_WORKING_DIR
         environment:
-            PYTHONHOME: ""
+            PATH: "{EH_WORKING_DIR}/build/{TRIPLET}{COMPILER}/{MODE}/install/bin:/usr/local/bin:/usr/bin"
+        working-dir: test/integration
         command-line:
-            test: [robot, "--outputdir", "build/{COMPILER}/{MODE}", --suitestatlevel, 3, "build/{COMPILER}/{MODE}/install/test/integration/"]
+            test: [ pytest, -m, "'{TARGET}'", .]
 
-    integration-old:
-        patterns:
-            - COMPILER
-            - MODE
-        command-line: build/{COMPILER}/{MODE}/install/test/integration/exec-helper-integration-test
     docs:
         patterns:
             - COMPILER
