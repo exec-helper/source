@@ -13,6 +13,9 @@ def Environment(string):
     pairs = string.split(";")
     return { pair.split(":")[0]: pair.split(":")[1] for pair in pairs }
 
+def CommandLineArgs(string):
+    return string.split(" ")
+
 def PatternType(string):
     characteristics = json.loads(string)
     key = characteristics['key']
@@ -71,15 +74,15 @@ def call_fails(run_environment, expected):
 def stdout_contains(run_environment, expected):
     expected = expected.strip("'")
     if not expected.encode('utf-8') in run_environment.last_run.stdout:
-        print(run_environment.last_run.stdout, file = sys.stderr)
+        print(run_environment.last_run.stdout, file = sys.stdout)
         assert(False)
     assert(True)
 
 @then(parsers.parse('stdout should not contain {expected}'))
-def stdout_contains(run_environment, expected):
+def stdout_not_contains(run_environment, expected):
     expected = expected.strip("'")
     if expected.encode('utf-8') in run_environment.last_run.stdout:
-        print(run_environment.last_run.stdout, file = sys.stderr)
+        print(run_environment.last_run.stdout, file = sys.stdout)
         assert(False)
     assert(True)
 
@@ -87,7 +90,15 @@ def stdout_contains(run_environment, expected):
 def stderr_contains(run_environment, expected):
     expected = expected.strip("'")
     if not expected.encode('utf-8') in run_environment.last_run.stderr:
-        print(run_environment.last_run.stdout, file = sys.stderr)
+        print(run_environment.last_run.stderr, file = sys.stderr)
+        assert(False)
+    assert(True)
+
+@then(parsers.parse('stderr should not contain {expected}'))
+def stderr_not_contains(run_environment, expected):
+    expected = expected.strip("'")
+    if expected.encode('utf-8') in run_environment.last_run.stderr:
+        print(run_environment.last_run.stderr, file = sys.stderr)
         assert(False)
     assert(True)
 

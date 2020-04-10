@@ -9,7 +9,7 @@ Feature: Calling exec-helper without command-line options
     Scenario: The application is called with no command line arguments and no valid configuration file
         When we call the application without arguments
         Then the call should fail with return code 1
-        And stderr should contain 'Could not find a settings file'
+        And stderr should contain 'Could not find an exec-helper settings file'
 
     @successful
     Scenario: The application is called with no command line arguments and a valid configuration file

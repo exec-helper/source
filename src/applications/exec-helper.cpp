@@ -397,6 +397,13 @@ int execHelperMain(int argc, char** argv, char** envp) {
             return EXIT_SUCCESS;
         }
 
+        if(firstPassFleetingOptions.listPlugins()) {
+            auto pluginSearchPath = getAdditionalSearchPaths(firstPassFleetingOptions, SettingsNode("error"), filesystem::current_path());
+            auto plugins = discoverPlugins(pluginSearchPath);
+            printPlugins(plugins);
+            return EXIT_SUCCESS;
+        }
+
         user_feedback_error("Could not find an exec-helper settings file");
         printHelp(args[0], firstPassOptions, SettingsNode("Options"));
         return EXIT_FAILURE;

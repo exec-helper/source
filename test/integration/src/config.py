@@ -17,7 +17,8 @@ class Config(object):
             raise AssertionError("Temporary file '{file}' already exists!".format(file = self._settings_file))
 
     def __del__(self):
-        self.remove()
+        # self.remove()
+        pass
 
     @property
     def file(self):
@@ -39,7 +40,8 @@ class Config(object):
     def write(self):
         config_file = dict()
 
-        config_file['commands'] = []
+        # Make sure the config file is not empty
+        config_file['blaat'] = []
 
         if self._patterns:
             config_file['patterns'] = {}
@@ -49,6 +51,9 @@ class Config(object):
                 }
                 if pattern.long_options:
                     config_file['patterns'][pattern.id]['long-option'] = pattern.long_options
+
+        if self._commands:
+            config_file['commands'] = []
 
         for id,cmd in self._commands.items():
             config_file['commands'].append(id)
