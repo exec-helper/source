@@ -344,7 +344,7 @@ command-line-command:
             PATH: "{EH_WORKING_DIR}/build/{TRIPLET}{COMPILER}/{MODE}/install/bin:/usr/local/bin:/usr/bin"
         working-dir: test/integration
         command-line:
-            test: [ pytest, -m, "'{TARGET}'", .]
+            test: [ pytest, -m, "'{TARGET}'", "--junitxml=../../build/{TRIPLET}{COMPILER}/{MODE}/system_test_report.xml", "--html=../../build/{TRIPLET}{COMPILER}/{MODE}/system_test_report.html", --self-contained-html, .]
 
     coverage:
         environment:

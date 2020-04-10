@@ -344,6 +344,15 @@ integration:
     before_script:
         - sudo pacman -Sy --needed --noconfirm python python-pip
         - sudo pip install -r test/integration/requirements.txt
+    artifacts:
+        name: ${CI_JOB_NAME}
+        paths:
+          - build/gcc/release/system_test_report.xml
+          - build/gcc/release/system_test_report.html
+          - build/clang/release/system_test_report.xml
+          - build/clang/release/system_test_report.html
+        reports:
+            junit: build/gcc/release/system_test_report.xml
 
 memory-check:
     <<: *memory_check

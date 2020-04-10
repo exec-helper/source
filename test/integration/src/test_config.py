@@ -18,8 +18,6 @@ def check_environment(run_environment, command, environment):
     runs = run_environment.config.commands[command].runs
     actual_env = runs[-1].environment
 
-    print(actual_env)
-
     assert(len(runs) > 0)
 
     for key,value in environment.items():

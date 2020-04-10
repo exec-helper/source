@@ -6,4 +6,4 @@ RUN sudo pacman -Sy --needed --noconfirm archlinux-keyring && sudo pacman -Scc -
 RUN sudo pacman -Sy --needed --noconfirm boost boost-libs yaml-cpp gcc clang clang-tools-extra cmake scons make ninja doxygen python-pip pkg-config valgrind cppcheck java-environment unzip curl catch2 llvm fakeroot patch file && sudo pacman -Scc --noconfirm && sudo rm -rf /var/lib/pacman/sync/*
 
 RUN yay -Sy --needed --noconfirm --noprovides rapidcheck microsoft-gsl-git lcov-git pmd && sudo pacman -Scc --noconfirm && sudo rm -rf /var/lib/pacman/sync/*
-RUN sudo pip install robotframework pytest-bdd pyyaml
+RUN sudo pip install pytest-bdd pyyaml pytest-html
