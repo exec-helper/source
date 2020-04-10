@@ -55,6 +55,7 @@ class FleetingOptions : public FleetingOptionsInterface {
     auto getDryRun() const noexcept -> DryRunOption_t override;
     auto getJobs() const noexcept -> Jobs_t override;
     auto listPlugins() const noexcept -> ListPluginsOption_t override;
+    [[nodiscard]] auto appendedSearchPaths() const noexcept -> const Paths& override;
 
     /**
      * Get the value of the log level option
@@ -80,6 +81,7 @@ class FleetingOptions : public FleetingOptionsInterface {
     Jobs_t m_jobs;
     const LogLevelOption_t m_logLevel;
     const ListPluginsOption_t m_listPlugins;
+    const Paths m_appendSearchPaths;
     CommandCollection m_commands;
 };
 } // namespace config

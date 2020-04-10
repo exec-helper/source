@@ -1,3 +1,6 @@
+additional-search-paths:
+    - /tmp
+
 patterns:
     COMPILER:
         default-values:

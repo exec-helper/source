@@ -23,6 +23,13 @@ Optionally the configuration file contains the following keys on the root level 
 ## patterns
 Patterns are parts of the configuration that will be replaced by its value when evaluated by exec-helper. The _patterns_ keyword describes a list of patterns identified by their key. See the @ref exec-helper-config-patterns for more information about how to define a pattern.
 
+## additional-search-paths
+An ordered list of additional search paths to use when searching for plugins. The search paths can be absolute or relative w.r.t. the parent path of the _settings file_ in which these paths are defined.
+
+Defining search paths is useful for extending exec-helper with your own custom plugins or for overwriting or extending the functionality in the provided plugins. See [exec-helper-custom-plugins](@ref exec-helper-custom-plugins)(5) for more information on writing a custom plugin.
+
+The paths defined in this list take precedence over the system search paths for modules with the same name. A higher position in this list implicates higher precedence.
+
 # WORKING DIRECTORY
 Configured commands are executed from the so-called _working directory_. Executing commands in a different working directory will not affect your current working directory (e.g. when executing from a shell). Each separately configured command can be executed in a separate working directory.
 
@@ -39,6 +46,8 @@ See [exec-helper-config-patterns](@ref exec-helper-config-patterns)(5) for more 
 See [exec-helper](@ref exec-helper)(1) for information about the usage of exec-helper.
 
 See [exec-helper-plugins](@ref exec-helper-plugins)(5) for the available plugins and their configuration options.
+
+See [exec-helper-custom-plugins](@ref exec-helper-custom-plugins)(5) for the available plugins and their configuration options.
 
 # COPYRIGHT
 Exec-helper is Copyright &copy; 2016-2017 under the GNU General Public License v3.0.

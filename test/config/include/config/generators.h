@@ -6,11 +6,13 @@
 #include <thread>
 
 #include "config/commandLineOptions.h"
+#include "config/path.h"
 #include "config/pattern.h"
 #include "config/settingsNode.h"
 
 #include "unittest/rapidcheck.h"
 #include "utils/testValue.h"
+#include "utils/commonGenerators.h"
 
 // NOTE: Must be in rc namespace!
 namespace rc {
@@ -66,6 +68,8 @@ struct DryRunValue : public BoolValue {
 struct ListPluginsValue : public BoolValue {
     ListPluginsValue(bool option) noexcept : BoolValue(option) {}
 };
+
+using AppendSearchPathValue = execHelper::config::Paths;
 
 template <> struct Arbitrary<JobsValue> {
     static Gen<JobsValue> arbitrary() {

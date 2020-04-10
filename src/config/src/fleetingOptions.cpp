@@ -1,5 +1,6 @@
 #include "fleetingOptions.h"
 
+#include <algorithm>
 #include <thread>
 
 #include <boost/lexical_cast.hpp>
@@ -8,11 +9,23 @@
 #include "log/logLevel.h"
 #include "logger.h"
 
+using std::back_inserter;
 using std::thread;
+using std::transform;
 
 using boost::lexical_cast;
 
 using execHelper::log::LogLevel;
+
+namespace  {
+inline execHelper::config::Paths toPaths(const std::vector<std::string>& toConvert) noexcept {
+    execHelper::config::Paths paths;
+    transform(toConvert.begin(), toConvert.end(), back_inserter(paths), [](const auto& to) {
+        return execHelper::config::Path{to};
+    });
+    return paths;
+}
+} // namespace 
 
 namespace execHelper::config {
 FleetingOptions::FleetingOptions(const VariablesMap& optionsMap) noexcept
@@ -25,6 +38,7 @@ FleetingOptions::FleetingOptions(const VariablesMap& optionsMap) noexcept
           optionsMap.get<LogLevelOption_t>(LOG_LEVEL_KEY).value_or("warning")),
       m_listPlugins(optionsMap.get<ListPluginsOption_t>(LIST_PLUGINS_KEY)
                         .value_or(false)),
+      m_appendSearchPaths(toPaths(optionsMap.get<AppendSearchPathOption_t>(APPEND_SEARCH_PATH_KEY).value_or(AppendSearchPathOption_t()))),
       m_commands(optionsMap.get<CommandCollection>(COMMAND_KEY)
                      .value_or(CommandCollection())) {
     auto jobs = optionsMap.get<JobsOption_t>(JOBS_KEY).value_or("auto");
@@ -85,6 +99,10 @@ auto FleetingOptions::listPlugins() const noexcept -> ListPluginsOption_t {
     return m_listPlugins;
 }
 
+auto FleetingOptions::appendedSearchPaths() const noexcept -> const Paths& {
+    return m_appendSearchPaths;
+}
+
 auto FleetingOptions::getDefault() noexcept -> VariablesMap {
     VariablesMap defaults("exec-helper");
     if(!defaults.add(HELP_OPTION_KEY, "no")) {
@@ -110,6 +128,9 @@ auto FleetingOptions::getDefault() noexcept -> VariablesMap {
     }
     if(!defaults.add(LIST_PLUGINS_KEY, "no")) {
         LOG(error) << "Failed to add 'list plugins' default option value";
+    }
+    if(!defaults.add(APPEND_SEARCH_PATH_KEY, AppendSearchPathOption_t())) {
+        LOG(error) << "Failed to add 'append-search-path' default option value";
     }
     if(!defaults.add(COMMAND_KEY, CommandCollection())) {
         LOG(error) << "Failed to add commands default option value";

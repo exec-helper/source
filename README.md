@@ -29,6 +29,7 @@ If this, together with _getting coffee in peace_ is not a sufficient rationale f
 - Searches for a suitable configuration in its parent folders.
 - Fast to type using the `eh` alias
 - Easy to find and/or list available commands using the `--help` option.
+- Easy extensible with your own, first-class citizen, plugins.
 
 # Simple example
 This is a simple illustration of the concept behind exec-helper. More extensive information and examples can be found in the _.exec-helper_ configuration file for this repository and in the [documentation](http://bverhagen.gitlab.io/exec-helper/docs/html/index.html).
@@ -148,8 +149,11 @@ see [Exec Helper](@ref exec-helper) for usage information.
 ## Configuration
 See [Exec Helper Config](@ref exec-helper-config) for information on the configuration file format.
 
-## Available Plugins
+## Available plugins
 See [Exec Helper Plugins](@ref exec-helper-plugins) for a list of all available plugins.
+
+## Writing custom plugins
+See [Exec Helper Custom Plugins](@ref exec-helper-custom-plugins) for a guide on writing your own plugins.
 
 # Code quality
 The source code of this project is continuously analyzed by multiple tools in an attempt to catch and fix issues and bugs as quickly as possible. Released versions should have passed the analysis from the following tools:
@@ -157,9 +161,10 @@ The source code of this project is continuously analyzed by multiple tools in an
 - [clang-format](https://clang.llvm.org/docs/UndefinedBehaviorSanitizer.html)
 - [clang-static-analyzer](https://clang-analyzer.llvm.org)
 - [clang-tidy](http://clang.llvm.org/extra/clang-tidy)
-- [coverity](https://scan.coverity.com/projects/exec-helper)
 - [cppcheck](http://cppcheck.sourceforge.net)
+- [License Scanning] (by Gitlab)
 - [pmd](https://pmd.github.io) (cpd)
+- [Static Application Security Testing](https://docs.gitlab.com/ee/user/application_security/sast) (SAST by Gitlab)
 - [valgrind](http://valgrind.org) (memcheck)
 - [UndefinedBehaviorSanitizer](https://clang.llvm.org/docs/UndefinedBehaviorSanitizer.html) (UBSan)
 

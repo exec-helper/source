@@ -5,8 +5,7 @@
 #include <string_view>
 #include <vector>
 
-namespace execHelper {
-namespace config {
+namespace execHelper::config {
 const std::string HELP_OPTION_KEY{"help"};
 using HelpOption_t = bool;
 
@@ -34,9 +33,11 @@ using CommandCollection = std::vector<Command>;
 const std::string LIST_PLUGINS_KEY{"list-plugins"};
 using ListPluginsOption_t = bool;
 
+const std::string APPEND_SEARCH_PATH_KEY{"additional-search-path"};
+using AppendSearchPathOption_t = std::vector<std::string>;
+
 const std::string LOG_LEVEL_KEY("debug");
 using LogLevelOption_t = std::string;
-} // namespace config
-} // namespace execHelper
+} // namespace execHelper::config
 
 #endif /* COMMAND_LINE_OPTIONS_INCLUDE */

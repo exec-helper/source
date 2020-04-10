@@ -39,8 +39,7 @@ class Config(object):
     def write(self):
         config_file = dict()
 
-        if self._commands:
-            config_file['commands'] = []
+        config_file['commands'] = []
 
         if self._patterns:
             config_file['patterns'] = {}

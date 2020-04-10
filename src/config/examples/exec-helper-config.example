@@ -17,6 +17,9 @@ patterns:                       # Declare the patterns for this configuration fi
         short-option: m
         long-option: mode
 
+additional-search-paths:
+    - /tmp
+
 # Define the commands listed under 'commands'
 build:
     - command-line-command      # Use the command-line-command plugin when using the 'build' command

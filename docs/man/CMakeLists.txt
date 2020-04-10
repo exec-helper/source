@@ -28,6 +28,7 @@ set(MAN1_EXTENSION .1)
 set(MAN5_SOURCES    src/config/docs/exec-helper-config.md
                 src/config/docs/exec-helper-config-patterns.md
                 src/config/docs/exec-helper-config-environment.md
+                src/plugins/docs/exec-helper-custom-plugins.md
                 src/plugins/docs/exec-helper-plugins-pmd.md
                 src/plugins/docs/exec-helper-plugins-valgrind.md
                 src/plugins/docs/exec-helper-plugins-execute-plugin.md

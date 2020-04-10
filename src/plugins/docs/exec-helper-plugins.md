@@ -51,8 +51,13 @@ The _pmd plugin_ is used for applying pmd analysis on source code files. See [ex
 ## valgrind
 The _valgrind plugin_ is used for applying valgrind analysis. See [exec-helper-plugins-valgrind](@ref exec-helper-plugins-valgrind)(5).
 
+# CUSTOM PLUGINS
+You can write your own plugins and integrate them with exec-helper. In addition, you can write plugins that overwrite the system plugins. See [exec-helper-custom-plugins](@ref exec-helper-custom-plugins)(5) for more information on writing your own plugins.
+
 # SEE ALSO
 See [exec-helper](@ref exec-helper)(1) for information about the usage of exec-helper.
+
+See [exec-helper-custom-plugins](@ref exec-helper-custom-plugins)(5) for the available plugins and their configuration options.
 
 See [exec-helper-config](@ref exec-helper-config)(5) for information about the configuration file format.
 
@@ -61,4 +66,3 @@ Exec-helper is Copyright &copy; 2016-2017 under the GNU General Public License v
 
 # AUTHOR
 Written by B. Verhagen
-

@@ -5,9 +5,9 @@
 #include <string>
 
 #include "commandLineOptions.h"
+#include "path.h"
 
-namespace execHelper {
-namespace config {
+namespace execHelper::config {
 /**
  * \brief   Class for collecting the values of variables that are expected to
  * change often
@@ -64,6 +64,13 @@ class FleetingOptionsInterface {
     virtual ListPluginsOption_t listPlugins() const noexcept = 0;
 
     /**
+     * Return the additional search paths
+     *
+     * \returns A list of additional search paths
+     */
+    [[nodiscard]] virtual const Paths& appendedSearchPaths() const noexcept = 0;
+
+    /**
      * Returns the commands that were set on the command line
      *
      * \returns A collection of commands given on the command line
@@ -91,7 +98,6 @@ class FleetingOptionsInterface {
     FleetingOptionsInterface&
     operator=(FleetingOptionsInterface&& other) = default;
 };
-} // namespace config
-} // namespace execHelper
+} // namespace execHelper::config
 
 #endif /* FLEETING_OPTIONS_INTERFACE_INCLUDE */

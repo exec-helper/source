@@ -1,8 +1,10 @@
+#include <algorithm>
 #include <cstdlib>
 #include <filesystem>
 #include <iomanip>
 #include <memory>
 #include <optional>
+#include <stdexcept>
 #include <string>
 #include <utility>
 #include <vector>
@@ -14,6 +16,7 @@
 #include "config/configFileSearcher.h"
 #include "config/envp.h"
 #include "config/fleetingOptions.h"
+#include "config/fleetingOptionsInterface.h"
 #include "config/optionDescriptions.h"
 #include "config/pathManipulation.h"
 #include "config/pattern.h"
@@ -45,13 +48,17 @@ using std::make_shared;
 using std::make_unique;
 using std::move;
 using std::optional;
+using std::runtime_error;
 using std::setw;
 using std::shared_ptr;
 using std::string;
 using std::stringstream;
+using std::transform;
 using std::vector;
 
 using execHelper::commander::Commander;
+using execHelper::config::APPEND_SEARCH_PATH_KEY;
+using execHelper::config::AppendSearchPathOption_t;
 using execHelper::config::ArgumentOption;
 using execHelper::config::ArgumentOptions;
 using execHelper::config::Argv;
@@ -63,6 +70,7 @@ using execHelper::config::DryRunOption_t;
 using execHelper::config::EnvironmentCollection;
 using execHelper::config::Envp;
 using execHelper::config::FleetingOptions;
+using execHelper::config::FleetingOptionsInterface;
 using execHelper::config::getAllParentDirectories;
 using execHelper::config::getHomeDirectory;
 using execHelper::config::HELP_OPTION_KEY;
@@ -155,6 +163,41 @@ inline Paths getSearchPaths(const EnvironmentCollection& env) noexcept {
     return searchPaths;
 }
 
+inline execHelper::config::Paths addAdditionalSearchPaths(execHelper::config::Paths& base, const execHelper::config::Paths& toAdd, const Path& basePath) noexcept {
+    transform(toAdd.rbegin(), toAdd.rend(), back_inserter(base), [&basePath](auto path) {
+        if(path.is_relative()) {
+            path =  basePath / path;
+        }
+
+        LOG(trace) << "Adding search path " << path;
+        return path;
+    });
+    return base;
+}
+
+inline execHelper::config::Paths addAdditionalSearchPaths(execHelper::config::Paths& base, const vector<string>& toAdd, const Path& basePath) noexcept {
+    Paths paths;
+    transform(toAdd.begin(), toAdd.end(), back_inserter(paths), [](const auto& path) {
+        return Path{path};
+    });
+    return addAdditionalSearchPaths(base, paths, basePath);
+}
+
+inline execHelper::config::Paths getAdditionalSearchPaths(const FleetingOptionsInterface& fleetingOptions, const SettingsNode& settings, const Path& basePath) noexcept {
+    constexpr std::string_view configKey{"additional-search-paths"};
+    Paths pluginSearchPath { PLUGINS_INSTALL_PATH };
+    if(settings.contains(string(configKey))) {
+        pluginSearchPath = addAdditionalSearchPaths(pluginSearchPath, settings.get<vector<string>>(string(configKey), {}), basePath);
+    }
+    return addAdditionalSearchPaths(pluginSearchPath, fleetingOptions.appendedSearchPaths(), basePath);
+}
+
+/**
+ * Discover all compatible plugins in the given search paths. This function does *not* recursively seek in these paths.
+ *
+ * \param[in] searchPaths   The search paths from the lowest priority to the hightest (collisions of plugins in later paths overwrite the ones from earlier ones)
+ * \returns     A mapping of the discovered plugins
+ */
 inline Plugins discoverPlugins(const Paths& searchPaths) noexcept {
     Plugins plugins{
         {"commands",
@@ -173,15 +216,20 @@ inline Plugins discoverPlugins(const Paths& searchPaths) noexcept {
     LOG(debug) << "Discovering plugins...";
     for(const auto& path : searchPaths) {
         LOG(trace) << "Discovering plugins for path " << path;
-        for(const auto& entry : filesystem::directory_iterator(path)) {
-            if(entry.is_regular_file() && entry.path().extension() == ".lua") {
-                LOG(trace) << "Module " << entry.path().stem() << " found at "
-                           << path;
-                plugins.emplace(std::make_pair(
-                    entry.path().stem(),
-                    shared_ptr<const Plugin>(
-                        new execHelper::plugins::LuaPlugin(entry))));
+        try {
+            for(const auto& entry : filesystem::directory_iterator(path)) {
+                if(entry.is_regular_file() && entry.path().extension() == ".lua") {
+                    LOG(trace) << "Module " << entry.path().stem() << " found at "
+                               << path;
+                    plugins.emplace(std::make_pair(
+                        entry.path().stem(),
+                        shared_ptr<const Plugin>(
+                            new execHelper::plugins::LuaPlugin(entry))));
+                }
             }
+        } catch(const filesystem::filesystem_error& e) {
+            user_feedback_error("Failed to discover plugins for path " << path << ". Skipping it");
+            LOG(warning) << "Failed to discover plugins for path " << path << ": " << e.what();
         }
     }
     return plugins;
@@ -236,38 +284,15 @@ inline bool verifyOptions(const FleetingOptions& options) noexcept {
     return true;
 }
 
-inline optional<Path>
-getSettingsFile(const Argv& argv, const EnvironmentCollection& env,
-                const Option<SettingsFileOption_t>& settingsOption) noexcept {
-    OptionDescriptions options;
-    options.addOption(settingsOption);
-
-    VariablesMap optionsMap = FleetingOptions::getDefault();
-    if(!options.getOptionsMap(optionsMap, argv, true)) {
-        user_feedback_error(
-            "Could not properly parse the command line options");
-        return std::nullopt;
-    }
-    FleetingOptions fleetingOptions(optionsMap);
-
+inline auto
+getSettingsFile(const std::string& settingsFilename, const EnvironmentCollection& env) -> Path {
     ConfigFileSearcher configFileSearcher(getSearchPaths(env));
 
-#ifdef _WIN32
-    SettingsFileOption_t settingsFileValue =
-        optionsMap.get<SettingsFileOption_t>(SETTINGS_FILE_KEY,
-                                             ".windows.exec-helper");
-#else
-    SettingsFileOption_t settingsFileValue =
-        optionsMap.get<SettingsFileOption_t>(SETTINGS_FILE_KEY, ".exec-helper");
-#endif
-    auto settingsFile = configFileSearcher.find(settingsFileValue);
+    auto settingsFile = configFileSearcher.find(settingsFilename);
     if(settingsFile == std::nullopt) {
-        if(!fleetingOptions.getHelp()) {
-            user_feedback_error("Could not find a settings file");
-        }
-        return std::nullopt;
+        throw std::runtime_error("Could not find a settings file");
     }
-    return settingsFile;
+    return *settingsFile;
 }
 
 PatternSettingsPair addPatternsFromSettingsFile(const Path& settingsFile,
@@ -311,6 +336,8 @@ inline OptionDescriptions getDefaultOptions() noexcept {
         Option<DryRunOption_t>(DRY_RUN_KEY, {"n"}, "Dry run exec-helper"));
     options.addOption(
         Option<ListPluginsOption_t>(LIST_PLUGINS_KEY, {}, "List all plugins"));
+    options.addOption(
+        Option<AppendSearchPathOption_t>(APPEND_SEARCH_PATH_KEY, {}, "Append to plugin search path. Plugins discovered earlier in the list overwrite plugins with the same name in later ones."));
     options.addOption(settingsFileOption);
     options.addOption(
         Option<LogLevelOption_t>(LOG_LEVEL_KEY, {"d"}, "Set the log level"));
@@ -333,21 +360,51 @@ inline VariablesMap handleConfiguration(const Argv& argv,
 } // namespace
 
 int execHelperMain(int argc, char** argv, char** envp) {
-    Argv args(argc, argv);
-    EnvironmentCollection env = toEnvCollection(envp);
+    const Argv args(argc, argv);
+    const EnvironmentCollection env = toEnvCollection(envp);
+
+    auto firstPassOptions = getDefaultOptions();
+
+    VariablesMap firstPassOptionsMap = FleetingOptions::getDefault();
+    if(!firstPassOptions.getOptionsMap(firstPassOptionsMap, args, true)) {
+        user_feedback_error(
+            "Could not properly parse the command line options");
+        printHelp(args[0], firstPassOptions, SettingsNode("Options"));
+        return EXIT_FAILURE;
+    }
+    FleetingOptions firstPassFleetingOptions(firstPassOptionsMap);
+
+    Path settingsFile;
+    try {
+#ifdef _WIN32
+        SettingsFileOption_t settingsFileValue =
+            firstPassOptionsMap.get<SettingsFileOption_t>(SETTINGS_FILE_KEY,
+                                             ".windows.exec-helper");
+#else
+        SettingsFileOption_t settingsFileValue =
+            firstPassOptionsMap.get<SettingsFileOption_t>(SETTINGS_FILE_KEY, ".exec-helper");
+#endif
+
+        settingsFile = getSettingsFile(settingsFileValue, env);
+    } catch(const runtime_error& e) {
+        if(firstPassFleetingOptions.getHelp()) {
+            printHelp(args[0], firstPassOptions, SettingsNode("Options"));
+            return EXIT_SUCCESS;
+        }
+
+        if(firstPassFleetingOptions.getVersion()) {
+            printVersion();
+            return EXIT_SUCCESS;
+        }
+
+        user_feedback_error("Could not find an exec-helper settings file");
+        printHelp(args[0], firstPassOptions, SettingsNode("Options"));
+        return EXIT_FAILURE;
+    }
 
     auto optionDescriptions = getDefaultOptions();
-    const auto settingsFile = getSettingsFile(args, env, settingsFileOption);
+    auto patternSettingsPair = addPatternsFromSettingsFile(settingsFile, optionDescriptions);
 
-    PatternSettingsPair patternSettingsPair(Patterns(), SettingsNode("empty"));
-    if(settingsFile) {
-        try {
-            patternSettingsPair =
-                addPatternsFromSettingsFile(*settingsFile, optionDescriptions);
-        } catch(const std::invalid_argument& e) {
-            std::cerr << e.what() << std::endl;
-        }
-    }
     auto patterns = patternSettingsPair.first;
     auto settings = patternSettingsPair.second;
 
@@ -369,6 +426,10 @@ int execHelperMain(int argc, char** argv, char** envp) {
         logInit.setSeverity(logModule, level);
     }
 
+    // All files are taken relative to this basePath
+    const auto basePath = settingsFile.parent_path();
+    LOG(debug) << "Base path is " << basePath;
+
     if(fleetingOptions.getHelp()) {
         printHelp(args[0], optionDescriptions, settings);
         return EXIT_SUCCESS;
@@ -379,7 +440,9 @@ int execHelperMain(int argc, char** argv, char** envp) {
         return EXIT_SUCCESS;
     }
 
-    auto plugins = discoverPlugins({Path{PLUGINS_INSTALL_PATH}});
+    auto pluginSearchPath = getAdditionalSearchPaths(fleetingOptions, settings, basePath);
+
+    auto plugins = discoverPlugins(pluginSearchPath);
     if(fleetingOptions.listPlugins()) {
         printPlugins(plugins);
         return EXIT_SUCCESS;
@@ -398,11 +461,6 @@ int execHelperMain(int argc, char** argv, char** envp) {
                            << longOption.value() << "'";
             }
         }
-    }
-
-    if(!settingsFile) {
-        printHelp(args[0], optionDescriptions, SettingsNode("empty"));
-        return EXIT_FAILURE;
     }
 
     auto shell = make_shared<PosixShell>();
@@ -431,7 +489,7 @@ int execHelperMain(int argc, char** argv, char** envp) {
 
     Commander commander;
     if(commander.run(fleetingOptions, settings, patterns,
-                     settingsFile->parent_path(), move(env), move(plugins))) {
+                     settingsFile.parent_path(), move(env), move(plugins))) {
         return EXIT_SUCCESS;
     } else {
         user_feedback_error("Error executing commands");

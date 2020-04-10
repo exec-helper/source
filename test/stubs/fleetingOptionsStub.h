@@ -3,8 +3,7 @@
 
 #include "config/fleetingOptionsInterface.h"
 
-namespace execHelper {
-namespace test {
+namespace execHelper::test {
 class FleetingOptionsStub : public config::FleetingOptionsInterface {
   public:
     virtual ~FleetingOptionsStub() = default;
@@ -29,6 +28,10 @@ class FleetingOptionsStub : public config::FleetingOptionsInterface {
         return m_listPlugins;
     }
 
+    [[nodiscard]] auto appendedSearchPaths() const noexcept -> const config::Paths& {
+        return m_appendSearchPaths;
+    }
+
     const config::CommandCollection& getCommands() const noexcept override {
         return m_commands;
     }
@@ -39,10 +42,9 @@ class FleetingOptionsStub : public config::FleetingOptionsInterface {
     config::DryRunOption_t m_dryRun = {false};
     config::Jobs_t m_jobs = 1024U;
     config::ListPluginsOption_t m_listPlugins = {false};
+    config::Paths m_appendSearchPaths = {};
     config::CommandCollection m_commands = {};
 };
-} // namespace test
-
-} // namespace execHelper
+} // namespace execHelper::test
 
 #endif /* FLEETING_OPTIONS_STUB_INCLUDE */
