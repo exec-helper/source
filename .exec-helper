@@ -331,7 +331,7 @@ command-line-command:
             - TRIPLET
             - MODE
             - MODULE
-        command-line: [ "build/{TRIPLET}{COMPILER}/{MODE}/install/test/unittest/exec-helper-{MODULE}-unittest"]
+        command-line: [ "build/{TRIPLET}{COMPILER}/{MODE}/install/test/unittest/exec-helper-{MODULE}-unittest", --reporter=junit, "--out=build/{TRIPLET}{COMPILER}/{MODE}/{MODULE}_report.xml"]
 
     integration:
         patterns:
