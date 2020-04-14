@@ -1,5 +1,6 @@
-import sys
 import json
+import re
+import sys
 
 import pytest
 from pytest_bdd import scenarios, given, when, then, parsers
@@ -53,6 +54,14 @@ def add_command(config, command):
 def run_one_command(run_environment, command):
     run_environment.run_application([command])
 
+@when('we call the application with the <command_line> options')
+def call_no_command(run_environment, command_line):
+    run_environment.run_application(command_line)
+
+@when('we call the application without arguments')
+def call_no_option(run_environment):
+    run_environment.run_application([])
+
 @then('the call should succeed')
 def call_succeeds(run_environment):
     if run_environment.last_run.returncode != 0:
@@ -69,11 +78,19 @@ def call_fails(run_environment, expected):
         assert(False)
     assert(True)
 
-@then('stdout should contain <command>')
 @then(parsers.parse('stdout should contain {expected}'))
 def stdout_contains(run_environment, expected):
     expected = expected.strip("'")
     if not expected.encode('utf-8') in run_environment.last_run.stdout:
+        print(run_environment.last_run.stdout, file = sys.stdout)
+        assert(False)
+    assert(True)
+
+@then(parsers.parse('stdout should contain regex {expected}'))
+def stdout_contains_regex(run_environment, expected):
+    expected = expected.strip("'")
+    regex = re.compile(expected.encode('utf-8'))
+    if not regex.search(run_environment.last_run.stdout):
         print(run_environment.last_run.stdout, file = sys.stdout)
         assert(False)
     assert(True)
@@ -110,3 +127,11 @@ def stderr_is_empty(run_environment):
         assert(False)
     assert(True)
 
+@when('run the <command> command <nb_of_times> in the same statement')
+def run_command_n_times(run_environment, command, nb_of_times):
+    args = [command for i in range(0, nb_of_times)]
+    run_environment.run_application(args)
+
+@then('the <command> command should be called <nb_of_times> times')
+def command_called_times(run_environment, command, nb_of_times):
+    assert(len(run_environment.config.commands[command].runs) == nb_of_times)

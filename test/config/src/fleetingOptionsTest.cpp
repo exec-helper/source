@@ -22,23 +22,23 @@ using execHelper::log::toString;
 
 using execHelper::test::propertyTest;
 
+using rc::AppendSearchPathValue;
 using rc::DryRunValue;
 using rc::HelpValue;
 using rc::JobsValue;
 using rc::ListPluginsValue;
 using rc::VerbosityValue;
 using rc::VersionValue;
-using rc::AppendSearchPathValue;
 
-namespace  {
-    inline std::vector<std::string> toStrings(const execHelper::config::Paths& paths) noexcept {
-        std::vector<std::string> strings;
-        transform(paths.begin(), paths.end(), back_inserter(strings), [](const auto& path) {
-            return path.string();
-        });
-        return strings;
-    }
-} // namespace 
+namespace {
+inline auto toStrings(const execHelper::config::Paths& paths) noexcept
+    -> std::vector<std::string> {
+    std::vector<std::string> strings;
+    transform(paths.begin(), paths.end(), back_inserter(strings),
+              [](const auto& path) { return path.string(); });
+    return strings;
+}
+} // namespace
 
 namespace execHelper::config::test {
 SCENARIO("Test the fleeting options defaults", "[config][fleeting-options]") {
@@ -51,7 +51,8 @@ SCENARIO("Test the fleeting options defaults", "[config][fleeting-options]") {
         REQUIRE(expectedDefaults.add(DRY_RUN_KEY, "no"));
         REQUIRE(expectedDefaults.add(LOG_LEVEL_KEY, "none"));
         REQUIRE(expectedDefaults.add(LIST_PLUGINS_KEY, "no"));
-        REQUIRE(expectedDefaults.add(APPEND_SEARCH_PATH_KEY, AppendSearchPathOption_t()));
+        REQUIRE(expectedDefaults.add(APPEND_SEARCH_PATH_KEY,
+                                     AppendSearchPathOption_t()));
         REQUIRE(expectedDefaults.add(COMMAND_KEY, CommandCollection()));
         REQUIRE(expectedDefaults.add(SETTINGS_FILE_KEY));
 
@@ -72,7 +73,8 @@ SCENARIO("Test the getters of the fleeting options",
         [](const HelpValue& help, const VersionValue& version,
            const VerbosityValue& verbosity, const JobsValue& jobs,
            const DryRunValue& dryRun, const LogLevel& logLevel,
-           const ListPluginsValue& listPlugins, const AppendSearchPathValue& appendedSearchPaths,
+           const ListPluginsValue& listPlugins,
+           const AppendSearchPathValue& appendedSearchPaths,
            const CommandCollection& commands) {
             VariablesMap variables = FleetingOptions::getDefault();
 
@@ -84,7 +86,8 @@ SCENARIO("Test the getters of the fleeting options",
             REQUIRE(
                 variables.replace(LOG_LEVEL_KEY, string{toString(logLevel)}));
             REQUIRE(variables.replace(LIST_PLUGINS_KEY, listPlugins.config()));
-            REQUIRE(variables.replace(APPEND_SEARCH_PATH_KEY, toStrings(appendedSearchPaths)));
+            REQUIRE(variables.replace(APPEND_SEARCH_PATH_KEY,
+                                      toStrings(appendedSearchPaths)));
             REQUIRE(variables.replace(COMMAND_KEY, commands));
 
             THEN_WHEN("We create fleeting options based on the variables map") {
@@ -98,7 +101,8 @@ SCENARIO("Test the getters of the fleeting options",
                     REQUIRE(dryRun == fleetingOptions.getDryRun());
                     REQUIRE(logLevel == fleetingOptions.getLogLevel());
                     REQUIRE(listPlugins == fleetingOptions.listPlugins());
-                    REQUIRE(appendedSearchPaths == fleetingOptions.appendedSearchPaths());
+                    REQUIRE(appendedSearchPaths ==
+                            fleetingOptions.appendedSearchPaths());
                     REQUIRE(commands == fleetingOptions.getCommands());
                 }
             }

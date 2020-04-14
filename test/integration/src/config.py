@@ -13,11 +13,12 @@ class Config(object):
         self._settings_file = directory + '/' + self._prefix + str(uuid.uuid4()) + self._suffix
         self._commands = dict()
         self._patterns = set()
+        self._plugin_search_path = []
         if os.path.exists(self._settings_file):
             raise AssertionError("Temporary file '{file}' already exists!".format(file = self._settings_file))
 
     def __del__(self):
-        # self.remove()
+        self.remove()
         pass
 
     @property
@@ -28,8 +29,14 @@ class Config(object):
     def commands(self):
         return self._commands
 
-    def create_command(self, cmd):
-        self._commands[cmd] = command.Command(cmd)
+    def create_command(self, command_id):
+        """ Creates a command for the given command id using an implementation-specific plugin
+        """
+        self._commands[command_id] = command.Command(command_id, 'command-line-command')
+
+    def add_command(self, command_id, command):
+        """ Adds the given command as a command associated with the command id to the configuration """
+        self._commands[command_id] = command
 
     def set_environment(self, cmd, envs):
         self._commands[cmd].set_environment(envs)
@@ -37,11 +44,17 @@ class Config(object):
     def add_pattern(self, pattern):
         self._patterns.add(pattern)
 
+    def add_plugin_search_path(self, path):
+        self._plugin_search_path.append(path)
+
     def write(self):
         config_file = dict()
 
         # Make sure the config file is not empty
         config_file['blaat'] = []
+
+        if self._plugin_search_path:
+            config_file['additional-search-paths'] = self._plugin_search_path
 
         if self._patterns:
             config_file['patterns'] = {}

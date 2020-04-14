@@ -7,10 +7,6 @@ from scenarios_run import *
 
 scenarios('../feature/cmd-args', example_converters=dict(command_line = CommandLineArgs, command = str, pattern = PatternType))
 
-@when('we call the application with the <command_line> options')
-def call_no_command(run_environment, command_line):
-    run_environment.run_application(command_line)
-
-@when('we call the application without arguments')
-def call_no_option(run_environment):
-    run_environment.run_application([])
+@then('stdout should contain <command>')
+def stdout_plugin_id(run_environment, command):
+    stdout_contains(run_environment, command)

@@ -24,11 +24,13 @@ class FleetingOptionsStub : public config::FleetingOptionsInterface {
 
     config::Jobs_t getJobs() const noexcept override { return m_jobs; }
 
-    auto listPlugins() const noexcept -> config::ListPluginsOption_t override {
+    [[nodiscard]] auto listPlugins() const noexcept
+        -> config::ListPluginsOption_t override {
         return m_listPlugins;
     }
 
-    [[nodiscard]] auto appendedSearchPaths() const noexcept -> const config::Paths& {
+    [[nodiscard]] auto appendedSearchPaths() const noexcept
+        -> const config::Paths& override {
         return m_appendSearchPaths;
     }
 

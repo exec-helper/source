@@ -69,8 +69,9 @@ class Command(object):
     _prefix = 'binary-'
     _suffix = '.exec-helper'
 
-    def __init__(self, id, directory = tempfile.gettempdir()):
+    def __init__(self, id, plugin_id, directory = tempfile.gettempdir()):
         self._id = id
+        self._plugin_id = plugin_id
         self._binary = directory + '/' + self._prefix + str(uuid.uuid4()) + self._suffix
         self._env = dict()
         self._patterns = []
@@ -102,14 +103,14 @@ class Command(object):
 
     def to_dict(self):
         result = dict()
-        result[self._id] = 'command-line-command'
-        result['command-line-command'] = dict()
-        result['command-line-command'][self._id] = dict()
-        result['command-line-command'][self._id]['command-line'] = [self._binary]
+        result[self._id] = self._plugin_id
+        result[self._plugin_id] = dict()
+        result[self._plugin_id][self._id] = dict()
+        result[self._plugin_id][self._id]['command-line'] = [self._binary]
         if self._env:
-            result['command-line-command'][self._id]['environment'] = self._env
+            result[self._plugin_id][self._id]['environment'] = self._env
         if self._patterns:
-            result['command-line-command'][self._id]['patterns'] = [pattern.id for pattern in self._patterns]
+            result[self._plugin_id][self._id]['patterns'] = [pattern.id for pattern in self._patterns]
         return result
 
     def write_binary(self):

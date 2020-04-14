@@ -8,7 +8,7 @@ class RunEnvironment(object):
     def __init__(self):
         self._working_dir = WorkingDir()
         self._config = Config(self._working_dir.dir)
-        self._args = {}
+        self._args = ['exec-helper']
 
     @property
     def config(self):
@@ -22,7 +22,8 @@ class RunEnvironment(object):
         self._config.remove()
 
     def add_valid_config(self):
-        self._args['--settings-file'] = self._config.file
+        self._args.append('--settings-file')
+        self._args.append(self._config.file)
 
     def add_pattern(self, command, pattern_string):
         """ Add the list of patterns to the given command """
@@ -34,14 +35,14 @@ class RunEnvironment(object):
         pattern = Pattern(pattern_id, pattern_values)
         self._config.add_pattern(command, pattern)
 
+    def add_commandline(self, arg_list):
+        self._args.extend(arg_list)
+
     def run_application(self, arg_list=[]):
         if self._config:
             self._config.write()
 
-        args = ['exec-helper']
-
-        for cmd_option,value in self._args.items():
-            args.extend([cmd_option, value])
+        args = self._args
         args.extend(arg_list)
         print(' '.join(args))
         self._last_run = subprocess.run(args, cwd = self._working_dir.dir, capture_output = True, check = False) 

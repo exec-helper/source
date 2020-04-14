@@ -17,15 +17,15 @@ using boost::lexical_cast;
 
 using execHelper::log::LogLevel;
 
-namespace  {
-inline execHelper::config::Paths toPaths(const std::vector<std::string>& toConvert) noexcept {
+namespace {
+inline auto toPaths(const std::vector<std::string>& toConvert) noexcept
+    -> execHelper::config::Paths {
     execHelper::config::Paths paths;
-    transform(toConvert.begin(), toConvert.end(), back_inserter(paths), [](const auto& to) {
-        return execHelper::config::Path{to};
-    });
+    transform(toConvert.begin(), toConvert.end(), back_inserter(paths),
+              [](const auto& to) { return execHelper::config::Path{to}; });
     return paths;
 }
-} // namespace 
+} // namespace
 
 namespace execHelper::config {
 FleetingOptions::FleetingOptions(const VariablesMap& optionsMap) noexcept
@@ -38,7 +38,9 @@ FleetingOptions::FleetingOptions(const VariablesMap& optionsMap) noexcept
           optionsMap.get<LogLevelOption_t>(LOG_LEVEL_KEY).value_or("warning")),
       m_listPlugins(optionsMap.get<ListPluginsOption_t>(LIST_PLUGINS_KEY)
                         .value_or(false)),
-      m_appendSearchPaths(toPaths(optionsMap.get<AppendSearchPathOption_t>(APPEND_SEARCH_PATH_KEY).value_or(AppendSearchPathOption_t()))),
+      m_appendSearchPaths(toPaths(
+          optionsMap.get<AppendSearchPathOption_t>(APPEND_SEARCH_PATH_KEY)
+              .value_or(AppendSearchPathOption_t()))),
       m_commands(optionsMap.get<CommandCollection>(COMMAND_KEY)
                      .value_or(CommandCollection())) {
     auto jobs = optionsMap.get<JobsOption_t>(JOBS_KEY).value_or("auto");

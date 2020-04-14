@@ -11,8 +11,8 @@
 #include "config/settingsNode.h"
 
 #include "unittest/rapidcheck.h"
-#include "utils/testValue.h"
 #include "utils/commonGenerators.h"
+#include "utils/testValue.h"
 
 // NOTE: Must be in rc namespace!
 namespace rc {
