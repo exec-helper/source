@@ -334,6 +334,9 @@ command-line-command:
             - TRIPLET
             - MODE
             - MODULE
+            - EH_WORKING_DIR
+        environment:
+            PATH: "{EH_WORKING_DIR}/build/{TRIPLET}{COMPILER}/{MODE}/install/bin:{EH_WORKING_DIR}/build/{TRIPLET}{COMPILER}/{MODE}/install/test/integration:/usr/local/bin:/usr/bin"
         command-line: [ "build/{TRIPLET}{COMPILER}/{MODE}/install/test/unittest/exec-helper-{MODULE}-unittest", --reporter=junit, "--out=build/{TRIPLET}{COMPILER}/{MODE}/{MODULE}_report.xml"]
 
     integration:
@@ -346,8 +349,7 @@ command-line-command:
         environment:
             PATH: "{EH_WORKING_DIR}/build/{TRIPLET}{COMPILER}/{MODE}/install/bin:/usr/local/bin:/usr/bin"
         working-dir: test/integration
-        command-line:
-            test: [ pytest, -m, "'{TARGET}'", "--junitxml=../../build/{TRIPLET}{COMPILER}/{MODE}/system_test_report.xml", "--html=../../build/{TRIPLET}{COMPILER}/{MODE}/system_test_report.html", --self-contained-html, .]
+        command-line: [ pytest, -m, "'{TARGET}'", "--junitxml=../../build/{TRIPLET}{COMPILER}/{MODE}/system_test_report.xml", "--html=../../build/{TRIPLET}{COMPILER}/{MODE}/system_test_report.html", --self-contained-html, .]
 
     coverage:
         environment:

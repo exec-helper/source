@@ -16,6 +16,7 @@
 #include "core/task.h"
 #include "unittest/catch.h"
 #include "unittest/rapidcheck.h"
+#include "utils/commonGenerators.h"
 #include "utils/utils.h"
 
 using std::ofstream;
@@ -376,5 +377,40 @@ SCENARIO("Test the shell for binaries found in the working directory but not "
             }
         }
     });
+}
+
+SCENARIO("The shell should properly set the PWD environment variable",
+         "[shell][posixShell]") {
+    propertyTest(
+        "An execution engine, a shell, a working dir and an initial value",
+        [](const Path& workingDir, std::string&& initialValue) {
+            IoService ioService;
+
+            PosixShell shell;
+
+            ExecutionContent::registerIoService(
+                gsl::not_null<IoService*>(&ioService));
+            ExecutionContent executionEngine(0);
+
+            ioService.run();
+
+            THEN_WHEN(
+                "We set the PWD environment variable to an initial value and "
+                "the working directory to the given directory and run it") {
+                Task task;
+                task.setEnvironment({{"PWD", move(initialValue)}});
+                task.setWorkingDirectory(workingDir);
+                task.append(executionEngine.getConfigCommand());
+                shell.execute(task);
+
+                THEN_CHECK(
+                    "That the PWD variable is set to the working directory") {
+                    REQUIRE(executionEngine.getReceivedData().size() == 1);
+                    auto env = executionEngine.getReceivedData().back().env;
+                    REQUIRE(env.count("PWD") > 0);
+                    REQUIRE(env["PWD"] == workingDir.string());
+                }
+            }
+        });
 }
 } // namespace execHelper::core::test

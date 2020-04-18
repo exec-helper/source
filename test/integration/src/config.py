@@ -1,16 +1,13 @@
+from pathlib import Path
 import os
-import tempfile
-import uuid
 import yaml
 
 import command
 
 class Config(object):
-    _prefix = 'test-'
-    _suffix = '.exec-helper'
-
-    def __init__(self, directory = tempfile.gettempdir()):
-        self._settings_file = directory + '/' + self._prefix + str(uuid.uuid4()) + self._suffix
+    def __init__(self, directory, filename = '.exec-helper'):
+        self._settings_file = Path(directory).joinpath(filename)
+        self._directory = directory
         self._commands = dict()
         self._patterns = set()
         self._plugin_search_path = []
@@ -18,7 +15,7 @@ class Config(object):
             raise AssertionError("Temporary file '{file}' already exists!".format(file = self._settings_file))
 
     def __del__(self):
-        self.remove()
+        # self.remove()
         pass
 
     @property
@@ -32,7 +29,7 @@ class Config(object):
     def create_command(self, command_id):
         """ Creates a command for the given command id using an implementation-specific plugin
         """
-        self._commands[command_id] = command.Command(command_id, 'command-line-command')
+        self._commands[command_id] = command.Command(command_id, 'command-line-command', self._directory)
 
     def add_command(self, command_id, command):
         """ Adds the given command as a command associated with the command id to the configuration """
@@ -45,7 +42,7 @@ class Config(object):
         self._patterns.add(pattern)
 
     def add_plugin_search_path(self, path):
-        self._plugin_search_path.append(path)
+        self._plugin_search_path.append(str(path))
 
     def write(self):
         config_file = dict()

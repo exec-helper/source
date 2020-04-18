@@ -2,10 +2,13 @@
 #define EXECUTION_CONTENT_INCLUDE
 
 #include <atomic>
+#include <map>
 #include <string>
 #include <thread>
+#include <vector>
 
 #include <boost/asio.hpp>
+#include <boost/serialization/map.hpp>
 #include <boost/serialization/vector.hpp>
 #include <gsl/gsl>
 
@@ -40,10 +43,11 @@ class IoService {
 
 struct ExecutionContentData {
     std::vector<std::string> args;
+    std::map<std::string, std::string> env;
 
     template <typename Archive>
     void serialize(Archive& ar, const unsigned int /*version*/) {
-        ar& args;
+        ar& args& env;
     }
 };
 

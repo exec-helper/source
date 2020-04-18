@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 from command import Command
 
@@ -6,10 +7,10 @@ class CustomPlugin():
     _suffix = '.lua'
 
     def __init__(self, name, directory):
-        self._id = name
-        self._file = directory + '/' + self._id + self._suffix
+        assert(directory.is_dir())
 
-        assert(os.path.isdir(directory))
+        self._id = name
+        self._file = Path(directory).joinpath(self._id + self._suffix)
 
         self.write(self._id, self._file)
 
@@ -28,5 +29,4 @@ class CustomPlugin():
             f.write('register_task(task)\n')
 
     def remove(self):
-        if os.path.exists(self._file):
-            os.remove(self._file)
+        self._file.unlink()

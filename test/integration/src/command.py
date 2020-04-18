@@ -4,12 +4,14 @@ import pickle
 import random
 import stat
 from threading import Thread
+from pathlib import Path
 import tempfile
 import uuid
 
 class Run(object):
-    def __init__(self, environment):
-        self._environment = environment
+    def __init__(self):
+        self._environment = {}
+        self._working_dir = None
 
     @property
     def environment(self):
@@ -18,6 +20,14 @@ class Run(object):
     @environment.setter
     def environment(self, value):
         self._environment = value
+
+    @property
+    def working_dir(self):
+        return self._working_dir
+
+    @working_dir.setter
+    def working_dir(self, value):
+        self._working_dir = value
 
 class Server(Thread):
     def __init__(self, host, port):
@@ -40,7 +50,10 @@ class Server(Thread):
         serialized = await reader.read(10000)
         data = pickle.loads(serialized)
         print("Received data!")
-        self._runs.append(Run(data['env']))
+        run = Run()
+        run.environment = data['env']
+        run.working_dir = Path(data['working_dir'])
+        self._runs.append(run)
 
         writer.close()
         await writer.wait_closed()
@@ -69,10 +82,10 @@ class Command(object):
     _prefix = 'binary-'
     _suffix = '.exec-helper'
 
-    def __init__(self, id, plugin_id, directory = tempfile.gettempdir()):
+    def __init__(self, id, plugin_id, directory):
         self._id = id
         self._plugin_id = plugin_id
-        self._binary = directory + '/' + self._prefix + str(uuid.uuid4()) + self._suffix
+        self._binary = Path(directory).joinpath(self._prefix + str(uuid.uuid4()) + self._suffix)
         self._env = dict()
         self._patterns = []
 
@@ -81,7 +94,7 @@ class Command(object):
 
     def __del__(self):
         self.stop()
-        self.remove()
+        # self.remove()
 
     @property
     def id(self):
@@ -106,7 +119,7 @@ class Command(object):
         result[self._id] = self._plugin_id
         result[self._plugin_id] = dict()
         result[self._plugin_id][self._id] = dict()
-        result[self._plugin_id][self._id]['command-line'] = [self._binary]
+        result[self._plugin_id][self._id]['command-line'] = [str(self._binary)]
         if self._env:
             result[self._plugin_id][self._id]['environment'] = self._env
         if self._patterns:
@@ -125,6 +138,7 @@ class Command(object):
             f.write("\n")
             f.write("    run_data = dict()\n")
             f.write("    run_data['env'] = { key: value for key, value in os.environ.items()}\n")
+            f.write("    run_data['working_dir'] = f'{os.getcwd()}'\n")
             f.write("    serialized = pickle.dumps(run_data)\n")
             f.write("\n")
             f.write("    writer.write(serialized)\n")
@@ -140,8 +154,7 @@ class Command(object):
         self._server.start()
 
     def remove(self):
-        if os.path.exists(self._binary):
-            os.remove(self._binary)
+        self._binary.unlink()
 
     def stop(self):
         if self._server.is_alive():

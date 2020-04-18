@@ -36,7 +36,7 @@ The following exec-helper specific functions are available next to the lua 5.1 f
 ```lua
 task:add_args(get_commandline())
 ```
-- **get\_environment()**: Returns a two-level Lua table containing the environment in which the task will be executed. The plugin can read and modify this environment. Values set by the `environment` key in the configuration are added automatically to this list before this plugin is called, there is no need to do this explicitly.
+- **get\_environment()**: Returns a two-level Lua table containing the environment in which the task will be executed. The plugin can read and modify this environment. Values set by the `environment` key in the configuration are added automatically to this list before this plugin is called, there is no need to do this explicitly. _Note_: The _PWD_ environment variable, following POSIX convention, is set by the application to the working directory of the task. Therefore, its value cannot be overriden in a custom module.
 - **get\_verbose(string arg)**: Adds `arg` to the current tasks command line if verbose mode is activated. This function does nothing if verbose mode is not activated.
 ```lua
 task:add_args(get_verbose('--debug'))

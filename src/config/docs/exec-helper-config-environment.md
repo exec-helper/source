@@ -12,6 +12,8 @@ The _environment_ keyword can be set for every plugin that supports the env conf
 
 The _environment_ keyword must contain a _map_ of key-value pairs, where the key is the name of the environment variable and the value is the value associated with the specified environment variable. [Patterns](@ref exec-helper-config-patterns) can not be used for the environment variable _value_.
 
+_Note_: The _PWD_ environment variable, following POSIX convention, is set by the application to the working directory of the task. Therefore, its value cannot be overriden in the configuration.
+
 # EXAMPLE CONFIGURATION
 \include exec-helper-config-environment.example
 

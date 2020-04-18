@@ -37,6 +37,9 @@ The _working directory_ is the directory that is associated with the first of th
 1. The _working-dir_ configuration setting is configured for the specific command. The value of the _working-dir_ configuration key can be an absolute path to the working directory or a relative one w.r.t. the directory of the considered configuration file. If the command should be executed in the actual working directory, use _<working-dir>_ as the value in the configuration file.
 2. The directory of the considered configuration file.
 
+# PATHS
+All relative paths in the configuration should be *relative to the directory in which the configuration resides*. While relative paths are convenient for users as they can freely choose the root directory of an application, some applications require an absolute path. In such case, use the _${PWD}_  environment variable (both POSIX and non-POSIX systems) to convert a relative path in your configuration into an absolute path for calling these particular applications.
+
 # EXAMPLE CONFIGURATION
 \include exec-helper-config.example
 

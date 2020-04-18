@@ -126,6 +126,11 @@ SCENARIO("Test the getters and setters of a task", "[task]") {
                 task.appendToEnvironment(move(value2));
             }
 
+            COMBINATIONS("Setting the work directory") {
+                actualWorkingDir /= "tmp";
+                task.setWorkingDirectory(actualWorkingDir);
+            }
+
             COMBINATIONS("Append an environment collection") {
                 EnvironmentCollection collection(
                     {{"APPENDCOLLECTION1", "append-collection1"},
@@ -135,11 +140,8 @@ SCENARIO("Test the getters and setters of a task", "[task]") {
                 }
                 task.appendToEnvironment(move(collection));
             }
-
-            COMBINATIONS("Setting the work directory") {
-                actualWorkingDir /= "tmp";
-                task.setWorkingDirectory(actualWorkingDir);
-            }
+            actualEnvironment.emplace(make_pair(
+                "PWD", filesystem::absolute(actualWorkingDir).string()));
 
             THEN_WHEN("We check the getters") {
                 THEN_CHECK("The commands are correct") {
@@ -282,7 +284,9 @@ SCENARIO("Test the streaming operator", "[task]") {
         Task task;
         task.append(tasks);
         const EnvironmentCollection env(
-            {{"ENV1", "value1"}, {"ENV2", "value2"}});
+            {{"ENV1", "value1"},
+             {"ENV2", "value2"},
+             {"PWD", filesystem::absolute(actualWorkingDirectory).string()}});
         task.setEnvironment(env);
         task.setWorkingDirectory(actualWorkingDirectory);
 

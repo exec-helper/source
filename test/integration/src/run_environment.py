@@ -1,29 +1,51 @@
 import subprocess
 
-from working_dir import WorkingDir
 from config import Config
 from pattern import Pattern
 
 class RunEnvironment(object):
-    def __init__(self):
-        self._working_dir = WorkingDir()
-        self._config = Config(self._working_dir.dir)
+    def __init__(self, root_dir):
+        self._config = None
+        self._root_dir = root_dir
+        self._working_dir = self._root_dir
         self._args = ['exec-helper']
+
+        self._root_dir.mkdir(parents=True, exist_ok=False)
+        print(f"Creating simulation environment in directory '{self._root_dir}'")
+
+    def __del__(self):
+        # self.remove()
+        pass
 
     @property
     def config(self):
         return self._config
 
+    @config.setter
+    def config(self, value):
+        self._config = value
+
     @property
     def last_run(self):
         return self._last_run
 
+    @property
+    def working_dir(self):
+        return self._working_dir
+
+    @property
+    def root_dir(self):
+        return self._root_dir
+
+    def set_working_dir(self, newWorkingDir):
+        self._working_dir = newWorkingDir
+
     def no_config(self):
         self._config.remove()
 
-    def add_valid_config(self):
+    def config_is_external(self):
         self._args.append('--settings-file')
-        self._args.append(self._config.file)
+        self._args.append(str(self._config.file))
 
     def add_pattern(self, command, pattern_string):
         """ Add the list of patterns to the given command """
@@ -44,6 +66,9 @@ class RunEnvironment(object):
 
         args = self._args
         args.extend(arg_list)
-        print(' '.join(args))
-        self._last_run = subprocess.run(args, cwd = self._working_dir.dir, capture_output = True, check = False) 
+        print("Executing '" + ' '.join(args) + "'")
+        self._last_run = subprocess.run(args, cwd = self._working_dir, capture_output = True, check = False) 
 
+    def remove(self):
+        if os.path.is_directory(self._root_dir):
+            shutil.rmtree(self._root_dir)

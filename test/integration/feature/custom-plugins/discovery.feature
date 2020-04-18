@@ -19,21 +19,21 @@ Feature: Discover custom plugins
         And stdout should contain regex <description>
 
         Examples:
-        | plugin_id             | description                                       |
-        | bootstrap             | Lua plugin for module \S*bootstrap.lua            |
-        | clang-static-analyzer | Lua plugin for module \S*clang-static-analyzer.lua|
-        | clang-tidy            | Lua plugin for module \S*clang-tidy.lua           |
-        | command-line-command  | Command-line-command \(internal\)                 |
-        | commands              | Command \(internal\)                              |
-        | cppcheck              | Lua plugin for module \S*cppcheck.lua             |
-        | lcov                  | Lcov \(internal\)                                 |
-        | memory                | Memory \(internal\)                               |
-        | make                  | Lua plugin for module \S*make.lua                 |
-        | ninja                 | Lua plugin for module \S*ninja.lua                |
-        | pmd                   | Pmd \(internal\)                                  |
-        | scons                 | Lua plugin for module \S*scons.lua                |
-        | selector              | Lua plugin for module \S*selector.lua             |
-        | valgrind              | Valgrind \(internal\)                             |
+        | plugin_id             | description                                                |
+        | bootstrap             | Lua plugin for module \S*/plugins/bootstrap.lua            |
+        | clang-static-analyzer | Lua plugin for module \S*/plugins/clang-static-analyzer.lua|
+        | clang-tidy            | Lua plugin for module \S*/plugins/clang-tidy.lua           |
+        | command-line-command  | Command-line-command \(internal\)                          |
+        | commands              | Command \(internal\)                                       |
+        | cppcheck              | Lua plugin for module \S*/plugins/cppcheck.lua             |
+        | lcov                  | Lcov \(internal\)                                          |
+        | memory                | Memory \(internal\)                                        |
+        | make                  | Lua plugin for module \S*/plugins/make.lua                 |
+        | ninja                 | Lua plugin for module \S*/plugins/ninja.lua                |
+        | pmd                   | Pmd \(internal\)                                           |
+        | scons                 | Lua plugin for module \S*/plugins/scons.lua                |
+        | selector              | Lua plugin for module \S*/plugins/selector.lua             |
+        | valgrind              | Valgrind \(internal\)                                      |
 
     @error
     Scenario: Fail to find a custom module when the search path is not set properly
@@ -58,8 +58,8 @@ Feature: Discover custom plugins
         And stdout should contain regex <description>
 
         Examples:
-        | plugin_id                 | description                                               | command  |
-        | exec-helper-custom-module | Lua plugin for module /tmp/exec-helper-custom-module.lua  | Command1 |
+        | plugin_id                 | description                                                             | command  |
+        | exec-helper-custom-module | Lua plugin for module \S*/custom-plugins/exec-helper-custom-module.lua  | Command1 |
 
     @successful
     Scenario: The search custom plugin configuration takes precedence over the sytem modules
@@ -72,9 +72,9 @@ Feature: Discover custom plugins
         And stdout should contain regex <description>
 
         Examples:
-        | plugin_id             | description                                         | command    |
-        | make                  | Lua plugin for module /tmp/make.lua                 | Command1   |
-        | command-line-command  | Lua plugin for module /tmp/command-line-command.lua | Command1   |
+        | plugin_id             | description                                                       | command    |
+        | make                  | Lua plugin for module \S*/custom-plugins/make.lua                 | Command1   |
+        | command-line-command  | Lua plugin for module \S*/custom-plugins/command-line-command.lua | Command1   |
 
     @successful
     Scenario: Discover a custom module by setting the search path on the command line
@@ -87,11 +87,11 @@ Feature: Discover custom plugins
         And stdout should contain regex <description>
 
         Examples:
-        | plugin_id                 | description                                               | command  |
-        | exec-helper-custom-module | Lua plugin for module /tmp/exec-helper-custom-module.lua  | Command1 |
+        | plugin_id                 | description                                                             | command  |
+        | exec-helper-custom-module | Lua plugin for module \S*/custom-plugins/exec-helper-custom-module.lua  | Command1 |
 
     @successful
-    Scenario: The search stuom plugin command line takes precedence over the system modules
+    Scenario: The search custom plugin command line takes precedence over the system modules
         Given a custom module with id <plugin_id>
         When we register the command <command> to use the module <plugin_id>
         And add the search path to the command line
@@ -101,9 +101,9 @@ Feature: Discover custom plugins
         And stdout should contain regex <description>
 
         Examples:
-        | plugin_id             | description                                         | command    |
-        | make                  | Lua plugin for module /tmp/make.lua                 | Command1   |
-        | command-line-command  | Lua plugin for module /tmp/command-line-command.lua | Command1   |
+        | plugin_id             | description                                                       | command    |
+        | make                  | Lua plugin for module \S*/custom-plugins/make.lua                 | Command1   |
+        | command-line-command  | Lua plugin for module \S*/custom-plugins/command-line-command.lua | Command1   |
 
     @successful
     Scenario: The search custom plugin command line parameter takes precedence over the one(s) in the configuration
@@ -117,5 +117,5 @@ Feature: Discover custom plugins
         And stdout should contain regex <description>
 
         Examples:
-        | plugin_id             | description                                         | command    |
-        | exec-helper-custom-module | Lua plugin for module /tmp/blaat/exec-helper-custom-module.lua  | Command1 |
+        | plugin_id                 | description                                                                   | command  |
+        | exec-helper-custom-module | Lua plugin for module \S*/custom-plugins/other/exec-helper-custom-module.lua  | Command1 |

@@ -1,6 +1,7 @@
 #include "task.h"
 
 #include <algorithm>
+#include <filesystem>
 #include <iostream>
 #include <numeric>
 #include <ostream>
@@ -11,6 +12,7 @@
 using std::accumulate;
 using std::back_inserter;
 using std::endl;
+using std::make_pair;
 using std::move;
 using std::ostream;
 using std::string;
@@ -19,6 +21,8 @@ using std::vector;
 using execHelper::config::EnvironmentCollection;
 using execHelper::config::EnvironmentValue;
 using execHelper::config::Path;
+
+namespace filesystem = std::filesystem;
 
 namespace {
 inline auto implodeVector(const vector<string>& toImplode,
@@ -47,7 +51,7 @@ Task::Task(std::vector<std::string> subtasks,
     : m_task(std::move(subtasks)),
       m_env(std::move(environment)),
       m_workingDirectory(std::move(workingDirectory)) {
-    ;
+    setWorkingDirectory(m_workingDirectory);
 }
 
 auto Task::getTask() const noexcept -> const execHelper::core::TaskCollection& {
@@ -63,6 +67,10 @@ auto Task::getEnvironment() const noexcept -> const EnvironmentCollection& {
 void Task::setWorkingDirectory(const Path& workingDirectory) noexcept {
     LOG(trace) << "Changing working directory of task to " << workingDirectory;
     m_workingDirectory = workingDirectory;
+
+    // Set the PWD environment variable to the working directory
+    appendToEnvironment(
+        make_pair("PWD", filesystem::absolute(m_workingDirectory).string()));
 }
 
 auto Task::getWorkingDirectory() const noexcept -> const Path& {
@@ -93,11 +101,13 @@ auto Task::append(TaskCollection&& taskPart) noexcept -> bool {
 
 auto Task::setEnvironment(const EnvironmentCollection& env) noexcept -> bool {
     m_env = env;
+    setWorkingDirectory(m_workingDirectory);
     return true;
 }
 
 auto Task::setEnvironment(EnvironmentCollection&& env) noexcept -> bool {
     m_env = move(env);
+    setWorkingDirectory(m_workingDirectory);
     return true;
 }
 
