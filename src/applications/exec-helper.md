@@ -12,8 +12,9 @@ The _exec-helper_ utility is a meta-wrapper for executables, optimizing one of t
   - It minimizes the amount of typing while eliminating redundancies
   - It chains multiple commands, inserting patterns at specified places
   - It avoids having to memorize or search for the right invocations for more complicated commands
+  - It allows to write your system- and project-specific plugins for more advanced optimizations
 
-These optimizations enable efficient users to do what they like to do the most: hang around the coffee machine with a peace of mind.
+These optimizations enable efficient users to do what they like to do the most: hang around the coffee machine with peace of mind.
 
 # OPTIONS
 Mandatory arguments to long options are mandatory for short options too. Arguments to options can be specified by appending the option with '=ARG' or ' ARG'. This manual will further use the '=ARG' notation. Multiple arguments can be specified, if appropriate and without the need to repeat the option, by using spaces in between the arguments.
