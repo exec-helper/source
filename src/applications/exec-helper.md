@@ -53,7 +53,7 @@ See [exec-helper-config](@ref exec-helper-config)(5) for information about the c
 See [exec-helper-plugins](@ref exec-helper-plugins)(5) for the available plugins and their configuration options.
 
 # COPYRIGHT
-Exec-helper is Copyright &copy; 2016-2017 under the GNU General Public License v3.0.
+Exec-helper is Copyright &copy; 2016-2020 under the Berkeley Software Distribution 3-clause (BSD 3-clause).
 
 # AUTHOR
 Written by B. Verhagen
