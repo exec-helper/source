@@ -38,6 +38,9 @@ using AppendSearchPathOption_t = std::vector<std::string>;
 
 const std::string LOG_LEVEL_KEY("debug");
 using LogLevelOption_t = std::string;
+
+const std::string_view AUTO_COMPLETE_KEY{"auto-complete"};
+using AutoCompleteOption_t = std::string;
 } // namespace execHelper::config
 
 #endif /* COMMAND_LINE_OPTIONS_INCLUDE */

@@ -62,6 +62,8 @@ using execHelper::config::AppendSearchPathOption_t;
 using execHelper::config::ArgumentOption;
 using execHelper::config::ArgumentOptions;
 using execHelper::config::Argv;
+using execHelper::config::AUTO_COMPLETE_KEY;
+using execHelper::config::AutoCompleteOption_t;
 using execHelper::config::COMMAND_KEY;
 using execHelper::config::CommandCollection;
 using execHelper::config::ConfigFileSearcher;
@@ -204,6 +206,16 @@ getAdditionalSearchPaths(const FleetingOptionsInterface& fleetingOptions,
         pluginSearchPath, fleetingOptions.appendedSearchPaths(), basePath);
 }
 
+inline auto printAutoComplete(const std::string& /*word*/,
+                              const OptionDescriptions& options,
+                              const vector<string>& commands) noexcept -> void {
+    for(const auto& key : options.getOptionKeys()) {
+        user_feedback(key);
+    }
+    for(const auto& command : commands) {
+        user_feedback(command);
+    }
+}
 /**
  * Discover all compatible plugins in the given search paths. This function does *not* recursively seek in these paths.
  *
@@ -364,6 +376,9 @@ inline OptionDescriptions getDefaultOptions() noexcept {
     options.addOption(settingsFileOption);
     options.addOption(
         Option<LogLevelOption_t>(LOG_LEVEL_KEY, {"d"}, "Set the log level"));
+    options.addOption(Option<AutoCompleteOption_t>(
+        string(AUTO_COMPLETE_KEY), {},
+        "List autocomplete options for the given word"));
     options.addOption(commandOption);
 
     return options;
@@ -430,6 +445,12 @@ int execHelperMain(int argc, char** argv, char** envp) {
             return EXIT_SUCCESS;
         }
 
+        if(firstPassFleetingOptions.getAutoComplete()) {
+            printAutoComplete(*(firstPassFleetingOptions.getAutoComplete()),
+                              firstPassOptions, {});
+            return EXIT_SUCCESS;
+        }
+
         user_feedback_error("Could not find an exec-helper settings file");
         printHelp(args[0], firstPassOptions, SettingsNode("Options"));
         return EXIT_FAILURE;
@@ -480,6 +501,13 @@ int execHelperMain(int argc, char** argv, char** envp) {
     auto plugins = discoverPlugins(pluginSearchPath);
     if(fleetingOptions.listPlugins()) {
         printPlugins(plugins);
+        return EXIT_SUCCESS;
+    }
+
+    if(firstPassFleetingOptions.getAutoComplete()) {
+        vector<string> commands = settings.get<vector<string>>("commands", {});
+        printAutoComplete(*(fleetingOptions.getAutoComplete()),
+                          optionDescriptions, move(commands));
         return EXIT_SUCCESS;
     }
 

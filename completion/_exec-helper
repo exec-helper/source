@@ -1,0 +1,23 @@
+#compdef exec-helper
+
+#local -a subcmds
+#subcmds=('c:description for c command' 'd:description for d command' 'hello' $1)
+
+local -a completions
+completions="$(exec-helper --auto-complete "")"
+
+local -a commands
+commands=( "${(ps:\n:)completions}" )
+
+local -a files_filter
+files_filter=('files:filename:_files')
+_describe 'command' commands -- files
+
+#_eh_complete() {
+  #local word completions
+  #word="$1"
+  #completions="$(exec-helper --auto-complete "${word}")"
+  #reply=( "${(ps:\n:)completions}" )
+#}
+
+#compctl -f -K _eh_complete exec-helper

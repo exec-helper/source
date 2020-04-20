@@ -30,6 +30,7 @@ If this, together with _getting coffee in peace_ is not a sufficient rationale f
 - Fast to type using the `eh` alias
 - Easy to find and/or list available commands using the `--help` option.
 - Easy extensible with your own, first-class citizen, plugins.
+- Automatic autocompletion of commands and patterns
 
 # Simple example
 This is a simple illustration of the concept behind exec-helper. More extensive information and examples can be found in the _.exec-helper_ configuration file for this repository and in the [documentation](http://bverhagen.gitlab.io/exec-helper/docs/html/index.html).

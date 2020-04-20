@@ -269,10 +269,17 @@ class OptionDescriptions {
      */
     template <typename T> void addOption(const Option<T>& option) noexcept {
         auto id = option.getId();
+
+        m_optionKeys.emplace_back("--" + id);
         std::string option_code(id);
         for(const auto& argumentOption : option.getArgumentOptions()) {
             option_code.append(",");
             option_code.append(argumentOption);
+            if(argumentOption.size() == 1U) {
+                m_optionKeys.emplace_back("-" + argumentOption);
+            } else {
+                m_optionKeys.emplace_back("--" + argumentOption);
+            }
         }
 
         m_optionDescription.add_options()(option_code.c_str(),
@@ -306,6 +313,15 @@ class OptionDescriptions {
     auto getOptionsMap(config::VariablesMap& variablesMap, const Argv& argv,
                        bool allowUnregistered = false) const noexcept -> bool;
 
+    /**
+     * Returns all the option keys
+     *
+     * \returns A list of option keys
+     */
+    auto getOptionKeys() const noexcept -> const std::vector<std::string>& {
+        return m_optionKeys;
+    }
+
   private:
     void toMap(
         config::VariablesMap& variablesMap,
@@ -313,6 +329,7 @@ class OptionDescriptions {
 
     boost::program_options::options_description m_optionDescription;
 
+    std::vector<std::string> m_optionKeys;
     std::map<std::string, std::unique_ptr<OptionBase>> m_options;
     std::optional<std::string> m_positional;
 };

@@ -63,9 +63,12 @@ class FleetingOptions : public FleetingOptionsInterface {
      *
      * \returns The log level associated with the log level option
      */
-    auto getLogLevel() const noexcept -> log::LogLevel;
+    auto getLogLevel() const noexcept -> log::LogLevel override;
 
     auto getCommands() const noexcept -> const CommandCollection& override;
+
+    auto getAutoComplete() const noexcept
+        -> const std::optional<AutoCompleteOption_t>& override;
 
     /**
      * Returns the default variables for the fleeting options
@@ -84,6 +87,7 @@ class FleetingOptions : public FleetingOptionsInterface {
     const ListPluginsOption_t m_listPlugins;
     const Paths m_appendSearchPaths;
     CommandCollection m_commands;
+    const std::optional<config::AutoCompleteOption_t> m_autocomplete;
 };
 } // namespace config
 } // namespace execHelper

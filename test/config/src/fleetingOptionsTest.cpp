@@ -1,6 +1,7 @@
 #include "unittest/catch.h"
 
 #include <algorithm>
+#include <optional>
 #include <string>
 
 #include "config/commandLineOptions.h"

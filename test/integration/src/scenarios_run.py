@@ -92,7 +92,7 @@ def stdout_contains(run_environment, expected):
 @then(parsers.parse('stdout should contain regex {expected}'))
 def stdout_contains_regex(run_environment, expected):
     expected = expected.strip("'")
-    regex = re.compile(expected.encode('utf-8'))
+    regex = re.compile(expected.encode('utf-8'), re.MULTILINE)
     if not regex.search(run_environment.last_run.stdout):
         print(run_environment.last_run.stdout, file = sys.stdout)
         raise AssertionError(f"Regex {expected} did not match stdout")

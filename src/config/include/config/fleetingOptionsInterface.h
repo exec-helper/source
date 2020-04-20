@@ -2,7 +2,10 @@
 #define FLEETING_OPTIONS_INTERFACE_INCLUDE
 
 #include <exception>
+#include <optional>
 #include <string>
+
+#include "log/logLevel.h"
 
 #include "commandLineOptions.h"
 #include "path.h"
@@ -41,6 +44,13 @@ class FleetingOptionsInterface {
     virtual VerboseOption_t getVerbosity() const noexcept = 0;
 
     /**
+     * Get the value of the log level option
+     *
+     * \returns The log level associated with the log level option
+     */
+    virtual auto getLogLevel() const noexcept -> log::LogLevel = 0;
+
+    /**
      * Returns whether dry run mode is set
      *
      * \returns True    If dry run mode is set
@@ -76,6 +86,16 @@ class FleetingOptionsInterface {
      * \returns A collection of commands given on the command line
      */
     virtual const CommandCollection& getCommands() const noexcept = 0;
+
+    /**
+     *
+     * Returns the autocomplete option value
+     *
+     * \returns string  The given value associated with the autocomplete option
+     *          none    If the option is not set
+     */
+    virtual auto getAutoComplete() const noexcept
+        -> const std::optional<AutoCompleteOption_t>& = 0;
 
   protected:
     FleetingOptionsInterface() = default;

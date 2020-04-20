@@ -10,6 +10,7 @@
 #include "logger.h"
 
 using std::back_inserter;
+using std::string;
 using std::thread;
 using std::transform;
 
@@ -42,7 +43,9 @@ FleetingOptions::FleetingOptions(const VariablesMap& optionsMap) noexcept
           optionsMap.get<AppendSearchPathOption_t>(APPEND_SEARCH_PATH_KEY)
               .value_or(AppendSearchPathOption_t()))),
       m_commands(optionsMap.get<CommandCollection>(COMMAND_KEY)
-                     .value_or(CommandCollection())) {
+                     .value_or(CommandCollection())),
+      m_autocomplete(
+          optionsMap.get<AutoCompleteOption_t>(string(AUTO_COMPLETE_KEY))) {
     auto jobs = optionsMap.get<JobsOption_t>(JOBS_KEY).value_or("auto");
     if(jobs == "auto") {
         m_jobs = thread::hardware_concurrency();
@@ -138,5 +141,10 @@ auto FleetingOptions::getDefault() noexcept -> VariablesMap {
         LOG(error) << "Failed to add commands default option value";
     }
     return defaults;
+}
+
+auto FleetingOptions::getAutoComplete() const noexcept
+    -> const std::optional<AutoCompleteOption_t>& {
+    return m_autocomplete;
 }
 } // namespace execHelper::config
