@@ -42,7 +42,7 @@ auto Valgrind::getVariablesMap(const FleetingOptionsInterface& fleetingOptions)
     if(!defaults.add(COMMAND_LINE_KEY, CommandLineArgs())) {
         LOG(error) << "Failed to add key '" << COMMAND_LINE_KEY << "'";
     }
-    const auto verbosity = fleetingOptions.getVerbosity() ? "yes" : "no";
+    const auto* const verbosity = fleetingOptions.getVerbosity() ? "yes" : "no";
     if(!defaults.add(VERBOSITY_KEY, verbosity)) {
         LOG(error) << "Failed to add key '" << VERBOSITY_KEY << "'";
     }

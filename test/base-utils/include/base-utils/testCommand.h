@@ -30,8 +30,8 @@ class TestCommand {
     size_t size() const noexcept;
     std::string get() const noexcept;
     unsigned int getNbOfStatements() const noexcept;
-    unsigned int getNumberOfStatementExecutions() const
-        noexcept; // Returns the sum of executions of all statements
+    unsigned int getNumberOfStatementExecutions()
+        const noexcept; // Returns the sum of executions of all statements
     void add(std::shared_ptr<Statement> statement) noexcept;
     void resetExecutions() noexcept;
 

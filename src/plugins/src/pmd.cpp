@@ -40,8 +40,8 @@ const czstring<> LANGUAGE_KEY = "language";
 } // namespace
 
 namespace execHelper::plugins {
-auto Pmd::getVariablesMap(const FleetingOptionsInterface& fleetingOptions) const
-    noexcept -> VariablesMap {
+auto Pmd::getVariablesMap(const FleetingOptionsInterface& fleetingOptions)
+    const noexcept -> VariablesMap {
     VariablesMap defaults(PLUGIN_NAME);
     if(!defaults.add(EXEC_KEY, PLUGIN_NAME)) {
         LOG(error) << "Failed to add key '" << EXEC_KEY << "'";

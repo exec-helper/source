@@ -25,8 +25,8 @@ class ShellStub final : public Shell {
         return m_returnCode;
     }
 
-    bool isExecutedSuccessfully(ShellReturnCode returnCode) const
-        noexcept override {
+    bool
+    isExecutedSuccessfully(ShellReturnCode returnCode) const noexcept override {
         return returnCode == RETURN_CODE_SUCCESS;
     }
 

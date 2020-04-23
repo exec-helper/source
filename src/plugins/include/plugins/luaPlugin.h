@@ -19,9 +19,9 @@ class LuaPlugin : public Plugin {
      */
     explicit LuaPlugin(config::Path script) noexcept;
 
-    config::VariablesMap getVariablesMap(
-        const config::FleetingOptionsInterface& fleetingOptions) const
-        noexcept override;
+    config::VariablesMap
+    getVariablesMap(const config::FleetingOptionsInterface& fleetingOptions)
+        const noexcept override;
     bool apply(core::Task task, const config::VariablesMap& config,
                const config::Patterns& patterns) const noexcept override;
 

@@ -63,9 +63,9 @@ class ExecutePlugin : public Plugin {
     ExecutePlugin(const config::CommandCollection& commandsToExecute,
                   const config::Command& initialCommand) noexcept;
 
-    config::VariablesMap getVariablesMap(
-        const config::FleetingOptionsInterface& fleetingOptions) const
-        noexcept override;
+    config::VariablesMap
+    getVariablesMap(const config::FleetingOptionsInterface& fleetingOptions)
+        const noexcept override;
     bool apply(core::Task task, const config::VariablesMap& variables,
                const config::Patterns& patterns) const noexcept override;
 

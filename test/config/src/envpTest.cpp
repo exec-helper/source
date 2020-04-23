@@ -155,7 +155,7 @@ SCENARIO("Test the envp copy and move constructor, assignment operators and "
             assign = envp;
 
             THEN("The values of the pointers must be equal") {
-                const auto copiedEnvp = assign.getEnvp();
+                const auto* copiedEnvp = assign.getEnvp();
                 size_t index = 0U;
                 while(
                     copiedEnvp // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
@@ -172,7 +172,7 @@ SCENARIO("Test the envp copy and move constructor, assignment operators and "
 
             THEN("It must have been a deep copy/the actual pointer must be "
                  "different") {
-                const auto copiedEnvp = assign.getEnvp();
+                const auto* copiedEnvp = assign.getEnvp();
                 size_t index = 0U;
                 while(
                     copiedEnvp // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)

@@ -23,7 +23,7 @@ Envp::Envp(const EnvironmentCollection& env) noexcept {
         string envVarString(envVar.first);
         envVarString.append(DELIMITER).append(envVar.second);
 
-        auto newVar = // NOLINT(cppcoreguidelines-owning-memory)
+        auto* newVar = // NOLINT(cppcoreguidelines-owning-memory)
             new char[envVarString.size() + 1U];
         strncpy(newVar, envVarString.c_str(), envVarString.size() + 1U);
         m_envp.emplace_back(newVar);
@@ -80,7 +80,7 @@ void Envp::deepCopy(const Envp& other) noexcept {
             break;
         }
         size_t length = strlen(otherElement) + 1U;
-        auto newArg = // NOLINT(cppcoreguidelines-owning-memory)
+        auto* newArg = // NOLINT(cppcoreguidelines-owning-memory)
             new char[length];
         strncpy(newArg, otherElement, length);
         m_envp.emplace_back(newArg);

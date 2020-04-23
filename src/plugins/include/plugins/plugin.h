@@ -48,9 +48,9 @@ class Plugin {
      * \param[in] fleetingOptions   The fleeting options to base the defaults on
      * \returns The default constructed variables map
      */
-    [[nodiscard]] virtual config::VariablesMap getVariablesMap(
-        const config::FleetingOptionsInterface& fleetingOptions) const
-        noexcept = 0;
+    [[nodiscard]] virtual config::VariablesMap
+    getVariablesMap(const config::FleetingOptionsInterface& fleetingOptions)
+        const noexcept = 0;
 
     /**
      * Returns the root settings key for the patterns of a plugin
@@ -73,10 +73,9 @@ class Plugin {
      * \returns True    If the application was successful False
      * Otherwise
      */
-    [[nodiscard]] virtual bool apply(core::Task task,
-                                     const config::VariablesMap& variables,
-                                     const config::Patterns& patterns) const
-        noexcept = 0;
+    [[nodiscard]] virtual bool
+    apply(core::Task task, const config::VariablesMap& variables,
+          const config::Patterns& patterns) const noexcept = 0;
 
     /**
      * Returns a summary of the specific plugin

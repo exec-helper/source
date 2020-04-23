@@ -58,7 +58,7 @@ class Config {
                        << std::endl;
             return boost::none;
         }
-        auto& subnode = m_config[key];
+        const auto& subnode = m_config[key];
 
         std::unordered_map<std::string, std::string> result;
         if(!subnode.values()) {
@@ -72,7 +72,7 @@ class Config {
             return result;
         }
 
-        auto& subsubnode = subnode[(*subnode.values()).front()];
+        const auto& subsubnode = subnode[(*subnode.values()).front()];
         if(subsubnode.values()) {
             // Construct a map
             for(const auto& value : values) {

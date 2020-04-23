@@ -19,7 +19,7 @@ Argv::Argv(int argc, const char* const* argv) noexcept {
     m_argv.reserve(argc + 1UL);
     for(const auto& arg : spanArgv) {
         const auto argLength = strnlen(arg, 256U) + 1U;
-        auto newArg = // NOLINT(cppcoreguidelines-owning-memory)
+        auto* newArg = // NOLINT(cppcoreguidelines-owning-memory)
             new char[argLength];
         strncpy(newArg, arg, argLength);
         m_argv.emplace_back(newArg);
@@ -31,7 +31,7 @@ Argv::Argv(const vector<string>& task) noexcept {
     m_argv.reserve(task.size() + 1);
 
     for(const auto& arg : task) {
-        auto newArg = // NOLINT(cppcoreguidelines-owning-memory)
+        auto* newArg = // NOLINT(cppcoreguidelines-owning-memory)
             new char[arg.size() + 1U];
         strncpy(newArg, arg.c_str(), arg.size() + 1U);
         m_argv.emplace_back(newArg);

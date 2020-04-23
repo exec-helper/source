@@ -318,7 +318,7 @@ SCENARIO("Error conditions for the access operator", "[config][argv]") {
         Argv argv(vector<string>({"arg1", "arg2", "arg3"}));
 
         WHEN("We access an out of bounds index") {
-            auto receivedArg = argv[argv.getArgc()];
+            auto* receivedArg = argv[argv.getArgc()];
 
             THEN("We should receive a nullptr") {
                 REQUIRE(receivedArg == nullptr);

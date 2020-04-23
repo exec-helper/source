@@ -152,8 +152,8 @@ class SettingsNode {
      *              boost::none otherwise
      */
     template <typename T>
-    [[nodiscard]] auto get(const SettingsKeys& key, const T& defaultValue) const
-        noexcept -> T {
+    [[nodiscard]] auto get(const SettingsKeys& key,
+                           const T& defaultValue) const noexcept -> T {
         return get<T>(key).value_or(defaultValue);
     }
 

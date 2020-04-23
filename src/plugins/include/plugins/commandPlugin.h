@@ -9,9 +9,9 @@ namespace execHelper::plugins {
  */
 class CommandPlugin : public Plugin {
   public:
-    config::VariablesMap getVariablesMap(
-        const config::FleetingOptionsInterface& fleetingOptions) const
-        noexcept override;
+    config::VariablesMap
+    getVariablesMap(const config::FleetingOptionsInterface& fleetingOptions)
+        const noexcept override;
     bool apply(core::Task task, const config::VariablesMap& variables,
                const config::Patterns& patterns) const noexcept override;
 

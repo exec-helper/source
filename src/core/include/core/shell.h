@@ -37,8 +37,8 @@ class Shell {
      * \returns True    If the return code implies a successful execution
      *          False   Otherwise
      */
-    virtual bool isExecutedSuccessfully(ShellReturnCode returnCode) const
-        noexcept = 0;
+    virtual bool
+    isExecutedSuccessfully(ShellReturnCode returnCode) const noexcept = 0;
 
   protected:
     Shell() = default;

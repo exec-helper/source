@@ -39,8 +39,8 @@ struct JobsValue
         return std::to_string(m_value);
     }
 
-    bool operator==(const execHelper::config::Jobs_t& other) const
-        noexcept override final {
+    bool operator==(
+        const execHelper::config::Jobs_t& other) const noexcept override final {
         if(m_value == 0) {
             return other == std::thread::hardware_concurrency();
         }

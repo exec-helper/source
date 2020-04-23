@@ -99,8 +99,8 @@ auto PosixShell::execute(const Task& task) -> PosixShell::ShellReturnCode {
         process::start_dir = filesystem::path(task.getWorkingDirectory()), env);
 }
 
-auto PosixShell::isExecutedSuccessfully(ShellReturnCode returnCode) const
-    noexcept -> bool {
+auto PosixShell::isExecutedSuccessfully(
+    ShellReturnCode returnCode) const noexcept -> bool {
     return returnCode == POSIX_SUCCESS;
 }
 

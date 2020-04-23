@@ -44,10 +44,9 @@ class OptionInterface {
      * \returns True    if the associated value(s) were successfully extracted
      *          False   otherwise
      */
-    virtual auto
-    toMap(config::VariablesMap& variablesMap,
-          const boost::program_options::variables_map& optionsMap) const
-        noexcept -> bool = 0;
+    virtual auto toMap(config::VariablesMap& variablesMap,
+                       const boost::program_options::variables_map& optionsMap)
+        const noexcept -> bool = 0;
 
     /**
      * Return the associated type value of this options in order to be able to
@@ -94,10 +93,9 @@ class OptionBase : public OptionInterface {
         return m_explanation;
     }
 
-    auto
-    toMap(config::VariablesMap& /*variablesMap*/,
-          const boost::program_options::variables_map& /*optionsMap*/) const
-        noexcept -> bool override {
+    auto toMap(config::VariablesMap& /*variablesMap*/,
+               const boost::program_options::variables_map& /*optionsMap*/)
+        const noexcept -> bool override {
         ensuresMessage(false, "We should not get here: all children should "
                               "implement this function");
         return false;
@@ -154,10 +152,9 @@ template <typename T> class Option : public OptionBase {
 
     virtual ~Option() {}
 
-    virtual auto
-    toMap(config::VariablesMap& variablesMap,
-          const boost::program_options::variables_map& optionsMap) const
-        noexcept -> bool override {
+    virtual auto toMap(config::VariablesMap& variablesMap,
+                       const boost::program_options::variables_map& optionsMap)
+        const noexcept -> bool override {
         try {
             return variablesMap.replace(
                 m_identifyingOption,
@@ -190,10 +187,9 @@ template <> class Option<bool> : public OptionBase {
 
     virtual ~Option() {}
 
-    virtual auto
-    toMap(config::VariablesMap& variablesMap,
-          const boost::program_options::variables_map& optionsMap) const
-        noexcept -> bool override {
+    virtual auto toMap(config::VariablesMap& variablesMap,
+                       const boost::program_options::variables_map& optionsMap)
+        const noexcept -> bool override {
         if(optionsMap.count(m_identifyingOption) > 0) {
             try {
                 if(optionsMap[m_identifyingOption].as<bool>()) {
@@ -231,10 +227,9 @@ template <typename T> class Option<std::vector<T>> : public OptionBase {
 
     virtual ~Option() {}
 
-    virtual auto
-    toMap(config::VariablesMap& variablesMap,
-          const boost::program_options::variables_map& optionsMap) const
-        noexcept -> bool override {
+    virtual auto toMap(config::VariablesMap& variablesMap,
+                       const boost::program_options::variables_map& optionsMap)
+        const noexcept -> bool override {
         try {
             return variablesMap.replace(
                 m_identifyingOption,
@@ -312,9 +307,9 @@ class OptionDescriptions {
                        bool allowUnregistered = false) const noexcept -> bool;
 
   private:
-    void toMap(config::VariablesMap& variablesMap,
-               const boost::program_options::variables_map& optionsMap) const
-        noexcept;
+    void toMap(
+        config::VariablesMap& variablesMap,
+        const boost::program_options::variables_map& optionsMap) const noexcept;
 
     boost::program_options::options_description m_optionDescription;
 
