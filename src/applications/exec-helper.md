@@ -47,6 +47,9 @@ Additional command-line options for exec-helper can be configured in the setting
 # EXIT STATUS
 Exec-helper exits with a status of _zero_ if all commands are executed successfully. When exec-helper is called improperly or its plugins are invoked improperly, exec-helper will exit with a status of _one_. If the executed return commands return an error code, the _exit status of the last executed command_ is returned as the exit status of exec-helper.
 
+# AUTO-COMPLETIONS
+Auto-completions are available for the Bash and Zsh shell. Package maintainers receive the tools to automatically enable these completions. If your installation package does not do this, you can enable them yourself by adding `source <install-directory>/share/exec-helper/completions/init-completion.sh` to your profile or bashrc.
+
 # SEE ALSO
 See [exec-helper-config](@ref exec-helper-config)(5) for information about the configuration file.
 
