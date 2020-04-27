@@ -493,7 +493,7 @@ pages:
         - mv test_coverage/ public/coverage
         - mkdir -p public/docs
         - mv build/gcc/release/install/share/doc/exec-helper/html public/docs/
-        - mv integration public/integration
+        - mkdir public/integration && mv build/gcc/release/system_test_report.html public/integration/index.html
     artifacts:
         paths:
             - public
