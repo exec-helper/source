@@ -35,7 +35,7 @@ FOREACH(FILE ${MAN5_OUTPUT_PAGES})
 ENDFOREACH(FILE)
 
 add_custom_target(docs-man5
-    SOURCES ${MAN5_OUTPUT_GZ}
+    DEPENDS ${MAN5_OUTPUT_GZ}
     COMMENT "Generating MAN5 API documentation..."
     VERBATIM)
 

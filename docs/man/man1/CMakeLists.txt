@@ -35,7 +35,7 @@ FOREACH(FILE ${MAN1_OUTPUT_PAGES})
 ENDFOREACH(FILE)
 
 add_custom_target(docs-man1
-    SOURCES ${MAN1_OUTPUT_GZ}
+    DEPENDS ${MAN1_OUTPUT_GZ}
     COMMENT "Generating MAN1 API documentation..."
     VERBATIM)
 
