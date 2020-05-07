@@ -10,8 +10,7 @@
 #include "config/variablesMap.h"
 #include "core/task.h"
 
-namespace execHelper {
-namespace plugins {
+namespace execHelper::plugins {
 using Jobs = config::Jobs_t;
 
 const gsl::czstring<> JOBS_KEY = "jobs";
@@ -25,7 +24,6 @@ struct JobsLong {
      *
      * @param[in] options       The fleeting options to take into account
      * @param[out] variables    The variables map to add the variables to
-     * @returns void
      */
     static void
     getVariables(config::VariablesMap& variables,
@@ -36,7 +34,6 @@ struct JobsLong {
      *
      * @param[in] variables The variables map to use
      * @param[out] task The task with the given variables map applied to it
-     * @returns void
      */
     inline static void apply(core::Task& task,
                              const config::VariablesMap& variables) noexcept {
@@ -65,7 +62,6 @@ struct JobsShort {
     }
 };
 
-} // namespace plugins
-} // namespace execHelper
+} // namespace execHelper::plugins
 
 #endif /* THREADEDNESS_INCLUDE */

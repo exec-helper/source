@@ -9,8 +9,7 @@
 
 #include "pluginUtils.h"
 
-namespace execHelper {
-namespace plugins {
+namespace execHelper::plugins {
 /**
  * \brief Extends the functionality to add environment variables to the environment of the process to execute, using the _environment_ key in the configuration
  */
@@ -20,7 +19,6 @@ struct AddEnvironment {
      *
      * @param[out] variables    The variables map to add the variables to
      * @param[in] options       The fleeting options to consider
-     * @returns void
      */
     static void
     getVariables(config::VariablesMap& variables,
@@ -33,7 +31,6 @@ struct AddEnvironment {
         task.appendToEnvironment(getEnvironment(variables));
     }
 };
-} // namespace plugins
-} // namespace execHelper
+} // namespace execHelper::plugins
 
 #endif /* ADD_ENVIRONMENT_INCLUDE */
