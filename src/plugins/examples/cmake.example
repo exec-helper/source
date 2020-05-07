@@ -1,0 +1,62 @@
+commands:                       # Define the commands that can be run
+    example: Run the make example
+    clean: Clean the build
+    run: Run the files that were built
+
+patterns:                       # Define the patterns that can be used
+    CMAKE_TARGET:                # Define the EXAMPLE_PATTERN.
+        default-values:         # Only define the default value
+            - hello
+            - world
+
+example:
+    - build                     # Use the make plugin when running the 'example' command
+    - run
+
+build:
+    - generate
+    - build-only
+    - install
+
+generate: cmake
+build-only: cmake
+install: cmake
+
+clean:                          # Use the make plugin when running the 'clean' command
+    - cmake
+
+run:
+    - command-line-command
+
+cmake:
+    environment:                # Define additional environment variables
+        WORLD: "world!"
+    patterns:               # The patterns that are used by the cmake plugin
+        - CMAKE_TARGET
+    source-dir: .           # Set the source dir for all cmake targets that do not further specialize this
+    build-dir: build        # Set the build dir for all cmake targets that do not further specialize this
+
+    generate:               # Specific settings for the 'generate' command
+        mode: generate      # Set the mode
+        defines:            # Set some defines
+            CMAKE_BUILD_MODE: RelWithDebInfo
+        command-line:           # Define additional command line arguments
+            - -Wno-dev          # An example argument passed to make
+
+    build-only:             # Specific settings for the 'build-only' command
+        mode: build         # Set the mode
+
+    install:                # Specific settings for the 'install' command
+        mode: install       # Set the mode
+        prefix: /tmp        # Set the prefix
+        component: runtime  # Limit to installing 'runtime' components
+
+    clean:
+        mode: build
+        target: clean
+
+command-line-command:
+    patterns:
+        - CMAKE_TARGET
+    command-line:
+        - build/{CMAKE_TARGET}

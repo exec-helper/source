@@ -463,6 +463,7 @@ examples:
         - exec-helper --settings-file command-line-command.example example
         - exec-helper --settings-file selector.example example
         - exec-helper --settings-file bootstrap.example example
+        - exec-helper --settings-file cmake.example example
         - exec-helper --settings-file make.example example
         - exec-helper --settings-file ninja.example example
         - exec-helper --settings-file scons.example example

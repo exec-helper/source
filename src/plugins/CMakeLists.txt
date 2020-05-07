@@ -36,6 +36,7 @@ install(TARGETS ${LIBRARY_NAME} DESTINATION ${LIB_DIRECTORY})
 
 set(PLUGINS
     src/scripts/make.lua
+    src/scripts/cmake.lua
     src/scripts/ninja.lua
     src/scripts/bootstrap.lua
     src/scripts/scons.lua
@@ -44,4 +45,4 @@ set(PLUGINS
     src/scripts/selector.lua
     src/scripts/clang-static-analyzer.lua
 )
-install(FILES ${PLUGINS} DESTINATION ${PLUGINS_INSTALL_PREFIX} COMPONENT runtime)
+install(FILES ${PLUGINS} DESTINATION  share/exec-helper/plugins COMPONENT runtime)

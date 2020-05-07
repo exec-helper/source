@@ -1,0 +1,11 @@
+cmake_minimum_required(VERSION 3.0)
+project(cmake-example CXX)
+
+set(SOURCES
+    src/hello.cpp
+    src/world.cpp
+)
+
+add_executable(hello src/hello.cpp)
+add_executable(world src/world.cpp)
+install(TARGETS hello world DESTINATION bin COMPONENT runtime)

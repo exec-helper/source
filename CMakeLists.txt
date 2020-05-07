@@ -73,10 +73,8 @@ endif()
 set(BIN_DIRECTORY ${CMAKE_INSTALL_BINDIR})
 set(LIB_DIRECTORY ${CMAKE_INSTALL_LIBDIR})
 
-# Expose PLUGINS_INSTALL_PATH as a build-time configure option
-set(PLUGINS_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}/share/exec-helper/plugins" CACHE PATH "Installation path for the default plugin files")
-set(ACTUAL_PLUGINS_INSTALL_PREFIX ${PLUGINS_INSTALL_PREFIX} CACHE PATH "The actual installation path for the default plugin files. Useful for packaging systems where the install PREFIX is different from where the plugins will end up eventually")
-message(STATUS "Exporting plugins to ${PLUGINS_INSTALL_PREFIX}")
+set(ACTUAL_PLUGINS_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}/share/exec-helper/plugins" CACHE PATH "The actual installation path for the default plugin files. Useful for packaging systems where the install PREFIX is different from where the plugins will end up eventually")
+message(STATUS "Expecting plugins to ultimately being exported to ${ACTUAL_PLUGINS_INSTALL_PREFIX}")
 
 option(ENABLE_TESTING "Enable building tests" ON)
 

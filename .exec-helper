@@ -1,5 +1,5 @@
 additional-search-paths:
-    - /tmp
+    - src/plugins/src/scripts
 
 patterns:
     COMPILER:
@@ -112,38 +112,38 @@ setup:
 
 init:
     - create-toolchain-file
-    - command-line-command
+    - cmake
 
 init-build:
     - create-toolchain-file
-    - command-line-command
+    - cmake
 
 init-no-system:
     - create-toolchain-file
-    - command-line-command
+    - cmake
 
 init-limited-optimization:
     - create-toolchain-file
-    - command-line-command
+    - cmake
 
 init-windows:
-    - command-line-command
+    - cmake
 
 build:
     - build-only
     - install
 
 build-only:
-    - ninja
+    - cmake
 
 install:
-    - command-line-command
+    - cmake
 
 create-installer:
     - command-line-command
 
 clean:
-    - ninja
+    - cmake
 
 distclean:
     - command-line-command
@@ -174,8 +174,14 @@ format:
     - command-line-command
 
 docs:
-    - ninja
-    - command-line-command
+    - build-docs
+    - install-docs
+
+build-docs:
+    - cmake
+
+install-docs:
+    - cmake
 
 selector:
     analyze:
@@ -190,8 +196,14 @@ asan:
     - command-line-command
 
 changelog:
-    - ninja
-    - command-line-command
+    - build-changelog
+    - install-changelog
+
+build-changelog:
+    - cmake
+
+install-changelog:
+    - cmake
 
 create-toolchain-file:
     - command-line-command
@@ -199,31 +211,133 @@ create-toolchain-file:
 language-server:
     - command-line-command
 
-ninja:
+coverity:
+    - command-line-command
+
+cmake:
     patterns:
         - COMPILER
         - TRIPLET
         - MODE
-    build-dir: build/{TRIPLET}{COMPILER}/{MODE}/build
-    single-threaded: no
+
+    source-dir: .
+    build-dir: "build/{TRIPLET}{COMPILER}/{MODE}/build"
+    prefix: "build/{TRIPLET}{COMPILER}/{MODE}/install"
+    generator: Ninja
+
+    init:
+        mode: generate
+        defines:
+            CMAKE_BUILD_TYPE: "{MODE}"
+            BUILD_HTML_DOCUMENTATION: ON
+            BUILD_XML_DOCUMENTATION: OFF
+            BUILD_MAN_DOCUMENTATION: ON
+            CMAKE_TOOLCHAIN_FILE: "build/{TRIPLET}{COMPILER}/{MODE}/toolchain.cmake"
+            ACTUAL_PLUGINS_INSTALL_PREFIX: "build/{TRIPLET}{COMPILER}/{MODE}/install/share/exec-helper/plugins"
+            TERMINATE_ON_ASSERT_FAILURE: ON
+            CMAKE_EXPORT_COMPILE_COMMANDS: ON
+
+    init-build:
+        mode: generate
+        defines:
+            CMAKE_BUILD_TYPE: "{MODE}"
+            BUILD_HTML_DOCUMENTATION: OFF
+            BUILD_XML_DOCUMENTATION: OFF
+            BUILD_MAN_DOCUMENTATION: OFF
+            CMAKE_TOOLCHAIN_FILE: "build/{TRIPLET}{COMPILER}/{MODE}/toolchain.cmake"
+            ACTUAL_PLUGINS_INSTALL_PREFIX: "build/{TRIPLET}{COMPILER}/{MODE}/install/share/exec-helper/plugins"
+            TERMINATE_ON_ASSERT_FAILURE: ON
+            CMAKE_EXPORT_COMPILE_COMMANDS: ON
+
+    init-no-system:
+        mode: generate
+        defines:
+            CMAKE_BUILD_TYPE: "{MODE}"
+            BUILD_HTML_DOCUMENTATION: OFF
+            BUILD_XML_DOCUMENTATION: OFF
+            BUILD_MAN_DOCUMENTATION: OFF
+            CMAKE_TOOLCHAIN_FILE: "build/{TRIPLET}{COMPILER}/{MODE}/toolchain.cmake"
+            ACTUAL_PLUGINS_INSTALL_PREFIX: "build/{TRIPLET}{COMPILER}/{MODE}/install/share/exec-helper/plugins"
+            TERMINATE_ON_ASSERT_FAILURE: ON
+            CMAKE_EXPORT_COMPILE_COMMANDS: ON
+            USE_SYSTEM_YAML_CPP: OFF
+            USE_SYSTEM_GSL: OFF
+            USE_SYSTEM_LUA: OFF
+            USE_SYSTEM_INTEGRAL: OFF
+            USE_SYSTEM_CATCH: OFF
+            USE_SYSTEM_RAPIDCHECK: OFF
+
+    init-limited-optimization:
+        mode: generate
+        defines:
+            CMAKE_BUILD_TYPE: "{MODE}"
+            BUILD_HTML_DOCUMENTATION: ON
+            BUILD_XML_DOCUMENTATION: OFF
+            BUILD_MAN_DOCUMENTATION: ON
+            CMAKE_TOOLCHAIN_FILE: "build/{TRIPLET}{COMPILER}/{MODE}/toolchain.cmake"
+            ACTUAL_PLUGINS_INSTALL_PREFIX: "build/{TRIPLET}{COMPILER}/{MODE}/install/share/exec-helper/plugins"
+            TERMINATE_ON_ASSERT_FAILURE: ON
+            LIMITED_OPTIMIZATION: ON
+            CMAKE_EXPORT_COMPILE_COMMANDS: ON
+
+    init-windows:
+        mode: generate
+        defines:
+            CMAKE_BUILD_TYPE: "{MODE}"
+            BUILD_HTML_DOCUMENTATION: OFF
+            BUILD_XML_DOCUMENTATION: OFF
+            BUILD_MAN_DOCUMENTATION: OFF
+            ENABLE_TESTING: OFF
+            Boost_USE_STATIC_LIBS: ON
+            BOOST_ROOT: '%cd%/3rdparty/bin/boost'
+            BOOST_INCLUDEDIR: '%cd%/3rdparty/bin/boost/include/boost-1_69'
+            Boost_NO_SYSTEM_PATHS: ON
+            Boost_USE_STATIC_RUNTIME: OFF
+            TERMINATE_ON_ASSERT_FAILURE: ON
+            ACTUAL_PLUGINS_INSTALL_PREFIX: "build/{TRIPLET}{COMPILER}/{MODE}/install/share/exec-helper/plugins"
+
+    build-only:
+        mode: build
+
+    install:
+        mode: install
+        patterns:
+            - COMPILER
+            - TRIPLET
+            - MODE
+            - COMPONENT
+        component: "{COMPONENT}"
+
     clean:
-        command-line:
-            - clean
-    docs:
+        mode: build
+        target: clean
+
+    build-docs:
+        mode: build
         patterns:
             - COMPILER
             - TRIPLET
             - MODE
             - DOCSTYPE
-        command-line:
-            - docs-{DOCSTYPE}
-    changelog:
+        target: "docs-{DOCSTYPE}"
+
+    install-docs:
         patterns:
             - COMPILER
             - TRIPLET
             - MODE
-        command-line:
-            - changelog
+            - DOCSTYPE
+        mode: install
+        component: "docs-{DOCSTYPE}"
+
+    build-changelog:
+        mode: build
+        component:
+        target: changelog
+
+    install-changelog:
+        mode: install
+        component: "changelog"
 
 cppcheck:
     patterns:
@@ -257,44 +371,6 @@ command-line-command:
             - TRIPLET
             - MODE
         command-line: [ ln, -fs, "build/{TRIPLET}{COMPILER}/{MODE}/build/compile_commands.json"]
-    init:
-        patterns:
-            - COMPILER
-            - TRIPLET
-            - MODE
-        command-line:
-            [ cmake, -G, "Ninja", -H., "-Bbuild/{TRIPLET}{COMPILER}/{MODE}/build", "-DCMAKE_INSTALL_PREFIX=build/{TRIPLET}{COMPILER}/{MODE}/install", -DCMAKE_EXPORT_COMPILE_COMMANDS=ON, "-DCMAKE_BUILD_TYPE={MODE}", -DBUILD_HTML_DOCUMENTATION=ON, -DBUILD_XML_DOCUMENTATION=OFF, -DBUILD_MAN_DOCUMENTATION=ON, "-DCMAKE_TOOLCHAIN_FILE=build/{TRIPLET}{COMPILER}/{MODE}/toolchain.cmake", -DTERMINATE_ON_ASSERT_FAILURE=ON]
-
-    init-build:
-        patterns:
-            - COMPILER
-            - TRIPLET
-            - MODE
-        command-line: [ cmake, -G, "Ninja", -H., "-Bbuild/{TRIPLET}{COMPILER}/{MODE}/build", "-DCMAKE_INSTALL_PREFIX=build/{TRIPLET}{COMPILER}/{MODE}/install", -DCMAKE_EXPORT_COMPILE_COMMANDS=ON, "-DCMAKE_BUILD_TYPE={MODE}", -DBUILD_HTML_DOCUMENTATION=OFF, -DBUILD_XML_DOCUMENTATION=OFF, -DBUILD_MAN_DOCUMENTATION=OFF, "-DCMAKE_TOOLCHAIN_FILE=build/{TRIPLET}{COMPILER}/{MODE}/toolchain.cmake", -DTERMINATE_ON_ASSERT_FAILURE=ON]
-
-    init-no-system:
-        patterns:
-            - COMPILER
-            - TRIPLET
-            - MODE
-        command-line:
-            [ cmake, -G, "Ninja", -H., "-Bbuild/{TRIPLET}{COMPILER}/{MODE}/build", "-DCMAKE_INSTALL_PREFIX=build/{TRIPLET}{COMPILER}/{MODE}/install", -DCMAKE_EXPORT_COMPILE_COMMANDS=ON, "-DCMAKE_BUILD_TYPE={MODE}", -DBUILD_HTML_DOCUMENTATION=OFF, -DBUILD_XML_DOCUMENTATION=OFF, -DBUILD_MAN_DOCUMENTATION=OFF, "-DCMAKE_TOOLCHAIN_FILE=build/{TRIPLET}{COMPILER}/{MODE}/toolchain.cmake", -DTERMINATE_ON_ASSERT_FAILURE=ON, -DUSE_SYSTEM_YAML_CPP=OFF, -DUSE_SYSTEM_CATCH=OFF, -DUSE_SYSTEM_GSL=OFF, -DUSE_SYSTEM_RAPIDCHECK=OFF, -DUSE_SYSTEM_LUA=OFF, -DUSE_SYSTEM_INTEGRAL=OFF]
-
-    init-limited-optimization:
-        patterns:
-            - COMPILER
-            - TRIPLET
-            - MODE
-        command-line:
-            [ cmake, -G, "Ninja", -H., "-Bbuild/{TRIPLET}{COMPILER}/{MODE}/build", "-DCMAKE_INSTALL_PREFIX=build/{TRIPLET}{COMPILER}/{MODE}/install", -DCMAKE_EXPORT_COMPILE_COMMANDS=ON, "-DCMAKE_BUILD_TYPE=RelWithDebInfo", -DBUILD_HTML_DOCUMENTATION=ON, -DBUILD_XML_DOCUMENTATION=OFF, -DBUILD_MAN_DOCUMENTATION=ON, "-DCMAKE_TOOLCHAIN_FILE=build/{TRIPLET}{COMPILER}/{MODE}/toolchain.cmake", -DTERMINATE_ON_ASSERT_FAILURE=ON]
-
-    init-windows:
-        patterns:
-            - COMPILER
-            - TRIPLET
-            - MODE
-            - EH_WORKING_DIR
-        command-line: [cmake, -G, "Ninja", "-H.", "-Bbuild/{TRIPLET}{COMPILER}/{MODE}/build", "-DCMAKE_INSTALL_PREFIX=build/{COMPILER}/{MODE}/install", "-DCMAKE_BUILD_TYPE={MODE}", -DBUILD_HTML_DOCUMENTATION=OFF, -DBUILD_XML_DOCUMENTATION=OFF, -DBUILD_MAN_DOCUMENTATION=OFF, -DTERMINATE_ON_ASSERT_FAILURE=ON, "-DBOOST_ROOT=%cd%/3rdparty/bin/boost", "-DBOOST_INCLUDEDIR=%cd%/3rdparty/bin/boost/include/boost-1_69", -DBoost_USE_STATIC_LIBS=ON, -DBUILD_MAN_DOCUMENTATION=OFF, -DENABLE_TESTING=OFF, -DBoost_NO_SYSTEM_PATHS=ON, -DBoost_USE_STATIC_RUNTIME=OFF]
 
     create-toolchain-file:
         patterns:
@@ -309,25 +385,21 @@ command-line-command:
             - replace-triplet: [ sed, -i, 's%@TRIPLET@%{TRIPLET}%g', "build/{TRIPLET}{COMPILER}/{MODE}/toolchain.cmake"]
             - replace-compiler-family: [ sed, -i, 's%@COMPILER_FAMILY@%{COMPILER}%g', "build/{TRIPLET}{COMPILER}/{MODE}/toolchain.cmake"]
             - replace-sysroot: [ sed, -i, 's%@SYSROOT@%{SYSROOT}%g', "build/{TRIPLET}{COMPILER}/{MODE}/toolchain.cmake"]
+
     distclean:
         patterns:
             - COMPILER
             - TRIPLET
             - MODE
         command-line: [ rm, -rf, "build/{TRIPLET}{COMPILER}/{MODE}"]
-    install:
-        patterns:
-            - COMPILER
-            - TRIPLET
-            - MODE
-            - COMPONENT
-        command-line: [ cmake, "-DCOMPONENT={COMPONENT}", -P, "build/{TRIPLET}{COMPILER}/{MODE}/build/cmake_install.cmake"]
+
     create-installer:
         patterns:
             - COMPILER
             - TRIPLET
             - MODE
 #        command-line: [ C:\Program Files (x86)\NSIS\Bin\makensis.exe, "build\{TRIPLET}{COMPILER}\{MODE}\install\bin"]
+
     unittest:
         patterns:
             - COMPILER
@@ -356,14 +428,17 @@ command-line-command:
             CXXFLAGS: -g --coverage -fprofile-arcs -ftest-coverage
             LDFLAGS: -g --coverage -fprofile-arcs -ftest-coverage
         command-line: [ exec-helper, init-build, build, analyze, --analyze, lcov, --compiler, gcc, --mode, coverage, --run-target, unittest]
+
     undefined-behaviour:
         environment:
             CXXFLAGS: -g -fno-omit-frame-pointer -fno-sanitize-recover=undefined
             LDFLAGS: -g -fno-omit-frame-pointer -fno-sanitize-recover=undefined
             UBSAN_OPTIONS: "suppresions=${PWD}/suppressions/ubsan.blacklist"
         command-line: [ exec-helper, init-limited-optimization, build, run-test, --compiler, clang, --mode, undefined-behaviour, --run-target, unittest, integration]
+
     memory-check:
         command-line: [ exec-helper, analyze, --analyze, valgrind, --run-target, unittest, --compiler, gcc, --mode, debug]
+
     asan:
         environment:
             ASAN_OPTIONS: "check_initialization_order=1 print_stacktrace=1"
@@ -372,13 +447,7 @@ command-line-command:
             - overwrite-init: [ cmake, -H., "-Bbuild/clang/asan/build", "-DSANITIZER=address,leak"]
             - build: [ exec-helper, build, --compiler, clang, --mode, asan, --run-target, unittest]
             - run: [ exec-helper, unittest, --compiler, clang, --mode, asan, --run-target, unittest]
-    docs:
-        patterns:
-            - COMPILER
-            - TRIPLET
-            - MODE
-            - DOCSTYPE
-        command-line: [ cmake, "-DCOMPONENT=docs-{DOCSTYPE}", -P, "build/{TRIPLET}{COMPILER}/{MODE}/build/cmake_install.cmake"]
+
     coverity:
         patterns:
             - COMPILER
@@ -390,6 +459,7 @@ command-line-command:
             - cov-build: [ cov-build, --dir, cov-int, exec-helper, build-only, --compiler, "{TRIPLET}{COMPILER}", --mode, "{MODE}" ]
             - archive: [tar, --create, --auto-compress, --file, "{COVERITY_ARCHIVE_NAME}", cov-int]
             - upload: [ echo, "{COVERITY_ARCHIVE_NAME} is now ready to get uploaded to coverity scan"]
+
     format:
         patterns:
             - SOURCE_TYPE
@@ -397,12 +467,6 @@ command-line-command:
         command-line:
             - rewrite-files: [ clang-format, -i, '$(find "{SOURCE_TYPE}/{MODULE}" -name "*.cpp" -o -name "*.h")']
             - check-rewritten: [ git, diff-index, --quiet, HEAD, --]
-    changelog:
-        patterns:
-            - COMPILER
-            - TRIPLET
-            - MODE
-        command-line: [ cmake, "-DCOMPONENT=changelog", -P, "build/{TRIPLET}{COMPILER}/{MODE}/build/cmake_install.cmake"]
 
     language-server:
         command-line: [ clangd]
@@ -457,6 +521,3 @@ clang-tidy:
         - MODULE
     sources:
         - "{SOURCE_TYPE}/{MODULE}/src/*.cpp"
-
-coverity:
-    - command-line-command
