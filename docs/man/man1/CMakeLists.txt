@@ -10,35 +10,26 @@ set(REFERENCED_PAGES ${MAN5_SOURCES})      # Reference these pages in order to a
 PREPEND(MAN1_SOURCES_FULL_PATH ${PROJECT_SOURCE_DIR} ${MAN1_SOURCES} ${REFERENCED_PAGES})
 string (REPLACE ";" " " MAN_SOURCES "${MAN1_SOURCES_FULL_PATH}")    # CMAKE separates multiple values with a ';', while Doxygen uses ' '
 
-# Create the output paths
+# Create temporary intermediate output paths
 STRIP_PATHS(MAN1_STRIPPED ${MAN1_SOURCES})
-PREPEND(MAN1_OUTPUT_TMP ${CMAKE_CURRENT_BINARY_DIR} ${MAN1_STRIPPED})
-string (REPLACE ".md" "${MAN1_EXTENSION}" MAN1_OUTPUT_PAGES "${MAN1_OUTPUT_TMP}")
+list(TRANSFORM MAN1_STRIPPED REPLACE "\.md$" "${MAN1_EXTENSION}" OUTPUT_VARIABLE MAN1_OUTPUT_TMP)
 
 # Create the gzipped output paths
-string(REPLACE "${MAN1_EXTENSION}" "${MAN1_EXTENSION}.gz" MAN1_OUTPUT_GZ "${MAN1_OUTPUT_PAGES}")
+list(TRANSFORM MAN1_STRIPPED REPLACE "\.md$" "${MAN1_EXTENSION}.gz" OUTPUT_VARIABLE MAN1_OUTPUT_GZ)
+PREPEND(MAN1_OUTPUT_FULL_PATH ${CMAKE_CURRENT_BINARY_DIR} ${MAN1_OUTPUT_GZ})
 
 configure_file(${doxyfile_in} ${doxyfile} @ONLY)
 
-add_custom_command(OUTPUT ${MAN1_OUTPUT_PAGES}
-    COMMAND ${DOXYGEN_EXECUTABLE} ${doxyfile}
-    MAIN_DEPENDENCY ${doxyfile_in}
-    DEPENDS ${MAN1_SOURCES_FULL_PATH}
-    VERBATIM)
-
-FOREACH(FILE ${MAN1_OUTPUT_PAGES})
-    add_custom_command(OUTPUT ${FILE}.gz
-        COMMAND ${Gzip} --force ${FILE}
-        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-        DEPENDS ${FILE}
-        VERBATIM)
-ENDFOREACH(FILE)
-
 add_custom_target(docs-man1
-    DEPENDS ${MAN1_OUTPUT_GZ}
+    ${DOXYGEN_EXECUTABLE} ${doxyfile}
+    COMMAND ${Gzip} --force ${MAN1_OUTPUT_TMP}
+    SOURCES ${doxyfile_in}
+    BYPRODUCTS ${MAN1_OUTPUT_GZ}
     COMMENT "Generating MAN1 API documentation..."
-    VERBATIM)
+    VERBATIM
+)
 
-install(FILES ${MAN1_OUTPUT_GZ} DESTINATION share/man/man1 COMPONENT docs-man)
-install(FILES ${MAN1_OUTPUT_GZ} DESTINATION share/man/man1 RENAME eh.1.gz COMPONENT docs-man)
+install(FILES ${MAN1_OUTPUT_FULL_PATH} DESTINATION share/man/man1 COMPONENT docs-man)
+install(FILES ${MAN1_OUTPUT_FULL_PATH} DESTINATION share/man/man1 RENAME eh.1.gz COMPONENT docs-man)
+
 add_dependencies(docs-man docs-man1)
