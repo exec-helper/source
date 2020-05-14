@@ -3,9 +3,7 @@
 #include <cstring>
 #include <string>
 
-#include <gsl/pointers>
-#include <gsl/span>
-#include <gsl/string_span>
+#include <gsl/gsl>
 
 #include "log/assertions.h"
 

@@ -4,8 +4,7 @@
 #include <iostream>
 #include <utility>
 
-#include <gsl/pointers>
-#include <gsl/string_span>
+#include <gsl/gsl>
 
 #include "config/fleetingOptionsInterface.h"
 #include "config/pattern.h"
