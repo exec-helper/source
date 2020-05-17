@@ -1,6 +1,8 @@
 #include "argv.h"
 
 #include <cstring>
+#include <iostream>
+#include <string_view>
 
 #include <gsl/span>
 #include <gsl/string_span>
@@ -12,6 +14,8 @@ using std::vector;
 
 using gsl::czstring;
 using gsl::span;
+
+using namespace std::literals;
 
 namespace execHelper::config {
 Argv::Argv(int argc, const char* const* argv) noexcept {
@@ -115,7 +119,7 @@ auto operator<<(std::ostream& os, const Argv& argv) noexcept -> std::ostream& {
     bool firstIteration = true;
     for(const auto& arg : args) {
         if(!firstIteration) {
-            os << ", ";
+            os << ", "sv;
         } else {
             firstIteration = false;
         }

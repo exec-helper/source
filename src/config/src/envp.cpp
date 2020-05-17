@@ -1,7 +1,9 @@
 #include "envp.h"
 
 #include <cstring>
+#include <iostream>
 #include <string>
+#include <string_view>
 
 #include <gsl/gsl>
 
@@ -12,6 +14,8 @@ using std::string;
 using gsl::czstring;
 using gsl::owner;
 using gsl::span;
+
+using namespace std::literals;
 
 namespace execHelper::config {
 Envp::Envp(const EnvironmentCollection& env) noexcept {
@@ -91,7 +95,7 @@ auto operator<<(std::ostream& os, const Envp& envp) noexcept -> std::ostream& {
     bool firstIteration = true;
     for(const auto& env : envs) {
         if(!firstIteration) {
-            os << ", ";
+            os << ", "sv;
         } else {
             firstIteration = false;
         }
