@@ -1,13 +1,7 @@
-pattern_key = one(config['patterns'])
+targets = list(config['targets'])
 
-if pattern_key == nil then
-    input_error('Undefined selector pattern: you must define a pattern to select using the "patterns" keyword.')
+if targets == nil then
+    input_error('Undefined selector target: you must define at least one target to select using the "targets" keyword.')
 end
 
-values = patterns[pattern_key]
-
-if values == nil then
-    input_error('Selector: Inactive or unknown select pattern used')
-end
-
-run_target(task, values)
+run_target(task, targets)

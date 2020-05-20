@@ -18,7 +18,9 @@ example:                            # Use the selector for the example command
     - selector
 
 selector:
-    patterns: SELECTOR              # Tell the selector plugin to use the SELECTOR pattern for deciding which paths to trigger
+    patterns:
+        - SELECTOR              # Tell the selector plugin to use the SELECTOR pattern for deciding which paths to trigger
+    targets: [ "{SELECTOR}" ]   # Execute the target when the selector is activated. The target is a permutation of the values in the registered patterns
 
 example1:                           # Define the 'example1' path
     - command-line-command

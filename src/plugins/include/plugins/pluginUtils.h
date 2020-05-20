@@ -42,7 +42,12 @@ config::EnvironmentCollection replacePatternsInEnvironment(
 core::Task replacePatternCombinations(
     const core::Task& task,
     const config::PatternCombinations& patternCombinations) noexcept;
-std::string toString(const config::PatternKeys& values) noexcept;
+
+auto replacePatternCombinations(
+    std::string element,
+    const config::PatternCombinations& patternCombinations) noexcept
+    -> std::string;
+auto toString(const config::PatternKeys& values) noexcept -> std::string;
 } // namespace plugins
 } // namespace execHelper
 

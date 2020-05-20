@@ -3,13 +3,15 @@ The selector plugin  {#exec-helper-plugins-selector}
 \brief An overview of the selector plugin configuration settings
 
 # DESCRIPTION
-The selector plugin is used for selecting a configuration path based on the value(s) of a pattern.
+The selector plugin is used for selecting a configuration path based on the value(s) of a target, typically one from a pattern value.
 
 # MANDATORY SETTINGS
 The configuration of the command-line-command must contain the following settings:
 
-## patterns
-The pattern keys to use for selecting the configuration path. The runtime value(s) associated with the pattern key must resolve either to an existing (configured) plugin or a configured command.
+## targets
+The targets to select on. Note that if patterns are used in this list, they must be listed using the _patterns_ configuration, as is the case for every plugin.
+
+The runtime value(s) associated with the pattern key must resolve either to an existing (configured) plugin or a configured command.
 
 # OPTIONAL SETTINGS
 There are no optional settings for the selector plugin.

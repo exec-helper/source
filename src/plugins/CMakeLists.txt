@@ -37,6 +37,7 @@ install(TARGETS ${LIBRARY_NAME} DESTINATION ${LIB_DIRECTORY})
 set(PLUGINS
     src/scripts/make.lua
     src/scripts/cmake.lua
+    src/scripts/docker.lua
     src/scripts/ninja.lua
     src/scripts/bootstrap.lua
     src/scripts/scons.lua

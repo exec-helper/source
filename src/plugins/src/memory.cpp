@@ -14,6 +14,8 @@ using execHelper::config::Patterns;
 using execHelper::config::VariablesMap;
 using execHelper::core::Task;
 
+using namespace std::string_literals;
+
 namespace {
 const czstring<> PLUGIN_NAME = "memory";
 } // namespace
@@ -69,4 +71,33 @@ void MemoryHandler::reset() noexcept { Memory::reset(); }
 void MemoryHandler::setReturnCode(bool returnCode) noexcept {
     Memory::setReturnCode(returnCode);
 }
+
+SpecialMemory::SpecialMemory(bool returnCode) noexcept
+    : m_returnCode(returnCode) {
+    ;
+}
+
+auto SpecialMemory::getVariablesMap(
+    const config::FleetingOptionsInterface& /*fleetingOptions*/) const noexcept
+    -> config::VariablesMap {
+    return VariablesMap(PLUGIN_NAME);
+}
+
+auto SpecialMemory::apply(core::Task task,
+                          const config::VariablesMap& variables,
+                          const config::Patterns& patterns) const noexcept
+    -> bool {
+    Memory_t newElement(task, variables, patterns);
+    m_executions.emplace_back(newElement);
+    return m_returnCode;
+}
+
+auto SpecialMemory::summary() const noexcept -> string {
+    return "SpecialMemory (internal)";
+}
+
+auto SpecialMemory::getExecutions() noexcept -> const Memories& {
+    return m_executions;
+}
+
 } // namespace execHelper::plugins

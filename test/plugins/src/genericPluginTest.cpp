@@ -1,6 +1,7 @@
 /**
  *@file Tests properties that each plugin should have
  */
+#include <catch.hpp>
 #include <filesystem>
 
 #include "unittest/catch.h"
@@ -83,6 +84,21 @@ SCENARIO("Test the pattern keyword for each plugin") {
     REQUIRE(Plugin::getPatternsKey() == "patterns");
 }
 
+SCENARIO("Check that all plugins are found") {
+    GIVEN("The expected number of plugins") {
+        constexpr auto expectedNbOfPlugins = 15U;
+
+        WHEN("We request all plugins") {
+            const auto plugins = getPlugins();
+
+            THEN("The number of plugins must equal the expected number of "
+                 "plugins") {
+                REQUIRE(plugins.size() == expectedNbOfPlugins);
+            }
+        }
+    }
+}
+
 SCENARIO("Every call to a plugin must lead to at least one registered task") {
     FleetingOptionsStub options;
     options.m_commands.push_back("memory");
@@ -113,7 +129,8 @@ SCENARIO("Every call to a plugin must lead to at least one registered task") {
             REQUIRE(variablesMap.add("command-line", "blaat"));
             REQUIRE(variablesMap.add("build-command", "memory"));
             REQUIRE(variablesMap.add("run-command", "memory"));
-            REQUIRE(variablesMap.add("patterns", std::string(patternKey)));
+            REQUIRE(variablesMap.add("container", "blaat"));
+            REQUIRE(variablesMap.add("targets", "memory"));
 
             THEN_WHEN("We apply the plugin") {
                 bool result =
@@ -163,7 +180,8 @@ SCENARIO("A plugin must not alter the arguments before a given task") {
             REQUIRE(variablesMap.add("command-line", "blaat"));
             REQUIRE(variablesMap.add("build-command", "memory"));
             REQUIRE(variablesMap.add("run-command", "memory"));
-            REQUIRE(variablesMap.add("patterns", std::string(patternKey)));
+            REQUIRE(variablesMap.add("container", "blaat"));
+            REQUIRE(variablesMap.add("targets", "memory"));
 
             MemoryHandler memory;
 

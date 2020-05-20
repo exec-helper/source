@@ -40,6 +40,8 @@ set(MAN5_SOURCES    src/config/docs/exec-helper-config.md
                 src/plugins/docs/exec-helper-plugins-memory.md
                 src/plugins/docs/exec-helper-plugins-scons.md
                 src/plugins/docs/exec-helper-plugins-make.md
+                src/plugins/docs/exec-helper-plugins-cmake.md
+                src/plugins/docs/exec-helper-plugins-docker.md
                 src/plugins/docs/exec-helper-plugins-clang-tidy.md
                 src/plugins/docs/exec-helper-plugins-command-line-command.md
                 src/plugins/docs/exec-helper-plugins-clang-static-analyzer.md

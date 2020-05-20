@@ -27,6 +27,7 @@
 
 using std::ifstream;
 using std::make_pair;
+using std::move;
 using std::pair;
 using std::string;
 using std::to_string;
@@ -213,17 +214,30 @@ auto LuaPlugin::apply(Task task, const VariablesMap& config,
         });
         lua.writeFunction<bool(const Task&, const vector<pair<int, string>>&)>(
             "run_target",
-            [](const Task& task, const vector<pair<int, string>>& commands) {
-                CommandCollection commandsToExecute;
-                commandsToExecute.reserve(commands.size());
+            [&patterns](const Task& task,
+                        const vector<pair<int, string>>& commands) {
+                for(const auto& combination : makePatternPermutator(patterns)) {
+                    CommandCollection commandsToExecute;
+                    commandsToExecute.reserve(commands.size());
 
-                transform(commands.begin(), commands.end(),
-                          back_inserter(commandsToExecute),
-                          [](const auto& command) { return command.second; });
+                    transform(commands.begin(), commands.end(),
+                              back_inserter(commandsToExecute),
+                              [&combination](const auto& command) {
+                                  return replacePatternCombinations(
+                                      command.second, combination);
+                              });
 
-                ExecutePlugin executePlugin(commandsToExecute);
-                return executePlugin.apply(task, VariablesMap("subtask"),
-                                           Patterns());
+                    ExecutePlugin executePlugin(commandsToExecute);
+
+                    core::Task newTask =
+                        replacePatternCombinations(task, combination);
+                    if(!executePlugin.apply(move(newTask),
+                                            VariablesMap("subtask"),
+                                            Patterns())) {
+                        return false;
+                    }
+                }
+                return true;
             });
 
         lua.writeFunction<optional<string>(

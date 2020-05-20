@@ -22,6 +22,9 @@ The _memory plugin_ remembers all calls and state the plugin was called with. Th
 ## selector
 The _selector plugin_ is used for selecting certain configuration paths based on the value of a pattern. See [exec-helper-plugins-selector](@ref exec-helper-plugins-selector)(5).
 
+## docker
+The _docker plugin_ is used for running commands inside a Docker container. See [exec-helper-plugins-docker](@ref exec-helper-plugins-docker)(5).
+
 # BUILD PLUGINS
 ## bootstrap
 The _bootstrap plugin_ is used for calling bootstrap scripts, typically used as a step in a build chain. See [exec-helper-plugins-bootstrap](@ref exec-helper-plugins-bootstrap)(5).
@@ -31,6 +34,9 @@ The _make plugin_ is used for running the make build system. See [exec-helper-pl
 
 ## scons
 The _scons plugin_ is used for running the scons build system. See [exec-helper-plugins-scons](@ref exec-helper-plugins-scons)(5).
+
+## cmake
+The _cmake plugin_ is used for running the CMake build system. See [exec-helper-plugins-cmake](@ref exec-helper-plugins-cmake)(5).
 
 # ANALYSIS PLUGINS
 ## clang-static-analyzer

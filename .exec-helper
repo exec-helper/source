@@ -1,6 +1,3 @@
-additional-search-paths:
-    - src/plugins/src/scripts
-
 patterns:
     COMPILER:
         default-values:
@@ -185,9 +182,13 @@ install-docs:
 
 selector:
     analyze:
-        patterns: ANALYZE
+        patterns:
+            - ANALYZE
+        targets: ["{ANALYZE}"]
     run-test:
-        patterns: RUNTARGET
+        patterns:
+            - RUNTARGET
+        targets: [ "{RUNTARGET}" ]
 
 undefined-behaviour:
     - command-line-command

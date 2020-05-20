@@ -135,6 +135,43 @@ class MemoryHandler : public Memory {
      */
     static void setReturnCode(bool returnCode) noexcept;
 };
+
+/**
+ * \brief   Plugin for remembering later on what has been executed. Mainly
+ * useful for testing purposes.
+ */
+class SpecialMemory : public Plugin {
+  public:
+    using Memories = std::vector<Memory_t>; //!< brief A collection of memories
+
+    SpecialMemory() : SpecialMemory(true) {}
+
+    /**
+     * \param[in]   returnCode  The code to return on invocation
+     */
+    explicit SpecialMemory(bool returnCode) noexcept;
+
+    auto getVariablesMap(
+        const config::FleetingOptionsInterface& fleetingOptions) const noexcept
+        -> config::VariablesMap override;
+    auto apply(core::Task task, const config::VariablesMap& variables,
+               const config::Patterns& patterns) const noexcept
+        -> bool override;
+
+    auto summary() const noexcept -> std::string override;
+
+    /**
+     * Getter for the executions that were remembered
+     *
+     * \returns A collection of memories
+     */
+    auto getExecutions() noexcept -> const Memories&;
+
+  private:
+    const bool m_returnCode;
+    mutable Memories
+        m_executions; // We are keeping state in this plugin, while this is not allowed in 'regular' plugins
+};
 } // namespace plugins
 } // namespace execHelper
 

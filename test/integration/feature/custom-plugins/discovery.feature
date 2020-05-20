@@ -23,9 +23,11 @@ Feature: Discover custom plugins
         | bootstrap             | Lua plugin for module \S*/plugins/bootstrap.lua            |
         | clang-static-analyzer | Lua plugin for module \S*/plugins/clang-static-analyzer.lua|
         | clang-tidy            | Lua plugin for module \S*/plugins/clang-tidy.lua           |
+        | cmake                 | Lua plugin for module \S*/plugins/cmake.lua                |
         | command-line-command  | Command-line-command \(internal\)                          |
         | commands              | Command \(internal\)                                       |
         | cppcheck              | Lua plugin for module \S*/plugins/cppcheck.lua             |
+        | docker                | Lua plugin for module \S*/plugins/docker.lua               |
         | lcov                  | Lcov \(internal\)                                          |
         | memory                | Memory \(internal\)                                        |
         | make                  | Lua plugin for module \S*/plugins/make.lua                 |

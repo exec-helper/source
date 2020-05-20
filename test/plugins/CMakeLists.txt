@@ -18,6 +18,7 @@ set(SRCS
         src/lcovTest.cpp
         src/ninjaTest.cpp
         src/cmakeTest.cpp
+        src/dockerTest.cpp
    )
 
 set(DEPENDENCIES

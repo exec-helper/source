@@ -18,29 +18,30 @@
 namespace rc {
 
 struct BoolValue : public execHelper::test::utils::TestValue<bool> {
-    BoolValue(bool option) noexcept
+    explicit BoolValue(bool option) noexcept
         : execHelper::test::utils::TestValue<bool>(option) {}
 
-    std::string config() const noexcept override final {
+    [[nodiscard]] auto config() const noexcept -> std::string final {
         return m_value ? "yes" : "no";
     }
 };
 
 struct JobsValue
     : public execHelper::test::utils::TestValue<execHelper::config::Jobs_t> {
-    JobsValue(execHelper::config::Jobs_t option) noexcept
+    explicit JobsValue(execHelper::config::Jobs_t option) noexcept
         : execHelper::test::utils::TestValue<execHelper::config::Jobs_t>(
               option) {}
 
-    std::string config() const noexcept override {
+    [[nodiscard]] auto config() const noexcept -> std::string override {
         if(m_value == 0) {
             return "auto";
         }
         return std::to_string(m_value);
     }
 
-    bool operator==(
-        const execHelper::config::Jobs_t& other) const noexcept override final {
+    [[nodiscard]] auto
+    operator==(const execHelper::config::Jobs_t& other) const noexcept
+        -> bool final {
         if(m_value == 0) {
             return other == std::thread::hardware_concurrency();
         }
@@ -49,63 +50,63 @@ struct JobsValue
 };
 
 struct HelpValue : public BoolValue {
-    HelpValue(execHelper::config::HelpOption_t option) noexcept
+    explicit HelpValue(execHelper::config::HelpOption_t option) noexcept
         : BoolValue(option) {}
 };
 
 struct VersionValue : public BoolValue {
-    VersionValue(bool option) noexcept : BoolValue(option) {}
+    explicit VersionValue(bool option) noexcept : BoolValue(option) {}
 };
 
 struct VerbosityValue : public BoolValue {
-    VerbosityValue(bool option) noexcept : BoolValue(option) {}
+    explicit VerbosityValue(bool option) noexcept : BoolValue(option) {}
 };
 
 struct DryRunValue : public BoolValue {
-    DryRunValue(bool option) noexcept : BoolValue(option) {}
+    explicit DryRunValue(bool option) noexcept : BoolValue(option) {}
 };
 
 struct ListPluginsValue : public BoolValue {
-    ListPluginsValue(bool option) noexcept : BoolValue(option) {}
+    explicit ListPluginsValue(bool option) noexcept : BoolValue(option) {}
 };
 
 using AppendSearchPathValue = execHelper::config::Paths;
 
 template <> struct Arbitrary<JobsValue> {
-    static Gen<JobsValue> arbitrary() {
+    static auto arbitrary() {
         return gen::construct<JobsValue>(gen::arbitrary<JobsValue::Value>());
     };
 };
 
 template <> struct Arbitrary<HelpValue> {
-    static Gen<HelpValue> arbitrary() {
+    static auto arbitrary() {
         return gen::construct<HelpValue>(gen::arbitrary<HelpValue::Value>());
     };
 };
 
 template <> struct Arbitrary<VersionValue> {
-    static Gen<VersionValue> arbitrary() {
+    static auto arbitrary() {
         return gen::construct<VersionValue>(
             gen::arbitrary<VersionValue::Value>());
     };
 };
 
 template <> struct Arbitrary<VerbosityValue> {
-    static Gen<VerbosityValue> arbitrary() {
+    static auto arbitrary() {
         return gen::construct<VerbosityValue>(
             gen::arbitrary<VerbosityValue::Value>());
     };
 };
 
 template <> struct Arbitrary<DryRunValue> {
-    static Gen<DryRunValue> arbitrary() {
+    static auto arbitrary() {
         return gen::construct<DryRunValue>(
             gen::arbitrary<DryRunValue::Value>());
     };
 };
 
 template <> struct Arbitrary<ListPluginsValue> {
-    static Gen<ListPluginsValue> arbitrary() {
+    static auto arbitrary() {
         return gen::construct<ListPluginsValue>(
             gen::arbitrary<ListPluginsValue::Value>());
     };
@@ -113,7 +114,7 @@ template <> struct Arbitrary<ListPluginsValue> {
 
 // TODO: further extend this. Currently generates settings nodes of exactly 2 levels deep + root level
 template <> struct Arbitrary<execHelper::config::SettingsNode> {
-    static Gen<execHelper::config::SettingsNode> arbitrary() {
+    static auto arbitrary() {
         const auto levelSize = *gen::inRange(0U, 1000U);
         return gen::apply(
             [](const std::string& root,
@@ -137,10 +138,12 @@ template <> struct Arbitrary<execHelper::config::SettingsNode> {
 };
 
 template <> struct Arbitrary<execHelper::config::Pattern> {
-    static Gen<execHelper::config::Pattern> arbitrary() {
-        return gen::construct<execHelper::config::Pattern>(
-            gen::arbitrary<std::string>(),
-            gen::arbitrary<std::vector<std::string>>());
+    static auto arbitrary() {
+        auto key = gen::nonEmpty(gen::string<std::string>());
+        auto values = gen::container<std::vector<std::string>>(
+            gen::nonEmpty(gen::string<std::string>()));
+        //auto values = gen::just<std::vector<std::string>>({"Blaat1", "Blaat2"});
+        return gen::construct<execHelper::config::Pattern>(key, values);
     };
 };
 } // namespace rc

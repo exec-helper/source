@@ -81,20 +81,26 @@ auto replacePatternCombinations(
     replacedTask.setEnvironment(replacePatternsInEnvironment(
         task.getEnvironment(), patternCombinations));
 
-    string newWorkingDir = task.getWorkingDirectory().string();
-    for(const auto& pattern : patternCombinations) {
-        newWorkingDir =
-            replacePatterns(newWorkingDir, pattern.first, pattern.second);
-    }
-    replacedTask.setWorkingDirectory(newWorkingDir);
+    auto newWorkingDir = replacePatternCombinations(
+        task.getWorkingDirectory().string(), patternCombinations);
+    replacedTask.setWorkingDirectory(move(newWorkingDir));
 
     for(auto argument : task.getTask()) {
-        for(const auto& pattern : patternCombinations) {
-            argument = replacePatterns(argument, pattern.first, pattern.second);
-        }
-        replacedTask.append(argument);
+        argument = replacePatternCombinations(argument, patternCombinations);
+        replacedTask.append(move(argument));
     }
     return replacedTask;
+}
+
+auto replacePatternCombinations(
+    std::string element,
+    const config::PatternCombinations& patternCombinations) noexcept
+    -> std::string {
+
+    for(const auto& pattern : patternCombinations) {
+        element = replacePatterns(element, pattern.first, pattern.second);
+    }
+    return element;
 }
 
 auto getEnvironment(const VariablesMap& variables) noexcept

@@ -1,0 +1,48 @@
+commands:                       # Define the commands that can be run
+    example: Run the docker example
+    run: Show the contents of the /example folder
+
+patterns:                       # Define the patterns that can be used
+    IMAGE:                      # Define the IMAGE
+        default-values:         # Define the default value(s)
+            - ubuntu:rolling
+        short-option: i         # Define the short option for overriding the default value
+        long-option: image      # Define the long option for overriding the default value
+
+    COMMAND:
+        default-values:
+            - ls
+            - echo
+
+example:
+    - docker                    # Use the docker plugin when running the 'example' command
+
+ls:
+    - command-line-command      # Use the 'command-line-command' plugin for constructing the 'ls' command
+
+echo:
+    - command-line-command      # Use the 'command-line-command' plugin for constructing the 'echo' command
+
+docker:
+    example:
+        patterns:               # Define the patterns we will use for this command.
+            - IMAGE             # Use the IMAGE pattern => all occurences of '{IMAGE}' will be replaced by the actual value
+            - COMMAND
+        mode: run               # Use the 'run' mode
+        image: "{IMAGE}"        # Set the image. The quotes "" are required due to the YAML specification and its JSON compatibility.
+        envs:                   # Define additional environment variables inside the container
+            SHELL: xterm-color  # Use a YAML dictionary to define all kay-value pairs
+        interactive: yes        # Run an interactive shell in the container
+        tty: no                 # Do not attach to a pseudo-tty in the container
+        privileged: no          # Do not run a privileged container
+        user: root              # Explicitly run as the root user
+        volumes:
+            - "${PWD}:/examples"  # Mount the folder of this configuration file in the container on the /examples path
+        targets: "{COMMAND}"    # Run the 'run' task in the configured container
+
+command-line-command:
+    ls:                        # Configure the 'run' command
+        command-line: [ ls, -la, /root]  # Run 'ls -la /root'
+
+    echo:                       # configure the 'echo' command
+        command-line: [ echo, Hello world]   # Run 'echo Hello world'
