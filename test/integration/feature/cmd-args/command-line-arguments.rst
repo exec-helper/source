@@ -11,4 +11,8 @@ Command line arguments
 
 .. literalinclude:: version-option.feature
 
+.. literalinclude:: dry-run.feature
+
+.. literalinclude:: keep-going.feature
+
 .. literalinclude:: list-plugins-option.feature

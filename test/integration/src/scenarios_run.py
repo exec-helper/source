@@ -77,6 +77,10 @@ def add_command_line(run_environment, command_line):
 def add_command_nb_of_times(run_environment, command, nb_of_times):
     run_environment.add_commandline([command] * nb_of_times)
 
+@when('we add the <command> to the command line options')
+def add_command_cli(run_environment, command):
+    run_environment.add_commandline([command])
+
 @when('we call the application')
 def call_no_option(run_environment):
     run_environment.run_application()
@@ -144,5 +148,6 @@ def run_command_n_times(run_environment, command, nb_of_times):
     run_environment.run_application(args)
 
 @then('the <command> command should be called <nb_of_times> times')
+@then(parsers.cfparse('the <command> command should be called {nb_of_times:Number} times', extra_types=dict(Number=int)))
 def command_called_times(run_environment, command, nb_of_times):
     assert(len(run_environment.config.commands[command].runs) == nb_of_times)
