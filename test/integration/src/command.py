@@ -82,12 +82,13 @@ class Command(object):
     _prefix = 'binary-'
     _suffix = '.exec-helper'
 
-    def __init__(self, id, plugin_id, directory):
+    def __init__(self, id, plugin_id, directory, return_code = 0):
         self._id = id
         self._plugin_id = plugin_id
         self._binary = Path(directory).joinpath(self._prefix + str(uuid.uuid4()) + self._suffix)
         self._env = dict()
         self._patterns = []
+        self._return_code = return_code
 
         port = random.randint(49152,65535)
         self._server = Server('localhost', port)
@@ -132,6 +133,7 @@ class Command(object):
             f.write("import asyncio\n")
             f.write("import os\n")
             f.write("import pickle\n")
+            f.write("import sys\n")
             f.write("\n")
             f.write("async def set_characteristics(loop):\n")
             f.write("    reader,writer = await asyncio.open_connection('{host}', {port})\n".format(host = self._server.host, port = self._server.port))
@@ -148,6 +150,7 @@ class Command(object):
             f.write("loop = asyncio.get_event_loop()\n")
             f.write("loop.run_until_complete(set_characteristics(loop))\n")
             f.write("loop.close()\n")
+            f.write("sys.exit({RETURN_CODE})\n".format(RETURN_CODE = self._return_code))
 
         os.chmod(self._binary, stat.S_IREAD | stat.S_IEXEC)
 

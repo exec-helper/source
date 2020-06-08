@@ -19,6 +19,10 @@ class Config(object):
         pass
 
     @property
+    def directory(self):
+        return self._directory
+
+    @property
     def file(self):
         return self._settings_file
 
@@ -31,9 +35,9 @@ class Config(object):
         """
         self._commands[command_id] = command.Command(command_id, 'command-line-command', self._directory)
 
-    def add_command(self, command_id, command):
+    def add_command(self, command):
         """ Adds the given command as a command associated with the command id to the configuration """
-        self._commands[command_id] = command
+        self._commands[command.id] = command
 
     def set_environment(self, cmd, envs):
         self._commands[cmd].set_environment(envs)

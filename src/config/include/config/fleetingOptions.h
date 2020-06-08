@@ -53,6 +53,7 @@ class FleetingOptions : public FleetingOptionsInterface {
     auto getVersion() const noexcept -> VersionOption_t override;
     auto getVerbosity() const noexcept -> VerboseOption_t override;
     auto getDryRun() const noexcept -> DryRunOption_t override;
+    auto getKeepGoing() const noexcept -> KeepGoingOption_t override;
     auto getJobs() const noexcept -> Jobs_t override;
     auto listPlugins() const noexcept -> ListPluginsOption_t override;
     [[nodiscard]] auto appendedSearchPaths() const noexcept
@@ -82,6 +83,7 @@ class FleetingOptions : public FleetingOptionsInterface {
     const VersionOption_t m_version;
     const VerboseOption_t m_verbose;
     const DryRunOption_t m_dryRun;
+    const KeepGoingOption_t m_keepGoing;
     Jobs_t m_jobs;
     const LogLevelOption_t m_logLevel;
     const ListPluginsOption_t m_listPlugins;

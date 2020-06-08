@@ -34,6 +34,8 @@ FleetingOptions::FleetingOptions(const VariablesMap& optionsMap) noexcept
       m_version(optionsMap.get<VersionOption_t>(VERSION_KEY).value_or(false)),
       m_verbose(optionsMap.get<VerboseOption_t>(VERBOSE_KEY).value_or(false)),
       m_dryRun(optionsMap.get<DryRunOption_t>(DRY_RUN_KEY).value_or(false)),
+      m_keepGoing(
+          optionsMap.get<KeepGoingOption_t>(KEEP_GOING_KEY).value_or(false)),
       m_jobs(1U),
       m_logLevel(
           optionsMap.get<LogLevelOption_t>(LOG_LEVEL_KEY).value_or("warning")),
@@ -85,6 +87,10 @@ auto FleetingOptions::getDryRun() const noexcept -> DryRunOption_t {
     return m_dryRun;
 }
 
+auto FleetingOptions::getKeepGoing() const noexcept -> KeepGoingOption_t {
+    return m_keepGoing;
+}
+
 auto FleetingOptions::getJobs() const noexcept -> Jobs_t { return m_jobs; }
 
 auto FleetingOptions::getCommands() const noexcept -> const CommandCollection& {
@@ -121,6 +127,9 @@ auto FleetingOptions::getDefault() noexcept -> VariablesMap {
     }
     if(!defaults.add(DRY_RUN_KEY, "no")) {
         LOG(error) << "Failed to add dry run default option value";
+    }
+    if(!defaults.add(KEEP_GOING_KEY, "no")) {
+        LOG(error) << "Failed to add keep going default option value";
     }
     if(!defaults.add(JOBS_KEY, "auto")) {
         LOG(error) << "Failed to add jobs default option value";

@@ -27,6 +27,7 @@ using rc::AppendSearchPathValue;
 using rc::DryRunValue;
 using rc::HelpValue;
 using rc::JobsValue;
+using rc::KeepGoingValue;
 using rc::ListPluginsValue;
 using rc::VerbosityValue;
 using rc::VersionValue;
@@ -50,6 +51,7 @@ SCENARIO("Test the fleeting options defaults", "[config][fleeting-options]") {
         REQUIRE(expectedDefaults.add(VERBOSE_KEY, "no"));
         REQUIRE(expectedDefaults.add(JOBS_KEY, "auto"));
         REQUIRE(expectedDefaults.add(DRY_RUN_KEY, "no"));
+        REQUIRE(expectedDefaults.add(KEEP_GOING_KEY, "no"));
         REQUIRE(expectedDefaults.add(LOG_LEVEL_KEY, "none"));
         REQUIRE(expectedDefaults.add(LIST_PLUGINS_KEY, "no"));
         REQUIRE(expectedDefaults.add(APPEND_SEARCH_PATH_KEY,
@@ -74,7 +76,7 @@ SCENARIO("Test the getters of the fleeting options",
         [](const HelpValue& help, const VersionValue& version,
            const VerbosityValue& verbosity, const JobsValue& jobs,
            const DryRunValue& dryRun, const LogLevel& logLevel,
-           const ListPluginsValue& listPlugins,
+           const KeepGoingValue& keepGoing, const ListPluginsValue& listPlugins,
            const AppendSearchPathValue& appendedSearchPaths,
            const CommandCollection& commands) {
             VariablesMap variables = FleetingOptions::getDefault();
@@ -86,6 +88,7 @@ SCENARIO("Test the getters of the fleeting options",
             REQUIRE(variables.replace(DRY_RUN_KEY, dryRun.config()));
             REQUIRE(
                 variables.replace(LOG_LEVEL_KEY, string{toString(logLevel)}));
+            REQUIRE(variables.replace(KEEP_GOING_KEY, keepGoing.config()));
             REQUIRE(variables.replace(LIST_PLUGINS_KEY, listPlugins.config()));
             REQUIRE(variables.replace(APPEND_SEARCH_PATH_KEY,
                                       toStrings(appendedSearchPaths)));
@@ -101,6 +104,7 @@ SCENARIO("Test the getters of the fleeting options",
                     REQUIRE(jobs == fleetingOptions.getJobs());
                     REQUIRE(dryRun == fleetingOptions.getDryRun());
                     REQUIRE(logLevel == fleetingOptions.getLogLevel());
+                    REQUIRE(keepGoing == fleetingOptions.getKeepGoing());
                     REQUIRE(listPlugins == fleetingOptions.listPlugins());
                     REQUIRE(appendedSearchPaths ==
                             fleetingOptions.appendedSearchPaths());

@@ -15,12 +15,14 @@ Feature: Use the 'list plugins' command-line option
     @successful
     Scenario: The 'list plugins' option is defined on a valid command line
         Given a valid configuration
-        When we call the application with the <command_line> options
+        When we add the <command_line> as command line arguments
+        And we call the application
         Then the call should succeed
         And stdout should contain 'command-line-command'
 
     @successful
     Scenario: The 'list plugins' option is defined on a valid command line with no configuration file
-        When we call the application with the <command_line> options
+        When we add the <command_line> as command line arguments
+        And we call the application
         Then the call should succeed
         And stdout should contain 'command-line-command'

@@ -55,13 +55,17 @@ Mandatory arguments to long options are mandatory for short options too. Argumen
 
     Print the commands that would be executed, but  do not execute them.
 
+.. option:: -k, --keep-going
+
+    Execute all scheduled commands, even if one or more of them fail.
+
 Configured options
 ==================
 Additional command-line options for :program:`exec-helper` can be configured in the settings file. Refer to the :manpage:`exec-helper-config(5)` documentation for more information. 
 
 Exit status
 ===========
-Exec-helper exits with a status of *zero* if all commands are executed successfully. When :program:`exec-helper` is called improperly or its plugins are invoked improperly, :program:`exec-helper` will exit with a status of *one*. If the executed return commands return an error code, the *exit status of the last executed command* is returned as the exit status of :program:`exec-helper`.
+When :program:`exec-helper` is called improperly or its plugins are invoked improperly, :program:`exec-helper` will exit with a status of *one*. In other cases, it exits with the same status as the last failed command or *zero* if all commands are executed successfully. 
 
 Auto-completion
 ===============

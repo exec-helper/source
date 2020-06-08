@@ -13,7 +13,7 @@ scenarios('../feature/custom-plugins', example_converters=dict(command_line = Co
 
 def register_command_for_plugin(run_environment, config, command, plugin_id):
     custom_command = Command(command, plugin_id, run_environment.working_dir)
-    config.add_command(command, custom_command)
+    config.add_command(custom_command)
 
 @given('a random custom plugin directory')
 def custom_plugin_dir(run_environment):

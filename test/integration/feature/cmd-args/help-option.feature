@@ -16,7 +16,8 @@ Feature: Use the help command-line option
     @successful
     Scenario: The help option is defined on a valid command line
         Given a valid configuration
-        When we call the application with the <command_line> options
+        When we add the <command_line> as command line arguments
+        And we call the application
         Then the call should succeed
         And stdout should contain 'Usage'
         And stdout should contain 'Optional arguments:'
@@ -24,7 +25,8 @@ Feature: Use the help command-line option
 
     @successful
     Scenario: The help option is defined on a valid command line with no configuration file
-        When we call the application with the <command_line> options
+        When we add the <command_line> as command line arguments
+        And we call the application
         Then the call should succeed
         And stdout should contain 'Usage: exec-helper [Optional arguments] COMMANDS...'
         And stdout should contain 'Optional arguments:'
@@ -33,7 +35,8 @@ Feature: Use the help command-line option
     @successful
     Scenario: The help option is defined for a configuration with a command
         Given the <command> command
-        When we call the application with the <command_line> options
+        When we add the <command_line> as command line arguments
+        And we call the application
         Then the call should succeed
         And stdout should contain 'Usage: exec-helper [Optional arguments] COMMANDS...'
         And stdout should contain 'Optional arguments:'
@@ -47,7 +50,8 @@ Feature: Use the help command-line option
     @successful
     Scenario: The help option is defined for a configuration with a pattern
         Given the <pattern> pattern
-        When we call the application with the <command_line> options
+        When we add the <command_line> as command line arguments
+        And we call the application
         Then the call should succeed
         And stdout should contain 'Usage: exec-helper [Optional arguments] COMMANDS...'
         And stdout should contain 'Optional arguments:'
@@ -62,7 +66,8 @@ Feature: Use the help command-line option
     Scenario: The help option is defined for a configuration with a pattern and a command
         Given the <command> command
         And the <pattern> pattern
-        When we call the application with the <command_line> options
+        When we add the <command_line> as command line arguments
+        And we call the application
         Then the call should succeed
         And stdout should contain 'Usage: exec-helper [Optional arguments] COMMANDS...'
         And stdout should contain 'Optional arguments:'

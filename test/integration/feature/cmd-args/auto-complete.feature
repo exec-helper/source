@@ -14,7 +14,8 @@ Feature: Use the auto-complete command-line option
 
     @successful
     Scenario: The auto-complete option is defined without a configuration file
-        When we call the application with the <command_line> options
+        When we add the <command_line> as command line arguments
+        And we call the application
         Then the call should succeed
         And stdout should contain regex '^-h$'
         And stdout should contain regex '^--help$'
@@ -38,7 +39,8 @@ Feature: Use the auto-complete command-line option
     @successful
     Scenario: The auto-complete option is defined on a valid command line
         Given a valid configuration
-        When we call the application with the <command_line> options
+        When we add the <command_line> as command line arguments
+        And we call the application
         Then the call should succeed
         And stdout should contain regex '^-h$'
         And stdout should contain regex '^--help$'
@@ -63,7 +65,8 @@ Feature: Use the auto-complete command-line option
     Scenario: The auto-complete option is defined with a command
         Given a valid configuration
         And the <command> command
-        When we call the application with the <command_line> options
+        When we add the <command_line> as command line arguments
+        And we call the application
         Then the call should succeed
         And stdout should contain the full line <command>
 
@@ -75,7 +78,8 @@ Feature: Use the auto-complete command-line option
     Scenario: The auto-complete option is defined with a pattern
         Given a valid configuration
         And the <pattern> pattern
-        When we call the application with the <command_line> options
+        When we add the <command_line> as command line arguments
+        And we call the application
         Then the call should succeed
         And stdout should contain the full line <pattern>
 
@@ -88,7 +92,8 @@ Feature: Use the auto-complete command-line option
         Given a valid configuration
         And the <command> command
         And the <pattern> pattern
-        When we call the application with the <command_line> options
+        When we add the <command_line> as command line arguments
+        And we call the application
         Then the call should succeed
         And stdout should contain the full line <pattern>
 

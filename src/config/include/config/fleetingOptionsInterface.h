@@ -59,6 +59,14 @@ class FleetingOptionsInterface {
     virtual DryRunOption_t getDryRun() const noexcept = 0;
 
     /**
+     * Returns whether keep going mode is set
+     *
+     * \returns True    If keep going mode is set
+     *          False   Otherwise
+     */
+    virtual auto getKeepGoing() const noexcept -> KeepGoingOption_t = 0;
+
+    /**
      * Returns the maximum number of jobs to use for a task
      *
      * \returns The number of jobs to use for a task

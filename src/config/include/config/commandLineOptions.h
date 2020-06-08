@@ -18,6 +18,9 @@ using VerboseOption_t = bool;
 const std::string DRY_RUN_KEY{"dry-run"};
 using DryRunOption_t = bool;
 
+const std::string KEEP_GOING_KEY{"keep-going"};
+using KeepGoingOption_t = bool;
+
 const std::string JOBS_KEY{"jobs"};
 using JobsOption_t =
     std::string; // Must be string, since the 'auto' keyword is also supported

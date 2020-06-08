@@ -22,6 +22,10 @@ class FleetingOptionsStub : public config::FleetingOptionsInterface {
         return m_dryRun;
     }
 
+    auto getKeepGoing() const noexcept -> config::KeepGoingOption_t override {
+        return m_keepGoing;
+    }
+
     auto getLogLevel() const noexcept -> log::LogLevel override {
         return m_logLevel;
     }
@@ -51,6 +55,7 @@ class FleetingOptionsStub : public config::FleetingOptionsInterface {
     config::VersionOption_t m_version = {false};
     config::VerboseOption_t m_verbose = {false};
     config::DryRunOption_t m_dryRun = {false};
+    config::KeepGoingOption_t m_keepGoing = {false};
     log::LogLevel m_logLevel = {log::warning};
     config::Jobs_t m_jobs = 1024U;
     config::ListPluginsOption_t m_listPlugins = {false};

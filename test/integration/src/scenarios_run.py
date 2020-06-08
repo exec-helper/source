@@ -11,6 +11,7 @@ from pytest_bdd import scenarios, given, when, then, parsers
 from run_environment import RunEnvironment
 from config import Config
 from pattern import Pattern
+from command import Command
 
 # Conversion types
 def Environment(string):
@@ -29,6 +30,10 @@ def PatternType(string):
     if 'long_options' in characteristics:
         long_options = characteristics['long_options']
     return Pattern(key, default_values, long_options)
+
+def add_command(config, command, return_code):
+    cmd = Command(command, 'command-line-command', config.directory, return_code)
+    config.add_command(cmd)
 
 @given('a controlled environment')
 def run_environment():
@@ -52,21 +57,29 @@ def a_pattern(config, pattern):
     config.add_pattern(pattern)
     return pattern
 
+@when('we add the <command> that returns <return_code>')
+def add_command_return_code(config, command, return_code):
+    add_command(config, command, return_code)
+
 @when('we add the <command> command')
-def add_command(config, command):
-    config.create_command(command)
+def add_simple_command(config, command):
+    add_command(config, command, 0)
 
 @when('we run the <command> command')
 def run_one_command(run_environment, command):
     run_environment.run_application([command])
 
-@when('we call the application with the <command_line> options')
-def call_no_command(run_environment, command_line):
-    run_environment.run_application(command_line)
+@when('we add the <command_line> as command line arguments')
+def add_command_line(run_environment, command_line):
+    run_environment.add_commandline(command_line)
 
-@when('we call the application without arguments')
+@when('we add the <command> <nb_of_times> to the command line options')
+def add_command_nb_of_times(run_environment, command, nb_of_times):
+    run_environment.add_commandline([command] * nb_of_times)
+
+@when('we call the application')
 def call_no_option(run_environment):
-    run_environment.run_application([])
+    run_environment.run_application()
 
 @then('the call should succeed')
 def call_succeeds(run_environment):
@@ -75,12 +88,13 @@ def call_succeeds(run_environment):
         print(run_environment.last_run.stderr, file = sys.stderr)
         raise AssertionError(f"Call was expected to succeed, but it failed with return code '{run_environment.last_run.returncode}'")
 
-@then(parsers.cfparse('the call should fail with return code {expected:Number}', extra_types=dict(Number=int)))
-def call_fails(run_environment, expected):
-    if run_environment.last_run.returncode != expected:
+@then('the call should fail with return code <return_code>')
+@then(parsers.cfparse('the call should fail with return code {return_code:Number}', extra_types=dict(Number=int)))
+def call_fails(run_environment, return_code):
+    if run_environment.last_run.returncode != return_code:
         print(run_environment.last_run.stdout)
         print(run_environment.last_run.stderr, file = sys.stderr)
-        raise AssertionError(f"Call was expected to fail with return code '{expected}', but it succeeded")
+        raise AssertionError(f"Call was expected to return code '{return_code}', but it returned '{run_environment.last_run.returncode}'")
 
 @then(parsers.parse('stdout should contain {expected}'))
 def stdout_contains(run_environment, expected):

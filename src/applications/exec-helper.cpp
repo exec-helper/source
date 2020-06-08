@@ -79,6 +79,8 @@ using execHelper::config::HELP_OPTION_KEY;
 using execHelper::config::HelpOption_t;
 using execHelper::config::JOBS_KEY;
 using execHelper::config::JobsOption_t;
+using execHelper::config::KEEP_GOING_KEY;
+using execHelper::config::KeepGoingOption_t;
 using execHelper::config::LIST_PLUGINS_KEY;
 using execHelper::config::ListPluginsOption_t;
 using execHelper::config::LOG_LEVEL_KEY;
@@ -368,6 +370,8 @@ inline OptionDescriptions getDefaultOptions() noexcept {
     options.addOption(
         Option<DryRunOption_t>(DRY_RUN_KEY, {"n"}, "Dry run exec-helper"));
     options.addOption(
+        Option<KeepGoingOption_t>(KEEP_GOING_KEY, {"k"}, "Keep going, even when commands fail"));
+    options.addOption(
         Option<ListPluginsOption_t>(LIST_PLUGINS_KEY, {}, "List all plugins"));
     options.addOption(Option<AppendSearchPathOption_t>(
         APPEND_SEARCH_PATH_KEY, {},
@@ -527,17 +531,21 @@ int execHelperMain(int argc, char** argv, char** envp) {
     }
 
     auto shell = make_shared<PosixShell>();
-    execHelper::core::ImmediateExecutor::Callback callback =
-        [](Shell::ShellReturnCode returnCode) {
-            user_feedback_error("Error executing commands");
-            { execHelper::log::LogInit logInit; }
-            exit(returnCode);
-        };
     std::unique_ptr<ExecutorInterface> executor;
+    auto lastReturnCode = EXIT_SUCCESS;
     if(fleetingOptions.getDryRun()) {
         executor.reset(new ReportingExecutor());
+    } else if(fleetingOptions.getKeepGoing()) {
+        executor = make_unique<ImmediateExecutor>(shell,  [&lastReturnCode](Shell::ShellReturnCode returnCode) {
+            lastReturnCode = returnCode;
+            user_feedback_error("Error executing command!");
+        });
     } else {
-        executor = make_unique<ImmediateExecutor>(shell, callback);
+        executor = make_unique<ImmediateExecutor>(shell,  [](Shell::ShellReturnCode returnCode) {
+            user_feedback_error("Error executing command!");
+            { execHelper::log::LogInit logInit; }       // Make sure the loggers are destroyed before exiting
+            exit(returnCode);
+        });
     }
 
     execHelper::plugins::ExecuteCallback executeCallback =
@@ -553,7 +561,7 @@ int execHelperMain(int argc, char** argv, char** envp) {
     Commander commander;
     if(commander.run(fleetingOptions, settings, patterns,
                      settingsFile.parent_path(), move(env), move(plugins))) {
-        return EXIT_SUCCESS;
+        return lastReturnCode;
     } else {
         user_feedback_error("Error executing commands");
         return EXIT_FAILURE;

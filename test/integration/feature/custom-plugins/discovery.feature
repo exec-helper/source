@@ -13,7 +13,8 @@ Feature: Discover custom plugins
 
     @successful
     Scenario: Discover the system modules
-        When we call the application with the <command_line> options
+        When we add the <command_line> as command line arguments
+        And we call the application
         Then the call should succeed
         And stdout should contain <plugin_id>
         And stdout should contain regex <description>
@@ -41,7 +42,8 @@ Feature: Discover custom plugins
     Scenario: Fail to find a custom module when the search path is not set properly
         Given a custom module with id <plugin_id>
         When we register the command <command> to use the module <plugin_id>
-        And we call the application with the <command_line> options
+        And we add the <command_line> as command line arguments
+        And we call the application
         Then the call should succeed
         And stdout should not contain <plugin_id>
 
@@ -54,7 +56,8 @@ Feature: Discover custom plugins
         Given a custom module with id <plugin_id>
         When we register the command <command> to use the module <plugin_id>
         And add the search path to the configuration
-        And we call the application with the <command_line> options
+        And we add the <command_line> as command line arguments
+        And we call the application
         Then the call should succeed
         And stdout should contain <plugin_id>
         And stdout should contain regex <description>
@@ -68,7 +71,8 @@ Feature: Discover custom plugins
         Given a custom module with id <plugin_id>
         When we register the command <command> to use the module <plugin_id>
         And add the search path to the configuration
-        And we call the application with the <command_line> options
+        And we add the <command_line> as command line arguments
+        And we call the application
         Then the call should succeed
         And stdout should contain <plugin_id>
         And stdout should contain regex <description>
@@ -83,7 +87,8 @@ Feature: Discover custom plugins
         Given a custom module with id <plugin_id>
         When we register the command <command> to use the module <plugin_id>
         And add the search path to the command line
-        And we call the application with the <command_line> options
+        And we add the <command_line> as command line arguments
+        And we call the application
         Then the call should succeed
         And stdout should contain <plugin_id>
         And stdout should contain regex <description>
@@ -97,7 +102,8 @@ Feature: Discover custom plugins
         Given a custom module with id <plugin_id>
         When we register the command <command> to use the module <plugin_id>
         And add the search path to the command line
-        And we call the application with the <command_line> options
+        And we add the <command_line> as command line arguments
+        And we call the application
         Then the call should succeed
         And stdout should contain <plugin_id>
         And stdout should contain regex <description>
@@ -113,7 +119,8 @@ Feature: Discover custom plugins
         And the same custom module <plugin_id> on a different location and add it to the command line search path
         When we register the command <command> to use the module <plugin_id>
         And add the search path to the configuration
-        And we call the application with the <command_line> options
+        And we add the <command_line> as command line arguments
+        And we call the application
         Then the call should succeed
         And stdout should contain <plugin_id>
         And stdout should contain regex <description>

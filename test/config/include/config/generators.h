@@ -66,6 +66,10 @@ struct DryRunValue : public BoolValue {
     explicit DryRunValue(bool option) noexcept : BoolValue(option) {}
 };
 
+struct KeepGoingValue : public BoolValue {
+    explicit KeepGoingValue(bool option) noexcept : BoolValue(option) {}
+};
+
 struct ListPluginsValue : public BoolValue {
     explicit ListPluginsValue(bool option) noexcept : BoolValue(option) {}
 };
@@ -102,6 +106,13 @@ template <> struct Arbitrary<DryRunValue> {
     static auto arbitrary() {
         return gen::construct<DryRunValue>(
             gen::arbitrary<DryRunValue::Value>());
+    };
+};
+
+template <> struct Arbitrary<KeepGoingValue> {
+    static auto arbitrary() {
+        return gen::construct<KeepGoingValue>(
+            gen::arbitrary<KeepGoingValue::Value>());
     };
 };
 
