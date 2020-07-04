@@ -26,7 +26,7 @@ install:
 build_script:
     - echo %CONFIGURATION%
     - "\"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Auxiliary\\Build\\vcvarsall.bat\" %PLATFORM%"
-    - cmake -G Ninja -H. -Bbuild -DCMAKE_INSTALL_PREFIX=install -DCMAKE_BUILD_TYPE=%CONFIGURATION% -DBOOST_ROOT=C:\Libraries\boost_1_71_0 -DBoost_NO_SYSTEM_PATHS=ON -DENABLE_TESTING=OFF -DBUILD_USAGE_DOCUMENTATION=OFF -DBUILD_API_DOCUMENTATION=OFF -DVERSION="{version}" -DCOPYRIGHT="Copyright (c) 2020 Bart Verhagen" -DACTUAL_PLUGINS_INSTALL_PREFIX="C:\Program Files\exec-helper"
+    - cmake -G Ninja -H. -Bbuild -DCMAKE_INSTALL_PREFIX=install -DCMAKE_BUILD_TYPE=%CONFIGURATION% -DBOOST_ROOT=C:\Libraries\boost_1_71_0 -DBoost_NO_SYSTEM_PATHS=ON -DENABLE_TESTING=OFF -DBUILD_USAGE_DOCUMENTATION=OFF -DBUILD_API_DOCUMENTATION=OFF -DVERSION="%APPVEYOR_BUILD_VERSION%" -DCOPYRIGHT="Copyright (c) 2020 Bart Verhagen" -DACTUAL_PLUGINS_INSTALL_PREFIX="C:\Program Files\exec-helper"
     - ninja -C build 
     - ninja -C build install
     - copy installer.nsi install
