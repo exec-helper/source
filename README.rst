@@ -4,7 +4,7 @@ Exec-helper
 ***********
 Or How To Get Your Coffee In Peace.
 
-|documentation| |nbsp| |build_badge| |nbsp| |coverage_badge| |nbsp| |code_quality_badge|
+|documentation| |nbsp| |build_badge| |nbsp| |build_windows_badge| |nbsp| |coverage_badge| |nbsp| |code_quality_badge|
 
 What
 ====
@@ -188,6 +188,8 @@ Check the *.exec-helper* file for detailed information about how these analysis 
 .. |build_badge| image:: https://gitlab.com/bverhagen/exec-helper/badges/master/pipeline.svg
                  :alt: Commits
                  :target: https://gitlab.com/bverhagen/exec-helper/commits/master
+.. |build_windows_badge| image:: https://ci.appveyor.com/api/projects/status/6hj664td3tjx9cs5/branch/master?svg=true
+                         :alt: Windows build
 .. |coverage_badge| image:: https://gitlab.com/bverhagen/exec-helper/badges/master/coverage.svg
                     :alt: Test report
                     :target: http://bverhagen.gitlab.io/exec-helper/coverage/index.html

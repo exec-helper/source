@@ -1,6 +1,7 @@
 #include "logLevel.h"
 
 #include <algorithm>
+#include <sstream>
 #include <vector>
 
 #include "log/assertions.h"

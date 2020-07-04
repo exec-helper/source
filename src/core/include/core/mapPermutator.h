@@ -44,7 +44,7 @@ template <typename T, typename U> class MapPermutator {
                           bool end = false) noexcept
             : m_map(map), m_end(end) {
             for(const auto& mapElement : map) {
-                uint32_t index = 0U;
+                size_t index = 0U;
                 if(mapElement.second.empty()) {
                     m_end = true;
                 }
@@ -120,7 +120,7 @@ template <typename T, typename U> class MapPermutator {
 
       private:
         const std::map<T, std::vector<U>>& m_map;
-        mutable std::map<T, uint32_t> m_indexes;
+        mutable std::map<T, size_t> m_indexes;
         bool m_end;
     };
 
