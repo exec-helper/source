@@ -6,8 +6,6 @@
 
 #include <boost/lexical_cast.hpp>
 
-#include "log/log.h"
-
 #include "cast.h"
 #include "path.h"
 
@@ -54,8 +52,7 @@ inline std::optional<T> Cast<T, U>::cast(const U& values) noexcept {
     }
     try {
         return std::make_optional(boost::lexical_cast<T>(values.back()));
-    } catch(boost::bad_lexical_cast& e) {
-        user_feedback_error("Internal error");
+    } catch(boost::bad_lexical_cast&) {
         return std::nullopt;
     }
 }
