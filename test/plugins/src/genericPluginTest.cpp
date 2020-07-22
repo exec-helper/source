@@ -1,7 +1,6 @@
 /**
  *@file Tests properties that each plugin should have
  */
-#include <catch.hpp>
 #include <filesystem>
 
 #include "unittest/catch.h"
@@ -29,6 +28,7 @@
 #include "plugins/valgrind.h"
 
 #include "core/coreGenerators.h"
+#include "unittest/catch.h"
 
 using std::shared_ptr;
 

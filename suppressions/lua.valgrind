@@ -1,0 +1,41 @@
+{
+   Suppress leak in luawrapper
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:_Znwm
+   fun:allocate
+   fun:_ZNSs4_Rep9_S_createEmmRKSaIcE
+   fun:_S_construct<char*>
+   fun:_ZNSs12_S_constructIPKcEEPcT_S3_RKSaIcESt20forward_iterator_tag
+   fun:_S_construct_aux<char const*>
+   fun:_S_construct<char const*>
+   fun:_ZNSsC1EPKcmRKSaIcE
+   fun:_ZNSt12__cow_stringC1EPKcm
+   fun:_ZNSt13runtime_errorC1ERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZZN10LuaContext6PusherIFvRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEEvE4pushIZNK10execHelper7plugins9LuaPlugin5applyENSC_4core4TaskERKNSC_6config12SettingsNodeERKSt6vectorINSH_7PatternESaISM_EEEUlS8_E7_EENSt9enable_ifIXsrN5boost22has_trivial_destructorIT_EE5valueENS_12PushedObjectEE4typeEP9lua_StateSV_ENUlS11_E_4_FUNES11_
+   fun:luaD_precall
+   fun:luaV_execute
+   fun:luaD_call
+   fun:f_call
+   fun:luaD_rawrunprotected
+}
+
+{
+   Suppress leak in liblua or luawrapper
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:malloc
+   fun:__cxa_allocate_exception
+   fun:_ZZN10LuaContext6PusherIFvRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEEvE4pushIZNK10execHelper7plugins9LuaPlugin5applyENSC_4core4TaskERKNSC_6config12SettingsNodeERKSt6vectorINSH_7PatternESaISM_EEEUlS8_E7_EENSt9enable_ifIXsrN5boost22has_trivial_destructorIT_EE5valueENS_12PushedObjectEE4typeEP9lua_StateSV_ENUlS11_E_4_FUNES11_
+   fun:luaD_precall
+   fun:luaV_execute
+   fun:luaD_call
+   fun:f_call
+   fun:luaD_rawrunprotected
+   fun:luaD_pcall
+   fun:lua_pcallk
+   fun:_ZN10LuaContext7callRawEP9lua_StateNS_12PushedObjectEi
+   fun:call<std::tuple<> >
+   fun:executeCode
+   fun:_ZNK10execHelper7plugins9LuaPlugin5applyENS_4core4TaskERKNS_6config12SettingsNodeERKSt6vectorINS4_7PatternESaIS9_EE
+}

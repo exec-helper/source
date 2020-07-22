@@ -1,7 +1,0 @@
-add_subdirectory(log)
-add_subdirectory(config)
-add_subdirectory(yaml)
-add_subdirectory(core)
-add_subdirectory(plugins)
-add_subdirectory(commander)
-add_subdirectory(applications)

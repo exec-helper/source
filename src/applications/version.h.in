@@ -1,6 +1,8 @@
 #ifndef VERSION_INCLUDE
 #define VERSION_INCLUDE
 
+#include <string_view>
+
 #include <gsl/string_span>
 
 const gsl::czstring<> BINARY_NAME = "@BINARY_NAME@";

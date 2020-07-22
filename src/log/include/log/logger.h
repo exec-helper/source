@@ -7,7 +7,7 @@
 
 BOOST_LOG_GLOBAL_LOGGER(
     exec_helper_log_logger,
-    execHelper::log::LoggerType); // NOLINT(modernize-use-using)
+    execHelper::log::LoggerType) // NOLINT(modernize-use-using)
 
 namespace execHelper::log::detail {
 using namespace std::literals;

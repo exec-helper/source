@@ -1,3 +1,5 @@
+import os
+import shutil
 import subprocess
 
 from config import Config
@@ -14,7 +16,7 @@ class RunEnvironment(object):
         print(f"Creating simulation environment in directory '{self._root_dir}'")
 
     def __del__(self):
-        # self.remove()
+        self.remove()
         pass
 
     @property
@@ -70,5 +72,5 @@ class RunEnvironment(object):
         self._last_run = subprocess.run(args, cwd = self._working_dir, capture_output = True, check = False) 
 
     def remove(self):
-        if os.path.is_directory(self._root_dir):
+        if os.path.isdir(self._root_dir):
             shutil.rmtree(self._root_dir)

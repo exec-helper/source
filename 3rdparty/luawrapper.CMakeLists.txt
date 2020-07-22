@@ -1,5 +1,0 @@
-set(MODULE lua-wrapper)
-
-add_library(${MODULE} INTERFACE)
-target_include_directories(${MODULE} SYSTEM INTERFACE luawrapper)
-target_link_libraries(${MODULE} INTERFACE lua)

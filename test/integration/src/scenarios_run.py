@@ -35,24 +35,24 @@ def add_command(config, command, return_code):
     cmd = Command(command, 'command-line-command', config.directory, return_code)
     config.add_command(cmd)
 
-@given('a controlled environment')
+@given('a controlled environment', target_fixture="run_environment")
 def run_environment():
     temp_directory = tempfile.gettempdir()
     temp_folder = 'eh-' + str(uuid.uuid4())
     root_dir = Path(f"{temp_directory}/{temp_folder}")
     return RunEnvironment(root_dir)
 
-@given('a valid configuration')
+@given('a valid configuration', target_fixture="config")
 def config(run_environment):
     run_environment.config = Config(run_environment.root_dir)
     return run_environment.config
 
-@given('the <command> command')
+@given('the <command> command', target_fixture="a_command")
 def a_command(config, command):
     config.create_command(command)
     return config.commands[command]
 
-@given('the <pattern> pattern')
+@given('the <pattern> pattern', target_fixture="a_pattern")
 def a_pattern(config, pattern):
     config.add_pattern(pattern)
     return pattern

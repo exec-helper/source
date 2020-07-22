@@ -22,9 +22,9 @@ Requirements
 ------------
 Build tools
 ~~~~~~~~~~~
-* A C++ 17 compatible compiler. Tested with: *g++*, *clang++* and MSVC 2017 (14.1)
-* cmake (3.15 or newer)
-* make or ninja
+* A C++ 17 compatible compiler. Tested with: *gcc*, *clang* and MSVC 2017 (14.1)
+* meson
+* ninja
 * make for the quick install
 * Sphinx for generating man-pages and general documentation
 * Doxygen (1.8.15 or newer) for building API documentation (optional)
@@ -37,7 +37,8 @@ Build dependencies
 * `boost-log <https://github.com/boostorg/log>`_ (1.64 or newer) development files
 * `yaml-cpp <https://github.com/jbeder/yaml-cpp>`_ (0.5.3 or newer) development files (optional, will be downloaded and compiled in statically if missing)
 * `Microsoft gsl <https://github.com/Microsoft/GSL>`_ development files (optional, will be downloaded and compiled in statically if missing)
-* `luaJIT <https://luajit.org/>`_ development files (optional, will be downloaded an compiled in statically if missing)
+* `lua <https://www.lua.org/>`_ (5.3 or newer) development files (optional, will be downloaded and compiled in statically if missing)
+* `readline <https://tiswww.case.edu/php/chet/readline/rltop.html>`_ development files (\*NIX systems): required if not using the system Lua.
 
 Quick installation
 ------------------

@@ -1,3 +1,6 @@
+additional-search-paths:
+    - eh-plugins
+
 patterns:
     COMPILER:
         default-values:
@@ -50,7 +53,6 @@ patterns:
         long-option: source-type
 
 commands:
-    setup: Setup the repository for building
     init: Initialize the build infrastructure
     build: Build-only + install
     build-only: Build only
@@ -59,33 +61,25 @@ commands:
     clean: Clean build
     distclean: Distclean build
     rebuild: Clean + build
-    run-test: unittest + integration
-    unittest: Run the specified unittests
-    integration: Run the specified integration tests
-    docs: Build + install the documentation
-    changelog: Build the changelog
-
-setup:
-    - command-line-command
 
 init:
-    - command-line-command
+    - meson
 
 build:
     - build-only
     - install
 
 build-only:
-    - ninja
+    - meson
 
 install:
-    - command-line-command
+    - meson
 
 create-installer:
     - command-line-command
 
 clean:
-    - ninja
+    - meson
 
 distclean:
     - command-line-command
@@ -94,83 +88,45 @@ rebuild:
     - clean
     - build
 
-run-test:
-    - selector
-
-unittest:
-    - command-line-command
-
-integration:
-    - integration-old
-    - integration-new
-
-integration-old:
-    - command-line-command
-
-integration-new:
-    - command-line-command
-
-docs:
-    - ninja
-    - command-line-command
-
-selector:
-    run-test:
-        patterns: RUNTARGET
-
-changelog:
-    - ninja
-    - command-line-command
-
-ninja:
+meson:
     patterns:
         - COMPILER
         - MODE
-    build-dir: build/{COMPILER}/{MODE}/build
-    single-threaded: no
-    clean:
-        command-line:
-            - clean
-    docs:
-        patterns:
-            - COMPILER
-            - MODE
-            - DOCSTYPE
-        command-line:
-            - docs-{DOCSTYPE}
-    changelog:
-        patterns:
-            - COMPILER
-            - MODE
-        command-line:
-            - changelog
 
-command-line-command:
-    setup:
-        patterns:
-            - COMPILER
-            - MODE
-        command-line: [ ln, -fs, "build/{COMPILER}/{MODE}/build/compile_commands.json"]
+    source-dir: .
+    build-dir: "build/{COMPILER}/{MODE}/build"
+    build-type: "{MODE}"
+    prefix: "%cd%/build/{COMPILER}/{MODE}/install"
+
+    mode: setup
+
+    environment:
+        BOOST_ROOT: "C:/local/boost_1_73_0"
 
     init:
-        patterns:
-            - COMPILER
-            - MODE
-            - EH_WORKING_DIR
-        command-line: [cmake, -G, "Ninja", "-H.", "-Bbuild/{COMPILER}/{MODE}/build", "-DCMAKE_INSTALL_PREFIX=build/{COMPILER}/{MODE}/install", "-DCMAKE_BUILD_TYPE={MODE}", -DBUILD_USAGE_DOCUMENTATION=OFF, -DBUILD_API_DOCUMENTATION=OFF, -DTERMINATE_ON_ASSERT_FAILURE=ON, "-DBOOST_ROOT=C:/local/boost_1_71_0", -DENABLE_TESTING=OFF, -DBoost_NO_SYSTEM_PATHS=OFF, -DVERSION=0.6.0_8869989, "-DCOPYRIGHT=2020 (c) Bart Verhagen", '-DACTUAL_PLUGINS_INSTALL_PREFIX=C:\Program Files\exec-helper']
+        options:
+            test: false
+            usage-documentation: false
+            api-documentation: false
+            plugins-prefix: "%cd%\\build\\{COMPILER}\\{MODE}\\install\\bin"
+            terminate-on-assert: true
+            changelog: false
+            use-static-boost: true
+        command-line: [--fatal-meson-warnings, --warnlevel, 2]
 
+    build-only:
+        mode: compile
+
+    install:
+        mode: install
+        command-line: [--only-changed, --no-rebuild]
+
+command-line-command:
     distclean:
         patterns:
             - COMPILER
             - MODE
-        command-line: [ rm, -rf, "build/{COMPILER}/{MODE}"]
-
-    install:
-        patterns:
-            - COMPILER
-            - MODE
-            - COMPONENT
-        command-line: [ cmake, "-DCOMPONENT={COMPONENT}", -P, "build/{COMPILER}/{MODE}/build/cmake_install.cmake"]
+        command-line: [ rmdir, /S, /Q, "build/{COMPILER}/{MODE}"]
 
     create-installer:
         patterns:
@@ -180,35 +136,3 @@ command-line-command:
         command-line:
 #            - copy-config: [ copy, ..\..\..\..\installer.nsi, .]
             - build: [ C:\Program Files (x86)\NSIS\Bin\makensis.exe, installer.nsi]
-    unittest:
-        patterns:
-            - COMPILER
-            - MODE
-            - MODULE
-        command-line: build/{COMPILER}/{MODE}/install/test/unittest/exec-helper-{MODULE}-unittest
-
-    integration-new:
-        patterns:
-            - COMPILER
-            - TRIPLET
-            - MODE
-            - TARGET
-            - EH_WORKING_DIR
-        environment:
-            PATH: "{EH_WORKING_DIR}/build/{TRIPLET}{COMPILER}/{MODE}/install/bin:/usr/local/bin:/usr/bin"
-        working-dir: test/integration
-        command-line:
-            test: [ pytest, -m, "'{TARGET}'", .]
-
-    docs:
-        patterns:
-            - COMPILER
-            - MODE
-            - DOCSTYPE
-        command-line: [ cmake, "-DCOMPONENT=docs-{DOCSTYPE}", -P, "build/{COMPILER}/{MODE}/build/cmake_install.cmake"]
-
-    changelog:
-        patterns:
-            - COMPILER
-            - MODE
-        command-line: [ cmake, "-DCOMPONENT=changelog", -P, "build/{COMPILER}/{MODE}/build/cmake_install.cmake"]

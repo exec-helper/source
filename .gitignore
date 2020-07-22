@@ -1,6 +1,13 @@
 # Project-specific
-build
+build/
+!docker/build
 compile_commands.json
+subprojects
+!subprojects/*.wrap
+sysroot_arm64/
+lcov-plugin.info
+test_coverage/
+
 
 # Python-specific
 __pycache__

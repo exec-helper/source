@@ -1,4 +1,3 @@
-#include <catch.hpp>
 #include <iostream>
 #include <optional>
 #include <sstream>

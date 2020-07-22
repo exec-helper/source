@@ -29,7 +29,7 @@ unsigned int IndirectStatement::getNumberOfExecutions() const noexcept {
                          const std::shared_ptr<Statement>& statement) {
                           return subTotal + statement->getNumberOfExecutions();
                       });
-};
+}
 
 void IndirectStatement::resetExecutions() noexcept {
     for(auto& statement : m_statements) {
@@ -52,7 +52,7 @@ void IndirectStatement::write(not_null<YamlWriter*> yaml,
         cerr << "The given YAML node is invalid" << endl;
         assert(false);
     }
-};
+}
 } // namespace baseUtils
 } // namespace test
 } // namespace execHelper

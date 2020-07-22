@@ -6,7 +6,7 @@
 #include "log/log.h"
 
 BOOST_LOG_GLOBAL_LOGGER(exec_helper_application_logger,
-                        execHelper::log::LoggerType);
+                        execHelper::log::LoggerType)
 
 namespace execHelper::log::detail {
     using namespace std::literals;

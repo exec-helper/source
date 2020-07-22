@@ -1,3 +1,6 @@
+additional-search-paths:
+    - eh-plugins
+
 patterns:
     COMPILER:
         default-values:
@@ -15,6 +18,10 @@ patterns:
         default-values:
             - ""
         long-option: triplet
+    ARCHITECTURE:
+        default-values:
+            - x86_64
+        long-option: arch
     TARGET:
         default-values:
             - ""
@@ -30,7 +37,6 @@ patterns:
         default-values:
             - log
             - config
-            - yaml
             - core
             - plugins
             - commander
@@ -110,19 +116,27 @@ setup:
 
 init:
     - create-toolchain-file
-    - cmake
+    - meson
 
 init-build:
     - create-toolchain-file
-    - cmake
+    - meson
 
 init-no-system:
     - create-toolchain-file
-    - cmake
+    - meson
 
 init-limited-optimization:
     - create-toolchain-file
-    - cmake
+    - meson
+
+init-coverage:
+    - create-toolchain-file
+    - meson
+
+init-asan:
+    - create-toolchain-file
+    - meson
 
 init-windows:
     - cmake
@@ -132,10 +146,10 @@ build:
     - install
 
 build-only:
-    - cmake
+    - meson
 
 install:
-    - cmake
+    - meson
 
 create-installer:
     - command-line-command
@@ -198,14 +212,7 @@ asan:
     - command-line-command
 
 changelog:
-    - build-changelog
-    - install-changelog
-
-build-changelog:
-    - cmake
-
-install-changelog:
-    - cmake
+    - build
 
 create-toolchain-file:
     - command-line-command
@@ -215,6 +222,109 @@ language-server:
 
 coverity:
     - command-line-command
+
+meson:
+    patterns:
+        - COMPILER
+        - TRIPLET
+        - MODE
+        - SYSROOT
+
+    source-dir: .
+    build-dir: "build/{TRIPLET}{COMPILER}/{MODE}/build"
+    build-type: "{MODE}"
+    prefix: "${PWD}/build/{TRIPLET}{COMPILER}/{MODE}/install"
+    cross-file: "build/{TRIPLET}{COMPILER}/{MODE}/cross-file.ini"
+
+    mode: setup
+
+    environment:
+        BOOST_ROOT: "{SYSROOT}/usr"
+
+    init:
+        options:
+            test: true
+            usage-documentation: true
+            usage-documentation-html: true
+            api-documentation: true
+            plugins-prefix: "${PWD}/build/{TRIPLET}{COMPILER}/{MODE}/install/share/exec-helper/plugins"
+            terminate-on-assert: true
+            changelog: true
+        #command-line: [--werror, --fatal-meson-warnings]
+
+    init-build:
+        options:
+            test: true
+            usage-documentation: false
+            api-documentation: false
+            plugins-prefix: "${PWD}/build/{TRIPLET}{COMPILER}/{MODE}/install/share/exec-helper/plugins"
+            terminate-on-assert: true
+        command-line: [--werror]
+
+    init-limited-optimization:
+        build-type: "debug"
+        options:
+            test: true
+            usage-documentation: false
+            api-documentation: false
+            plugins-prefix: "${PWD}/build/{TRIPLET}{COMPILER}/{MODE}/install/share/exec-helper/plugins"
+        command-line: [--optimization, 1]
+
+    init-no-system:
+        options:
+            test: true
+            usage-documentation: false
+            api-documentation: false
+            use-system-yaml-cpp: disabled
+            use-system-gsl: disabled
+            use-system-lua: disabled
+            use-system-catch2: disabled
+            use-system-rapidcheck: disabled
+            terminate-on-assert: true
+            changelog: false
+            b_pie: true
+
+    init-coverage:
+        options:
+            test: true
+            usage-documentation: false
+            api-documentation: false
+            plugins-prefix: "${PWD}/build/{TRIPLET}{COMPILER}/{MODE}/install/share/exec-helper/plugins"
+            terminate-on-assert: true
+            #cpp_args: "['-g', '--coverage', '-fprofile-arcs', '-ftest-coverage']"
+            #cpp_link_args: "['-g', '--coverage', '-fprofile-arcs', '-ftest-coverage']"
+            b_coverage: true
+        build-type: debug
+
+    init-asan:
+        options:
+            test: true
+            usage-documentation: false
+            api-documentation: false
+            plugins-prefix: "${PWD}/build/{TRIPLET}{COMPILER}/{MODE}/install/share/exec-helper/plugins"
+            terminate-on-assert: true
+            b_sanitize: address,undefined
+        build-type: debugoptimized
+
+    build-only:
+        mode: compile
+
+    install:
+        mode: install
+        command-line: [--only-changed, --no-rebuild]
+
+    #unittest:
+        #patterns:
+            #- COMPILER
+            #- TRIPLET
+            #- MODE
+            #- MODULE
+        #mode: test
+        #suite: unittest
+        #targets: "{MODULE}"
+        #environment:
+            #PATH: "${PWD}/build/{TRIPLET}{COMPILER}/{MODE}/install/bin:${PWD}/build/{TRIPLET}{COMPILER}/{MODE}/install/test:/usr/local/bin:/usr/bin"
+        #command-line: [ --no-rebuild, --print-errorlogs, --test-args, "'\\-\\-reporter=junit'", --test-args, "'\\-\\-out=../{MODULE}_report.xml'"]
 
 cmake:
     patterns:
@@ -226,58 +336,6 @@ cmake:
     build-dir: "build/{TRIPLET}{COMPILER}/{MODE}/build"
     prefix: "build/{TRIPLET}{COMPILER}/{MODE}/install"
     generator: Ninja
-
-    init:
-        mode: generate
-        defines:
-            CMAKE_BUILD_TYPE: "{MODE}"
-            BUILD_USAGE_DOCUMENTATION: ON
-            BUILD_API_DOCUMENTATION: ON
-            CMAKE_TOOLCHAIN_FILE: "build/{TRIPLET}{COMPILER}/{MODE}/toolchain.cmake"
-            ACTUAL_PLUGINS_INSTALL_PREFIX: "build/{TRIPLET}{COMPILER}/{MODE}/install/share/exec-helper/plugins"
-            TERMINATE_ON_ASSERT_FAILURE: ON
-            CMAKE_EXPORT_COMPILE_COMMANDS: ON
-
-    init-build:
-        mode: generate
-        defines:
-            CMAKE_BUILD_TYPE: "{MODE}"
-            BUILD_USAGE_DOCUMENTATION: OFF
-            BUILD_API_DOCUMENTATION: OFF
-            BUILD_API_DOCUMENTATION: OFF
-            CMAKE_TOOLCHAIN_FILE: "build/{TRIPLET}{COMPILER}/{MODE}/toolchain.cmake"
-            ACTUAL_PLUGINS_INSTALL_PREFIX: "build/{TRIPLET}{COMPILER}/{MODE}/install/share/exec-helper/plugins"
-            TERMINATE_ON_ASSERT_FAILURE: ON
-            CMAKE_EXPORT_COMPILE_COMMANDS: ON
-
-    init-no-system:
-        mode: generate
-        defines:
-            CMAKE_BUILD_TYPE: "{MODE}"
-            BUILD_USAGE_DOCUMENTATION: OFF
-            BUILD_API_DOCUMENTATION: OFF
-            CMAKE_TOOLCHAIN_FILE: "build/{TRIPLET}{COMPILER}/{MODE}/toolchain.cmake"
-            ACTUAL_PLUGINS_INSTALL_PREFIX: "build/{TRIPLET}{COMPILER}/{MODE}/install/share/exec-helper/plugins"
-            TERMINATE_ON_ASSERT_FAILURE: ON
-            CMAKE_EXPORT_COMPILE_COMMANDS: ON
-            USE_SYSTEM_YAML_CPP: OFF
-            USE_SYSTEM_GSL: OFF
-            USE_SYSTEM_LUA: OFF
-            USE_SYSTEM_INTEGRAL: OFF
-            USE_SYSTEM_CATCH: OFF
-            USE_SYSTEM_RAPIDCHECK: OFF
-
-    init-limited-optimization:
-        mode: generate
-        defines:
-            CMAKE_BUILD_TYPE: "{MODE}"
-            BUILD_USAGE_DOCUMENTATION: ON
-            BUILD_API_DOCUMENTATION: OFF
-            CMAKE_TOOLCHAIN_FILE: "build/{TRIPLET}{COMPILER}/{MODE}/toolchain.cmake"
-            ACTUAL_PLUGINS_INSTALL_PREFIX: "build/{TRIPLET}{COMPILER}/{MODE}/install/share/exec-helper/plugins"
-            TERMINATE_ON_ASSERT_FAILURE: ON
-            LIMITED_OPTIMIZATION: ON
-            CMAKE_EXPORT_COMPILE_COMMANDS: ON
 
     init-windows:
         mode: generate
@@ -293,18 +351,6 @@ cmake:
             Boost_USE_STATIC_RUNTIME: OFF
             TERMINATE_ON_ASSERT_FAILURE: ON
             ACTUAL_PLUGINS_INSTALL_PREFIX: "build/{TRIPLET}{COMPILER}/{MODE}/install/share/exec-helper/plugins"
-
-    build-only:
-        mode: build
-
-    install:
-        mode: install
-        patterns:
-            - COMPILER
-            - TRIPLET
-            - MODE
-            - COMPONENT
-        component: "{COMPONENT}"
 
     clean:
         mode: build
@@ -327,24 +373,6 @@ cmake:
             - DOCSTYPE
         mode: install
         component: "docs-{DOCSTYPE}"
-
-    changelog:
-        patterns:
-            - COMPILER
-            - TRIPLET
-            - MODE
-            - DOCSTYPE
-        mode: install
-        component: "docs-{DOCSTYPE}"
-
-    build-changelog:
-        mode: build
-        component:
-        target: changelog
-
-    install-changelog:
-        mode: install
-        component: "changelog"
 
 cppcheck:
     patterns:
@@ -383,15 +411,17 @@ command-line-command:
         patterns:
             - COMPILER
             - TRIPLET
+            - ARCHITECTURE
             - SYSROOT
             - MODE
         command-line:
-            - remove-toolchain-tmp: [ rm, -f, "build/{TRIPLET}{COMPILER}/{MODE}/toolchain.cmake"]
             - create-build-dir: [ mkdir, -p, "build/{TRIPLET}{COMPILER}/{MODE}"]
-            - create-toolchain-tmp: [ cp, toolchain.cmake.in, "build/{TRIPLET}{COMPILER}/{MODE}/toolchain.cmake"]
-            - replace-triplet: [ sed, -i, 's%@TRIPLET@%{TRIPLET}%g', "build/{TRIPLET}{COMPILER}/{MODE}/toolchain.cmake"]
-            - replace-compiler-family: [ sed, -i, 's%@COMPILER_FAMILY@%{COMPILER}%g', "build/{TRIPLET}{COMPILER}/{MODE}/toolchain.cmake"]
-            - replace-sysroot: [ sed, -i, 's%@SYSROOT@%{SYSROOT}%g', "build/{TRIPLET}{COMPILER}/{MODE}/toolchain.cmake"]
+            - remove-toolchain-tmp: [ rm, -f, "build/{TRIPLET}{COMPILER}/{MODE}/cross-file.ini"]
+            - create-toolchain-tmp: [ cp, "crossfiles/{COMPILER}.ini.in", "build/{TRIPLET}{COMPILER}/{MODE}/cross-file.ini"]
+            - replace-triplet: [ sed, -i, 's%@TRIPLET@%{TRIPLET}%g', "build/{TRIPLET}{COMPILER}/{MODE}/cross-file.ini"]
+            - replace-compiler-family: [ sed, -i, 's%@COMPILER_FAMILY@%{COMPILER}%g', "build/{TRIPLET}{COMPILER}/{MODE}/cross-file.ini"]
+            - replace-sysroot: [ sed, -i, 's%@SYSROOT@%{SYSROOT}%g', "build/{TRIPLET}{COMPILER}/{MODE}/cross-file.ini"]
+            - replace-arch: [ sed, -i, 's%@ARCHITECTURE@%{ARCHITECTURE}%g', "build/{TRIPLET}{COMPILER}/{MODE}/cross-file.ini"]
 
     distclean:
         patterns:
@@ -415,8 +445,8 @@ command-line-command:
             - MODULE
             - EH_WORKING_DIR
         environment:
-            PATH: "{EH_WORKING_DIR}/build/{TRIPLET}{COMPILER}/{MODE}/install/bin:{EH_WORKING_DIR}/build/{TRIPLET}{COMPILER}/{MODE}/install/test/integration:/usr/local/bin:/usr/bin"
-        command-line: [ "build/{TRIPLET}{COMPILER}/{MODE}/install/test/unittest/exec-helper-{MODULE}-unittest", --reporter=junit, "--out=build/{TRIPLET}{COMPILER}/{MODE}/{MODULE}_report.xml"]
+            PATH: "{EH_WORKING_DIR}/build/{TRIPLET}{COMPILER}/{MODE}/install/bin:{EH_WORKING_DIR}/build/{TRIPLET}{COMPILER}/{MODE}/install/test:/usr/local/bin:/usr/bin"
+        command-line: [ "build/{TRIPLET}{COMPILER}/{MODE}/install/test/exec-helper-{MODULE}-unittest", --reporter=junit, "--out=build/{TRIPLET}{COMPILER}/{MODE}/{MODULE}_report.xml"]
 
     integration:
         patterns:
@@ -431,10 +461,7 @@ command-line-command:
         command-line: [ pytest, -m, "'{TARGET}'", "--junitxml=../../build/{TRIPLET}{COMPILER}/{MODE}/system_test_report.xml", "--html=../../build/{TRIPLET}{COMPILER}/{MODE}/system_test_report.html", --self-contained-html, .]
 
     coverage:
-        environment:
-            CXXFLAGS: -g --coverage -fprofile-arcs -ftest-coverage
-            LDFLAGS: -g --coverage -fprofile-arcs -ftest-coverage
-        command-line: [ exec-helper, init-build, build, analyze, --analyze, lcov, --compiler, gcc, --mode, coverage, --run-target, unittest]
+        command-line: [ exec-helper, init-coverage, build, analyze, --analyze, lcov, --compiler, gcc, --mode, coverage, --run-target, unittest]
 
     undefined-behaviour:
         environment:
@@ -449,11 +476,7 @@ command-line-command:
     asan:
         environment:
             ASAN_OPTIONS: "check_initialization_order=1 print_stacktrace=1"
-        command-line: 
-            - init: [ exec-helper, init-build, --compiler, clang, --mode, asan, --run-target, unittest]
-            - overwrite-init: [ cmake, -H., "-Bbuild/clang/asan/build", "-DSANITIZER=address,leak"]
-            - build: [ exec-helper, build, --compiler, clang, --mode, asan, --run-target, unittest]
-            - run: [ exec-helper, unittest, --compiler, clang, --mode, asan, --run-target, unittest]
+        command-line: [ exec-helper, init-asan, build, run-test, --compiler, clang, --mode, asan, --run-target, unittest]
 
     coverity:
         patterns:
@@ -487,7 +510,7 @@ valgrind:
         - --leak-check=full
         - --error-exitcode=1
         - --suppressions=suppressions/valgrind
-        - --suppressions=suppressions/luajit.valgrind
+        - --suppressions=suppressions/lua.valgrind
 
 pmd:
     patterns:
@@ -516,6 +539,7 @@ lcov:
         - /usr*
         - "*/3rdparty/*"
         - "*/test/*"
+        - "*/subprojects/*"
     gen-html: yes
     gen-html-output: test_coverage
     gen-html-command-line:

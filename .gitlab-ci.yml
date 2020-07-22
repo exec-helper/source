@@ -10,7 +10,7 @@ stages:
 
 variables:
     ALL_RUN_TARGETS: unittest integration
-    ALL_MODULES: log config yaml core commander plugins
+    ALL_MODULES: log config core commander plugins
     ALL_SOURCE_TYPES: src test
     DOCKER_DRIVER: overlay2         # Overwrite default docker driver
     SAST_DISABLE_DIND: "true"
@@ -86,7 +86,6 @@ variables:
     script:
         - *install_exec_helper
         - exec-helper setup init-build -c gcc -m release
-        - ninja -C build/gcc/release/build download     # Downloads and builds all non-system dependencies for clang-tidy to find them
         - exec-helper analyze --analyze clang-tidy --module $MODULES --source-type $SOURCE_TYPE
 
 .cppcheck: &cppcheck
@@ -207,8 +206,8 @@ build:native:
     variables:
         INSTALL_DIR: usr
     script:
-        - make PREFIX=${INSTALL_DIR} ACTUAL_PLUGINS_INSTALL_PREFIX=/usr/share/exec-helper/plugins
-        - make PREFIX=${INSTALL_DIR} ACTUAL_PLUGINS_INSTALL_PREFIX=/usr/share/exec-helper/plugins install 
+        - make PREFIX=${PWD}/${INSTALL_DIR} ACTUAL_PLUGINS_INSTALL_PREFIX=/usr/share/exec-helper/plugins
+        - make PREFIX=${PWD}/${INSTALL_DIR} ACTUAL_PLUGINS_INSTALL_PREFIX=/usr/share/exec-helper/plugins install 
     artifacts:
         expire_in: 1 day
         paths:
@@ -233,8 +232,8 @@ build:debian:
     variables:
         INSTALL_DIR: usr
     script:
-        - make BUILD_DOCUMENTATION=OFF PREFIX=${INSTALL_DIR} ACTUAL_PLUGINS_INSTALL_PREFIX=/usr/share/exec-helper/plugins binary
-        - make PREFIX=${INSTALL_DIR} ACTUAL_PLUGINS_INSTALL_PREFIX=/usr/share/exec-helper/plugins install-bin
+        - make BUILD_DOCUMENTATION=OFF PREFIX=${PWD}/${INSTALL_DIR} ACTUAL_PLUGINS_INSTALL_PREFIX=/usr/share/exec-helper/plugins
+        - make PREFIX=${PWD}/${INSTALL_DIR} ACTUAL_PLUGINS_INSTALL_PREFIX=/usr/share/exec-helper/plugins install
     artifacts:
         expire_in: 1 day
         paths:
@@ -308,7 +307,7 @@ build:no-system:
         - job: build:native
           artifacts: true
     before_script:
-        - sudo pacman -Sy --needed --noconfirm clang cmake make doxygen git
+        - sudo pacman -Sy --needed --noconfirm clang meson ninja doxygen git tar pkg-config
     script: 
         - *install_exec_helper
         - exec-helper init-no-system build --compiler clang --mode release
@@ -324,17 +323,17 @@ cross-compilation:
     before_script:
         - *install_exec_helper
     script:
-        - apt-get install --yes debootstrap g++-aarch64-linux-gnu cmake ninja-build pkg-config git
-        - debootstrap --arch=arm64 --download-only --variant=minbase --include=libboost-program-options-dev,libboost-filesystem-dev,libboost-log-dev,libboost-thread-dev,doxygen,libc6-dev,libluajit-5.1-dev testing ./sysroot_arm64 http://deb.debian.org/debian/
+        - apt-get install --yes debootstrap gcc-aarch64-linux-gnu g++-aarch64-linux-gnu cmake pkg-config git
+        - debootstrap --arch=arm64 --download-only --variant=minbase --include=libboost-program-options-dev,libboost-filesystem-dev,libboost-log-dev,libboost-thread-dev,libc6-dev,liblua5.3-dev,libyaml-cpp-dev,libmsgsl-dev testing ./sysroot_arm64 http://deb.debian.org/debian/
         - for DEB in $(find sysroot_arm64/var/cache/apt/archives -not -path sysroot_arm64/var/cache/apt/archives/partial -type f); do echo "Extracting ${DEB}..."; dpkg -x ${DEB} sysroot_arm64; done   # Unpack all downloaded debian packages, since debootstrap does not seem to unpack the additional included ones and their dependencies
         - cp -r /usr/aarch64-linux-gnu/* sysroot_arm64/usr/
-        - exec-helper init-build build --compiler gcc --triplet aarch64-linux-gnu- --mode release --sysroot $(pwd)/sysroot_arm64
+        - exec-helper init-build build --compiler gcc --triplet aarch64-linux-gnu- --arch aarch64 --mode release --sysroot $(pwd)/sysroot_arm64
 
 unittests:
     <<: *run_test
     variables:
         RUN_TARGET: unittest
-        MODULES: log config yaml commander
+        MODULES: log config commander
         NB_RUNS: 1000
 
 unittests-core:

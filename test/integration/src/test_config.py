@@ -5,11 +5,11 @@ from scenarios_run import *
 
 scenarios('../feature/config', example_converters=dict(command = str, environment = Environment, pattern = PatternType))
 
-@given('the <environment> is configured for <command> command in the configuration')
+@given('the <environment> is configured for <command> command in the configuration', target_fixture="add_environment_to_command")
 def add_environment_to_command(config, command, environment):
     config.commands[command].set_environment(environment)
 
-@given('the <pattern> is configured for <command> command in the configuration')
+@given('the <pattern> is configured for <command> command in the configuration', target_fixture="add_pattern_to_command")
 def add_pattern_to_command(config, command, pattern):
     config.commands[command].add_pattern(pattern)
 

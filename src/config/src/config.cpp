@@ -3,14 +3,13 @@
 #include <string>
 #include <string_view>
 
-#include "yaml/yaml.h"
-
 #include "commandLineOptions.h"
 #include "logger.h"
 #include "optionDescriptions.h"
 #include "pattern.h"
 #include "patternsHandler.h"
 #include "variablesMap.h"
+#include "yaml.h"
 
 using std::optional;
 using std::string;

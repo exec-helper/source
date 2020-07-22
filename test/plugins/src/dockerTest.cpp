@@ -66,9 +66,7 @@ namespace filesystem = std::filesystem;
 namespace {
 enum class Mode { Run, Exec };
 
-constexpr auto getAllModes() {
-    return array<Mode, 2>({Mode::Run, Mode::Exec});
-};
+constexpr auto getAllModes() { return array<Mode, 2>({Mode::Run, Mode::Exec}); }
 
 inline void addToConfig(const execHelper::config::SettingsKeys& key,
                         const Mode mode, not_null<VariablesMap*> config) {

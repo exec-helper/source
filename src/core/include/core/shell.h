@@ -5,20 +5,18 @@
 
 #include "pathNotFoundError.h"
 
-namespace execHelper {
-namespace core {
-class Task;
-} // namespace core
-} // namespace execHelper
+namespace execHelper::core {
 
-namespace execHelper {
-namespace core {
+class Task;
+
 /**
  * \brief Represents a shell for executing tasks
  */
 class Shell {
   public:
     using ShellReturnCode = uint8_t; //!< brief Shell return code abstraction
+
+    virtual ~Shell() = default;
 
     /**
      * Executes the given task
@@ -27,7 +25,7 @@ class Shell {
      * \returns A shell return code
      * \throws PathNotFoundError    The binary to execute was not found
      */
-    virtual ShellReturnCode execute(const Task& task) = 0;
+    virtual auto execute(const Task& task) -> ShellReturnCode = 0;
 
     /**
      * Checks whether the given shell return code can be associated with a
@@ -37,13 +35,29 @@ class Shell {
      * \returns True    If the return code implies a successful execution
      *          False   Otherwise
      */
-    virtual bool
-    isExecutedSuccessfully(ShellReturnCode returnCode) const noexcept = 0;
+    [[nodiscard]] virtual auto
+    isExecutedSuccessfully(ShellReturnCode returnCode) const noexcept
+        -> bool = 0;
 
   protected:
     Shell() = default;
+
+    /*! @copydoc config::Argv::Argv(const config::Argv&)
+     */
+    Shell(const Shell& other) = default;
+
+    /*! @copydoc config::Argv::Argv(config::Argv&&)
+     */
+    Shell(Shell&& other) = default;
+
+    /*! @copydoc config::Argv::operator=(const config::Argv&)
+     */
+    auto operator=(const Shell& other) -> Shell& = default;
+
+    /*! @copydoc config::Argv::operator=(config::Argv&&)
+     */
+    auto operator=(Shell&& other) -> Shell& = default;
 };
-} // namespace core
-} // namespace execHelper
+} // namespace execHelper::core
 
 #endif /* __SHELL_INTERFACE_H__ */

@@ -67,7 +67,7 @@ Feature: Discover custom plugins
         | exec-helper-custom-module | Lua plugin for module \S*/custom-plugins/exec-helper-custom-module.lua  | Command1 |
 
     @successful
-    Scenario: The search custom plugin configuration takes precedence over the sytem modules
+    Scenario: The search custom plugin configuration takes precedence over the system modules
         Given a custom module with id <plugin_id>
         When we register the command <command> to use the module <plugin_id>
         And add the search path to the configuration

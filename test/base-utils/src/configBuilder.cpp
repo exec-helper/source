@@ -48,7 +48,7 @@ ConfigBuilder::ConfigBuilderRAII::~ConfigBuilderRAII() {
     for(auto& command : m_commands) {
         command.resetExecutions();
     }
-};
+}
 
 } // namespace baseUtils
 } // namespace test

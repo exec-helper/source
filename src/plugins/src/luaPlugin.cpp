@@ -1,6 +1,7 @@
 #include "luaPlugin.h"
 
 #include <algorithm>
+#include <filesystem>
 #include <fstream>
 #include <iterator>
 #include <optional>
@@ -47,6 +48,8 @@ using execHelper::core::Task;
 using execHelper::core::TaskCollection;
 using execHelper::core::Tasks;
 
+namespace filesystem = std::filesystem;
+
 namespace {
 class Config {
   public:
@@ -55,8 +58,6 @@ class Config {
     auto get(const string& key) noexcept
         -> optional<unordered_map<string, string>> {
         if(!m_config.contains(key)) {
-            LOG(debug) << "key '" << key << "' does not exist in config"
-                       << std::endl;
             return boost::none;
         }
         const auto& subnode = m_config[key];
@@ -281,6 +282,12 @@ auto LuaPlugin::apply(Task task, const VariablesMap& config,
                     ++index;
                 }
                 return result;
+            });
+
+        lua.writeFunction<bool(const std::string&)>(
+            "isdir", [](const std::string& path) {
+                filesystem::path ppath(path);
+                return filesystem::is_directory(ppath);
             });
     } catch(std::exception& e) {
         user_feedback_error("Internal error");

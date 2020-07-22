@@ -2,7 +2,7 @@
 Feature: Use the help command-line option
     Scenarios for when the help option is given on the command line
 
-    Examples:    
+    Examples:
     | command_line                      |
     | -h                                |
     | --help                            |
@@ -34,7 +34,8 @@ Feature: Use the help command-line option
 
     @successful
     Scenario: The help option is defined for a configuration with a command
-        Given the <command> command
+        Given a valid configuration
+        And the <command> command
         When we add the <command_line> as command line arguments
         And we call the application
         Then the call should succeed
@@ -49,7 +50,8 @@ Feature: Use the help command-line option
 
     @successful
     Scenario: The help option is defined for a configuration with a pattern
-        Given the <pattern> pattern
+        Given a valid configuration
+        And the <pattern> pattern
         When we add the <command_line> as command line arguments
         And we call the application
         Then the call should succeed
@@ -64,7 +66,8 @@ Feature: Use the help command-line option
 
     @successful
     Scenario: The help option is defined for a configuration with a pattern and a command
-        Given the <command> command
+        Given a valid configuration
+        And the <command> command
         And the <pattern> pattern
         When we add the <command_line> as command line arguments
         And we call the application

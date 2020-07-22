@@ -8,31 +8,34 @@ platform:
     - x86
 
 configuration:
-    - Release
-    - Debug
+    - release
+    - debug
 
 environment:
     APPVEYOR_RDP_PASSWORD: Blaat0
 
 install:
+    # - meson   # Pre-installed by app veyor
     # - cmake   # Pre-installed by app veyor
     # - git     # Pre-installed by app veyor
     # - boost   # Pre-installed by app veyor
     - cinst ninja
-    - cinst nsis
-    - ps: (new-object System.Net.WebClient).DownloadFile('https://nsis.sourceforge.io/mediawiki/images/7/7f/EnVar_plugin.zip', "$($pwd)/envar.zip")     # Retrieve NSIS EnVar plugin
-    - ps: Expand-Archive "$($pwd)/envar.zip" -DestinationPath "${Env:ProgramFiles(x86)}/NSIS"   # Install NSIS EnVar plugin
+    #- cinst nsis
+    #- ps: (new-object System.Net.WebClient).DownloadFile('https://nsis.sourceforge.io/mediawiki/images/7/7f/EnVar_plugin.zip', "$($pwd)/envar.zip")     # Retrieve NSIS EnVar plugin
+    #- ps: Expand-Archive "$($pwd)/envar.zip" -DestinationPath "${Env:ProgramFiles(x86)}/NSIS"   # Install NSIS EnVar plugin
 
 build_script:
     - echo %CONFIGURATION%
     - "\"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Auxiliary\\Build\\vcvarsall.bat\" %PLATFORM%"
-    - cmake -G Ninja -H. -Bbuild -DCMAKE_INSTALL_PREFIX=install -DCMAKE_BUILD_TYPE=%CONFIGURATION% -DBOOST_ROOT=C:\Libraries\boost_1_71_0 -DBoost_NO_SYSTEM_PATHS=ON -DENABLE_TESTING=OFF -DBUILD_USAGE_DOCUMENTATION=OFF -DBUILD_API_DOCUMENTATION=OFF -DVERSION="%APPVEYOR_BUILD_VERSION%" -DCOPYRIGHT="Copyright (c) 2020 Bart Verhagen" -DACTUAL_PLUGINS_INSTALL_PREFIX="C:\Program Files\exec-helper"
-    - ninja -C build 
-    - ninja -C build install
-    - copy installer.nsi install
-    - copy LICENSE install
-    - cd install
-    - makensis installer.nsi
+    - set BOOST_ROOT="C:/local/boost_1_73_0"
+    - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+    - meson setup --buildtype %CONFIGURATION% --prefix %cd%/install -D api-documentation=false -D usage-documentation=false -D changelog=false -D terminate-on-assert=false -D test=false -D "plugins-prefix=C:\\Program Files\\exec-helper" -D "version=%APPVEYOR_BUILD_VERSION%" -D "copyright=Copyright (c) 2020 Bart Verhagen"  build .
+    - meson compile -C build
+    - meson install -C build --no-rebuild
+    #- copy installer.nsi install
+    #- copy LICENSE install
+    #- cd install
+    #- makensis installer.nsi
     #- ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
     - cd ..
 
@@ -46,4 +49,3 @@ artifacts:
     - path: install
       name: install
       type: zip
-

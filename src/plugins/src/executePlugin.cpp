@@ -174,7 +174,7 @@ auto ExecutePlugin::getNextStep(const Command& command,
         LOG(trace) << "Retrieving plugin named '" << command << "'.";
         try {
             return getPlugin(command);
-        } catch(const InvalidPlugin& e) {
+        } catch(const InvalidPlugin& /*e*/) {
             LOG(error) << "Unable to retrieve a plugin name '" << command
                        << "'.";
             return nullptr;

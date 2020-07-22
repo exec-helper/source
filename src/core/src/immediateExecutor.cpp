@@ -11,15 +11,16 @@ using std::move;
 
 namespace execHelper::core {
 
-ImmediateExecutor::ImmediateExecutor(std::shared_ptr<Shell> shell,
-                                     Callback callback) noexcept
-    : m_shell(move(shell)), m_callback(move(callback)) {
-    assert(m_shell != nullptr);
+ImmediateExecutor::ImmediateExecutor(
+    const gsl::not_null<std::shared_ptr<Shell>>& shell,
+    Callback callback) noexcept
+    : m_shell(shell), m_callback(move(callback)) {
+    ;
 }
 
 void ImmediateExecutor::execute(const Task& task) noexcept {
-    user_feedback_info("Executing " << task.toString());
-    Shell::ShellReturnCode returnCode = m_shell->execute(task);
+    user_feedback_info("Executing '" << task.toString() << "'");
+    auto returnCode = m_shell->execute(task);
     if(!m_shell->isExecutedSuccessfully(returnCode)) {
         m_callback(returnCode);
     }

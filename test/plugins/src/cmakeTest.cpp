@@ -45,7 +45,7 @@ enum class Mode { Generate, Build, Install };
 
 constexpr auto getAllModes() {
     return array<Mode, 3>({Mode::Generate, Mode::Build, Mode::Install});
-};
+}
 } // namespace
 
 namespace rc {

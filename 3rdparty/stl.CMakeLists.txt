@@ -1,9 +1,0 @@
-# std::filesystem
-set(LIBRARY filesystem)
-add_library(${LIBRARY} INTERFACE)
-
-if(MSVC)
-    target_link_libraries(${LIBRARY} INTERFACE)
-else()
-    target_link_libraries(${LIBRARY} INTERFACE stdc++fs)
-endif()
