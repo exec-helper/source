@@ -401,6 +401,8 @@ coverage:
         - *install_exec_helper
         - export PATH=$(pwd)/build/gcc/release/install/bin:$(pwd)/build/gcc/release/install/test/integration:$PATH
         - exec-helper coverage
+    after_script:
+        - bash <(curl -s https://codecov.io/bash) -t "${CODECOV_TOKEN}" -f lcov-plugin.info -Z -F unittests
     artifacts:
         paths:
             - test_coverage/

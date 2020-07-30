@@ -1,0 +1,28 @@
+codecov:
+  require_ci_to_pass: yes
+  ci:
+      - gitlab
+      - appveyor
+
+coverage:
+  precision: 3
+  round: nearest
+  range: "85...100"
+  status:
+        project:
+            flags:
+                - unittest
+            
+
+parsers:
+  gcov:
+    branch_detection:
+      conditional: yes
+      loop: yes
+      method: no
+      macro: no
+
+comment:
+  layout: "reach,diff,flags,tree"
+  behavior: default
+  require_changes: no
