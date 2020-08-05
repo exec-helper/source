@@ -1,6 +1,8 @@
 #ifndef LOG_MESSAGE_INCLUDE
 #define LOG_MESSAGE_INCLUDE
 
+#include <string_view>
+
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/log/expressions.hpp>
 #include <boost/log/sources/channel_feature.hpp>
@@ -11,13 +13,11 @@
 
 #include "logLevel.h"
 
-namespace execHelper {
-namespace log {
-using Channel = std::string;
+namespace execHelper::log {
+using Channel = std::string_view;
 using LoggerType =
-    boost::log::sources::severity_channel_logger_mt<LogLevel, std::string>;
-} // namespace log
-} // namespace execHelper
+    boost::log::sources::severity_channel_logger_mt<LogLevel, Channel>;
+} // namespace execHelper::log
 
 BOOST_LOG_ATTRIBUTE_KEYWORD(fileLog, "File",
                             std::string) // NOLINT(modernize-use-using)

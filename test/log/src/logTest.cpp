@@ -46,6 +46,7 @@ using execHelper::log::InvalidLogLevel;
 using execHelper::log::LogLevel;
 using execHelper::log::toLogLevel;
 using execHelper::log::toString;
+using execHelper::log::detail::LOG_CHANNEL;
 
 using execHelper::test::propertyTest;
 
@@ -75,7 +76,7 @@ class LogMessage {
                string file, unsigned int lineNumber, string message)
         : m_date(move(date)),
           m_time(move(time)),
-          m_channel(move(channel)),
+          m_channel(channel),
           m_level(level),
           m_file(move(file)),
           m_lineNumber(lineNumber),
@@ -91,7 +92,7 @@ class LogMessage {
         return m_time;
     }
 
-    [[nodiscard]] auto getChannel() const noexcept -> const Channel& {
+    [[nodiscard]] auto getChannel() const noexcept -> Channel {
         return m_channel;
     }
 
@@ -132,11 +133,14 @@ auto toMessage(const string& message) -> LogMessage {
                                         // results in undefined behaviour. so
                                         // convert it to an intermediate string
                                         // first.
+
+        // Note: parsedResult can not parse directly to the string_view. Intermediate conversions are destroyed at the end of the expression, which is why this conversion must happen in the calling function and cannot be saved as an lvalue.
+        string channel = parsedResult["channel"];
         string logLevelString = parsedResult["severity"];
         LogLevel logLevel = toLogLevel(logLevelString);
-        return LogMessage(parsedResult["date"], parsedResult["time"],
-                          parsedResult["channel"], logLevel,
-                          parsedResult["file"],
+
+        return LogMessage(parsedResult["date"], parsedResult["time"], channel,
+                          logLevel, parsedResult["file"],
                           boost::lexical_cast<unsigned int>(lineNumberString),
                           parsedResult["message"]);
     }
@@ -232,37 +236,37 @@ SCENARIO("Test the conversion of a wrong string to a log level", "[log]") {
 }
 
 SCENARIO("Write a log message with the severity enabled", "[log]") {
-    propertyTest("An enabled log level should give the right output",
-                 [](LogLevel severity) {
-                     stringbuf logBuffer;
-                     ostream logStream(&logBuffer);
+    propertyTest(
+        "An enabled log level should give the right output",
+        [](LogLevel severity) {
+            stringbuf logBuffer(std::ios_base::out | std::ios_base::trunc);
+            ostream logStream(&logBuffer);
 
-                     execHelper::log::LogInit logInit(logStream);
+            execHelper::log::LogInit logInit(logStream);
 
-                     const string message1("Hello world!!!");
+            const string message1("Hello world!!!");
 
-                     THEN_WHEN("We switch on the right severity") {
-                         logInit.setSeverity(LOG_CHANNEL, severity);
-                         logInit.setSeverity("other-channel",
-                                             getRelativeLogLevel(severity, 1));
+            THEN_WHEN("We switch on the right severity") {
+                logInit.setSeverity(LOG_CHANNEL, severity);
+                logInit.setSeverity("other-channel",
+                                    getRelativeLogLevel(severity, 1));
 
-                         // Switch off clang-format, since it will put the line assignment
-                         // on a separate line, annihilating the purpose of the test
-                         // clang-format off
-            LOG(severity) << message1; const unsigned int line = __LINE__;
-                         // clang-format on
+                // Switch off clang-format, since it will put the line assignment
+                // on a separate line, annihilating the purpose of the test
+                // clang-format off
+                         LOG(severity) << message1; const unsigned int line = __LINE__;
+                // clang-format on
 
-                         THEN_CHECK(
-                             "We should find the message in the stream") {
-                             LogMessage result = toMessage(logBuffer.str());
-                             REQUIRE(result.getChannel() == LOG_CHANNEL);
-                             REQUIRE(result.getLevel() == severity);
-                             REQUIRE(result.getFile() == __FILE__);
-                             REQUIRE(result.getLineNumber() == line);
-                             REQUIRE(result.getMessage() == message1);
-                         }
-                     }
-                 });
+                THEN_CHECK("We should find the message in the stream") {
+                    LogMessage result = toMessage(logBuffer.str());
+                    REQUIRE(result.getChannel() == LOG_CHANNEL);
+                    REQUIRE(result.getLevel() == severity);
+                    REQUIRE(result.getFile() == __FILE__);
+                    REQUIRE(result.getLineNumber() == line);
+                    REQUIRE(result.getMessage() == message1);
+                }
+            }
+        });
 }
 
 SCENARIO("Write a log message with the severity disabled", "[log]") {

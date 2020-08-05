@@ -13,7 +13,7 @@
 #include "base-utils/configFileWriter.h"
 #include "base-utils/yaml.h"
 
-#include "logger.h"
+#include "unittest/logger.h"
 
 using std::endl;
 using std::initializer_list;
