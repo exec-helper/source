@@ -443,9 +443,9 @@ command-line-command:
             - TRIPLET
             - MODE
             - MODULE
-            - EH_WORKING_DIR
+            - EH_ROOT_DIR
         environment:
-            PATH: "{EH_WORKING_DIR}/build/{TRIPLET}{COMPILER}/{MODE}/install/bin:{EH_WORKING_DIR}/build/{TRIPLET}{COMPILER}/{MODE}/install/test:/usr/local/bin:/usr/bin"
+            PATH: "{EH_ROOT_DIR}/build/{TRIPLET}{COMPILER}/{MODE}/install/bin:{EH_ROOT_DIR}/build/{TRIPLET}{COMPILER}/{MODE}/install/test:/usr/local/bin:/usr/bin"
         command-line: [ "build/{TRIPLET}{COMPILER}/{MODE}/install/test/exec-helper-{MODULE}-unittest", --reporter=junit, "--out=build/{TRIPLET}{COMPILER}/{MODE}/{MODULE}_report.xml"]
 
     integration:
@@ -454,9 +454,9 @@ command-line-command:
             - TRIPLET
             - MODE
             - TARGET
-            - EH_WORKING_DIR
+            - EH_ROOT_DIR
         environment:
-            PATH: "{EH_WORKING_DIR}/build/{TRIPLET}{COMPILER}/{MODE}/install/bin:/usr/local/bin:/usr/bin"
+            PATH: "{EH_ROOT_DIR}/build/{TRIPLET}{COMPILER}/{MODE}/install/bin:/usr/local/bin:/usr/bin"
         working-dir: test/integration
         command-line: [ pytest, -m, "'{TARGET}'", "--junitxml=../../build/{TRIPLET}{COMPILER}/{MODE}/system_test_report.xml", "--html=../../build/{TRIPLET}{COMPILER}/{MODE}/system_test_report.html", --self-contained-html, .]
 
@@ -464,10 +464,12 @@ command-line-command:
         command-line: [ exec-helper, init-coverage, build, analyze, --analyze, lcov, --compiler, gcc, --mode, coverage, --run-target, unittest]
 
     undefined-behaviour:
+        patterns:
+            - EH_ROOT_DIR
         environment:
             CXXFLAGS: -g -fno-omit-frame-pointer -fno-sanitize-recover=undefined
             LDFLAGS: -g -fno-omit-frame-pointer -fno-sanitize-recover=undefined
-            UBSAN_OPTIONS: "suppresions=${PWD}/suppressions/ubsan.blacklist"
+            UBSAN_OPTIONS: "suppresions={EH_ROOT_DIR}/suppressions/ubsan.blacklist"
         command-line: [ exec-helper, init-limited-optimization, build, run-test, --compiler, clang, --mode, undefined-behaviour, --run-target, unittest, integration]
 
     memory-check:

@@ -14,6 +14,28 @@
 #include "utils/commonGenerators.h"
 #include "utils/testValue.h"
 
+namespace execHelper::config::test {
+template <typename T> class Unique {
+  public:
+    explicit Unique(T value) : m_value{std::move(value)} {}
+
+    const auto& get() const { return m_value; }
+
+    const auto& operator*() const { return get(); }
+
+    const auto* operator->() const { return &m_value; }
+
+  private:
+    const T m_value;
+};
+} // namespace execHelper::config::test
+
+namespace execHelper::config {
+inline bool operator<(const Pattern& lhs, const Pattern& rhs) {
+    return lhs.getKey() < rhs.getKey();
+}
+} // namespace execHelper::config
+
 // NOTE: Must be in rc namespace!
 namespace rc {
 
@@ -156,6 +178,14 @@ template <> struct Arbitrary<execHelper::config::Pattern> {
         //auto values = gen::just<std::vector<std::string>>({"Blaat1", "Blaat2"});
         return gen::construct<execHelper::config::Pattern>(key, values);
     };
+};
+
+template <typename T> struct Arbitrary<execHelper::config::test::Unique<T>> {
+    static auto arbitrary() {
+        return gen::construct<execHelper::config::test::Unique<T>>(
+            gen::nonEmpty(
+                gen::unique<T>(gen::arbitrary<typename T::value_type>())));
+    }
 };
 } // namespace rc
 

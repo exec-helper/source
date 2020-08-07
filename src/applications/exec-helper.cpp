@@ -560,7 +560,7 @@ int execHelperMain(int argc, char** argv, char** envp) {
 
     Commander commander;
     if(commander.run(fleetingOptions, settings, patterns,
-                     settingsFile.parent_path(), move(env), move(plugins))) {
+                     settingsFile.parent_path(), move(env), move(plugins), settingsFile.parent_path())) {
         return lastReturnCode;
     } else {
         user_feedback_error("Error executing commands");

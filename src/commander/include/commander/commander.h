@@ -43,6 +43,7 @@ class Commander {
      * \param[in] workingDirectory   The working directory for the commander
      * \param[in] env       The environment to apply the plugins in
      * \param[in] plugins   A map of plugin prototypes where each key is associated with a certain plugin
+     * \param[in] rootDirectory     The directory to use as the root of the project
      * \returns True    If the command was run successfully
      *          False   Otherwise
      */
@@ -50,7 +51,8 @@ class Commander {
              config::SettingsNode settings, config::Patterns patterns,
              const config::Path& workingDirectory,
              const config::EnvironmentCollection& env,
-             plugins::Plugins&& plugins) noexcept -> bool;
+             plugins::Plugins&& plugins,
+             const config::Path& rootDirectory) noexcept -> bool;
 };
 } // namespace commander
 } // namespace execHelper

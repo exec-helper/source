@@ -157,6 +157,15 @@ class ExecutePlugin : public Plugin {
                       const config::SettingsNode& settings,
                       const config::SettingsKeys& key) noexcept;
 
+    /**
+     * Returns the currently active patterns handler
+     *
+     * \note Requesting the active patterns handler when there is no active one, leads to undefined behaviour
+     * \returns The currently active patterns handler
+     */
+    [[nodiscard]] static auto activePattern() noexcept
+        -> const config::PatternsHandler&;
+
     const config::CommandCollection m_commands;
     const config::CommandCollection m_initialCommands;
 

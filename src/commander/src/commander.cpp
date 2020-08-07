@@ -34,11 +34,17 @@ using execHelper::plugins::Plugins;
 namespace filesystem = std::filesystem;
 
 namespace {
-const czstring<> WORKING_DIR_PATTERN_KEY = "EH_WORKING_DIR";
+inline auto addPredefinedPatterns(Patterns patterns, const Path& rootDirectory)
+    -> Patterns {
+    using namespace std::string_literals;
 
-inline auto addPredefinedPatterns(Patterns patterns) -> Patterns {
+    const auto WORKING_DIR_PATTERN_KEY = "EH_WORKING_DIR"s;
+    const auto ROOT_DIR_PATTERN_KEY = "EH_ROOT_DIR"s;
+
     patterns.emplace_back(Pattern(WORKING_DIR_PATTERN_KEY,
                                   {filesystem::current_path().string()}));
+    patterns.emplace_back(
+        Pattern(ROOT_DIR_PATTERN_KEY, {rootDirectory.string()}));
     return patterns;
 }
 } // namespace
@@ -48,9 +54,9 @@ namespace commander {
 auto Commander::run(const FleetingOptionsInterface& fleetingOptions,
                     SettingsNode settings, Patterns patterns,
                     const Path& workingDirectory,
-                    const EnvironmentCollection& env,
-                    Plugins&& plugins) noexcept -> bool {
-    patterns = addPredefinedPatterns(patterns);
+                    const EnvironmentCollection& env, Plugins&& plugins,
+                    const Path& rootDirectory) noexcept -> bool {
+    patterns = addPredefinedPatterns(patterns, rootDirectory);
 
     ExecutePlugin::push(
         not_null<const FleetingOptionsInterface*>(&fleetingOptions));

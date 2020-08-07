@@ -13,7 +13,7 @@
 #include "base-utils/executionContent.h"
 #include "base-utils/path.h"
 
-#include "unittest/logger.h"
+#include "logger.h"
 
 namespace bp = boost::process;
 namespace filesystem = boost::filesystem;

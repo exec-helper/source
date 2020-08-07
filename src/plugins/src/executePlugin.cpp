@@ -149,8 +149,7 @@ auto ExecutePlugin::apply(Task task, const VariablesMap& /*variables*/,
             {{*command}, {*command, *initialCommand}});
         getVariablesMap(&newVariablesMap, keys, m_settings.back());
 
-        expects(!m_patterns.empty());
-        auto newPatterns = getNextPatterns(newVariablesMap, m_patterns.back());
+        auto newPatterns = getNextPatterns(newVariablesMap, activePattern());
         if(!plugin->apply(task, newVariablesMap, newPatterns)) {
             user_feedback_error("An error occured executing the '"
                                 << *command << "' command");
@@ -255,6 +254,11 @@ auto ExecutePlugin::push(config::Patterns&& patterns) noexcept -> bool {
 
 void ExecutePlugin::push(Plugins&& plugins) noexcept {
     m_plugins.emplace_back(plugins);
+}
+
+auto ExecutePlugin::activePattern() noexcept -> const PatternsHandler& {
+    expects(!m_patterns.empty());
+    return m_patterns.back();
 }
 
 void ExecutePlugin::popFleetingOptions() noexcept {

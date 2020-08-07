@@ -39,7 +39,6 @@ variables:
     script:
         - sudo pacman -Sy --noconfirm --needed tar
         - *install_exec_helper
-        - export PATH=$(pwd)/build/gcc/release/install/bin:$(pwd)/build/gcc/release/install/test/integration:$PATH
         - echo "using run target '$RUN_TARGET'"
         - echo "using modules '$MODULES'"
         - export RC_PARAMS="max_success=${NB_RUNS} max_size=${NB_RUNS}"
@@ -53,6 +52,7 @@ variables:
           - build/clang/release/*.html
         reports:
             junit: build/gcc/release/*_report.xml
+        when: always
 
 .memory-check: &memory_check
     stage: analyze
@@ -333,14 +333,14 @@ unittests:
     <<: *run_test
     variables:
         RUN_TARGET: unittest
-        MODULES: log config commander
+        MODULES: log config
         NB_RUNS: 1000
 
 unittests-core:
     <<: *run_test
     variables:
         RUN_TARGET: unittest
-        MODULES: core plugins
+        MODULES: core plugins commander
         NB_RUNS: 100
     before_script:
         - ulimit -n

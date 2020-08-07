@@ -9,7 +9,8 @@ Patterns are parts of the configuration that will be replaced by its value when 
 
 Patterns can be used to:
 
-* add options to the :program:`exec-helper` command line. 
+* add options to the :program:`exec-helper` command line
+* centralize a value in a variable
 * allow iterating over multiple configurations
 * control the configurations to iterate over
 
@@ -33,6 +34,7 @@ Predefined patterns
 ===================
 Exec-helper predefines some specific patterns for convenience:
 
+* **EH_ROOT_DIR**: contains the absolute path to the directory where the :program:`exec-helper` configuration is located. Useful for converting relative paths to absolute paths for tools that require it (e.g. when setting your :code:`PATH`)
 * **EH_WORKING_DIR**: contains the working directory from where the :program:`exec-helper` executable is called.
 
 Example configuration

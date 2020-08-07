@@ -57,9 +57,7 @@ const string YAML_CONFIG_OPTION_CHARACTER("- ");
 const string rootPatternKey("patterns");
 } // namespace
 
-namespace execHelper {
-namespace test {
-namespace utils {
+namespace execHelper::test::utils {
 MainVariables::MainVariables(const Arguments& arguments) {
     argc = static_cast<int>(arguments.size());
     argv.reset(new char*[argc]);
@@ -310,23 +308,25 @@ string toString(const SettingsNode& settings, unsigned int nbOfTabs) noexcept {
     if(settingsValues) {
         result += "\n";
         return result;
-    } else {
-        result += ":\n";
     }
+
+    result += ":\n";
     for(const auto& value : settingsValues.value()) {
         result += toString(settings[value], nbOfTabs + 1);
     }
     return result;
 }
 
-std::string inheritWorkingDirKey() noexcept { return "EH_WORKING_DIR"; }
+auto getPredefinedPatterns(const Path& rootDirectory) noexcept -> Patterns {
+    using namespace std::literals;
+    constexpr auto workingDirKey = "EH_WORKING_DIR"sv;
+    constexpr auto rootDirKey = "EH_ROOT_DIR"sv;
 
-Patterns getPredefinedPatterns() noexcept {
     Patterns predefined;
     predefined.emplace_back(
-        Pattern{inheritWorkingDirKey(), {filesystem::current_path().string()}});
+        Pattern{string(workingDirKey), {filesystem::current_path().string()}});
+    predefined.emplace_back(
+        Pattern{string(rootDirKey), {rootDirectory.string()}});
     return predefined;
 }
-} // namespace utils
-} // namespace test
-} // namespace execHelper
+} // namespace execHelper::test::utils

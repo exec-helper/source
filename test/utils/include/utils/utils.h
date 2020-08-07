@@ -16,6 +16,7 @@
 #include "config/path.h"
 #include "config/pattern.h"
 #include "plugins/pluginUtils.h"
+#include "plugins/memory.h"
 
 #include "executorStub.h"
 
@@ -46,6 +47,13 @@ std::ostream& operator<<(std::ostream& os, const std::pair<T, U>& stream) {
     return os;
 }
 } // namespace std
+
+namespace execHelper::plugins {
+inline auto operator<<(std::ostream& os, const Memory_t& memory) noexcept -> std::ostream& {
+    os << "Memory: { Task: {" << memory.task << "}, patterns: {" << memory.patterns << "}}";
+    return os;
+}
+} // namespace execHelper::plugins
 
 namespace execHelper {
 namespace test {
@@ -129,8 +137,7 @@ getExpectedTasks(const core::test::ExecutorStub::TaskQueue& tasks,
 std::string toString(const config::SettingsNode& settings,
                      unsigned int nbOfTabs = 0) noexcept;
 
-std::string inheritWorkingDirKey() noexcept;
-Patterns getPredefinedPatterns() noexcept;
+auto getPredefinedPatterns(const config::Path& rootDirectory) noexcept -> Patterns;
 } // namespace utils
 } // namespace test
 } // namespace execHelper
