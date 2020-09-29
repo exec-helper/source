@@ -149,7 +149,13 @@ class SpecialMemory : public Plugin {
     /**
      * \param[in]   returnCode  The code to return on invocation
      */
-    explicit SpecialMemory(bool returnCode) noexcept;
+    explicit SpecialMemory(bool returnCode) : SpecialMemory(returnCode, 0U) {}
+
+    /**
+     * \param[in]   returnCode  The code to return on invocation
+     * \param[in]   expectedSize    The expected size of the memory. Passing this allows for some memory optimization.
+     */
+    SpecialMemory(bool returnCode, size_t expectedSize) noexcept;
 
     auto getVariablesMap(
         const config::FleetingOptionsInterface& fleetingOptions) const noexcept

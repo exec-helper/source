@@ -11,9 +11,8 @@
 #include "plugins/pluginUtils.h"
 
 #include "base-utils/configFileWriter.h"
+#include "base-utils/logger.h"
 #include "base-utils/yaml.h"
-
-#include "unittest/logger.h"
 
 using std::endl;
 using std::initializer_list;

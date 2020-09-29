@@ -8,6 +8,7 @@ src = [
   'src/configBuilder.cpp',
   'src/testCommand.cpp',
   'src/indirectStatement.cpp',
+  'src/logger.cpp',
 ]
 
 deps = [

@@ -1,5 +1,6 @@
 src = [
-  'src/utils.cpp'
+  'src/utils.cpp',
+  'src/matchers.cpp',
 ]
 
 deps = [

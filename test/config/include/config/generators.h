@@ -19,11 +19,11 @@ template <typename T> class Unique {
   public:
     explicit Unique(T value) : m_value{std::move(value)} {}
 
-    const auto& get() const { return m_value; }
+    auto get() const -> const T& { return m_value; }
 
-    const auto& operator*() const { return get(); }
+    auto operator*() const -> const T& { return get(); }
 
-    const auto* operator->() const { return &m_value; }
+    auto operator->() const -> const T* { return &m_value; }
 
   private:
     const T m_value;
@@ -31,7 +31,7 @@ template <typename T> class Unique {
 } // namespace execHelper::config::test
 
 namespace execHelper::config {
-inline bool operator<(const Pattern& lhs, const Pattern& rhs) {
+inline auto operator<(const Pattern& lhs, const Pattern& rhs) {
     return lhs.getKey() < rhs.getKey();
 }
 } // namespace execHelper::config

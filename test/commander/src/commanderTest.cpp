@@ -71,14 +71,13 @@ SCENARIO("Basic test the commander", "[commander][wip]") {
         [](SettingsNode settings, const Unique<CommandCollection>& commands,
            const Path& workingDirectory, const Path& rootDirectory,
            const Unique<Patterns>& patterns, const EnvironmentCollection& env) {
-            const CommandCollection cmds = commands.get();
             FleetingOptionsStub fleetingOptions;
-            fleetingOptions.m_commands = cmds;
+            fleetingOptions.m_commands = *commands;
 
             ExecutorStub::TaskQueue expectedTasks(
                 commands->size(), Task({}, env, workingDirectory));
 
-            auto memory = make_shared<SpecialMemory>();
+            auto memory = make_shared<SpecialMemory>(commands->size());
             Plugins plugins = {
                 {COMMANDS_KEY, shared_ptr<Plugin>(new CommandPlugin())}};
             transform(commands->begin(), commands->end(),
@@ -92,14 +91,13 @@ SCENARIO("Basic test the commander", "[commander][wip]") {
             expectedPatterns.insert(expectedPatterns.end(), patterns->begin(),
                                     patterns->end());
 
-            for(const auto& command : cmds) {
+            for(const auto& command : *commands) {
                 REQUIRE(settings.add(COMMANDS_KEY, command));
 
                 const SettingsKeys keys({command, getPatternsKey()});
 
                 for(const auto& pattern : expectedPatterns) {
-                    REQUIRE(settings.add(keys,
-                                         pattern.getKey()));
+                    REQUIRE(settings.add(keys, pattern.getKey()));
                 }
             }
 

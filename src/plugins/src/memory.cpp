@@ -72,9 +72,9 @@ void MemoryHandler::setReturnCode(bool returnCode) noexcept {
     Memory::setReturnCode(returnCode);
 }
 
-SpecialMemory::SpecialMemory(bool returnCode) noexcept
+SpecialMemory::SpecialMemory(bool returnCode, size_t expectedSize) noexcept
     : m_returnCode(returnCode) {
-    ;
+    m_executions.reserve(expectedSize);
 }
 
 auto SpecialMemory::getVariablesMap(
@@ -87,8 +87,7 @@ auto SpecialMemory::apply(core::Task task,
                           const config::VariablesMap& variables,
                           const config::Patterns& patterns) const noexcept
     -> bool {
-    Memory_t newElement(task, variables, patterns);
-    m_executions.emplace_back(newElement);
+    m_executions.emplace_back(task, variables, patterns);
     return m_returnCode;
 }
 

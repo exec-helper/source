@@ -8,6 +8,7 @@ deps = [
   test_base_utils,
   test_utils,
   commander,
+  config_generators,
 ]
 
 exe = executable('exec-helper-commander-unittest', src,

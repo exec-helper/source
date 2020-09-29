@@ -1,6 +1,5 @@
 src = [
   'src/catch.cpp',
-  'src/logger.cpp',
 ]
 
 deps = [
