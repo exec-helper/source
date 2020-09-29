@@ -11,7 +11,9 @@
 #include "log/assertions.h"
 #include "plugins/commandLineCommand.h"
 #include "plugins/executePlugin.h"
+#include "plugins/lcov.h"
 #include "plugins/memory.h"
+#include "plugins/pmd.h"
 #include "plugins/valgrind.h"
 #include "unittest/catch.h"
 
@@ -40,8 +42,10 @@ using execHelper::config::VariablesMap;
 using execHelper::core::Task;
 using execHelper::plugins::CommandLineCommand;
 using execHelper::plugins::ExecutePlugin;
+using execHelper::plugins::Lcov;
 using execHelper::plugins::Memory;
 using execHelper::plugins::MemoryHandler;
+using execHelper::plugins::Pmd;
 using execHelper::plugins::Valgrind;
 
 using execHelper::test::FleetingOptionsStub;
@@ -430,6 +434,8 @@ SCENARIO("Testing the plugin getter", "[execute-plugin]") {
                     "command-line-command"));
                 REQUIRE(checkGetPlugin<const Memory>("memory"));
                 REQUIRE(checkGetPlugin<const Valgrind>("valgrind"));
+                REQUIRE(checkGetPlugin<const Pmd>("pmd"));
+                REQUIRE(checkGetPlugin<const Lcov>("lcov"));
             }
         }
         WHEN("We try to get a non-existing plugin") {
@@ -438,6 +444,33 @@ SCENARIO("Testing the plugin getter", "[execute-plugin]") {
                     ExecutePlugin::getPlugin("non-existing-plugin"),
                     plugins::InvalidPlugin);
             }
+        }
+    }
+}
+
+SCENARIO("Print the execute-plugin summary", "[execute-plugin][success]") {
+    ExecutePlugin plugin({});
+
+    WHEN("We request the summary of the plugin") {
+        auto summary = plugin.summary();
+
+        THEN("The summary must not be empty") { REQUIRE(!summary.empty()); }
+    }
+}
+
+SCENARIO("Stream the execute-plugin summary", "[execute-plugin][success]") {
+    ExecutePlugin plugin({});
+
+    WHEN("We request the summary of the plugin") {
+        std::stringstream summary;
+        summary << plugin;
+
+        THEN("The summary must not be empty") {
+            REQUIRE(!summary.str().empty());
+        }
+
+        THEN("The summary must show the expected message") {
+            REQUIRE(summary.str() == plugin.summary());
         }
     }
 }
