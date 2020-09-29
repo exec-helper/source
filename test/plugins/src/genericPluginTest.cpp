@@ -2,6 +2,7 @@
  *@file Tests properties that each plugin should have
  */
 #include <filesystem>
+#include <sstream>
 
 #include "unittest/catch.h"
 #include "unittest/config.h"
@@ -220,16 +221,6 @@ SCENARIO("A plugin must not alter the arguments before a given task") {
 }
 
 SCENARIO("Print the plugin summary", "[generic-plugin][success]") {
-    FleetingOptionsStub options;
-    options.m_commands.push_back("memory");
-
-    execHelper::plugins::ExecutePlugin::push(
-        gsl::not_null<FleetingOptionsInterface*>(&options));
-
-    Patterns patterns = {Pattern(std::string(patternKey), {"memory"})};
-    execHelper::plugins::ExecutePlugin::push(Patterns(patterns));
-
-    execHelper::plugins::ExecutePlugin::push(SettingsNode("test"));
     execHelper::plugins::ExecutePlugin::push(getPlugins());
 
     propertyTest("A plugin", [](std::shared_ptr<const Plugin>&& plugin) {
@@ -241,8 +232,26 @@ SCENARIO("Print the plugin summary", "[generic-plugin][success]") {
     });
 
     execHelper::plugins::ExecutePlugin::popPlugins();
-    execHelper::plugins::ExecutePlugin::popSettingsNode();
-    execHelper::plugins::ExecutePlugin::popPatterns();
-    execHelper::plugins::ExecutePlugin::popFleetingOptions();
+}
+
+SCENARIO("Stream the plugin summary", "[generic-plugin][success]") {
+    execHelper::plugins::ExecutePlugin::push(getPlugins());
+
+    propertyTest("A plugin", [](std::shared_ptr<const Plugin>&& plugin) {
+        THEN_WHEN("We request the summary of the plugin") {
+            std::stringstream summary;
+            summary << *plugin;
+
+            THEN_CHECK("The summary must not be empty") {
+                REQUIRE(!summary.str().empty());
+            }
+
+            THEN_CHECK("The summary must show the expected message") {
+                REQUIRE(summary.str() == plugin->summary());
+            }
+        }
+    });
+
+    execHelper::plugins::ExecutePlugin::popPlugins();
 }
 } // namespace execHelper::plugins::test
