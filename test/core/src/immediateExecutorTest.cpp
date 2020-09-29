@@ -13,12 +13,6 @@ using std::string;
 using execHelper::core::ImmediateExecutor;
 using execHelper::core::Shell;
 
-namespace {
-ImmediateExecutor::Callback // NOLINT(fuchsia-statically-constructed-objects)
-    IGNORE_CALLBACK = [](Shell::ShellReturnCode /* returnCode */) noexcept {
-    }; // NOLINT(cert-err58-cpp)
-} // namespace
-
 namespace execHelper::core::test {
 SCENARIO("Test the execution of the immediateExecutor",
          "[ExecutorInterface][ImmediateExecutor]") {
@@ -32,8 +26,9 @@ SCENARIO("Test the execution of the immediateExecutor",
 
         ShellStub::TaskQueue actualTasks = {task1, task2, task3};
         auto shell = make_shared<ShellStub>();
-        ImmediateExecutor executor(static_pointer_cast<Shell>(shell),
-                                   IGNORE_CALLBACK);
+        ImmediateExecutor executor(
+            static_pointer_cast<Shell>(shell),
+            []([[maybe_unused]] Shell::ShellReturnCode returnCode) {});
 
         WHEN("We schedule each task and run the executor") {
             executor.execute(task1);
