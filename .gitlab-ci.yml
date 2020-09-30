@@ -323,7 +323,8 @@ cross-compilation:
     before_script:
         - *install_exec_helper
     script:
-        - apt-get install --yes debootstrap gcc-aarch64-linux-gnu g++-aarch64-linux-gnu cmake pkg-config git
+        - apt-get update
+        - apt-get install --yes --no-install-recommends debootstrap gcc-aarch64-linux-gnu g++-aarch64-linux-gnu cmake pkg-config git
         - debootstrap --arch=arm64 --download-only --variant=minbase --include=libboost-program-options-dev,libboost-filesystem-dev,libboost-log-dev,libboost-thread-dev,libc6-dev,liblua5.3-dev,libyaml-cpp-dev,libmsgsl-dev testing ./sysroot_arm64 http://deb.debian.org/debian/
         - for DEB in $(find sysroot_arm64/var/cache/apt/archives -not -path sysroot_arm64/var/cache/apt/archives/partial -type f); do echo "Extracting ${DEB}..."; dpkg -x ${DEB} sysroot_arm64; done   # Unpack all downloaded debian packages, since debootstrap does not seem to unpack the additional included ones and their dependencies
         - cp -r /usr/aarch64-linux-gnu/* sysroot_arm64/usr/
