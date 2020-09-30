@@ -1,5 +1,4 @@
-ARG  DOCKER_TAG=latest
-FROM bverhagen/awesome-aur-wrapper:${DOCKER_TAG}
+FROM bverhagen/awesome-aur-wrapper:yay
 LABEL maintainer="barrie.verhagen@gmail.com"
 
 RUN sudo pacman -Sy --needed --noconfirm archlinux-keyring && sudo pacman -Scc --noconfirm  # Fixes some pacman keyring issues
