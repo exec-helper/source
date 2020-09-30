@@ -134,7 +134,7 @@ inline auto PosixShell::wordExpand(const Task& task) noexcept
     char** cached_environ = environ;
 
     // Set global environment, since this is where wordexp will look for substitutions
-    Envp envp = Envp(task.getEnvironment());
+    auto envp = Envp(task.getEnvironment());
     environ = envp.getEnvp();
 
     TaskCollection result;

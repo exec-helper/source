@@ -13,7 +13,6 @@
 #include "config/commandLineOptions.h"
 #include "config/config.h"
 #include "config/configFileSearcher.h"
-#include "config/envp.h"
 #include "config/fleetingOptions.h"
 #include "config/fleetingOptionsInterface.h"
 #include "config/optionDescriptions.h"
@@ -69,7 +68,6 @@ using execHelper::config::ConfigFileSearcher;
 using execHelper::config::DRY_RUN_KEY;
 using execHelper::config::DryRunOption_t;
 using execHelper::config::EnvironmentCollection;
-using execHelper::config::Envp;
 using execHelper::config::FleetingOptions;
 using execHelper::config::FleetingOptionsInterface;
 using execHelper::config::getAllParentDirectories;

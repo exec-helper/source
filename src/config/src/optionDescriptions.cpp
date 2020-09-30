@@ -32,8 +32,7 @@ auto OptionDescriptions::getOptionsMap(VariablesMap& variablesMap,
                                        bool allowUnregistered) const noexcept
     -> bool {
     variables_map optionsMap;
-    auto commandLineParser =
-        command_line_parser(args.size(), args.data());
+    auto commandLineParser = command_line_parser(args.size(), args.data());
     commandLineParser.options(m_optionDescription);
 
     // Assign positional arguments

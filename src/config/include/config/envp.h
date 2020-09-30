@@ -18,24 +18,20 @@ class Envp {
 
     /*! @copydoc Argv::Argv(const Argv&)
      */
-    Envp(const Envp& other) noexcept;
+    Envp(const Envp& other) noexcept = delete;
 
     /*! @copydoc Argv::Argv(Argv&&)
      */
-    Envp(Envp&& other) noexcept;
+    Envp(Envp&& other) noexcept = delete;
     ~Envp() noexcept;
 
     /*! @copydoc Argv::operator=(const Argv&)
      */
-    auto operator=(const Envp& other) noexcept -> Envp&;
+    auto operator=(const Envp& other) noexcept -> Envp& = delete;
 
     /*! @copydoc Argv::operator=(Argv&&)
      */
-    auto operator=(Envp&& other) noexcept -> Envp&;
-
-    /*! @copydoc Argv::swap(Argv&)
-     */
-    void swap(Envp& other) noexcept;
+    auto operator=(Envp&& other) noexcept -> Envp& = delete;
 
     /**
      * Returns the size of the collection
@@ -54,6 +50,7 @@ class Envp {
      * delimited by a nullptr.
      *
      * \returns A pointer to an array of pointers to environment variables
+     * \note    Only remains valid while this whole object exists
      */
     [[nodiscard]] auto getEnvp() noexcept -> char**;
 
@@ -63,13 +60,6 @@ class Envp {
 
   private:
     using Envp_t = std::vector<char*>;
-
-    /**
-     * Create a deep copy
-     *
-     * \param[in] other The other object to copy
-     */
-    void deepCopy(const Envp& other) noexcept;
 
     Envp_t m_envp;
 };
