@@ -7,7 +7,6 @@ src = [
   'src/pattern.cpp',
   'src/patternsHandler.cpp',
   'src/optionDescriptions.cpp',
-  'src/argv.cpp',
   'src/envp.cpp',
   'src/cast.cpp',
   'src/pathManipulation.cpp',

@@ -6,6 +6,8 @@
 #include <vector>
 
 #include <boost/program_options.hpp>
+#include <gsl/span>
+#include <gsl/string_span>
 
 #include "log/assertions.h"
 
@@ -16,10 +18,10 @@ namespace execHelper::config {
 class Argv;
 } // namespace execHelper::config
 
-namespace execHelper {
-namespace config {
-typedef std::string ArgumentOption;
-typedef std::vector<ArgumentOption> ArgumentOptions;
+namespace execHelper::config {
+using ArgumentOption = std::string;
+using ArgumentOptions = std::vector<ArgumentOption>;
+using Args = gsl::span<const gsl::czstring<>>;
 
 /**
  * \brief Interface for determining the option characteristics associated with
@@ -305,12 +307,12 @@ class OptionDescriptions {
      * command line arguments
      *
      * \param[out] variablesMap  The variables map to add the values to
-     * \param[in] argv  A collection of input arguments
-     * \param[in] allowUnregistered Whether to allow options in argv that are
+     * \param[in] args  A collection of input arguments
+     * \param[in] allowUnregistered Whether to allow options in args that are
      * not described in this option description \returns True    if the options
      * map was successfully constructed False   otherwise
      */
-    auto getOptionsMap(config::VariablesMap& variablesMap, const Argv& argv,
+    auto getOptionsMap(config::VariablesMap& variablesMap, const Args& args,
                        bool allowUnregistered = false) const noexcept -> bool;
 
     /**
@@ -333,7 +335,6 @@ class OptionDescriptions {
     std::map<std::string, std::unique_ptr<OptionBase>> m_options;
     std::optional<std::string> m_positional;
 };
-} // namespace config
-} // namespace execHelper
+} // namespace execHelper::config
 
 #endif /* __OPTION_DESCRIPTIONS_H__ */

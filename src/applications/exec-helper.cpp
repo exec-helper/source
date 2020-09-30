@@ -10,7 +10,6 @@
 #include <vector>
 
 #include "commander/commander.h"
-#include "config/argv.h"
 #include "config/commandLineOptions.h"
 #include "config/config.h"
 #include "config/configFileSearcher.h"
@@ -61,7 +60,7 @@ using execHelper::config::APPEND_SEARCH_PATH_KEY;
 using execHelper::config::AppendSearchPathOption_t;
 using execHelper::config::ArgumentOption;
 using execHelper::config::ArgumentOptions;
-using execHelper::config::Argv;
+using execHelper::config::Args;
 using execHelper::config::AUTO_COMPLETE_KEY;
 using execHelper::config::AutoCompleteOption_t;
 using execHelper::config::COMMAND_KEY;
@@ -388,12 +387,12 @@ inline OptionDescriptions getDefaultOptions() noexcept {
     return options;
 }
 
-inline VariablesMap handleConfiguration(const Argv& argv,
+inline VariablesMap handleConfiguration(const Args& args,
                                         const EnvironmentCollection& /*env*/,
                                         OptionDescriptions& options) {
     options.setPositionalArgument(commandOption);
     VariablesMap optionsMap = FleetingOptions::getDefault();
-    if(!options.getOptionsMap(optionsMap, argv, false)) {
+    if(!options.getOptionsMap(optionsMap, args, false)) {
         throw std::invalid_argument(
             "Could not properly parse the command line options");
     }
@@ -402,7 +401,7 @@ inline VariablesMap handleConfiguration(const Argv& argv,
 } // namespace
 
 int execHelperMain(int argc, char** argv, char** envp) {
-    const Argv args(argc, argv);
+    const Args args(argv, argc);
     const EnvironmentCollection env = toEnvCollection(envp);
 
     auto firstPassOptions = getDefaultOptions();

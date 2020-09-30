@@ -11,7 +11,6 @@ src = [
   'src/configTest.cpp',
   'src/fleetingOptionsTest.cpp',
   'src/commandLineOptionsTest.cpp',
-  'src/argvTest.cpp',
   'src/envpTest.cpp',
   'src/pathManipulationTest.cpp',
   'src/yamlTest.cpp',
