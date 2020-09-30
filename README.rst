@@ -190,12 +190,12 @@ Check the *.exec-helper* file for detailed information about how these analysis 
                  :target: https://gitlab.com/bverhagen/exec-helper/commits/master
 .. |build_windows_badge| image:: https://ci.appveyor.com/api/projects/status/6hj664td3tjx9cs5/branch/master?svg=true
                          :alt: Windows build
-.. |coverage_badge| image:: https://codecov.io/gh/exec-helper/source/branch/master/graph/badge.svg
+.. |coverage_badge| image:: https://app.codacy.com/project/badge/Coverage/6b2efb802a97469ea6d010b12fd14584
                     :alt: Test coverage report
-                    :target: https://codecov.io/gh/exec-helper/source
+                    :target: https://app.codacy.com/gl/exec-helper/source/dashboard
 .. |code_quality_badge| image:: https://api.codacy.com/project/badge/Grade/98d9b8174f0d4a8ba79adebda064093d
                         :alt: Code quality report
-                        :target: https://www.codacy.com/app/bverhagen/exec-helper?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=bverhagen/exec-helper&amp;utm_campaign=Badge_Grade
+                        :target: https://app.codacy.com/gl/exec-helper/source/dashboard
 .. |documentation| image:: https://readthedocs.org/projects/exec-helper/badge/?version=master
                    :target: https://exec-helper.readthedocs.io
                    :alt: Documentation Status

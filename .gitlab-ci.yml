@@ -396,12 +396,15 @@ coverage:
           artifacts: true
         - job: build:gcc
           artifacts: true
+    before_script:
+        - sudo pacman -Sy --noconfirm --needed which
     script:
         - *install_exec_helper
         - export PATH=$(pwd)/build/gcc/release/install/bin:$(pwd)/build/gcc/release/install/test/integration:$PATH
         - exec-helper coverage
     after_script:
         - bash <(curl -s https://codecov.io/bash) -t "${CODECOV_TOKEN}" -f lcov-plugin.info -Z -F unittests
+        - bash <(curl -Ls https://coverage.codacy.com/get.sh) report --project-token "${CODACY_PROJECT_TOKEN}" --coverage-reports lcov-plugin.info
     artifacts:
         paths:
             - test_coverage/
