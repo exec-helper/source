@@ -1,7 +1,11 @@
 #include "optionDescriptions.h"
 
+#include "log/log.h"
 #include "logger.h"
+#include <stdexcept>
 
+using gsl::not_null;
+using std::invalid_argument;
 using std::string;
 
 using boost::program_options::command_line_parser;
@@ -22,12 +26,11 @@ auto OptionDescriptions::getOptionDescriptions() const noexcept
 }
 
 auto OptionDescriptions::setPositionalArgument(
-    const OptionInterface& option) noexcept -> bool {
+    const OptionInterface& option) noexcept -> void {
     m_positional = option.getId();
-    return true;
 }
 
-auto OptionDescriptions::getOptionsMap(VariablesMap& variablesMap,
+auto OptionDescriptions::getOptionsMap(not_null<VariablesMap*> variablesMap,
                                        const Args& args,
                                        bool allowUnregistered) const noexcept
     -> bool {
@@ -57,15 +60,33 @@ auto OptionDescriptions::getOptionsMap(VariablesMap& variablesMap,
     }
 
     notify(optionsMap);
-    toMap(variablesMap, optionsMap);
+    try {
+        toMap(variablesMap, optionsMap);
+    } catch(const std::invalid_argument& e) {
+        user_feedback_error(e.what());
+        return false;
+    }
     return true;
 }
 
-void OptionDescriptions::toMap(VariablesMap& variablesMap,
-                               const variables_map& optionsMap) const noexcept {
+void OptionDescriptions::toMap(not_null<VariablesMap*> variablesMap,
+                               const variables_map& optionsMap) const {
     for(const auto& option : optionsMap) {
         if(m_options.count(option.first) > 0U) {
-            m_options.at(option.first)->toMap(variablesMap, optionsMap);
+            try {
+                m_options.at(option.first)->toMap(variablesMap, optionsMap);
+            } catch(const boost::bad_any_cast& e) {
+                LOG(error) << "Failed to parse '" << option.first
+                           << "': " << e.what();
+                throw invalid_argument(
+                    string("Failed to parse value for option '")
+                        .append(option.first));
+            } catch(const invalid_argument& e) {
+                LOG(error) << e.what();
+                throw invalid_argument(
+                    string("Failed to parse value for option '")
+                        .append(option.first));
+            }
         }
     }
 }
