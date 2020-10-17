@@ -33,7 +33,7 @@ Feature: Discover custom plugins
         | memory                | Memory \(internal\)                                        |
         | make                  | Lua plugin for module \S*/plugins/make.lua                 |
         | ninja                 | Lua plugin for module \S*/plugins/ninja.lua                |
-        | pmd                   | Pmd \(internal\)                                           |
+        | pmd                   | Lua plugin for module \S*/plugins/pmd.lua                  |
         | scons                 | Lua plugin for module \S*/plugins/scons.lua                |
         | selector              | Lua plugin for module \S*/plugins/selector.lua             |
         | valgrind              | Valgrind \(internal\)                                      |

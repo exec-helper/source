@@ -25,7 +25,6 @@
 #include "plugins/memory.h"
 #include "plugins/plugin.h"
 #include "plugins/pluginUtils.h"
-#include "plugins/pmd.h"
 #include "plugins/valgrind.h"
 
 #include "core/coreGenerators.h"
@@ -61,7 +60,6 @@ auto getPlugins() noexcept -> Plugins {
          shared_ptr<Plugin>(new execHelper::plugins::CommandLineCommand())},
         {"memory", shared_ptr<Plugin>(new execHelper::plugins::Memory())},
         {"valgrind", shared_ptr<Plugin>(new execHelper::plugins::Valgrind())},
-        {"pmd", shared_ptr<Plugin>(new execHelper::plugins::Pmd())},
         {"lcov", shared_ptr<Plugin>(new execHelper::plugins::Lcov())},
     };
 

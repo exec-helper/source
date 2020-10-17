@@ -13,7 +13,6 @@
 #include "plugins/executePlugin.h"
 #include "plugins/lcov.h"
 #include "plugins/memory.h"
-#include "plugins/pmd.h"
 #include "plugins/valgrind.h"
 #include "unittest/catch.h"
 
@@ -45,7 +44,6 @@ using execHelper::plugins::ExecutePlugin;
 using execHelper::plugins::Lcov;
 using execHelper::plugins::Memory;
 using execHelper::plugins::MemoryHandler;
-using execHelper::plugins::Pmd;
 using execHelper::plugins::Valgrind;
 
 using execHelper::test::FleetingOptionsStub;
@@ -434,7 +432,6 @@ SCENARIO("Testing the plugin getter", "[execute-plugin]") {
                     "command-line-command"));
                 REQUIRE(checkGetPlugin<const Memory>("memory"));
                 REQUIRE(checkGetPlugin<const Valgrind>("valgrind"));
-                REQUIRE(checkGetPlugin<const Pmd>("pmd"));
                 REQUIRE(checkGetPlugin<const Lcov>("lcov"));
             }
         }

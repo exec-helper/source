@@ -39,11 +39,9 @@ inline void
 addToConfig(const execHelper::config::SettingsKeys& key,
             const std::vector<T>& value,
             gsl::not_null<execHelper::config::VariablesMap*> config) {
-    if(!config->add(key, value)) {
-        throw std::runtime_error("Failed to add key " + key.back() +
-                                 " with first value '" + value.front() +
-                                 "' to config");
-    }
+    std::for_each(value.begin(), value.end(), [&key, &config](const auto& element) {
+        addToConfig(key, element, config);
+    });
 }
 
 inline void
@@ -59,6 +57,12 @@ addToConfig(const execHelper::config::SettingsKeys& key, bool value,
         throw std::runtime_error("Failed to add key " + key.back() +
                                  " with value 'false' to config");
     }
+}
+
+inline void
+addToConfig(const execHelper::config::SettingsKeys& key, std::uint16_t value,
+            gsl::not_null<execHelper::config::VariablesMap*> config) {
+    addToConfig(key, std::to_string(value), config);
 }
 
 inline void

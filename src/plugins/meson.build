@@ -1,6 +1,5 @@
 src = [
   'src/luaPlugin.cpp',
-  'src/pmd.cpp',
   'src/pluginUtils.cpp',
   'src/memory.cpp',
   'src/commandPlugin.cpp',
@@ -46,5 +45,6 @@ plugin_files = [
   'src/scripts/cppcheck.lua',
   'src/scripts/selector.lua',
   'src/scripts/clang-static-analyzer.lua',
+  'src/scripts/pmd.lua',
 ]
 install_data(plugin_files, install_dir : get_option('datadir') / 'exec-helper' / 'plugins')

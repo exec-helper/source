@@ -1,6 +1,7 @@
 #ifndef ADD_TO_TASK_INCLUDE
 #define ADD_TO_TASK_INCLUDE
 
+#include <filesystem>
 #include <functional>
 #include <initializer_list>
 #include <optional>
@@ -35,16 +36,29 @@ inline void addToTask(bool value, gsl::not_null<core::Task*> task,
     }
 }
 
-inline void addToTask(const std::vector<std::string>& value,
-                      gsl::not_null<core::Task*> task, AddToTaskFunction func) {
-    std::for_each(
-        value.begin(), value.end(),
-        [&task, func](const auto& element) { task->append(func(element)); });
+inline void addToTask(uint16_t value, gsl::not_null<core::Task*> task,
+                      AddToTaskFunction func) {
+    addToTask(std::to_string(value), task, std::move(func));
 }
 
 inline void addToTask(const std::pair<std::string, std::string>& value,
                       gsl::not_null<core::Task*> task, AddToTaskFunction func) {
     task->append(func(value.first + "=" + value.second));
+}
+
+inline void addToTask(const std::filesystem::path& value,
+                        gsl::not_null<core::Task*> task, AddToTaskFunction func = [](const std::filesystem::path& value) -> execHelper::core::TaskCollection { return { value.string() }; } ) {
+    task->append(func(value));
+}
+
+template<typename T>
+inline void addToTask(const std::vector<T>& value,
+                      gsl::not_null<core::Task*> task, AddToTaskFunction func) {
+    std::for_each(
+        value.begin(), value.end(),
+        [&task, func](const auto& element) {
+            addToTask(element, task, func);
+        });
 }
 
 template <typename T>
