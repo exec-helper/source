@@ -10,8 +10,7 @@
 
 #include "fleetingOptionsInterface.h"
 
-namespace execHelper {
-namespace config {
+namespace execHelper::config {
 /**
  * \brief Options that are as fleeting as the wind
  */
@@ -24,28 +23,39 @@ class FleetingOptions : public FleetingOptionsInterface {
      */
     explicit FleetingOptions(const VariablesMap& optionsMap) noexcept;
 
-    /*! @copydoc config::Argv::Argv(const config::Argv& other)
+    /**
+     * Copy constructor
+     *
+     * \param[in] other The object to copy from
      */
     FleetingOptions(const FleetingOptions& other) = default;
 
-    /*! @copydoc config::Argv::Argv(config::Argv&& other)
+    /**
+     * Move constructor
+     *
+     * \param[in] other The object to move from
      */
     FleetingOptions(FleetingOptions&& other) = default;
+
     virtual ~FleetingOptions() = default;
 
-    /*! @copydoc config::Argv::operator=(const config::Argv& other)
-     */
     FleetingOptions& operator=(const FleetingOptions& other) = delete;
-
-    /*! @copydoc config::Argv::operator=(config::Argv&& other)
-     */
     FleetingOptions& operator=(FleetingOptions&& other) = delete;
 
-    /*! @copydoc config::Argv::operator==(const config::Argv& other) const
+    /**
+     * Equality operator
+     *
+     * \param[in] other The other object to compare with
+     * \returns True    If the objects are considered equal
+     *          False   Otherwise
      */
     auto operator==(const FleetingOptions& other) const -> bool;
 
-    /*! @copydoc config::Argv::operator!=(const config::Argv& other) const
+    /**
+     * Inequality operator
+     *
+     * \param[in] other The other object to compare with
+     * \returns !operator==(other)
      */
     auto operator!=(const FleetingOptions& other) const -> bool;
 
@@ -91,7 +101,6 @@ class FleetingOptions : public FleetingOptionsInterface {
     CommandCollection m_commands;
     const std::optional<config::AutoCompleteOption_t> m_autocomplete;
 };
-} // namespace config
-} // namespace execHelper
+} // namespace execHelper::config
 
 #endif /* EXEC_HELPER_CONFIG_INCLUDE */

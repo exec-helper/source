@@ -1,5 +1,7 @@
 #include "patternsHandler.h"
 
+#include <algorithm>
+#include <optional>
 #include <string>
 
 #include <log/assertions.h>
@@ -7,21 +9,22 @@
 #include "logger.h"
 #include "variablesMap.h"
 
-using std::string;
-
+using std::inserter;
+using std::move;
 using std::optional;
+using std::pair;
+using std::string;
+using std::transform;
 
 namespace execHelper::config {
-PatternsHandler::PatternsHandler(const Patterns& other) {
-    for(const auto& pattern : other) {
-        m_patterns.emplace(pattern.getKey(), pattern);
-    }
+PatternsHandler::PatternsHandler(const Patterns& patterns)
+    : m_patterns(convert(Patterns(patterns))) {
+    ;
 }
 
-PatternsHandler::PatternsHandler(Patterns&& other) noexcept {
-    for(auto&& pattern : other) {
-        m_patterns.emplace(pattern.getKey(), pattern);
-    }
+PatternsHandler::PatternsHandler(Patterns&& patterns)
+    : m_patterns(convert(move(patterns))) {
+    ;
 }
 
 auto PatternsHandler::operator==(const PatternsHandler& other) const noexcept
@@ -71,5 +74,17 @@ auto PatternsHandler::toPattern(const PatternKey& key,
     auto shortOption = patternMap.get<char>(SHORT_OPTION_KEY);
     auto longOptionOpt = patternMap.get<string>(LONG_OPTION_KEY);
     return Pattern(key, *defaultValues, shortOption, longOptionOpt);
+}
+
+inline auto PatternsHandler::convert(Patterns&& patterns) noexcept
+    -> PatternCollection {
+    execHelper::config::PatternsHandler::PatternCollection result;
+    transform(
+        patterns.begin(), patterns.end(), inserter(result, result.end()),
+        [](auto&& pattern) -> pair<execHelper::config::PatternKey,
+                                   execHelper::config::Pattern> {
+            return {pattern.getKey(), std::forward<decltype(pattern)>(pattern)};
+        });
+    return result;
 }
 } // namespace execHelper::config

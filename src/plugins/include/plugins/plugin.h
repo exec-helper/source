@@ -25,21 +25,12 @@ namespace plugins {
  */
 class Plugin {
   public:
-    /*! @copydoc config::Argv::Argv(const Argv&)
-     */
     Plugin(const Plugin& other) = delete;
-
-    /*! @copydoc config::Argv::Argv(Argv&&)
-     */
     Plugin(Plugin&& other) noexcept = delete;
+
     virtual ~Plugin() = default;
 
-    /*! @copydoc config::Argv::operator=(const Argv&)
-     */
     Plugin& operator=(const Plugin& other) = delete;
-
-    /*! @copydoc config::Argv::operator=(Argv&&)
-     */
     Plugin& operator=(Plugin&& other) noexcept = delete;
 
     /**

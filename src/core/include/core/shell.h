@@ -42,19 +42,33 @@ class Shell {
   protected:
     Shell() = default;
 
-    /*! @copydoc config::Argv::Argv(const config::Argv&)
+    /**
+     * Copy constructor
+     *
+     * \param[in] other The object to copy from
      */
     Shell(const Shell& other) = default;
 
-    /*! @copydoc config::Argv::Argv(config::Argv&&)
+    /**
+     * Move constructor
+     *
+     * \param[in] other The object to move from
      */
     Shell(Shell&& other) = default;
 
-    /*! @copydoc config::Argv::operator=(const config::Argv&)
+    /**
+     * Copy assignment operator
+     *
+     * \param[in] other The object to assign from
+     * \returns A reference to this object
      */
     auto operator=(const Shell& other) -> Shell& = default;
 
-    /*! @copydoc config::Argv::operator=(config::Argv&&)
+    /**
+     * Move assignment operator
+     *
+     * \param[in] other the object to move assign from
+     * \returns a reference to this object
      */
     auto operator=(Shell&& other) -> Shell& = default;
 };

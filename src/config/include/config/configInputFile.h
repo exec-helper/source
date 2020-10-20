@@ -12,26 +12,12 @@ namespace config {
  */
 class ConfigInputFile {
   public:
-    /*! @copydoc config::Argv::Argv(const Argv&)
-     * \note Deleted
-     */
     ConfigInputFile(const ConfigInputFile& other) = delete;
-
-    /*! @copydoc config::Argv::Argv(Argv&&)
-     * \note Deleted
-     */
     ConfigInputFile(ConfigInputFile&& other) noexcept = delete;
 
     virtual ~ConfigInputFile() = default;
 
-    /*! @copydoc config::Argv::operator=(const Argv&)
-     * \note Deleted
-     */
     ConfigInputFile& operator=(const ConfigInputFile& other) = delete;
-
-    /*! @copydoc config::Argv::operator=(Argv&&)
-     * \note Deleted
-     */
     ConfigInputFile& operator=(ConfigInputFile&& other) noexcept = delete;
 
     /**

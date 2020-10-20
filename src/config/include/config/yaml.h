@@ -32,21 +32,12 @@ class Yaml : public config::ConfigInputFile {
      */
     explicit Yaml(const std::string& yamlConfig);
 
-    /*! @copydoc config::Argv::Argv(const Argv&)
-     */
     Yaml(const Yaml& other) = delete;
-
-    /*! @copydoc config::Argv::Argv(Argv&&)
-     */
     Yaml(Yaml&& other) noexcept = delete;
+
     ~Yaml() override = default;
 
-    /*! @copydoc config::Argv::operator=(const Argv&)
-     */
     Yaml& operator=(const Yaml& other) = delete;
-
-    /*! @copydoc config::Argv::operator=(Argv&&)
-     */
     Yaml& operator=(Yaml&& other) noexcept = delete;
 
     /**

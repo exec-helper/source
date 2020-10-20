@@ -12,8 +12,7 @@
 #include "config/path.h"
 #include "config/settingsNode.h"
 
-namespace execHelper {
-namespace yaml {
+namespace execHelper::yaml {
 /**
  * \brief   Wrapper for yaml-cpp
  */
@@ -34,24 +33,42 @@ class YamlWrapper {
      */
     explicit YamlWrapper(const std::string& yamlConfig);
 
-    /*! @copydoc config::Argv::Argv(const Argv&)
+    /**
+     * Copy constructor
+     *
+     * \param[in] other The object to copy from
      */
     YamlWrapper(const YamlWrapper& other);
 
-    /*! @copydoc config::Argv::Argv(Argv&&)
+    /**
+     * Move constructor
+     *
+     * \param[in] other The object to move from
      */
     YamlWrapper(YamlWrapper&& other) noexcept;
+
     ~YamlWrapper() = default;
 
-    /*! @copydoc config::Argv::operator=(const Argv&)
+    /**
+     * Copy assignment operator
+     *
+     * \param[in] other The object to assign from
+     * \returns A reference to this object
      */
-    YamlWrapper& operator=(const YamlWrapper& other);
+    auto operator=(const YamlWrapper& other) -> YamlWrapper&;
 
-    /*! @copydoc config::Argv::operator=(Argv&&)
+    /**
+     * Move assignment operator
+     *
+     * \param[in] other the object to move assign from
+     * \returns a reference to this object
      */
-    YamlWrapper& operator=(YamlWrapper&& other) noexcept;
+    auto operator=(YamlWrapper&& other) noexcept -> YamlWrapper&;
 
-    /*! @copydoc config::Argv::swap(Argv&)
+    /**
+     * Swap contents
+     *
+     * \param[in] other The object to swap with
      */
     void swap(const YamlWrapper& other) noexcept;
 
@@ -117,7 +134,6 @@ class YamlWrapper {
 
     YAML::Node m_node;
 };
-} // namespace yaml
-} // namespace execHelper
+} // namespace execHelper::yaml
 
 #endif /* __YAML_WRAPPER_H__ */

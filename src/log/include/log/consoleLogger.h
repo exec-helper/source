@@ -22,22 +22,12 @@ class ConsoleLogger {
      */
     explicit ConsoleLogger(std::ostream& logStream);
 
-    /*! @copydoc config::Argv::Argv(const Argv&)
-     */
     ConsoleLogger(const ConsoleLogger& other) = delete;
-
-    /*! @copydoc config::Argv::Argv(Argv&&)
-     */
     ConsoleLogger(ConsoleLogger&& other) = delete;
 
     ~ConsoleLogger();
 
-    /*! @copydoc config::Argv::operator=(const Argv&)
-     */
     ConsoleLogger& operator=(const ConsoleLogger& other) = delete;
-
-    /*! @copydoc config::Argv::operator=(Argv&&)
-     */
     ConsoleLogger& operator=(ConsoleLogger&& other) = delete;
 
     /**

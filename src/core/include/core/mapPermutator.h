@@ -5,8 +5,7 @@
 #include <map>
 #include <vector>
 
-namespace execHelper {
-namespace core {
+namespace execHelper::core {
 /**
  * \brief Represents all permutations for the values of a given map
  */
@@ -60,7 +59,7 @@ template <typename T, typename U> class MapPermutator {
          *
          * \returns The next iterator element
          */
-        iterator& operator++() noexcept {
+        auto operator++() noexcept -> iterator& {
             if(m_end) {
                 return *this;
             }
@@ -82,9 +81,14 @@ template <typename T, typename U> class MapPermutator {
             return *this;
         }
 
-        /*! @copydoc config::Argv::operator==(const Argv&) const
+        /**
+         * Equality operator
+         *
+         * \param[in] other The other object to compare with
+         * \returns True    If the objects are considered equal
+         *          False   Otherwise
          */
-        bool operator==(const iterator& other) const {
+        auto operator==(const iterator& other) const -> bool {
             if(m_map != other.m_map) {
                 return false;
             }
@@ -98,9 +102,13 @@ template <typename T, typename U> class MapPermutator {
                                });
         }
 
-        /*! @copydoc config::Argv::operator!=(const Argv&) const
+        /**
+         * Inequality operator
+         *
+         * \param[in] other The other object to compare with
+         * \returns !operator==(other)
          */
-        bool operator!=(const iterator& other) const {
+        auto operator!=(const iterator& other) const -> bool {
             return !(*this == other);
         }
 
@@ -109,7 +117,7 @@ template <typename T, typename U> class MapPermutator {
          *
          * \returns The dereferenced object
          */
-        value_type operator*() const {
+        auto operator*() const -> value_type {
             value_type result;
             for(const auto& index : m_indexes) {
                 result.insert(std::make_pair(
@@ -133,29 +141,32 @@ template <typename T, typename U> class MapPermutator {
      *
      * \returns A begin iterator
      */
-    iterator begin() noexcept { return iterator(m_map); }
+    auto begin() noexcept -> iterator { return iterator(m_map); }
 
     /*! @copydoc begin()
      *
      */
-    const_iterator begin() const noexcept { return const_iterator(m_map); }
+    auto begin() const noexcept -> const_iterator {
+        return const_iterator(m_map);
+    }
 
     /**
      * Return iterator to end
      *
      * \returns An end iterator
      */
-    iterator end() noexcept { return iterator(m_map, true); }
+    auto end() noexcept -> iterator { return iterator(m_map, true); }
 
     /*! @copydoc end()
      *
      */
-    const_iterator end() const noexcept { return const_iterator(m_map, true); }
+    auto end() const noexcept -> const_iterator {
+        return const_iterator(m_map, true);
+    }
 
   private:
     const std::map<T, std::vector<U>> m_map;
 };
-} // namespace core
-} // namespace execHelper
+} // namespace execHelper::core
 
 #endif /* __MAP_PERMUTATOR_H__ */

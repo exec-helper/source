@@ -108,20 +108,34 @@ class FleetingOptionsInterface {
   protected:
     FleetingOptionsInterface() = default;
 
-    /*! @copydoc config::Argv::Argv(const config::Argv&)
+    /**
+     * Copy constructor
+     *
+     * \param[in] other The object to copy from
      */
     FleetingOptionsInterface(const FleetingOptionsInterface& other) = default;
 
-    /*! @copydoc config::Argv::Argv(config::Argv&&)
+    /**
+     * Move constructor
+     *
+     * \param[in] other The object to move from
      */
     FleetingOptionsInterface(FleetingOptionsInterface&& other) = default;
 
-    /*! @copydoc config::Argv::operator=(const config::Argv&)
+    /**
+     * Copy assignment operator
+     *
+     * \param[in] other The object to assign from
+     * \returns A reference to this object
      */
     FleetingOptionsInterface&
     operator=(const FleetingOptionsInterface& other) = default;
 
-    /*! @copydoc config::Argv::operator=(config::Argv&&)
+    /**
+     * Move assignment operator
+     *
+     * \param[in] other The object to move assign from
+     * \returns A reference to this object
      */
     FleetingOptionsInterface&
     operator=(FleetingOptionsInterface&& other) = default;

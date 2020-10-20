@@ -250,7 +250,7 @@ meson:
             plugins-prefix: "${PWD}/build/{TRIPLET}{COMPILER}/{MODE}/install/share/exec-helper/plugins"
             terminate-on-assert: true
             changelog: true
-        #command-line: [--werror, --fatal-meson-warnings]
+        command-line: [--werror]
 
     init-build:
         options:
@@ -268,7 +268,7 @@ meson:
             usage-documentation: false
             api-documentation: false
             plugins-prefix: "${PWD}/build/{TRIPLET}{COMPILER}/{MODE}/install/share/exec-helper/plugins"
-        command-line: [--optimization, 1]
+        command-line: [--optimization, 1, --werror]
 
     init-no-system:
         options:
@@ -295,6 +295,7 @@ meson:
             #cpp_link_args: "['-g', '--coverage', '-fprofile-arcs', '-ftest-coverage']"
             b_coverage: true
         build-type: debug
+        command-line: [--werror]
 
     init-asan:
         options:
@@ -305,6 +306,7 @@ meson:
             terminate-on-assert: true
             b_sanitize: address,undefined
         build-type: debugoptimized
+        command-line: [--werror]
 
     build-only:
         mode: compile

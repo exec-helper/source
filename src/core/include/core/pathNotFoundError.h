@@ -3,8 +3,7 @@
 
 #include <stdexcept>
 
-namespace execHelper {
-namespace core {
+namespace execHelper::core {
 /**
  * \brief Thrown when a path is not found on the system
  */
@@ -20,25 +19,39 @@ class PathNotFoundError : public std::runtime_error {
         ;
     }
 
-    /*! @copydoc config::Argv::Argv(const config::Argv&)
+    /**
+     * Copy constructor
+     *
+     * \param[in] other The object to copy from
      */
     PathNotFoundError(const PathNotFoundError& other) = default;
 
-    /*! @copydoc config::Argv::Argv(config::Argv&&)
+    /**
+     * Move constructor
+     *
+     * \param[in] other The object to move from
      */
     PathNotFoundError(PathNotFoundError&& other) = default;
 
-    ~PathNotFoundError() noexcept override = default;
+    ~PathNotFoundError() override = default;
 
-    /*! @copydoc config::Argv::operator=(const config::Argv&)
+    /**
+     * Copy assignment operator
+     *
+     * \param[in] other The object to assign from
+     * \returns A reference to this object
      */
-    PathNotFoundError& operator=(const PathNotFoundError& other) = default;
+    auto operator=(const PathNotFoundError& other)
+        -> PathNotFoundError& = default;
 
-    /*! @copydoc config::Argv::operator=(config::Argv&&)
+    /**
+     * Move assignment operator
+     *
+     * \param[in] other the object to move assign from
+     * \returns a reference to this object
      */
-    PathNotFoundError& operator=(PathNotFoundError&& other) = default;
+    auto operator=(PathNotFoundError&& other) -> PathNotFoundError& = default;
 };
-} // namespace core
-} // namespace execHelper
+} // namespace execHelper::core
 
 #endif /* PATH_NOT_FOUND_ERROR_INCLUDE */

@@ -7,8 +7,7 @@
 
 #include "createObject.h"
 
-namespace execHelper {
-namespace core {
+namespace execHelper::core {
 /**
  * \brief Iterates over permutations of the given collection
  *
@@ -88,9 +87,14 @@ class PermutationIterator {
                m_innerIterator.hasEmptyCollection();
     }
 
-    /*! @copydoc config::Argv::operator==(const Argv&) const
+    /**
+     * Equality operator
+     *
+     * \param[in] other The other object to compare with
+     * \returns True    If the objects are considered equal
+     *          False   Otherwise
      */
-    bool operator==(const iterator& other) const {
+    auto operator==(const iterator& other) const -> bool {
         if(atEnd()) {
             // If the outer iterator is at the end, we do not care about the
             // state of the inner iterators
@@ -100,9 +104,15 @@ class PermutationIterator {
                 m_outerIterator == other.m_outerIterator);
     }
 
-    /*! @copydoc config::Argv::operator!=(const Argv&) const
+    /**
+     * Inequality operator
+     *
+     * \param[in] other The other object to compare with
+     * \returns !operator==(other)
      */
-    bool operator!=(const iterator& other) const { return !(*this == other); }
+    auto operator!=(const iterator& other) const -> bool {
+        return !(*this == other);
+    }
 
     /**
      * Convert the current iterator position to a tuple of the actual objects
@@ -202,15 +212,26 @@ class PermutationIterator<IteratorType, CollectionType> {
         return m_collectionBeginIterator == m_collectionEndIterator;
     }
 
-    /*! @copydoc PermutationIterator::operator==()
+    /**
+     * Equality operator
+     *
+     * \param[in] other The other object to compare with
+     * \returns True    If the objects are considered equal
+     *          False   Otherwise
      */
-    bool operator==(const iterator& other) const {
+    auto operator==(const iterator& other) const -> bool {
         return m_collectionIterator == other.m_collectionIterator;
     }
 
-    /*! @copydoc PermutationIterator::operator!=()
+    /**
+     * Inequality operator
+     *
+     * \param[in] other The other object to compare with
+     * \returns !operator==(other)
      */
-    bool operator!=(const iterator& other) const { return !(*this == other); }
+    auto operator!=(const iterator& other) const -> bool {
+        return !(*this == other);
+    }
 
     /*! @copydoc PermutationIterator::operator*()
      */
@@ -230,7 +251,6 @@ class PermutationIterator<IteratorType, CollectionType> {
      */
     void restart() { m_collectionIterator = m_collectionBeginIterator; }
 };
-} // namespace core
-} // namespace execHelper
+} // namespace execHelper::core
 
 #endif /* __PERMUTATION_ITERATOR_H__ */

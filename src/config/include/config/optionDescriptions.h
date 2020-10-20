@@ -23,12 +23,20 @@ using ArgumentOptions = std::vector<ArgumentOption>;
 using Args = gsl::span<const gsl::czstring<>>;
 
 namespace detail {
+/**
+ * Converts the given value to the associated settings value
+ *
+ * \param[in] value     The value to convert
+ * \returns The converted value
+ */
 template <typename T> inline auto toSetting([[maybe_unused]] T value) noexcept {
     static_assert(std::is_void_v<T>,
                   "T was not specialized for the correct type");
     return SettingsValue();
 }
 
+/*! \overload toSetting<T>(T)
+ */
 inline auto toSetting(bool value) noexcept {
     if(value) {
         return "1";
@@ -36,27 +44,49 @@ inline auto toSetting(bool value) noexcept {
     return "0";
 }
 
+/*! \overload toSetting<T>(T)
+ */
 inline auto toSetting(const std::string& value) noexcept { return value; }
 
+/*! \overload toSetting<T>(T)
+ */
 inline auto toSetting(const std::vector<std::string>& value) noexcept {
     return value;
 }
 
+/**
+ * \brief Construction for getting a command line argument that fits the expected type
+ */
 template <typename T> struct TypeValue {
+    /**
+     * Returns a program_options value that converts to the given type
+     *
+     * \returns A boost::program_options value that can contain and convert a command line argument to the given type
+     */
     [[nodiscard]] static inline auto value() noexcept
         -> const boost::program_options::value_semantic* {
         return boost::program_options::value<T>();
     }
 };
 
+/**
+ * \brief Construction for getting a command line argument that fits the expected type. Specialization for bool.
+ */
 template <> struct TypeValue<bool> {
+    /*! @copydoc TypeValue<T>::value()
+     */
     [[nodiscard]] static inline auto value() noexcept
         -> const boost::program_options::value_semantic* {
         return boost::program_options::bool_switch();
     }
 };
 
+/**
+ * \brief Construction for getting a command line argument that fits the expected type. Specialization for std::vector<T>.
+ */
 template <typename T> struct TypeValue<std::vector<T>> {
+    /*! @copydoc TypeValue<T>()::value()
+     */
     [[nodiscard]] static inline auto value() noexcept
         -> boost::program_options::value_semantic* {
         return boost::program_options::value<std::vector<T>>()->multitoken();
@@ -103,6 +133,7 @@ class OptionInterface {
      * \param[out] variablesMap The variables map to write to
      * \param[in] optionsMap    The options map to take the value(s) from
      * \throws boost::bad_any_cast  If the given option value can not be parsed to the given option type
+     * \returns void
      */
     virtual auto
     toMap(gsl::not_null<config::VariablesMap*> variablesMap,
@@ -121,10 +152,35 @@ class OptionInterface {
 
   protected:
     OptionInterface() = default;
+
+    /**
+     * Copy constructor
+     *
+     * \param[in] other The object to copy from
+     */
     OptionInterface(const OptionInterface& other) = default;
+
+    /**
+     * Move constructor
+     *
+     * \param[in] other The object to move from
+     */
     OptionInterface(OptionInterface&& other) = default;
 
+    /**
+     * Copy assignment operator
+     *
+     * \param[in] other The object to assign from
+     * \returns A reference to this object
+     */
     auto operator=(const OptionInterface& other) -> OptionInterface& = default;
+
+    /**
+     * move assignment operator
+     *
+     * \param[in] other the object to move assign from
+     * \returns a reference to this object
+     */
     auto operator=(OptionInterface&& other) -> OptionInterface& = default;
 };
 
@@ -149,12 +205,36 @@ template <typename T> class Option : public OptionInterface {
                        "non-identifying option: the associated short option");
     }
 
+    /**
+     * Copy constructor
+     *
+     * \param[in] other The object to copy from
+     */
     Option(const Option& other) = default;
+
+    /**
+     * Move constructor
+     *
+     * \param[in] other The object to move from
+     */
     Option(Option&& other) noexcept = default;
 
     ~Option() override = default;
 
+    /**
+     * Copy assignment operator
+     *
+     * \param[in] other The object to assign from
+     * \returns A reference to this object
+     */
     auto operator=(const Option& other) -> Option& = default;
+
+    /**
+     * move assignment operator
+     *
+     * \param[in] other the object to move assign from
+     * \returns a reference to this object
+     */
     auto operator=(Option&& other) noexcept -> Option& = default;
 
     [[nodiscard]] auto getId() const noexcept -> std::string override {

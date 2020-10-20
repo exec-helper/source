@@ -16,21 +16,12 @@ class Envp {
      */
     explicit Envp(const EnvironmentCollection& env) noexcept;
 
-    /*! @copydoc Argv::Argv(const Argv&)
-     */
     Envp(const Envp& other) noexcept = delete;
-
-    /*! @copydoc Argv::Argv(Argv&&)
-     */
     Envp(Envp&& other) noexcept = delete;
+
     ~Envp() noexcept;
 
-    /*! @copydoc Argv::operator=(const Argv&)
-     */
     auto operator=(const Envp& other) noexcept -> Envp& = delete;
-
-    /*! @copydoc Argv::operator=(Argv&&)
-     */
     auto operator=(Envp&& other) noexcept -> Envp& = delete;
 
     /**

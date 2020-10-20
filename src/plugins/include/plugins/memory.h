@@ -47,21 +47,12 @@ class Memory : public Plugin {
 
     Memory() = default;
 
-    /*! @copydoc config::Argv::Argv(const Argv&)
-     */
     Memory(const Memory& other) = delete;
-
-    /*! @copydoc config::Argv::Argv(Argv&&)
-     */
     Memory(Memory&& other) noexcept = delete;
+
     ~Memory() override = default;
 
-    /*! @copydoc config::Argv::operator=(const Argv&)
-     */
     Memory& operator=(const Memory& other) = delete;
-
-    /*! @copydoc config::Argv::operator=(Argv&&)
-     */
     Memory& operator=(Memory&& other) noexcept = delete;
 
     config::VariablesMap
@@ -106,21 +97,12 @@ class MemoryHandler : public Memory {
 
     MemoryHandler();
 
-    /*! @copydoc config::Argv::Argv(const Argv&)
-     */
     MemoryHandler(const MemoryHandler& other) = delete;
-
-    /*! @copydoc config::Argv::Argv(Argv&&)
-     */
     MemoryHandler(MemoryHandler&& other) noexcept = delete;
+
     ~MemoryHandler() override;
 
-    /*! @copydoc config::Argv::operator=(const Argv&)
-     */
     MemoryHandler& operator=(const MemoryHandler& other) = delete;
-
-    /*! @copydoc config::Argv::operator=(Argv&&)
-     */
     MemoryHandler& operator=(MemoryHandler&& other) noexcept = delete;
 
     /*! @copydoc Memory::getExecutions()
