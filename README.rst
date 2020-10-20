@@ -192,10 +192,10 @@ Check the *.exec-helper* file for detailed information about how these analysis 
                          :alt: Windows build
 .. |coverage_badge| image:: https://app.codacy.com/project/badge/Coverage/6b2efb802a97469ea6d010b12fd14584
                     :alt: Test coverage report
-                    :target: https://app.codacy.com/gl/exec-helper/source/dashboard
-.. |code_quality_badge| image:: https://api.codacy.com/project/badge/Grade/98d9b8174f0d4a8ba79adebda064093d
+                    :target: https://www.codacy.com/gl/exec-helper/source/dashboard?utm_source=gitlab.com&amp;utm_medium=referral&amp;utm_content=exec-helper/source&amp;utm_campaign=Badge_Coverage
+.. |code_quality_badge| image:: https://app.codacy.com/project/badge/Grade/6b2efb802a97469ea6d010b12fd14584
                         :alt: Code quality report
-                        :target: https://app.codacy.com/gl/exec-helper/source/dashboard
+                        :target: https://www.codacy.com/gl/exec-helper/source/dashboard?utm_source=gitlab.com&amp;utm_medium=referral&amp;utm_content=exec-helper/source&amp;utm_campaign=Badge_Grade
 .. |documentation| image:: https://readthedocs.org/projects/exec-helper/badge/?version=master
                    :target: https://exec-helper.readthedocs.io
                    :alt: Documentation Status
