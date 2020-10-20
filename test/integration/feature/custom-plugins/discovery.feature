@@ -36,7 +36,7 @@ Feature: Discover custom plugins
         | pmd                   | Lua plugin for module \S*/plugins/pmd.lua                  |
         | scons                 | Lua plugin for module \S*/plugins/scons.lua                |
         | selector              | Lua plugin for module \S*/plugins/selector.lua             |
-        | valgrind              | Valgrind \(internal\)                                      |
+        | valgrind              | Lua plugin for module \S*/plugins/valgrind.lua             |
 
     @error
     Scenario: Fail to find a custom module when the search path is not set properly

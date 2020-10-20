@@ -14,7 +14,7 @@
 #include "core/task.h"
 #include "plugins/luaPlugin.h"
 
-#include "plugins/handlers.h"
+#include "core/coreGenerators.h"
 #include "unittest/catch.h"
 #include "unittest/config.h"
 #include "utils/addToConfig.h"
@@ -23,6 +23,7 @@
 #include "utils/utils.h"
 
 #include "executorStub.h"
+#include "handlers.h"
 
 namespace filesystem = std::filesystem;
 
@@ -103,8 +104,8 @@ SCENARIO("Testing the configuration settings of the pmd plugin", "[pmd]") {
                         const optional<bool> verbose,
                         const optional<string>& language,
                         const optional<uint16_t>& minimumTokens,
-                        const optional<vector<filesystem::path>>& files) {
-        const Task task;
+                        const optional<vector<filesystem::path>>& files,
+                        const Task& task) {
         Task expectedTask(task);
         Patterns patterns;
 

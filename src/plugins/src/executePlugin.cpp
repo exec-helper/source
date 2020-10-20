@@ -16,7 +16,6 @@
 #include "logger.h"
 #include "memory.h"
 #include "pluginUtils.h"
-#include "valgrind.h"
 
 using std::find;
 using std::make_shared;
@@ -218,9 +217,6 @@ auto ExecutePlugin::getPlugin(const string& pluginName)
     }
     if(pluginName == "memory") {
         return make_shared<Memory>();
-    }
-    if(pluginName == "valgrind") {
-        return make_shared<Valgrind>();
     }
     if(pluginName == "lcov") {
         return make_shared<Lcov>();

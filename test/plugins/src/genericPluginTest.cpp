@@ -25,7 +25,6 @@
 #include "plugins/memory.h"
 #include "plugins/plugin.h"
 #include "plugins/pluginUtils.h"
-#include "plugins/valgrind.h"
 
 #include "core/coreGenerators.h"
 #include "unittest/catch.h"
@@ -59,7 +58,6 @@ auto getPlugins() noexcept -> Plugins {
         {"command-line-command",
          shared_ptr<Plugin>(new execHelper::plugins::CommandLineCommand())},
         {"memory", shared_ptr<Plugin>(new execHelper::plugins::Memory())},
-        {"valgrind", shared_ptr<Plugin>(new execHelper::plugins::Valgrind())},
         {"lcov", shared_ptr<Plugin>(new execHelper::plugins::Lcov())},
     };
 

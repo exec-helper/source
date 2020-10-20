@@ -35,7 +35,6 @@
 #include "plugins/memory.h"
 #include "plugins/plugin.h"
 #include "plugins/pluginUtils.h"
-#include "plugins/valgrind.h"
 
 #include "logger.h"
 #include "version.h"
@@ -227,7 +226,6 @@ inline Plugins discoverPlugins(const Paths& searchPaths) noexcept {
         {"command-line-command",
          shared_ptr<Plugin>(new execHelper::plugins::CommandLineCommand())},
         {"memory", shared_ptr<Plugin>(new execHelper::plugins::Memory())},
-        {"valgrind", shared_ptr<Plugin>(new execHelper::plugins::Valgrind())},
         {"lcov", shared_ptr<Plugin>(new execHelper::plugins::Lcov())},
     };
 

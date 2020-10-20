@@ -3,7 +3,6 @@ src = [
   'src/pluginUtils.cpp',
   'src/memory.cpp',
   'src/commandPlugin.cpp',
-  'src/valgrind.cpp',
   'src/executePlugin.cpp',
   'src/plugin.cpp',
   'src/commandLineCommand.cpp',
@@ -46,5 +45,6 @@ plugin_files = [
   'src/scripts/selector.lua',
   'src/scripts/clang-static-analyzer.lua',
   'src/scripts/pmd.lua',
+  'src/scripts/valgrind.lua',
 ]
 install_data(plugin_files, install_dir : get_option('datadir') / 'exec-helper' / 'plugins')

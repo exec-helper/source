@@ -6,6 +6,7 @@
 #include <initializer_list>
 #include <optional>
 #include <string>
+#include <string_view>
 #include <utility>
 #include <vector>
 
@@ -25,6 +26,11 @@ inline void addToTask(const std::string& value, gsl::not_null<core::Task*> task,
 inline void addToTask(const NonEmptyString& value,
                       gsl::not_null<core::Task*> task, AddToTaskFunction func) {
     task->append(func(*value));
+}
+
+inline void addToTask(const std::string_view& value, gsl::not_null<core::Task*> task,
+                      AddToTaskFunction func) {
+    task->append(func(std::string(value)));
 }
 
 inline void addToTask(bool value, gsl::not_null<core::Task*> task,

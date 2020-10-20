@@ -4,6 +4,7 @@
 #include <optional>
 #include <stdexcept>
 #include <string>
+#include <string_view>
 #include <utility>
 #include <vector>
 
@@ -22,6 +23,13 @@ addToConfig(const execHelper::config::SettingsKeys& key,
         throw std::runtime_error("Failed to add key " + key.back() +
                                  " with value '" + value + "' to config");
     }
+}
+
+inline void
+addToConfig(const execHelper::config::SettingsKeys& key,
+            const std::string_view& value,
+            gsl::not_null<execHelper::config::VariablesMap*> config) {
+    addToConfig(key, std::string(value), config);
 }
 
 inline void
