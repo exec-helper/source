@@ -56,7 +56,7 @@ Copy the following to a file named '.exec-helper'::
     patterns:
         COMPILER:
             default-values:
-                - g++ 
+                - g++
                 - clang++
             short-option: c
             long-option: compiler
@@ -113,7 +113,7 @@ Example output
        -z [ --command ] arg       Commands to execute
        -c [ --compiler ] arg      Values for pattern 'compiler'
        -m [ --mode ] arg          Values for pattern 'mode'
-     
+
      Configured commands:
        init                 Initialize build
        build                Build-only + install
@@ -143,7 +143,7 @@ Example output
 
 Installation
 ============
-See :ref:`INSTALL` for more information on:
+See `INSTALL <https://exec-helper.readthedocs.io/en/master/INSTALL.html>`_ for more information on:
 
 * Using one of the available packages or installers
 * (Cross-)build from source
@@ -154,19 +154,19 @@ See `documentation <http://exec-helper.readthedocs.io>`_ for the latest document
 
 Usage
 -----
-see :ref:`exec-helper` for usage information.
+see `exec-helper <https://exec-helper.readthedocs.io/en/master/src/applications/exec-helper.html>`_ for usage information.
 
 Configuration
 -------------
-See :ref:`exec-helper-config` for information on the configuration file format.
+See `exec-helper-config <https://exec-helper.readthedocs.io/en/master/src/config/docs/exec-helper-config.html>`_ for information on the configuration file format.
 
 Available plugins
 -----------------
-See :ref:`exec-helper-plugins` for a list of all available plugins.
+See `exec-helper-plugins <https://exec-helper.readthedocs.io/en/master/src/plugins/docs/exec-helper-plugins.html>`_ for a list of all available plugins.
 
 Writing custom plugins
 ----------------------
-See :ref:`exec-helper-custom-plugins` for a guide on writing your own plugins.
+See `exec-helper-custom-plugins <https://exec-helper.readthedocs.io/en/master/src/plugins/docs/exec-helper-custom-plugins.html>`_ for a guide on writing your own plugins.
 
 Code quality
 ============
