@@ -15,6 +15,7 @@
 #endif
 #include <boost/optional.hpp>
 
+#include "config/commandLineOptions.h"
 #include "config/pattern.h"
 #include "core/task.h"
 
@@ -22,14 +23,13 @@
 #include "executePlugin.h"
 #include "logger.h"
 #include "pluginUtils.h"
-#include "threadedness.h"
-#include "verbosity.h"
 #include "workingDirectory.h"
 
 using std::ifstream;
 using std::make_pair;
 using std::move;
 using std::pair;
+using std::runtime_error;
 using std::string;
 using std::to_string;
 using std::unordered_map;
@@ -39,11 +39,14 @@ using boost::optional;
 
 using execHelper::config::CommandCollection;
 using execHelper::config::FleetingOptionsInterface;
+using execHelper::config::JOBS_KEY;
+using execHelper::config::Jobs_t;
 using execHelper::config::Path;
 using execHelper::config::PatternKey;
 using execHelper::config::Patterns;
 using execHelper::config::PatternValues;
 using execHelper::config::VariablesMap;
+using execHelper::config::VERBOSE_KEY;
 using execHelper::core::Task;
 using execHelper::core::TaskCollection;
 using execHelper::core::Tasks;
@@ -129,13 +132,10 @@ class PatternWrapper {
 namespace execHelper::plugins {
 LuaPlugin::LuaPlugin(Path script) noexcept : m_script(std::move(script)) { ; }
 
-auto LuaPlugin::getVariablesMap(const FleetingOptionsInterface& fleetingOptions)
-    const noexcept -> VariablesMap {
-    VariablesMap defaults{"luaPlugin"};
-
-    VerbosityLong::getVariables(defaults, fleetingOptions);
-    JobsLong::getVariables(defaults, fleetingOptions);
-    return defaults;
+auto LuaPlugin::getVariablesMap(
+    const FleetingOptionsInterface& /*fleetingOptions*/) const noexcept
+    -> VariablesMap {
+    return VariablesMap("luaPlugin");
 }
 
 auto LuaPlugin::apply(Task task, const VariablesMap& config,
@@ -147,9 +147,8 @@ auto LuaPlugin::apply(Task task, const VariablesMap& config,
     AddEnvironment::apply(task, config);
 
     try {
-        lua.writeVariable("verbose",
-                          config.get<Verbosity>(VERBOSITY_KEY, false));
-        lua.writeVariable("jobs", config.get<Jobs>(JOBS_KEY, 1U));
+        lua.writeVariable("verbose", config.get<bool>(VERBOSE_KEY, false));
+        lua.writeVariable("jobs", config.get<Jobs_t>(JOBS_KEY, 1U));
 
         lua.executeCode("function get_commandline() "
                         "return list(config['command-line']) or {} "
@@ -210,9 +209,16 @@ auto LuaPlugin::apply(Task task, const VariablesMap& config,
                 return wrapper.get(key);
             });
 
-        lua.writeFunction("register_task", [&tasks](const Task& task) {
-            tasks.push_back(task);
+        lua.writeFunction("register_task", [&patterns](const Task& task) {
+            for(const auto& combination : makePatternPermutator(patterns)) {
+                core::Task newTask =
+                    replacePatternCombinations(task, combination);
+                if(!registerTask(newTask)) {
+                    throw runtime_error("Task failed to execute");
+                }
+            }
         });
+
         lua.writeFunction<bool(const Task&, const vector<pair<int, string>>&)>(
             "run_target",
             [&patterns](const Task& task,

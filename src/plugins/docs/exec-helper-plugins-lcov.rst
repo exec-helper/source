@@ -54,6 +54,10 @@ The configuration of the lcov plugin may contain the following settings:
 
     Set the title of the generated HTML report. Does nothing if **gen-html** is not enabled. Default: :code:`Hello`.
 
+.. describe:: gen-html-command-line
+
+    Set additional command line options for the gen html stage. Default: no additional command line options.
+
 .. describe:: excludes
 
     A list of directories and files to excluse from the coverage report. The paths are relative to the current working directory. Default: an empty list.

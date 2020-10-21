@@ -19,7 +19,6 @@
 #include "plugins/commandLineCommand.h"
 #include "plugins/commandPlugin.h"
 #include "plugins/executePlugin.h"
-#include "plugins/lcov.h"
 #include "plugins/logger.h"
 #include "plugins/luaPlugin.h"
 #include "plugins/memory.h"
@@ -58,7 +57,6 @@ auto getPlugins() noexcept -> Plugins {
         {"command-line-command",
          shared_ptr<Plugin>(new execHelper::plugins::CommandLineCommand())},
         {"memory", shared_ptr<Plugin>(new execHelper::plugins::Memory())},
-        {"lcov", shared_ptr<Plugin>(new execHelper::plugins::Lcov())},
     };
 
     auto searchPaths = {PLUGINS_INSTALL_PATH};

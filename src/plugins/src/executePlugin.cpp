@@ -12,7 +12,6 @@
 #include "log/assertions.h"
 
 #include "commandLineCommand.h"
-#include "lcov.h"
 #include "logger.h"
 #include "memory.h"
 #include "pluginUtils.h"
@@ -217,9 +216,6 @@ auto ExecutePlugin::getPlugin(const string& pluginName)
     }
     if(pluginName == "memory") {
         return make_shared<Memory>();
-    }
-    if(pluginName == "lcov") {
-        return make_shared<Lcov>();
     }
 
     throw InvalidPlugin(string("Plugin associated with name '")

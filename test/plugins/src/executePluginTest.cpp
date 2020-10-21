@@ -11,7 +11,6 @@
 #include "log/assertions.h"
 #include "plugins/commandLineCommand.h"
 #include "plugins/executePlugin.h"
-#include "plugins/lcov.h"
 #include "plugins/memory.h"
 #include "unittest/catch.h"
 
@@ -40,7 +39,6 @@ using execHelper::config::VariablesMap;
 using execHelper::core::Task;
 using execHelper::plugins::CommandLineCommand;
 using execHelper::plugins::ExecutePlugin;
-using execHelper::plugins::Lcov;
 using execHelper::plugins::Memory;
 using execHelper::plugins::MemoryHandler;
 
@@ -429,7 +427,6 @@ SCENARIO("Testing the plugin getter", "[execute-plugin]") {
                 REQUIRE(checkGetPlugin<const CommandLineCommand>(
                     "command-line-command"));
                 REQUIRE(checkGetPlugin<const Memory>("memory"));
-                REQUIRE(checkGetPlugin<const Lcov>("lcov"));
             }
         }
         WHEN("We try to get a non-existing plugin") {

@@ -224,7 +224,7 @@ SCENARIO("Testing the configuration settings of the valgrind plugin",
     });
 }
 
-SCENARIO("Test erroneous scenarios", "[valgrind]") {
+SCENARIO("Test erroneous scenarios for the valgrind plugin", "[valgrind]") {
     GIVEN("A configuration without a configured run command") {
         LuaPlugin plugin(std::string(PLUGINS_INSTALL_PATH) + "/valgrind.lua");
         VariablesMap variables("valgrind-test");

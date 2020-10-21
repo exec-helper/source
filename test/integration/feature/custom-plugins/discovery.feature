@@ -29,7 +29,7 @@ Feature: Discover custom plugins
         | commands              | Command \(internal\)                                       |
         | cppcheck              | Lua plugin for module \S*/plugins/cppcheck.lua             |
         | docker                | Lua plugin for module \S*/plugins/docker.lua               |
-        | lcov                  | Lcov \(internal\)                                          |
+        | lcov                  | Lua plugin for module \S*/plugins/lcov.lua                 |
         | memory                | Memory \(internal\)                                        |
         | make                  | Lua plugin for module \S*/plugins/make.lua                 |
         | ninja                 | Lua plugin for module \S*/plugins/ninja.lua                |

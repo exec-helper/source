@@ -6,12 +6,9 @@ src = [
   'src/executePlugin.cpp',
   'src/plugin.cpp',
   'src/commandLineCommand.cpp',
-  'src/lcov.cpp',
   'src/logger.cpp',
   'src/commandLine.cpp',
-  'src/verbosity.cpp',
   'src/addEnvironment.cpp',
-  'src/threadedness.cpp',
 ]
 
 deps = [
@@ -46,5 +43,6 @@ plugin_files = [
   'src/scripts/clang-static-analyzer.lua',
   'src/scripts/pmd.lua',
   'src/scripts/valgrind.lua',
+  'src/scripts/lcov.lua',
 ]
 install_data(plugin_files, install_dir : get_option('datadir') / 'exec-helper' / 'plugins')

@@ -9,14 +9,11 @@
 #include "config/variablesMap.h"
 #include "core/task.h"
 
-namespace execHelper {
-namespace config {
+namespace execHelper::config {
 class FleetingOptionsInterface;
-} // namespace config
-} // namespace execHelper
+} // namespace execHelper::config
 
-namespace execHelper {
-namespace plugins {
+namespace execHelper::plugins {
 using WorkingDir = std::string;
 const gsl::czstring<> WORKING_DIR_KEY = "working-dir";
 
@@ -26,14 +23,22 @@ const gsl::czstring<> WORKING_DIR_KEY = "working-dir";
 struct WorkingDirectory {
     /**
      * Adds the variables for this functionality to the given variables map
+     *
+     * @param[in] options       The fleeting options to take into account
+     * @param[out] variables    The variables map to add the variables to
      */
     inline static void
-    getVariables(config::VariablesMap& /*variables*/,
-                 const config::FleetingOptionsInterface& /*options*/) noexcept {
+    getVariables([[maybe_unused]] config::VariablesMap& variables,
+                 [[maybe_unused]] const config::FleetingOptionsInterface&
+                     options) noexcept {
         ;
     }
 
-    /*! @copydoc JobsLong::apply(core::Task&, const config::VariablesMap&)
+    /**
+     * Applies the given variables to the task
+     *
+     * @param[in] variables The variables map to use
+     * @param[out] task The task with the given variables map applied to it
      */
     inline static void apply(core::Task& task,
                              const config::VariablesMap& variables) noexcept {
@@ -43,7 +48,6 @@ struct WorkingDirectory {
         }
     }
 };
-} // namespace plugins
-} // namespace execHelper
+} // namespace execHelper::plugins
 
 #endif /* WORKING_DIRECTORY_INCLUDE */

@@ -7,8 +7,7 @@
 
 #include <gsl/string_span>
 
-namespace execHelper {
-namespace config {
+namespace execHelper::config {
 using EnvArg = std::string;
 using EnvArgs = std::vector<EnvArg>;
 
@@ -17,7 +16,6 @@ using EnvironmentValue = std::pair<std::string, EnvArg>;
 
 static const gsl::czstring<> ENVIRONMENT_KEY = "environment";
 
-} // namespace config
-} // namespace execHelper
+} // namespace execHelper::config
 
 #endif /* ENVIRONMENT_INCLUDE */

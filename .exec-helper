@@ -537,13 +537,18 @@ lcov:
         - MODE
     run-command: run-test
     base-directory: "build/{TRIPLET}{COMPILER}/{MODE}/build"
-    directory: .
+    directory: "build/{TRIPLET}{COMPILER}/{MODE}/build"
     zero-counters: yes
     excludes:
         - /usr*
         - "*/3rdparty/*"
         - "*/test/*"
         - "*/subprojects/*"
+        - "boost/*"
+        - "c++/*"
+        - "gsl/*"
+        - "rapidcheck/*"
+        - "yaml-cpp/*"
     gen-html: yes
     gen-html-output: test_coverage
     gen-html-command-line:

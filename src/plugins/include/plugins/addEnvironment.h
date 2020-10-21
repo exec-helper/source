@@ -24,7 +24,11 @@ struct AddEnvironment {
     getVariables(config::VariablesMap& variables,
                  const config::FleetingOptionsInterface& options) noexcept;
 
-    /*! @copydoc JobsLong::apply(core::Task&, const config::VariablesMap&)
+    /**
+     * Applies the given variables to the task
+     *
+     * @param[in] variables The variables map to use
+     * @param[out] task The task with the given variables map applied to it
      */
     inline static void apply(core::Task& task,
                              const config::VariablesMap& variables) noexcept {

@@ -1,107 +1,224 @@
+#include <filesystem>
+#include <map>
+#include <memory>
+#include <optional>
 #include <string>
+#include <string_view>
+#include <utility>
 #include <vector>
 
-#include <gsl/string_span>
-
-#include "config/path.h"
+#include "config/environment.h"
 #include "config/settingsNode.h"
 #include "config/variablesMap.h"
 #include "core/task.h"
 #include "plugins/executePlugin.h"
-#include "plugins/lcov.h"
+#include "plugins/luaPlugin.h"
 #include "plugins/memory.h"
+
+#include "config/generators.h"
+#include "core/coreGenerators.h"
 #include "unittest/catch.h"
+#include "unittest/config.h"
+#include "unittest/rapidcheck.h"
+#include "utils/addToConfig.h"
+#include "utils/addToTask.h"
+#include "utils/commonGenerators.h"
 #include "utils/utils.h"
 
 #include "fleetingOptionsStub.h"
+#include "handlers.h"
 
+using std::make_pair;
+using std::make_shared;
+using std::map;
+using std::optional;
 using std::shared_ptr;
+using std::static_pointer_cast;
 using std::string;
+using std::string_view;
 using std::vector;
+using std::filesystem::path;
 
-using gsl::czstring;
-
-using execHelper::config::Command;
-using execHelper::config::CommandCollection;
-using execHelper::config::Path;
+using execHelper::config::EnvironmentCollection;
 using execHelper::config::Pattern;
 using execHelper::config::Patterns;
 using execHelper::config::SettingsNode;
 using execHelper::config::VariablesMap;
 using execHelper::core::Task;
+using execHelper::core::TaskCollection;
 using execHelper::plugins::ExecutePlugin;
-using execHelper::plugins::Lcov;
+using execHelper::plugins::LuaPlugin;
 
 using execHelper::core::test::ExecutorStub;
+using execHelper::test::addToConfig;
+using execHelper::test::addToTask;
 using execHelper::test::FleetingOptionsStub;
+using execHelper::test::propertyTest;
 using execHelper::test::utils::getExpectedTasks;
 
 namespace {
-const czstring<> PLUGIN_NAME = "lcov";
-const czstring<> RUN_COMMAND = "run-command";
-const czstring<> INFO_FILE_KEY = "info-file";
-const czstring<> BASE_DIR_KEY = "base-directory";
-const czstring<> DIR_KEY = "directory";
-const czstring<> ZERO_COUNTERS_KEY = "zero-counters";
-const czstring<> GEN_HTML_KEY = "gen-html";
-const czstring<> GEN_HTML_OUTPUT_KEY = "gen-html-output";
-const czstring<> GEN_HTML_TITLE_KEY = "gen-html-title";
-const czstring<> GEN_HTML_COMMAND_LINE_KEY = "gen-html-command-line";
-const czstring<> EXCLUDES_KEY = "excludes";
-const czstring<> MEMORY_KEY = "memory";
+using namespace std::literals;
+constexpr string_view binary = "lcov"sv;
+inline auto defaultBaseDir() { return path("."sv); }
+inline auto defaultDir() { return path("."sv); }
+inline auto defaultInfoFile() { return path("lcov-plugin.info"sv); }
+inline auto defaultGenHtmlOutput() { return path("."sv); }
+
+auto zeroCounterTask(Task task, const optional<path>& workingDir,
+                     const optional<vector<string>>& commandLine,
+                     const optional<EnvironmentCollection>& environment,
+                     const optional<path>& baseDirectory,
+                     const optional<path>& directory,
+                     const Pattern& pattern) noexcept {
+    task.append(string(binary));
+    addToTask(
+        baseDirectory, &task,
+        [](const auto& dir) -> TaskCollection {
+            return {"--base-directory", dir};
+        },
+        defaultBaseDir());
+    addToTask(
+        directory, &task,
+        [](const auto& dir) -> TaskCollection {
+            return {"--directory", dir};
+        },
+        defaultDir());
+    task.append("--zerocounters");
+    task.append(commandLine.value_or(vector<string>()));
+
+    if(workingDir) {
+        task.setWorkingDirectory(*workingDir);
+    }
+    if(environment) {
+        task.setEnvironment(*environment);
+    }
+    return getExpectedTasks(task, {pattern});
+}
+
+auto captureTask(Task task, const optional<path>& workingDir,
+                 const optional<vector<string>>& commandLine,
+                 const optional<EnvironmentCollection>& environment,
+                 const optional<path>& baseDirectory,
+                 const optional<path>& directory,
+                 const optional<path>& infoFile,
+                 const Pattern& pattern) noexcept {
+    task.append(string(binary));
+    addToTask(
+        baseDirectory, &task,
+        [](const auto& dir) -> TaskCollection {
+            return {"--base-directory", dir};
+        },
+        defaultBaseDir());
+    addToTask(
+        directory, &task,
+        [](const auto& dir) -> TaskCollection {
+            return {"--directory", dir};
+        },
+        defaultDir());
+    task.append("--capture");
+    addToTask(
+        infoFile, &task,
+        [](const auto& file) -> TaskCollection {
+            return {"--output", file};
+        },
+        defaultInfoFile());
+    task.append(commandLine.value_or(vector<string>()));
+
+    if(workingDir) {
+        task.setWorkingDirectory(*workingDir);
+    }
+    if(environment) {
+        task.setEnvironment(*environment);
+    }
+    return getExpectedTasks(task, {pattern});
+}
+
+auto excludeTask(Task task, const optional<path>& workingDir,
+                 const optional<vector<string>>& commandLine,
+                 const optional<EnvironmentCollection>& environment,
+                 const optional<path>& infoFile, const vector<string>& excludes,
+                 const Pattern& pattern) noexcept {
+    task.append({string(binary), "--remove"});
+    addToTask(
+        infoFile, &task,
+        [](const auto& file) -> TaskCollection { return {file}; },
+        defaultInfoFile());
+    addToTask(excludes, &task, [](const auto& exclude) -> TaskCollection {
+        return {"'" + exclude + "'"};
+    });
+    addToTask(
+        infoFile, &task,
+        [](const auto& file) -> TaskCollection {
+            return {"--output-file", file};
+        },
+        defaultInfoFile());
+    task.append(commandLine.value_or(vector<string>()));
+
+    if(workingDir) {
+        task.setWorkingDirectory(*workingDir);
+    }
+    if(environment) {
+        task.setEnvironment(*environment);
+    }
+    return getExpectedTasks(task, {pattern});
+}
+
+auto genHtmlTask(Task task, const optional<path>& workingDir,
+                 const optional<EnvironmentCollection>& environment,
+                 const optional<path>& infoFile,
+                 const optional<path>& genHtmlOutput,
+                 const optional<string>& genHtmlTitle,
+                 const optional<vector<string>>& genHtmlCommandLine,
+                 const Pattern& pattern) noexcept {
+    task.append("genhtml");
+    addToTask(
+        genHtmlOutput, &task,
+        [](const auto& output) -> TaskCollection {
+            return {"--output-directory", output};
+        },
+        defaultGenHtmlOutput());
+    addToTask(
+        genHtmlTitle, &task,
+        [](const auto& title) -> TaskCollection {
+            return {"--title", title};
+        },
+        "Hello"s);
+    task.append(genHtmlCommandLine.value_or(vector<string>()));
+    addToTask(
+        infoFile, &task,
+        [](const auto& file) -> TaskCollection { return {file}; },
+        defaultInfoFile());
+
+    if(workingDir) {
+        task.setWorkingDirectory(*workingDir);
+    }
+    if(environment) {
+        task.setEnvironment(*environment);
+    }
+    return getExpectedTasks(task, {pattern});
+}
 } // namespace
 
 namespace execHelper::plugins::test {
-SCENARIO("Obtaining the default variables map of the lcov plugin", "[lcov]") {
-    GIVEN("The default fleeting options") {
-        FleetingOptionsStub fleetingOptions;
-        Lcov plugin;
+SCENARIO("Testing the configuration settings of the lcov plugin", "[lcov]") {
+    propertyTest("", [](const optional<path>& workingDir,
+                        const optional<vector<string>>& commandLine,
+                        const optional<EnvironmentCollection>& environment,
+                        const optional<path>& baseDirectory,
+                        const optional<path>& directory,
+                        const optional<bool>& zeroCounters,
+                        const optional<path>& infoFile,
+                        const optional<vector<string>>& excludes,
+                        const optional<bool>& genHtml,
+                        const optional<path>& genHtmlOutput,
+                        const optional<string>& genHtmlTitle,
+                        const optional<vector<string>>& genHtmlCommandLine,
+                        const Pattern& pattern, const Task& task) {
+        ExecutorStub::TaskQueue allTasks;
 
-        VariablesMap actualVariables(PLUGIN_NAME);
-        REQUIRE(actualVariables.add(COMMAND_LINE_KEY, CommandLineArgs()));
-        REQUIRE(actualVariables.add(INFO_FILE_KEY, "lcov-plugin.info"));
-        REQUIRE(actualVariables.add(BASE_DIR_KEY, "."));
-        REQUIRE(actualVariables.add(DIR_KEY, "."));
-        REQUIRE(actualVariables.add(ZERO_COUNTERS_KEY, "no"));
-        REQUIRE(actualVariables.add(GEN_HTML_KEY, "no"));
-        REQUIRE(actualVariables.add(GEN_HTML_OUTPUT_KEY, "."));
-        REQUIRE(actualVariables.add(GEN_HTML_TITLE_KEY, "Hello"));
-        REQUIRE(
-            actualVariables.add(GEN_HTML_COMMAND_LINE_KEY, vector<string>()));
-        REQUIRE(actualVariables.add(EXCLUDES_KEY, vector<string>()));
+        VariablesMap config("lcov-test");
 
-        WHEN("We request the variables map") {
-            VariablesMap variables = plugin.getVariablesMap(fleetingOptions);
-
-            THEN("We should find the same ones") {
-                REQUIRE(variables == actualVariables);
-            }
-        }
-    }
-}
-
-SCENARIO("Test multiple configurations of the lcov plugin", "[lcov]") {
-    MAKE_COMBINATIONS("Of several configurations") {
-        const Pattern pattern1("PATTERN1", {"value1a", "value1b"});
-        const Pattern pattern2("PATTERN2", {"value2a", "value2b"});
-        const Patterns patterns({pattern1, pattern2});
-
-        Lcov plugin;
-        Task task;
-
-        VariablesMap variables = plugin.getVariablesMap(FleetingOptionsStub());
-
-        CommandCollection runCommands({MEMORY_KEY});
-        auto infoFile = variables.get<Path>(INFO_FILE_KEY).value();
-        auto baseDir = variables.get<Path>(BASE_DIR_KEY).value();
-        auto dir = variables.get<Path>(DIR_KEY).value();
-        CommandLineArgs commandLine;
-        bool zeroCounters = false;
-        bool genHtml = false;
-        Path genHtmlOutput = variables.get<Path>(GEN_HTML_OUTPUT_KEY).value();
-        string genHtmlTitle("Hello");
-        CommandLineArgs genHtmlCommandLine;
-        vector<string> excludes;
+        LuaPlugin plugin(std::string(PLUGINS_INSTALL_PATH) + "/lcov.lua");
 
         ExecutorStub executor;
         ExecuteCallback executeCallback = [&executor](const Task& task) {
@@ -109,121 +226,127 @@ SCENARIO("Test multiple configurations of the lcov plugin", "[lcov]") {
         };
         registerExecuteCallback(executeCallback);
 
+        map<std::string, shared_ptr<SpecialMemory>> memories;
+        const auto& patternValues = pattern.getValues();
+        transform(patternValues.begin(), patternValues.end(),
+                  inserter(memories, memories.end()), [](const auto& value) {
+                      return make_pair(value, make_shared<SpecialMemory>());
+                  });
+
+        addToConfig("base-directory", baseDirectory, &config);
+        addToConfig("directory", directory, &config);
+        addToConfig("info-file", infoFile, &config);
+        addToConfig("command-line", commandLine, &config);
+        addToConfig("working-dir", workingDir, &config);
+
+        if(environment) {
+            addToConfig("environment", vector<string>(), &config);
+            std::for_each(
+                environment->begin(), environment->end(),
+                [&config](const auto& env) {
+                    REQUIRE(config.add({"environment", env.first}, env.second));
+                });
+        }
+
+        addToConfig("zero-counters", zeroCounters, &config);
+        if(zeroCounters.value_or(false)) {
+            auto replacedTasks =
+                zeroCounterTask(task, workingDir, commandLine, environment,
+                                baseDirectory, directory, pattern);
+            allTasks.insert(allTasks.end(), replacedTasks.begin(),
+                            replacedTasks.end());
+        }
+
+        auto runCommand = string("{").append(pattern.getKey()).append("}");
+        addToConfig("run-command", runCommand, &config);
+
+        Task runTask = task;
+        if(workingDir) {
+            runTask.setWorkingDirectory(*workingDir);
+        }
+        if(environment) {
+            runTask.setEnvironment(*environment);
+        }
+
+        auto replacedTasks =
+            captureTask(task, workingDir, commandLine, environment,
+                        baseDirectory, directory, infoFile, pattern);
+        allTasks.insert(allTasks.end(), replacedTasks.begin(),
+                        replacedTasks.end());
+
+        addToConfig("excludes", excludes, &config);
+        if(excludes && !excludes->empty()) {
+            auto excludeTasks =
+                excludeTask(task, workingDir, commandLine, environment,
+                            infoFile, *excludes, pattern);
+            allTasks.insert(allTasks.end(), excludeTasks.begin(),
+                            excludeTasks.end());
+        }
+
+        addToConfig("gen-html", genHtml, &config);
+        addToConfig("gen-html-output", genHtmlOutput, &config);
+        addToConfig("gen-html-title", genHtmlTitle, &config);
+        addToConfig("gen-html-command-line", genHtmlCommandLine, &config);
+
+        if(genHtml.value_or(false)) {
+            auto genHtmlTasks = genHtmlTask(
+                task, workingDir, environment, infoFile, genHtmlOutput,
+                genHtmlTitle, genHtmlCommandLine, pattern);
+            allTasks.insert(allTasks.end(), genHtmlTasks.begin(),
+                            genHtmlTasks.end());
+        }
+
+        // Register each memories mapping as the endpoint for every target command
+        Plugins plugins;
+        transform(memories.begin(), memories.end(),
+                  inserter(plugins, plugins.end()), [](const auto& memory) {
+                      return make_pair(
+                          memory.first,
+                          static_pointer_cast<Plugin>(memory.second));
+                  });
+
         FleetingOptionsStub fleetingOptions;
+
+        ExecutePlugin::push(move(plugins));
         ExecutePlugin::push(
             gsl::not_null<config::FleetingOptionsInterface*>(&fleetingOptions));
-        ExecutePlugin::push(SettingsNode(PLUGIN_NAME));
-        ExecutePlugin::push(Patterns(patterns));
-        ExecutePlugin::push(
-            Plugins({{"Memory",
-                      shared_ptr<Plugin>(new execHelper::plugins::Memory())}}));
-
-        COMBINATIONS("Change the info file") {
-            infoFile = "/tmp";
-            REQUIRE(variables.replace(INFO_FILE_KEY, infoFile.native()));
-        }
-
-        COMBINATIONS("Change the base directory") {
-            baseDir /= "tmp";
-            REQUIRE(variables.replace(BASE_DIR_KEY, baseDir.native()));
-        }
-
-        COMBINATIONS("Change the directory") {
-            dir /= "..";
-            REQUIRE(variables.replace(DIR_KEY, dir.native()));
-        }
-
-        COMBINATIONS("Add a command line") {
-            commandLine = {"{" + pattern1.getKey() + "}",
-                           "{" + pattern2.getKey() + "}"};
-            REQUIRE(variables.add(COMMAND_LINE_KEY, commandLine));
-        }
-
-        COMBINATIONS("Switch on zero counters") {
-            zeroCounters = true;
-            REQUIRE(variables.replace(ZERO_COUNTERS_KEY, "yes"));
-        }
-
-        COMBINATIONS("Switch on html generation") {
-            genHtml = true;
-            REQUIRE(variables.replace(GEN_HTML_KEY, "yes"));
-        }
-
-        COMBINATIONS("Set html output") {
-            genHtmlOutput = "/tmp/blaat";
-            REQUIRE(
-                variables.replace(GEN_HTML_OUTPUT_KEY, genHtmlOutput.native()));
-        }
-
-        COMBINATIONS("Set html title") {
-            genHtmlTitle = "World!";
-            REQUIRE(variables.replace(GEN_HTML_TITLE_KEY, genHtmlTitle));
-        }
-
-        COMBINATIONS("Set gen html command line") {
-            genHtmlCommandLine = {"{" + pattern1.getKey() + "}",
-                                  "{" + pattern2.getKey() + "}"};
-            REQUIRE(variables.replace(GEN_HTML_COMMAND_LINE_KEY,
-                                      genHtmlCommandLine));
-        }
-
-        COMBINATIONS("Set excludes") {
-            excludes = {"exclude1", "{" + pattern1.getKey() + "}"};
-            REQUIRE(variables.replace(EXCLUDES_KEY, excludes));
-        }
-
-        ExecutorStub::TaskQueue expectedTasks;
-        if(zeroCounters) {
-            Task zeroCountersTask({PLUGIN_NAME, "--base-directory",
-                                   baseDir.native(), "--directory",
-                                   dir.native(), "--zerocounters"});
-            zeroCountersTask.append(commandLine);
-            expectedTasks.emplace_back(zeroCountersTask);
-        }
-        for(const auto& command : runCommands) {
-            REQUIRE(variables.add(RUN_COMMAND, command));
-        }
-        Task captureTask({PLUGIN_NAME, "--base-directory", baseDir.native(),
-                          "--directory", dir.native(), "--capture", "--output",
-                          infoFile.native()});
-        captureTask.append(commandLine);
-        expectedTasks.emplace_back(captureTask);
-
-        if(!excludes.empty()) {
-            Task excludeTask({PLUGIN_NAME, "--remove", infoFile.native()});
-            for(const auto& exclude : excludes) {
-                excludeTask.append(
-                    string(R"(")").append(exclude).append(R"(")"));
-            }
-            excludeTask.append({"--output-file", infoFile.native()});
-            excludeTask.append(commandLine);
-            expectedTasks.emplace_back(excludeTask);
-        }
-
-        if(genHtml) {
-            Task genHtml({"genhtml", "--output-directory",
-                          genHtmlOutput.native(), "--title", genHtmlTitle});
-            genHtml.append(genHtmlCommandLine);
-            genHtml.append(infoFile.native());
-            expectedTasks.emplace_back(genHtml);
-        }
-
-        const ExecutorStub::TaskQueue replacedTasks =
-            getExpectedTasks(expectedTasks, patterns);
+        ExecutePlugin::push(SettingsNode("lcov-test"));
+        ExecutePlugin::push({pattern});
 
         THEN_WHEN("We apply the plugin") {
-            bool returnCode = plugin.apply(task, variables, patterns);
+            bool returnCode = plugin.apply(task, config, {pattern});
             THEN_CHECK("It should succeed") { REQUIRE(returnCode); }
 
             THEN_CHECK("It called the right commands") {
-                REQUIRE(replacedTasks == executor.getExecutedTasks());
+                REQUIRE(allTasks == executor.getExecutedTasks());
+
+                for(const auto& memory : memories) {
+                    auto executions = memory.second->getExecutions();
+                    for(const auto& execution : executions) {
+                        REQUIRE(execution.task == runTask);
+                        REQUIRE(execution.patterns.empty());
+                    }
+                }
             }
         }
 
-        ExecutePlugin::popPlugins();
         ExecutePlugin::popFleetingOptions();
         ExecutePlugin::popSettingsNode();
         ExecutePlugin::popPatterns();
+        ExecutePlugin::popPlugins();
+    });
+}
+
+SCENARIO("Test erroneous scenarios for the lcov plugin", "[lcov]") {
+    GIVEN("A configuration without a configured run command") {
+        LuaPlugin plugin(std::string(PLUGINS_INSTALL_PATH) + "/lcov.lua");
+        VariablesMap variables("lcov-test");
+
+        WHEN("We call the plugin") {
+            auto returnCode = plugin.apply(Task(), variables, Patterns());
+
+            THEN("It should fail") { REQUIRE_FALSE(returnCode); }
+        }
     }
 }
 } // namespace execHelper::plugins::test
