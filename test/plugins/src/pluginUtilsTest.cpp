@@ -25,6 +25,7 @@ using execHelper::config::EnvironmentCollection;
 using execHelper::config::EnvironmentValue;
 using execHelper::config::PatternCombinations;
 using execHelper::config::VariablesMap;
+using execHelper::core::Task;
 using execHelper::core::TaskCollection;
 
 using execHelper::test::NonEmptyString;
@@ -160,5 +161,19 @@ SCENARIO("Test replacing patterns in the environment", "[plugin-utils]") {
                 }
             }
         });
+}
+
+SCENARIO(
+    "Test the function for registering tasks when no callback is registered",
+    "[plugin]") {
+    GIVEN("No registered function") {
+        unregisterExecuteCallback();
+
+        WHEN("We call the registerTask function") {
+            auto returnCode = registerTask(Task());
+
+            THEN("It should succeed") { REQUIRE(returnCode); }
+        }
+    }
 }
 } // namespace execHelper::plugins::test

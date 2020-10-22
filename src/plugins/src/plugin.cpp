@@ -24,6 +24,10 @@ void registerExecuteCallback(const ExecuteCallback& callback) noexcept {
     getExecuteCallback() = callback;
 }
 
+void unregisterExecuteCallback() noexcept {
+    getExecuteCallback() = noExecuteCallback;
+}
+
 auto registerTask(const Task& task) noexcept -> bool {
     getExecuteCallback()(task);
     return true;

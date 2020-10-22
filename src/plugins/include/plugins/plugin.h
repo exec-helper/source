@@ -81,7 +81,17 @@ class Plugin {
 
 using ExecuteCallback = std::function<void(const core::Task&)>;
 
+/**
+ * Register a callback function. This replaces the previous callback function.
+ *
+ * \param[in] callback  The function to call when a task is registered.
+ */
 void registerExecuteCallback(const ExecuteCallback& callback) noexcept;
+
+/**
+ * Unregister the current callback function.
+ */
+void unregisterExecuteCallback() noexcept;
 
 /**
  * Register a finished task to an executor
