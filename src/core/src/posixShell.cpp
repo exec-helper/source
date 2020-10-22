@@ -1,4 +1,5 @@
 #include "posixShell.h"
+#include "log/log.h"
 
 #include <vector>
 
@@ -85,18 +86,43 @@ auto PosixShell::execute(const Task& task) -> PosixShell::ShellReturnCode {
                 filesystem::path(
                     task.getWorkingDirectory()))); // getPath guarantees that the given working directory is part of the PATH it returns, so there is no need to explicitly look for the binary in the considered working directory first.
 
+        if(binary.empty()) {
+            throw PathNotFoundError(
+                std::string("Failed to convert binary '")
+                    .append(args.front())
+                    .append("' to an absolute path. Are you sure the binary is "
+                            "in your PATH?"));
+        }
+
+        LOG(debug) << "Binary is relative. Corrected to " << binary;
         binary = filesystem::absolute(binary);
+        LOG(debug) << "Binary " << args.front() << " is relative. Corrected to "
+                   << binary;
     }
     if(!filesystem::exists(binary)) {
         throw PathNotFoundError(std::string("Could not find binary '")
                                     .append(args.front())
                                     .append("' on this system"));
     }
+    if(!filesystem::is_regular_file(binary) &&
+       !filesystem::is_symlink(binary)) {
+        throw PathNotFoundError(std::string("Cannot execute a non-file binary ")
+                                    .append(binary.string()));
+    }
+
     args.erase(args.begin());
 
-    return system(
-        binary, process::args = args,
-        process::start_dir = filesystem::path(task.getWorkingDirectory()), env);
+    try {
+        return system(binary, process::args = args,
+                      process::start_dir =
+                          filesystem::path(task.getWorkingDirectory()),
+                      env);
+    } catch(const boost::process::process_error& e) {
+        LOG(error) << "Failed to execute command with " << binary;
+        user_feedback_error("Failed to execute command. Are you sure "
+                            << binary << " is available for this user?'");
+        return 1U;
+    }
 }
 
 auto PosixShell::isExecutedSuccessfully(

@@ -4,6 +4,7 @@
 
 #include "log/log.h"
 
+#include "pathNotFoundError.h"
 #include "shell.h"
 #include "task.h"
 
@@ -20,9 +21,14 @@ ImmediateExecutor::ImmediateExecutor(
 
 void ImmediateExecutor::execute(const Task& task) noexcept {
     user_feedback_info("Executing '" << task.toString() << "'");
-    auto returnCode = m_shell->execute(task);
-    if(!m_shell->isExecutedSuccessfully(returnCode)) {
-        m_callback(returnCode);
+    try {
+        auto returnCode = m_shell->execute(task);
+        if(!m_shell->isExecutedSuccessfully(returnCode)) {
+            m_callback(returnCode);
+        }
+    } catch(const PathNotFoundError& e) {
+        user_feedback_error("Execution error: " << e.what());
+        m_callback(1U);
     }
 }
 } // namespace execHelper::core
