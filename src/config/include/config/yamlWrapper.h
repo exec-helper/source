@@ -38,14 +38,14 @@ class YamlWrapper {
      *
      * \param[in] other The object to copy from
      */
-    YamlWrapper(const YamlWrapper& other);
+    YamlWrapper(const YamlWrapper& other) = delete;
 
     /**
      * Move constructor
      *
      * \param[in] other The object to move from
      */
-    YamlWrapper(YamlWrapper&& other) noexcept;
+    YamlWrapper(YamlWrapper&& other) noexcept = delete;
 
     ~YamlWrapper() = default;
 
@@ -55,7 +55,7 @@ class YamlWrapper {
      * \param[in] other The object to assign from
      * \returns A reference to this object
      */
-    auto operator=(const YamlWrapper& other) -> YamlWrapper&;
+    auto operator=(const YamlWrapper& other) -> YamlWrapper& = delete;
 
     /**
      * Move assignment operator
@@ -63,7 +63,7 @@ class YamlWrapper {
      * \param[in] other the object to move assign from
      * \returns a reference to this object
      */
-    auto operator=(YamlWrapper&& other) noexcept -> YamlWrapper&;
+    auto operator=(YamlWrapper&& other) noexcept -> YamlWrapper& = delete;
 
     /**
      * Swap contents

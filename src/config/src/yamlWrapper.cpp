@@ -28,28 +28,6 @@ YamlWrapper::YamlWrapper(const string& yamlConfig)
     ;
 }
 
-YamlWrapper::YamlWrapper(const YamlWrapper& other)
-    : m_node(Clone(other.m_node)) {
-    ;
-}
-
-YamlWrapper::YamlWrapper(YamlWrapper&& other) noexcept
-    : m_node(Clone(other.m_node)) {
-    ;
-}
-
-auto YamlWrapper::operator=(const YamlWrapper& other) -> YamlWrapper& {
-    if(this != &other) {
-        m_node = Clone(other.m_node);
-    }
-    return *this;
-}
-
-auto YamlWrapper::operator=(YamlWrapper&& other) noexcept -> YamlWrapper& {
-    swap(other);
-    return *this;
-}
-
 void YamlWrapper::swap(const YamlWrapper& other) noexcept {
     try {
         m_node = Clone(other.m_node);
