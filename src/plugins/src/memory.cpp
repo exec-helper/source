@@ -21,9 +21,13 @@ const czstring<> PLUGIN_NAME = "memory";
 } // namespace
 
 namespace execHelper::plugins {
-Memory::Memories               // NOLINT(fuchsia-statically-constructed-objects)
-    Memory::m_executions = {}; // NOLINT(readability-redundant-declaration)
-bool Memory::m_returnCode = true; // NOLINT(readability-redundant-declaration)
+Memory::Memories // NOLINT(fuchsia-statically-constructed-objects)
+    Memory::
+        m_executions = // NOLINT(readability-redundant-declaration, cppcoreguidelines-avoid-non-const-global-variables)
+    {};
+bool Memory::
+    m_returnCode = // NOLINT(readability-redundant-declaration, cppcoreguidelines-avoid-non-const-global-variables)
+    true;
 
 auto Memory::getVariablesMap(
     const FleetingOptionsInterface& /*fleetingOptions*/) const noexcept

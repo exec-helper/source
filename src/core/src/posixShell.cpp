@@ -114,15 +114,17 @@ auto PosixShell::execute(const Task& task) -> PosixShell::ShellReturnCode {
 
     try {
         process::group executionGroup;
-        process::child child(binary, process::args = args,
-                             process::start_dir =
-                                 filesystem::path(task.getWorkingDirectory()),
-                             env, executionGroup, process::std_out > stdout, process::std_err > stderr, process::std_in < stdin);
+        process::child child(
+            binary, process::args = args,
+            process::start_dir = filesystem::path(task.getWorkingDirectory()),
+            env, executionGroup, process::std_out > stdout,
+            process::std_err > stderr, process::std_in < stdin);
 
         while(child.running()) {
             ;
         }
-        child.wait();   // Note: Waiting for groups is currently broken on Windows and may result in a dead-lock. So we wait on the one child process instead.
+        child
+            .wait(); // Note: Waiting for groups is currently broken on Windows and may result in a dead-lock. So we wait on the one child process instead.
 
         return child.exit_code();
     } catch(const boost::process::process_error& e) {

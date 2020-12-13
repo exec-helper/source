@@ -9,6 +9,7 @@
 
 #include "logger.h"
 
+using std::all_of;
 using std::initializer_list;
 using std::make_unique;
 using std::ostream;
@@ -18,7 +19,8 @@ using execHelper::config::SettingsKeys;
 using execHelper::config::SettingsValues;
 
 namespace {
-auto stream(ostream& os, const execHelper::config::SettingsNode& settings,
+auto stream(ostream& os, // NOLINT(misc-no-recursion)
+            const execHelper::config::SettingsNode& settings,
             const string& prepend) noexcept -> ostream& {
     os << prepend << "- " << settings.key();
     auto values =
@@ -40,9 +42,10 @@ SettingsNode::SettingsNode(SettingsKey key) noexcept : m_key(std::move(key)) {
     ;
 }
 
-SettingsNode::SettingsNode(const SettingsNode& other) noexcept
+SettingsNode::SettingsNode( // NOLINT(misc-no-recursion)
+    const SettingsNode& other) noexcept
     : m_key(other.m_key) {
-    deepCopy(other);
+    deepCopy(other); // NOLINT(misc-no-recursion)
 }
 
 SettingsNode::SettingsNode(SettingsNode&& other) noexcept
@@ -66,8 +69,8 @@ auto SettingsNode::operator=(SettingsNode&& other) noexcept -> SettingsNode& {
     return *this;
 }
 
-auto SettingsNode::operator==(const SettingsNode& other) const noexcept
-    -> bool {
+auto SettingsNode::operator==( // NOLINT(misc-no-recursion)
+    const SettingsNode& other) const noexcept -> bool {
     if(m_key != other.m_key) {
         return false;
     }
@@ -77,18 +80,16 @@ auto SettingsNode::operator==(const SettingsNode& other) const noexcept
     if(m_values->size() != other.m_values->size()) {
         return false;
     }
-    for(const auto& value : *m_values) {
-        if(!other.contains(value.m_key)) {
-            return false;
-        }
-        if(value != other[value.m_key]) {
-            return false;
-        }
-    }
-    return true;
+    return all_of(m_values->begin(), m_values->end(),
+                  [&other](const auto& value) { // NOLINT(misc-no-recursion)
+                      return other.contains(value.m_key) &&
+                             other[value.m_key] == // NOLINT(misc-no-recursion)
+                                 value;
+                  });
 }
 
-auto SettingsNode::operator!=(const SettingsNode& other) const noexcept
+auto SettingsNode::operator!=(
+    const SettingsNode& other) const noexcept // NOLINT(misc-no-recursion)
     -> bool {
     return !(*this == other);
 }
@@ -312,7 +313,8 @@ auto SettingsNode::at(const SettingsKeys& key) const noexcept
     return settings;
 }
 
-void SettingsNode::deepCopy(const SettingsNode& other) noexcept {
+void SettingsNode::deepCopy( // NOLINT(misc-no-recursion)
+    const SettingsNode& other) noexcept {
     if(!other.m_values) {
         return;
     }

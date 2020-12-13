@@ -11,3 +11,6 @@ test_coverage/
 
 # Python-specific
 __pycache__
+
+# Clangd-specific
+.cache

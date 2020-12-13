@@ -58,15 +58,18 @@ auto getNextPatterns(const VariablesMap& variables,
 
 vector<gsl::not_null< // NOLINT(fuchsia-statically-constructed-objects)
     const FleetingOptionsInterface*>>
-    execHelper::plugins::ExecutePlugin::m_fleeting;
+    execHelper::plugins::ExecutePlugin::
+        m_fleeting; // NOLINT(cppcoreguidelines-avoid-non-const-global-variables)
 vector<SettingsNode> // NOLINT(fuchsia-statically-constructed-objects)
-    execHelper::plugins::ExecutePlugin::m_settings;
+    execHelper::plugins::ExecutePlugin::
+        m_settings; // NOLINT(cppcoreguidelines-avoid-non-const-global-variables)
 vector<PatternsHandler> // NOLINT(fuchsia-statically-constructed-objects)
-    execHelper::plugins::ExecutePlugin::m_patterns;
+    execHelper::plugins::ExecutePlugin::
+        m_patterns; // NOLINT(cppcoreguidelines-avoid-non-const-global-variables)
 vector<execHelper::plugins:: // NOLINT(fuchsia-statically-constructed-objects)
        Plugins>
     execHelper::plugins::ExecutePlugin::
-        m_plugins; // NOLINT(fuchsia-statically-constructed-objects)
+        m_plugins; // NOLINT(fuchsia-statically-constructed-objects, cppcoreguidelines-avoid-non-const-global-variables)
 
 namespace execHelper::plugins {
 ExecutePlugin::ExecutePlugin(

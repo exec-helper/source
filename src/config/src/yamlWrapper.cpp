@@ -64,8 +64,9 @@ auto YamlWrapper::getTree(const YAML::Node& rootNode,
     return getSubTree(node, settings, {});
 }
 
-auto YamlWrapper::getSubTree(const YAML::Node& node, SettingsNode* yamlNode,
-                             const SettingsKeys& keys) noexcept -> bool {
+auto YamlWrapper::getSubTree( // NOLINT(misc-no-recursion)
+    const YAML::Node& node, SettingsNode* yamlNode,
+    const SettingsKeys& keys) noexcept -> bool {
     YAML::NodeType::value type = YAML::NodeType::Null;
     try {
         type = node.Type();
@@ -112,7 +113,8 @@ auto YamlWrapper::getSubTree(const YAML::Node& node, SettingsNode* yamlNode,
         break;
     case YAML::NodeType::Sequence:
         if(!std::all_of(node.begin(), node.end(),
-                        [&yamlNode, &keys](const auto& element) {
+                        [&yamlNode, &keys]( // NOLINT(misc-no-recursion)
+                            const auto& element) {
                             return YamlWrapper::getSubTree(element, yamlNode,
                                                            keys);
                         })) {

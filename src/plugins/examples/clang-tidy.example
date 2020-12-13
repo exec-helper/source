@@ -22,5 +22,6 @@ clang-tidy:
         - "performance-*"
         - "readability-*"
         - "-fuchsia-*"
+        - "-llvmlibc-*"
     command-line:
         - -fix
