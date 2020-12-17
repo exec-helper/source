@@ -144,10 +144,13 @@ variables:
           artifacts: false
         - job: build:native
           artifacts: true
+        - job: build:asan
+          artifacts: true
     script:
         - *install_exec_helper
         - export PATH=$(pwd)/build/clang/asan/install/bin:$(pwd)/build/clang/asan/install/test/integration:$PATH
-        - exec-helper analyze --analyze asan --module "${ALL_MODULES}"      # Note: the quotes are used to cheat exec-helper so that the binaries are only built once rather than for each module separately
+        - export ASAN_OPTIONS="check_initialization_order=1 print_stacktrace=1"
+        - /usr/bin/exec-helper run-test --compiler clang --mode asan --run-target unittest
 
 .build_image: &build_image
     stage: build-image
@@ -330,6 +333,22 @@ cross-compilation:
         - cp -r /usr/aarch64-linux-gnu/* sysroot_arm64/usr/
         - exec-helper init-build build --compiler gcc --triplet aarch64-linux-gnu- --arch aarch64 --mode release --sysroot $(pwd)/sysroot_arm64
 
+build:asan:
+    stage: build
+    image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-build
+    needs:
+        - job: build-image:build
+          artifacts: false
+        - job: build:native
+    script:
+        - *install_exec_helper
+        - export ASAN_OPTIONS="check_initialization_order=1 print_stacktrace=1"
+        - exec-helper init-asan build --compiler clang --mode asan
+    artifacts:
+        expire_in: 1 day
+        paths:
+            - build/clang/asan/install
+
 unittests:
     <<: *run_test
     variables:
@@ -360,8 +379,17 @@ memory-check:
         RUN_TARGET: unittest integration-old
         MODULES: $ALL_MODULES
 
-clang-tidy:
+clang-tidy:config:
     <<: *clang_tidy
+    variables:
+        MODULES: log config
+        SOURCE_TYPE: $ALL_SOURCE_TYPES
+
+clang-tidy:plugins:
+    <<: *clang_tidy
+    variables:
+        MODULES: core commander plugins
+        SOURCE_TYPE: $ALL_SOURCE_TYPES
 
 clang-tidy-integration:
     <<: *clang_tidy
