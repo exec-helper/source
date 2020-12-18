@@ -8,9 +8,9 @@
 
 #include "config/environment.h"
 #include "config/path.h"
+#include "config/pattern.h"
 
-namespace execHelper {
-namespace core {
+namespace execHelper::core {
 using TaskCollection = std::vector<std::string>;
 
 /**
@@ -153,10 +153,25 @@ class Task {
      */
     bool operator!=(const Task& other) const noexcept;
 
+    /**
+     * Add relevant patterns to the context of this task
+     *
+     * \param[in] patterns  The patterns to add to this task.
+     */
+    void addPatterns(const config::Patterns& patterns) noexcept;
+
+    /**
+     * Get the patterns for this tasks context
+     *
+     * \returns The patterns registered for this tasks context
+     */
+    [[nodiscard]] auto getPatterns() const noexcept -> const config::Patterns&;
+
   private:
     TaskCollection m_task;
     config::EnvironmentCollection m_env;
     config::Path m_workingDirectory;
+    config::Patterns m_patterns = {};
 };
 using Tasks = std::vector<Task>;
 
@@ -168,6 +183,5 @@ using Tasks = std::vector<Task>;
  * \returns The given stream expanded with the details of the given task
  */
 std::ostream& operator<<(std::ostream& os, const Task& task) noexcept;
-} // namespace core
-} // namespace execHelper
+} // namespace execHelper::core
 #endif /* __TASK_H__ */

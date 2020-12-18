@@ -8,7 +8,6 @@
 #include <gsl/pointers>
 
 #include "config/environment.h"
-#include "config/pattern.h"
 #include "config/settingsNode.h"
 #include "config/variablesMap.h"
 #include "core/task.h"
@@ -22,7 +21,6 @@
 #include "utils/commonGenerators.h"
 #include "utils/utils.h"
 
-#include "executorStub.h"
 #include "handlers.h"
 
 namespace filesystem = std::filesystem;
@@ -36,16 +34,14 @@ using std::vector;
 using gsl::not_null;
 
 using execHelper::config::EnvironmentCollection;
-using execHelper::config::Patterns;
 using execHelper::config::VariablesMap;
 using execHelper::core::Task;
 using execHelper::core::TaskCollection;
+using execHelper::core::Tasks;
 
-using execHelper::core::test::ExecutorStub;
 using execHelper::test::addToConfig;
 using execHelper::test::addToTask;
 using execHelper::test::propertyTest;
-using execHelper::test::utils::getExpectedTasks;
 
 namespace {
 const uint16_t defaultMinimumTokens = 80U;
@@ -107,17 +103,10 @@ SCENARIO("Testing the configuration settings of the pmd plugin", "[pmd]") {
                         const optional<vector<filesystem::path>>& files,
                         const Task& task) {
         Task expectedTask(task);
-        Patterns patterns;
 
         VariablesMap config("pmd-test");
 
         LuaPlugin plugin(std::string(PLUGINS_INSTALL_PATH) + "/pmd.lua");
-
-        ExecutorStub executor;
-        ExecuteCallback executeCallback = [&executor](const Task& task) {
-            executor.execute(task);
-        };
-        registerExecuteCallback(executeCallback);
 
         addToConfig("exec", exe, &config);
         addToConfig("tool", tool, &config);
@@ -161,16 +150,11 @@ SCENARIO("Testing the configuration settings of the pmd plugin", "[pmd]") {
             handleCommandLine(*commandLine, config, expectedTask);
         }
 
-        ExecutorStub::TaskQueue expectedTasks =
-            getExpectedTasks(expectedTask, patterns);
-
         THEN_WHEN("We apply the plugin") {
-            bool returnCode = plugin.apply(task, config, patterns);
+            auto actualTasks = plugin.apply(task, config);
 
-            THEN_CHECK("It should succeed") { REQUIRE(returnCode); }
-
-            THEN_CHECK("It called the right commands") {
-                REQUIRE(expectedTasks == executor.getExecutedTasks());
+            THEN_CHECK("It generated the expected tasks") {
+                REQUIRE(Tasks({expectedTask}) == actualTasks);
             }
         }
     });

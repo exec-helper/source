@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <cstdlib>
+#include <exception>
 #include <filesystem>
 #include <iomanip>
 #include <memory>
@@ -38,6 +39,7 @@
 #include "logger.h"
 #include "version.h"
 
+using std::exception;
 using std::make_pair;
 using std::make_shared;
 using std::make_unique;
@@ -105,6 +107,8 @@ using execHelper::core::Task;
 using execHelper::log::LogLevel;
 using execHelper::plugins::Plugin;
 using execHelper::plugins::Plugins;
+using execHelper::plugins::makePatternPermutator;
+using execHelper::plugins::replacePatternCombinations;
 
 namespace filesystem = std::filesystem;
 
@@ -539,24 +543,22 @@ int execHelperMain(int argc, char** argv, char** envp) {
         });
     }
 
-    execHelper::plugins::ExecuteCallback executeCallback =
-        [executor = executor.get()](const Task& task) {
-            try {
-                executor->execute(task);
-            } catch(const std::runtime_error& e) {
-                user_feedback_error("Runtime error: " << e.what());
-            }
-        };
-    execHelper::plugins::registerExecuteCallback(executeCallback);
-
     Commander commander;
-    if(commander.run(fleetingOptions, settings, patterns,
-                     settingsFile.parent_path(), move(env), move(plugins), settingsFile.parent_path())) {
-        return lastReturnCode;
-    } else {
-        user_feedback_error("Error executing commands");
+    try {
+        auto tasks = commander.run(fleetingOptions, settings, patterns,
+                     settingsFile.parent_path(), move(env), move(plugins), settingsFile.parent_path());
+
+        for(const auto& task : tasks) {
+            for(const auto& combination : makePatternPermutator(task.getPatterns())) {
+                Task newTask = replacePatternCombinations(task, combination);
+                executor->execute(newTask);
+            }
+        }
+    } catch(const exception& e) {
+        user_feedback_error("Error executing commands: " << e.what());
         return EXIT_FAILURE;
     }
+    return lastReturnCode;
 }
 
 int main(int argc, char** argv, char** envp) {

@@ -4,7 +4,6 @@ src = [
   'src/memory.cpp',
   'src/commandPlugin.cpp',
   'src/executePlugin.cpp',
-  'src/plugin.cpp',
   'src/commandLineCommand.cpp',
   'src/logger.cpp',
   'src/commandLine.cpp',

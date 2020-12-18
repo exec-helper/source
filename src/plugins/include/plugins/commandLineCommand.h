@@ -12,9 +12,11 @@ class CommandLineCommand : public Plugin {
     config::VariablesMap
     getVariablesMap(const config::FleetingOptionsInterface& fleetingOptions)
         const noexcept override;
-    bool apply(core::Task task, const config::VariablesMap& variables,
-               const config::Patterns& patterns) const noexcept override;
-    std::string summary() const noexcept override;
+    [[nodiscard]] auto apply(core::Task task,
+                             const config::VariablesMap& variables) const
+        -> core::Tasks override;
+
+    [[nodiscard]] auto summary() const noexcept -> std::string override;
 };
 } // namespace execHelper::plugins
 

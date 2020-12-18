@@ -27,8 +27,8 @@ using execHelper::config::Patterns;
 using execHelper::config::SettingsNode;
 using execHelper::config::VariablesMap;
 using execHelper::core::Task;
+using execHelper::core::Tasks;
 
-using execHelper::core::test::ExecutorStub;
 using execHelper::test::FleetingOptionsStub;
 
 namespace {
@@ -70,26 +70,18 @@ SCENARIO("Obtaining the default variables map of the command-plugin",
 
 SCENARIO("Test the commandPlugin plugin", "[command-plugin]") {
     MAKE_COMBINATIONS("Of several options and configurations") {
-        MemoryHandler memory;
-
         Task task;
         CommandPlugin plugin;
 
         VariablesMap variables = plugin.getVariablesMap(FleetingOptionsStub());
-        ExecutorStub::TaskQueue expectedTasks;
-
-        ExecutorStub executor;
-        ExecuteCallback executeCallback = [&executor](const Task& task) {
-            executor.execute(task);
-        };
-        registerExecuteCallback(executeCallback);
+        Tasks expectedTasks;
 
         FleetingOptionsStub fleetingOptions;
-        ExecutePlugin::push(
+        auto flRaii = ExecutePlugin::push(
             gsl::not_null<config::FleetingOptionsInterface*>(&fleetingOptions));
-        ExecutePlugin::push(SettingsNode(PLUGIN_NAME));
-        ExecutePlugin::push(Patterns());
-        ExecutePlugin::push(
+        auto seRaii = ExecutePlugin::push(SettingsNode(PLUGIN_NAME));
+        auto paRaii = ExecutePlugin::push(Patterns());
+        auto plRaii = ExecutePlugin::push(
             Plugins({{"Memory",
                       shared_ptr<Plugin>(new execHelper::plugins::Memory())}}));
 
@@ -107,27 +99,12 @@ SCENARIO("Test the commandPlugin plugin", "[command-plugin]") {
         }
 
         THEN_WHEN("We apply the plugin") {
-            bool return_code = plugin.apply(task, variables, Patterns());
-
-            THEN_CHECK("The call should succeed") { REQUIRE(return_code); }
+            auto actualTasks = plugin.apply(task, variables);
 
             THEN_CHECK("All expected actions should be executed") {
-                const Memory::Memories& memories =
-                    MemoryHandler::getExecutions();
-                REQUIRE(memories.size() == expectedTasks.size());
-                auto taskIterator = expectedTasks.begin();
-                for(auto memoryIterator = memories.begin();
-                    memoryIterator != memories.end();
-                    ++memoryIterator, ++taskIterator) {
-                    REQUIRE(memoryIterator->task == task);
-                }
+                REQUIRE(actualTasks == expectedTasks);
             }
         }
-
-        ExecutePlugin::popPlugins();
-        ExecutePlugin::popFleetingOptions();
-        ExecutePlugin::popSettingsNode();
-        ExecutePlugin::popPatterns();
     }
 }
 } // namespace execHelper::plugins::test

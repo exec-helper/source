@@ -25,7 +25,6 @@ using execHelper::config::ENVIRONMENT_KEY;
 using execHelper::config::EnvironmentCollection;
 using execHelper::config::FleetingOptionsInterface;
 using execHelper::config::Path;
-using execHelper::config::Patterns;
 using execHelper::config::SettingsKeys;
 using execHelper::config::SettingsValues;
 using execHelper::config::VariablesMap;
@@ -50,9 +49,8 @@ auto CommandLineCommand::getVariablesMap(
     return defaults;
 }
 
-auto CommandLineCommand::apply(Task task, const VariablesMap& variables,
-                               const Patterns& patterns) const noexcept
-    -> bool {
+auto CommandLineCommand::apply(Task task, const VariablesMap& variables) const
+    -> Tasks {
     task.appendToEnvironment(getEnvironment(variables));
 
     auto workingDir = variables.get<WorkingDir>(WORKING_DIR_KEY);
@@ -62,10 +60,14 @@ auto CommandLineCommand::apply(Task task, const VariablesMap& variables,
 
     auto commandLine = *(variables.get<CommandLineArgs>(COMMAND_LINE_KEY));
     if(commandLine.empty()) {
-        user_feedback_error("Could not find the '"
-                            << COMMAND_LINE_KEY << "' setting in the '"
-                            << PLUGIN_NAME << "' settings");
-        return false;
+        LOG(error) << "Could not find the '" << COMMAND_LINE_KEY
+                   << "' setting in the '" << PLUGIN_NAME << "' settings";
+        throw std::runtime_error(
+            string("Command-line-command plugin: Could not find the '")
+                .append(COMMAND_LINE_KEY)
+                .append("' setting in the '")
+                .append(PLUGIN_NAME)
+                .append("' settings"));
     }
 
     Tasks tasks;
@@ -87,16 +89,7 @@ auto CommandLineCommand::apply(Task task, const VariablesMap& variables,
             tasks.emplace_back(newTask);
         }
     }
-
-    for(const auto& combination : makePatternPermutator(patterns)) {
-        for(const auto& executeTask : tasks) {
-            Task newTask = replacePatternCombinations(executeTask, combination);
-            if(!registerTask(newTask)) {
-                return false;
-            }
-        }
-    }
-    return true;
+    return tasks;
 }
 
 auto CommandLineCommand::summary() const noexcept -> std::string {

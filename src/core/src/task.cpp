@@ -127,6 +127,18 @@ auto Task::appendToEnvironment(EnvironmentCollection&& newValue) noexcept
     return true;
 }
 
+auto Task::addPatterns(const config::Patterns& patterns) noexcept -> void {
+    for(const auto& pattern : patterns) {
+        if(count(m_patterns.begin(), m_patterns.end(), pattern) == 0) {
+            m_patterns.emplace_back(pattern);
+        }
+    }
+}
+
+auto Task::getPatterns() const noexcept -> const config::Patterns& {
+    return m_patterns;
+}
+
 auto Task::operator==(const Task& other) const noexcept -> bool {
     return (m_task == other.m_task &&
             m_workingDirectory == other.m_workingDirectory &&

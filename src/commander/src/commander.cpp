@@ -28,6 +28,7 @@ using execHelper::config::Patterns;
 using execHelper::config::SettingsNode;
 using execHelper::config::VariablesMap;
 using execHelper::core::Task;
+using execHelper::core::Tasks;
 using execHelper::plugins::ExecutePlugin;
 using execHelper::plugins::Plugins;
 
@@ -55,29 +56,23 @@ auto Commander::run(const FleetingOptionsInterface& fleetingOptions,
                     SettingsNode settings, Patterns patterns,
                     const Path& workingDirectory,
                     const EnvironmentCollection& env, Plugins&& plugins,
-                    const Path& rootDirectory) noexcept -> bool {
+                    const Path& rootDirectory) -> Tasks {
     patterns = addPredefinedPatterns(patterns, rootDirectory);
 
-    ExecutePlugin::push(
+    auto foRaii = ExecutePlugin::push(
         not_null<const FleetingOptionsInterface*>(&fleetingOptions));
-    ExecutePlugin::push(move(settings));
-    ExecutePlugin::push(move(patterns));
-    ExecutePlugin::push(move(plugins));
+    auto seRaii = ExecutePlugin::push(move(settings));
+    auto paRaii = ExecutePlugin::push(move(patterns));
+    auto plRaii = ExecutePlugin::push(move(plugins));
     Task task({}, env, workingDirectory);
 
     auto commands = fleetingOptions.getCommands();
     if(commands.empty()) {
-        user_feedback_error("You must define at least one command");
-        return false;
+        throw std::runtime_error("You must define at least one command");
     }
     ExecutePlugin plugin(move(commands));
-    auto returnCode = plugin.apply(task, VariablesMap("commands"), patterns);
-
-    ExecutePlugin::popPlugins();
-    ExecutePlugin::popFleetingOptions();
-    ExecutePlugin::popSettingsNode();
-    ExecutePlugin::popPatterns();
-    return returnCode;
+    auto tasks = plugin.apply(task, VariablesMap("commands"));
+    return tasks;
 }
 } // namespace commander
 } // namespace execHelper

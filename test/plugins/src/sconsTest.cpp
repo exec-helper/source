@@ -14,7 +14,6 @@
 #include "utils/commonGenerators.h"
 #include "utils/utils.h"
 
-#include "executorStub.h"
 #include "fleetingOptionsStub.h"
 #include "handlers.h"
 
@@ -30,10 +29,9 @@ using execHelper::config::Path;
 using execHelper::config::Patterns;
 using execHelper::config::VariablesMap;
 using execHelper::core::Task;
+using execHelper::core::Tasks;
 
-using execHelper::core::test::ExecutorStub;
 using execHelper::test::propertyTest;
-using execHelper::test::utils::getExpectedTasks;
 
 namespace filesystem = std::filesystem;
 
@@ -47,15 +45,8 @@ SCENARIO("Testing the configuration settings of the scons plugin", "[scons]") {
                         const optional<Jobs_t> jobs) {
         const Task task;
         Task expectedTask(task);
-        Patterns patterns;
 
         VariablesMap config("scons-test");
-
-        ExecutorStub executor;
-        ExecuteCallback executeCallback = [&executor](const Task& task) {
-            executor.execute(task);
-        };
-        registerExecuteCallback(executeCallback);
 
         expectedTask.append("scons");
 
@@ -93,16 +84,11 @@ SCENARIO("Testing the configuration settings of the scons plugin", "[scons]") {
 
         LuaPlugin plugin(std::string(PLUGINS_INSTALL_PATH) + "/scons.lua");
 
-        ExecutorStub::TaskQueue expectedTasks =
-            getExpectedTasks(expectedTask, patterns);
-
         THEN_WHEN("We apply the plugin") {
-            bool returnCode = plugin.apply(task, config, patterns);
+            auto actualTasks = plugin.apply(task, config);
 
-            THEN_CHECK("It should succeed") { REQUIRE(returnCode); }
-
-            THEN_CHECK("It called the right commands") {
-                REQUIRE(expectedTasks == executor.getExecutedTasks());
+            THEN_CHECK("It generated the expected tasks") {
+                REQUIRE(Tasks{expectedTask} == actualTasks);
             }
         }
     });

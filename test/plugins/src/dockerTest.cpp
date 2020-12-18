@@ -51,15 +51,14 @@ using execHelper::config::SettingsNode;
 using execHelper::config::VariablesMap;
 using execHelper::core::Task;
 using execHelper::core::TaskCollection;
+using execHelper::core::Tasks;
 using execHelper::plugins::ExecutePlugin;
 
-using execHelper::core::test::ExecutorStub;
 using execHelper::test::addToConfig;
 using execHelper::test::addToTask;
 using execHelper::test::FleetingOptionsStub;
 using execHelper::test::NonEmptyString;
 using execHelper::test::propertyTest;
-using execHelper::test::utils::getExpectedTasks;
 
 namespace filesystem = std::filesystem;
 
@@ -116,7 +115,7 @@ template <> struct Arbitrary<Mode> {
 
 namespace execHelper::plugins::test {
 SCENARIO("Testing the configuration settings of the docker plugin",
-         "[docker][successful]") {
+         "[docker][successful][wip]") {
     propertyTest(
         "",
         [](Mode mode, const NonEmptyString& image,
@@ -128,40 +127,46 @@ SCENARIO("Testing the configuration settings of the docker plugin",
            const optional<string>& user,
            const optional<pair<string, string>>&
                env, // Lua does not necessarily preserve the order of these, so we currently limit ourselves to one value
-           const optional<vector<string>>& volumes,
-           const optional<NonEmptyString>& target) {
-            const Task task;
-            Task expectedTask(task);
-            Patterns patterns;
+           const optional<vector<string>>& volumes, const Pattern& pattern) {
+            Task task;
+
+            Patterns patterns = {pattern};
+            task.addPatterns(patterns);
+
+            Task expectedTask = task;
 
             VariablesMap config("docker-test");
 
             LuaPlugin plugin(std::string(PLUGINS_INSTALL_PATH) + "/docker.lua");
 
-            ExecutorStub executor;
-            ExecuteCallback executeCallback = [&executor](const Task& task) {
-                executor.execute(task);
-            };
-            registerExecuteCallback(executeCallback);
+            auto memory = make_shared<Memory>();
 
-            auto memory = make_shared<SpecialMemory>();
+            SettingsNode generalSettings("docker-test");
+            FleetingOptionsStub fleetingOptions;
 
-            if(target) {
-                SettingsNode generalSettings("docker-test");
-                FleetingOptionsStub fleetingOptions;
+            map<std::string, shared_ptr<Memory>> memories;
+            const auto& patternValues = pattern.getValues();
+            transform(patternValues.begin(), patternValues.end(),
+                      inserter(memories, memories.end()),
+                      [](const auto& value) {
+                          return make_pair(value, make_shared<Memory>());
+                      });
 
-                string key = **target;
+            // Register each memory mapping as the endpoint for every target command
+            Plugins plugins;
+            transform(memories.begin(), memories.end(),
+                      inserter(plugins, plugins.end()), [](const auto& memory) {
+                          return make_pair(
+                              memory.first,
+                              static_pointer_cast<Plugin>(memory.second));
+                      });
 
-                Plugins plugins;
-                plugins.emplace(
-                    make_pair(move(key), static_pointer_cast<Plugin>(memory)));
-                ExecutePlugin::push(move(plugins));
-                ExecutePlugin::push(
-                    gsl::not_null<config::FleetingOptionsInterface*>(
-                        &fleetingOptions));
-                ExecutePlugin::push(SettingsNode("general-docker"));
-                ExecutePlugin::push(Patterns(patterns));
-            }
+            auto flRaii = ExecutePlugin::push(
+                gsl::not_null<config::FleetingOptionsInterface*>(
+                    &fleetingOptions));
+            auto seRaii = ExecutePlugin::push(SettingsNode("general-docker"));
+            auto plRaii = ExecutePlugin::push(move(plugins));
+            auto paRaii = ExecutePlugin::push(Patterns(patterns));
 
             expectedTask.append("docker");
 
@@ -237,6 +242,7 @@ SCENARIO("Testing the configuration settings of the docker plugin",
                 REQUIRE(false);
             }
 
+            auto target = string("{").append(pattern.getKey()).append("}");
             addToConfig("targets", target, &config);
 
             if(environment) {
@@ -247,104 +253,16 @@ SCENARIO("Testing the configuration settings of the docker plugin",
                 handleWorkingDirectory(*workingDir, config, expectedTask);
             }
 
-            ExecutorStub::TaskQueue expectedTasks =
-                getExpectedTasks(expectedTask, patterns);
-
             THEN_WHEN("We apply the plugin") {
-                bool returnCode = plugin.apply(task, config, patterns);
+                auto actualTasks = plugin.apply(task, config);
 
-                THEN_CHECK("It should succeed") { REQUIRE(returnCode); }
-
-                THEN_CHECK("It called the right commands") {
-                    if(target) {
-                        auto executions = memory->getExecutions();
-                        REQUIRE(executions.size() == 1);
-                        REQUIRE(expectedTasks.size() == executions.size());
-                        auto expectedTask = expectedTasks.begin();
-                        for(auto execution = executions.begin();
-                            execution != executions.end();
-                            ++execution, ++expectedTask) {
-                            REQUIRE(execution->task == *expectedTask);
-                            REQUIRE(execution->patterns.empty());
-                        }
-                    } else {
-                        REQUIRE(expectedTasks == executor.getExecutedTasks());
-                    }
+                THEN_CHECK("It generated the expected tasks") {
+                    //Tasks expectedTasks( target ? 1U : 1U, expectedTask);
+                    Tasks expectedTasks(pattern.getValues().size(),
+                                        expectedTask);
+                    REQUIRE(actualTasks == expectedTasks);
                 }
             }
-
-            if(target) {
-                ExecutePlugin::popFleetingOptions();
-                ExecutePlugin::popSettingsNode();
-                ExecutePlugin::popPatterns();
-                ExecutePlugin::popPlugins();
-            }
-        });
-}
-
-SCENARIO("Use a pattern for the target", "[docker][successful]") {
-    propertyTest(
-        "A pattern to use as a target",
-        [](Mode mode, const NonEmptyString& image,
-           const NonEmptyString& container, const Pattern& pattern) {
-            auto target = string("{").append(pattern.getKey()).append("}");
-            LuaPlugin plugin(std::string(PLUGINS_INSTALL_PATH) + "/docker.lua");
-
-            const Task task;
-            Patterns patterns = {pattern};
-
-            map<std::string, shared_ptr<SpecialMemory>> memories;
-            const auto& patternValues = pattern.getValues();
-            transform(patternValues.begin(), patternValues.end(),
-                      inserter(memories, memories.end()),
-                      [](const auto& value) {
-                          return make_pair(value, make_shared<SpecialMemory>());
-                      });
-
-            // Register each memories mapping as the endpoint for every target command
-            Plugins plugins;
-            transform(memories.begin(), memories.end(),
-                      inserter(plugins, plugins.end()), [](const auto& memory) {
-                          return make_pair(
-                              memory.first,
-                              static_pointer_cast<Plugin>(memory.second));
-                      });
-
-            ExecutePlugin::push(move(plugins));
-            FleetingOptionsStub fleetingOptions;
-            ExecutePlugin::push(
-                gsl::not_null<config::FleetingOptionsInterface*>(
-                    &fleetingOptions));
-            ExecutePlugin::push(SettingsNode("general-docker"));
-            ExecutePlugin::push(Patterns(patterns));
-
-            VariablesMap config("docker-test");
-            addToConfig("run", mode, &config);
-            addToConfig("image", image, &config);
-            addToConfig("container", container, &config);
-            addToConfig("targets", target, &config);
-
-            THEN_WHEN("We apply the plugin") {
-                bool returnCode = plugin.apply(task, config, patterns);
-
-                THEN_CHECK("It should succeed") { REQUIRE(returnCode); }
-
-                THEN_CHECK("The pattern was unwrapped into its actual values") {
-                    for(const auto& memory : memories) {
-                        // Expected executions is 1 per memory, multiplied by the number of occurences of the pattern value in all the pattern values
-                        size_t nbOfExpectedExecutions =
-                            count(patternValues.begin(), patternValues.end(),
-                                  memory.first);
-                        REQUIRE(memory.second->getExecutions().size() ==
-                                nbOfExpectedExecutions);
-                    }
-                }
-            }
-
-            ExecutePlugin::popFleetingOptions();
-            ExecutePlugin::popSettingsNode();
-            ExecutePlugin::popPatterns();
-            ExecutePlugin::popPlugins();
         });
 }
 
@@ -370,9 +288,10 @@ SCENARIO("Not passing an image or container to the docker plugin",
             addToConfig("volumes", volumes, &config);
 
             THEN_WHEN("We call the docker plugin with this configuration") {
-                bool returnCode = plugin.apply(Task(), config, Patterns());
-
-                THEN_CHECK("It should fail") { REQUIRE_FALSE(returnCode); }
+                THEN_CHECK("It throws a runtime error") {
+                    REQUIRE_THROWS_AS(plugin.apply(Task(), config),
+                                      runtime_error);
+                }
             }
         });
 }

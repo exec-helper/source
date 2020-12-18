@@ -2,6 +2,7 @@
 #include <map>
 #include <memory>
 #include <optional>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 #include <utility>
@@ -32,6 +33,7 @@ using std::make_pair;
 using std::make_shared;
 using std::map;
 using std::optional;
+using std::runtime_error;
 using std::shared_ptr;
 using std::static_pointer_cast;
 using std::string;
@@ -46,10 +48,10 @@ using execHelper::config::SettingsNode;
 using execHelper::config::VariablesMap;
 using execHelper::core::Task;
 using execHelper::core::TaskCollection;
+using execHelper::core::Tasks;
 using execHelper::plugins::ExecutePlugin;
 using execHelper::plugins::LuaPlugin;
 
-using execHelper::core::test::ExecutorStub;
 using execHelper::test::addToConfig;
 using execHelper::test::addToTask;
 using execHelper::test::FleetingOptionsStub;
@@ -68,8 +70,7 @@ auto zeroCounterTask(Task task, const optional<path>& workingDir,
                      const optional<vector<string>>& commandLine,
                      const optional<EnvironmentCollection>& environment,
                      const optional<path>& baseDirectory,
-                     const optional<path>& directory,
-                     const Pattern& pattern) noexcept {
+                     const optional<path>& directory) noexcept {
     task.append(string(binary));
     addToTask(
         baseDirectory, &task,
@@ -92,7 +93,7 @@ auto zeroCounterTask(Task task, const optional<path>& workingDir,
     if(environment) {
         task.setEnvironment(*environment);
     }
-    return getExpectedTasks(task, {pattern});
+    return task;
 }
 
 auto captureTask(Task task, const optional<path>& workingDir,
@@ -100,8 +101,7 @@ auto captureTask(Task task, const optional<path>& workingDir,
                  const optional<EnvironmentCollection>& environment,
                  const optional<path>& baseDirectory,
                  const optional<path>& directory,
-                 const optional<path>& infoFile,
-                 const Pattern& pattern) noexcept {
+                 const optional<path>& infoFile) noexcept {
     task.append(string(binary));
     addToTask(
         baseDirectory, &task,
@@ -130,14 +130,14 @@ auto captureTask(Task task, const optional<path>& workingDir,
     if(environment) {
         task.setEnvironment(*environment);
     }
-    return getExpectedTasks(task, {pattern});
+    return task;
 }
 
 auto excludeTask(Task task, const optional<path>& workingDir,
                  const optional<vector<string>>& commandLine,
                  const optional<EnvironmentCollection>& environment,
-                 const optional<path>& infoFile, const vector<string>& excludes,
-                 const Pattern& pattern) noexcept {
+                 const optional<path>& infoFile,
+                 const vector<string>& excludes) noexcept {
     task.append({string(binary), "--remove"});
     addToTask(
         infoFile, &task,
@@ -160,7 +160,7 @@ auto excludeTask(Task task, const optional<path>& workingDir,
     if(environment) {
         task.setEnvironment(*environment);
     }
-    return getExpectedTasks(task, {pattern});
+    return task;
 }
 
 auto genHtmlTask(Task task, const optional<path>& workingDir,
@@ -168,8 +168,7 @@ auto genHtmlTask(Task task, const optional<path>& workingDir,
                  const optional<path>& infoFile,
                  const optional<path>& genHtmlOutput,
                  const optional<string>& genHtmlTitle,
-                 const optional<vector<string>>& genHtmlCommandLine,
-                 const Pattern& pattern) noexcept {
+                 const optional<vector<string>>& genHtmlCommandLine) noexcept {
     task.append("genhtml");
     addToTask(
         genHtmlOutput, &task,
@@ -195,7 +194,7 @@ auto genHtmlTask(Task task, const optional<path>& workingDir,
     if(environment) {
         task.setEnvironment(*environment);
     }
-    return getExpectedTasks(task, {pattern});
+    return task;
 }
 } // namespace
 
@@ -213,24 +212,19 @@ SCENARIO("Testing the configuration settings of the lcov plugin", "[lcov]") {
                         const optional<path>& genHtmlOutput,
                         const optional<string>& genHtmlTitle,
                         const optional<vector<string>>& genHtmlCommandLine,
-                        const Pattern& pattern, const Task& task) {
-        ExecutorStub::TaskQueue allTasks;
-
+                        const Pattern& pattern, Task task) {
         VariablesMap config("lcov-test");
+        task.addPatterns({pattern});
+
+        Tasks expectedTasks;
 
         LuaPlugin plugin(std::string(PLUGINS_INSTALL_PATH) + "/lcov.lua");
 
-        ExecutorStub executor;
-        ExecuteCallback executeCallback = [&executor](const Task& task) {
-            executor.execute(task);
-        };
-        registerExecuteCallback(executeCallback);
-
-        map<std::string, shared_ptr<SpecialMemory>> memories;
+        map<std::string, shared_ptr<Memory>> memories;
         const auto& patternValues = pattern.getValues();
         transform(patternValues.begin(), patternValues.end(),
                   inserter(memories, memories.end()), [](const auto& value) {
-                      return make_pair(value, make_shared<SpecialMemory>());
+                      return make_pair(value, make_shared<Memory>());
                   });
 
         addToConfig("base-directory", baseDirectory, &config);
@@ -250,11 +244,9 @@ SCENARIO("Testing the configuration settings of the lcov plugin", "[lcov]") {
 
         addToConfig("zero-counters", zeroCounters, &config);
         if(zeroCounters.value_or(false)) {
-            auto replacedTasks =
-                zeroCounterTask(task, workingDir, commandLine, environment,
-                                baseDirectory, directory, pattern);
-            allTasks.insert(allTasks.end(), replacedTasks.begin(),
-                            replacedTasks.end());
+            auto zero = zeroCounterTask(task, workingDir, commandLine,
+                                        environment, baseDirectory, directory);
+            expectedTasks.emplace_back(zero);
         }
 
         auto runCommand = string("{").append(pattern.getKey()).append("}");
@@ -267,20 +259,19 @@ SCENARIO("Testing the configuration settings of the lcov plugin", "[lcov]") {
         if(environment) {
             runTask.setEnvironment(*environment);
         }
+        auto replacedRunTasks = getExpectedTasks(runTask, {pattern});
+        move(replacedRunTasks.begin(), replacedRunTasks.end(),
+             back_inserter(expectedTasks));
 
-        auto replacedTasks =
-            captureTask(task, workingDir, commandLine, environment,
-                        baseDirectory, directory, infoFile, pattern);
-        allTasks.insert(allTasks.end(), replacedTasks.begin(),
-                        replacedTasks.end());
+        auto capture = captureTask(task, workingDir, commandLine, environment,
+                                   baseDirectory, directory, infoFile);
+        expectedTasks.emplace_back(capture);
 
         addToConfig("excludes", excludes, &config);
         if(excludes && !excludes->empty()) {
-            auto excludeTasks =
-                excludeTask(task, workingDir, commandLine, environment,
-                            infoFile, *excludes, pattern);
-            allTasks.insert(allTasks.end(), excludeTasks.begin(),
-                            excludeTasks.end());
+            auto exclude = excludeTask(task, workingDir, commandLine,
+                                       environment, infoFile, *excludes);
+            expectedTasks.emplace_back(exclude);
         }
 
         addToConfig("gen-html", genHtml, &config);
@@ -289,11 +280,10 @@ SCENARIO("Testing the configuration settings of the lcov plugin", "[lcov]") {
         addToConfig("gen-html-command-line", genHtmlCommandLine, &config);
 
         if(genHtml.value_or(false)) {
-            auto genHtmlTasks = genHtmlTask(
-                task, workingDir, environment, infoFile, genHtmlOutput,
-                genHtmlTitle, genHtmlCommandLine, pattern);
-            allTasks.insert(allTasks.end(), genHtmlTasks.begin(),
-                            genHtmlTasks.end());
+            auto genHtml =
+                genHtmlTask(task, workingDir, environment, infoFile,
+                            genHtmlOutput, genHtmlTitle, genHtmlCommandLine);
+            expectedTasks.emplace_back(genHtml);
         }
 
         // Register each memories mapping as the endpoint for every target command
@@ -307,33 +297,19 @@ SCENARIO("Testing the configuration settings of the lcov plugin", "[lcov]") {
 
         FleetingOptionsStub fleetingOptions;
 
-        ExecutePlugin::push(move(plugins));
-        ExecutePlugin::push(
+        auto plRaii = ExecutePlugin::push(move(plugins));
+        auto flRaii = ExecutePlugin::push(
             gsl::not_null<config::FleetingOptionsInterface*>(&fleetingOptions));
-        ExecutePlugin::push(SettingsNode("lcov-test"));
-        ExecutePlugin::push({pattern});
+        auto seRaii = ExecutePlugin::push(SettingsNode("lcov-test"));
+        auto paRaii = ExecutePlugin::push({pattern});
 
         THEN_WHEN("We apply the plugin") {
-            bool returnCode = plugin.apply(task, config, {pattern});
-            THEN_CHECK("It should succeed") { REQUIRE(returnCode); }
+            auto actualTasks = plugin.apply(task, config);
 
             THEN_CHECK("It called the right commands") {
-                REQUIRE(allTasks == executor.getExecutedTasks());
-
-                for(const auto& memory : memories) {
-                    auto executions = memory.second->getExecutions();
-                    for(const auto& execution : executions) {
-                        REQUIRE(execution.task == runTask);
-                        REQUIRE(execution.patterns.empty());
-                    }
-                }
+                REQUIRE(expectedTasks == actualTasks);
             }
         }
-
-        ExecutePlugin::popFleetingOptions();
-        ExecutePlugin::popSettingsNode();
-        ExecutePlugin::popPatterns();
-        ExecutePlugin::popPlugins();
     });
 }
 
@@ -343,9 +319,10 @@ SCENARIO("Test erroneous scenarios for the lcov plugin", "[lcov]") {
         VariablesMap variables("lcov-test");
 
         WHEN("We call the plugin") {
-            auto returnCode = plugin.apply(Task(), variables, Patterns());
-
-            THEN("It should fail") { REQUIRE_FALSE(returnCode); }
+            THEN("It should throw a runtime error") {
+                REQUIRE_THROWS_AS(plugin.apply(Task(), variables),
+                                  runtime_error);
+            }
         }
     }
 }

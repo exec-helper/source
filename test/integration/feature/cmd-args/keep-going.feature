@@ -2,7 +2,7 @@
 Feature: Use the keep-going command-line option
     Scenarios for when the keep-going option is given on the command line
 
-    Examples:    
+    Examples:
     | command_line                         |
     | -k                                   |
     | --keep-going                         |

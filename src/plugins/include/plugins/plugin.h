@@ -3,35 +3,54 @@
 
 #include <functional>
 #include <utility>
+#include <vector>
 
 #include "config/commandLineOptions.h"
-#include "config/pattern.h"
 #include "config/settingsNode.h"
 #include "config/variablesMap.h"
+#include "core/task.h"
 
-namespace execHelper {
-namespace config {
+namespace execHelper::config {
 class FleetingOptionsInterface;
-}
-namespace core {
-class Task;
-} // namespace core
-} // namespace execHelper
+} // namespace execHelper::config
 
-namespace execHelper {
-namespace plugins {
+namespace execHelper::plugins {
 /**
  * \brief Interface declaration to which plugins should comply
  */
 class Plugin {
   public:
+    /**
+     * Copy constructor
+     *
+     * \param[in] other The object to copy from
+     */
     Plugin(const Plugin& other) = delete;
-    Plugin(Plugin&& other) noexcept = delete;
+
+    /**
+     * Move constructor
+     *
+     * \param[in] other The object to move from
+     */
+    Plugin(Plugin&& other) = delete;
 
     virtual ~Plugin() = default;
 
-    Plugin& operator=(const Plugin& other) = delete;
-    Plugin& operator=(Plugin&& other) noexcept = delete;
+    /**
+     * Copy assignment operator
+     *
+     * \param[in] other The object to assign from
+     * \returns A reference to this object
+     */
+    auto operator=(const Plugin& other) -> Plugin& = delete;
+
+    /**
+     * Move assignment operator
+     *
+     * \param[in] other the object to move assign from
+     * \returns a reference to this object
+     */
+    auto operator=(Plugin&& other) -> Plugin& = delete;
 
     /**
      * Returns the default variables map based on the given fleeting options
@@ -48,7 +67,7 @@ class Plugin {
      *
      * \returns The root settings key
      */
-    [[nodiscard]] static config::SettingsKey getPatternsKey() noexcept {
+    [[nodiscard]] static auto getPatternsKey() noexcept -> config::SettingsKey {
         return "patterns";
     }
 
@@ -57,50 +76,25 @@ class Plugin {
      *
      * \param[in] task      The task to extend
      * \param[in] variables The variables map containing the values to use for
-     * the executed command for this specific plugin \param[in] patterns  The
-     * patterns that were configured to use for the executed command for this
-     * specific plugin
+     * the executed command for this specific plugin
      *
      * \returns True    If the application was successful False
      * Otherwise
      */
-    [[nodiscard]] virtual bool
-    apply(core::Task task, const config::VariablesMap& variables,
-          const config::Patterns& patterns) const noexcept = 0;
+    [[nodiscard]] virtual auto
+    apply(core::Task task, const config::VariablesMap& variables) const
+        -> core::Tasks = 0;
 
     /**
      * Returns a summary of the specific plugin
      *
      * \returns A short description of the plugin
      */
-    [[nodiscard]] virtual std::string summary() const noexcept = 0;
+    [[nodiscard]] virtual auto summary() const noexcept -> std::string = 0;
 
   protected:
     Plugin() = default;
 };
-
-using ExecuteCallback = std::function<void(const core::Task&)>;
-
-/**
- * Register a callback function. This replaces the previous callback function.
- *
- * \param[in] callback  The function to call when a task is registered.
- */
-void registerExecuteCallback(const ExecuteCallback& callback) noexcept;
-
-/**
- * Unregister the current callback function.
- */
-void unregisterExecuteCallback() noexcept;
-
-/**
- * Register a finished task to an executor
- *
- * \param[in] task  The finished task
- * \returns True    If the task was successfully registered
- *          False   Otherwise
- */
-[[nodiscard]] auto registerTask(const core::Task& task) noexcept -> bool;
 
 /**
  * Output specifics of the plugin
@@ -110,7 +104,6 @@ inline auto operator<<(std::ostream& os, // NOLINT(fuchsia-overloaded-operator)
     os << plugin.summary();
     return os;
 }
-} // namespace plugins
-} // namespace execHelper
+} // namespace execHelper::plugins
 
 #endif /* __PLUGIN_H__ */

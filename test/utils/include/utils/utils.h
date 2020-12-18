@@ -25,16 +25,14 @@ namespace config {
 class SettingsNode;
 } // namespace config
 
-namespace test {
-namespace baseUtils {
+namespace test::baseUtils {
 class ConfigFileWriter;
-} // namespace baseUtils
-} // namespace test
+} // namespace test::baseUtils
 } // namespace execHelper
 
 namespace std {
 template <typename T>
-std::ostream& operator<<(std::ostream& os, const std::vector<T>& stream) {
+auto operator<<(std::ostream& os, const std::vector<T>& stream) noexcept -> std::ostream& {
     for(const auto& element : stream) {
         os << element << ", ";
     }
@@ -42,22 +40,13 @@ std::ostream& operator<<(std::ostream& os, const std::vector<T>& stream) {
 }
 
 template <typename T, typename U>
-std::ostream& operator<<(std::ostream& os, const std::pair<T, U>& stream) {
+auto operator<<(std::ostream& os, const std::pair<T, U>& stream) noexcept -> std::ostream& {
     os << stream.first << ": " << stream.second;
     return os;
 }
 } // namespace std
 
-namespace execHelper::plugins {
-inline auto operator<<(std::ostream& os, const Memory_t& memory) noexcept -> std::ostream& {
-    os << "Memory: { Task: {" << memory.task << "}, patterns: {" << memory.patterns << "}}";
-    return os;
-}
-} // namespace execHelper::plugins
-
-namespace execHelper {
-namespace test {
-namespace utils {
+namespace execHelper::test::utils {
 using Patterns = std::vector<config::Pattern>;
 
 using Arguments = std::vector<std::string>;
@@ -138,8 +127,6 @@ std::string toString(const config::SettingsNode& settings,
                      unsigned int nbOfTabs = 0) noexcept;
 
 auto getPredefinedPatterns(const config::Path& rootDirectory) noexcept -> Patterns;
-} // namespace utils
-} // namespace test
-} // namespace execHelper
+} // namespace execHelper::test::utils
 
 #endif /* __TEST_UTILS_H__ */

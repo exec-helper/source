@@ -17,7 +17,7 @@ if targets == nil then
 end
 
 local run_task = task:copy()
-run_target(run_task, targets)
+register_tasks(run_target(run_task, targets))
 
 local capture_task = task:copy()
 capture_task:add_args({'lcov', '--base-directory', base_directory, '--directory', directory, '--capture', '--output', info_file})

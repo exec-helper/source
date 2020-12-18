@@ -3,6 +3,7 @@
 #include <map>
 #include <memory>
 #include <optional>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -27,17 +28,16 @@
 #include "utils/addToTask.h"
 #include "utils/commonGenerators.h"
 
-#include "executorStub.h"
 #include "fleetingOptionsStub.h"
 #include "handlers.h"
 
-using std::count;
 using std::inserter;
 using std::make_pair;
 using std::make_shared;
 using std::map;
 using std::move;
 using std::optional;
+using std::runtime_error;
 using std::shared_ptr;
 using std::static_pointer_cast;
 using std::string;
@@ -53,6 +53,7 @@ using execHelper::config::PatternValues;
 using execHelper::config::SettingsNode;
 using execHelper::config::VariablesMap;
 using execHelper::core::Task;
+using execHelper::core::Tasks;
 using execHelper::plugins::ExecutePlugin;
 
 using execHelper::test::addToConfig;
@@ -74,12 +75,13 @@ SCENARIO("Testing the configuration settings of the selector plugin",
                         const optional<EnvironmentCollection>& environment,
                         const Pattern& pattern, Task task) {
         Patterns patterns = {pattern};
+        task.addPatterns(patterns);
 
-        map<std::string, shared_ptr<SpecialMemory>> memories;
+        map<std::string, shared_ptr<Memory>> memories;
         const auto& patternValues = pattern.getValues();
         transform(patternValues.begin(), patternValues.end(),
                   inserter(memories, memories.end()), [](const auto& value) {
-                      return make_pair(value, make_shared<SpecialMemory>());
+                      return make_pair(value, make_shared<Memory>());
                   });
 
         VariablesMap config("selector-test");
@@ -108,43 +110,21 @@ SCENARIO("Testing the configuration settings of the selector plugin",
                           static_pointer_cast<Plugin>(memory.second));
                   });
 
-        ExecutePlugin::push(move(plugins));
-        ExecutePlugin::push(
+        auto plRaii = ExecutePlugin::push(move(plugins));
+        auto flRaii = ExecutePlugin::push(
             gsl::not_null<config::FleetingOptionsInterface*>(&fleetingOptions));
-        ExecutePlugin::push(SettingsNode("selector-test"));
-        ExecutePlugin::push(Patterns(patterns));
+        auto seRaii = ExecutePlugin::push(SettingsNode("selector-test"));
+        auto paRaii = ExecutePlugin::push(Patterns(patterns));
+
+        Tasks expectedTasks(patternValues.size(), task);
 
         THEN_WHEN("We apply the plugin") {
-            bool returnCode = plugin.apply(task, config, patterns);
-            THEN_CHECK("It should succeed") { REQUIRE(returnCode); }
-
-            THEN_CHECK(
-                "The memories were called the expected number of times") {
-                for(const auto& memory : memories) {
-                    // Expected executions is 1 per memory, multiplied by the number of occurences of the pattern value in all the pattern values
-                    size_t nbOfExpectedExecutions =
-                        count(patternValues.begin(), patternValues.end(),
-                              memory.first);
-                    REQUIRE(memory.second->getExecutions().size() ==
-                            nbOfExpectedExecutions);
-                }
-            }
+            auto actualTasks = plugin.apply(task, config);
 
             THEN_CHECK("It called the right commands") {
-                for(const auto& memory : memories) {
-                    auto executions = memory.second->getExecutions();
-                    for(const auto& execution : executions) {
-                        REQUIRE(execution.task == task);
-                        REQUIRE(execution.patterns.empty());
-                    }
-                }
+                REQUIRE(actualTasks == expectedTasks);
             }
         }
-
-        ExecutePlugin::popFleetingOptions();
-        ExecutePlugin::popSettingsNode();
-        ExecutePlugin::popPatterns();
-        ExecutePlugin::popPlugins();
     });
 }
 
@@ -153,21 +133,18 @@ SCENARIO("Unconfigured target in selector", "[selector]") {
         LuaPlugin plugin(scriptPath());
 
         FleetingOptionsStub fleetingOptions;
-        ExecutePlugin::push(
+        auto flRaii = ExecutePlugin::push(
             gsl::not_null<config::FleetingOptionsInterface*>(&fleetingOptions));
-        ExecutePlugin::push(SettingsNode("selector-test"));
-        ExecutePlugin::push(Patterns());
+        auto seRaii = ExecutePlugin::push(SettingsNode("selector-test"));
+        auto paRaii = ExecutePlugin::push(Patterns());
 
         WHEN("We call the plugin") {
-            bool returnCode =
-                plugin.apply(Task(), VariablesMap("selector-test"), Patterns());
-
-            THEN("It should fail") { REQUIRE_FALSE(returnCode); }
+            THEN("It should throw a runtime error") {
+                REQUIRE_THROWS_AS(
+                    plugin.apply(Task(), VariablesMap("selector-test")),
+                    runtime_error);
+            }
         }
-
-        ExecutePlugin::popFleetingOptions();
-        ExecutePlugin::popSettingsNode();
-        ExecutePlugin::popPatterns();
     }
 }
 } // namespace execHelper::plugins::test

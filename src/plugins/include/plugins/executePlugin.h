@@ -41,6 +41,11 @@ struct InvalidPlugin : public std::runtime_error {
 };
 
 /**
+ * Utility for defining custom RAII objects
+ */
+struct Raii {};
+
+/**
  * \brief Plugin for executing arbitrary configured commands and/or plugins
  *
  * The ExecutePlugin handles the context of and calls all plugins. It uses the prototype pattern for retrieving a map of plugins it can call.
@@ -66,10 +71,12 @@ class ExecutePlugin : public Plugin {
     config::VariablesMap
     getVariablesMap(const config::FleetingOptionsInterface& fleetingOptions)
         const noexcept override;
-    bool apply(core::Task task, const config::VariablesMap& variables,
-               const config::Patterns& patterns) const noexcept override;
 
-    std::string summary() const noexcept override;
+    [[nodiscard]] auto apply(core::Task task,
+                             const config::VariablesMap& variables) const
+        -> core::Tasks override;
+
+    [[nodiscard]] auto summary() const noexcept -> std::string override;
 
     /**
      * Returns a list with the names of all known plugins
@@ -94,9 +101,11 @@ class ExecutePlugin : public Plugin {
      * \param[in] fleetingOptions   The fleeting options to use. The last option
      * on the stack will be used for calling the commands. \returns True    if
      * the options were successfully pushed False   otherwise
+     * \returns     An Raii object that will pop the fleeting options stack when no longer referenced
      */
-    static bool push(gsl::not_null<const config::FleetingOptionsInterface*>
-                         fleetingOptions) noexcept;
+    [[nodiscard]] static auto
+    push(gsl::not_null<const config::FleetingOptionsInterface*>
+             fleetingOptions) noexcept -> std::shared_ptr<Raii>;
 
     /**
      * Push the given settings node on the stack
@@ -104,46 +113,29 @@ class ExecutePlugin : public Plugin {
      * \param[in] settings   The settings node to use. The last settings node on
      * the stack will be used for calling the commands. \returns True    if the
      * settings node was successfully pushed False   otherwise
+     * \returns     An Raii object that will pop the fleeting options stack when no longer referenced
      */
-    static bool push(config::SettingsNode&& settings) noexcept;
+    [[nodiscard]] static auto push(config::SettingsNode&& settings) noexcept
+        -> std::shared_ptr<Raii>;
 
     /**
      * Push the given patterns on the stack
      *
      * \param[in] patterns   The patterns to use. The last patterns on the stack
      * will be used for calling the commands.
-     * \returns True    if the patterns were successfully pushed
-     *          False   otherwise
+     * \returns     An Raii object that will pop the fleeting options stack when no longer referenced
      */
-    static bool push(config::Patterns&& patterns) noexcept;
+    [[nodiscard]] static auto push(config::Patterns&& patterns) noexcept
+        -> std::shared_ptr<Raii>;
 
     /**
      * Push the plugin prototypes to the stack
      *
      * \param[in] plugins   Mapping of discovered plugin prototypes
+     * \returns     An Raii object that will pop the fleeting options stack when no longer referenced
      */
-    static void push(Plugins&& plugins) noexcept;
-
-    /**
-     * Pop the last fleeting options from the stack
-     *
-     */
-    static void popFleetingOptions() noexcept;
-
-    /**
-     * Pop the last settings node from the stack
-     */
-    static void popSettingsNode() noexcept;
-
-    /**
-     * Pop the last patterns from the stack
-     */
-    static void popPatterns() noexcept;
-
-    /**
-     * Pop the last plugin prototypes from the stack
-     */
-    static void popPlugins() noexcept;
+    [[nodiscard]] static auto push(Plugins&& plugins) noexcept
+        -> std::shared_ptr<Raii>;
 
   private:
     static auto getNextStep(const config::Command& command,
@@ -165,6 +157,27 @@ class ExecutePlugin : public Plugin {
      */
     [[nodiscard]] static auto activePattern() noexcept
         -> const config::PatternsHandler&;
+
+    /**
+     * Pop the last settings node from the stack
+     */
+    static void popSettingsNode() noexcept;
+
+    /**
+     * Pop the last fleeting options from the stack
+     *
+     */
+    static void popFleetingOptions() noexcept;
+
+    /**
+     * Pop the last patterns from the stack
+     */
+    static void popPatterns() noexcept;
+
+    /**
+     * Pop the last plugin prototypes from the stack
+     */
+    static void popPlugins() noexcept;
 
     const config::CommandCollection m_commands;
     const config::CommandCollection m_initialCommands;

@@ -39,11 +39,9 @@ using execHelper::config::SettingsNode;
 using execHelper::config::VariablesMap;
 using execHelper::core::Task;
 using execHelper::core::Tasks;
-using execHelper::plugins::MemoryHandler;
 using execHelper::plugins::Plugin;
 using execHelper::plugins::Plugins;
 
-using execHelper::core::test::ExecutorStub;
 using execHelper::test::FleetingOptionsStub;
 using execHelper::test::propertyTest;
 
@@ -98,27 +96,20 @@ SCENARIO("Every call to a plugin must lead to at least one registered task") {
     FleetingOptionsStub options;
     options.m_commands.push_back("memory");
 
-    execHelper::plugins::ExecutePlugin::push(
+    auto flRaii = execHelper::plugins::ExecutePlugin::push(
         gsl::not_null<FleetingOptionsInterface*>(&options));
 
     Patterns patterns = {Pattern(std::string(patternKey), {"memory"})};
-    execHelper::plugins::ExecutePlugin::push(Patterns(patterns));
+    auto paRaii = execHelper::plugins::ExecutePlugin::push(Patterns(patterns));
 
-    execHelper::plugins::ExecutePlugin::push(SettingsNode("test"));
-    execHelper::plugins::ExecutePlugin::push(getPlugins());
+    auto seRaii =
+        execHelper::plugins::ExecutePlugin::push(SettingsNode("test"));
+    auto plRaii = execHelper::plugins::ExecutePlugin::push(getPlugins());
 
     propertyTest(
-        "Every call to a plugin must lead to at least one registered task",
-        [&patterns](shared_ptr<const Plugin>&& plugin) {
-            uint32_t nbOfRegisteredTasks = 0U;
-
+        "Every call to a plugin must lead to at least one generated task",
+        [](shared_ptr<const Plugin>&& plugin) {
             REQUIRE(plugin);
-
-            registerExecuteCallback(
-                [&nbOfRegisteredTasks](const core::Task& /*task*/) {
-                    ++nbOfRegisteredTasks;
-                });
-            MemoryHandler memory;
 
             auto variablesMap = plugin->getVariablesMap(FleetingOptionsStub());
             REQUIRE(variablesMap.add("command-line", "blaat"));
@@ -128,48 +119,32 @@ SCENARIO("Every call to a plugin must lead to at least one registered task") {
             REQUIRE(variablesMap.add("targets", "memory"));
 
             THEN_WHEN("We apply the plugin") {
-                bool result =
-                    plugin->apply(core::Task(), variablesMap, patterns);
+                auto actualTasks = plugin->apply(core::Task(), variablesMap);
 
-                THEN_CHECK("The call must succeed") { REQUIRE(result); }
-
-                THEN_CHECK(
-                    "The executor should have been called at least once") {
-                    REQUIRE(nbOfRegisteredTasks +
-                                memory.getExecutions().size() >
-                            0U);
+                THEN_CHECK("It should return at least one task") {
+                    REQUIRE_FALSE(actualTasks.empty());
                 }
             }
         });
-
-    execHelper::plugins::ExecutePlugin::popPlugins();
-    execHelper::plugins::ExecutePlugin::popSettingsNode();
-    execHelper::plugins::ExecutePlugin::popPatterns();
-    execHelper::plugins::ExecutePlugin::popFleetingOptions();
 }
 
 SCENARIO("A plugin must not alter the arguments before a given task") {
     FleetingOptionsStub options;
     options.m_commands.push_back("memory");
 
-    execHelper::plugins::ExecutePlugin::push(
+    auto seRaii =
+        execHelper::plugins::ExecutePlugin::push(SettingsNode("test"));
+    auto plRaii = execHelper::plugins::ExecutePlugin::push(getPlugins());
+    auto flRaii = execHelper::plugins::ExecutePlugin::push(
         gsl::not_null<FleetingOptionsInterface*>(&options));
 
     Patterns patterns = {Pattern(std::string(patternKey), {"memory"})};
-    execHelper::plugins::ExecutePlugin::push(Patterns(patterns));
-
-    execHelper::plugins::ExecutePlugin::push(SettingsNode("test"));
-    execHelper::plugins::ExecutePlugin::push(getPlugins());
+    auto paRaii = execHelper::plugins::ExecutePlugin::push(Patterns(patterns));
 
     propertyTest(
         "A plugin must not alter the arguments already in a given task",
-        [&patterns](std::shared_ptr<const Plugin>&& plugin, const Task& task) {
+        [](std::shared_ptr<const Plugin>&& plugin, const Task& task) {
             RC_PRE(!task.getTask().empty());
-            ExecutorStub executor;
-            ExecuteCallback executeCallback = [&executor](const Task& task) {
-                executor.execute(task);
-            };
-            registerExecuteCallback(executeCallback);
 
             auto variablesMap = plugin->getVariablesMap(FleetingOptionsStub());
             REQUIRE(variablesMap.add("command-line", "blaat"));
@@ -178,44 +153,29 @@ SCENARIO("A plugin must not alter the arguments before a given task") {
             REQUIRE(variablesMap.add("container", "blaat"));
             REQUIRE(variablesMap.add("targets", "memory"));
 
-            MemoryHandler memory;
-
             THEN_WHEN("We apply the plugin") {
-                bool result = plugin->apply(task, variablesMap, patterns);
-
-                THEN_CHECK("The call must succeed") { REQUIRE(result); }
-
-                Tasks executedTasks = executor.getExecutedTasks();
-                auto memories = MemoryHandler::getExecutions();
-                std::transform(memories.begin(), memories.end(),
-                               std::back_inserter(executedTasks),
-                               [](const auto& mem) { return mem.task; });
+                auto actualTasks = plugin->apply(task, variablesMap);
 
                 THEN_CHECK("The arguments before the task must remain") {
-                    auto task_remains = std::any_of(
-                        executedTasks.begin(), executedTasks.end(),
-                        [&task](const auto& executedTask) {
-                            // Check that any of the executed tasks starts with the content of task
-                            auto actual = executedTask.getTask().begin();
+                    // At least one generated task must start with the input task
+                    REQUIRE(any_of(
+                        actualTasks.begin(), actualTasks.end(),
+                        [&task](const auto& actualTask) {
+                            // Check that the beginning of each executed tasks starts with the content of task
+                            auto actual = actualTask.getTask().begin();
                             return std::all_of(
                                 task.getTask().begin(), task.getTask().end(),
                                 [&actual](const std::string& expected) {
                                     return (*actual++ == expected);
                                 });
-                        });
-                    REQUIRE(task_remains);
+                        }));
                 }
             }
         });
-
-    execHelper::plugins::ExecutePlugin::popPlugins();
-    execHelper::plugins::ExecutePlugin::popSettingsNode();
-    execHelper::plugins::ExecutePlugin::popPatterns();
-    execHelper::plugins::ExecutePlugin::popFleetingOptions();
 }
 
 SCENARIO("Print the plugin summary", "[generic-plugin][success]") {
-    execHelper::plugins::ExecutePlugin::push(getPlugins());
+    auto plRaii = execHelper::plugins::ExecutePlugin::push(getPlugins());
 
     propertyTest("A plugin", [](std::shared_ptr<const Plugin>&& plugin) {
         WHEN("We request the summary of the plugin") {
@@ -224,12 +184,10 @@ SCENARIO("Print the plugin summary", "[generic-plugin][success]") {
             THEN("The summary must not be empty") { REQUIRE(!summary.empty()); }
         }
     });
-
-    execHelper::plugins::ExecutePlugin::popPlugins();
 }
 
 SCENARIO("Stream the plugin summary", "[generic-plugin][success]") {
-    execHelper::plugins::ExecutePlugin::push(getPlugins());
+    auto plRaii = execHelper::plugins::ExecutePlugin::push(getPlugins());
 
     propertyTest("A plugin", [](std::shared_ptr<const Plugin>&& plugin) {
         THEN_WHEN("We request the summary of the plugin") {
@@ -245,7 +203,5 @@ SCENARIO("Stream the plugin summary", "[generic-plugin][success]") {
             }
         }
     });
-
-    execHelper::plugins::ExecutePlugin::popPlugins();
 }
 } // namespace execHelper::plugins::test

@@ -1,106 +1,44 @@
+#include <utility>
+
 #include "memory.h"
 
-#include <gsl/string_span>
+#include <stdexcept>
 
 #include "config/fleetingOptionsInterface.h"
 #include "config/variablesMap.h"
 
+using std::move;
 using std::string;
 
-using gsl::czstring;
-
 using execHelper::config::FleetingOptionsInterface;
-using execHelper::config::Patterns;
 using execHelper::config::VariablesMap;
 using execHelper::core::Task;
+using execHelper::core::Tasks;
 
 using namespace std::string_literals;
 
-namespace {
-const czstring<> PLUGIN_NAME = "memory";
-} // namespace
-
 namespace execHelper::plugins {
-Memory::Memories // NOLINT(fuchsia-statically-constructed-objects)
-    Memory::
-        m_executions = // NOLINT(readability-redundant-declaration, cppcoreguidelines-avoid-non-const-global-variables)
-    {};
-bool Memory::
-    m_returnCode = // NOLINT(readability-redundant-declaration, cppcoreguidelines-avoid-non-const-global-variables)
-    true;
+Memory::Memory() noexcept
+    : m_apply([](Task task,
+                 const VariablesMap& /*variablesMap*/) noexcept -> Tasks {
+          return {move(task)};
+      }) {
+    ;
+}
+
+Memory::Memory(ApplyFunction apply) noexcept : m_apply(move(apply)) { ; }
 
 auto Memory::getVariablesMap(
     const FleetingOptionsInterface& /*fleetingOptions*/) const noexcept
     -> VariablesMap {
-    return VariablesMap(PLUGIN_NAME);
+    return VariablesMap("memory");
 }
 
-auto Memory::apply(Task task, const VariablesMap& variables,
-                   const Patterns& patterns) const noexcept -> bool {
-    Memory_t newElement(task, variables, patterns);
-    m_executions.emplace_back(newElement);
-    return m_returnCode;
+auto Memory::apply(Task task, const VariablesMap& variables) const -> Tasks {
+    return m_apply(task, variables);
 }
 
 auto Memory::summary() const noexcept -> std::string {
     return "Memory (internal)";
 }
-
-auto Memory::getExecutions() noexcept -> const Memory::Memories& {
-    return m_executions;
-}
-
-void Memory::reset() noexcept {
-    m_executions.clear();
-    m_returnCode = true;
-}
-
-void Memory::setReturnCode(bool returnCode) noexcept {
-    m_returnCode = returnCode;
-}
-
-MemoryHandler::MemoryHandler() {
-    // Reset the memory here too, just to be sure
-    Memory::reset();
-}
-
-MemoryHandler::~MemoryHandler() { Memory::reset(); }
-
-auto MemoryHandler::getExecutions() noexcept -> const Memory::Memories& {
-    return Memory::getExecutions();
-}
-
-void MemoryHandler::reset() noexcept { Memory::reset(); }
-
-void MemoryHandler::setReturnCode(bool returnCode) noexcept {
-    Memory::setReturnCode(returnCode);
-}
-
-SpecialMemory::SpecialMemory(bool returnCode, size_t expectedSize) noexcept
-    : m_returnCode(returnCode) {
-    m_executions.reserve(expectedSize);
-}
-
-auto SpecialMemory::getVariablesMap(
-    const config::FleetingOptionsInterface& /*fleetingOptions*/) const noexcept
-    -> config::VariablesMap {
-    return VariablesMap(PLUGIN_NAME);
-}
-
-auto SpecialMemory::apply(core::Task task,
-                          const config::VariablesMap& variables,
-                          const config::Patterns& patterns) const noexcept
-    -> bool {
-    m_executions.emplace_back(task, variables, patterns);
-    return m_returnCode;
-}
-
-auto SpecialMemory::summary() const noexcept -> string {
-    return "SpecialMemory (internal)";
-}
-
-auto SpecialMemory::getExecutions() noexcept -> const Memories& {
-    return m_executions;
-}
-
 } // namespace execHelper::plugins

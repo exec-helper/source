@@ -42,11 +42,6 @@ patterns:
             - commander
         short-option: e
         long-option: module
-    COMPONENT:
-        default-values:
-            - ""
-        short-option: f
-        long-option: component
     ANALYZE:
         default-values:
             - cppcheck
@@ -83,6 +78,12 @@ patterns:
             - test
         long-option: source-type
 
+    FILTER:
+        default-values:
+            - ""
+        short-option: f
+        long-option: filter
+
 commands:
     setup: Setup the repository for building
     init: Initialize the build infrastructure
@@ -99,7 +100,7 @@ commands:
     rebuild: Clean + build
     analyze: Run the specified analysis tool(s)
     run-test: unittest + integration
-    unittest: Run the specified unittests
+    unittest: Run the specified unittests using the specified FILTER
     integration: Run the specified integration tests
     coverage: Run the coverage analysis tools using a specific setup (for convenience)
     memory-check: Run the memory check analysis tool for a specific setup (for convenience)
@@ -305,6 +306,7 @@ meson:
             plugins-prefix: "${PWD}/build/{TRIPLET}{COMPILER}/{MODE}/install/share/exec-helper/plugins"
             terminate-on-assert: true
             b_sanitize: address,undefined
+            b_lundef: false
         build-type: debugoptimized
         command-line: [--werror]
 
@@ -445,10 +447,11 @@ command-line-command:
             - TRIPLET
             - MODE
             - MODULE
+            - FILTER
             - EH_ROOT_DIR
         environment:
             PATH: "{EH_ROOT_DIR}/build/{TRIPLET}{COMPILER}/{MODE}/install/bin:{EH_ROOT_DIR}/build/{TRIPLET}{COMPILER}/{MODE}/install/test:/usr/local/bin:/usr/bin"
-        command-line: [ "build/{TRIPLET}{COMPILER}/{MODE}/install/test/exec-helper-{MODULE}-unittest", --reporter=junit, "--out=build/{TRIPLET}{COMPILER}/{MODE}/{MODULE}_report.xml"]
+        command-line: [ "build/{TRIPLET}{COMPILER}/{MODE}/install/test/exec-helper-{MODULE}-unittest", "{FILTER}"]
 
     integration:
         patterns:

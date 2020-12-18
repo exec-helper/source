@@ -51,8 +51,8 @@ class Commander {
              config::SettingsNode settings, config::Patterns patterns,
              const config::Path& workingDirectory,
              const config::EnvironmentCollection& env,
-             plugins::Plugins&& plugins,
-             const config::Path& rootDirectory) noexcept -> bool;
+             plugins::Plugins&& plugins, const config::Path& rootDirectory)
+        -> core::Tasks;
 };
 } // namespace commander
 } // namespace execHelper

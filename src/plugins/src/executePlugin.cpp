@@ -1,6 +1,7 @@
 #include "executePlugin.h"
 
 #include <algorithm>
+#include <memory>
 
 #include <gsl/gsl_assert>
 #include <gsl/string_span>
@@ -37,6 +38,7 @@ using execHelper::config::SettingsNode;
 using execHelper::config::SettingsValues;
 using execHelper::config::VariablesMap;
 using execHelper::core::Task;
+using execHelper::core::Tasks;
 
 namespace {
 auto getNextPatterns(const VariablesMap& variables,
@@ -125,20 +127,25 @@ inline auto ExecutePlugin::getVariablesMap(
     return true;
 }
 
-auto ExecutePlugin::apply(Task task, const VariablesMap& /*variables*/,
-                          const Patterns& /*patterns*/) const noexcept -> bool {
+auto ExecutePlugin::apply(Task task, const VariablesMap& /*variables*/) const
+    -> Tasks {
     if(m_commands.empty()) {
         user_feedback_error("No commands configured to execute");
         LOG(warning) << "No commands configured to execute";
     }
+
+    Tasks tasks;
     auto initialCommand = m_initialCommands.begin();
     for(auto command = m_commands.begin(); command != m_commands.end();
         ++command, ++initialCommand) {
         auto plugin = getNextStep(*command, *initialCommand);
         if(!plugin) {
-            user_feedback_error("Could not find a command or plugin called '"
-                                << *command << "'");
-            return false;
+            LOG(error) << "Could not find a command or plugin called '"
+                       << *command << "'";
+            throw std::runtime_error(
+                string("Could not find a command or plugin called '")
+                    .append(*command)
+                    .append("'"));
         }
 
         expects(!m_fleeting.empty());
@@ -149,14 +156,13 @@ auto ExecutePlugin::apply(Task task, const VariablesMap& /*variables*/,
             {{*command}, {*command, *initialCommand}});
         getVariablesMap(&newVariablesMap, keys, m_settings.back());
 
+        Task preparedTask = task;
         auto newPatterns = getNextPatterns(newVariablesMap, activePattern());
-        if(!plugin->apply(task, newVariablesMap, newPatterns)) {
-            user_feedback_error("An error occured executing the '"
-                                << *command << "' command");
-            return false;
-        }
+        preparedTask.addPatterns(newPatterns);
+        auto newTasks = plugin->apply(preparedTask, newVariablesMap);
+        tasks.insert(tasks.end(), newTasks.begin(), newTasks.end());
     }
-    return true;
+    return tasks;
 }
 
 auto ExecutePlugin::summary() const noexcept -> std::string {
@@ -228,23 +234,38 @@ auto ExecutePlugin::getPlugin(const string& pluginName)
 
 auto ExecutePlugin::push(
     not_null<const config::FleetingOptionsInterface*> fleetingOptions) noexcept
-    -> bool {
+    -> shared_ptr<Raii> {
     m_fleeting.push_back(fleetingOptions);
-    return true;
+    return shared_ptr<Raii>(new Raii(), []([[maybe_unused]] Raii* raii) {
+        ExecutePlugin::popFleetingOptions();
+        delete raii; // NOLINT(cppcoreguidelines-owning-memory)
+    });
 }
 
-auto ExecutePlugin::push(config::SettingsNode&& settings) noexcept -> bool {
+auto ExecutePlugin::push(config::SettingsNode&& settings) noexcept
+    -> shared_ptr<Raii> {
     m_settings.emplace_back(settings);
-    return true;
+    return shared_ptr<Raii>(new Raii(), []([[maybe_unused]] Raii* raii) {
+        ExecutePlugin::popSettingsNode();
+        delete raii; // NOLINT(cppcoreguidelines-owning-memory)
+    });
 }
 
-auto ExecutePlugin::push(config::Patterns&& patterns) noexcept -> bool {
+auto ExecutePlugin::push(config::Patterns&& patterns) noexcept
+    -> shared_ptr<Raii> {
     m_patterns.emplace_back(patterns);
-    return true;
+    return shared_ptr<Raii>(new Raii(), []([[maybe_unused]] Raii* raii) {
+        ExecutePlugin::popPatterns();
+        delete raii; // NOLINT(cppcoreguidelines-owning-memory)
+    });
 }
 
-void ExecutePlugin::push(Plugins&& plugins) noexcept {
+auto ExecutePlugin::push(Plugins&& plugins) noexcept -> shared_ptr<Raii> {
     m_plugins.emplace_back(plugins);
+    return shared_ptr<Raii>(new Raii(), []([[maybe_unused]] Raii* raii) {
+        ExecutePlugin::popPlugins();
+        delete raii; // NOLINT(cppcoreguidelines-owning-memory)
+    });
 }
 
 auto ExecutePlugin::activePattern() noexcept -> const PatternsHandler& {

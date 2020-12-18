@@ -1,4 +1,5 @@
 #include "luaPlugin.h"
+#include "log/log.h"
 
 #include <algorithm>
 #include <filesystem>
@@ -16,7 +17,6 @@
 #include <boost/optional.hpp>
 
 #include "config/commandLineOptions.h"
-#include "config/pattern.h"
 #include "core/task.h"
 
 #include "addEnvironment.h"
@@ -29,6 +29,7 @@ using std::ifstream;
 using std::make_pair;
 using std::move;
 using std::pair;
+using std::rethrow_if_nested;
 using std::runtime_error;
 using std::string;
 using std::to_string;
@@ -42,9 +43,6 @@ using execHelper::config::FleetingOptionsInterface;
 using execHelper::config::JOBS_KEY;
 using execHelper::config::Jobs_t;
 using execHelper::config::Path;
-using execHelper::config::PatternKey;
-using execHelper::config::Patterns;
-using execHelper::config::PatternValues;
 using execHelper::config::VariablesMap;
 using execHelper::config::VERBOSE_KEY;
 using execHelper::core::Task;
@@ -95,38 +93,6 @@ class Config {
   private:
     const VariablesMap& m_config;
 };
-
-class PatternWrapper {
-  public:
-    explicit PatternWrapper(const Patterns& patterns) : m_patterns(patterns) {}
-
-    auto get(const string& key) noexcept
-        -> optional<vector<pair<int, string>>> {
-        auto found = find_if(
-            m_patterns.begin(), m_patterns.end(),
-            [&key](const auto& pattern) { return key == pattern.getKey(); });
-        if(found == m_patterns.end()) {
-            // Key not found
-            return boost::none;
-        }
-
-        vector<pair<int, string>> result;
-        auto index = 1; // Lua arrays start at index 1
-
-        auto values = found->getValues();
-        transform(values.begin(), values.end(), back_inserter(result),
-                  [&index](const auto& value) {
-                      auto convertedValue = make_pair(index, value);
-                      ++index;
-                      return convertedValue;
-                  });
-        return result;
-    }
-
-  private:
-    const Patterns& m_patterns;
-};
-
 } // namespace
 
 namespace execHelper::plugins {
@@ -138,8 +104,7 @@ auto LuaPlugin::getVariablesMap(
     return VariablesMap("luaPlugin");
 }
 
-auto LuaPlugin::apply(Task task, const VariablesMap& config,
-                      const Patterns& patterns) const noexcept -> bool {
+auto LuaPlugin::apply(Task task, const VariablesMap& config) const -> Tasks {
     Tasks tasks;
     LuaContext lua;
 
@@ -199,31 +164,25 @@ auto LuaPlugin::apply(Task task, const VariablesMap& config,
                     [&task](const auto& arg) { task.append(arg.second); });
             });
 
-        // Define the Pattern class
-        PatternWrapper patternWrapper(patterns);
-        lua.writeVariable("patterns", patternWrapper);
-        lua.writeFunction<optional<vector<pair<int, string>>>(PatternWrapper&,
-                                                              const string&)>(
-            "patterns", LuaContext::Metatable, "__index",
-            [](PatternWrapper& wrapper, const string& key) {
-                return wrapper.get(key);
-            });
-
-        lua.writeFunction("register_task", [&patterns](const Task& task) {
-            for(const auto& combination : makePatternPermutator(patterns)) {
-                core::Task newTask =
-                    replacePatternCombinations(task, combination);
-                if(!registerTask(newTask)) {
-                    throw runtime_error("Task failed to execute");
-                }
-            }
+        lua.writeFunction("register_task", [&tasks](Task task) {
+            tasks.emplace_back(move(task));
         });
 
-        lua.writeFunction<bool(const Task&, const vector<pair<int, string>>&)>(
+        lua.writeFunction("register_tasks",
+                          [&tasks](const vector<pair<int, Task>>& newTasks) {
+                              transform(
+                                  newTasks.begin(), newTasks.end(),
+                                  back_inserter(tasks),
+                                  [](const auto& task) { return task.second; });
+                          });
+
+        lua.writeFunction<Tasks(const Task&, const vector<pair<int, string>>&)>(
             "run_target",
-            [&patterns](const Task& task,
-                        const vector<pair<int, string>>& commands) {
-                for(const auto& combination : makePatternPermutator(patterns)) {
+            [](const Task& task,
+               const vector<pair<int, string>>& commands) -> Tasks {
+                Tasks tasks;
+                for(const auto& combination :
+                    makePatternPermutator(task.getPatterns())) {
                     CommandCollection commandsToExecute;
                     commandsToExecute.reserve(commands.size());
 
@@ -238,13 +197,17 @@ auto LuaPlugin::apply(Task task, const VariablesMap& config,
 
                     core::Task newTask =
                         replacePatternCombinations(task, combination);
-                    if(!executePlugin.apply(move(newTask),
-                                            VariablesMap("subtask"),
-                                            Patterns())) {
-                        return false;
+                    try {
+                        auto newTasks = executePlugin.apply(
+                            move(newTask), VariablesMap("subtask"));
+                        move(newTasks.begin(), newTasks.end(),
+                             back_inserter(tasks));
+                    } catch(const std::runtime_error& e) {
+                        user_feedback_error(e.what());
+                        rethrow_if_nested(e);
                     }
                 }
-                return true;
+                return tasks;
             });
 
         lua.writeFunction<optional<string>(
@@ -296,50 +259,29 @@ auto LuaPlugin::apply(Task task, const VariablesMap& config,
                 return filesystem::is_directory(ppath);
             });
     } catch(std::exception& e) {
-        user_feedback_error("Internal error");
         LOG(error) << "Internal error: '" << e.what() << "'";
-        return false;
+        throw runtime_error(
+            string("Lua plugin: Internal error: ").append(e.what()));
     }
 
     try {
         ifstream executionCode(m_script);
         lua.executeCode(executionCode);
     } catch(const LuaContext::SyntaxErrorException& e) {
-        user_feedback_error("Syntax error detected in lua file '" +
-                            m_script.string() + "': " + e.what());
-
         LOG(error) << "Syntax error detected in lua file '" +
                           m_script.string() + "': " + e.what();
-        return false;
+        throw runtime_error(string("Syntax error detected in lua file '")
+                                .append(m_script.string())
+                                .append("': ")
+                                .append(e.what()));
     } catch(const LuaContext::ExecutionErrorException& e) {
-        try {
-            std::rethrow_if_nested(e);
-        } catch(const std::runtime_error& e) {
-            user_feedback_error(e.what());
-
-            LOG(error) << e.what();
-        } catch(...) {
-            user_feedback_error("Module '" + m_script.string() +
-                                "' reported an error: " + e.what());
-
-            LOG(error) << "Module '" + m_script.string() +
-                              "': reported an error" + e.what();
-        }
-        return false;
+        LOG(error) << e.what();
+        throw runtime_error(e.what());
     } catch(const std::runtime_error& e) {
         LOG(error) << e.what();
-        return false;
+        rethrow_if_nested(e);
     }
-
-    for(const auto& task : tasks) {
-        for(const auto& combination : makePatternPermutator(patterns)) {
-            core::Task newTask = replacePatternCombinations(task, combination);
-            if(!registerTask(newTask)) {
-                return false;
-            }
-        }
-    }
-    return true;
+    return tasks;
 }
 
 auto LuaPlugin::summary() const noexcept -> std::string {

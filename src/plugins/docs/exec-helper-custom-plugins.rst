@@ -65,6 +65,18 @@ The following :program:`exec-helper` specific functions are available next to th
 
         register_task(task)
 
+.. describe:: register_tasks(array<Task> tasks)
+
+    Registers the given :code:`tasks` as multiple tasks to execute by the executor(s). Patterns associated with the task will be automatically permutated and substituted. E.g.::
+
+        register_tasks(tasks)
+
+.. describe:: run_target(Task task, array<string> targets)
+
+    Applies the given targets using the given task as their base task. These targets may contain patterns. The result of these applications is returned as an :code:`array<Task>`. The returned tasks must be explicitly registered in order to be executed. E.g.::
+
+        run_target(task, {'cmake', 'ninja'})
+
 .. describe:: user_feedback_error(string message)
 
     Show the given :code:`message` as an error to the user. E.g.::
@@ -109,7 +121,7 @@ The following pre-defined objects are automatically present when your module is 
     Example::
 
         task:add_args({'--jobs', jobs})
-  
+
     Adds :code:`--jobs \<value\>` to the command line of the given task where `<value>` is the value of the configured number of jobs.
 
 .. describe:: config
@@ -129,24 +141,6 @@ The following pre-defined objects are automatically present when your module is 
     For example, to create a module that calls `echo hello` on its invocation, use::
 
         task:add_args({'echo', 'hello'})
-
-.. describe:: patterns
-
-    A Lua table of all patterns and resolved pattern values for all *configured* patterns for the module. Note that patterns can be left as-is or added to a task as a pattern and do *NOT* have to be replaced or permutated by the plugin itself. This object is mainly useful for use cases where subcommands are called based on a pattern, for example the :ref:`exec-helper-plugins-selector`::
-
-        pattern_key = one(config['patterns'])
-
-        if pattern_key == nil then
-            input_error('Undefined selector pattern: you must define a pattern to select using the "patterns" keyword.')
-        end
-
-        values = patterns[pattern_key]
-
-        if values == nil then
-            input_error('Selector: Inactive or unknown select pattern used')
-        end
-
-        run_target(task, values)
 
 Example
 =======

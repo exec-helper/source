@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -17,6 +18,7 @@
 #include "executorStub.h"
 #include "fleetingOptionsStub.h"
 
+using std::runtime_error;
 using std::string;
 using std::vector;
 
@@ -33,11 +35,10 @@ using execHelper::config::SettingsKeys;
 using execHelper::config::VariablesMap;
 using execHelper::core::Task;
 using execHelper::core::TaskCollection;
+using execHelper::core::Tasks;
 using execHelper::plugins::COMMAND_LINE_KEY;
 
-using execHelper::core::test::ExecutorStub;
 using execHelper::test::FleetingOptionsStub;
-using execHelper::test::utils::getExpectedTasks;
 
 namespace {
 const czstring<> PLUGIN_NAME("command-line-command");
@@ -86,12 +87,6 @@ SCENARIO(
         REQUIRE(variables.add(COMMAND_LINE_KEY, command1));
         commandLines.push_back(command1);
 
-        ExecutorStub executor;
-        ExecuteCallback executeCallback = [&executor](const Task& task) {
-            executor.execute(task);
-        };
-        registerExecuteCallback(executeCallback);
-
         COMBINATIONS("Set multiple command lines") {
             const CommandLineArgs multipleCommand1({"multiple-commandA"});
             const CommandLineArgs multipleCommand2(
@@ -128,21 +123,21 @@ SCENARIO(
                 variables.get<Path>(WORKING_DIR_KEY).value());
         }
 
-        ExecutorStub::TaskQueue unreplacedTasks;
+        Tasks expectedTasks;
+        expectedTasks.reserve(commandLines.size());
         for(const auto& commandLine : commandLines) {
             Task newTask = expectedTask;
             newTask.append(commandLine);
-            unreplacedTasks.emplace_back(newTask);
+            newTask.addPatterns(patterns);
+            expectedTasks.emplace_back(newTask);
         }
-        const ExecutorStub::TaskQueue expectedTasks =
-            getExpectedTasks(unreplacedTasks, patterns);
 
         Task task;
-        bool returnCode = plugin.apply(task, variables, patterns);
-        THEN_CHECK("It should succeed") { REQUIRE(returnCode); }
+        task.addPatterns(patterns);
+        auto actualTasks = plugin.apply(task, variables);
 
         THEN_CHECK("It called the right commands") {
-            REQUIRE(expectedTasks == executor.getExecutedTasks());
+            REQUIRE(expectedTasks == actualTasks);
         }
     }
 }
@@ -161,10 +156,8 @@ SCENARIO("Testing erroneous configuration conditions for the "
         }
 
         THEN_WHEN("We add no parameter and apply") {
-            bool return_code = plugin.apply(task, variables, Patterns());
-
-            THEN_CHECK("The call should not succeed") {
-                REQUIRE_FALSE(return_code);
+            THEN_CHECK("The plugin should throw an exception") {
+                REQUIRE_THROWS_AS(plugin.apply(task, variables), runtime_error);
             }
         }
     }

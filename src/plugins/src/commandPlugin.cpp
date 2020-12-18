@@ -1,6 +1,7 @@
 #include "commandPlugin.h"
 
 #include <gsl/string_span>
+#include <stdexcept>
 
 #include "config/variablesMap.h"
 #include "log/assertions.h"
@@ -16,9 +17,9 @@ using gsl::czstring;
 
 using execHelper::config::CommandCollection;
 using execHelper::config::FleetingOptionsInterface;
-using execHelper::config::Patterns;
 using execHelper::config::VariablesMap;
 using execHelper::core::Task;
+using execHelper::core::Tasks;
 
 namespace {
 const czstring<> PLUGIN_NAME = "commands";
@@ -35,12 +36,14 @@ auto CommandPlugin::getVariablesMap(
     return defaults;
 }
 
-auto CommandPlugin::apply(Task task, const VariablesMap& variables,
-                          const Patterns& patterns) const noexcept -> bool {
-    ensures(variables.get<CommandCollection>(PLUGIN_NAME) != std::nullopt);
+auto CommandPlugin::apply(Task task, const VariablesMap& variables) const
+    -> Tasks {
+    if(!variables.get<CommandCollection>(PLUGIN_NAME)) {
+        throw std::runtime_error("Define at least one command to execute");
+    }
     auto commands = *(variables.get<CommandCollection>(PLUGIN_NAME));
     ExecutePlugin executePlugin(commands);
-    return executePlugin.apply(task, variables, patterns);
+    return executePlugin.apply(task, variables);
 }
 
 auto CommandPlugin::summary() const noexcept -> std::string {

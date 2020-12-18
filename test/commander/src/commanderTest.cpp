@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <filesystem>
 #include <memory>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -20,14 +21,13 @@
 #include "config/generators.h"
 #include "unittest/catch.h"
 #include "unittest/rapidcheck.h"
-#include "utils/matchers.h"
 #include "utils/utils.h"
 
-#include "executorStub.h"
 #include "fleetingOptionsStub.h"
 
 using std::inserter;
 using std::make_shared;
+using std::runtime_error;
 using std::shared_ptr;
 using std::static_pointer_cast;
 using std::string;
@@ -44,16 +44,16 @@ using execHelper::config::SettingsKeys;
 using execHelper::config::SettingsNode;
 using execHelper::config::VariablesMap;
 using execHelper::core::Task;
+using execHelper::core::Tasks;
 using execHelper::plugins::CommandPlugin;
 using execHelper::plugins::getPatternsKey;
+using execHelper::plugins::Memory;
 using execHelper::plugins::Plugin;
 using execHelper::plugins::Plugins;
-using execHelper::plugins::SpecialMemory;
 
 using execHelper::config::test::Unique;
 using execHelper::core::test::ExecutorStub;
 using execHelper::test::FleetingOptionsStub;
-using execHelper::test::MatchExecution;
 using execHelper::test::propertyTest;
 using execHelper::test::utils::getPredefinedPatterns;
 
@@ -65,7 +65,7 @@ const czstring<> MEMORY_KEY = "memory";
 } // namespace
 
 namespace execHelper::commander::test {
-SCENARIO("Basic test the commander", "[commander][wip]") {
+SCENARIO("Basic test the commander", "[commander]") {
     propertyTest(
         "A commander and properly configured arguments for running it",
         [](SettingsNode settings, const Unique<CommandCollection>& commands,
@@ -77,7 +77,7 @@ SCENARIO("Basic test the commander", "[commander][wip]") {
             ExecutorStub::TaskQueue expectedTasks(
                 commands->size(), Task({}, env, workingDirectory));
 
-            auto memory = make_shared<SpecialMemory>(commands->size());
+            auto memory = make_shared<Memory>();
             Plugins plugins = {
                 {COMMANDS_KEY, shared_ptr<Plugin>(new CommandPlugin())}};
             transform(commands->begin(), commands->end(),
@@ -104,16 +104,12 @@ SCENARIO("Basic test the commander", "[commander][wip]") {
             Commander commander;
 
             THEN_WHEN("We apply the configuration and run the commander") {
-                bool returnCode = commander.run(
+                auto actualTasks = commander.run(
                     fleetingOptions, settings, *patterns, workingDirectory, env,
                     Plugins{plugins}, rootDirectory);
 
-                THEN_CHECK("It must succeed") { REQUIRE(returnCode); }
-
                 THEN_CHECK("The expected tasks are executed") {
-                    REQUIRE_THAT(
-                        memory->getExecutions(),
-                        MatchExecution(expectedTasks, expectedPatterns));
+                    REQUIRE(expectedTasks == actualTasks);
                 }
             }
         });
@@ -140,10 +136,12 @@ SCENARIO(
 
         WHEN("We apply the configuration and run the commander") {
             THEN("It should fail") {
-                REQUIRE_FALSE(commander.run(
-                    fleetingOptions, settings, Patterns(),
-                    filesystem::current_path(), EnvironmentCollection(),
-                    Plugins(), filesystem::current_path()));
+                REQUIRE_THROWS_AS(
+                    commander.run(fleetingOptions, settings, Patterns(),
+                                  filesystem::current_path(),
+                                  EnvironmentCollection(), Plugins(),
+                                  filesystem::current_path()),
+                    runtime_error);
             }
         }
     }
@@ -170,10 +168,12 @@ SCENARIO("Test when no commands are passed", "[commander]") {
 
         WHEN("We apply the configuration and run the commander") {
             THEN("It should fail") {
-                REQUIRE_FALSE(commander.run(
-                    fleetingOptions, settings, Patterns(),
-                    filesystem::current_path(), EnvironmentCollection(),
-                    Plugins{plugins}, filesystem::current_path()));
+                REQUIRE_THROWS_AS(
+                    commander.run(fleetingOptions, settings, Patterns(),
+                                  filesystem::current_path(),
+                                  EnvironmentCollection(), Plugins{plugins},
+                                  filesystem::current_path()),
+                    runtime_error);
             }
         }
     }

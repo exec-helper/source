@@ -14,4 +14,4 @@ end
 task:add_args(get_verbose('--verbose'))
 task:add_args(get_commandline())
 
-run_target(task, targets)
+register_tasks(run_target(task, targets))

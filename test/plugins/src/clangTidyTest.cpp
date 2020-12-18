@@ -16,7 +16,6 @@
 #include "utils/commonGenerators.h"
 #include "utils/utils.h"
 
-#include "executorStub.h"
 #include "fleetingOptionsStub.h"
 #include "handlers.h"
 
@@ -32,10 +31,9 @@ using execHelper::config::Path;
 using execHelper::config::Patterns;
 using execHelper::config::VariablesMap;
 using execHelper::core::Task;
+using execHelper::core::Tasks;
 
-using execHelper::core::test::ExecutorStub;
 using execHelper::test::propertyTest;
-using execHelper::test::utils::getExpectedTasks;
 
 namespace filesystem = std::filesystem;
 
@@ -50,18 +48,11 @@ SCENARIO("Testing the configuration settings of the clang-tidy plugin",
                         const optional<vector<string>>& commandLine,
                         const optional<EnvironmentCollection>& environment) {
         const Task task;
-        Task expectedTask(task);
-        Patterns patterns;
+        Task expectedTask = task;
 
         VariablesMap config("clang-tidy-test");
 
         LuaPlugin plugin(std::string(PLUGINS_INSTALL_PATH) + "/clang-tidy.lua");
-
-        ExecutorStub executor;
-        ExecuteCallback executeCallback = [&executor](const Task& task) {
-            executor.execute(task);
-        };
-        registerExecuteCallback(executeCallback);
 
         expectedTask.append("clang-tidy");
 
@@ -135,16 +126,13 @@ SCENARIO("Testing the configuration settings of the clang-tidy plugin",
             handleEnvironment(*environment, config, expectedTask);
         }
 
-        ExecutorStub::TaskQueue expectedTasks =
-            getExpectedTasks(expectedTask, patterns);
+        Tasks expectedTasks = {expectedTask};
 
         THEN_WHEN("We apply the plugin") {
-            bool returnCode = plugin.apply(task, config, patterns);
-
-            THEN_CHECK("It should succeed") { REQUIRE(returnCode); }
+            auto actualTasks = plugin.apply(task, config);
 
             THEN_CHECK("It called the right commands") {
-                REQUIRE(expectedTasks == executor.getExecutedTasks());
+                REQUIRE(expectedTasks == actualTasks);
             }
         }
     });

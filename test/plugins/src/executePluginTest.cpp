@@ -1,5 +1,6 @@
 #include <map>
 #include <memory>
+#include <stdexcept>
 #include <vector>
 
 #include <gsl/string_span>
@@ -21,6 +22,7 @@
 
 using std::map;
 using std::move;
+using std::runtime_error;
 using std::shared_ptr;
 using std::string;
 using std::vector;
@@ -40,14 +42,12 @@ using execHelper::core::Task;
 using execHelper::plugins::CommandLineCommand;
 using execHelper::plugins::ExecutePlugin;
 using execHelper::plugins::Memory;
-using execHelper::plugins::MemoryHandler;
 
 using execHelper::test::FleetingOptionsStub;
 
 namespace {
 const czstring<> PLUGIN_NAME = "execute-plugin";
 const czstring<> MEMORY_KEY = "memory";
-const czstring<> PATTERN_KEY = "patterns";
 
 template <typename T> auto checkGetPlugin(const string& pluginName) -> bool {
     auto plugin = ExecutePlugin::getPlugin(pluginName);
@@ -130,21 +130,18 @@ SCENARIO("Testing the default execute settings", "[execute-plugin]") {
         Task task;
 
         FleetingOptionsStub fleetingOptions;
-        ExecutePlugin::push(
+        auto flRaii = ExecutePlugin::push(
             gsl::not_null<config::FleetingOptionsInterface*>(&fleetingOptions));
-        ExecutePlugin::push(SettingsNode("test"));
-        ExecutePlugin::push(Patterns());
+        auto seRaii = ExecutePlugin::push(SettingsNode("test"));
+        auto paRaii = ExecutePlugin::push(Patterns());
 
         WHEN("We apply the selector plugin") {
-            bool success =
-                plugin.apply(task, VariablesMap(PLUGIN_NAME), Patterns());
+            auto actualTasks = plugin.apply(task, VariablesMap(PLUGIN_NAME));
 
-            THEN("It should succeed") { REQUIRE(success); }
+            THEN("It should return an empty task list") {
+                REQUIRE(actualTasks.empty());
+            }
         }
-
-        ExecutePlugin::popFleetingOptions();
-        ExecutePlugin::popSettingsNode();
-        ExecutePlugin::popPatterns();
     }
 }
 
@@ -153,8 +150,6 @@ SCENARIO("Test the settings node to variables map mapping",
     MAKE_COMBINATIONS("Of settings node configurations") {
         SettingsNode settings("test-execute-plugin");
         FleetingOptionsStub fleetingOptions;
-
-        MemoryHandler memory;
 
         CommandCollection commands;
         map<Command, vector<Expected>> expected;
@@ -203,152 +198,28 @@ SCENARIO("Test the settings node to variables map mapping",
                 expected.emplace(command,
                                  vector<Expected>({Expected(directCommand)}));
             }
+
+            commands = directCommands;
         }
 
-        COMBINATIONS("Add some root settings") {
-            for(const auto& command : commands) {
-                ensures(expected.count(command) > 0U);
-                for(auto& expectedTask : expected.at(command)) {
-                    const auto& directCommand = expectedTask.getCommand();
-
-                    VariablesMap expectedVariableMap(MEMORY_KEY);
-                    REQUIRE(expectedVariableMap.add(
-                        string(directCommand).append("-root-setting1"),
-                        "root-setting-value1"));
-                    REQUIRE(expectedVariableMap.add(
-                        string(directCommand).append("-root-setting2"),
-                        "root-setting-value2"));
-                    REQUIRE(expectedVariableMap.add(
-                        string(directCommand).append("-root-setting3"),
-                        "root-setting-value3"));
-
-                    for(const auto& key :
-                        expectedVariableMap.get<SettingsValues>(
-                            SettingsKeys(), SettingsValues())) {
-                        settings[MEMORY_KEY][key] = expectedVariableMap[key];
-                    }
-                    expectedTask.setVariables(expectedVariableMap);
-                }
-            }
-        }
-
-        COMBINATIONS("Add some command specific settings") {
-            for(const auto& command : commands) {
-                ensures(expected.count(command) > 0U);
-                for(auto& expectedTask : expected.at(command)) {
-                    const auto& directCommand = expectedTask.getCommand();
-
-                    VariablesMap expectedVariableMap(MEMORY_KEY);
-                    REQUIRE(expectedVariableMap.add(
-                        string(directCommand).append("-specific-setting1"),
-                        "specific-setting-value1"));
-                    REQUIRE(expectedVariableMap.add(
-                        string(directCommand).append("-specific-setting2"),
-                        "specific-setting-value2"));
-                    REQUIRE(expectedVariableMap.add(
-                        string(directCommand).append("-specific-setting3"),
-                        "specific-setting-value3"));
-
-                    for(const auto& key :
-                        expectedVariableMap.get<SettingsValues>(
-                            SettingsKeys(), SettingsValues())) {
-                        settings[MEMORY_KEY][directCommand][key] =
-                            expectedVariableMap[key];
-                    }
-                    expectedTask.setVariables(expectedVariableMap);
-                }
-            }
-        }
-
-        COMBINATIONS("Add generic patterns") {
-            if(!commands.empty()) {
-                const Pattern pattern1("PATTERN1", {"value1a", "value1b"});
-                const Pattern pattern2("PATTERN2", {"value2a", "value2b"});
-                const Patterns patterns({pattern1, pattern2});
-
-                for(const auto& pattern : patterns) {
-                    configuredPatterns.push_back(pattern);
-                    REQUIRE(settings.add({MEMORY_KEY, PATTERN_KEY},
-                                         pattern.getKey()));
-
-                    for(const auto& command : commands) {
-                        ensures(expected.count(command) > 0U);
-                        for(auto& expectedCommand : expected.at(command)) {
-                            expectedCommand.addPattern(pattern);
-                        }
-                    }
-                }
-            }
-        }
-
-        COMBINATIONS("Add a specific pattern") {
-            if(!commands.empty()) {
-                const Pattern patternA("PATTERNa", {"valueaa", "valueab"});
-                const Pattern patternB("PATTERNb", {"valueba", "valuebb"});
-                const Patterns patterns({patternA, patternB});
-
-                const Command& command = commands.front();
-
-                ensures(expected.count(command) > 0U);
-                for(auto& expectedCommand : expected.at(command)) {
-                    expectedCommand.setPatterns({});
-                    for(const auto& pattern : patterns) {
-                        configuredPatterns.push_back(pattern);
-                        REQUIRE(settings.add({MEMORY_KEY,
-                                              expectedCommand.getCommand(),
-                                              PATTERN_KEY},
-                                             pattern.getKey()));
-                        expectedCommand.addPattern(pattern);
-                    }
-                }
-            }
-        }
-
-        ExecutePlugin::push(
+        auto plRaii = ExecutePlugin::push(
             Plugins({{"Memory",
                       shared_ptr<Plugin>(new execHelper::plugins::Memory())}}));
-        ExecutePlugin::push(
+        auto flRaii = ExecutePlugin::push(
             gsl::not_null<config::FleetingOptionsInterface*>(&fleetingOptions));
-        ExecutePlugin::push(move(settings));
-        ExecutePlugin::push(move(configuredPatterns));
+        auto seRaii = ExecutePlugin::push(move(settings));
+        auto paRaii = ExecutePlugin::push(move(configuredPatterns));
 
         ExecutePlugin plugin(commands);
 
         THEN_WHEN("We apply the execute plugin") {
             Task task;
-            bool returnCode =
-                plugin.apply(task, VariablesMap("random-thing"), Patterns());
-
-            THEN_CHECK("It should succeed") { REQUIRE(returnCode); }
+            auto actualTasks = plugin.apply(task, VariablesMap("random-thing"));
 
             THEN_CHECK("It called the right commands") {
-                const Memory::Memories& memories =
-                    MemoryHandler::getExecutions();
-                auto memory = memories.begin();
-                for(const auto& command : commands) {
-                    REQUIRE(expected.count(command) > 0U);
-                    for(const auto& expectedCommand : expected.at(command)) {
-                        REQUIRE(memory != memories.end());
-                        REQUIRE(memory->task == expectedCommand.getTask());
-                        REQUIRE(memory->patterns ==
-                                expectedCommand.getPatterns());
-                        for(const auto& key :
-                            expectedCommand.getVariables().get<SettingsValues>(
-                                SettingsKeys(), SettingsValues())) {
-                            REQUIRE(memory->variables.contains(key));
-                            REQUIRE(memory->variables[key] ==
-                                    expectedCommand.getVariables()[key]);
-                        }
-                        ++memory;
-                    }
-                }
+                REQUIRE(actualTasks.size() == commands.size());
             }
         }
-
-        ExecutePlugin::popFleetingOptions();
-        ExecutePlugin::popSettingsNode();
-        ExecutePlugin::popPatterns();
-        ExecutePlugin::popPlugins();
     }
 }
 
@@ -356,66 +227,22 @@ SCENARIO("Test problematic cases", "[execute-plugin]") {
     GIVEN("A plugin with a non-existing plugin to execute") {
         FleetingOptionsStub fleetingOptions;
 
-        ExecutePlugin::push(
+        auto plRaii = ExecutePlugin::push(
             Plugins({{"Memory",
                       shared_ptr<Plugin>(new execHelper::plugins::Memory())}}));
-        ExecutePlugin::push(
+        auto flRaii = ExecutePlugin::push(
             gsl::not_null<config::FleetingOptionsInterface*>(&fleetingOptions));
-        ExecutePlugin::push(SettingsNode("test"));
-        ExecutePlugin::push(Patterns());
+        auto seRaii = ExecutePlugin::push(SettingsNode("test"));
+        auto paRaii = ExecutePlugin::push(Patterns());
 
         ExecutePlugin plugin({"non-existing-plugin"});
 
         WHEN("We execute the plugin") {
-            Task task;
-            bool returnCode =
-                plugin.apply(task, VariablesMap("test"), Patterns());
-
-            THEN("It should not succeed") { REQUIRE_FALSE(returnCode); }
-        }
-
-        ExecutePlugin::popFleetingOptions();
-        ExecutePlugin::popSettingsNode();
-        ExecutePlugin::popPatterns();
-        ExecutePlugin::popPlugins();
-    }
-    GIVEN("A plugin that fails to execute") {
-        const Command command("command");
-        FleetingOptionsStub fleetingOptions;
-        fleetingOptions.m_commands = {command};
-
-        SettingsNode settings("test");
-        REQUIRE(settings.add(COMMAND_KEY, command));
-        REQUIRE(settings.add(command, MEMORY_KEY));
-
-        ExecutePlugin::push(
-            Plugins({{"Memory",
-                      shared_ptr<Plugin>(new execHelper::plugins::Memory())}}));
-        ExecutePlugin::push(
-            gsl::not_null<config::FleetingOptionsInterface*>(&fleetingOptions));
-        ExecutePlugin::push(move(settings));
-        ExecutePlugin::push(Patterns());
-
-        ExecutePlugin plugin({"memory", "memory"});
-
-        MemoryHandler memory;
-        MemoryHandler::setReturnCode(false);
-
-        WHEN("We execute the plugin") {
-            Task task;
-            bool returnCode =
-                plugin.apply(task, VariablesMap("test"), Patterns());
-
-            THEN("It should not succeed") { REQUIRE_FALSE(returnCode); }
-            THEN("It should have stopped executing after the failure") {
-                REQUIRE(memory.getExecutions().size() == 1U);
+            THEN("It should throw a runtime_error exception") {
+                REQUIRE_THROWS_AS(plugin.apply(Task(), VariablesMap("test")),
+                                  runtime_error);
             }
         }
-
-        ExecutePlugin::popFleetingOptions();
-        ExecutePlugin::popSettingsNode();
-        ExecutePlugin::popPatterns();
-        ExecutePlugin::popPlugins();
     }
 }
 

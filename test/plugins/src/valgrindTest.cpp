@@ -26,7 +26,6 @@
 #include "utils/commonGenerators.h"
 #include "utils/utils.h"
 
-#include "executorStub.h"
 #include "fleetingOptionsStub.h"
 #include "handlers.h"
 
@@ -54,8 +53,8 @@ using execHelper::config::SettingsNode;
 using execHelper::config::VariablesMap;
 using execHelper::core::Task;
 using execHelper::core::TaskCollection;
+using execHelper::core::Tasks;
 
-using execHelper::core::test::ExecutorStub;
 using execHelper::test::addToConfig;
 using execHelper::test::addToTask;
 using execHelper::test::FleetingOptionsStub;
@@ -140,7 +139,9 @@ SCENARIO("Testing the configuration settings of the valgrind plugin",
                         const optional<vector<string>>& commandLine,
                         const optional<EnvironmentCollection>& environment,
                         const optional<bool> verbose, const Pattern& pattern,
-                        const Task& task) {
+                        Task task) {
+        task.addPatterns({pattern});
+
         Task expectedTask = task;
         expectedTask.append("valgrind");
 
@@ -148,18 +149,12 @@ SCENARIO("Testing the configuration settings of the valgrind plugin",
 
         LuaPlugin plugin(std::string(PLUGINS_INSTALL_PATH) + "/valgrind.lua");
 
-        map<std::string, shared_ptr<SpecialMemory>> memories;
+        map<std::string, shared_ptr<Memory>> memories;
         const auto& patternValues = pattern.getValues();
         transform(patternValues.begin(), patternValues.end(),
                   inserter(memories, memories.end()), [](const auto& value) {
-                      return make_pair(value, make_shared<SpecialMemory>());
+                      return make_pair(value, make_shared<Memory>());
                   });
-
-        ExecutorStub executor;
-        ExecuteCallback executeCallback = [&executor](const Task& task) {
-            executor.execute(task);
-        };
-        registerExecuteCallback(executeCallback);
 
         auto runCommand = string("{").append(pattern.getKey()).append("}");
         addToConfig("run-command", runCommand, &config);
@@ -196,31 +191,21 @@ SCENARIO("Testing the configuration settings of the valgrind plugin",
 
         FleetingOptionsStub fleetingOptions;
 
-        ExecutePlugin::push(move(plugins));
-        ExecutePlugin::push(
+        Tasks expectedTasks(patternValues.size(), expectedTask);
+
+        auto plRaii = ExecutePlugin::push(move(plugins));
+        auto flRaii = ExecutePlugin::push(
             gsl::not_null<config::FleetingOptionsInterface*>(&fleetingOptions));
-        ExecutePlugin::push(SettingsNode("selector-test"));
-        ExecutePlugin::push({pattern});
+        auto seRaii = ExecutePlugin::push(SettingsNode("selector-test"));
+        auto paRaii = ExecutePlugin::push({pattern});
 
         THEN_WHEN("We apply the plugin") {
-            bool returnCode = plugin.apply(task, config, {pattern});
-            THEN_CHECK("It should succeed") { REQUIRE(returnCode); }
+            auto actualTasks = plugin.apply(task, config);
 
             THEN_CHECK("It called the right commands") {
-                for(const auto& memory : memories) {
-                    auto executions = memory.second->getExecutions();
-                    for(const auto& execution : executions) {
-                        REQUIRE(execution.task == expectedTask);
-                        REQUIRE(execution.patterns.empty());
-                    }
-                }
+                REQUIRE(expectedTasks == actualTasks);
             }
         }
-
-        ExecutePlugin::popFleetingOptions();
-        ExecutePlugin::popSettingsNode();
-        ExecutePlugin::popPatterns();
-        ExecutePlugin::popPlugins();
     });
 }
 
@@ -230,9 +215,10 @@ SCENARIO("Test erroneous scenarios for the valgrind plugin", "[valgrind]") {
         VariablesMap variables("valgrind-test");
 
         WHEN("We call the plugin") {
-            bool returnCode = plugin.apply(Task(), variables, Patterns());
-
-            THEN("It should fail") { REQUIRE_FALSE(returnCode); }
+            THEN("It should throw an exception") {
+                REQUIRE_THROWS_AS(plugin.apply(Task(), variables),
+                                  runtime_error);
+            }
         }
     }
 }

@@ -13,4 +13,4 @@ if type(next(build_commands)) == 'nil' then
     input_error('Clang-static-analyzer: one must define at least one build command')
 end
 
-run_target(task, build_commands)
+register_tasks(run_target(task, build_commands))

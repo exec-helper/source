@@ -1,5 +1,6 @@
 #include <memory>
 #include <optional>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -20,11 +21,11 @@
 #include "unittest/rapidcheck.h"
 #include "utils/commonGenerators.h"
 
-#include "executorStub.h"
 #include "fleetingOptionsStub.h"
 #include "handlers.h"
 
 using std::optional;
+using std::runtime_error;
 using std::shared_ptr;
 using std::string;
 using std::string_view;
@@ -36,10 +37,9 @@ using execHelper::config::Patterns;
 using execHelper::config::SettingsNode;
 using execHelper::config::VariablesMap;
 using execHelper::core::Task;
+using execHelper::core::Tasks;
 using execHelper::plugins::ExecutePlugin;
-using execHelper::plugins::MemoryHandler;
 
-using execHelper::core::test::ExecutorStub;
 using execHelper::test::FleetingOptionsStub;
 using execHelper::test::NonEmptyString;
 using execHelper::test::propertyTest;
@@ -64,12 +64,11 @@ SCENARIO(
                         const optional<vector<string>>& commandLine,
                         const optional<bool> verbose) {
         RC_PRE(!buildCommand.empty());
-        Patterns patterns;
         const Task task;
-        Task expectedTask(task);
+
+        Task expectedTask = task;
 
         VariablesMap config("clang-static-analyzer-test");
-        MemoryHandler memory;
 
         LuaPlugin plugin(scriptPath());
 
@@ -98,39 +97,24 @@ SCENARIO(
             handleCommandLine(*commandLine, config, expectedTask);
         }
 
-        ExecutorStub::TaskQueue expectedTasks(buildCommand.size(),
-                                              expectedTask);
+        Tasks expectedTasks(buildCommand.size(), expectedTask);
 
         FleetingOptionsStub fleetingOptions;
 
-        ExecutePlugin::push(std::move(plugins));
-        ExecutePlugin::push(
+        auto plRaii = ExecutePlugin::push(std::move(plugins));
+        auto flRaii = ExecutePlugin::push(
             gsl::not_null<config::FleetingOptionsInterface*>(&fleetingOptions));
-        ExecutePlugin::push(SettingsNode("clang-static-analyzer-test"));
-        ExecutePlugin::push(Patterns(patterns));
+        auto seRaii =
+            ExecutePlugin::push(SettingsNode("clang-static-analyzer-test"));
+        auto paRaii = ExecutePlugin::push(Patterns(task.getPatterns()));
 
         THEN_WHEN("We apply the plugin") {
-            Task task;
-            bool returnCode = plugin.apply(task, config, patterns);
-            THEN_CHECK("It should succeed") { REQUIRE(returnCode); }
+            auto actualTasks = plugin.apply(task, config);
 
             THEN_CHECK("It called the right commands") {
-                const Memory::Memories& memories =
-                    MemoryHandler::getExecutions();
-                REQUIRE(memories.size() == expectedTasks.size());
-                auto expectedTask = expectedTasks.begin();
-                for(auto memory = memories.begin(); memory != memories.end();
-                    ++memory, ++expectedTask) {
-                    REQUIRE(memory->task == *expectedTask);
-                    REQUIRE(memory->patterns.empty());
-                }
+                REQUIRE(actualTasks == expectedTasks);
             }
         }
-
-        ExecutePlugin::popFleetingOptions();
-        ExecutePlugin::popSettingsNode();
-        ExecutePlugin::popPatterns();
-        ExecutePlugin::popPlugins();
     });
 }
 
@@ -140,17 +124,10 @@ SCENARIO("Testing invalid configurations", "[clang-static-analyzer][error]") {
         VariablesMap variables = plugin.getVariablesMap(FleetingOptionsStub());
 
         Task task;
-        MemoryHandler memory;
 
         WHEN("We apply the plugin") {
-            bool returnCode = plugin.apply(task, variables, Patterns());
-
-            THEN("It should fail") { REQUIRE_FALSE(returnCode); }
-
-            THEN("Nothing should have been executed") {
-                const Memory::Memories& memories =
-                    MemoryHandler::getExecutions();
-                REQUIRE(memories.empty());
+            THEN("It should throw an exception") {
+                REQUIRE_THROWS_AS(plugin.apply(task, variables), runtime_error);
             }
         }
 
@@ -158,8 +135,9 @@ SCENARIO("Testing invalid configurations", "[clang-static-analyzer][error]") {
              "value") {
             REQUIRE(variables.add(string(buildCommandConfigKey)));
 
-            bool returnCode = plugin.apply(task, variables, Patterns());
-            THEN("It should fail") { REQUIRE_FALSE(returnCode); }
+            THEN("It should fail") {
+                REQUIRE_THROWS_AS(plugin.apply(task, variables), runtime_error);
+            }
         }
     }
 }

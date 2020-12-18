@@ -2,11 +2,11 @@
 #include <array>
 #include <filesystem>
 #include <optional>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 #include <utility>
 
-#include "config/pattern.h"
 #include "config/variablesMap.h"
 #include "plugins/luaPlugin.h"
 
@@ -17,26 +17,24 @@
 #include "utils/commonGenerators.h"
 #include "utils/utils.h"
 
-#include "executorStub.h"
 #include "fleetingOptionsStub.h"
 #include "handlers.h"
 
 using std::array;
 using std::optional;
 using std::pair;
+using std::runtime_error;
 using std::string;
 using std::string_view;
 using std::vector;
 
 using execHelper::config::EnvironmentCollection;
 using execHelper::config::Jobs_t;
-using execHelper::config::Patterns;
 using execHelper::config::VariablesMap;
 using execHelper::core::Task;
+using execHelper::core::Tasks;
 
-using execHelper::core::test::ExecutorStub;
 using execHelper::test::propertyTest;
-using execHelper::test::utils::getExpectedTasks;
 
 namespace filesystem = std::filesystem;
 
@@ -75,17 +73,10 @@ SCENARIO("Testing the configuration settings of the cmake plugin", "[cmake]") {
            const optional<string>& component) {
             const Task task;
             Task expectedTask(task);
-            Patterns patterns;
 
             VariablesMap config("cmake-test");
 
             LuaPlugin plugin(std::string(PLUGINS_INSTALL_PATH) + "/cmake.lua");
-
-            ExecutorStub executor;
-            ExecuteCallback executeCallback = [&executor](const Task& task) {
-                executor.execute(task);
-            };
-            registerExecuteCallback(executeCallback);
 
             expectedTask.append("cmake");
 
@@ -212,16 +203,11 @@ SCENARIO("Testing the configuration settings of the cmake plugin", "[cmake]") {
                 handleWorkingDirectory(*workingDir, config, expectedTask);
             }
 
-            ExecutorStub::TaskQueue expectedTasks =
-                getExpectedTasks(expectedTask, patterns);
-
             THEN_WHEN("We apply the plugin") {
-                bool returnCode = plugin.apply(task, config, patterns);
+                auto actualTasks = plugin.apply(task, config);
 
-                THEN_CHECK("It should succeed") { REQUIRE(returnCode); }
-
-                THEN_CHECK("It called the right commands") {
-                    REQUIRE(expectedTasks == executor.getExecutedTasks());
+                THEN_CHECK("It generated the expected tasks") {
+                    REQUIRE(Tasks({expectedTask}) == actualTasks);
                 }
             }
         });
@@ -235,23 +221,16 @@ SCENARIO("Set a wrong mode", "[cmake]") {
 
         const Task task;
 
-        Patterns patterns;
         VariablesMap config("cmake-test");
 
         LuaPlugin plugin(std::string(PLUGINS_INSTALL_PATH) + "/cmake.lua");
 
-        ExecutorStub executor;
-        ExecuteCallback executeCallback = [&executor](const Task& task) {
-            executor.execute(task);
-        };
-        registerExecuteCallback(executeCallback);
-
         REQUIRE(config.add("mode", mode));
 
         THEN_WHEN("We apply the plugin") {
-            bool returnCode = plugin.apply(task, config, patterns);
-
-            THEN_CHECK("It should fail") { REQUIRE_FALSE(returnCode); }
+            THEN_CHECK("It throws a runtime error") {
+                REQUIRE_THROWS_AS(plugin.apply(task, config), runtime_error);
+            }
         }
     });
 }
