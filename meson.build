@@ -32,7 +32,7 @@ if not gsl_dep.found()
   gsl_dep = gsl_proj.get_variable('microsoft_gsl_dep')
 endif
 
-lua_dep = dependency('lua-5.3', required: get_option('use-system-lua'), static: true)
+lua_dep = dependency('lua-5.3', required: get_option('use-system-lua'))
 if not lua_dep.found()
   lua_proj = subproject('lua', default_options: ['default_library=static', 'werror=false'])
   lua_dep = lua_proj.get_variable('lua_dep')
