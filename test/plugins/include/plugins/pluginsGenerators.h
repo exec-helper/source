@@ -1,6 +1,7 @@
 #ifndef PLUGINS_GENERATORS_INCLUDE
 #define PLUGINS_GENERATORS_INCLUDE
 
+#include <filesystem>
 #include <memory>
 #include <string>
 #include <vector>
@@ -8,19 +9,20 @@
 #include <rapidcheck.h>
 
 #include "plugins/executePlugin.h"
+#include "plugins/pluginUtils.h"
+
+#include "unittest/config.h"
 
 namespace rc {
 
 template <>
 struct Arbitrary<std::shared_ptr<const execHelper::plugins::Plugin>> {
-    static Gen<std::shared_ptr<const execHelper::plugins::Plugin>> arbitrary() {
-        const auto pluginNames =
-            execHelper::plugins::ExecutePlugin::getPluginNames();
-        return gen::map(
-            gen::elementOf(pluginNames), [](const std::string& name) {
-                return std::shared_ptr<const execHelper::plugins::Plugin>(
-                    execHelper::plugins::ExecutePlugin::getPlugin(name));
-            });
+    static auto arbitrary()
+        -> Gen<std::shared_ptr<const execHelper::plugins::Plugin>> {
+        static const auto plugins = execHelper::plugins::discoverPlugins(
+            {std::filesystem::path(PLUGINS_INSTALL_PATH)});
+        return gen::map(gen::elementOf(plugins),
+                        [](const auto& plugin) { return plugin.second; });
     };
 };
 

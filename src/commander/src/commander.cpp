@@ -8,28 +8,31 @@
 
 #include "config/fleetingOptionsInterface.h"
 #include "config/pattern.h"
+#include "config/patternsHandler.h"
 #include "config/settingsNode.h"
 #include "config/variablesMap.h"
 #include "core/task.h"
 #include "plugins/executePlugin.h"
+#include "plugins/executionContext.h"
 
 #include "logger.h"
 
 using std::move;
 
 using gsl::czstring;
-using gsl::not_null;
 
 using execHelper::config::EnvironmentCollection;
 using execHelper::config::FleetingOptionsInterface;
 using execHelper::config::Path;
 using execHelper::config::Pattern;
 using execHelper::config::Patterns;
+using execHelper::config::PatternsHandler;
 using execHelper::config::SettingsNode;
 using execHelper::config::VariablesMap;
 using execHelper::core::Task;
 using execHelper::core::Tasks;
 using execHelper::plugins::ExecutePlugin;
+using execHelper::plugins::ExecutionContext;
 using execHelper::plugins::Plugins;
 
 namespace filesystem = std::filesystem;
@@ -58,12 +61,10 @@ auto Commander::run(const FleetingOptionsInterface& fleetingOptions,
                     const EnvironmentCollection& env, Plugins&& plugins,
                     const Path& rootDirectory) -> Tasks {
     patterns = addPredefinedPatterns(patterns, rootDirectory);
+    PatternsHandler handler(move(patterns));
 
-    auto foRaii = ExecutePlugin::push(
-        not_null<const FleetingOptionsInterface*>(&fleetingOptions));
-    auto seRaii = ExecutePlugin::push(move(settings));
-    auto paRaii = ExecutePlugin::push(move(patterns));
-    auto plRaii = ExecutePlugin::push(move(plugins));
+    ExecutionContext context(fleetingOptions, settings, handler, plugins);
+
     Task task({}, env, workingDirectory);
 
     auto commands = fleetingOptions.getCommands();
@@ -71,7 +72,7 @@ auto Commander::run(const FleetingOptionsInterface& fleetingOptions,
         throw std::runtime_error("You must define at least one command");
     }
     ExecutePlugin plugin(move(commands));
-    auto tasks = plugin.apply(task, VariablesMap("commands"));
+    auto tasks = plugin.apply(task, VariablesMap("commands"), context);
     return tasks;
 }
 } // namespace commander

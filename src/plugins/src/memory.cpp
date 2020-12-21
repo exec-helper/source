@@ -1,5 +1,6 @@
 #include <utility>
 
+#include "executionContext.h"
 #include "memory.h"
 
 #include <stdexcept>
@@ -19,8 +20,8 @@ using namespace std::string_literals;
 
 namespace execHelper::plugins {
 Memory::Memory() noexcept
-    : m_apply([](Task task,
-                 const VariablesMap& /*variablesMap*/) noexcept -> Tasks {
+    : m_apply([](Task task, const VariablesMap& /*variablesMap*/,
+                 const ExecutionContext& /*context*/) noexcept -> Tasks {
           return {move(task)};
       }) {
     ;
@@ -34,8 +35,9 @@ auto Memory::getVariablesMap(
     return VariablesMap("memory");
 }
 
-auto Memory::apply(Task task, const VariablesMap& variables) const -> Tasks {
-    return m_apply(task, variables);
+auto Memory::apply(Task task, const VariablesMap& variables,
+                   const ExecutionContext& context) const -> Tasks {
+    return m_apply(task, variables, context);
 }
 
 auto Memory::summary() const noexcept -> std::string {

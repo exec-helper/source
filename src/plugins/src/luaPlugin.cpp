@@ -1,4 +1,5 @@
 #include "luaPlugin.h"
+#include "executionContext.h"
 #include "log/log.h"
 
 #include <algorithm>
@@ -104,7 +105,8 @@ auto LuaPlugin::getVariablesMap(
     return VariablesMap("luaPlugin");
 }
 
-auto LuaPlugin::apply(Task task, const VariablesMap& config) const -> Tasks {
+auto LuaPlugin::apply(Task task, const VariablesMap& config,
+                      const ExecutionContext& context) const -> Tasks {
     Tasks tasks;
     LuaContext lua;
 
@@ -137,6 +139,9 @@ auto LuaPlugin::apply(Task task, const VariablesMap& config) const -> Tasks {
                         "end "
                         "end "
                         "return {} "
+                        "end");
+        lua.executeCode("function input_error(message) "
+                        "error(message) "
                         "end");
 
         // Define the Config class
@@ -178,8 +183,8 @@ auto LuaPlugin::apply(Task task, const VariablesMap& config) const -> Tasks {
 
         lua.writeFunction<Tasks(const Task&, const vector<pair<int, string>>&)>(
             "run_target",
-            [](const Task& task,
-               const vector<pair<int, string>>& commands) -> Tasks {
+            [&context](const Task& task,
+                       const vector<pair<int, string>>& commands) -> Tasks {
                 Tasks tasks;
                 for(const auto& combination :
                     makePatternPermutator(task.getPatterns())) {
@@ -199,7 +204,7 @@ auto LuaPlugin::apply(Task task, const VariablesMap& config) const -> Tasks {
                         replacePatternCombinations(task, combination);
                     try {
                         auto newTasks = executePlugin.apply(
-                            move(newTask), VariablesMap("subtask"));
+                            move(newTask), VariablesMap("subtask"), context);
                         move(newTasks.begin(), newTasks.end(),
                              back_inserter(tasks));
                     } catch(const std::runtime_error& e) {
@@ -220,10 +225,6 @@ auto LuaPlugin::apply(Task task, const VariablesMap& config) const -> Tasks {
                 }
                 return (*values).at("0");
             });
-
-        lua.writeFunction("input_error", [](const string& message) {
-            throw std::runtime_error(message);
-        });
 
         lua.writeFunction("user_feedback", [](const string& message) {
             user_feedback_error(message);

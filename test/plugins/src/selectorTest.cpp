@@ -11,9 +11,9 @@
 #include "config/commandLineOptions.h"
 #include "config/environment.h"
 #include "config/pattern.h"
+#include "config/patternsHandler.h"
 #include "config/variablesMap.h"
 #include "core/task.h"
-#include "plugins/executePlugin.h"
 #include "plugins/logger.h"
 #include "plugins/luaPlugin.h"
 #include "plugins/memory.h"
@@ -35,7 +35,6 @@ using std::inserter;
 using std::make_pair;
 using std::make_shared;
 using std::map;
-using std::move;
 using std::optional;
 using std::runtime_error;
 using std::shared_ptr;
@@ -49,12 +48,12 @@ using execHelper::config::EnvironmentCollection;
 using execHelper::config::Pattern;
 using execHelper::config::PatternKey;
 using execHelper::config::Patterns;
+using execHelper::config::PatternsHandler;
 using execHelper::config::PatternValues;
 using execHelper::config::SettingsNode;
 using execHelper::config::VariablesMap;
 using execHelper::core::Task;
 using execHelper::core::Tasks;
-using execHelper::plugins::ExecutePlugin;
 
 using execHelper::test::addToConfig;
 using execHelper::test::FleetingOptionsStub;
@@ -110,16 +109,16 @@ SCENARIO("Testing the configuration settings of the selector plugin",
                           static_pointer_cast<Plugin>(memory.second));
                   });
 
-        auto plRaii = ExecutePlugin::push(move(plugins));
-        auto flRaii = ExecutePlugin::push(
-            gsl::not_null<config::FleetingOptionsInterface*>(&fleetingOptions));
-        auto seRaii = ExecutePlugin::push(SettingsNode("selector-test"));
-        auto paRaii = ExecutePlugin::push(Patterns(patterns));
+        FleetingOptionsStub options;
+        SettingsNode settings("selector-test");
+        PatternsHandler patternsHandler(patterns);
+        const ExecutionContext context(options, settings, patternsHandler,
+                                       plugins);
 
         Tasks expectedTasks(patternValues.size(), task);
 
         THEN_WHEN("We apply the plugin") {
-            auto actualTasks = plugin.apply(task, config);
+            auto actualTasks = plugin.apply(task, config, context);
 
             THEN_CHECK("It called the right commands") {
                 REQUIRE(actualTasks == expectedTasks);
@@ -132,17 +131,19 @@ SCENARIO("Unconfigured target in selector", "[selector]") {
     GIVEN("A config without a defined target") {
         LuaPlugin plugin(scriptPath());
 
-        FleetingOptionsStub fleetingOptions;
-        auto flRaii = ExecutePlugin::push(
-            gsl::not_null<config::FleetingOptionsInterface*>(&fleetingOptions));
-        auto seRaii = ExecutePlugin::push(SettingsNode("selector-test"));
-        auto paRaii = ExecutePlugin::push(Patterns());
+        FleetingOptionsStub options;
+        SettingsNode settings("selector-test");
+        PatternsHandler patternsHandler;
+        Plugins plugins;
+        const ExecutionContext context(options, settings, patternsHandler,
+                                       plugins);
 
         WHEN("We call the plugin") {
             THEN("It should throw a runtime error") {
-                REQUIRE_THROWS_AS(
-                    plugin.apply(Task(), VariablesMap("selector-test")),
-                    runtime_error);
+                REQUIRE_THROWS_AS(plugin.apply(Task(),
+                                               VariablesMap("selector-test"),
+                                               context),
+                                  runtime_error);
             }
         }
     }

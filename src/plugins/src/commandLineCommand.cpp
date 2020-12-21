@@ -8,6 +8,7 @@
 #include "config/variablesMap.h"
 #include "core/patterns.h"
 #include "core/task.h"
+#include "executionContext.h"
 #include "plugins/workingDirectory.h"
 
 #include "commandLine.h"
@@ -49,7 +50,8 @@ auto CommandLineCommand::getVariablesMap(
     return defaults;
 }
 
-auto CommandLineCommand::apply(Task task, const VariablesMap& variables) const
+auto CommandLineCommand::apply(Task task, const VariablesMap& variables,
+                               const ExecutionContext& /*context*/) const
     -> Tasks {
     task.appendToEnvironment(getEnvironment(variables));
 

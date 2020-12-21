@@ -4,8 +4,11 @@
 
 #include "config/commandLineOptions.h"
 #include "config/environment.h"
+#include "config/patternsHandler.h"
+#include "config/settingsNode.h"
 #include "config/variablesMap.h"
 #include "core/task.h"
+#include "fleetingOptionsStub.h"
 #include "plugins/luaPlugin.h"
 
 #include "unittest/catch.h"
@@ -22,70 +25,80 @@ using std::to_string;
 
 using execHelper::config::EnvironmentCollection;
 using execHelper::config::Jobs_t;
+using execHelper::config::PatternsHandler;
+using execHelper::config::SettingsNode;
 using execHelper::config::VariablesMap;
 using execHelper::core::Task;
 using execHelper::core::Tasks;
 
+using execHelper::test::FleetingOptionsStub;
 using execHelper::test::propertyTest;
 
 namespace filesystem = std::filesystem;
 
 namespace execHelper::plugins::test {
 SCENARIO("Testing the configuration settings of the ninja plugin", "[ninja]") {
-    propertyTest("", [](const optional<filesystem::path>& buildDir,
-                        const optional<filesystem::path>& workingDir,
-                        const optional<std::vector<std::string>>& commandLine,
-                        const optional<EnvironmentCollection>& environment,
-                        const optional<bool> verbose,
-                        const optional<Jobs_t> jobs) {
-        const Task task;
-        Task expectedTask(task);
+    FleetingOptionsStub options;
+    SettingsNode settings("ninja");
+    PatternsHandler patternsHandler;
+    Plugins plugins;
+    const ExecutionContext context(options, settings, patternsHandler, plugins);
 
-        VariablesMap config("ninja-test");
+    propertyTest(
+        "",
+        [&context](const optional<filesystem::path>& buildDir,
+                   const optional<filesystem::path>& workingDir,
+                   const optional<std::vector<std::string>>& commandLine,
+                   const optional<EnvironmentCollection>& environment,
+                   const optional<bool> verbose, const optional<Jobs_t> jobs) {
+            const Task task;
+            Task expectedTask(task);
 
-        LuaPlugin plugin(std::string(PLUGINS_INSTALL_PATH) + "/ninja.lua");
+            VariablesMap config("ninja-test");
 
-        expectedTask.append("ninja");
+            LuaPlugin plugin(std::string(PLUGINS_INSTALL_PATH) + "/ninja.lua");
 
-        if(workingDir) {
-            handleWorkingDirectory(*workingDir, config, expectedTask);
-        }
+            expectedTask.append("ninja");
 
-        if(environment) {
-            handleEnvironment(*environment, config, expectedTask);
-        }
-
-        const string directoryOption("-C");
-        if(buildDir) {
-            REQUIRE(config.add("build-dir", buildDir->string()));
-            expectedTask.append({directoryOption, buildDir->string()});
-        } else {
-            expectedTask.append({directoryOption, "."});
-        }
-
-        if(verbose) {
-            handleVerbosity(*verbose, "--verbose", config, expectedTask);
-        }
-
-        if(jobs) {
-            REQUIRE(config.add("jobs", std::to_string(*jobs)));
-            expectedTask.append({"-j", to_string(*jobs)});
-        } else {
-            const std::string defaultNumberOfJobs{"1"};
-            expectedTask.append({"-j", defaultNumberOfJobs});
-        }
-
-        if(commandLine) {
-            handleCommandLine(*commandLine, config, expectedTask);
-        }
-
-        THEN_WHEN("We apply the plugin") {
-            auto actualTasks = plugin.apply(task, config);
-
-            THEN_CHECK("It called the right commands") {
-                REQUIRE(actualTasks == Tasks({expectedTask}));
+            if(workingDir) {
+                handleWorkingDirectory(*workingDir, config, expectedTask);
             }
-        }
-    });
+
+            if(environment) {
+                handleEnvironment(*environment, config, expectedTask);
+            }
+
+            const string directoryOption("-C");
+            if(buildDir) {
+                REQUIRE(config.add("build-dir", buildDir->string()));
+                expectedTask.append({directoryOption, buildDir->string()});
+            } else {
+                expectedTask.append({directoryOption, "."});
+            }
+
+            if(verbose) {
+                handleVerbosity(*verbose, "--verbose", config, expectedTask);
+            }
+
+            if(jobs) {
+                REQUIRE(config.add("jobs", std::to_string(*jobs)));
+                expectedTask.append({"-j", to_string(*jobs)});
+            } else {
+                const std::string defaultNumberOfJobs{"1"};
+                expectedTask.append({"-j", defaultNumberOfJobs});
+            }
+
+            if(commandLine) {
+                handleCommandLine(*commandLine, config, expectedTask);
+            }
+
+            THEN_WHEN("We apply the plugin") {
+                auto actualTasks = plugin.apply(task, config, context);
+
+                THEN_CHECK("It called the right commands") {
+                    REQUIRE(actualTasks == Tasks({expectedTask}));
+                }
+            }
+        });
 }
 } // namespace execHelper::plugins::test

@@ -9,10 +9,10 @@
 #include <vector>
 
 #include "config/environment.h"
+#include "config/patternsHandler.h"
 #include "config/settingsNode.h"
 #include "config/variablesMap.h"
 #include "core/task.h"
-#include "plugins/executePlugin.h"
 #include "plugins/luaPlugin.h"
 #include "plugins/memory.h"
 
@@ -44,12 +44,12 @@ using std::filesystem::path;
 using execHelper::config::EnvironmentCollection;
 using execHelper::config::Pattern;
 using execHelper::config::Patterns;
+using execHelper::config::PatternsHandler;
 using execHelper::config::SettingsNode;
 using execHelper::config::VariablesMap;
 using execHelper::core::Task;
 using execHelper::core::TaskCollection;
 using execHelper::core::Tasks;
-using execHelper::plugins::ExecutePlugin;
 using execHelper::plugins::LuaPlugin;
 
 using execHelper::test::addToConfig;
@@ -295,16 +295,14 @@ SCENARIO("Testing the configuration settings of the lcov plugin", "[lcov]") {
                           static_pointer_cast<Plugin>(memory.second));
                   });
 
-        FleetingOptionsStub fleetingOptions;
-
-        auto plRaii = ExecutePlugin::push(move(plugins));
-        auto flRaii = ExecutePlugin::push(
-            gsl::not_null<config::FleetingOptionsInterface*>(&fleetingOptions));
-        auto seRaii = ExecutePlugin::push(SettingsNode("lcov-test"));
-        auto paRaii = ExecutePlugin::push({pattern});
+        FleetingOptionsStub options;
+        SettingsNode settings("lcov-test");
+        PatternsHandler patternsHandler({pattern});
+        const ExecutionContext context(options, settings, patternsHandler,
+                                       plugins);
 
         THEN_WHEN("We apply the plugin") {
-            auto actualTasks = plugin.apply(task, config);
+            auto actualTasks = plugin.apply(task, config, context);
 
             THEN_CHECK("It called the right commands") {
                 REQUIRE(expectedTasks == actualTasks);
@@ -318,9 +316,16 @@ SCENARIO("Test erroneous scenarios for the lcov plugin", "[lcov]") {
         LuaPlugin plugin(std::string(PLUGINS_INSTALL_PATH) + "/lcov.lua");
         VariablesMap variables("lcov-test");
 
+        FleetingOptionsStub options;
+        SettingsNode settings("lcov-test");
+        PatternsHandler patternsHandler;
+        Plugins plugins;
+        const ExecutionContext context(options, settings, patternsHandler,
+                                       plugins);
+
         WHEN("We call the plugin") {
             THEN("It should throw a runtime error") {
-                REQUIRE_THROWS_AS(plugin.apply(Task(), variables),
+                REQUIRE_THROWS_AS(plugin.apply(Task(), variables, context),
                                   runtime_error);
             }
         }

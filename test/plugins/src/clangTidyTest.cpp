@@ -6,6 +6,8 @@
 
 #include "config/environment.h"
 #include "config/pattern.h"
+#include "config/patternsHandler.h"
+#include "config/settingsNode.h"
 #include "config/variablesMap.h"
 #include "plugins/luaPlugin.h"
 
@@ -29,10 +31,13 @@ using execHelper::config::EnvArgs;
 using execHelper::config::EnvironmentCollection;
 using execHelper::config::Path;
 using execHelper::config::Patterns;
+using execHelper::config::PatternsHandler;
+using execHelper::config::SettingsNode;
 using execHelper::config::VariablesMap;
 using execHelper::core::Task;
 using execHelper::core::Tasks;
 
+using execHelper::test::FleetingOptionsStub;
 using execHelper::test::propertyTest;
 
 namespace filesystem = std::filesystem;
@@ -40,13 +45,21 @@ namespace filesystem = std::filesystem;
 namespace execHelper::plugins::test {
 SCENARIO("Testing the configuration settings of the clang-tidy plugin",
          "[clang-tidy]") {
-    propertyTest("", [](const optional<filesystem::path>& buildDir,
-                        const optional<filesystem::path>& workingDir,
-                        const optional<vector<filesystem::path>>& sources,
-                        const optional<vector<string>>& checks,
-                        const optional<vector<string>>& warningAsErrors,
-                        const optional<vector<string>>& commandLine,
-                        const optional<EnvironmentCollection>& environment) {
+
+    FleetingOptionsStub options;
+    SettingsNode settings("clang-tidy");
+    Plugins plugins;
+    PatternsHandler patternsHandler;
+    ExecutionContext context(options, settings, patternsHandler, plugins);
+
+    propertyTest("", [&context](
+                         const optional<filesystem::path>& buildDir,
+                         const optional<filesystem::path>& workingDir,
+                         const optional<vector<filesystem::path>>& sources,
+                         const optional<vector<string>>& checks,
+                         const optional<vector<string>>& warningAsErrors,
+                         const optional<vector<string>>& commandLine,
+                         const optional<EnvironmentCollection>& environment) {
         const Task task;
         Task expectedTask = task;
 
@@ -129,7 +142,7 @@ SCENARIO("Testing the configuration settings of the clang-tidy plugin",
         Tasks expectedTasks = {expectedTask};
 
         THEN_WHEN("We apply the plugin") {
-            auto actualTasks = plugin.apply(task, config);
+            auto actualTasks = plugin.apply(task, config, context);
 
             THEN_CHECK("It called the right commands") {
                 REQUIRE(expectedTasks == actualTasks);

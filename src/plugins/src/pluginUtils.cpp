@@ -1,6 +1,8 @@
 #include "pluginUtils.h"
 
+#include <filesystem>
 #include <map>
+#include <memory>
 #include <utility>
 #include <vector>
 
@@ -12,10 +14,16 @@
 #include "core/patterns.h"
 
 #include "commandLineCommand.h"
+#include "commandPlugin.h"
 #include "logger.h"
+#include "luaPlugin.h"
+#include "memory.h"
+
+namespace filesystem = std::filesystem;
 
 using std::map;
 using std::ostream;
+using std::shared_ptr;
 using std::string;
 using std::vector;
 
@@ -23,6 +31,7 @@ using execHelper::config::Command;
 using execHelper::config::ENVIRONMENT_KEY;
 using execHelper::config::EnvironmentCollection;
 using execHelper::config::Path;
+using execHelper::config::Paths;
 using execHelper::config::PatternCombinations;
 using execHelper::config::PatternKey;
 using execHelper::config::PatternKeys;
@@ -136,5 +145,54 @@ auto toString(const PatternKeys& values) noexcept -> string {
         result.append(", ").append(*it);
     }
     return result;
+}
+
+/**
+ * Discover all compatible plugins in the given search paths. This function does *not* recursively seek in these paths.
+ *
+ * \param[in] searchPaths   The search paths from the lowest priority to the hightest (collisions of plugins in later paths overwrite the ones from earlier ones)
+ * \returns     A mapping of the discovered plugins
+ */
+auto discoverPlugins(const Paths& searchPaths) noexcept -> Plugins {
+    Plugins plugins{
+        {"commands",
+         shared_ptr<Plugin>(new execHelper::plugins::CommandPlugin())},
+        {"command-line-command",
+         shared_ptr<Plugin>(new execHelper::plugins::CommandLineCommand())},
+        {"memory", shared_ptr<Plugin>(new execHelper::plugins::Memory())},
+    };
+
+    /**
+     * We search the searchpaths in reverse and overwrite plugins with the same name in later search paths
+     */
+    LOG(debug) << "Discovering plugins...";
+    for(const auto& path : searchPaths) {
+        LOG(trace) << "Discovering plugins for path " << path;
+        try {
+            for(const auto& entry : filesystem::directory_iterator(path)) {
+                if(entry.is_regular_file() &&
+                   entry.path().extension() == ".lua") {
+                    LOG(trace) << "Module " << entry.path().stem()
+                               << " found at " << path;
+                    auto newId = entry.path().stem().string();
+                    auto newPlugin = shared_ptr<const Plugin>(
+                        new execHelper::plugins::LuaPlugin(entry));
+
+                    if(plugins.count(newId) == 0) {
+                        plugins.emplace(
+                            make_pair(move(newId), move(newPlugin)));
+                    } else {
+                        plugins[newId] = std::move(newPlugin);
+                    }
+                }
+            }
+        } catch(const filesystem::filesystem_error& e) {
+            user_feedback_error("Failed to discover plugins for path "
+                                << path << ". Skipping it");
+            LOG(warning) << "Failed to discover plugins for path " << path
+                         << ": " << e.what();
+        }
+    }
+    return plugins;
 }
 } // namespace execHelper::plugins

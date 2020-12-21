@@ -10,6 +10,7 @@
 
 #include <gsl/pointers>
 
+#include "config/patternsHandler.h"
 #include "config/settingsNode.h"
 #include "core/task.h"
 #include "plugins/executePlugin.h"
@@ -48,6 +49,7 @@ using gsl::not_null;
 using execHelper::config::EnvironmentCollection;
 using execHelper::config::Pattern;
 using execHelper::config::Patterns;
+using execHelper::config::PatternsHandler;
 using execHelper::config::SettingsKeys;
 using execHelper::config::SettingsNode;
 using execHelper::config::VariablesMap;
@@ -189,18 +191,17 @@ SCENARIO("Testing the configuration settings of the valgrind plugin",
                           static_pointer_cast<Plugin>(memory.second));
                   });
 
-        FleetingOptionsStub fleetingOptions;
+        FleetingOptionsStub options;
+        SettingsNode settings("valgrind");
+        PatternsHandler patternsHandler;
+        patternsHandler.addPattern(pattern);
+        const ExecutionContext context(options, settings, patternsHandler,
+                                       plugins);
 
         Tasks expectedTasks(patternValues.size(), expectedTask);
 
-        auto plRaii = ExecutePlugin::push(move(plugins));
-        auto flRaii = ExecutePlugin::push(
-            gsl::not_null<config::FleetingOptionsInterface*>(&fleetingOptions));
-        auto seRaii = ExecutePlugin::push(SettingsNode("selector-test"));
-        auto paRaii = ExecutePlugin::push({pattern});
-
         THEN_WHEN("We apply the plugin") {
-            auto actualTasks = plugin.apply(task, config);
+            auto actualTasks = plugin.apply(task, config, context);
 
             THEN_CHECK("It called the right commands") {
                 REQUIRE(expectedTasks == actualTasks);
@@ -211,12 +212,20 @@ SCENARIO("Testing the configuration settings of the valgrind plugin",
 
 SCENARIO("Test erroneous scenarios for the valgrind plugin", "[valgrind]") {
     GIVEN("A configuration without a configured run command") {
+        FleetingOptionsStub options;
+        SettingsNode settings("settings");
+        Plugins plugins;
+        PatternsHandler patternsHandler;
+        const ExecutionContext context(options, settings, patternsHandler,
+                                       plugins);
+
         LuaPlugin plugin(std::string(PLUGINS_INSTALL_PATH) + "/valgrind.lua");
-        VariablesMap variables("valgrind-test");
 
         WHEN("We call the plugin") {
             THEN("It should throw an exception") {
-                REQUIRE_THROWS_AS(plugin.apply(Task(), variables),
+                REQUIRE_THROWS_AS(plugin.apply(Task(),
+                                               VariablesMap("valgrind-test"),
+                                               context),
                                   runtime_error);
             }
         }

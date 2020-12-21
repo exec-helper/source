@@ -7,6 +7,8 @@
 #include <string_view>
 #include <utility>
 
+#include "config/patternsHandler.h"
+#include "config/settingsNode.h"
 #include "config/variablesMap.h"
 #include "plugins/luaPlugin.h"
 
@@ -30,10 +32,13 @@ using std::vector;
 
 using execHelper::config::EnvironmentCollection;
 using execHelper::config::Jobs_t;
+using execHelper::config::PatternsHandler;
+using execHelper::config::SettingsNode;
 using execHelper::config::VariablesMap;
 using execHelper::core::Task;
 using execHelper::core::Tasks;
 
+using execHelper::test::FleetingOptionsStub;
 using execHelper::test::propertyTest;
 
 namespace filesystem = std::filesystem;
@@ -56,21 +61,28 @@ template <> struct Arbitrary<Mode> {
 
 namespace execHelper::plugins::test {
 SCENARIO("Testing the configuration settings of the cmake plugin", "[cmake]") {
+    FleetingOptionsStub options;
+    SettingsNode settings("cmake-test");
+    PatternsHandler patternsHandler;
+    Plugins plugins;
+    const ExecutionContext context(options, settings, patternsHandler, plugins);
+
     propertyTest(
         "",
-        [](Mode mode, const optional<filesystem::path>& sourcePath,
-           const optional<filesystem::path>& buildPath,
-           const optional<filesystem::path>& workingDir,
-           const optional<vector<string>>& commandLine,
-           const optional<EnvironmentCollection>& environment,
-           const optional<bool> verbose, const optional<Jobs_t> jobs,
-           const optional<string>& generator,
-           const optional<pair<string, string>>&
-               defines, // Problem: the order of a map is not necessarily preserved
-           const optional<string>& target,
-           const optional<filesystem::path>& prefix,
-           const optional<string>& configuration,
-           const optional<string>& component) {
+        [&context](
+            Mode mode, const optional<filesystem::path>& sourcePath,
+            const optional<filesystem::path>& buildPath,
+            const optional<filesystem::path>& workingDir,
+            const optional<vector<string>>& commandLine,
+            const optional<EnvironmentCollection>& environment,
+            const optional<bool> verbose, const optional<Jobs_t> jobs,
+            const optional<string>& generator,
+            const optional<pair<string, string>>&
+                defines, // Problem: the order of a map is not necessarily preserved
+            const optional<string>& target,
+            const optional<filesystem::path>& prefix,
+            const optional<string>& configuration,
+            const optional<string>& component) {
             const Task task;
             Task expectedTask(task);
 
@@ -204,7 +216,7 @@ SCENARIO("Testing the configuration settings of the cmake plugin", "[cmake]") {
             }
 
             THEN_WHEN("We apply the plugin") {
-                auto actualTasks = plugin.apply(task, config);
+                auto actualTasks = plugin.apply(task, config, context);
 
                 THEN_CHECK("It generated the expected tasks") {
                     REQUIRE(Tasks({expectedTask}) == actualTasks);
@@ -214,7 +226,13 @@ SCENARIO("Testing the configuration settings of the cmake plugin", "[cmake]") {
 }
 
 SCENARIO("Set a wrong mode", "[cmake]") {
-    propertyTest("", [](const string& mode) {
+    FleetingOptionsStub options;
+    SettingsNode settings("cmake-test");
+    PatternsHandler patternsHandler;
+    Plugins plugins;
+    const ExecutionContext context(options, settings, patternsHandler, plugins);
+
+    propertyTest("", [&context](const string& mode) {
         RC_PRE(mode != "generate");
         RC_PRE(mode != "build");
         RC_PRE(mode != "install");
@@ -229,7 +247,8 @@ SCENARIO("Set a wrong mode", "[cmake]") {
 
         THEN_WHEN("We apply the plugin") {
             THEN_CHECK("It throws a runtime error") {
-                REQUIRE_THROWS_AS(plugin.apply(task, config), runtime_error);
+                REQUIRE_THROWS_AS(plugin.apply(task, config, context),
+                                  runtime_error);
             }
         }
     });

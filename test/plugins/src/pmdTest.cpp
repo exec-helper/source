@@ -8,6 +8,7 @@
 #include <gsl/pointers>
 
 #include "config/environment.h"
+#include "config/patternsHandler.h"
 #include "config/settingsNode.h"
 #include "config/variablesMap.h"
 #include "core/task.h"
@@ -21,6 +22,7 @@
 #include "utils/commonGenerators.h"
 #include "utils/utils.h"
 
+#include "fleetingOptionsStub.h"
 #include "handlers.h"
 
 namespace filesystem = std::filesystem;
@@ -34,6 +36,8 @@ using std::vector;
 using gsl::not_null;
 
 using execHelper::config::EnvironmentCollection;
+using execHelper::config::PatternsHandler;
+using execHelper::config::SettingsNode;
 using execHelper::config::VariablesMap;
 using execHelper::core::Task;
 using execHelper::core::TaskCollection;
@@ -41,6 +45,7 @@ using execHelper::core::Tasks;
 
 using execHelper::test::addToConfig;
 using execHelper::test::addToTask;
+using execHelper::test::FleetingOptionsStub;
 using execHelper::test::propertyTest;
 
 namespace {
@@ -92,16 +97,23 @@ template <> struct Arbitrary<Tool> {
 
 namespace execHelper::plugins::test {
 SCENARIO("Testing the configuration settings of the pmd plugin", "[pmd]") {
-    propertyTest("", [](const optional<filesystem::path>& exe,
-                        const optional<Tool>& tool,
-                        const optional<filesystem::path>& workingDir,
-                        const optional<vector<string>>& commandLine,
-                        const optional<EnvironmentCollection>& environment,
-                        const optional<bool> verbose,
-                        const optional<string>& language,
-                        const optional<uint16_t>& minimumTokens,
-                        const optional<vector<filesystem::path>>& files,
-                        const Task& task) {
+    FleetingOptionsStub options;
+    SettingsNode settings("clang-tidy");
+    Plugins plugins;
+    PatternsHandler patternsHandler;
+    const ExecutionContext context(options, settings, patternsHandler, plugins);
+
+    propertyTest("", [&context](
+                         const optional<filesystem::path>& exe,
+                         const optional<Tool>& tool,
+                         const optional<filesystem::path>& workingDir,
+                         const optional<vector<string>>& commandLine,
+                         const optional<EnvironmentCollection>& environment,
+                         const optional<bool> verbose,
+                         const optional<string>& language,
+                         const optional<uint16_t>& minimumTokens,
+                         const optional<vector<filesystem::path>>& files,
+                         const Task& task) {
         Task expectedTask(task);
 
         VariablesMap config("pmd-test");
@@ -151,7 +163,7 @@ SCENARIO("Testing the configuration settings of the pmd plugin", "[pmd]") {
         }
 
         THEN_WHEN("We apply the plugin") {
-            auto actualTasks = plugin.apply(task, config);
+            auto actualTasks = plugin.apply(task, config, context);
 
             THEN_CHECK("It generated the expected tasks") {
                 REQUIRE(Tasks({expectedTask}) == actualTasks);

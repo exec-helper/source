@@ -8,6 +8,7 @@
 #include "config/variablesMap.h"
 #include "core/task.h"
 
+#include "executionContext.h"
 #include "plugin.h"
 
 namespace execHelper::plugins {
@@ -18,7 +19,8 @@ namespace execHelper::plugins {
 class Memory : public Plugin {
   public:
     using ApplyFunction = std::function<core::Tasks(
-        core::Task, const config::VariablesMap&)>; //!< Apply function signature
+        core::Task, const config::VariablesMap&,
+        const ExecutionContext& context)>; //!< Apply function signature
 
     /**
      * Create a memory object with the given runtime state. Returns the given task as is as a one-sized task list.
@@ -38,17 +40,19 @@ class Memory : public Plugin {
 
     ~Memory() override = default;
 
-    Memory& operator=(const Memory& other) = delete;
-    Memory& operator=(Memory&& other) noexcept = delete;
+    auto operator=(const Memory& other) = delete;
+    auto operator=(Memory&& other) noexcept = delete;
 
-    config::VariablesMap
-    getVariablesMap(const config::FleetingOptionsInterface& fleetingOptions)
-        const noexcept override;
+    [[nodiscard]] auto getVariablesMap(
+        const config::FleetingOptionsInterface& fleetingOptions) const noexcept
+        -> config::VariablesMap override;
+
     [[nodiscard]] auto apply(core::Task task,
-                             const config::VariablesMap& variables) const
+                             const config::VariablesMap& variables,
+                             const ExecutionContext& context) const
         -> core::Tasks override;
 
-    [[nodiscard]] std::string summary() const noexcept override;
+    [[nodiscard]] auto summary() const noexcept -> std::string override;
 
   private:
     ApplyFunction m_apply;

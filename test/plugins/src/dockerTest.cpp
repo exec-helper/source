@@ -7,10 +7,10 @@
 #include <string>
 
 #include "config/pattern.h"
+#include "config/patternsHandler.h"
 #include "config/settingsNode.h"
 #include "config/variablesMap.h"
 #include "core/task.h"
-#include "plugins/executePlugin.h"
 #include "plugins/luaPlugin.h"
 #include "plugins/memory.h"
 
@@ -33,7 +33,6 @@ using std::array;
 using std::make_pair;
 using std::make_shared;
 using std::map;
-using std::move;
 using std::optional;
 using std::pair;
 using std::runtime_error;
@@ -47,12 +46,12 @@ using gsl::not_null;
 using execHelper::config::EnvironmentCollection;
 using execHelper::config::Pattern;
 using execHelper::config::Patterns;
+using execHelper::config::PatternsHandler;
 using execHelper::config::SettingsNode;
 using execHelper::config::VariablesMap;
 using execHelper::core::Task;
 using execHelper::core::TaskCollection;
 using execHelper::core::Tasks;
-using execHelper::plugins::ExecutePlugin;
 
 using execHelper::test::addToConfig;
 using execHelper::test::addToTask;
@@ -115,7 +114,7 @@ template <> struct Arbitrary<Mode> {
 
 namespace execHelper::plugins::test {
 SCENARIO("Testing the configuration settings of the docker plugin",
-         "[docker][successful][wip]") {
+         "[docker][successful]") {
     propertyTest(
         "",
         [](Mode mode, const NonEmptyString& image,
@@ -161,12 +160,11 @@ SCENARIO("Testing the configuration settings of the docker plugin",
                               static_pointer_cast<Plugin>(memory.second));
                       });
 
-            auto flRaii = ExecutePlugin::push(
-                gsl::not_null<config::FleetingOptionsInterface*>(
-                    &fleetingOptions));
-            auto seRaii = ExecutePlugin::push(SettingsNode("general-docker"));
-            auto plRaii = ExecutePlugin::push(move(plugins));
-            auto paRaii = ExecutePlugin::push(Patterns(patterns));
+            FleetingOptionsStub options;
+            SettingsNode settings("general-docker");
+            PatternsHandler patternsHandler(patterns);
+            const ExecutionContext context(options, settings, patternsHandler,
+                                           plugins);
 
             expectedTask.append("docker");
 
@@ -254,7 +252,7 @@ SCENARIO("Testing the configuration settings of the docker plugin",
             }
 
             THEN_WHEN("We apply the plugin") {
-                auto actualTasks = plugin.apply(task, config);
+                auto actualTasks = plugin.apply(task, config, context);
 
                 THEN_CHECK("It generated the expected tasks") {
                     //Tasks expectedTasks( target ? 1U : 1U, expectedTask);
@@ -268,14 +266,21 @@ SCENARIO("Testing the configuration settings of the docker plugin",
 
 SCENARIO("Not passing an image or container to the docker plugin",
          "[docker][error]") {
+    FleetingOptionsStub options;
+    SettingsNode settings("general-docker");
+    PatternsHandler patternsHandler;
+    Plugins plugins;
+    const ExecutionContext context(options, settings, patternsHandler, plugins);
+
     propertyTest(
         "A docker plugin and a configuration configured for run mode",
-        [](const Mode mode, const optional<bool>& interactive,
-           const optional<bool>& tty, const optional<bool>& privileged,
-           const optional<string>& user,
-           const optional<pair<string, string>>&
-               env, // Lua does not necessarily preserve the order of these, so we currently limit ourselves to one value
-           const optional<vector<string>>& volumes) {
+        [&context](
+            const Mode mode, const optional<bool>& interactive,
+            const optional<bool>& tty, const optional<bool>& privileged,
+            const optional<string>& user,
+            const optional<pair<string, string>>&
+                env, // Lua does not necessarily preserve the order of these, so we currently limit ourselves to one value
+            const optional<vector<string>>& volumes) {
             LuaPlugin plugin(std::string(PLUGINS_INSTALL_PATH) + "/docker.lua");
 
             VariablesMap config("docker-test");
@@ -289,7 +294,7 @@ SCENARIO("Not passing an image or container to the docker plugin",
 
             THEN_WHEN("We call the docker plugin with this configuration") {
                 THEN_CHECK("It throws a runtime error") {
-                    REQUIRE_THROWS_AS(plugin.apply(Task(), config),
+                    REQUIRE_THROWS_AS(plugin.apply(Task(), config, context),
                                       runtime_error);
                 }
             }

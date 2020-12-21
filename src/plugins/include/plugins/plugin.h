@@ -9,12 +9,15 @@
 #include "config/settingsNode.h"
 #include "config/variablesMap.h"
 #include "core/task.h"
+#include "executionContext.h"
 
 namespace execHelper::config {
 class FleetingOptionsInterface;
 } // namespace execHelper::config
 
 namespace execHelper::plugins {
+class ExecutionContext;
+
 /**
  * \brief Interface declaration to which plugins should comply
  */
@@ -58,9 +61,9 @@ class Plugin {
      * \param[in] fleetingOptions   The fleeting options to base the defaults on
      * \returns The default constructed variables map
      */
-    [[nodiscard]] virtual config::VariablesMap
-    getVariablesMap(const config::FleetingOptionsInterface& fleetingOptions)
-        const noexcept = 0;
+    [[nodiscard]] virtual auto getVariablesMap(
+        const config::FleetingOptionsInterface& fleetingOptions) const noexcept
+        -> config::VariablesMap = 0;
 
     /**
      * Returns the root settings key for the patterns of a plugin
@@ -77,12 +80,14 @@ class Plugin {
      * \param[in] task      The task to extend
      * \param[in] variables The variables map containing the values to use for
      * the executed command for this specific plugin
+     * \param[in] context   The execution context for this plugin
      *
      * \returns True    If the application was successful False
      * Otherwise
      */
-    [[nodiscard]] virtual auto
-    apply(core::Task task, const config::VariablesMap& variables) const
+    [[nodiscard]] virtual auto apply(core::Task task,
+                                     const config::VariablesMap& variables,
+                                     const ExecutionContext& context) const
         -> core::Tasks = 0;
 
     /**

@@ -1,18 +1,10 @@
 /**
  *@file Tests properties that each plugin should have
  */
-#include <filesystem>
 #include <sstream>
 
-#include "unittest/catch.h"
-#include "unittest/config.h"
-#include "unittest/rapidcheck.h"
-
-#include "executorStub.h"
-#include "fleetingOptionsStub.h"
-#include "pluginsGenerators.h"
-
 #include "config/pattern.h"
+#include "config/patternsHandler.h"
 #include "config/settingsNode.h"
 #include "config/variablesMap.h"
 #include "core/task.h"
@@ -27,12 +19,18 @@
 
 #include "core/coreGenerators.h"
 #include "unittest/catch.h"
+#include "unittest/config.h"
+#include "unittest/rapidcheck.h"
+
+#include "executorStub.h"
+#include "fleetingOptionsStub.h"
+#include "pluginsGenerators.h"
 
 using std::shared_ptr;
 
-using execHelper::config::FleetingOptionsInterface;
 using execHelper::config::Pattern;
 using execHelper::config::Patterns;
+using execHelper::config::PatternsHandler;
 using execHelper::config::PatternValue;
 using execHelper::config::PatternValues;
 using execHelper::config::SettingsNode;
@@ -45,31 +43,10 @@ using execHelper::plugins::Plugins;
 using execHelper::test::FleetingOptionsStub;
 using execHelper::test::propertyTest;
 
-namespace filesystem = std::filesystem;
-
 namespace {
-constexpr std::string_view patternKey{"BLAAT"};
+using namespace std::literals;
 
-auto getPlugins() noexcept -> Plugins {
-    Plugins plugins{
-        {"command-line-command",
-         shared_ptr<Plugin>(new execHelper::plugins::CommandLineCommand())},
-        {"memory", shared_ptr<Plugin>(new execHelper::plugins::Memory())},
-    };
-
-    auto searchPaths = {PLUGINS_INSTALL_PATH};
-    for(const auto& path : searchPaths) {
-        for(const auto& entry : filesystem::directory_iterator(path)) {
-            if(entry.is_regular_file() && entry.path().extension() == ".lua") {
-                plugins.emplace(std::make_pair(
-                    entry.path().stem(),
-                    shared_ptr<const Plugin>(
-                        new execHelper::plugins::LuaPlugin(entry))));
-            }
-        }
-    }
-    return plugins;
-}
+constexpr std::string_view patternKey = "BLAAT"sv;
 } // namespace
 
 namespace execHelper::plugins::test {
@@ -79,10 +56,10 @@ SCENARIO("Test the pattern keyword for each plugin") {
 
 SCENARIO("Check that all plugins are found") {
     GIVEN("The expected number of plugins") {
-        constexpr auto expectedNbOfPlugins = 15U;
+        constexpr auto expectedNbOfPlugins = 16U;
 
         WHEN("We request all plugins") {
-            const auto plugins = getPlugins();
+            const auto plugins = discoverPlugins({PLUGINS_INSTALL_PATH});
 
             THEN("The number of plugins must equal the expected number of "
                  "plugins") {
@@ -96,19 +73,15 @@ SCENARIO("Every call to a plugin must lead to at least one registered task") {
     FleetingOptionsStub options;
     options.m_commands.push_back("memory");
 
-    auto flRaii = execHelper::plugins::ExecutePlugin::push(
-        gsl::not_null<FleetingOptionsInterface*>(&options));
-
-    Patterns patterns = {Pattern(std::string(patternKey), {"memory"})};
-    auto paRaii = execHelper::plugins::ExecutePlugin::push(Patterns(patterns));
-
-    auto seRaii =
-        execHelper::plugins::ExecutePlugin::push(SettingsNode("test"));
-    auto plRaii = execHelper::plugins::ExecutePlugin::push(getPlugins());
+    SettingsNode settings("clang-static-analyzer-test");
+    PatternsHandler patterns;
+    auto plugins = discoverPlugins({PLUGINS_INSTALL_PATH});
+    patterns.addPattern(Pattern(std::string(patternKey), {"memory"}));
+    const ExecutionContext context(options, settings, patterns, plugins);
 
     propertyTest(
         "Every call to a plugin must lead to at least one generated task",
-        [](shared_ptr<const Plugin>&& plugin) {
+        [&context](shared_ptr<const Plugin>&& plugin) {
             REQUIRE(plugin);
 
             auto variablesMap = plugin->getVariablesMap(FleetingOptionsStub());
@@ -117,9 +90,11 @@ SCENARIO("Every call to a plugin must lead to at least one registered task") {
             REQUIRE(variablesMap.add("run-command", "memory"));
             REQUIRE(variablesMap.add("container", "blaat"));
             REQUIRE(variablesMap.add("targets", "memory"));
+            REQUIRE(variablesMap.add("commands", "memory"));
 
             THEN_WHEN("We apply the plugin") {
-                auto actualTasks = plugin->apply(core::Task(), variablesMap);
+                auto actualTasks =
+                    plugin->apply(core::Task(), variablesMap, context);
 
                 THEN_CHECK("It should return at least one task") {
                     REQUIRE_FALSE(actualTasks.empty());
@@ -132,18 +107,15 @@ SCENARIO("A plugin must not alter the arguments before a given task") {
     FleetingOptionsStub options;
     options.m_commands.push_back("memory");
 
-    auto seRaii =
-        execHelper::plugins::ExecutePlugin::push(SettingsNode("test"));
-    auto plRaii = execHelper::plugins::ExecutePlugin::push(getPlugins());
-    auto flRaii = execHelper::plugins::ExecutePlugin::push(
-        gsl::not_null<FleetingOptionsInterface*>(&options));
-
-    Patterns patterns = {Pattern(std::string(patternKey), {"memory"})};
-    auto paRaii = execHelper::plugins::ExecutePlugin::push(Patterns(patterns));
+    SettingsNode settings("clang-static-analyzer-test");
+    PatternsHandler patterns;
+    auto plugins = discoverPlugins({PLUGINS_INSTALL_PATH});
+    patterns.addPattern(Pattern(std::string(patternKey), {"memory"}));
+    const ExecutionContext context(options, settings, patterns, plugins);
 
     propertyTest(
         "A plugin must not alter the arguments already in a given task",
-        [](std::shared_ptr<const Plugin>&& plugin, const Task& task) {
+        [&context](std::shared_ptr<const Plugin>&& plugin, const Task& task) {
             RC_PRE(!task.getTask().empty());
 
             auto variablesMap = plugin->getVariablesMap(FleetingOptionsStub());
@@ -152,9 +124,10 @@ SCENARIO("A plugin must not alter the arguments before a given task") {
             REQUIRE(variablesMap.add("run-command", "memory"));
             REQUIRE(variablesMap.add("container", "blaat"));
             REQUIRE(variablesMap.add("targets", "memory"));
+            REQUIRE(variablesMap.add("commands", "memory"));
 
             THEN_WHEN("We apply the plugin") {
-                auto actualTasks = plugin->apply(task, variablesMap);
+                auto actualTasks = plugin->apply(task, variablesMap, context);
 
                 THEN_CHECK("The arguments before the task must remain") {
                     // At least one generated task must start with the input task
@@ -175,8 +148,6 @@ SCENARIO("A plugin must not alter the arguments before a given task") {
 }
 
 SCENARIO("Print the plugin summary", "[generic-plugin][success]") {
-    auto plRaii = execHelper::plugins::ExecutePlugin::push(getPlugins());
-
     propertyTest("A plugin", [](std::shared_ptr<const Plugin>&& plugin) {
         WHEN("We request the summary of the plugin") {
             auto summary = plugin->summary();
@@ -187,8 +158,6 @@ SCENARIO("Print the plugin summary", "[generic-plugin][success]") {
 }
 
 SCENARIO("Stream the plugin summary", "[generic-plugin][success]") {
-    auto plRaii = execHelper::plugins::ExecutePlugin::push(getPlugins());
-
     propertyTest("A plugin", [](std::shared_ptr<const Plugin>&& plugin) {
         THEN_WHEN("We request the summary of the plugin") {
             std::stringstream summary;

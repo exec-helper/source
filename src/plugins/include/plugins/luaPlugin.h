@@ -4,6 +4,8 @@
 #include "config/commandLineOptions.h"
 #include "config/path.h"
 
+#include "config/variablesMap.h"
+#include "executionContext.h"
 #include "plugin.h"
 
 namespace execHelper::plugins {
@@ -19,12 +21,13 @@ class LuaPlugin : public Plugin {
      */
     explicit LuaPlugin(config::Path script) noexcept;
 
-    config::VariablesMap
-    getVariablesMap(const config::FleetingOptionsInterface& fleetingOptions)
-        const noexcept override;
+    [[nodiscard]] auto getVariablesMap(
+        const config::FleetingOptionsInterface& fleetingOptions) const noexcept
+        -> config::VariablesMap override;
 
     [[nodiscard]] auto apply(core::Task task,
-                             const config::VariablesMap& config) const
+                             const config::VariablesMap& config,
+                             const ExecutionContext& context) const
         -> core::Tasks override;
 
     [[nodiscard]] auto summary() const noexcept -> std::string override;

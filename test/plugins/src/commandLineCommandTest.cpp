@@ -8,10 +8,12 @@
 #include "config/environment.h"
 #include "config/path.h"
 #include "config/pattern.h"
+#include "config/patternsHandler.h"
 #include "config/variablesMap.h"
 #include "core/task.h"
 #include "plugins/commandLine.h"
 #include "plugins/commandLineCommand.h"
+#include "plugins/executionContext.h"
 #include "unittest/catch.h"
 #include "utils/utils.h"
 
@@ -30,8 +32,10 @@ using execHelper::config::EnvironmentValue;
 using execHelper::config::Path;
 using execHelper::config::Pattern;
 using execHelper::config::Patterns;
+using execHelper::config::PatternsHandler;
 using execHelper::config::SettingsKey;
 using execHelper::config::SettingsKeys;
+using execHelper::config::SettingsNode;
 using execHelper::config::VariablesMap;
 using execHelper::core::Task;
 using execHelper::core::TaskCollection;
@@ -80,7 +84,8 @@ SCENARIO(
         const CommandLineArgs command1({"command1"});
 
         CommandLineCommand plugin;
-        VariablesMap variables = plugin.getVariablesMap(FleetingOptionsStub());
+        FleetingOptionsStub options;
+        VariablesMap variables = plugin.getVariablesMap(options);
         Task expectedTask;
         std::vector<TaskCollection> commandLines;
 
@@ -132,9 +137,14 @@ SCENARIO(
             expectedTasks.emplace_back(newTask);
         }
 
+        SettingsNode settings("command-line-command");
+        Plugins plugins;
+        PatternsHandler patternsHandler;
+        ExecutionContext context(options, settings, patternsHandler, plugins);
+
         Task task;
         task.addPatterns(patterns);
-        auto actualTasks = plugin.apply(task, variables);
+        auto actualTasks = plugin.apply(task, variables, context);
 
         THEN_CHECK("It called the right commands") {
             REQUIRE(expectedTasks == actualTasks);
@@ -149,7 +159,13 @@ SCENARIO("Testing erroneous configuration conditions for the "
         Task task;
         CommandLineCommand plugin;
 
-        VariablesMap variables = plugin.getVariablesMap(FleetingOptionsStub());
+        FleetingOptionsStub options;
+        SettingsNode settings("command-line-command");
+        Plugins plugins;
+        PatternsHandler patternsHandler;
+        ExecutionContext context(options, settings, patternsHandler, plugins);
+
+        VariablesMap variables = plugin.getVariablesMap(options);
 
         COMBINATIONS("Add command line key without value") {
             REQUIRE(variables.add(COMMAND_LINE_KEY));
@@ -157,7 +173,8 @@ SCENARIO("Testing erroneous configuration conditions for the "
 
         THEN_WHEN("We add no parameter and apply") {
             THEN_CHECK("The plugin should throw an exception") {
-                REQUIRE_THROWS_AS(plugin.apply(task, variables), runtime_error);
+                REQUIRE_THROWS_AS(plugin.apply(task, variables, context),
+                                  runtime_error);
             }
         }
     }

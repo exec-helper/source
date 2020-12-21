@@ -10,16 +10,13 @@
 #include <gsl/gsl>
 
 #include "config/commandLineOptions.h"
-#include "config/fleetingOptionsInterface.h"
 #include "config/pattern.h"
-#include "config/patternsHandler.h"
-#include "config/settingsNode.h"
 
+#include "config/variablesMap.h"
+#include "executionContext.h"
 #include "plugin.h"
 
 namespace execHelper::plugins {
-using Plugins = std::map<std::string, std::shared_ptr<const Plugin>>;
-
 /**
  * \brief Exception thrown when the requested plugin is invalid
  *
@@ -39,11 +36,6 @@ struct InvalidPlugin : public std::runtime_error {
      */
     inline explicit InvalidPlugin(const char* msg) : std::runtime_error(msg) {}
 };
-
-/**
- * Utility for defining custom RAII objects
- */
-struct Raii {};
 
 /**
  * \brief Plugin for executing arbitrary configured commands and/or plugins
@@ -68,125 +60,43 @@ class ExecutePlugin : public Plugin {
     ExecutePlugin(const config::CommandCollection& commandsToExecute,
                   const config::Command& initialCommand) noexcept;
 
-    config::VariablesMap
-    getVariablesMap(const config::FleetingOptionsInterface& fleetingOptions)
-        const noexcept override;
+    [[nodiscard]] auto getVariablesMap(
+        const config::FleetingOptionsInterface& fleetingOptions) const noexcept
+        -> config::VariablesMap override;
 
     [[nodiscard]] auto apply(core::Task task,
-                             const config::VariablesMap& variables) const
+                             const config::VariablesMap& variables,
+                             const ExecutionContext& context) const
         -> core::Tasks override;
 
     [[nodiscard]] auto summary() const noexcept -> std::string override;
 
     /**
-     * Returns a list with the names of all known plugins
+     * Returns a list with the names of the given plugins
      *
+     * @param[in] plugins   The list of plugins to get the name for
      * @returns A list of plugin names
      */
-    static auto getPluginNames() noexcept -> std::vector<std::string>;
-
-    /**
-     * Returns an instance of the plugin associated with the given name
-     *
-     * \param[in] pluginName    The plugin to get the associated instance from
-     * \returns A pointer to the new instance
-     * \throws  InvalidPlugin   When no plugin associated with the given pluginName is found
-     */
-    static std::shared_ptr<const Plugin>
-    getPlugin(const std::string& pluginName);
-
-    /**
-     * Push the given fleeting options on the stack
-     *
-     * \param[in] fleetingOptions   The fleeting options to use. The last option
-     * on the stack will be used for calling the commands. \returns True    if
-     * the options were successfully pushed False   otherwise
-     * \returns     An Raii object that will pop the fleeting options stack when no longer referenced
-     */
-    [[nodiscard]] static auto
-    push(gsl::not_null<const config::FleetingOptionsInterface*>
-             fleetingOptions) noexcept -> std::shared_ptr<Raii>;
-
-    /**
-     * Push the given settings node on the stack
-     *
-     * \param[in] settings   The settings node to use. The last settings node on
-     * the stack will be used for calling the commands. \returns True    if the
-     * settings node was successfully pushed False   otherwise
-     * \returns     An Raii object that will pop the fleeting options stack when no longer referenced
-     */
-    [[nodiscard]] static auto push(config::SettingsNode&& settings) noexcept
-        -> std::shared_ptr<Raii>;
-
-    /**
-     * Push the given patterns on the stack
-     *
-     * \param[in] patterns   The patterns to use. The last patterns on the stack
-     * will be used for calling the commands.
-     * \returns     An Raii object that will pop the fleeting options stack when no longer referenced
-     */
-    [[nodiscard]] static auto push(config::Patterns&& patterns) noexcept
-        -> std::shared_ptr<Raii>;
-
-    /**
-     * Push the plugin prototypes to the stack
-     *
-     * \param[in] plugins   Mapping of discovered plugin prototypes
-     * \returns     An Raii object that will pop the fleeting options stack when no longer referenced
-     */
-    [[nodiscard]] static auto push(Plugins&& plugins) noexcept
-        -> std::shared_ptr<Raii>;
+    static auto getPluginNames(const Plugins& plugins) noexcept
+        -> std::vector<std::string>;
 
   private:
     static auto getNextStep(const config::Command& command,
-                            const config::Command& originalCommand) noexcept
+                            const config::Command& originalCommand,
+                            const config::SettingsNode& settings,
+                            const Plugins& plugins) noexcept
         -> std::shared_ptr<const Plugin>;
-    static bool
+
+    static auto
     getVariablesMap(config::VariablesMap* variables,
                     const std::vector<config::SettingsKeys>& keys,
-                    const config::SettingsNode& rootSettings) noexcept;
+                    const config::SettingsNode& rootSettings) noexcept -> bool;
     static void index(config::VariablesMap* variables,
                       const config::SettingsNode& settings,
                       const config::SettingsKeys& key) noexcept;
 
-    /**
-     * Returns the currently active patterns handler
-     *
-     * \note Requesting the active patterns handler when there is no active one, leads to undefined behaviour
-     * \returns The currently active patterns handler
-     */
-    [[nodiscard]] static auto activePattern() noexcept
-        -> const config::PatternsHandler&;
-
-    /**
-     * Pop the last settings node from the stack
-     */
-    static void popSettingsNode() noexcept;
-
-    /**
-     * Pop the last fleeting options from the stack
-     *
-     */
-    static void popFleetingOptions() noexcept;
-
-    /**
-     * Pop the last patterns from the stack
-     */
-    static void popPatterns() noexcept;
-
-    /**
-     * Pop the last plugin prototypes from the stack
-     */
-    static void popPlugins() noexcept;
-
     const config::CommandCollection m_commands;
     const config::CommandCollection m_initialCommands;
-
-    static std::vector<gsl::not_null<const config::FleetingOptionsInterface*>>
-        m_fleeting;
-    static std::vector<config::SettingsNode> m_settings;
-    static std::vector<config::PatternsHandler> m_patterns;
-    static std::vector<Plugins> m_plugins;
 };
 } // namespace execHelper::plugins
 

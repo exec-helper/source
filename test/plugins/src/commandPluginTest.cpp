@@ -4,6 +4,7 @@
 
 #include "config/commandLineOptions.h"
 #include "config/pattern.h"
+#include "config/patternsHandler.h"
 #include "config/settingsNode.h"
 #include "config/variablesMap.h"
 #include "core/task.h"
@@ -23,7 +24,7 @@ using gsl::czstring;
 
 using execHelper::config::Command;
 using execHelper::config::CommandCollection;
-using execHelper::config::Patterns;
+using execHelper::config::PatternsHandler;
 using execHelper::config::SettingsNode;
 using execHelper::config::VariablesMap;
 using execHelper::core::Task;
@@ -76,14 +77,13 @@ SCENARIO("Test the commandPlugin plugin", "[command-plugin]") {
         VariablesMap variables = plugin.getVariablesMap(FleetingOptionsStub());
         Tasks expectedTasks;
 
-        FleetingOptionsStub fleetingOptions;
-        auto flRaii = ExecutePlugin::push(
-            gsl::not_null<config::FleetingOptionsInterface*>(&fleetingOptions));
-        auto seRaii = ExecutePlugin::push(SettingsNode(PLUGIN_NAME));
-        auto paRaii = ExecutePlugin::push(Patterns());
-        auto plRaii = ExecutePlugin::push(
-            Plugins({{"Memory",
-                      shared_ptr<Plugin>(new execHelper::plugins::Memory())}}));
+        FleetingOptionsStub options;
+        SettingsNode settings(PLUGIN_NAME);
+        PatternsHandler patterns;
+        Plugins plugins({{"memory", shared_ptr<Plugin>(
+                                        new execHelper::plugins::Memory())}});
+
+        ExecutionContext context(options, settings, patterns, plugins);
 
         COMBINATIONS("Add a command to execute") {
             REQUIRE(variables.add(PLUGIN_NAME, MEMORY_KEY));
@@ -99,7 +99,7 @@ SCENARIO("Test the commandPlugin plugin", "[command-plugin]") {
         }
 
         THEN_WHEN("We apply the plugin") {
-            auto actualTasks = plugin.apply(task, variables);
+            auto actualTasks = plugin.apply(task, variables, context);
 
             THEN_CHECK("All expected actions should be executed") {
                 REQUIRE(actualTasks == expectedTasks);

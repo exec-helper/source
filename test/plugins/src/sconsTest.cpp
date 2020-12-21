@@ -4,6 +4,7 @@
 
 #include "config/environment.h"
 #include "config/pattern.h"
+#include "config/patternsHandler.h"
 #include "config/variablesMap.h"
 #include "plugins/luaPlugin.h"
 
@@ -27,22 +28,32 @@ using execHelper::config::EnvironmentCollection;
 using execHelper::config::Jobs_t;
 using execHelper::config::Path;
 using execHelper::config::Patterns;
+using execHelper::config::PatternsHandler;
+using execHelper::config::SettingsNode;
 using execHelper::config::VariablesMap;
 using execHelper::core::Task;
 using execHelper::core::Tasks;
 
+using execHelper::test::FleetingOptionsStub;
 using execHelper::test::propertyTest;
 
 namespace filesystem = std::filesystem;
 
 namespace execHelper::plugins::test {
 SCENARIO("Testing the configuration settings of the scons plugin", "[scons]") {
-    propertyTest("", [](const optional<filesystem::path>& buildDir,
-                        const optional<filesystem::path>& workingDir,
-                        const optional<std::vector<std::string>>& commandLine,
-                        const optional<EnvironmentCollection>& environment,
-                        const optional<bool> verbose,
-                        const optional<Jobs_t> jobs) {
+    FleetingOptionsStub options;
+    SettingsNode settings("scons");
+    PatternsHandler patternsHandler;
+    Plugins plugins;
+    const ExecutionContext context(options, settings, patternsHandler, plugins);
+
+    propertyTest("", [&context](
+                         const optional<filesystem::path>& workingDir,
+                         const optional<filesystem::path>& buildDir,
+                         const optional<std::vector<std::string>>& commandLine,
+                         const optional<EnvironmentCollection>& environment,
+                         const optional<bool> verbose,
+                         const optional<Jobs_t> jobs) {
         const Task task;
         Task expectedTask(task);
 
@@ -85,7 +96,7 @@ SCENARIO("Testing the configuration settings of the scons plugin", "[scons]") {
         LuaPlugin plugin(std::string(PLUGINS_INSTALL_PATH) + "/scons.lua");
 
         THEN_WHEN("We apply the plugin") {
-            auto actualTasks = plugin.apply(task, config);
+            auto actualTasks = plugin.apply(task, config, context);
 
             THEN_CHECK("It generated the expected tasks") {
                 REQUIRE(Tasks{expectedTask} == actualTasks);

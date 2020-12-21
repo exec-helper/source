@@ -4,6 +4,7 @@
 #include <stdexcept>
 
 #include "config/variablesMap.h"
+#include "executionContext.h"
 #include "log/assertions.h"
 
 #include "commandLine.h"
@@ -36,14 +37,14 @@ auto CommandPlugin::getVariablesMap(
     return defaults;
 }
 
-auto CommandPlugin::apply(Task task, const VariablesMap& variables) const
-    -> Tasks {
+auto CommandPlugin::apply(Task task, const VariablesMap& variables,
+                          const ExecutionContext& context) const -> Tasks {
     if(!variables.get<CommandCollection>(PLUGIN_NAME)) {
         throw std::runtime_error("Define at least one command to execute");
     }
     auto commands = *(variables.get<CommandCollection>(PLUGIN_NAME));
     ExecutePlugin executePlugin(commands);
-    return executePlugin.apply(task, variables);
+    return executePlugin.apply(task, variables, context);
 }
 
 auto CommandPlugin::summary() const noexcept -> std::string {

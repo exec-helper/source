@@ -376,7 +376,7 @@ integration:
 memory-check:
     <<: *memory_check
     variables:
-        RUN_TARGET: unittest integration-old
+        RUN_TARGET: unittest
         MODULES: $ALL_MODULES
 
 clang-tidy:config:

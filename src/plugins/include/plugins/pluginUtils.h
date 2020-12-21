@@ -11,18 +11,10 @@
 #include "core/mapPermutator.h"
 #include "core/task.h"
 
-namespace execHelper {
-namespace core {
-class TargetDescriptionElement;
-class CompilerDescriptionElement;
-} // namespace core
-namespace plugins {
+namespace execHelper::plugins {
 class Plugin;
-} // namespace plugins
-} // namespace execHelper
+using Plugins = std::map<std::string, std::shared_ptr<const Plugin>>;
 
-namespace execHelper {
-namespace plugins {
 using PatternPermutator =
     core::MapPermutator<config::PatternKey, config::PatternValue>;
 
@@ -48,7 +40,8 @@ auto replacePatternCombinations(
     const config::PatternCombinations& patternCombinations) noexcept
     -> std::string;
 auto toString(const config::PatternKeys& values) noexcept -> std::string;
-} // namespace plugins
-} // namespace execHelper
+
+auto discoverPlugins(const config::Paths& searchPaths) noexcept -> Plugins;
+} // namespace execHelper::plugins
 
 #endif /* __PLUGIN_UTILS_H__ */

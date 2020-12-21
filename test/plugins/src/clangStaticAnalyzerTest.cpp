@@ -8,10 +8,11 @@
 #include "config/commandLineOptions.h"
 #include "config/environment.h"
 #include "config/pattern.h"
+#include "config/patternsHandler.h"
 #include "config/settingsNode.h"
 #include "config/variablesMap.h"
 #include "core/task.h"
-#include "plugins/executePlugin.h"
+#include "plugins/executionContext.h"
 #include "plugins/luaPlugin.h"
 #include "plugins/memory.h"
 
@@ -34,11 +35,11 @@ using std::vector;
 using execHelper::config::Command;
 using execHelper::config::EnvironmentCollection;
 using execHelper::config::Patterns;
+using execHelper::config::PatternsHandler;
 using execHelper::config::SettingsNode;
 using execHelper::config::VariablesMap;
 using execHelper::core::Task;
 using execHelper::core::Tasks;
-using execHelper::plugins::ExecutePlugin;
 
 using execHelper::test::FleetingOptionsStub;
 using execHelper::test::NonEmptyString;
@@ -100,16 +101,12 @@ SCENARIO(
         Tasks expectedTasks(buildCommand.size(), expectedTask);
 
         FleetingOptionsStub fleetingOptions;
-
-        auto plRaii = ExecutePlugin::push(std::move(plugins));
-        auto flRaii = ExecutePlugin::push(
-            gsl::not_null<config::FleetingOptionsInterface*>(&fleetingOptions));
-        auto seRaii =
-            ExecutePlugin::push(SettingsNode("clang-static-analyzer-test"));
-        auto paRaii = ExecutePlugin::push(Patterns(task.getPatterns()));
+        SettingsNode settings("clang-static-analyzer-test");
+        PatternsHandler patterns;
+        ExecutionContext context(fleetingOptions, settings, patterns, plugins);
 
         THEN_WHEN("We apply the plugin") {
-            auto actualTasks = plugin.apply(task, config);
+            auto actualTasks = plugin.apply(task, config, context);
 
             THEN_CHECK("It called the right commands") {
                 REQUIRE(actualTasks == expectedTasks);
@@ -121,13 +118,21 @@ SCENARIO(
 SCENARIO("Testing invalid configurations", "[clang-static-analyzer][error]") {
     GIVEN("An empty setup") {
         LuaPlugin plugin(scriptPath());
+
+        FleetingOptionsStub options;
+        SettingsNode settings("clang-static-analyzer");
+        PatternsHandler patterns;
+        Plugins plugins;
+        ExecutionContext context(options, settings, patterns, plugins);
+
         VariablesMap variables = plugin.getVariablesMap(FleetingOptionsStub());
 
         Task task;
 
         WHEN("We apply the plugin") {
             THEN("It should throw an exception") {
-                REQUIRE_THROWS_AS(plugin.apply(task, variables), runtime_error);
+                REQUIRE_THROWS_AS(plugin.apply(task, variables, context),
+                                  runtime_error);
             }
         }
 
@@ -136,7 +141,8 @@ SCENARIO("Testing invalid configurations", "[clang-static-analyzer][error]") {
             REQUIRE(variables.add(string(buildCommandConfigKey)));
 
             THEN("It should fail") {
-                REQUIRE_THROWS_AS(plugin.apply(task, variables), runtime_error);
+                REQUIRE_THROWS_AS(plugin.apply(task, variables, context),
+                                  runtime_error);
             }
         }
     }
