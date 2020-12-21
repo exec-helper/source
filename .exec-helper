@@ -230,11 +230,12 @@ meson:
         - TRIPLET
         - MODE
         - SYSROOT
+        - EH_ROOT_DIR
 
     source-dir: .
     build-dir: "build/{TRIPLET}{COMPILER}/{MODE}/build"
     build-type: "{MODE}"
-    prefix: "${PWD}/build/{TRIPLET}{COMPILER}/{MODE}/install"
+    prefix: "{EH_ROOT_DIR}/build/{TRIPLET}{COMPILER}/{MODE}/install"
     cross-file: "build/{TRIPLET}{COMPILER}/{MODE}/cross-file.ini"
 
     mode: setup
@@ -248,7 +249,8 @@ meson:
             usage-documentation: true
             usage-documentation-html: true
             api-documentation: true
-            plugins-prefix: "${PWD}/build/{TRIPLET}{COMPILER}/{MODE}/install/share/exec-helper/plugins"
+            plugins-prefix: "{EH_ROOT_DIR}/build/{TRIPLET}{COMPILER}/{MODE}/install/share/exec-helper/plugins"
+            license-prefix: "{EH_ROOT_DIR}/build/{TRIPLET}{COMPILER}/{MODE}/install/share/exec-helper"
             terminate-on-assert: true
             changelog: true
         command-line: [--werror]
@@ -258,7 +260,8 @@ meson:
             test: true
             usage-documentation: false
             api-documentation: false
-            plugins-prefix: "${PWD}/build/{TRIPLET}{COMPILER}/{MODE}/install/share/exec-helper/plugins"
+            plugins-prefix: "{EH_ROOT_DIR}/build/{TRIPLET}{COMPILER}/{MODE}/install/share/exec-helper/plugins"
+            license-prefix: "{EH_ROOT_DIR}/build/{TRIPLET}{COMPILER}/{MODE}/install/share/exec-helper"
             terminate-on-assert: true
         command-line: [--werror]
 
@@ -268,7 +271,8 @@ meson:
             test: true
             usage-documentation: false
             api-documentation: false
-            plugins-prefix: "${PWD}/build/{TRIPLET}{COMPILER}/{MODE}/install/share/exec-helper/plugins"
+            plugins-prefix: "{EH_ROOT_DIR}/build/{TRIPLET}{COMPILER}/{MODE}/install/share/exec-helper/plugins"
+            license-prefix: "{EH_ROOT_DIR}/build/{TRIPLET}{COMPILER}/{MODE}/install/share/exec-helper"
         command-line: [--optimization, 1, --werror]
 
     init-no-system:
@@ -276,6 +280,8 @@ meson:
             test: true
             usage-documentation: false
             api-documentation: false
+            plugins-prefix: "{EH_ROOT_DIR}/build/{TRIPLET}{COMPILER}/{MODE}/install/share/exec-helper/plugins"
+            license-prefix: "{EH_ROOT_DIR}/build/{TRIPLET}{COMPILER}/{MODE}/install/share/exec-helper"
             use-system-yaml-cpp: disabled
             use-system-gsl: disabled
             use-system-lua: disabled
@@ -290,7 +296,8 @@ meson:
             test: true
             usage-documentation: false
             api-documentation: false
-            plugins-prefix: "${PWD}/build/{TRIPLET}{COMPILER}/{MODE}/install/share/exec-helper/plugins"
+            plugins-prefix: "{EH_ROOT_DIR}/build/{TRIPLET}{COMPILER}/{MODE}/install/share/exec-helper/plugins"
+            license-prefix: "{EH_ROOT_DIR}/build/{TRIPLET}{COMPILER}/{MODE}/install/share/exec-helper"
             terminate-on-assert: true
             #cpp_args: "['-g', '--coverage', '-fprofile-arcs', '-ftest-coverage']"
             #cpp_link_args: "['-g', '--coverage', '-fprofile-arcs', '-ftest-coverage']"
@@ -303,7 +310,8 @@ meson:
             test: true
             usage-documentation: false
             api-documentation: false
-            plugins-prefix: "${PWD}/build/{TRIPLET}{COMPILER}/{MODE}/install/share/exec-helper/plugins"
+            plugins-prefix: "{EH_ROOT_DIR}/build/{TRIPLET}{COMPILER}/{MODE}/install/share/exec-helper/plugins"
+            license-prefix: "{EH_ROOT_DIR}/build/{TRIPLET}{COMPILER}/{MODE}/install/share/exec-helper"
             terminate-on-assert: true
             b_sanitize: address,undefined
             b_lundef: false
