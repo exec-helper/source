@@ -1,6 +1,7 @@
 option('version', type: 'string', value: 'DEVELOPER-VERSION', description: 'Set target version')
 option('copyright', type: 'string', value: 'COPYRIGHT (c)', description: 'Set copyright message')
 option('plugins-prefix', type: 'string', value: '/usr/share/exec-helper/plugins', description: 'The actual installation path for the default plugin files. Useful for packaging systems where the install prefix is different from where the plugins will end up eventually')
+option('license-prefix', type: 'string', value: '/usr/share/exec-helper', description: 'The directory to install the license to')
 
 option('usage-documentation', type : 'boolean', value : 'true', description: 'Build usage documentation')
 option('usage-documentation-man', type : 'boolean', value : 'true', description: 'Build usage documentation as MAN pages')

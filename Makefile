@@ -14,11 +14,12 @@ CHANGELOG_CONFIG?= .gitchangelog.rc## Sets the changelog config to use. Default:
 CHANGELOG_OUTPUT?= &1## Sets the changelog output redirection for print-changelog. Default: stdout
 CMAKE_BUILD_TYPE?=Release	## Sets the cmake build type. Default: Release
 ACTUAL_PLUGINS_INSTALL_PREFIX?=$(PREFIX)/share/exec-helper/plugins## Set the actual installation prefix: useful if the files end up on a different place than the current PLUGINS_INSTALL_PREFIX
+LICENSE_PREFIX?=$(PREFIX)/share/exec-helper## Set the license installation prefix. Default: PREFIX/share/exec-helper
 
 all: build
 
 init:	## Initialize native build
-	meson setup --buildtype release --prefix ${PREFIX} -D "usage-documentation=true" -D "api-documentation=false" -D "plugins-prefix=${ACTUAL_PLUGINS_INSTALL_PREFIX}" -D "test=false" -D "version=$(shell git describe --long --dirty)-MANUAL" -D "copyright=COPYRIGHT (c) $(shell date +'%Y') Bart Verhagen" $(BUILD_DIR) .
+	meson setup --buildtype release --prefix ${PREFIX} -D "usage-documentation=true" -D "api-documentation=false" -D "plugins-prefix=${ACTUAL_PLUGINS_INSTALL_PREFIX}" -D "license-prefix=${LICENSE_PREFIX}" -D "test=false" -D "version=$(shell git describe --long --dirty)-MANUAL" -D "copyright=COPYRIGHT (c) $(shell date +'%Y') Bart Verhagen" $(BUILD_DIR) .
 
 build: init ## Build the exec-helper binary
 	meson compile -C $(BUILD_DIR) --jobs $(JOBS)

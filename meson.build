@@ -59,7 +59,7 @@ if host_machine.system() == 'windows'
   add_project_arguments(['-D_WIN32_WINNT=0x0601', '-D_CRT_SECURE_NO_WARNINGS'], language: 'cpp')
 endif
 
-install_data('LICENSE', install_dir : get_option('datadir') / 'exec-helper')
+install_data('LICENSE', install_dir : get_option('license-prefix'))
 
 subdir('gitchangelog')
 subdir('docs')
@@ -89,7 +89,8 @@ endif
 
 summary({
   'Prefix': get_option('prefix'),
-  'Plugins prefix': get_option('plugins-prefix')
+  'Plugins prefix': get_option('plugins-prefix'),
+  'License prefix': get_option('license-prefix')
 }, section: 'Directories')
 
 summary({
