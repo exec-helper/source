@@ -28,6 +28,7 @@ using std::pair;
 using std::runtime_error;
 using std::string;
 using std::string_view;
+using std::to_string;
 using std::vector;
 
 using execHelper::config::EnvironmentCollection;
@@ -61,10 +62,10 @@ template <> struct Arbitrary<Mode> {
 
 namespace execHelper::plugins::test {
 SCENARIO("Testing the configuration settings of the cmake plugin", "[cmake]") {
-    FleetingOptionsStub options;
-    SettingsNode settings("cmake-test");
-    PatternsHandler patternsHandler;
-    Plugins plugins;
+    const FleetingOptionsStub options;
+    const SettingsNode settings("cmake-test");
+    const PatternsHandler patternsHandler;
+    const Plugins plugins;
     const ExecutionContext context(options, settings, patternsHandler, plugins);
 
     propertyTest(
@@ -149,10 +150,9 @@ SCENARIO("Testing the configuration settings of the cmake plugin", "[cmake]") {
                                                    "\""});
                 }
 
-                if(verbose) {
-                    handleVerbosity(*verbose, "--log-level=VERBOSE", config,
-                                    expectedTask);
-                }
+                handleVerbosity(verbose ? *verbose
+                                        : context.options().getVerbosity(),
+                                "--log-level=VERBOSE", config, expectedTask);
                 break;
             case Mode::Build:
                 REQUIRE(config.add("mode", "build"));
@@ -169,12 +169,13 @@ SCENARIO("Testing the configuration settings of the cmake plugin", "[cmake]") {
                 }
 
                 expectedTask.append(
-                    {"--parallel", jobs ? std::to_string(*jobs) : "1"});
+                    {"--parallel",
+                     jobs ? std::to_string(*jobs)
+                          : to_string(context.options().getJobs())});
 
-                if(verbose) {
-                    handleVerbosity(*verbose, "--verbose", config,
-                                    expectedTask);
-                }
+                handleVerbosity(verbose ? *verbose
+                                        : context.options().getVerbosity(),
+                                "--verbose", config, expectedTask);
                 break;
             case Mode::Install:
                 REQUIRE(config.add("mode", "install"));
@@ -194,10 +195,9 @@ SCENARIO("Testing the configuration settings of the cmake plugin", "[cmake]") {
                     expectedTask.append({"--component", *component});
                 }
 
-                if(verbose) {
-                    handleVerbosity(*verbose, "--verbose", config,
-                                    expectedTask);
-                }
+                handleVerbosity(verbose ? *verbose
+                                        : context.options().getVerbosity(),
+                                "--verbose", config, expectedTask);
                 break;
             default:
                 REQUIRE(false);

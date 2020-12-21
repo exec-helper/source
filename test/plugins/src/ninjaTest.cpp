@@ -38,67 +38,65 @@ namespace filesystem = std::filesystem;
 
 namespace execHelper::plugins::test {
 SCENARIO("Testing the configuration settings of the ninja plugin", "[ninja]") {
-    FleetingOptionsStub options;
-    SettingsNode settings("ninja");
-    PatternsHandler patternsHandler;
-    Plugins plugins;
+    const FleetingOptionsStub options;
+    const SettingsNode settings("ninja");
+    const PatternsHandler patternsHandler;
+    const Plugins plugins;
     const ExecutionContext context(options, settings, patternsHandler, plugins);
 
-    propertyTest(
-        "",
-        [&context](const optional<filesystem::path>& buildDir,
-                   const optional<filesystem::path>& workingDir,
-                   const optional<std::vector<std::string>>& commandLine,
-                   const optional<EnvironmentCollection>& environment,
-                   const optional<bool> verbose, const optional<Jobs_t> jobs) {
-            const Task task;
-            Task expectedTask(task);
+    propertyTest("", [&context](
+                         const optional<filesystem::path>& buildDir,
+                         const optional<filesystem::path>& workingDir,
+                         const optional<std::vector<std::string>>& commandLine,
+                         const optional<EnvironmentCollection>& environment,
+                         const optional<bool> verbose,
+                         const optional<Jobs_t> jobs) {
+        const Task task;
+        Task expectedTask(task);
 
-            VariablesMap config("ninja-test");
+        VariablesMap config("ninja-test");
 
-            LuaPlugin plugin(std::string(PLUGINS_INSTALL_PATH) + "/ninja.lua");
+        LuaPlugin plugin(std::string(PLUGINS_INSTALL_PATH) + "/ninja.lua");
 
-            expectedTask.append("ninja");
+        expectedTask.append("ninja");
 
-            if(workingDir) {
-                handleWorkingDirectory(*workingDir, config, expectedTask);
+        if(workingDir) {
+            handleWorkingDirectory(*workingDir, config, expectedTask);
+        }
+
+        if(environment) {
+            handleEnvironment(*environment, config, expectedTask);
+        }
+
+        const string directoryOption("-C");
+        if(buildDir) {
+            REQUIRE(config.add("build-dir", buildDir->string()));
+            expectedTask.append({directoryOption, buildDir->string()});
+        } else {
+            expectedTask.append({directoryOption, "."});
+        }
+
+        handleVerbosity(verbose ? *verbose : context.options().getVerbosity(),
+                        "--verbose", config, expectedTask);
+
+        if(jobs) {
+            REQUIRE(config.add("jobs", to_string(*jobs)));
+            expectedTask.append({"-j", to_string(*jobs)});
+        } else {
+            expectedTask.append({"-j", to_string(context.options().getJobs())});
+        }
+
+        if(commandLine) {
+            handleCommandLine(*commandLine, config, expectedTask);
+        }
+
+        THEN_WHEN("We apply the plugin") {
+            auto actualTasks = plugin.apply(task, config, context);
+
+            THEN_CHECK("It called the right commands") {
+                REQUIRE(actualTasks == Tasks({expectedTask}));
             }
-
-            if(environment) {
-                handleEnvironment(*environment, config, expectedTask);
-            }
-
-            const string directoryOption("-C");
-            if(buildDir) {
-                REQUIRE(config.add("build-dir", buildDir->string()));
-                expectedTask.append({directoryOption, buildDir->string()});
-            } else {
-                expectedTask.append({directoryOption, "."});
-            }
-
-            if(verbose) {
-                handleVerbosity(*verbose, "--verbose", config, expectedTask);
-            }
-
-            if(jobs) {
-                REQUIRE(config.add("jobs", std::to_string(*jobs)));
-                expectedTask.append({"-j", to_string(*jobs)});
-            } else {
-                const std::string defaultNumberOfJobs{"1"};
-                expectedTask.append({"-j", defaultNumberOfJobs});
-            }
-
-            if(commandLine) {
-                handleCommandLine(*commandLine, config, expectedTask);
-            }
-
-            THEN_WHEN("We apply the plugin") {
-                auto actualTasks = plugin.apply(task, config, context);
-
-                THEN_CHECK("It called the right commands") {
-                    REQUIRE(actualTasks == Tasks({expectedTask}));
-                }
-            }
-        });
+        }
+    });
 }
 } // namespace execHelper::plugins::test

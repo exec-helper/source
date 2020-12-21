@@ -136,12 +136,16 @@ template <> struct Arbitrary<Tool> {
 namespace execHelper::plugins::test {
 SCENARIO("Testing the configuration settings of the valgrind plugin",
          "[valgrind]") {
-    propertyTest("", [](const optional<Tool>& tool,
-                        const optional<filesystem::path>& workingDir,
-                        const optional<vector<string>>& commandLine,
-                        const optional<EnvironmentCollection>& environment,
-                        const optional<bool> verbose, const Pattern& pattern,
-                        Task task) {
+    const FleetingOptionsStub options;
+    const SettingsNode settings("valgrind");
+
+    propertyTest("", [&options, &settings](
+                         const optional<Tool>& tool,
+                         const optional<filesystem::path>& workingDir,
+                         const optional<vector<string>>& commandLine,
+                         const optional<EnvironmentCollection>& environment,
+                         const optional<bool> verbose, const Pattern& pattern,
+                         Task task) {
         task.addPatterns({pattern});
 
         Task expectedTask = task;
@@ -158,6 +162,20 @@ SCENARIO("Testing the configuration settings of the valgrind plugin",
                       return make_pair(value, make_shared<Memory>());
                   });
 
+        // Register each memories mapping as the endpoint for every target command
+        Plugins plugins;
+        transform(memories.begin(), memories.end(),
+                  inserter(plugins, plugins.end()), [](const auto& memory) {
+                      return make_pair(
+                          memory.first,
+                          static_pointer_cast<Plugin>(memory.second));
+                  });
+
+        PatternsHandler patternsHandler;
+        patternsHandler.addPattern(pattern);
+        const ExecutionContext context(options, settings, patternsHandler,
+                                       plugins);
+
         auto runCommand = string("{").append(pattern.getKey()).append("}");
         addToConfig("run-command", runCommand, &config);
 
@@ -166,9 +184,8 @@ SCENARIO("Testing the configuration settings of the valgrind plugin",
             return {std::string("--tool=").append(tool)};
         });
 
-        if(verbose) {
-            handleVerbosity(*verbose, "--verbose", config, expectedTask);
-        }
+        handleVerbosity(verbose ? *verbose : context.options().getVerbosity(),
+                        "--verbose", config, expectedTask);
 
         if(workingDir) {
             handleWorkingDirectory(*workingDir, config, expectedTask);
@@ -181,22 +198,6 @@ SCENARIO("Testing the configuration settings of the valgrind plugin",
         if(commandLine) {
             handleCommandLine(*commandLine, config, expectedTask);
         }
-
-        // Register each memories mapping as the endpoint for every target command
-        Plugins plugins;
-        transform(memories.begin(), memories.end(),
-                  inserter(plugins, plugins.end()), [](const auto& memory) {
-                      return make_pair(
-                          memory.first,
-                          static_pointer_cast<Plugin>(memory.second));
-                  });
-
-        FleetingOptionsStub options;
-        SettingsNode settings("valgrind");
-        PatternsHandler patternsHandler;
-        patternsHandler.addPattern(pattern);
-        const ExecutionContext context(options, settings, patternsHandler,
-                                       plugins);
 
         Tasks expectedTasks(patternValues.size(), expectedTask);
 

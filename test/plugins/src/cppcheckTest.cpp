@@ -86,16 +86,14 @@ SCENARIO("Testing the configuration settings of the cppcheck plugin",
             expectedTask.append(enableString);
         }
 
-        if(verbose) {
-            handleVerbosity(*verbose, "--verbose", config, expectedTask);
-        }
+        handleVerbosity(verbose ? *verbose : context.options().getVerbosity(),
+                        "--verbose", config, expectedTask);
 
         if(jobs) {
-            REQUIRE(config.add("jobs", std::to_string(*jobs)));
-            expectedTask.append({"-j", std::to_string(*jobs)});
+            REQUIRE(config.add("jobs", to_string(*jobs)));
+            expectedTask.append({"-j", to_string(*jobs)});
         } else {
-            const std::string defaultNumberOfJobs{"1"};
-            expectedTask.append({"-j", defaultNumberOfJobs});
+            expectedTask.append({"-j", to_string(context.options().getJobs())});
         }
 
         if(commandLine) {

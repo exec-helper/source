@@ -41,10 +41,10 @@ namespace filesystem = std::filesystem;
 
 namespace execHelper::plugins::test {
 SCENARIO("Testing the configuration settings of the scons plugin", "[scons]") {
-    FleetingOptionsStub options;
-    SettingsNode settings("scons");
-    PatternsHandler patternsHandler;
-    Plugins plugins;
+    const FleetingOptionsStub options;
+    const SettingsNode settings("scons");
+    const PatternsHandler patternsHandler;
+    const Plugins plugins;
     const ExecutionContext context(options, settings, patternsHandler, plugins);
 
     propertyTest("", [&context](
@@ -77,16 +77,15 @@ SCENARIO("Testing the configuration settings of the scons plugin", "[scons]") {
             expectedTask.append({directoryOption, "."});
         }
 
-        if(verbose) {
-            handleVerbosity(*verbose, "--debug=explain", config, expectedTask);
-        }
+        handleVerbosity(verbose ? *verbose : context.options().getVerbosity(),
+                        "--debug=explain", config, expectedTask);
 
         if(jobs) {
-            expectedTask.append({"--jobs", std::to_string(*jobs)});
-            REQUIRE(config.add("jobs", std::to_string(*jobs)));
+            expectedTask.append({"--jobs", to_string(*jobs)});
+            REQUIRE(config.add("jobs", to_string(*jobs)));
         } else {
-            const std::string defaultNumberOfJobs{"1"};
-            expectedTask.append({"--jobs", defaultNumberOfJobs});
+            expectedTask.append(
+                {"--jobs", to_string(context.options().getJobs())});
         }
 
         if(commandLine) {

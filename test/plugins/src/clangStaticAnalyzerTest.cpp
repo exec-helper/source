@@ -59,11 +59,16 @@ namespace execHelper::plugins::test {
 SCENARIO(
     "Testing the configuration settings of the clang-static-analyzer plugin",
     "[clang-static-analyzer][success]") {
-    propertyTest("", [](const optional<filesystem::path>& workingDir,
-                        const optional<EnvironmentCollection>& environment,
-                        const std::vector<NonEmptyString>& buildCommand,
-                        const optional<vector<string>>& commandLine,
-                        const optional<bool> verbose) {
+    const FleetingOptionsStub options;
+    const SettingsNode settings("clang-static-analyzer-test");
+    const PatternsHandler patterns;
+
+    propertyTest("", [&options, &settings, &patterns](
+                         const optional<filesystem::path>& workingDir,
+                         const optional<EnvironmentCollection>& environment,
+                         const std::vector<NonEmptyString>& buildCommand,
+                         const optional<vector<string>>& commandLine,
+                         const optional<bool> verbose) {
         RC_PRE(!buildCommand.empty());
         const Task task;
 
@@ -80,6 +85,8 @@ SCENARIO(
             plugins[*command] = memoryPlugin;
         }
 
+        ExecutionContext context(options, settings, patterns, plugins);
+
         expectedTask.append("scan-build");
 
         if(workingDir) {
@@ -90,20 +97,14 @@ SCENARIO(
             handleEnvironment(*environment, config, expectedTask);
         }
 
-        if(verbose) {
-            handleVerbosity(*verbose, "-v", config, expectedTask);
-        }
+        handleVerbosity(verbose ? *verbose : context.options().getVerbosity(),
+                        "-v", config, expectedTask);
 
         if(commandLine) {
             handleCommandLine(*commandLine, config, expectedTask);
         }
 
         Tasks expectedTasks(buildCommand.size(), expectedTask);
-
-        FleetingOptionsStub fleetingOptions;
-        SettingsNode settings("clang-static-analyzer-test");
-        PatternsHandler patterns;
-        ExecutionContext context(fleetingOptions, settings, patterns, plugins);
 
         THEN_WHEN("We apply the plugin") {
             auto actualTasks = plugin.apply(task, config, context);

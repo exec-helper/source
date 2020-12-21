@@ -53,7 +53,7 @@ class FleetingOptionsStub : public config::FleetingOptionsInterface {
 
     config::HelpOption_t m_help = {false};
     config::VersionOption_t m_version = {false};
-    config::VerboseOption_t m_verbose = {false};
+    config::VerboseOption_t m_verbose = {true};
     config::DryRunOption_t m_dryRun = {false};
     config::KeepGoingOption_t m_keepGoing = {false};
     log::LogLevel m_logLevel = {log::warning};

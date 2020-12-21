@@ -130,9 +130,8 @@ SCENARIO("Testing the configuration settings of the pmd plugin", "[pmd]") {
                       return {"--language", language};
                   });
 
-        if(verbose) {
-            handleVerbosity(*verbose, "-verbose", config, expectedTask);
-        }
+        handleVerbosity(verbose ? *verbose : context.options().getVerbosity(),
+                        "-verbose", config, expectedTask);
 
         if(tool.value_or(Tool::Cpd) == Tool::Cpd) {
             addToConfig("minimum-tokens", minimumTokens, &config);

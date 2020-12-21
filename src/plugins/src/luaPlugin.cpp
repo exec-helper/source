@@ -114,8 +114,11 @@ auto LuaPlugin::apply(Task task, const VariablesMap& config,
     AddEnvironment::apply(task, config);
 
     try {
-        lua.writeVariable("verbose", config.get<bool>(VERBOSE_KEY, false));
-        lua.writeVariable("jobs", config.get<Jobs_t>(JOBS_KEY, 1U));
+        lua.writeVariable(
+            "verbose",
+            config.get<bool>(VERBOSE_KEY, context.options().getVerbosity()));
+        lua.writeVariable(
+            "jobs", config.get<Jobs_t>(JOBS_KEY, context.options().getJobs()));
 
         lua.executeCode("function get_commandline() "
                         "return list(config['command-line']) or {} "
