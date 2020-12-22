@@ -1,6 +1,4 @@
 #include <filesystem>
-#include <map>
-#include <memory>
 #include <optional>
 #include <stdexcept>
 #include <string>
@@ -14,7 +12,6 @@
 #include "config/variablesMap.h"
 #include "core/task.h"
 #include "plugins/luaPlugin.h"
-#include "plugins/memory.h"
 
 #include "config/generators.h"
 #include "core/coreGenerators.h"
@@ -29,13 +26,8 @@
 #include "fleetingOptionsStub.h"
 #include "handlers.h"
 
-using std::make_pair;
-using std::make_shared;
-using std::map;
 using std::optional;
 using std::runtime_error;
-using std::shared_ptr;
-using std::static_pointer_cast;
 using std::string;
 using std::string_view;
 using std::vector;
@@ -57,6 +49,7 @@ using execHelper::test::addToTask;
 using execHelper::test::FleetingOptionsStub;
 using execHelper::test::propertyTest;
 using execHelper::test::utils::getExpectedTasks;
+using execHelper::test::utils::registerValuesAsCommands;
 
 namespace {
 using namespace std::literals;
@@ -200,19 +193,23 @@ auto genHtmlTask(Task task, const optional<path>& workingDir,
 
 namespace execHelper::plugins::test {
 SCENARIO("Testing the configuration settings of the lcov plugin", "[lcov]") {
-    propertyTest("", [](const optional<path>& workingDir,
-                        const optional<vector<string>>& commandLine,
-                        const optional<EnvironmentCollection>& environment,
-                        const optional<path>& baseDirectory,
-                        const optional<path>& directory,
-                        const optional<bool>& zeroCounters,
-                        const optional<path>& infoFile,
-                        const optional<vector<string>>& excludes,
-                        const optional<bool>& genHtml,
-                        const optional<path>& genHtmlOutput,
-                        const optional<string>& genHtmlTitle,
-                        const optional<vector<string>>& genHtmlCommandLine,
-                        const Pattern& pattern, Task task) {
+    const FleetingOptionsStub options;
+    const SettingsNode settings("lcov-test");
+
+    propertyTest("", [&options, &settings](
+                         const optional<path>& workingDir,
+                         const optional<vector<string>>& commandLine,
+                         const optional<EnvironmentCollection>& environment,
+                         const optional<path>& baseDirectory,
+                         const optional<path>& directory,
+                         const optional<bool>& zeroCounters,
+                         const optional<path>& infoFile,
+                         const optional<vector<string>>& excludes,
+                         const optional<bool>& genHtml,
+                         const optional<path>& genHtmlOutput,
+                         const optional<string>& genHtmlTitle,
+                         const optional<vector<string>>& genHtmlCommandLine,
+                         const Pattern& pattern, Task task) {
         VariablesMap config("lcov-test");
         task.addPatterns({pattern});
 
@@ -220,12 +217,8 @@ SCENARIO("Testing the configuration settings of the lcov plugin", "[lcov]") {
 
         LuaPlugin plugin(std::string(PLUGINS_INSTALL_PATH) + "/lcov.lua");
 
-        map<std::string, shared_ptr<Memory>> memories;
-        const auto& patternValues = pattern.getValues();
-        transform(patternValues.begin(), patternValues.end(),
-                  inserter(memories, memories.end()), [](const auto& value) {
-                      return make_pair(value, make_shared<Memory>());
-                  });
+        Plugins plugins;
+        auto memories = registerValuesAsCommands(pattern.getValues(), &plugins);
 
         addToConfig("base-directory", baseDirectory, &config);
         addToConfig("directory", directory, &config);
@@ -286,17 +279,6 @@ SCENARIO("Testing the configuration settings of the lcov plugin", "[lcov]") {
             expectedTasks.emplace_back(genHtml);
         }
 
-        // Register each memories mapping as the endpoint for every target command
-        Plugins plugins;
-        transform(memories.begin(), memories.end(),
-                  inserter(plugins, plugins.end()), [](const auto& memory) {
-                      return make_pair(
-                          memory.first,
-                          static_pointer_cast<Plugin>(memory.second));
-                  });
-
-        FleetingOptionsStub options;
-        SettingsNode settings("lcov-test");
         PatternsHandler patternsHandler({pattern});
         const ExecutionContext context(options, settings, patternsHandler,
                                        plugins);

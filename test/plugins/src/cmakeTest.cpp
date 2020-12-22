@@ -170,8 +170,7 @@ SCENARIO("Testing the configuration settings of the cmake plugin", "[cmake]") {
 
                 expectedTask.append(
                     {"--parallel",
-                     jobs ? std::to_string(*jobs)
-                          : to_string(context.options().getJobs())});
+                     to_string(jobs.value_or(context.options().getJobs()))});
 
                 handleVerbosity(verbose ? *verbose
                                         : context.options().getVerbosity(),

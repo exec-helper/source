@@ -80,12 +80,10 @@ SCENARIO("Testing the configuration settings of the scons plugin", "[scons]") {
         handleVerbosity(verbose ? *verbose : context.options().getVerbosity(),
                         "--debug=explain", config, expectedTask);
 
+        expectedTask.append(
+            {"--jobs", to_string(jobs.value_or(context.options().getJobs()))});
         if(jobs) {
-            expectedTask.append({"--jobs", to_string(*jobs)});
             REQUIRE(config.add("jobs", to_string(*jobs)));
-        } else {
-            expectedTask.append(
-                {"--jobs", to_string(context.options().getJobs())});
         }
 
         if(commandLine) {

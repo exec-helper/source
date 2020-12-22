@@ -79,11 +79,10 @@ SCENARIO("Testing the configuration settings of the ninja plugin", "[ninja]") {
         handleVerbosity(verbose ? *verbose : context.options().getVerbosity(),
                         "--verbose", config, expectedTask);
 
+        expectedTask.append(
+            {"-j", to_string(jobs.value_or(context.options().getJobs()))});
         if(jobs) {
             REQUIRE(config.add("jobs", to_string(*jobs)));
-            expectedTask.append({"-j", to_string(*jobs)});
-        } else {
-            expectedTask.append({"-j", to_string(context.options().getJobs())});
         }
 
         if(commandLine) {

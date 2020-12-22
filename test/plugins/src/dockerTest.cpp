@@ -1,7 +1,6 @@
 #include <algorithm>
 #include <array>
 #include <map>
-#include <memory>
 #include <optional>
 #include <stdexcept>
 #include <string>
@@ -12,7 +11,6 @@
 #include "config/variablesMap.h"
 #include "core/task.h"
 #include "plugins/luaPlugin.h"
-#include "plugins/memory.h"
 
 #include "config/generators.h"
 #include "unittest/catch.h"
@@ -30,14 +28,9 @@
 #include "handlers.h"
 
 using std::array;
-using std::make_pair;
-using std::make_shared;
-using std::map;
 using std::optional;
 using std::pair;
 using std::runtime_error;
-using std::shared_ptr;
-using std::static_pointer_cast;
 using std::string;
 using std::vector;
 
@@ -58,6 +51,7 @@ using execHelper::test::addToTask;
 using execHelper::test::FleetingOptionsStub;
 using execHelper::test::NonEmptyString;
 using execHelper::test::propertyTest;
+using execHelper::test::utils::registerValuesAsCommands;
 
 namespace filesystem = std::filesystem;
 
@@ -115,18 +109,22 @@ template <> struct Arbitrary<Mode> {
 namespace execHelper::plugins::test {
 SCENARIO("Testing the configuration settings of the docker plugin",
          "[docker][successful]") {
+    const FleetingOptionsStub options;
+    const SettingsNode settings("general-docker");
+
     propertyTest(
         "",
-        [](Mode mode, const NonEmptyString& image,
-           const optional<filesystem::path>& workingDir,
-           const optional<vector<string>>& commandLine,
-           const optional<EnvironmentCollection>& environment,
-           const NonEmptyString& container, const optional<bool>& interactive,
-           const optional<bool>& tty, const optional<bool>& privileged,
-           const optional<string>& user,
-           const optional<pair<string, string>>&
-               env, // Lua does not necessarily preserve the order of these, so we currently limit ourselves to one value
-           const optional<vector<string>>& volumes, const Pattern& pattern) {
+        [&options, &settings](
+            Mode mode, const NonEmptyString& image,
+            const optional<filesystem::path>& workingDir,
+            const optional<vector<string>>& commandLine,
+            const optional<EnvironmentCollection>& environment,
+            const NonEmptyString& container, const optional<bool>& interactive,
+            const optional<bool>& tty, const optional<bool>& privileged,
+            const optional<string>& user,
+            const optional<pair<string, string>>&
+                env, // Lua does not necessarily preserve the order of these, so we currently limit ourselves to one value
+            const optional<vector<string>>& volumes, const Pattern& pattern) {
             Task task;
 
             Patterns patterns = {pattern};
@@ -138,30 +136,12 @@ SCENARIO("Testing the configuration settings of the docker plugin",
 
             LuaPlugin plugin(std::string(PLUGINS_INSTALL_PATH) + "/docker.lua");
 
-            auto memory = make_shared<Memory>();
-
             SettingsNode generalSettings("docker-test");
-            FleetingOptionsStub fleetingOptions;
 
-            map<std::string, shared_ptr<Memory>> memories;
-            const auto& patternValues = pattern.getValues();
-            transform(patternValues.begin(), patternValues.end(),
-                      inserter(memories, memories.end()),
-                      [](const auto& value) {
-                          return make_pair(value, make_shared<Memory>());
-                      });
-
-            // Register each memory mapping as the endpoint for every target command
             Plugins plugins;
-            transform(memories.begin(), memories.end(),
-                      inserter(plugins, plugins.end()), [](const auto& memory) {
-                          return make_pair(
-                              memory.first,
-                              static_pointer_cast<Plugin>(memory.second));
-                      });
+            auto memories =
+                registerValuesAsCommands(pattern.getValues(), &plugins);
 
-            FleetingOptionsStub options;
-            SettingsNode settings("general-docker");
             PatternsHandler patternsHandler(patterns);
             const ExecutionContext context(options, settings, patternsHandler,
                                            plugins);
@@ -266,10 +246,10 @@ SCENARIO("Testing the configuration settings of the docker plugin",
 
 SCENARIO("Not passing an image or container to the docker plugin",
          "[docker][error]") {
-    FleetingOptionsStub options;
-    SettingsNode settings("general-docker");
-    PatternsHandler patternsHandler;
-    Plugins plugins;
+    const FleetingOptionsStub options;
+    const SettingsNode settings("general-docker");
+    const PatternsHandler patternsHandler;
+    const Plugins plugins;
     const ExecutionContext context(options, settings, patternsHandler, plugins);
 
     propertyTest(

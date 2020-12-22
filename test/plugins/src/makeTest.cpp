@@ -79,12 +79,10 @@ SCENARIO("Testing the configuration settings of the make plugin", "[make]") {
         handleVerbosity(verbose ? *verbose : context.options().getVerbosity(),
                         "--debug", config, expectedTask);
 
+        expectedTask.append(
+            {"--jobs", to_string(jobs.value_or(context.options().getJobs()))});
         if(jobs) {
             REQUIRE(config.add("jobs", to_string(*jobs)));
-            expectedTask.append({"--jobs", to_string(*jobs)});
-        } else {
-            expectedTask.append(
-                {"--jobs", to_string(context.options().getJobs())});
         }
 
         if(commandLine) {
