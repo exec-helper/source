@@ -184,6 +184,17 @@ memory-check:
     - command-line-command
 
 format:
+    - cpp-format
+    - py-format
+    - check-changes
+
+cpp-format:
+    - command-line-command
+
+py-format:
+    - command-line-command
+
+check-changes:
     - command-line-command
 
 docs:
@@ -505,13 +516,17 @@ command-line-command:
             - archive: [tar, --create, --auto-compress, --file, "{COVERITY_ARCHIVE_NAME}", cov-int]
             - upload: [ echo, "{COVERITY_ARCHIVE_NAME} is now ready to get uploaded to coverity scan"]
 
-    format:
+    cpp-format:
         patterns:
             - SOURCE_TYPE
             - MODULE
-        command-line:
-            - rewrite-files: [ clang-format, -i, '$(find "{SOURCE_TYPE}/{MODULE}" -name "*.cpp" -o -name "*.h")']
-            - check-rewritten: [ git, diff-index, --quiet, HEAD, --]
+        command-line: [ clang-format, -i, '$(find "{SOURCE_TYPE}/{MODULE}" -name "*.cpp" -o -name "*.h")']
+
+    py-format:
+        command-line: [ black, --line-length, 100, test/integration/src/*.py]
+
+    check-changes:
+        command-line: [ git, diff-index, --quiet, HEAD, --]
 
     language-server:
         command-line: [ clangd]

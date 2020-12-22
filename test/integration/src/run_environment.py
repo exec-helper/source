@@ -5,12 +5,13 @@ import subprocess
 from config import Config
 from pattern import Pattern
 
+
 class RunEnvironment(object):
     def __init__(self, root_dir):
         self._config = None
         self._root_dir = root_dir
         self._working_dir = self._root_dir
-        self._args = ['exec-helper']
+        self._args = ["exec-helper"]
 
         self._root_dir.mkdir(parents=True, exist_ok=False)
         print(f"Creating simulation environment in directory '{self._root_dir}'")
@@ -46,16 +47,16 @@ class RunEnvironment(object):
         self._config.remove()
 
     def config_is_external(self):
-        self._args.append('--settings-file')
+        self._args.append("--settings-file")
         self._args.append(str(self._config.file))
 
     def add_pattern(self, command, pattern_string):
         """ Add the list of patterns to the given command """
         parts = pattern_string.split(":")
         if len(parts) != 2:
-            raise AssertionError("Cannot parse '{value}' to pattern".format(value = value))
+            raise AssertionError("Cannot parse '{value}' to pattern".format(value=value))
         pattern_id = parts[0]
-        pattern_values = parts[1].split(',')
+        pattern_values = parts[1].split(",")
         pattern = Pattern(pattern_id, pattern_values)
         self._config.add_pattern(command, pattern)
 
@@ -68,8 +69,10 @@ class RunEnvironment(object):
 
         args = self._args
         args.extend(arg_list)
-        print("Executing '" + ' '.join(args) + "'")
-        self._last_run = subprocess.run(args, cwd = self._working_dir, capture_output = True, check = False) 
+        print("Executing '" + " ".join(args) + "'")
+        self._last_run = subprocess.run(
+            args, cwd=self._working_dir, capture_output=True, check=False
+        )
 
     def remove(self):
         if os.path.isdir(self._root_dir):

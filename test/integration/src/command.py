@@ -8,6 +8,7 @@ from pathlib import Path
 import tempfile
 import uuid
 
+
 class Run(object):
     def __init__(self):
         self._environment = {}
@@ -28,6 +29,7 @@ class Run(object):
     @working_dir.setter
     def working_dir(self, value):
         self._working_dir = value
+
 
 class Server(Thread):
     def __init__(self, host, port):
@@ -51,8 +53,8 @@ class Server(Thread):
         data = pickle.loads(serialized)
         print("Received data!")
         run = Run()
-        run.environment = data['env']
-        run.working_dir = Path(data['working_dir'])
+        run.environment = data["env"]
+        run.working_dir = Path(data["working_dir"])
         self._runs.append(run)
 
         writer.close()
@@ -78,11 +80,12 @@ class Server(Thread):
         if self._loop is not None:
             self._loop.call_soon_threadsafe(self._loop.stop)
 
-class Command(object):
-    _prefix = 'binary-'
-    _suffix = '.exec-helper'
 
-    def __init__(self, id, plugin_id, directory, return_code = 0):
+class Command(object):
+    _prefix = "binary-"
+    _suffix = ".exec-helper"
+
+    def __init__(self, id, plugin_id, directory, return_code=0):
         self._id = id
         self._plugin_id = plugin_id
         self._binary = Path(directory).joinpath(self._prefix + str(uuid.uuid4()) + self._suffix)
@@ -90,8 +93,8 @@ class Command(object):
         self._patterns = []
         self._return_code = return_code
 
-        port = random.randint(49152,65535)
-        self._server = Server('localhost', port)
+        port = random.randint(49152, 65535)
+        self._server = Server("localhost", port)
 
     def __del__(self):
         self.stop()
@@ -120,15 +123,17 @@ class Command(object):
         result[self._id] = self._plugin_id
         result[self._plugin_id] = dict()
         result[self._plugin_id][self._id] = dict()
-        result[self._plugin_id][self._id]['command-line'] = [str(self._binary)]
+        result[self._plugin_id][self._id]["command-line"] = [str(self._binary)]
         if self._env:
-            result[self._plugin_id][self._id]['environment'] = self._env
+            result[self._plugin_id][self._id]["environment"] = self._env
         if self._patterns:
-            result[self._plugin_id][self._id]['patterns'] = [pattern.id for pattern in self._patterns]
+            result[self._plugin_id][self._id]["patterns"] = [
+                pattern.id for pattern in self._patterns
+            ]
         return result
 
     def write_binary(self):
-        with open(self._binary, 'w') as f:
+        with open(self._binary, "w") as f:
             f.write("#!/usr/bin/env python3\n")
             f.write("import asyncio\n")
             f.write("import os\n")
@@ -136,7 +141,11 @@ class Command(object):
             f.write("import sys\n")
             f.write("\n")
             f.write("async def set_characteristics(loop):\n")
-            f.write("    reader,writer = await asyncio.open_connection('{host}', {port})\n".format(host = self._server.host, port = self._server.port))
+            f.write(
+                "    reader,writer = await asyncio.open_connection('{host}', {port})\n".format(
+                    host=self._server.host, port=self._server.port
+                )
+            )
             f.write("\n")
             f.write("    run_data = dict()\n")
             f.write("    run_data['env'] = { key: value for key, value in os.environ.items()}\n")
@@ -150,7 +159,7 @@ class Command(object):
             f.write("loop = asyncio.get_event_loop()\n")
             f.write("loop.run_until_complete(set_characteristics(loop))\n")
             f.write("loop.close()\n")
-            f.write("sys.exit({RETURN_CODE})\n".format(RETURN_CODE = self._return_code))
+            f.write("sys.exit({RETURN_CODE})\n".format(RETURN_CODE=self._return_code))
 
         os.chmod(self._binary, stat.S_IREAD | stat.S_IEXEC)
 
