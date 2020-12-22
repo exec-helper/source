@@ -477,12 +477,12 @@ command-line-command:
             - COMPILER
             - TRIPLET
             - MODE
-            - TARGET
+            - FILTER
             - EH_ROOT_DIR
         environment:
             PATH: "{EH_ROOT_DIR}/build/{TRIPLET}{COMPILER}/{MODE}/install/bin:/usr/local/bin:/usr/bin"
         working-dir: test/integration
-        command-line: [ pytest, -m, "'{TARGET}'", "--junitxml=../../build/{TRIPLET}{COMPILER}/{MODE}/system_test_report.xml", "--html=../../build/{TRIPLET}{COMPILER}/{MODE}/system_test_report.html", --self-contained-html, .]
+        command-line: [ pytest, -m, "'{FILTER}'", "--junitxml=../../build/{TRIPLET}{COMPILER}/{MODE}/system_test_report.xml", "--html=../../build/{TRIPLET}{COMPILER}/{MODE}/system_test_report.html", --self-contained-html, .]
 
     coverage:
         command-line: [ exec-helper, init-coverage, build, analyze, --analyze, lcov, --compiler, gcc, --mode, coverage, --run-target, unittest]

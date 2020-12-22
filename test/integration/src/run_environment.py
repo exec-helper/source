@@ -1,3 +1,4 @@
+import asyncio
 import os
 import shutil
 import subprocess
@@ -6,7 +7,26 @@ from config import Config
 from pattern import Pattern
 
 
-class RunEnvironment(object):
+class Run:
+    def __init__(self, returncode, stdout, stderr):
+        self._returncode = returncode
+        self._stdout = stdout
+        self._stderr = stderr
+
+    @property
+    def returncode(self):
+        return self._returncode
+
+    @property
+    def stdout(self):
+        return self._stdout
+
+    @property
+    def stderr(self):
+        return self._stderr
+
+
+class RunEnvironment:
     def __init__(self, root_dir):
         self._config = None
         self._root_dir = root_dir
@@ -63,16 +83,35 @@ class RunEnvironment(object):
     def add_commandline(self, arg_list):
         self._args.extend(arg_list)
 
-    def run_application(self, arg_list=[]):
+    async def _run(self, arg_list=[]):
         if self._config:
             self._config.write()
 
         args = self._args
         args.extend(arg_list)
         print("Executing '" + " ".join(args) + "'")
-        self._last_run = subprocess.run(
-            args, cwd=self._working_dir, capture_output=True, check=False
+
+        if self._config:
+            # Schedule all asyncio servers
+            for id, command in self._config.commands.items():
+                asyncio.create_task(command.server.coroutine)
+
+        process = await asyncio.create_subprocess_exec(  # Wait until the process is created
+            *args,
+            cwd=self._working_dir,
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
         )
+
+        stdout, stderr = await process.communicate()  # Wait for the actual process to finish
+        returncode = process.returncode
+
+        self._last_run = Run(returncode, stdout, stderr)
+
+    def run_application(self, arg_list=[]):
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(self._run(arg_list))
 
     def remove(self):
         if os.path.isdir(self._root_dir):

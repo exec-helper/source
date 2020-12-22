@@ -1,15 +1,12 @@
 import asyncio
 import os
 import pickle
-import random
 import stat
-from threading import Thread
 from pathlib import Path
-import tempfile
 import uuid
 
 
-class Run(object):
+class Run:
     def __init__(self):
         self._environment = {}
         self._working_dir = None
@@ -31,27 +28,34 @@ class Run(object):
         self._working_dir = value
 
 
-class Server(Thread):
+class Server:
     def __init__(self, host, port):
-        Thread.__init__(self)
-        self._host = host
-        self._port = port
         self._runs = []
-        self._loop = None
+
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(self._init(host, port))
 
     @property
-    def host(self):
-        return self._host
+    def coroutine(self):
+        return self._coroutine
+
+    @property
+    def runs(self):
+        return self._runs
 
     @property
     def port(self):
-        return self._port
+        return self._server.sockets[0].getsockname()[1]
+
+    async def _init(self, host, port):
+        self._server = await asyncio.start_server(self.get_characteristics, host, port)
+        self._coroutine = (
+            self._server.serve_forever()
+        )  # Coroutine is initialized, but not started here!
 
     async def get_characteristics(self, reader, writer):
-        print("hello")
         serialized = await reader.read(10000)
         data = pickle.loads(serialized)
-        print("Received data!")
         run = Run()
         run.environment = data["env"]
         run.working_dir = Path(data["working_dir"])
@@ -60,28 +64,16 @@ class Server(Thread):
         writer.close()
         await writer.wait_closed()
 
-    @property
-    def runs(self):
-        return self._runs
-
-    def run(self):
-        self._loop = asyncio.new_event_loop()
-        coro = asyncio.start_server(self.get_characteristics, self._host, self._port)
-        server = self._loop.run_until_complete(coro)
-
-        self._loop.run_forever()
-
-        server.close()
-        self._loop.run_until_complete(server.wait_closed())
-        self._loop.close()
-        self._loop = None
+    async def _stop(self):
+        self._server.close()
+        await self._server.wait_closed()
 
     def stop(self):
-        if self._loop is not None:
-            self._loop.call_soon_threadsafe(self._loop.stop)
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(self._stop())
 
 
-class Command(object):
+class Command:
     _prefix = "binary-"
     _suffix = ".exec-helper"
 
@@ -93,8 +85,9 @@ class Command(object):
         self._patterns = []
         self._return_code = return_code
 
-        port = random.randint(49152, 65535)
-        self._server = Server("localhost", port)
+        self._host = "localhost"
+        self._server = Server(self._host, 0)
+        self._port = self._server.port
 
     def __del__(self):
         self.stop()
@@ -111,6 +104,10 @@ class Command(object):
     @property
     def patterns(self):
         return self._patterns
+
+    @property
+    def server(self):
+        return self._server
 
     def set_environment(self, envs):
         self._env = envs
@@ -143,7 +140,7 @@ class Command(object):
             f.write("async def set_characteristics(loop):\n")
             f.write(
                 "    reader,writer = await asyncio.open_connection('{host}', {port})\n".format(
-                    host=self._server.host, port=self._server.port
+                    host=self._host, port=self._port
                 )
             )
             f.write("\n")
@@ -163,15 +160,11 @@ class Command(object):
 
         os.chmod(self._binary, stat.S_IREAD | stat.S_IEXEC)
 
-        self._server.start()
-
     def remove(self):
         self._binary.unlink()
 
     def stop(self):
-        if self._server.is_alive():
-            self._server.stop()
-            self._server.join()
+        self._server.stop()
 
     @staticmethod
     def _permutate_patterns(patterns):
