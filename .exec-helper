@@ -1,6 +1,3 @@
-additional-search-paths:
-    - eh-plugins
-
 patterns:
     COMPILER:
         default-values:

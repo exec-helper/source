@@ -43,5 +43,6 @@ plugin_files = [
   'src/scripts/pmd.lua',
   'src/scripts/valgrind.lua',
   'src/scripts/lcov.lua',
+  'src/scripts/meson.lua',
 ]
 install_data(plugin_files, install_dir : get_option('datadir') / 'exec-helper' / 'plugins')

@@ -505,6 +505,7 @@ examples:
         - exec-helper --settings-file lcov.example example
         - exec-helper --settings-file pmd.example example
         - exec-helper --settings-file valgrind.example example
+        - exec-helper --settings-file meson.example example
 
 code-format:
     <<: *code_format

@@ -1,6 +1,8 @@
 #ifndef ADD_TO_CONFIG_INCLUDE
 #define ADD_TO_CONFIG_INCLUDE
 
+#include <filesystem>
+#include <map>
 #include <optional>
 #include <stdexcept>
 #include <string>
@@ -74,6 +76,12 @@ addToConfig(const execHelper::config::SettingsKeys& key, std::uint16_t value,
 }
 
 inline void
+addToConfig(const execHelper::config::SettingsKeys& key, std::uint32_t value,
+            gsl::not_null<execHelper::config::VariablesMap*> config) {
+    addToConfig(key, std::to_string(value), config);
+}
+
+inline void
 addToConfig(execHelper::config::SettingsKeys key,
             const std::pair<std::string, std::string>& value,
             gsl::not_null<execHelper::config::VariablesMap*> config) {
@@ -83,6 +91,23 @@ addToConfig(execHelper::config::SettingsKeys key,
                                  " with first value '" + value.second +
                                  "' to config");
     }
+}
+
+inline void
+addToConfig(const execHelper::config::SettingsKeys& key,
+            const std::filesystem::path& value,
+            gsl::not_null<execHelper::config::VariablesMap*> config) {
+    addToConfig(key, value.string(), config);
+}
+
+template <typename K, typename V>
+inline void
+addToConfig(const execHelper::config::SettingsKey& key,
+            const std::map<K, V>& value,
+            gsl::not_null<execHelper::config::VariablesMap*> config) {
+    std::for_each(value.begin(), value.end(), [&key, &config](const auto& element) {
+        addToConfig(execHelper::config::SettingsKeys({key}), element, config);
+    });
 }
 
 template <typename T>

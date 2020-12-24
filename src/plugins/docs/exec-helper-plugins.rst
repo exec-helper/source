@@ -66,6 +66,10 @@ Build plugins
 
     The cmake plugin is used for running the CMake build system. See :ref:`exec-helper-plugins-cmake` (5).
 
+.. describe:: meson
+
+    The meson plugin is used for running the CMake build system. See :ref:`exec-helper-plugins-meson` (5).
+
 Analysis plugins
 ================
 

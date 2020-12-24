@@ -41,9 +41,9 @@ if mode == 'setup' then
 end
 
 if mode == 'compile' then
-    task:add_args({'-C', build_dir})
-
     task:add_args({'--jobs', one(config['jobs']) or jobs})
+
+    task:add_args({'-C', build_dir})
 end
 
 if mode == 'install' then
@@ -51,22 +51,24 @@ if mode == 'install' then
 end
 
 if mode == 'test' then
-    task:add_args({'-C', build_dir})
-
-    local suites = list(config['suite'])
+    local suites = list(config['suites'])
     if suites then
         for _,suite in ipairs(suites) do
             task:add_args({'--suite', suite})
         end
     end
 
+    task:add_args({'-C', build_dir})
+end
+
+task:add_args(get_commandline())
+
+if mode == 'test' then
     local targets = list(config['targets'])
     if targets then
         task:add_args(targets)
     end
 end
-
-task:add_args(get_commandline())
 
 -- Configure positional arguments
 if mode == 'setup' then

@@ -1,0 +1,54 @@
+commands:                       # Define the commands that can be run
+    example: Run the meson example
+    run: Run the files that were built
+
+patterns:                       # Define the patterns that can be used
+    MESON_TARGET:               # Define the MESON_TARGET pattern.
+        default-values:         # Only define the default value
+            - hello
+            - world
+
+example:
+    - build                     # Use the meson plugin when running the 'example' command
+    - run
+
+build:                          # Subdivide the 'build' command into three consecutive commands
+    - generate
+    - build-only
+    - install
+
+generate: meson                 # Define the subcommands. These commands can be called directly to.
+build-only: meson
+install: meson
+
+run:
+    - command-line-command  # Use the command-line-command plugin for the 'run' command
+
+meson:
+    environment:            # Define additional environment variables
+        WORLD: "world!"
+
+    prefix: /tmp            # Set the installation prefix
+    source-dir: .           # Set the source dir for all meson targets that do not further specialize this
+    build-dir: build        # Set the build dir for all meson targets that do not further specialize this
+
+    generate:               # Specific settings for the 'generate' command
+        mode: setup         # Set the mode
+        options:            # Set some defines
+            test: true
+        command-line:       # Define additional command line arguments
+            - --strip       # An example argument passed to make
+
+    build-only:             # Specific settings for the 'build-only' command
+        mode: compile       # Set the mode
+        jobs: 1             # Always compile with one thread
+
+    install:                # Specific settings for the 'install' command
+        mode: install       # Set the mode
+
+command-line-command:
+    run:
+        patterns:               # The patterns that are used by the 'run' command
+            - MESON_TARGET
+        command-line:
+            - build/{MESON_TARGET}

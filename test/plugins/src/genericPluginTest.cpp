@@ -56,7 +56,7 @@ SCENARIO("Test the pattern keyword for each plugin") {
 
 SCENARIO("Check that all plugins are found") {
     GIVEN("The expected number of plugins") {
-        constexpr auto expectedNbOfPlugins = 16U;
+        constexpr auto expectedNbOfPlugins = 17U;
 
         WHEN("We request all plugins") {
             const auto plugins = discoverPlugins({PLUGINS_INSTALL_PATH});

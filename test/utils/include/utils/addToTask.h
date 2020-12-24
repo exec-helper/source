@@ -4,6 +4,7 @@
 #include <filesystem>
 #include <functional>
 #include <initializer_list>
+#include <map>
 #include <optional>
 #include <string>
 #include <string_view>
@@ -47,6 +48,11 @@ inline void addToTask(uint16_t value, gsl::not_null<core::Task*> task,
     addToTask(std::to_string(value), task, std::move(func));
 }
 
+inline void addToTask(uint32_t value, gsl::not_null<core::Task*> task,
+                      AddToTaskFunction func) {
+    addToTask(std::to_string(value), task, std::move(func));
+}
+
 inline void addToTask(const std::pair<std::string, std::string>& value,
                       gsl::not_null<core::Task*> task, AddToTaskFunction func) {
     task->append(func(value.first + "=" + value.second));
@@ -65,6 +71,17 @@ inline void addToTask(const std::vector<T>& value,
         [&task, func](const auto& element) {
             addToTask(element, task, func);
         });
+}
+
+template<typename K, typename V>
+inline void addToTask(const std::map<K, V>& value,
+                      gsl::not_null<core::Task*> task, std::function<core::TaskCollection(const K&, const V&)> func) {
+    core::TaskCollection collection;
+    collection.reserve(value.size());
+
+    std::for_each(value.begin(), value.end(), [&task, func](const auto& element) {
+        task->append(func(element.first, element.second));
+    });
 }
 
 template <typename T>

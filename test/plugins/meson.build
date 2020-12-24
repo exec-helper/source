@@ -22,6 +22,7 @@ src = [
   'src/ninjaTest.cpp',
   'src/cmakeTest.cpp',
   'src/dockerTest.cpp',
+  'src/mesonTest.cpp',
 ]
 
 deps = [
