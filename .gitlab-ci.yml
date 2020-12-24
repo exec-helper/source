@@ -209,8 +209,8 @@ build:native:
     variables:
         INSTALL_DIR: usr
     script:
-        - make PREFIX=${PWD}/${INSTALL_DIR} ACTUAL_PLUGINS_INSTALL_PREFIX=/usr/share/exec-helper/plugins
-        - make PREFIX=${PWD}/${INSTALL_DIR} ACTUAL_PLUGINS_INSTALL_PREFIX=/usr/share/exec-helper/plugins install 
+        - make PREFIX=${PWD}/${INSTALL_DIR} ACTUAL_PLUGINS_INSTALL_PREFIX=/usr/share/exec-helper/plugins UNITY_BUILD=on
+        - make PREFIX=${PWD}/${INSTALL_DIR} ACTUAL_PLUGINS_INSTALL_PREFIX=/usr/share/exec-helper/plugins install
     artifacts:
         expire_in: 1 day
         paths:
@@ -223,7 +223,7 @@ build:local:
         - job: build-image:build
           artifacts: false
     script:
-        - make
+        - make UNITY_BUILD=on
         - sudo make install
 
 build:debian:
@@ -235,7 +235,7 @@ build:debian:
     variables:
         INSTALL_DIR: usr
     script:
-        - make BUILD_DOCUMENTATION=OFF PREFIX=${PWD}/${INSTALL_DIR} ACTUAL_PLUGINS_INSTALL_PREFIX=/usr/share/exec-helper/plugins
+        - make BUILD_DOCUMENTATION=OFF PREFIX=${PWD}/${INSTALL_DIR} ACTUAL_PLUGINS_INSTALL_PREFIX=/usr/share/exec-helper/plugins UNITY_BUILD=on
         - make PREFIX=${PWD}/${INSTALL_DIR} ACTUAL_PLUGINS_INSTALL_PREFIX=/usr/share/exec-helper/plugins install
     artifacts:
         expire_in: 1 day
