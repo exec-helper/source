@@ -54,7 +54,7 @@ class Server:
         )  # Coroutine is initialized, but not started here!
 
     async def get_characteristics(self, reader, writer):
-        serialized = await reader.read(10000)
+        serialized = await reader.read()
         data = pickle.loads(serialized)
         run = Run()
         run.environment = data["env"]
