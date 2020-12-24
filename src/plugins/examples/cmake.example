@@ -1,16 +1,16 @@
 commands:                       # Define the commands that can be run
-    example: Run the make example
+    example: Run the cmake example
     clean: Clean the build
     run: Run the files that were built
 
 patterns:                       # Define the patterns that can be used
-    CMAKE_TARGET:                # Define the EXAMPLE_PATTERN.
+    CMAKE_TARGET:               # Define the CMAKE_TARGET pattern.
         default-values:         # Only define the default value
             - hello
             - world
 
 example:
-    - build                     # Use the make plugin when running the 'example' command
+    - build                     # Use the cmake plugin when running the 'example' command
     - run
 
 build:
@@ -22,7 +22,7 @@ generate: cmake
 build-only: cmake
 install: cmake
 
-clean:                          # Use the make plugin when running the 'clean' command
+clean:                          # Use the cmake plugin when running the 'clean' command
     - cmake
 
 run:
@@ -41,7 +41,7 @@ cmake:
         defines:            # Set some defines
             CMAKE_BUILD_MODE: RelWithDebInfo
         command-line:           # Define additional command line arguments
-            - -Wno-dev          # An example argument passed to make
+            - -Wno-dev          # An example argument passed to cmake
 
     build-only:             # Specific settings for the 'build-only' command
         mode: build         # Set the mode
