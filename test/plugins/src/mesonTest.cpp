@@ -109,8 +109,7 @@ inline auto buildTypeToString(BuildType buildType) {
 }
 
 inline void addToConfig(const execHelper::config::SettingsKey& key,
-                        const BuildType buildType,
-                        not_null<VariablesMap*> config) {
+                        BuildType buildType, not_null<VariablesMap*> config) {
     auto command = buildTypeToString(buildType);
     if(!config->add(key, string(command))) {
         throw runtime_error("Failed to add key " + key +
@@ -118,7 +117,7 @@ inline void addToConfig(const execHelper::config::SettingsKey& key,
     }
 }
 
-inline void addToTask(const BuildType buildType,
+inline void addToTask(BuildType buildType,
                       gsl::not_null<execHelper::core::Task*> task) {
     auto command = buildTypeToString(buildType);
     execHelper::test::addToTask(command, task,

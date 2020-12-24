@@ -25,9 +25,27 @@ General plugins
     The command-line-command plugin is used for executing arbitrary command line commands.
     See :ref:`exec-helper-plugins-command-line-command` (5).
 
-.. describe:: execute-plugin
+.. describe:: sh
 
-    The execute plugin is used for executing other commands and/or targets configured in the :program:`exec-helper` configuration file. See :ref:`exec-helper-plugins-execute-plugin` (5).
+    The sh plugin is used for executing arbitrary commands in the sh shell. This is very useful for executing command lines that need special shell characters like :code:`&&`, :code:`|`, :code:`;`, :code:`>`.
+    See :ref:`exec-helper-plugins-sh` (5).
+
+.. describe:: bash
+
+    The bash plugin is used for executing arbitrary commands in the bash shell. This is very useful for executing command lines that need special shell characters like :code:`&&`, :code:`|`, :code:`;`, :code:`>`.
+    See :ref:`exec-helper-plugins-bash` (5).
+
+.. describe:: fish
+
+    The fish plugin is used for executing arbitrary commands in the fish shell. This is very useful for executing command lines that need special shell characters like :code:`&&`, :code:`|`, :code:`;`, :code:`>`.
+    See :ref:`exec-helper-plugins-fish` (5).
+
+
+.. describe:: zsh
+
+    The zsh plugin is used for executing arbitrary commands in the zsh shell. This is very useful for executing command lines that need special shell characters like :code:`&&`, :code:`|`, :code:`;`, :code:`>`.
+    See :ref:`exec-helper-plugins-zsh` (5).
+
 
 .. describe:: selector
 

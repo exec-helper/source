@@ -485,6 +485,8 @@ examples:
           artifacts: false
         - job: build:native
           artifacts: true
+    before_script:
+        - sudo pacman -Sy --noconfirm --needed fish zsh bash
     script:
         - *install_exec_helper
         - export ROOT_DIR=$(pwd)
@@ -506,6 +508,10 @@ examples:
         - exec-helper --settings-file pmd.example example
         - exec-helper --settings-file valgrind.example example
         - exec-helper --settings-file meson.example example
+        - exec-helper --settings-file sh.example example
+        - exec-helper --settings-file bash.example example
+        - exec-helper --settings-file zsh.example example
+        - exec-helper --settings-file fish.example example
 
 code-format:
     <<: *code_format

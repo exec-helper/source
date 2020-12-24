@@ -26,6 +26,10 @@ man5_sources = [
   '../../src/plugins/docs/exec-helper-plugins-command-line-command.rst',
   '../../src/plugins/docs/exec-helper-plugins-clang-static-analyzer.rst',
   '../../src/plugins/docs/exec-helper-plugins-lcov.rst',
+  '../../src/plugins/docs/exec-helper-plugins-sh.rst',
+  '../../src/plugins/docs/exec-helper-plugins-bash.rst',
+  '../../src/plugins/docs/exec-helper-plugins-zsh.rst',
+  '../../src/plugins/docs/exec-helper-plugins-fish.rst',
 ]
 
 sources = man1_sources + man5_sources

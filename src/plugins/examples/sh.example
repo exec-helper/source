@@ -1,0 +1,20 @@
+commands:                       # Define the commands that can be run
+    example: run the sh example
+
+patterns:                       # Define the patterns that can be used
+    EXAMPLE_PATTERN:            # Define the EXAMPLE_PATTERN.
+        default-values:         # Define the default value
+            - world!
+
+example:
+    - sh                        # Use the sh plugin when running the 'example' command
+
+sh:                             # Sh plugin configuration settings
+    example:                    # Settings specific to the 'example' command
+        environment:            # Define the environment
+            EXAMPLE_ENVIRONMENT: hello
+        patterns:               # Define the patterns that are used
+            - EXAMPLE_PATTERN
+        command: 'echo ${EXAMPLE_ENVIRONMENT} && echo {EXAMPLE_PATTERN} && echo "working directory is $(pwd)"'      # Define the shell command
+        command-line: [ -ex]     # Pass additional command line arguments
+        working-dir: /tmp       # Set the working directory to a predefined value

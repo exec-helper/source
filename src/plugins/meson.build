@@ -42,5 +42,9 @@ plugin_files = [
   'src/scripts/valgrind.lua',
   'src/scripts/lcov.lua',
   'src/scripts/meson.lua',
+  'src/scripts/sh.lua',
+  'src/scripts/bash.lua',
+  'src/scripts/zsh.lua',
+  'src/scripts/fish.lua',
 ]
 install_data(plugin_files, install_dir : get_option('datadir') / 'exec-helper' / 'plugins')

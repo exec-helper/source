@@ -53,7 +53,7 @@ constexpr std::string_view patternKey = "BLAAT"sv;
 namespace execHelper::plugins::test {
 SCENARIO("Check that all plugins are found") {
     GIVEN("The expected number of plugins") {
-        constexpr auto expectedNbOfPlugins = 15U;
+        constexpr auto expectedNbOfPlugins = 19U;
 
         WHEN("We request all plugins") {
             const auto plugins = discoverPlugins({PLUGINS_INSTALL_PATH});
@@ -94,6 +94,8 @@ SCENARIO("Every call to a plugin must lead to at least one registered task") {
             VariablesMap variablesMap("generic_plugin");
             REQUIRE(variablesMap.add("command-line", "blaat"));
             REQUIRE(variablesMap.add("build-command", "memory"));
+            REQUIRE(variablesMap.add("commands", "memory"));
+            REQUIRE(variablesMap.add("command", "ls"));
             REQUIRE(variablesMap.add("run-command", "memory"));
             REQUIRE(variablesMap.add("container", "blaat"));
             REQUIRE(variablesMap.add("targets", "memory"));
@@ -130,6 +132,7 @@ SCENARIO("A plugin must not alter the arguments before a given task") {
             REQUIRE(variablesMap.add("run-command", "memory"));
             REQUIRE(variablesMap.add("container", "blaat"));
             REQUIRE(variablesMap.add("targets", "memory"));
+            REQUIRE(variablesMap.add("command", "ls"));
 
             THEN_WHEN("We apply the plugin") {
                 auto actualTasks = apply(task, variablesMap, context);
