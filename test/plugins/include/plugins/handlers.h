@@ -9,6 +9,7 @@
 #include "core/task.h"
 #include "plugins/commandLine.h"
 
+#include "plugins/plugin.h"
 #include "unittest/catch.h"
 
 namespace execHelper::plugins::test {
@@ -45,6 +46,32 @@ inline void handleVerbosity(bool verbose, const std::string& flag,
     } else {
         REQUIRE(config.add("verbose", "no"));
     }
+}
+
+constexpr auto memoryFunction() {
+    return
+        [](core::Task task,
+           [[maybe_unused]] const config::VariablesMap& variablesMap,
+           [[maybe_unused]] const plugins::ExecutionContext& context) noexcept
+        -> core::Tasks { return {std::move(task)}; };
+}
+
+/**
+ * Register the given values as a separate command that is associated with its own memory backend
+ *
+ * \param[in] values    The values to create a command for
+ * \returns A collection of values mapped to plugin functions
+ */
+[[nodiscard]] inline auto
+mapToMemories(const std::vector<std::string>& values) noexcept {
+    Plugins plugins;
+
+    std::transform(values.begin(), values.end(),
+                   std::inserter(plugins, plugins.end()),
+                   [](const auto& value) {
+                       return std::make_pair(value, memoryFunction());
+                   });
+    return plugins;
 }
 } // namespace execHelper::plugins::test
 

@@ -9,7 +9,6 @@ src = [
   'src/clangTidyTest.cpp',
   'src/pmdTest.cpp',
   'src/commandLineCommandTest.cpp',
-  'src/commandPluginTest.cpp',
   'src/cppcheckTest.cpp',
   'src/pluginUtilsTest.cpp',
   'src/bootstrapTest.cpp',

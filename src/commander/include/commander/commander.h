@@ -9,6 +9,7 @@
 #include "config/path.h"
 #include "config/pattern.h"
 #include "core/task.h"
+#include "plugins/plugin.h"
 
 namespace execHelper {
 namespace config {
@@ -19,11 +20,6 @@ class SettingsNode;
 namespace core {
 class Options;
 }
-
-namespace plugins {
-class Plugin;
-using Plugins = std::map<std::string, std::shared_ptr<const Plugin>>;
-} // namespace plugins
 } // namespace execHelper
 
 namespace execHelper {

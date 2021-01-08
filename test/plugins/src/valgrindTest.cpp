@@ -53,7 +53,6 @@ using execHelper::test::addToConfig;
 using execHelper::test::addToTask;
 using execHelper::test::FleetingOptionsStub;
 using execHelper::test::propertyTest;
-using execHelper::test::utils::registerValuesAsCommands;
 
 namespace {
 enum class Tool {
@@ -146,10 +145,7 @@ SCENARIO("Testing the configuration settings of the valgrind plugin",
 
         VariablesMap config("valgrind-test");
 
-        LuaPlugin plugin(std::string(PLUGINS_INSTALL_PATH) + "/valgrind.lua");
-
-        Plugins plugins;
-        auto memories = registerValuesAsCommands(pattern.getValues(), &plugins);
+        auto plugins = mapToMemories(pattern.getValues());
 
         PatternsHandler patternsHandler;
         patternsHandler.addPattern(pattern);
@@ -182,7 +178,9 @@ SCENARIO("Testing the configuration settings of the valgrind plugin",
         Tasks expectedTasks(pattern.getValues().size(), expectedTask);
 
         THEN_WHEN("We apply the plugin") {
-            auto actualTasks = plugin.apply(task, config, context);
+            auto actualTasks =
+                luaPlugin(task, config, context,
+                          std::string(PLUGINS_INSTALL_PATH) + "/valgrind.lua");
 
             THEN_CHECK("It called the right commands") {
                 REQUIRE(expectedTasks == actualTasks);
@@ -200,14 +198,13 @@ SCENARIO("Test erroneous scenarios for the valgrind plugin", "[valgrind]") {
         const ExecutionContext context(options, settings, patternsHandler,
                                        plugins);
 
-        LuaPlugin plugin(std::string(PLUGINS_INSTALL_PATH) + "/valgrind.lua");
-
         WHEN("We call the plugin") {
             THEN("It should throw an exception") {
-                REQUIRE_THROWS_AS(plugin.apply(Task(),
-                                               VariablesMap("valgrind-test"),
-                                               context),
-                                  runtime_error);
+                REQUIRE_THROWS_AS(
+                    luaPlugin(Task(), VariablesMap("valgrind-test"), context,
+                              std::string(PLUGINS_INSTALL_PATH) +
+                                  "/valgrind.lua"),
+                    runtime_error);
             }
         }
     }

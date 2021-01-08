@@ -164,8 +164,6 @@ SCENARIO("Testing the configuration settings of the meson plugin",
 
             VariablesMap config("meson-test");
 
-            LuaPlugin plugin(std::string(PLUGINS_INSTALL_PATH) + "/meson.lua");
-
             expectedTask.append("meson");
 
             addToConfig("mode", mode, &config);
@@ -252,7 +250,9 @@ SCENARIO("Testing the configuration settings of the meson plugin",
             }
 
             THEN_WHEN("We apply the plugin") {
-                auto actualTasks = plugin.apply(task, config, context);
+                auto actualTasks =
+                    luaPlugin(task, config, context,
+                              std::string(PLUGINS_INSTALL_PATH) + "/meson.lua");
 
                 THEN_CHECK("It generated the expected tasks") {
                     REQUIRE(actualTasks == Tasks({expectedTask}));
@@ -274,15 +274,15 @@ SCENARIO("Pass an invalid mode to the meson plugin", "[meson][error]") {
         RC_PRE(mode != "test");
         RC_PRE(mode != "install");
 
-        LuaPlugin plugin(std::string(PLUGINS_INSTALL_PATH) + "/meson.lua");
-
         VariablesMap config("meson-test");
         addToConfig("mode", mode, &config);
 
         THEN_WHEN("We call the meson plugin with this configuration") {
             THEN_CHECK("It throws a runtime error") {
-                REQUIRE_THROWS_AS(plugin.apply(task, config, context),
-                                  runtime_error);
+                REQUIRE_THROWS_AS(
+                    luaPlugin(task, config, context,
+                              std::string(PLUGINS_INSTALL_PATH) + "/meson.lua"),
+                    runtime_error);
             }
         }
     });

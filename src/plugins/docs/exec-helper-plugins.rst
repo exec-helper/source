@@ -25,17 +25,9 @@ General plugins
     The command-line-command plugin is used for executing arbitrary command line commands.
     See :ref:`exec-helper-plugins-command-line-command` (5).
 
-.. describe:: command-plugin
-
-    The command plugin is used for executing the given command as it is configured in the :program:`exec-helper` configuration file. See :ref:`exec-helper-plugins-command-plugin` (5).
-
 .. describe:: execute-plugin
 
     The execute plugin is used for executing other commands and/or targets configured in the :program:`exec-helper` configuration file. See :ref:`exec-helper-plugins-execute-plugin` (5).
-
-.. describe:: memory
-
-    The memory plugin remembers all calls and state the plugin was called with. This plugin is mainly useful for testing and debugging purposes. See :ref:`exec-helper-plugins-memory` (5).
 
 .. describe:: selector
 

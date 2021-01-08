@@ -1,26 +1,22 @@
 #ifndef __COMMAND_LINE_COMMAND_HPP
 #define __COMMAND_LINE_COMMAND_HPP
 
+#include <string_view>
+
 #include "config/variablesMap.h"
 #include "executionContext.h"
 #include "plugin.h"
 
 namespace execHelper::plugins {
-/**
- * \brief Plugin for executing arbitrary command lines
- */
-class CommandLineCommand : public Plugin {
-  public:
-    [[nodiscard]] auto getVariablesMap(
-        const config::FleetingOptionsInterface& fleetingOptions) const noexcept
-        -> config::VariablesMap override;
-    [[nodiscard]] auto apply(core::Task task,
-                             const config::VariablesMap& variables,
-                             const ExecutionContext& context) const
-        -> core::Tasks override;
+[[nodiscard]] auto commandLineCommand(core::Task task,
+                                      const config::VariablesMap& variables,
+                                      const ExecutionContext& context)
+    -> core::Tasks;
 
-    [[nodiscard]] auto summary() const noexcept -> std::string override;
-};
+[[nodiscard]] inline constexpr auto commandLineCommandSummary() noexcept {
+    using namespace std::literals;
+    return "Command-line-command (internal)"sv;
+}
 } // namespace execHelper::plugins
 
 #endif /* __COMMAND_LINE_COMMAND_HPP */

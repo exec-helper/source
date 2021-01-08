@@ -42,14 +42,12 @@ using execHelper::config::VariablesMap;
 using execHelper::core::Task;
 using execHelper::core::TaskCollection;
 using execHelper::core::Tasks;
-using execHelper::plugins::LuaPlugin;
 
 using execHelper::test::addToConfig;
 using execHelper::test::addToTask;
 using execHelper::test::FleetingOptionsStub;
 using execHelper::test::propertyTest;
 using execHelper::test::utils::getExpectedTasks;
-using execHelper::test::utils::registerValuesAsCommands;
 
 namespace {
 using namespace std::literals;
@@ -215,10 +213,7 @@ SCENARIO("Testing the configuration settings of the lcov plugin", "[lcov]") {
 
         Tasks expectedTasks;
 
-        LuaPlugin plugin(std::string(PLUGINS_INSTALL_PATH) + "/lcov.lua");
-
-        Plugins plugins;
-        auto memories = registerValuesAsCommands(pattern.getValues(), &plugins);
+        const auto plugins = mapToMemories(pattern.getValues());
 
         addToConfig("base-directory", baseDirectory, &config);
         addToConfig("directory", directory, &config);
@@ -284,7 +279,9 @@ SCENARIO("Testing the configuration settings of the lcov plugin", "[lcov]") {
                                        plugins);
 
         THEN_WHEN("We apply the plugin") {
-            auto actualTasks = plugin.apply(task, config, context);
+            auto actualTasks =
+                luaPlugin(task, config, context,
+                          std::string(PLUGINS_INSTALL_PATH) + "/lcov.lua");
 
             THEN_CHECK("It called the right commands") {
                 REQUIRE(expectedTasks == actualTasks);
@@ -295,20 +292,21 @@ SCENARIO("Testing the configuration settings of the lcov plugin", "[lcov]") {
 
 SCENARIO("Test erroneous scenarios for the lcov plugin", "[lcov]") {
     GIVEN("A configuration without a configured run command") {
-        LuaPlugin plugin(std::string(PLUGINS_INSTALL_PATH) + "/lcov.lua");
         VariablesMap variables("lcov-test");
 
-        FleetingOptionsStub options;
-        SettingsNode settings("lcov-test");
-        PatternsHandler patternsHandler;
-        Plugins plugins;
+        const FleetingOptionsStub options;
+        const SettingsNode settings("lcov-test");
+        const PatternsHandler patternsHandler;
+        const Plugins plugins;
         const ExecutionContext context(options, settings, patternsHandler,
                                        plugins);
 
         WHEN("We call the plugin") {
             THEN("It should throw a runtime error") {
-                REQUIRE_THROWS_AS(plugin.apply(Task(), variables, context),
-                                  runtime_error);
+                REQUIRE_THROWS_AS(
+                    luaPlugin(Task(), variables, context,
+                              std::string(PLUGINS_INSTALL_PATH) + "/lcov.lua"),
+                    runtime_error);
             }
         }
     }

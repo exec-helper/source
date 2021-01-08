@@ -2,7 +2,7 @@
 Feature: Use the 'list plugins' command-line option
     Scenarios for when the 'list plugins' option is given on the command line
 
-    Examples:    
+    Examples:
     | command_line                           |
     | --list-plugins                         |
     | --list-plugins --debug debug --dry-run |

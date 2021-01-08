@@ -59,8 +59,6 @@ SCENARIO("Testing the configuration settings of the cppcheck plugin",
 
         VariablesMap config("cppcheck-test");
 
-        LuaPlugin plugin(std::string(PLUGINS_INSTALL_PATH) + "/cppcheck.lua");
-
         expectedTask.append("cppcheck");
 
         if(workingDir) {
@@ -111,7 +109,9 @@ SCENARIO("Testing the configuration settings of the cppcheck plugin",
         }
 
         THEN_WHEN("We apply the plugin") {
-            auto actualTasks = plugin.apply(task, config, context);
+            auto actualTasks =
+                luaPlugin(task, config, context,
+                          std::string(PLUGINS_INSTALL_PATH) + "/cppcheck.lua");
 
             THEN_CHECK("It generated the expected tasks") {
                 REQUIRE(Tasks({expectedTask}) == actualTasks);

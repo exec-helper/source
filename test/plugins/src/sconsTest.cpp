@@ -90,10 +90,10 @@ SCENARIO("Testing the configuration settings of the scons plugin", "[scons]") {
             handleCommandLine(*commandLine, config, expectedTask);
         }
 
-        LuaPlugin plugin(std::string(PLUGINS_INSTALL_PATH) + "/scons.lua");
-
         THEN_WHEN("We apply the plugin") {
-            auto actualTasks = plugin.apply(task, config, context);
+            auto actualTasks =
+                luaPlugin(task, config, context,
+                          std::string(PLUGINS_INSTALL_PATH) + "/scons.lua");
 
             THEN_CHECK("It generated the expected tasks") {
                 REQUIRE(Tasks{expectedTask} == actualTasks);

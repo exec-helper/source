@@ -6,7 +6,6 @@
 #include <filesystem>
 #include <fstream>
 #include <iterator>
-#include <optional>
 #include <stdexcept>
 #include <unordered_map>
 #include <utility>
@@ -26,21 +25,11 @@
 #include "pluginUtils.h"
 #include "workingDirectory.h"
 
-using std::ifstream;
-using std::make_pair;
-using std::move;
-using std::pair;
-using std::rethrow_if_nested;
-using std::runtime_error;
-using std::string;
-using std::to_string;
-using std::unordered_map;
-using std::vector;
+using namespace std;
 
 using boost::optional;
 
 using execHelper::config::CommandCollection;
-using execHelper::config::FleetingOptionsInterface;
 using execHelper::config::JOBS_KEY;
 using execHelper::config::Jobs_t;
 using execHelper::config::Path;
@@ -58,7 +47,7 @@ class Config {
     explicit Config(const VariablesMap& config) noexcept : m_config(config) {}
 
     auto get(const string& key) noexcept
-        -> optional<unordered_map<string, string>> {
+        -> boost::optional<unordered_map<string, string>> {
         if(!m_config.contains(key)) {
             return boost::none;
         }
@@ -97,16 +86,9 @@ class Config {
 } // namespace
 
 namespace execHelper::plugins {
-LuaPlugin::LuaPlugin(Path script) noexcept : m_script(std::move(script)) { ; }
-
-auto LuaPlugin::getVariablesMap(
-    const FleetingOptionsInterface& /*fleetingOptions*/) const noexcept
-    -> VariablesMap {
-    return VariablesMap("luaPlugin");
-}
-
-auto LuaPlugin::apply(Task task, const VariablesMap& config,
-                      const ExecutionContext& context) const -> Tasks {
+auto luaPlugin(Task task, const VariablesMap& config,
+               const ExecutionContext& context, const filesystem::path& script)
+    -> Tasks {
     Tasks tasks;
     LuaContext lua;
 
@@ -152,7 +134,7 @@ auto LuaPlugin::apply(Task task, const VariablesMap& config,
 
         lua.writeVariable("config", configWrapper);
 
-        lua.writeFunction<optional<unordered_map<string, string>>(
+        lua.writeFunction<boost::optional<unordered_map<string, string>>(
             Config&, const std::string&)>(
             "config", LuaContext::Metatable, "__index",
             [](Config& config, const std::string& key) {
@@ -201,13 +183,11 @@ auto LuaPlugin::apply(Task task, const VariablesMap& config,
                                       command.second, combination);
                               });
 
-                    ExecutePlugin executePlugin(commandsToExecute);
-
                     core::Task newTask =
                         replacePatternCombinations(task, combination);
                     try {
-                        auto newTasks = executePlugin.apply(
-                            move(newTask), VariablesMap("subtask"), context);
+                        auto newTasks = executeCommands(commandsToExecute,
+                                                        newTask, context);
                         move(newTasks.begin(), newTasks.end(),
                              back_inserter(tasks));
                     } catch(const std::runtime_error& e) {
@@ -218,11 +198,11 @@ auto LuaPlugin::apply(Task task, const VariablesMap& config,
                 return tasks;
             });
 
-        lua.writeFunction<optional<string>(
-            const optional<unordered_map<string, string>>&)>(
+        lua.writeFunction<boost::optional<string>(
+            const boost::optional<unordered_map<string, string>>&)>(
             "one",
-            [](const optional<unordered_map<string, string>>& values)
-                -> optional<string> {
+            [](const boost::optional<unordered_map<string, string>>& values)
+                -> boost::optional<string> {
                 if(!values) {
                     return boost::none;
                 }
@@ -237,8 +217,8 @@ auto LuaPlugin::apply(Task task, const VariablesMap& config,
         });
         lua.writeFunction(
             "list",
-            [](const optional<unordered_map<string, string>>& values)
-                -> optional<std::vector<pair<int, string>>> {
+            [](const boost::optional<unordered_map<string, string>>& values)
+                -> boost::optional<std::vector<pair<int, string>>> {
                 if(!values) {
                     return boost::none;
                 }
@@ -269,13 +249,13 @@ auto LuaPlugin::apply(Task task, const VariablesMap& config,
     }
 
     try {
-        ifstream executionCode(m_script);
+        ifstream executionCode(script);
         lua.executeCode(executionCode);
     } catch(const LuaContext::SyntaxErrorException& e) {
-        LOG(error) << "Syntax error detected in lua file '" +
-                          m_script.string() + "': " + e.what();
+        LOG(error) << "Syntax error detected in lua file '" + script.string() +
+                          "': " + e.what();
         throw runtime_error(string("Syntax error detected in lua file '")
-                                .append(m_script.string())
+                                .append(script.string())
                                 .append("': ")
                                 .append(e.what()));
     } catch(const LuaContext::ExecutionErrorException& e) {
@@ -286,9 +266,5 @@ auto LuaPlugin::apply(Task task, const VariablesMap& config,
         rethrow_if_nested(e);
     }
     return tasks;
-}
-
-auto LuaPlugin::summary() const noexcept -> std::string {
-    return "Lua plugin for module " + m_script.string();
 }
 } // namespace execHelper::plugins

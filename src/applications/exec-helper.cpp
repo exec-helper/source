@@ -28,7 +28,6 @@
 #include "core/task.h"
 #include "log/assertions.h"
 #include "log/log.h"
-#include "plugins/commandPlugin.h"
 #include "plugins/plugin.h"
 #include "plugins/pluginUtils.h"
 
@@ -102,14 +101,16 @@ using execHelper::core::Shell;
 using execHelper::core::Task;
 using execHelper::log::LogLevel;
 using execHelper::plugins::discoverPlugins;
+using execHelper::plugins::discoverPluginSummaries;
 using execHelper::plugins::Plugins;
+using execHelper::plugins::PluginSummaries;
 using execHelper::plugins::makePatternPermutator;
 using execHelper::plugins::replacePatternCombinations;
 
 namespace filesystem = std::filesystem;
 
 namespace {
-vector<string> logModules({"log", "yaml", "config", "core", "plugins",
+vector<string> logModules({"log", "config", "core", "plugins",
                            "commander", "application"});
 
 const auto settingsFileOption = Option<SettingsFileOption_t>(
@@ -245,11 +246,11 @@ inline void printVersion() noexcept {
     user_feedback(COPYRIGHT);
 }
 
-inline void printPlugins(const Plugins& plugins) noexcept {
+inline void printPlugins(const PluginSummaries& plugins) noexcept {
     user_feedback("Registered plugins:");
     for(const auto& plugin : plugins) {
         user_feedback(std::left << std::setfill('.') << std::setw(25)
-                                << plugin.first << " " << *(plugin.second));
+                                << plugin.first << " " << plugin.second);
     }
 }
 
@@ -387,8 +388,8 @@ int execHelperMain(int argc, char** argv, char** envp) {
             auto pluginSearchPath = getAdditionalSearchPaths(
                 firstPassFleetingOptions, SettingsNode("error"),
                 filesystem::current_path());
-            auto plugins = discoverPlugins(pluginSearchPath);
-            printPlugins(plugins);
+            auto summaries = discoverPluginSummaries(pluginSearchPath);
+            printPlugins(summaries);
             return EXIT_SUCCESS;
         }
 
@@ -445,12 +446,13 @@ int execHelperMain(int argc, char** argv, char** envp) {
     auto pluginSearchPath =
         getAdditionalSearchPaths(fleetingOptions, settings, basePath);
 
-    auto plugins = discoverPlugins(pluginSearchPath);
     if(fleetingOptions.listPlugins()) {
-        printPlugins(plugins);
+        auto summaries = discoverPluginSummaries(pluginSearchPath);
+        printPlugins(summaries);
         return EXIT_SUCCESS;
     }
 
+    auto plugins = discoverPlugins(pluginSearchPath);
     if(firstPassFleetingOptions.getAutoComplete()) {
         vector<string> commands = settings.get<vector<string>>("commands", {});
         printAutoComplete(*(fleetingOptions.getAutoComplete()),

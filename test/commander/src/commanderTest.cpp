@@ -2,10 +2,8 @@
 #include <filesystem>
 #include <memory>
 #include <stdexcept>
-#include <string>
+#include <string_view>
 #include <vector>
-
-#include <gsl/string_span>
 
 #include "commander/commander.h"
 #include "config/commandLineOptions.h"
@@ -14,26 +12,17 @@
 #include "config/settingsNode.h"
 #include "config/variablesMap.h"
 #include "log/log.h"
-#include "plugins/commandPlugin.h"
-#include "plugins/memory.h"
 #include "plugins/pluginUtils.h"
 
 #include "config/generators.h"
+#include "plugins/handlers.h"
 #include "unittest/catch.h"
 #include "unittest/rapidcheck.h"
 #include "utils/utils.h"
 
 #include "fleetingOptionsStub.h"
 
-using std::inserter;
-using std::make_shared;
-using std::runtime_error;
-using std::shared_ptr;
-using std::static_pointer_cast;
-using std::string;
-using std::vector;
-
-using gsl::czstring;
+using namespace std;
 
 using execHelper::config::Command;
 using execHelper::config::CommandCollection;
@@ -45,14 +34,12 @@ using execHelper::config::SettingsNode;
 using execHelper::config::VariablesMap;
 using execHelper::core::Task;
 using execHelper::core::Tasks;
-using execHelper::plugins::CommandPlugin;
 using execHelper::plugins::getPatternsKey;
-using execHelper::plugins::Memory;
-using execHelper::plugins::Plugin;
 using execHelper::plugins::Plugins;
 
 using execHelper::config::test::Unique;
 using execHelper::core::test::ExecutorStub;
+using execHelper::plugins::test::mapToMemories;
 using execHelper::test::FleetingOptionsStub;
 using execHelper::test::propertyTest;
 using execHelper::test::utils::getPredefinedPatterns;
@@ -60,8 +47,10 @@ using execHelper::test::utils::getPredefinedPatterns;
 namespace filesystem = std::filesystem;
 
 namespace {
-const czstring<> COMMANDS_KEY = "commands";
-const czstring<> MEMORY_KEY = "memory";
+using namespace std::literals;
+
+constexpr string_view COMMANDS_KEY = "commands"sv;
+constexpr string_view MEMORY_KEY = "memory"sv;
 } // namespace
 
 namespace execHelper::commander::test {
@@ -77,22 +66,14 @@ SCENARIO("Basic test the commander", "[commander]") {
             ExecutorStub::TaskQueue expectedTasks(
                 commands->size(), Task({}, env, workingDirectory));
 
-            auto memory = make_shared<Memory>();
-            Plugins plugins = {
-                {COMMANDS_KEY, shared_ptr<Plugin>(new CommandPlugin())}};
-            transform(commands->begin(), commands->end(),
-                      inserter(plugins, plugins.end()),
-                      [&memory](const auto& key) {
-                          return make_pair(move(key),
-                                           static_pointer_cast<Plugin>(memory));
-                      });
+            auto plugins = mapToMemories(*commands);
 
             Patterns expectedPatterns = getPredefinedPatterns(rootDirectory);
             expectedPatterns.insert(expectedPatterns.end(), patterns->begin(),
                                     patterns->end());
 
             for(const auto& command : *commands) {
-                REQUIRE(settings.add(COMMANDS_KEY, command));
+                REQUIRE(settings.add(string(COMMANDS_KEY), command));
 
                 const SettingsKeys keys({command, getPatternsKey()});
 
@@ -128,9 +109,9 @@ SCENARIO(
         fleetingOptions.m_commands = {"command3"};
 
         SettingsNode settings("test");
-        REQUIRE(settings.add(COMMANDS_KEY, commands));
-        REQUIRE(settings.add(command1, MEMORY_KEY));
-        REQUIRE(settings.add(command2, MEMORY_KEY));
+        REQUIRE(settings.add(string(COMMANDS_KEY), commands));
+        REQUIRE(settings.add(command1, string(MEMORY_KEY)));
+        REQUIRE(settings.add(command2, string(MEMORY_KEY)));
 
         Commander commander;
 
@@ -156,15 +137,13 @@ SCENARIO("Test when no commands are passed", "[commander]") {
         FleetingOptionsStub fleetingOptions;
 
         SettingsNode settings("test");
-        REQUIRE(settings.add(COMMANDS_KEY, commands));
-        REQUIRE(settings.add(command1, MEMORY_KEY));
-        REQUIRE(settings.add(command2, MEMORY_KEY));
+        REQUIRE(settings.add(string(COMMANDS_KEY), commands));
+        REQUIRE(settings.add(command1, string(MEMORY_KEY)));
+        REQUIRE(settings.add(command2, string(MEMORY_KEY)));
 
         Commander commander;
 
-        Plugins plugins = {
-            {COMMANDS_KEY, shared_ptr<Plugin>(new CommandPlugin())},
-        };
+        Plugins plugins;
 
         WHEN("We apply the configuration and run the commander") {
             THEN("It should fail") {

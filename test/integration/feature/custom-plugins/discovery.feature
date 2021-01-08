@@ -26,11 +26,9 @@ Feature: Discover custom plugins
         | clang-tidy            | Lua plugin for module \S*/plugins/clang-tidy.lua           |
         | cmake                 | Lua plugin for module \S*/plugins/cmake.lua                |
         | command-line-command  | Command-line-command \(internal\)                          |
-        | commands              | Command \(internal\)                                       |
         | cppcheck              | Lua plugin for module \S*/plugins/cppcheck.lua             |
         | docker                | Lua plugin for module \S*/plugins/docker.lua               |
         | lcov                  | Lua plugin for module \S*/plugins/lcov.lua                 |
-        | memory                | Memory \(internal\)                                        |
         | make                  | Lua plugin for module \S*/plugins/make.lua                 |
         | ninja                 | Lua plugin for module \S*/plugins/ninja.lua                |
         | pmd                   | Lua plugin for module \S*/plugins/pmd.lua                  |

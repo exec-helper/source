@@ -1,6 +1,7 @@
 /**
  *@file Tests properties that each plugin should have
  */
+#include <iostream>
 #include <sstream>
 
 #include "config/pattern.h"
@@ -9,11 +10,9 @@
 #include "config/variablesMap.h"
 #include "core/task.h"
 #include "plugins/commandLineCommand.h"
-#include "plugins/commandPlugin.h"
 #include "plugins/executePlugin.h"
 #include "plugins/logger.h"
 #include "plugins/luaPlugin.h"
-#include "plugins/memory.h"
 #include "plugins/plugin.h"
 #include "plugins/pluginUtils.h"
 
@@ -24,9 +23,10 @@
 
 #include "executorStub.h"
 #include "fleetingOptionsStub.h"
+#include "handlers.h"
 #include "pluginsGenerators.h"
 
-using std::shared_ptr;
+using namespace std;
 
 using execHelper::config::Pattern;
 using execHelper::config::Patterns;
@@ -37,7 +37,7 @@ using execHelper::config::SettingsNode;
 using execHelper::config::VariablesMap;
 using execHelper::core::Task;
 using execHelper::core::Tasks;
-using execHelper::plugins::Plugin;
+using execHelper::plugins::ApplyFunction;
 using execHelper::plugins::Plugins;
 
 using execHelper::test::FleetingOptionsStub;
@@ -50,13 +50,9 @@ constexpr std::string_view patternKey = "BLAAT"sv;
 } // namespace
 
 namespace execHelper::plugins::test {
-SCENARIO("Test the pattern keyword for each plugin") {
-    REQUIRE(Plugin::getPatternsKey() == "patterns");
-}
-
 SCENARIO("Check that all plugins are found") {
     GIVEN("The expected number of plugins") {
-        constexpr auto expectedNbOfPlugins = 17U;
+        constexpr auto expectedNbOfPlugins = 15U;
 
         WHEN("We request all plugins") {
             const auto plugins = discoverPlugins({PLUGINS_INSTALL_PATH});
@@ -76,25 +72,22 @@ SCENARIO("Every call to a plugin must lead to at least one registered task") {
     SettingsNode settings("clang-static-analyzer-test");
     PatternsHandler patterns;
     auto plugins = discoverPlugins({PLUGINS_INSTALL_PATH});
+    plugins.try_emplace("memory"s, memoryFunction());
     patterns.addPattern(Pattern(std::string(patternKey), {"memory"}));
     const ExecutionContext context(options, settings, patterns, plugins);
 
     propertyTest(
         "Every call to a plugin must lead to at least one generated task",
-        [&context](shared_ptr<const Plugin>&& plugin) {
-            REQUIRE(plugin);
-
-            auto variablesMap = plugin->getVariablesMap(FleetingOptionsStub());
+        [&context](const ApplyFunction& apply) {
+            VariablesMap variablesMap("generic_plugin");
             REQUIRE(variablesMap.add("command-line", "blaat"));
             REQUIRE(variablesMap.add("build-command", "memory"));
             REQUIRE(variablesMap.add("run-command", "memory"));
             REQUIRE(variablesMap.add("container", "blaat"));
             REQUIRE(variablesMap.add("targets", "memory"));
-            REQUIRE(variablesMap.add("commands", "memory"));
 
             THEN_WHEN("We apply the plugin") {
-                auto actualTasks =
-                    plugin->apply(core::Task(), variablesMap, context);
+                auto actualTasks = apply(core::Task(), variablesMap, context);
 
                 THEN_CHECK("It should return at least one task") {
                     REQUIRE_FALSE(actualTasks.empty());
@@ -110,24 +103,28 @@ SCENARIO("A plugin must not alter the arguments before a given task") {
     SettingsNode settings("clang-static-analyzer-test");
     PatternsHandler patterns;
     auto plugins = discoverPlugins({PLUGINS_INSTALL_PATH});
+    plugins.try_emplace("memory"s, memoryFunction());
     patterns.addPattern(Pattern(std::string(patternKey), {"memory"}));
     const ExecutionContext context(options, settings, patterns, plugins);
 
     propertyTest(
         "A plugin must not alter the arguments already in a given task",
-        [&context](std::shared_ptr<const Plugin>&& plugin, const Task& task) {
+        [&context](const ApplyFunction& apply, const Task& task) {
             RC_PRE(!task.getTask().empty());
 
-            auto variablesMap = plugin->getVariablesMap(FleetingOptionsStub());
+            VariablesMap variablesMap("generic_plugin");
             REQUIRE(variablesMap.add("command-line", "blaat"));
             REQUIRE(variablesMap.add("build-command", "memory"));
             REQUIRE(variablesMap.add("run-command", "memory"));
             REQUIRE(variablesMap.add("container", "blaat"));
             REQUIRE(variablesMap.add("targets", "memory"));
-            REQUIRE(variablesMap.add("commands", "memory"));
 
             THEN_WHEN("We apply the plugin") {
-                auto actualTasks = plugin->apply(task, variablesMap, context);
+                auto actualTasks = apply(task, variablesMap, context);
+
+                THEN_CHECK("At least one task is returned") {
+                    REQUIRE_FALSE(actualTasks.empty());
+                }
 
                 THEN_CHECK("The arguments before the task must remain") {
                     // At least one generated task must start with the input task
@@ -147,30 +144,13 @@ SCENARIO("A plugin must not alter the arguments before a given task") {
         });
 }
 
-SCENARIO("Print the plugin summary", "[generic-plugin][success]") {
-    propertyTest("A plugin", [](std::shared_ptr<const Plugin>&& plugin) {
-        WHEN("We request the summary of the plugin") {
-            auto summary = plugin->summary();
+//SCENARIO("Print the plugin summary", "[generic-plugin][success]") {
+//propertyTest("A plugin", [](SummaryFunction func) {
+//WHEN("We request the summary of the plugin") {
+//auto summary = func();
 
-            THEN("The summary must not be empty") { REQUIRE(!summary.empty()); }
-        }
-    });
-}
-
-SCENARIO("Stream the plugin summary", "[generic-plugin][success]") {
-    propertyTest("A plugin", [](std::shared_ptr<const Plugin>&& plugin) {
-        THEN_WHEN("We request the summary of the plugin") {
-            std::stringstream summary;
-            summary << *plugin;
-
-            THEN_CHECK("The summary must not be empty") {
-                REQUIRE(!summary.str().empty());
-            }
-
-            THEN_CHECK("The summary must show the expected message") {
-                REQUIRE(summary.str() == plugin->summary());
-            }
-        }
-    });
-}
+//THEN("The summary must not be empty") { REQUIRE(!summary.empty()); }
+//}
+//});
+//}
 } // namespace execHelper::plugins::test

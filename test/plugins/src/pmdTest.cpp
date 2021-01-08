@@ -118,8 +118,6 @@ SCENARIO("Testing the configuration settings of the pmd plugin", "[pmd]") {
 
         VariablesMap config("pmd-test");
 
-        LuaPlugin plugin(std::string(PLUGINS_INSTALL_PATH) + "/pmd.lua");
-
         addToConfig("exec", exe, &config);
         addToConfig("tool", tool, &config);
         addToTask(exe.value_or("pmd"), tool.value_or(Tool::Cpd), &expectedTask);
@@ -162,7 +160,9 @@ SCENARIO("Testing the configuration settings of the pmd plugin", "[pmd]") {
         }
 
         THEN_WHEN("We apply the plugin") {
-            auto actualTasks = plugin.apply(task, config, context);
+            auto actualTasks =
+                luaPlugin(task, config, context,
+                          std::string(PLUGINS_INSTALL_PATH) + "/pmd.lua");
 
             THEN_CHECK("It generated the expected tasks") {
                 REQUIRE(Tasks({expectedTask}) == actualTasks);

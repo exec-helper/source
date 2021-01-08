@@ -10,7 +10,6 @@
 #include "config/pattern.h"
 #include "config/settingsNode.h"
 #include "plugins/pluginUtils.h"
-#include "plugins/memory.h"
 
 #include "base-utils/configFileWriter.h"
 #include "base-utils/logger.h"
@@ -43,9 +42,7 @@ using execHelper::config::SettingsKeys;
 using execHelper::config::SettingsNode;
 using execHelper::config::SettingsValues;
 using execHelper::core::Task;
-using execHelper::plugins::Memory;
 using execHelper::plugins::PatternPermutator;
-using execHelper::plugins::Plugin;
 using execHelper::plugins::Plugins;
 using execHelper::plugins::replacePatternCombinations;
 
@@ -335,25 +332,5 @@ auto getPredefinedPatterns(const Path& rootDirectory) noexcept -> Patterns {
     predefined.emplace_back(
         Pattern{string(rootDirKey), {rootDirectory.string()}});
     return predefined;
-}
-
-auto registerValuesAsCommands(const vector<string>& values, gsl::not_null<Plugins*> plugins) noexcept -> map<string, shared_ptr<Memory>> {
-    map<string, shared_ptr<Memory>> memories;
-
-    transform(values.begin(),values.end(),
-              inserter(memories, memories.end()),
-              [](const auto& value) {
-                  return make_pair(value, make_shared<Memory>());
-              });
-
-    // Register each memory mapping as the endpoint for every target command
-    transform(memories.begin(), memories.end(),
-              inserter(*plugins, plugins->end()), [](const auto& memory) {
-                  return make_pair(
-                      memory.first,
-                      static_pointer_cast<Plugin>(memory.second));
-              });
-
-    return memories;
 }
 } // namespace execHelper::test::utils

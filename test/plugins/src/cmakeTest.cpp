@@ -89,8 +89,6 @@ SCENARIO("Testing the configuration settings of the cmake plugin", "[cmake]") {
 
             VariablesMap config("cmake-test");
 
-            LuaPlugin plugin(std::string(PLUGINS_INSTALL_PATH) + "/cmake.lua");
-
             expectedTask.append("cmake");
 
             // Set all configuration options, even if they are not relevant
@@ -215,7 +213,9 @@ SCENARIO("Testing the configuration settings of the cmake plugin", "[cmake]") {
             }
 
             THEN_WHEN("We apply the plugin") {
-                auto actualTasks = plugin.apply(task, config, context);
+                auto actualTasks =
+                    luaPlugin(task, config, context,
+                              std::string(PLUGINS_INSTALL_PATH) + "/cmake.lua");
 
                 THEN_CHECK("It generated the expected tasks") {
                     REQUIRE(Tasks({expectedTask}) == actualTasks);
@@ -240,14 +240,14 @@ SCENARIO("Set a wrong mode", "[cmake]") {
 
         VariablesMap config("cmake-test");
 
-        LuaPlugin plugin(std::string(PLUGINS_INSTALL_PATH) + "/cmake.lua");
-
         REQUIRE(config.add("mode", mode));
 
         THEN_WHEN("We apply the plugin") {
             THEN_CHECK("It throws a runtime error") {
-                REQUIRE_THROWS_AS(plugin.apply(task, config, context),
-                                  runtime_error);
+                REQUIRE_THROWS_AS(
+                    luaPlugin(task, config, context,
+                              std::string(PLUGINS_INSTALL_PATH) + "/cmake.lua"),
+                    runtime_error);
             }
         }
     });

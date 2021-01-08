@@ -48,7 +48,6 @@ using execHelper::core::Tasks;
 using execHelper::test::addToConfig;
 using execHelper::test::FleetingOptionsStub;
 using execHelper::test::propertyTest;
-using execHelper::test::utils::registerValuesAsCommands;
 
 namespace filesystem = std::filesystem;
 
@@ -67,14 +66,12 @@ SCENARIO("Testing the configuration settings of the selector plugin",
         Patterns patterns = {pattern};
         task.addPatterns(patterns);
 
-        Plugins plugins;
-        auto memories = registerValuesAsCommands(pattern.getValues(), &plugins);
+        const auto plugins = mapToMemories(pattern.getValues());
 
         VariablesMap config("selector-test");
 
         auto target = string("{").append(pattern.getKey()).append("}");
 
-        LuaPlugin plugin(scriptPath());
         addToConfig("targets", target, &config);
 
         if(workingDir) {
@@ -94,7 +91,7 @@ SCENARIO("Testing the configuration settings of the selector plugin",
         Tasks expectedTasks(pattern.getValues().size(), task);
 
         THEN_WHEN("We apply the plugin") {
-            auto actualTasks = plugin.apply(task, config, context);
+            auto actualTasks = luaPlugin(task, config, context, scriptPath());
 
             THEN_CHECK("It called the right commands") {
                 REQUIRE(actualTasks == expectedTasks);
@@ -105,20 +102,18 @@ SCENARIO("Testing the configuration settings of the selector plugin",
 
 SCENARIO("Unconfigured target in selector", "[selector]") {
     GIVEN("A config without a defined target") {
-        LuaPlugin plugin(scriptPath());
-
-        FleetingOptionsStub options;
-        SettingsNode settings("selector-test");
-        PatternsHandler patternsHandler;
-        Plugins plugins;
+        const FleetingOptionsStub options;
+        const SettingsNode settings("selector-test");
+        const PatternsHandler patternsHandler;
+        const Plugins plugins;
         const ExecutionContext context(options, settings, patternsHandler,
                                        plugins);
 
         WHEN("We call the plugin") {
             THEN("It should throw a runtime error") {
-                REQUIRE_THROWS_AS(plugin.apply(Task(),
-                                               VariablesMap("selector-test"),
-                                               context),
+                REQUIRE_THROWS_AS(luaPlugin(Task(),
+                                            VariablesMap("selector-test"),
+                                            context, scriptPath()),
                                   runtime_error);
             }
         }

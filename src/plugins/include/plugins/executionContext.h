@@ -4,6 +4,8 @@
 #include <map>
 #include <memory>
 
+#include "plugin.h"
+
 namespace execHelper::config {
 class FleetingOptionsInterface;
 class PatternsHandler;
@@ -11,9 +13,6 @@ class SettingsNode;
 } // namespace execHelper::config
 
 namespace execHelper::plugins {
-class Plugin;
-using Plugins = std::map<std::string, std::shared_ptr<const Plugin>>;
-
 /**
  * @brief Class containing the current execution context
  *

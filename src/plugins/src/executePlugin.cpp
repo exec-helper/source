@@ -2,34 +2,25 @@
 
 #include <algorithm>
 #include <memory>
+#include <utility>
 
 #include <gsl/gsl_assert>
-#include <gsl/string_span>
+#include <stdexcept>
 
-#include "config/fleetingOptionsInterface.h"
 #include "config/patternsHandler.h"
 #include "config/settingsNode.h"
 #include "config/variablesMap.h"
 #include "core/task.h"
 #include "log/assertions.h"
 
-#include "commandLineCommand.h"
 #include "executionContext.h"
 #include "logger.h"
-#include "memory.h"
-#include "pluginUtils.h"
+#include "plugin.h"
 
-using std::find;
-using std::make_shared;
-using std::shared_ptr;
-using std::string;
-using std::vector;
-
-using gsl::czstring;
+using namespace std;
 
 using execHelper::config::Command;
 using execHelper::config::CommandCollection;
-using execHelper::config::FleetingOptionsInterface;
 using execHelper::config::PatternKeys;
 using execHelper::config::Patterns;
 using execHelper::config::PatternsHandler;
@@ -42,10 +33,13 @@ using execHelper::core::Task;
 using execHelper::core::Tasks;
 
 namespace {
+using namespace std::literals;
+using namespace execHelper::plugins;
+constexpr auto patternsKey = "patterns"sv;
+
 auto getNextPatterns(const VariablesMap& variables,
                      const PatternsHandler& patterns) -> Patterns {
-    auto newPatternKeys =
-        variables.get<PatternKeys>(execHelper::plugins::getPatternsKey(), {});
+    auto newPatternKeys = variables.get<PatternKeys>(string(patternsKey), {});
     Patterns newPatterns;
     for(const auto& key : newPatternKeys) {
         if(!patterns.contains(key)) {
@@ -57,31 +51,53 @@ auto getNextPatterns(const VariablesMap& variables,
     }
     return newPatterns;
 }
-} // namespace
 
-namespace execHelper::plugins {
-ExecutePlugin::ExecutePlugin(
-    const CommandCollection& commandsToExecute) noexcept
-    : m_commands(commandsToExecute), m_initialCommands(commandsToExecute) {
-    ensures(m_commands.size() == m_initialCommands.size());
+auto getNextStep(const Command& command, const SettingsNode& settings,
+                 const Plugins& plugins) -> ApplyFunction {
+    auto plugin = plugins.find(command);
+    if(plugin != plugins.end()) {
+        LOG(trace) << "Identified '" << command << "' as a plugin";
+        return plugin->second;
+    }
+
+    LOG(trace)
+        << "'" << command
+        << "' is not a known plugin. Checking whether it is a known command";
+
+    auto commandToExecuteOpt = settings.get<CommandCollection>(
+        command); // Check whether the settings node contains a root key that is called <command>
+    if(commandToExecuteOpt) {
+        auto commandsToExecute = *(commandToExecuteOpt);
+        for(const auto& commandToExecute : commandsToExecute) {
+            LOG(trace) << command << " -> " << commandToExecute;
+        }
+
+        LOG(trace) << "Scheduling subsequent commands";
+        return [commandsToExecute,
+                command](const Task& task,
+                         [[maybe_unused]] const VariablesMap& variables,
+                         const ExecutionContext& context) -> Tasks {
+            LOG(trace) << "Resolving subsequent commands...";
+            Tasks tasks;
+            for(const auto& commandToExecute : commandsToExecute) {
+                auto newTasks = detail::executeCommands(
+                    command, commandToExecute, task, context);
+                tasks.insert(tasks.end(), newTasks.begin(), newTasks.end());
+            }
+            return tasks;
+        };
+    }
+
+    LOG(error) << "Could not find a command or plugin called '" << command
+               << "'";
+    throw std::runtime_error(
+        string("Could not find a command or plugin called '")
+            .append(command)
+            .append("'"));
 }
 
-ExecutePlugin::ExecutePlugin(const CommandCollection& commandsToExecute,
-                             const Command& initialCommand) noexcept
-    : m_commands(commandsToExecute),
-      m_initialCommands(commandsToExecute.size(), initialCommand) {
-    ensures(m_commands.size() == m_initialCommands.size());
-}
-
-auto ExecutePlugin::getVariablesMap(
-    const FleetingOptionsInterface& /*fleetingOptions*/) const noexcept
-    -> VariablesMap {
-    return VariablesMap("execute-plugin");
-}
-
-inline void ExecutePlugin::index(VariablesMap* variables,
-                                 const SettingsNode& settings,
-                                 const SettingsKeys& key) noexcept {
+inline void index(VariablesMap* variables, const SettingsNode& settings,
+                  const SettingsKeys& key) noexcept {
     if(!settings.contains(key)) {
         return;
     }
@@ -102,9 +118,9 @@ inline void ExecutePlugin::index(VariablesMap* variables,
     }
 }
 
-inline auto ExecutePlugin::getVariablesMap(
-    VariablesMap* variables, const vector<SettingsKeys>& keys,
-    const SettingsNode& rootSettings) noexcept -> bool {
+inline auto getVariablesMap(VariablesMap* variables,
+                            const vector<SettingsKeys>& keys,
+                            const SettingsNode& rootSettings) noexcept -> bool {
     for(const auto& key : keys) {
         if(rootSettings.contains(key)) {
             index(variables, rootSettings, key);
@@ -113,88 +129,35 @@ inline auto ExecutePlugin::getVariablesMap(
     return true;
 }
 
-auto ExecutePlugin::apply(Task task, const VariablesMap& /*variables*/,
-                          const ExecutionContext& context) const -> Tasks {
-    if(m_commands.empty()) {
-        user_feedback_error("No commands configured to execute");
-        LOG(warning) << "No commands configured to execute";
-    }
+} // namespace
 
-    Tasks tasks;
-    auto initialCommand = m_initialCommands.begin();
-    for(auto command = m_commands.begin(); command != m_commands.end();
-        ++command, ++initialCommand) {
-        auto plugin = getNextStep(*command, *initialCommand, context.settings(),
-                                  context.plugins());
-        if(!plugin) {
-            LOG(error) << "Could not find a command or plugin called '"
-                       << *command << "'";
-            throw std::runtime_error(
-                string("Could not find a command or plugin called '")
-                    .append(*command)
-                    .append("'"));
-        }
+namespace execHelper::plugins::detail {
+auto executeCommands(const config::Command& initialCommand,
+                     const config::Command& command, const core::Task& task,
+                     const ExecutionContext& context) -> core::Tasks {
+    LOG(trace) << "Resolving command '" << command << "'";
+    auto applyFunction =
+        getNextStep(command, context.settings(), context.plugins());
+    VariablesMap newVariablesMap(command);
+    const vector<SettingsKeys> keys = {{command}, {command, initialCommand}};
+    getVariablesMap(&newVariablesMap, keys, context.settings());
 
-        VariablesMap newVariablesMap =
-            plugin->getVariablesMap(context.options());
-        const vector<SettingsKeys> keys(
-            {{*command}, {*command, *initialCommand}});
-        getVariablesMap(&newVariablesMap, keys, context.settings());
+    Task preparedTask = task;
+    auto newPatterns = getNextPatterns(newVariablesMap, context.patterns());
+    preparedTask.addPatterns(newPatterns);
+    return applyFunction(preparedTask, newVariablesMap, context);
+}
+} // namespace execHelper::plugins::detail
 
-        Task preparedTask = task;
-        auto newPatterns = getNextPatterns(newVariablesMap, context.patterns());
-        preparedTask.addPatterns(newPatterns);
-        auto newTasks = plugin->apply(preparedTask, newVariablesMap, context);
+namespace execHelper::plugins {
+auto executeCommands(const CommandCollection& commands, const Task& task,
+                     const ExecutionContext& context) -> Tasks {
+    core::Tasks tasks;
+    for(const auto& command : commands) {
+        auto newTasks =
+            detail::executeCommands(command, command, task, context);
         tasks.insert(tasks.end(), newTasks.begin(), newTasks.end());
     }
     return tasks;
-}
-
-auto ExecutePlugin::summary() const noexcept -> std::string {
-    return "ExecutePlugin";
-}
-
-auto ExecutePlugin::getNextStep(const Command& command,
-                                const Command& /*originalCommand*/,
-                                const SettingsNode& settings,
-                                const Plugins& plugins) noexcept
-    -> shared_ptr<const Plugin> {
-    const auto pluginNames = getPluginNames(plugins);
-
-    if(find(pluginNames.begin(), pluginNames.end(), command) !=
-       pluginNames.end()) {
-        LOG(trace) << "Retrieving plugin named '" << command << "'.";
-        try {
-            return plugins.at(command);
-        } catch(const InvalidPlugin& /*e*/) {
-            LOG(error) << "Unable to retrieve a plugin name '" << command
-                       << "'.";
-            return nullptr;
-        }
-    }
-
-    LOG(trace) << "Checking whether '" << command << "' is a known command";
-    auto commandToExecuteOpt = settings.get<CommandCollection>(command);
-    if(!commandToExecuteOpt) {
-        LOG(warning)
-            << "Execute plugin found an empty value collection for the '"
-            << command << "' command";
-        return nullptr;
-    }
-    auto commandsToExecute = *(commandToExecuteOpt);
-    for(const auto& commandToExecute : commandsToExecute) {
-        LOG(trace) << command << " -> " << commandToExecute;
-    }
-    return make_shared<ExecutePlugin>(commandsToExecute, command);
-}
-
-inline auto ExecutePlugin::getPluginNames(const Plugins& plugins) noexcept
-    -> std::vector<std::string> {
-    vector<string> names;
-    names.reserve(plugins.size());
-
-    transform(plugins.begin(), plugins.end(), back_inserter(names),
-              [](const auto& plugin) { return plugin.first; });
-    return names;
 }
 } // namespace execHelper::plugins

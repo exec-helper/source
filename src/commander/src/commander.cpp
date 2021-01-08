@@ -2,9 +2,6 @@
 
 #include <filesystem>
 #include <iostream>
-#include <utility>
-
-#include <gsl/gsl>
 
 #include "config/fleetingOptionsInterface.h"
 #include "config/pattern.h"
@@ -17,10 +14,6 @@
 
 #include "logger.h"
 
-using std::move;
-
-using gsl::czstring;
-
 using execHelper::config::EnvironmentCollection;
 using execHelper::config::FleetingOptionsInterface;
 using execHelper::config::Path;
@@ -31,7 +24,6 @@ using execHelper::config::SettingsNode;
 using execHelper::config::VariablesMap;
 using execHelper::core::Task;
 using execHelper::core::Tasks;
-using execHelper::plugins::ExecutePlugin;
 using execHelper::plugins::ExecutionContext;
 using execHelper::plugins::Plugins;
 
@@ -53,8 +45,7 @@ inline auto addPredefinedPatterns(Patterns patterns, const Path& rootDirectory)
 }
 } // namespace
 
-namespace execHelper {
-namespace commander {
+namespace execHelper::commander {
 auto Commander::run(const FleetingOptionsInterface& fleetingOptions,
                     SettingsNode settings, Patterns patterns,
                     const Path& workingDirectory,
@@ -71,9 +62,6 @@ auto Commander::run(const FleetingOptionsInterface& fleetingOptions,
     if(commands.empty()) {
         throw std::runtime_error("You must define at least one command");
     }
-    ExecutePlugin plugin(move(commands));
-    auto tasks = plugin.apply(task, VariablesMap("commands"), context);
-    return tasks;
+    return executeCommands(commands, task, context);
 }
-} // namespace commander
-} // namespace execHelper
+} // namespace execHelper::commander

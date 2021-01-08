@@ -65,8 +65,6 @@ SCENARIO("Testing the configuration settings of the clang-tidy plugin",
 
         VariablesMap config("clang-tidy-test");
 
-        LuaPlugin plugin(std::string(PLUGINS_INSTALL_PATH) + "/clang-tidy.lua");
-
         expectedTask.append("clang-tidy");
 
         const string directoryOption("-p");
@@ -142,7 +140,9 @@ SCENARIO("Testing the configuration settings of the clang-tidy plugin",
         Tasks expectedTasks = {expectedTask};
 
         THEN_WHEN("We apply the plugin") {
-            auto actualTasks = plugin.apply(task, config, context);
+            auto actualTasks = luaPlugin(task, config, context,
+                                         std::string(PLUGINS_INSTALL_PATH) +
+                                             "/clang-tidy.lua");
 
             THEN_CHECK("It called the right commands") {
                 REQUIRE(expectedTasks == actualTasks);

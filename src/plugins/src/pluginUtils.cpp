@@ -14,18 +14,13 @@
 #include "core/patterns.h"
 
 #include "commandLineCommand.h"
-#include "commandPlugin.h"
 #include "logger.h"
 #include "luaPlugin.h"
 #include "memory.h"
+#include "plugin.h"
 
+using namespace std;
 namespace filesystem = std::filesystem;
-
-using std::map;
-using std::ostream;
-using std::shared_ptr;
-using std::string;
-using std::vector;
 
 using execHelper::config::Command;
 using execHelper::config::ENVIRONMENT_KEY;
@@ -147,25 +142,15 @@ auto toString(const PatternKeys& values) noexcept -> string {
     return result;
 }
 
-/**
- * Discover all compatible plugins in the given search paths. This function does *not* recursively seek in these paths.
- *
- * \param[in] searchPaths   The search paths from the lowest priority to the hightest (collisions of plugins in later paths overwrite the ones from earlier ones)
- * \returns     A mapping of the discovered plugins
- */
-auto discoverPlugins(const Paths& searchPaths) noexcept -> Plugins {
-    Plugins plugins{
-        {"commands",
-         shared_ptr<Plugin>(new execHelper::plugins::CommandPlugin())},
-        {"command-line-command",
-         shared_ptr<Plugin>(new execHelper::plugins::CommandLineCommand())},
-        {"memory", shared_ptr<Plugin>(new execHelper::plugins::Memory())},
-    };
-
+namespace detail {
+auto discoverLuaPlugins(
+    const Paths& searchPaths,
+    const std::function<void(const filesystem::path& plugin)>&
+        callback) noexcept {
     /**
      * We search the searchpaths in reverse and overwrite plugins with the same name in later search paths
      */
-    LOG(debug) << "Discovering plugins...";
+    LOG(debug) << "Discovering lua plugins...";
     for(const auto& path : searchPaths) {
         LOG(trace) << "Discovering plugins for path " << path;
         try {
@@ -175,15 +160,7 @@ auto discoverPlugins(const Paths& searchPaths) noexcept -> Plugins {
                     LOG(trace) << "Module " << entry.path().stem()
                                << " found at " << path;
                     auto newId = entry.path().stem().string();
-                    auto newPlugin = shared_ptr<const Plugin>(
-                        new execHelper::plugins::LuaPlugin(entry));
-
-                    if(plugins.count(newId) == 0) {
-                        plugins.emplace(
-                            make_pair(move(newId), move(newPlugin)));
-                    } else {
-                        plugins[newId] = std::move(newPlugin);
-                    }
+                    callback(entry.path());
                 }
             }
         } catch(const filesystem::filesystem_error& e) {
@@ -193,6 +170,62 @@ auto discoverPlugins(const Paths& searchPaths) noexcept -> Plugins {
                          << ": " << e.what();
         }
     }
+}
+} // namespace detail
+
+/**
+ * Discover all compatible plugins in the given search paths. This function does *not* recursively seek in these paths.
+ *
+ * \param[in] searchPaths   The search paths from the lowest priority to the hightest (collisions of plugins in later paths overwrite the ones from earlier ones)
+ * \returns     A mapping of the discovered plugins
+ */
+auto discoverPlugins(const Paths& searchPaths) noexcept -> Plugins {
+    Plugins plugins{{"command-line-command", &commandLineCommand}};
+
+    /**
+     * We search the searchpaths in reverse and overwrite plugins with the same name in later search paths
+     */
+    LOG(debug) << "Discovering plugins...";
+    detail::discoverLuaPlugins(
+        searchPaths, [&plugins](const filesystem::path& path) {
+            LOG(trace) << "Module " << path.stem() << " found at " << path;
+            auto newId = path.stem().string();
+            auto plugin = [path](Task task, const VariablesMap& variables,
+                                 const ExecutionContext& context) {
+                return luaPlugin(move(task), variables, context, path);
+            };
+
+            if(plugins.count(newId) == 0) {
+                plugins.try_emplace(newId, plugin);
+            } else {
+                plugins[newId] = plugin;
+            }
+        });
+    return plugins;
+}
+
+/**
+ * Discover all compatible plugins in the given search paths. This function does *not* recursively seek in these paths.
+ *
+ * \param[in] searchPaths   The search paths from the lowest priority to the hightest (collisions of plugins in later paths overwrite the ones from earlier ones)
+ * \returns     A mapping of the discovered plugins to their summary
+ */
+auto discoverPluginSummaries(const Paths& searchPaths) noexcept
+    -> PluginSummaries {
+    PluginSummaries plugins{
+        {"command-line-command", string(commandLineCommandSummary())}};
+
+    detail::discoverLuaPlugins(searchPaths,
+                               [&plugins](const filesystem::path& path) {
+                                   auto newId = path.stem().string();
+                                   auto summary = luaPluginSummary(path);
+
+                                   if(plugins.count(newId) == 0) {
+                                       plugins.try_emplace(newId, summary);
+                                   } else {
+                                       plugins[newId] = summary;
+                                   }
+                               });
     return plugins;
 }
 } // namespace execHelper::plugins

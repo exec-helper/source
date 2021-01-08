@@ -1,8 +1,6 @@
 src = [
   'src/luaPlugin.cpp',
   'src/pluginUtils.cpp',
-  'src/memory.cpp',
-  'src/commandPlugin.cpp',
   'src/executePlugin.cpp',
   'src/commandLineCommand.cpp',
   'src/logger.cpp',

@@ -56,8 +56,6 @@ SCENARIO("Testing the configuration settings of the make plugin", "[make]") {
 
         VariablesMap config("make-test");
 
-        LuaPlugin plugin(std::string(PLUGINS_INSTALL_PATH) + "/make.lua");
-
         expectedTask.append("make");
 
         const string directoryOption("--directory");
@@ -90,7 +88,9 @@ SCENARIO("Testing the configuration settings of the make plugin", "[make]") {
         }
 
         THEN_WHEN("We apply the plugin") {
-            auto actualTasks = plugin.apply(task, config, context);
+            auto actualTasks =
+                luaPlugin(task, config, context,
+                          std::string(PLUGINS_INSTALL_PATH) + "/make.lua");
 
             THEN_CHECK("It generated the expected tasks") {
                 REQUIRE(Tasks({expectedTask}) == actualTasks);

@@ -51,27 +51,6 @@ const czstring<> WORKING_DIR_KEY("working-dir");
 
 namespace execHelper::plugins::test {
 SCENARIO(
-    "Obtaining the default variables map of the command-line-command plugin",
-    "[command-line-command]") {
-    GIVEN("The default fleeting options") {
-        FleetingOptionsStub fleetingOptions;
-        CommandLineCommand plugin;
-
-        VariablesMap actualVariables(PLUGIN_NAME);
-        REQUIRE(actualVariables.add(COMMAND_LINE_KEY, CommandLineArgs()));
-        REQUIRE(actualVariables.add(ENVIRONMENT_KEY, EnvArgs()));
-
-        WHEN("We request the variables map") {
-            VariablesMap variables = plugin.getVariablesMap(fleetingOptions);
-
-            THEN("We should find the same ones") {
-                REQUIRE(variables == actualVariables);
-            }
-        }
-    }
-}
-
-SCENARIO(
     "Testing the configuration settings of the command-line-command plugin",
     "[command-line-command]") {
     MAKE_COMBINATIONS("Of several settings") {
@@ -83,9 +62,8 @@ SCENARIO(
         const string commandKey("command1");
         const CommandLineArgs command1({"command1"});
 
-        CommandLineCommand plugin;
         FleetingOptionsStub options;
-        VariablesMap variables = plugin.getVariablesMap(options);
+        VariablesMap variables(PLUGIN_NAME);
         Task expectedTask;
         std::vector<TaskCollection> commandLines;
 
@@ -144,7 +122,7 @@ SCENARIO(
 
         Task task;
         task.addPatterns(patterns);
-        auto actualTasks = plugin.apply(task, variables, context);
+        auto actualTasks = commandLineCommand(task, variables, context);
 
         THEN_CHECK("It called the right commands") {
             REQUIRE(expectedTasks == actualTasks);
@@ -157,7 +135,6 @@ SCENARIO("Testing erroneous configuration conditions for the "
          "[command-line-command]") {
     MAKE_COMBINATIONS("Of erroneous setups") {
         Task task;
-        CommandLineCommand plugin;
 
         FleetingOptionsStub options;
         SettingsNode settings("command-line-command");
@@ -165,7 +142,7 @@ SCENARIO("Testing erroneous configuration conditions for the "
         PatternsHandler patternsHandler;
         ExecutionContext context(options, settings, patternsHandler, plugins);
 
-        VariablesMap variables = plugin.getVariablesMap(options);
+        VariablesMap variables(PLUGIN_NAME);
 
         COMBINATIONS("Add command line key without value") {
             REQUIRE(variables.add(COMMAND_LINE_KEY));
@@ -173,7 +150,7 @@ SCENARIO("Testing erroneous configuration conditions for the "
 
         THEN_WHEN("We add no parameter and apply") {
             THEN_CHECK("The plugin should throw an exception") {
-                REQUIRE_THROWS_AS(plugin.apply(task, variables, context),
+                REQUIRE_THROWS_AS(commandLineCommand(task, variables, context),
                                   runtime_error);
             }
         }

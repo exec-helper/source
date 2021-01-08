@@ -15,8 +15,8 @@
 #include "base-utils/yaml.h"
 #include "config/path.h"
 #include "config/pattern.h"
+#include "plugins/executionContext.h"
 #include "plugins/pluginUtils.h"
-#include "plugins/memory.h"
 
 #include "executorStub.h"
 
@@ -127,15 +127,6 @@ std::string toString(const config::SettingsNode& settings,
                      unsigned int nbOfTabs = 0) noexcept;
 
 auto getPredefinedPatterns(const config::Path& rootDirectory) noexcept -> Patterns;
-
-/**
- * Register the given values as a separate command that is associated with its own memory backend
- *
- * \param[in] values    The values to create a command for
- * \param[out] plugins  Append the created plugin mappings to the given plugins
- * \returns The command and its associated memory backend.
- */
-[[nodiscard]] auto registerValuesAsCommands(const std::vector<std::string>& values, gsl::not_null<execHelper::plugins::Plugins*> plugins) noexcept -> std::map<std::string, std::shared_ptr<execHelper::plugins::Memory>>;
 } // namespace execHelper::test::utils
 
 #endif /* __TEST_UTILS_H__ */

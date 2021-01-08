@@ -51,8 +51,6 @@ SCENARIO("Testing the configuration settings of the bootstrap plugin",
 
         VariablesMap config("make-test");
 
-        LuaPlugin plugin(std::string(PLUGINS_INSTALL_PATH) + "/bootstrap.lua");
-
         if(workingDir) {
             handleWorkingDirectory(*workingDir, config, expectedTask);
         }
@@ -73,7 +71,9 @@ SCENARIO("Testing the configuration settings of the bootstrap plugin",
         }
 
         THEN_WHEN("We apply the plugin") {
-            auto actualTasks = plugin.apply(task, config, context);
+            auto actualTasks =
+                luaPlugin(task, config, context,
+                          std::string(PLUGINS_INSTALL_PATH) + "/bootstrap.lua");
 
             THEN_CHECK("It generated the expected tasks") {
                 REQUIRE(Tasks({expectedTask}) == actualTasks);

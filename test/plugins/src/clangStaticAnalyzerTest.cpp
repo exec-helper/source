@@ -1,4 +1,3 @@
-#include <memory>
 #include <optional>
 #include <stdexcept>
 #include <string>
@@ -14,7 +13,6 @@
 #include "core/task.h"
 #include "plugins/executionContext.h"
 #include "plugins/luaPlugin.h"
-#include "plugins/memory.h"
 
 #include "base-utils/nonEmptyString.h"
 #include "unittest/catch.h"
@@ -27,7 +25,6 @@
 
 using std::optional;
 using std::runtime_error;
-using std::shared_ptr;
 using std::string;
 using std::string_view;
 using std::vector;
@@ -76,13 +73,10 @@ SCENARIO(
 
         VariablesMap config("clang-static-analyzer-test");
 
-        LuaPlugin plugin(scriptPath());
-
         Plugins plugins;
-        auto memoryPlugin = shared_ptr<Plugin>(new Memory());
         for(const auto& command : buildCommand) {
             REQUIRE(config.add(string(buildCommandConfigKey), *command));
-            plugins[*command] = memoryPlugin;
+            plugins.try_emplace(*command, memoryFunction());
         }
 
         ExecutionContext context(options, settings, patterns, plugins);
@@ -107,7 +101,7 @@ SCENARIO(
         Tasks expectedTasks(buildCommand.size(), expectedTask);
 
         THEN_WHEN("We apply the plugin") {
-            auto actualTasks = plugin.apply(task, config, context);
+            auto actualTasks = luaPlugin(task, config, context, scriptPath());
 
             THEN_CHECK("It called the right commands") {
                 REQUIRE(actualTasks == expectedTasks);
@@ -118,22 +112,21 @@ SCENARIO(
 
 SCENARIO("Testing invalid configurations", "[clang-static-analyzer][error]") {
     GIVEN("An empty setup") {
-        LuaPlugin plugin(scriptPath());
-
         FleetingOptionsStub options;
         SettingsNode settings("clang-static-analyzer");
         PatternsHandler patterns;
         Plugins plugins;
         ExecutionContext context(options, settings, patterns, plugins);
 
-        VariablesMap variables = plugin.getVariablesMap(FleetingOptionsStub());
+        VariablesMap variables("clang-static-analyzer");
 
         Task task;
 
         WHEN("We apply the plugin") {
             THEN("It should throw an exception") {
-                REQUIRE_THROWS_AS(plugin.apply(task, variables, context),
-                                  runtime_error);
+                REQUIRE_THROWS_AS(
+                    luaPlugin(task, variables, context, scriptPath()),
+                    runtime_error);
             }
         }
 
@@ -142,8 +135,9 @@ SCENARIO("Testing invalid configurations", "[clang-static-analyzer][error]") {
             REQUIRE(variables.add(string(buildCommandConfigKey)));
 
             THEN("It should fail") {
-                REQUIRE_THROWS_AS(plugin.apply(task, variables, context),
-                                  runtime_error);
+                REQUIRE_THROWS_AS(
+                    luaPlugin(task, variables, context, scriptPath()),
+                    runtime_error);
             }
         }
     }

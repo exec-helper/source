@@ -1,5 +1,4 @@
 #include <map>
-#include <memory>
 #include <stdexcept>
 #include <vector>
 
@@ -12,18 +11,17 @@
 #include "core/task.h"
 #include "log/assertions.h"
 #include "plugins/executePlugin.h"
-#include "plugins/memory.h"
 #include "unittest/catch.h"
 
 #include "utils/utils.h"
 
 #include "executorStub.h"
 #include "fleetingOptionsStub.h"
+#include "handlers.h"
 
 using std::map;
 using std::move;
 using std::runtime_error;
-using std::shared_ptr;
 using std::string;
 using std::vector;
 
@@ -40,8 +38,6 @@ using execHelper::config::SettingsNode;
 using execHelper::config::SettingsValues;
 using execHelper::config::VariablesMap;
 using execHelper::core::Task;
-using execHelper::plugins::ExecutePlugin;
-using execHelper::plugins::Memory;
 
 using execHelper::test::FleetingOptionsStub;
 
@@ -99,39 +95,21 @@ class Expected {
 } // namespace
 
 namespace execHelper::plugins::test {
-SCENARIO("Obtaining the default variables map of the execute-plugin",
-         "[clang-tidy]") {
-    GIVEN("The default fleeting options") {
-        FleetingOptionsStub fleetingOptions;
-        ExecutePlugin plugin({});
-
-        VariablesMap actualVariables(PLUGIN_NAME);
-
-        WHEN("We request the variables map") {
-            VariablesMap variables = plugin.getVariablesMap(fleetingOptions);
-
-            THEN("We should find the same ones") {
-                REQUIRE(variables == actualVariables);
-            }
-        }
-    }
-}
+using namespace std::literals;
 
 SCENARIO("Testing the default execute settings", "[execute-plugin]") {
     GIVEN("A selector plugin object and the default options") {
-        ExecutePlugin plugin({});
         Task task;
 
-        FleetingOptionsStub options;
-        SettingsNode settings(PLUGIN_NAME);
-        Plugins plugins;
-        PatternsHandler patternsHandler;
+        const FleetingOptionsStub options;
+        const SettingsNode settings(PLUGIN_NAME);
+        const Plugins plugins;
+        const PatternsHandler patternsHandler;
         const ExecutionContext context(options, settings, patternsHandler,
                                        plugins);
 
         WHEN("We apply the selector plugin") {
-            auto actualTasks =
-                plugin.apply(task, VariablesMap(PLUGIN_NAME), context);
+            auto actualTasks = executeCommands({}, task, context);
 
             THEN("It should return an empty task list") {
                 REQUIRE(actualTasks.empty());
@@ -142,6 +120,9 @@ SCENARIO("Testing the default execute settings", "[execute-plugin]") {
 
 SCENARIO("Test the settings node to variables map mapping",
          "[execute-plugin]") {
+    const auto plugins = mapToMemories({"memory"s});
+    const PatternsHandler patternsHandler;
+
     MAKE_COMBINATIONS("Of settings node configurations") {
         SettingsNode settings("test-execute-plugin");
         FleetingOptionsStub fleetingOptions;
@@ -197,19 +178,12 @@ SCENARIO("Test the settings node to variables map mapping",
             commands = directCommands;
         }
 
-        ExecutePlugin plugin(commands);
-
-        const Plugins plugins(
-            {{"memory",
-              shared_ptr<Plugin>(new execHelper::plugins::Memory())}});
-        PatternsHandler patternsHandler;
         const ExecutionContext context(fleetingOptions, settings,
                                        patternsHandler, plugins);
 
         THEN_WHEN("We apply the execute plugin") {
             Task task;
-            auto actualTasks =
-                plugin.apply(task, VariablesMap(PLUGIN_NAME), context);
+            auto actualTasks = executeCommands(commands, task, context);
 
             THEN_CHECK("It called the right commands") {
                 REQUIRE(actualTasks.size() == commands.size());
@@ -220,50 +194,19 @@ SCENARIO("Test the settings node to variables map mapping",
 
 SCENARIO("Test problematic cases", "[execute-plugin]") {
     GIVEN("A plugin with a non-existing plugin to execute") {
-        FleetingOptionsStub options;
-        SettingsNode settings(PLUGIN_NAME);
-        const Plugins plugins(
-            {{"Memory",
-              shared_ptr<Plugin>(new execHelper::plugins::Memory())}});
-        PatternsHandler patternsHandler;
+        const FleetingOptionsStub options;
+        const SettingsNode settings(PLUGIN_NAME);
+        const Plugins plugins;
+        const PatternsHandler patternsHandler;
         const ExecutionContext context(options, settings, patternsHandler,
                                        plugins);
-
-        ExecutePlugin plugin({"non-existing-plugin"});
 
         WHEN("We execute the plugin") {
             THEN("It should throw a runtime_error exception") {
                 REQUIRE_THROWS_AS(
-                    plugin.apply(Task(), VariablesMap("test"), context),
+                    executeCommands({"non-existing-plugin"}, Task(), context),
                     runtime_error);
             }
-        }
-    }
-}
-
-SCENARIO("Print the execute-plugin summary", "[execute-plugin][success]") {
-    ExecutePlugin plugin({});
-
-    WHEN("We request the summary of the plugin") {
-        auto summary = plugin.summary();
-
-        THEN("The summary must not be empty") { REQUIRE(!summary.empty()); }
-    }
-}
-
-SCENARIO("Stream the execute-plugin summary", "[execute-plugin][success]") {
-    ExecutePlugin plugin({});
-
-    WHEN("We request the summary of the plugin") {
-        std::stringstream summary;
-        summary << plugin;
-
-        THEN("The summary must not be empty") {
-            REQUIRE(!summary.str().empty());
-        }
-
-        THEN("The summary must show the expected message") {
-            REQUIRE(summary.str() == plugin.summary());
         }
     }
 }

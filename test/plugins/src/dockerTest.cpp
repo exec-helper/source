@@ -51,7 +51,6 @@ using execHelper::test::addToTask;
 using execHelper::test::FleetingOptionsStub;
 using execHelper::test::NonEmptyString;
 using execHelper::test::propertyTest;
-using execHelper::test::utils::registerValuesAsCommands;
 
 namespace filesystem = std::filesystem;
 
@@ -134,15 +133,10 @@ SCENARIO("Testing the configuration settings of the docker plugin",
 
             VariablesMap config("docker-test");
 
-            LuaPlugin plugin(std::string(PLUGINS_INSTALL_PATH) + "/docker.lua");
-
             SettingsNode generalSettings("docker-test");
 
-            Plugins plugins;
-            auto memories =
-                registerValuesAsCommands(pattern.getValues(), &plugins);
-
-            PatternsHandler patternsHandler(patterns);
+            const auto plugins = mapToMemories(pattern.getValues());
+            const PatternsHandler patternsHandler(patterns);
             const ExecutionContext context(options, settings, patternsHandler,
                                            plugins);
 
@@ -232,7 +226,9 @@ SCENARIO("Testing the configuration settings of the docker plugin",
             }
 
             THEN_WHEN("We apply the plugin") {
-                auto actualTasks = plugin.apply(task, config, context);
+                auto actualTasks = luaPlugin(task, config, context,
+                                             std::string(PLUGINS_INSTALL_PATH) +
+                                                 "/docker.lua");
 
                 THEN_CHECK("It generated the expected tasks") {
                     //Tasks expectedTasks( target ? 1U : 1U, expectedTask);
@@ -261,8 +257,6 @@ SCENARIO("Not passing an image or container to the docker plugin",
             const optional<pair<string, string>>&
                 env, // Lua does not necessarily preserve the order of these, so we currently limit ourselves to one value
             const optional<vector<string>>& volumes) {
-            LuaPlugin plugin(std::string(PLUGINS_INSTALL_PATH) + "/docker.lua");
-
             VariablesMap config("docker-test");
             addToConfig("run", mode, &config);
             addToConfig("interactive", interactive, &config);
@@ -274,8 +268,11 @@ SCENARIO("Not passing an image or container to the docker plugin",
 
             THEN_WHEN("We call the docker plugin with this configuration") {
                 THEN_CHECK("It throws a runtime error") {
-                    REQUIRE_THROWS_AS(plugin.apply(Task(), config, context),
-                                      runtime_error);
+                    REQUIRE_THROWS_AS(
+                        luaPlugin(Task(), config, context,
+                                  std::string(PLUGINS_INSTALL_PATH) +
+                                      "/docker.lua"),
+                        runtime_error);
                 }
             }
         });

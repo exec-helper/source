@@ -56,8 +56,6 @@ SCENARIO("Testing the configuration settings of the ninja plugin", "[ninja]") {
 
         VariablesMap config("ninja-test");
 
-        LuaPlugin plugin(std::string(PLUGINS_INSTALL_PATH) + "/ninja.lua");
-
         expectedTask.append("ninja");
 
         if(workingDir) {
@@ -90,7 +88,9 @@ SCENARIO("Testing the configuration settings of the ninja plugin", "[ninja]") {
         }
 
         THEN_WHEN("We apply the plugin") {
-            auto actualTasks = plugin.apply(task, config, context);
+            auto actualTasks =
+                luaPlugin(task, config, context,
+                          std::string(PLUGINS_INSTALL_PATH) + "/ninja.lua");
 
             THEN_CHECK("It called the right commands") {
                 REQUIRE(actualTasks == Tasks({expectedTask}));
