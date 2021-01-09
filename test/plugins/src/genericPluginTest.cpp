@@ -1,7 +1,7 @@
 /**
  *@file Tests properties that each plugin should have
  */
-#include <iostream>
+#include <algorithm>
 #include <sstream>
 
 #include "config/pattern.h"
@@ -28,6 +28,7 @@
 
 using namespace std;
 
+using execHelper::config::Paths;
 using execHelper::config::Pattern;
 using execHelper::config::Patterns;
 using execHelper::config::PatternsHandler;
@@ -60,6 +61,17 @@ SCENARIO("Check that all plugins are found") {
             THEN("The number of plugins must equal the expected number of "
                  "plugins") {
                 REQUIRE(plugins.size() == expectedNbOfPlugins);
+            }
+        }
+
+        WHEN("We request all plugin summaries") {
+            const auto summaries =
+                discoverPluginSummaries({PLUGINS_INSTALL_PATH});
+
+            THEN("The number of plugin summaries must equal the expected "
+                 "number of "
+                 "plugins") {
+                REQUIRE(summaries.size() == expectedNbOfPlugins);
             }
         }
     }
@@ -144,13 +156,21 @@ SCENARIO("A plugin must not alter the arguments before a given task") {
         });
 }
 
-//SCENARIO("Print the plugin summary", "[generic-plugin][success]") {
-//propertyTest("A plugin", [](SummaryFunction func) {
-//WHEN("We request the summary of the plugin") {
-//auto summary = func();
+SCENARIO("Every plugin should have a non-empty summary",
+         "[generic-plugin][success]") {
+    GIVEN("All search paths for discovering plugins") {
+        const Paths searchPaths = {PLUGINS_INSTALL_PATH};
 
-//THEN("The summary must not be empty") { REQUIRE(!summary.empty()); }
-//}
-//});
-//}
+        WHEN("We request all plugin summaries") {
+            const auto summaries = discoverPluginSummaries(searchPaths);
+
+            THEN("The summaries must not be empty") {
+                REQUIRE(std::none_of(summaries.begin(), summaries.end(),
+                                     [](const auto& summary) {
+                                         return summary.second.empty();
+                                     }));
+            }
+        }
+    }
+}
 } // namespace execHelper::plugins::test

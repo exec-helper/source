@@ -20,17 +20,6 @@ template <> struct Arbitrary<execHelper::plugins::ApplyFunction> {
                         [](const auto& plugin) { return plugin.second; });
     };
 };
-
-//template <>
-//struct Arbitrary<execHelper::plugins::SummaryFunction> {
-//static auto arbitrary()
-//-> Gen<execHelper::plugins::SummaryFunction> {
-//static const auto plugins = execHelper::plugins::discoverPluginSummaries(
-//{std::filesystem::path(PLUGINS_INSTALL_PATH)});
-//return gen::map(gen::elementOf(plugins),
-//[](const auto& plugin) { return plugin.second; });
-//};
-//};
 } // namespace rc
 
 #endif /* PLUGINS_GENERATORS_INCLUDE */
