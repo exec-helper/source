@@ -34,7 +34,6 @@ using execHelper::config::Envp;
 
 namespace process = boost::process;
 namespace this_process = boost::this_process;
-namespace filesystem = boost::filesystem;
 
 namespace {
 const execHelper::core::PosixShell::ShellReturnCode POSIX_SUCCESS = 0U;
@@ -48,9 +47,9 @@ const execHelper::core::PosixShell::ShellReturnCode POSIX_SUCCESS = 0U;
  * \returns The constructed PATH for the child. The first entry will be the given working directory
  */
 inline auto getPath(const process::environment& env,
-                    const filesystem::path& workingDir) noexcept
-    -> std::vector<filesystem::path> {
-    std::vector<filesystem::path> path({filesystem::absolute(workingDir)});
+                    const boost::filesystem::path& workingDir) noexcept
+    -> std::vector<boost::filesystem::path> {
+    std::vector<boost::filesystem::path> path({boost::filesystem::absolute(workingDir)});
     if(env.count("PATH") == 0) {
         auto parent_path = this_process::path();
         path.insert(path.end(), parent_path.begin(), parent_path.end());
@@ -76,14 +75,14 @@ auto PosixShell::execute(const Task& task) -> PosixShell::ShellReturnCode {
     }
 
     TaskCollection args = shellExpand(task);
-    filesystem::path binary = args.front();
+    boost::filesystem::path binary = args.front();
 
     if(binary.is_relative()) {
         binary = process::search_path(
             args.front(),
             getPath(
                 env,
-                filesystem::path(
+                boost::filesystem::path(
                     task.getWorkingDirectory()))); // getPath guarantees that the given working directory is part of the PATH it returns, so there is no need to explicitly look for the binary in the considered working directory first.
 
         if(binary.empty()) {
@@ -95,17 +94,17 @@ auto PosixShell::execute(const Task& task) -> PosixShell::ShellReturnCode {
         }
 
         LOG(debug) << "Binary is relative. Corrected to " << binary;
-        binary = filesystem::absolute(binary);
+        binary = boost::filesystem::absolute(binary);
         LOG(debug) << "Binary " << args.front() << " is relative. Corrected to "
                    << binary;
     }
-    if(!filesystem::exists(binary)) {
+    if(!boost::filesystem::exists(binary)) {
         throw PathNotFoundError(std::string("Could not find binary '")
                                     .append(args.front())
                                     .append("' on this system"));
     }
-    if(!filesystem::is_regular_file(binary) &&
-       !filesystem::is_symlink(binary)) {
+    if(!boost::filesystem::is_regular_file(binary) &&
+       !boost::filesystem::is_symlink(binary)) {
         throw PathNotFoundError(std::string("Cannot execute a non-file binary ")
                                     .append(binary.string()));
     }
@@ -115,7 +114,7 @@ auto PosixShell::execute(const Task& task) -> PosixShell::ShellReturnCode {
     try {
         return system(binary, process::args = args,
                       process::start_dir =
-                          filesystem::path(task.getWorkingDirectory()),
+                          boost::filesystem::path(task.getWorkingDirectory()),
                       env);
     } catch(const boost::process::process_error& e) {
         LOG(error) << "Failed to execute command with " << binary;
