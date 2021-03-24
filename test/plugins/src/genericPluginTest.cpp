@@ -53,7 +53,7 @@ constexpr std::string_view patternKey = "BLAAT"sv;
 namespace execHelper::plugins::test {
 SCENARIO("Check that all plugins are found") {
     GIVEN("The expected number of plugins") {
-        constexpr auto expectedNbOfPlugins = 19U;
+        constexpr auto expectedNbOfPlugins = 4U;
 
         WHEN("We request all plugins") {
             const auto plugins = discoverPlugins({PLUGINS_INSTALL_PATH});

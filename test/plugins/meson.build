@@ -5,23 +5,10 @@ plugins_generators = declare_dependency(
 
 src = [
   'src/genericPluginTest.cpp',
-  'src/clangStaticAnalyzerTest.cpp',
-  'src/clangTidyTest.cpp',
-  'src/pmdTest.cpp',
   'src/commandLineCommandTest.cpp',
-  'src/cppcheckTest.cpp',
   'src/pluginUtilsTest.cpp',
-  'src/bootstrapTest.cpp',
   'src/executePluginTest.cpp',
-  'src/valgrindTest.cpp',
   'src/selectorTest.cpp',
-  'src/sconsTest.cpp',
-  'src/makeTest.cpp',
-  'src/lcovTest.cpp',
-  'src/ninjaTest.cpp',
-  'src/cmakeTest.cpp',
-  'src/dockerTest.cpp',
-  'src/mesonTest.cpp',
   'src/shellTest.cpp',
 ]
 

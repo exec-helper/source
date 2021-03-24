@@ -28,23 +28,8 @@ plugins = declare_dependency(
 )
 
 plugin_files = [
-  'src/scripts/make.lua',
-  'src/scripts/cmake.lua',
-  'src/scripts/docker.lua',
-  'src/scripts/ninja.lua',
-  'src/scripts/bootstrap.lua',
-  'src/scripts/scons.lua',
-  'src/scripts/clang-tidy.lua',
-  'src/scripts/cppcheck.lua',
   'src/scripts/selector.lua',
-  'src/scripts/clang-static-analyzer.lua',
-  'src/scripts/pmd.lua',
-  'src/scripts/valgrind.lua',
-  'src/scripts/lcov.lua',
-  'src/scripts/meson.lua',
   'src/scripts/sh.lua',
   'src/scripts/bash.lua',
-  'src/scripts/zsh.lua',
-  'src/scripts/fish.lua',
 ]
 install_data(plugin_files, install_dir : get_option('datadir') / 'exec-helper' / 'plugins')

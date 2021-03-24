@@ -41,8 +41,7 @@ namespace {
 enum class Shell { Sh, Bash, Zsh, Fish };
 
 constexpr auto getAllShells() {
-    return std::experimental::make_array(Shell::Sh, Shell::Bash, Shell::Zsh,
-                                         Shell::Fish);
+    return std::experimental::make_array(Shell::Sh, Shell::Bash);
 }
 
 inline auto shellToString(Shell shell) {
