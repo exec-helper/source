@@ -1,3 +1,31 @@
+commands:
+    setup: Setup the repository for building
+    init: Initialize the build infrastructure
+    init-build: Initialize the build infrastructure and switches off everything that has nothing to do with building the exec-helper binaries themselves
+    init-no-system: Initialize system and disable the use of all system packages
+    init-limited-optimization: Initialize system and build using a sensible trade-off between speed and useful backtraces
+    init-windows: Initialize windows build
+    build: Build-only + install
+    build-only: Build only
+    install: Install only
+    create-installer: Create Windows installer
+    clean: Clean build
+    distclean: Distclean build
+    rebuild: Clean + build
+    analyze: Run the specified analysis tool(s)
+    run-test: unittest + integration
+    unittest: Run the specified unittests using the specified FILTER
+    integration: Run the specified integration tests
+    coverage: Run the coverage analysis tools using a specific setup (for convenience)
+    memory-check: Run the memory check analysis tool for a specific setup (for convenience)
+    undefined-behaviour: Check for undefined behaviour using UBSan
+    asan: Check for memory usage errors using AddressSanitizer
+    docs: Build + install the documentation
+    changelog: Build the changelog
+    create-toolchain-file: Create the associated toolchain file
+    format: Format and check the format of the sources
+    language-server: Start and connect to the c++ language server
+
 patterns:
     COMPILER:
         default-values:
@@ -81,33 +109,8 @@ patterns:
         short-option: f
         long-option: filter
 
-commands:
-    setup: Setup the repository for building
-    init: Initialize the build infrastructure
-    init-build: Initialize the build infrastructure and switches off everything that has nothing to do with building the exec-helper binaries themselves
-    init-no-system: Initialize system and disable the use of all system packages
-    init-limited-optimization: Initialize system and build using a sensible trade-off between speed and useful backtraces
-    init-windows: Initialize windows build
-    build: Build-only + install
-    build-only: Build only
-    install: Install only
-    create-installer: Create Windows installer
-    clean: Clean build
-    distclean: Distclean build
-    rebuild: Clean + build
-    analyze: Run the specified analysis tool(s)
-    run-test: unittest + integration
-    unittest: Run the specified unittests using the specified FILTER
-    integration: Run the specified integration tests
-    coverage: Run the coverage analysis tools using a specific setup (for convenience)
-    memory-check: Run the memory check analysis tool for a specific setup (for convenience)
-    undefined-behaviour: Check for undefined behaviour using UBSan
-    asan: Check for memory usage errors using AddressSanitizer
-    docs: Build + install the documentation
-    changelog: Build the changelog
-    create-toolchain-file: Create the associated toolchain file
-    format: Format and check the format of the sources
-    language-server: Start and connect to the c++ language server
+additional-search-paths:
+    - plugins/plugins
 
 setup:
     - command-line-command
