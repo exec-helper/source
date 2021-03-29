@@ -15,6 +15,7 @@ variables:
     DOCKER_DRIVER: overlay2         # Overwrite default docker driver
     SAST_DISABLE_DIND: "true"
     SAST_DEFAULT_ANALYZERS: "flawfinder,gitleaks,trufflehog,pmd"
+    GIT_SUBMODULE_STRATEGY: normal
 
 
 .install_exec_helper: &install_exec_helper
