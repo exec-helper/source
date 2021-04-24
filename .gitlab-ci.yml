@@ -40,6 +40,7 @@ variables:
     script:
         - sudo pacman -Sy --noconfirm --needed tar
         - *install_exec_helper
+        - exec-helper --list-plugins
         - echo "using run target '$RUN_TARGET'"
         - echo "using modules '$MODULES'"
         - export RC_PARAMS="max_success=${NB_RUNS} max_size=${NB_RUNS}"
