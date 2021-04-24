@@ -21,20 +21,10 @@ Feature: Discover custom plugins
 
         Examples:
         | plugin_id             | description                                                |
-        | bootstrap             | Lua plugin for module \S*/plugins/bootstrap.lua            |
-        | clang-static-analyzer | Lua plugin for module \S*/plugins/clang-static-analyzer.lua|
-        | clang-tidy            | Lua plugin for module \S*/plugins/clang-tidy.lua           |
-        | cmake                 | Lua plugin for module \S*/plugins/cmake.lua                |
+        | bash                  | Lua plugin for module \S*/custom-plugins/bash.lua          |
         | command-line-command  | Command-line-command \(internal\)                          |
-        | cppcheck              | Lua plugin for module \S*/plugins/cppcheck.lua             |
-        | docker                | Lua plugin for module \S*/plugins/docker.lua               |
-        | lcov                  | Lua plugin for module \S*/plugins/lcov.lua                 |
-        | make                  | Lua plugin for module \S*/plugins/make.lua                 |
-        | ninja                 | Lua plugin for module \S*/plugins/ninja.lua                |
-        | pmd                   | Lua plugin for module \S*/plugins/pmd.lua                  |
-        | scons                 | Lua plugin for module \S*/plugins/scons.lua                |
-        | selector              | Lua plugin for module \S*/plugins/selector.lua             |
-        | valgrind              | Lua plugin for module \S*/plugins/valgrind.lua             |
+        | selector              | Lua plugin for module \S*/custom-plugins/selector.lua      |
+        | sh                    | Lua plugin for module \S*/custom-plugins/sh.lua            |
 
     @error
     Scenario: Fail to find a custom module when the search path is not set properly
@@ -77,7 +67,7 @@ Feature: Discover custom plugins
 
         Examples:
         | plugin_id             | description                                                       | command    |
-        | make                  | Lua plugin for module \S*/custom-plugins/make.lua                 | Command1   |
+        | sh                    | Lua plugin for module \S*/custom-plugins/sh.lua                   | Command1   |
         | command-line-command  | Lua plugin for module \S*/custom-plugins/command-line-command.lua | Command1   |
 
     @successful
@@ -108,7 +98,7 @@ Feature: Discover custom plugins
 
         Examples:
         | plugin_id             | description                                                       | command    |
-        | make                  | Lua plugin for module \S*/custom-plugins/make.lua                 | Command1   |
+        | sh                    | Lua plugin for module \S*/custom-plugins/sh.lua                   | Command1   |
         | command-line-command  | Lua plugin for module \S*/custom-plugins/command-line-command.lua | Command1   |
 
     @successful

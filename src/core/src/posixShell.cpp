@@ -49,7 +49,8 @@ const execHelper::core::PosixShell::ShellReturnCode POSIX_SUCCESS = 0U;
 inline auto getPath(const process::environment& env,
                     const boost::filesystem::path& workingDir) noexcept
     -> std::vector<boost::filesystem::path> {
-    std::vector<boost::filesystem::path> path({boost::filesystem::absolute(workingDir)});
+    std::vector<boost::filesystem::path> path(
+        {boost::filesystem::absolute(workingDir)});
     if(env.count("PATH") == 0) {
         auto parent_path = this_process::path();
         path.insert(path.end(), parent_path.begin(), parent_path.end());
