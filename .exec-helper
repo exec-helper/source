@@ -526,7 +526,7 @@ command-line-command:
         command-line: [ git, diff-index, --quiet, HEAD, --]
 
     language-server:
-        command-line: [ clangd]
+        command-line: [ clangd, --background-index]
 
 valgrind:
     environment:
