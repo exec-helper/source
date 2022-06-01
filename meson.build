@@ -1,5 +1,5 @@
 project('exec-helper', 'cpp',
-  version: '0.6.0',
+  version: '0.7.0',
   default_options: [
     'warning_level=3',
     'cpp_std=c++17',
@@ -10,6 +10,10 @@ project('exec-helper', 'cpp',
 
 if get_option('terminate-on-assert')
   add_project_arguments('-DTERMINATE_ON_ASSERT_FAILURE', language: 'cpp')
+endif
+
+if meson.get_compiler('cpp').get_id() == 'gcc'
+  add_project_arguments('-Wno-maybe-uninitialized', language: 'cpp')
 endif
 
 cmake = import('cmake')
@@ -26,7 +30,7 @@ if not yaml_cpp_dep.found()
   yaml_cpp_dep = yaml_cpp_proj.dependency('yaml_cpp')
 endif
 
-gsl_dep = dependency('gsl', required: get_option('use-system-gsl'))  # pkg-config can falsely trigger on GNU Scientific Library
+gsl_dep = dependency('Microsoft.GSL', required: get_option('use-system-gsl'), modules: ['Microsoft.GSL::GSL'])  # pkg-config can falsely trigger on GNU Scientific Library
 if not gsl_dep.found()
   gsl_proj = subproject('microsoft-gsl')
   gsl_dep = gsl_proj.get_variable('microsoft_gsl_dep')
@@ -46,13 +50,13 @@ luawrapper = declare_dependency(
 boost_dep = dependency('boost', version: '>=1.64.0', static: get_option('use-static-boost'))
 boost_filesystem_dep = dependency('boost', modules: ['filesystem'], static: get_option('use-static-boost'))
 boost_program_options_dep = dependency('boost', modules: ['program_options'], static: get_option('use-static-boost'))
-boost_log_dep = dependency('boost', modules: ['log', 'log_setup', 'thread'], static: get_option('use-static-boost'))
+boost_log_dep = dependency('boost', modules: ['log', 'log_setup', 'thread', 'filesystem'], static: get_option('use-static-boost'))
 
 # Fix for boost for meson version 0.53 and lower.
 if get_option('use-static-boost')
-  add_project_arguments(['-DBOOST_LOG_STATIC_LINK=1', '-DBOOST_PROGRAM_OPTIONS_STATIC_LINK=1'], language: 'cpp')
+  add_project_arguments(['-DBOOST_ALL_STATIC_LINK=1', '-DBOOST_LOG_STATIC_LINK=1', '-DBOOST_PROGRAM_OPTIONS_STATIC_LINK=1', '-DBOOST_FILESYSTEM_STATIC_LINK=1'], language: 'cpp')
 else
-  add_project_arguments('-DBOOST_LOG_DYN_LINK=1', '-DBOOST_PROGRAM_OPTIONS_DYN_LINK=1', language: 'cpp')
+  add_project_arguments(['-DBOOST_ALL_DYN_LINK=1', '-DBOOST_LOG_DYN_LINK=1', '-DBOOST_PROGRAM_OPTIONS_DYN_LINK=1', '-DBOOST_FILESYSTEM_DYN_LINK=1'], language: 'cpp')
 endif
 
 if host_machine.system() == 'windows'

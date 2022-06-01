@@ -65,7 +65,8 @@ SCENARIO("Test getting the environment", "[plugin-utils]") {
 
         VariablesMap variables("test");
         for(const auto& env : ENVIRONMENT_VALUES) {
-            REQUIRE(variables.add({string(ENVIRONMENT_KEY), env.first}, env.second));
+            REQUIRE(variables.add({string(ENVIRONMENT_KEY), env.first},
+                                  env.second));
         }
 
         WHEN("We get the environment") {

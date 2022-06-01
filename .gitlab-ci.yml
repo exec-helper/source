@@ -20,6 +20,9 @@ variables:
 .install_exec_helper: &install_exec_helper
         tar -cf exec-helper.tar.xz usr && sudo tar -xvf exec-helper.tar.xz --directory=/ && rm -rf exec-helper.tar.xz
 
+.safe_git_dir: &safe_git_dir
+        git config --global --add safe.directory "${CI_PROJECT_DIR}"
+
 .run_test: &run_test
     stage: test
     image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-run
@@ -209,6 +212,7 @@ build:native:
     variables:
         INSTALL_DIR: usr
     script:
+        - *safe_git_dir
         - make PREFIX=${PWD}/${INSTALL_DIR} ACTUAL_PLUGINS_INSTALL_PREFIX=/usr/share/exec-helper/plugins UNITY_BUILD=on
         - make PREFIX=${PWD}/${INSTALL_DIR} ACTUAL_PLUGINS_INSTALL_PREFIX=/usr/share/exec-helper/plugins install
     artifacts:
@@ -223,6 +227,7 @@ build:local:
         - job: build-image:build
           artifacts: false
     script:
+        - *safe_git_dir
         - make UNITY_BUILD=on
         - sudo make install
 
@@ -235,6 +240,7 @@ build:debian:
     variables:
         INSTALL_DIR: usr
     script:
+        - *safe_git_dir
         - make BUILD_DOCUMENTATION=OFF PREFIX=${PWD}/${INSTALL_DIR} ACTUAL_PLUGINS_INSTALL_PREFIX=/usr/share/exec-helper/plugins UNITY_BUILD=on
         - make PREFIX=${PWD}/${INSTALL_DIR} ACTUAL_PLUGINS_INSTALL_PREFIX=/usr/share/exec-helper/plugins install
     artifacts:
@@ -252,6 +258,7 @@ build:gcc:
           artifacts: true
     script:
         - *install_exec_helper
+        - *safe_git_dir
         - exec-helper init build --compiler gcc --mode release
     artifacts:
         expire_in: 1 day
@@ -266,8 +273,9 @@ build:clang:
           artifacts: false
         - job: build:native
           artifacts: true
-    script: 
+    script:
         - *install_exec_helper
+        - *safe_git_dir
         - exec-helper init build --compiler clang --mode release
     artifacts:
         expire_in: 1 day
@@ -284,6 +292,7 @@ build:gcc:debug:
           artifacts: true
     script:
         - *install_exec_helper
+        - *safe_git_dir
         - exec-helper init build --compiler gcc --mode debug
 
 build:gcc:limited-optimization:
@@ -295,6 +304,7 @@ build:gcc:limited-optimization:
         - job: build:native
     script:
         - *install_exec_helper
+        - *safe_git_dir
         - exec-helper init-limited-optimization build --compiler gcc --mode limited
     artifacts:
         expire_in: 1 day
@@ -311,8 +321,9 @@ build:no-system:
           artifacts: true
     before_script:
         - sudo pacman -Sy --needed --noconfirm clang meson ninja doxygen git tar pkg-config
-    script: 
+    script:
         - *install_exec_helper
+        - *safe_git_dir
         - exec-helper init-no-system build --compiler clang --mode release
 
 cross-compilation:
@@ -325,6 +336,7 @@ cross-compilation:
           artifacts: true
     before_script:
         - *install_exec_helper
+        - *safe_git_dir
     script:
         - apt-get update
         - apt-get install --yes --no-install-recommends debootstrap gcc-aarch64-linux-gnu g++-aarch64-linux-gnu cmake pkg-config git
@@ -342,6 +354,7 @@ build:asan:
         - job: build:native
     script:
         - *install_exec_helper
+        - *safe_git_dir
         - export ASAN_OPTIONS="check_initialization_order=1 print_stacktrace=1"
         - exec-helper init-asan build --compiler clang --mode asan
     artifacts:

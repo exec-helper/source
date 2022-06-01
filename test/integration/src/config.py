@@ -40,7 +40,7 @@ class Config(object):
         )
 
     def add_command(self, command):
-        """ Adds the given command as a command associated with the command id to the configuration """
+        """Adds the given command as a command associated with the command id to the configuration"""
         self._commands[command.id] = command
 
     def set_environment(self, cmd, envs):

@@ -29,11 +29,8 @@ class Run:
 
 
 class Server:
-    def __init__(self, host, port):
+    def __init__(self):
         self._runs = []
-
-        loop = asyncio.get_event_loop()
-        loop.run_until_complete(self._init(host, port))
 
     @property
     def coroutine(self):
@@ -47,7 +44,7 @@ class Server:
     def port(self):
         return self._server.sockets[0].getsockname()[1]
 
-    async def _init(self, host, port):
+    async def init(self, host, port):
         self._server = await asyncio.start_server(self.get_characteristics, host, port)
         self._coroutine = (
             self._server.serve_forever()
@@ -68,9 +65,8 @@ class Server:
         self._server.close()
         await self._server.wait_closed()
 
-    def stop(self):
-        loop = asyncio.get_event_loop()
-        loop.run_until_complete(self._stop())
+    async def stop(self):
+        await self._stop()
 
 
 class Command:
@@ -86,11 +82,12 @@ class Command:
         self._return_code = return_code
 
         self._host = "localhost"
-        self._server = Server(self._host, 0)
-        self._port = self._server.port
+        self._server = Server()
+        self._port = 0
 
     def __del__(self):
-        self.stop()
+        pass
+        # self.stop()
         # self.remove()
 
     @property
@@ -108,6 +105,10 @@ class Command:
     @property
     def server(self):
         return self._server
+
+    async def init(self):
+        await self._server.init(self._host, self._port)
+        self._port = self._server.port
 
     def set_environment(self, envs):
         self._env = envs
@@ -137,7 +138,7 @@ class Command:
             f.write("import pickle\n")
             f.write("import sys\n")
             f.write("\n")
-            f.write("async def set_characteristics(loop):\n")
+            f.write("async def set_characteristics():\n")
             f.write(
                 "    reader,writer = await asyncio.open_connection('{host}', {port})\n".format(
                     host=self._host, port=self._port
@@ -153,9 +154,7 @@ class Command:
             f.write("    writer.close()\n")
             f.write("    await writer.wait_closed()\n")
             f.write("\n")
-            f.write("loop = asyncio.get_event_loop()\n")
-            f.write("loop.run_until_complete(set_characteristics(loop))\n")
-            f.write("loop.close()\n")
+            f.write("asyncio.run(set_characteristics())\n")
             f.write("sys.exit({RETURN_CODE})\n".format(RETURN_CODE=self._return_code))
 
         os.chmod(self._binary, stat.S_IREAD | stat.S_IEXEC)
@@ -163,8 +162,8 @@ class Command:
     def remove(self):
         self._binary.unlink()
 
-    def stop(self):
-        self._server.stop()
+    async def stop(self):
+        await self._server.stop()
 
     @staticmethod
     def _permutate_patterns(patterns):

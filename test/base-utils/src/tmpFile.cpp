@@ -43,9 +43,7 @@ inline Path unique_path(const Path& model) {
 }
 } // namespace
 
-namespace execHelper {
-namespace test {
-namespace baseUtils {
+namespace execHelper::test::baseUtils {
 TmpFile::TmpFile(const string& model)
     : m_path(filesystem::temp_directory_path() / ::unique_path(model)) {
     ;
@@ -88,6 +86,4 @@ std::string TmpFile::getParentDirectory() const noexcept {
 }
 
 void TmpFile::clear() noexcept { m_path.clear(); }
-} // namespace baseUtils
-} // namespace test
-} // namespace execHelper
+} // namespace execHelper::test::baseUtils

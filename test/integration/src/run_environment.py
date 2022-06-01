@@ -71,7 +71,7 @@ class RunEnvironment:
         self._args.append(str(self._config.file))
 
     def add_pattern(self, command, pattern_string):
-        """ Add the list of patterns to the given command """
+        """Add the list of patterns to the given command"""
         parts = pattern_string.split(":")
         if len(parts) != 2:
             raise AssertionError("Cannot parse '{value}' to pattern".format(value=value))
@@ -84,6 +84,10 @@ class RunEnvironment:
         self._args.extend(arg_list)
 
     async def _run(self, arg_list=[]):
+        if self._config:
+            for id, command in self._config.commands.items():
+                await command.init()
+
         if self._config:
             self._config.write()
 
@@ -109,9 +113,13 @@ class RunEnvironment:
 
         self._last_run = Run(returncode, stdout, stderr)
 
+        if self._config:
+            # Schedule all asyncio servers
+            for id, command in self._config.commands.items():
+                await command.stop()
+
     def run_application(self, arg_list=[]):
-        loop = asyncio.get_event_loop()
-        loop.run_until_complete(self._run(arg_list))
+        asyncio.run(self._run(arg_list))
 
     def remove(self):
         if os.path.isdir(self._root_dir):

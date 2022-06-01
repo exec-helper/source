@@ -53,47 +53,47 @@ auto getNextPatterns(const VariablesMap& variables,
     return newPatterns;
 }
 
-auto getNextStep(const Command& command, const SettingsNode& settings,
+auto getNextStep(const Command& currentCommand, const SettingsNode& settings,
                  const Plugins& plugins) -> ApplyFunction {
-    auto plugin = plugins.find(command);
+    auto plugin = plugins.find(currentCommand);
     if(plugin != plugins.end()) {
-        LOG(trace) << "Identified '" << command << "' as a plugin";
+        LOG(trace) << "Identified '" << currentCommand << "' as a plugin";
         return plugin->second;
     }
 
     LOG(trace)
-        << "'" << command
+        << "'" << currentCommand
         << "' is not a known plugin. Checking whether it is a known command";
 
     auto commandToExecuteOpt = settings.get<CommandCollection>(
-        command); // Check whether the settings node contains a root key that is called <command>
+        currentCommand); // Check whether the settings node contains a root key that is called <command>
     if(commandToExecuteOpt) {
         auto commandsToExecute = *(commandToExecuteOpt);
         for(const auto& commandToExecute : commandsToExecute) {
-            LOG(trace) << command << " -> " << commandToExecute;
+            LOG(trace) << currentCommand << " -> " << commandToExecute;
         }
 
         LOG(trace) << "Scheduling subsequent commands";
         return [commandsToExecute,
-                command](const Task& task,
-                         [[maybe_unused]] const VariablesMap& variables,
-                         const ExecutionContext& context) -> Tasks {
+                currentCommand](const Task& task,
+                                [[maybe_unused]] const VariablesMap& variables,
+                                const ExecutionContext& context) -> Tasks {
             LOG(trace) << "Resolving subsequent commands...";
             Tasks tasks;
-            for(const auto& commandToExecute : commandsToExecute) {
+            for(const auto& command : commandsToExecute) {
                 auto newTasks = detail::executeCommands(
-                    command, commandToExecute, task, context);
+                    currentCommand, command, task, context);
                 tasks.insert(tasks.end(), newTasks.begin(), newTasks.end());
             }
             return tasks;
         };
     }
 
-    LOG(error) << "Could not find a command or plugin called '" << command
-               << "'";
+    LOG(error) << "Could not find a command or plugin called '"
+               << currentCommand << "'";
     throw std::runtime_error(
         string("Could not find a command or plugin called '")
-            .append(command)
+            .append(currentCommand)
             .append("'"));
 }
 

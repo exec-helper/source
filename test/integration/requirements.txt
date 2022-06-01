@@ -1,4 +1,4 @@
 pyyaml
-pytest-bdd >= 4.0.0
+pytest-bdd == 4.1.0
 pytest-html
 pytest-xdist

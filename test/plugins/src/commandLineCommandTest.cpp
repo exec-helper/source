@@ -80,8 +80,9 @@ SCENARIO(
             REQUIRE(variables.add(
                 SettingsKeys({string(COMMAND_LINE_KEY), "multiple-commandA"}),
                 multipleCommand1));
-            REQUIRE(variables.add({string(COMMAND_LINE_KEY), "multiple-commandB"},
-                                  multipleCommand2));
+            REQUIRE(
+                variables.add({string(COMMAND_LINE_KEY), "multiple-commandB"},
+                              multipleCommand2));
 
             commandLines.clear();
             commandLines.push_back(multipleCommand1);
@@ -92,8 +93,10 @@ SCENARIO(
             EnvironmentValue ENV1("VAR1", "environmentValue{" +
                                               pattern1.getKey() + "}");
             EnvironmentValue ENV2("VAR2", "environmentValue2");
-            REQUIRE(variables.add({string(ENVIRONMENT_KEY), ENV1.first}, ENV1.second));
-            REQUIRE(variables.add({string(ENVIRONMENT_KEY), ENV2.first}, ENV2.second));
+            REQUIRE(variables.add({string(ENVIRONMENT_KEY), ENV1.first},
+                                  ENV1.second));
+            REQUIRE(variables.add({string(ENVIRONMENT_KEY), ENV2.first},
+                                  ENV2.second));
             expectedTask.appendToEnvironment(move(ENV1));
             expectedTask.appendToEnvironment(move(ENV2));
         }

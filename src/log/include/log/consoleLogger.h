@@ -8,8 +8,7 @@
 #include "logLevel.h"
 #include "logMessage.h"
 
-namespace execHelper {
-namespace log {
+namespace execHelper::log {
 /**
  * \brief Frontend wrapper for the logger that logs to the console
  */
@@ -47,7 +46,6 @@ class ConsoleLogger {
         boost::log::sinks::basic_text_ostream_backend<char>>>
         m_consoleSink; //!< The backend for this logger
 };
-} // namespace log
-} // namespace execHelper
+} // namespace execHelper::log
 
 #endif /* CONSOLE_LOGGER_INCLUDE */

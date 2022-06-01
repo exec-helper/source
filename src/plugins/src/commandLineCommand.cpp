@@ -57,8 +57,8 @@ commandLineCommand(Task task, const VariablesMap& variables,
         tasks.emplace_back(move(task));
     } else {
         SettingsKeys keys({string(COMMAND_LINE_KEY)});
-        for(const auto& commandKey :
-            variables.get<SettingsValues>(string(COMMAND_LINE_KEY), SettingsValues())) {
+        for(const auto& commandKey : variables.get<SettingsValues>(
+                string(COMMAND_LINE_KEY), SettingsValues())) {
             SettingsKeys tmpKey = keys;
             tmpKey.emplace_back(commandKey);
             Task newTask = task;

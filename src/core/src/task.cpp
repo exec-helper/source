@@ -29,11 +29,11 @@ inline auto implodeVector(const vector<string>& toImplode,
                           const string& delimiter) -> string {
     string result;
     return accumulate(toImplode.begin(), toImplode.end(), string(),
-                      [&delimiter](std::string& a, const std::string& b) {
+                      [&delimiter](const std::string& a, const std::string& b) {
                           if(a.empty()) {
                               return string(b);
                           }
-                          return a.append(delimiter).append(b);
+                          return string(a).append(delimiter).append(b);
                       });
 }
 

@@ -1,4 +1,4 @@
-FROM archlinux/base:latest
+FROM archlinux:latest
 LABEL maintainer="barrie.verhagen@gmail.com"
 
 RUN pacman -Sy --needed --noconfirm archlinux-keyring && pacman -Scc --noconfirm && rm -rf /var/lib/pacman/sync/*   # Fixes some pacman keyring issues

@@ -139,12 +139,15 @@ auto toMessage(const string& message) -> LogMessage {
         string logLevelString = parsedResult["severity"];
         LogLevel logLevel = toLogLevel(logLevelString);
 
-        return LogMessage(parsedResult["date"], parsedResult["time"], channel,
-                          logLevel, parsedResult["file"],
-                          boost::lexical_cast<unsigned int>(lineNumberString),
-                          parsedResult["message"]);
+        return {parsedResult["date"],
+                parsedResult["time"],
+                channel,
+                logLevel,
+                parsedResult["file"],
+                boost::lexical_cast<unsigned int>(lineNumberString),
+                parsedResult["message"]};
     }
-    return LogMessage("", "", "", none, "", 0U, "");
+    return {"", "", "", none, "", 0U, ""};
 }
 
 auto getRelativeLogLevel(LogLevel currentLogLevel, int relativeLevel) noexcept

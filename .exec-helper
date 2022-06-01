@@ -295,6 +295,7 @@ meson:
             use-system-lua: disabled
             use-system-catch2: disabled
             use-system-rapidcheck: disabled
+            use-static-boost: true
             terminate-on-assert: true
             changelog: false
             b_pie: true
@@ -582,5 +583,13 @@ clang-tidy:
     patterns:
         - SOURCE_TYPE
         - MODULE
+        - TRIPLET
+        - COMPILER
+        - MODE
+    checks:
+      - -altera-unroll-loops
+      - -altera-id-dependent-backward-branch
+      - -readability-function-cognitive-complexity
+    build-dir: 'build/{TRIPLET}{COMPILER}/{MODE}/build'
     sources:
         - "{SOURCE_TYPE}/{MODULE}/src/*.cpp"

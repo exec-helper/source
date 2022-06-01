@@ -200,13 +200,15 @@ SCENARIO("Test the permutation iterators for partial iteration",
         const PermuteObject permute(collection1, collection2);
 
         vector<PermuteObjectElement> orderedCombinations;
-        const size_t beginIndexObject1 = 1U;
-        const size_t endIndexObject1 = permute.getCollection1().size() - 1U;
-        const size_t beginIndexObject2 = 1U;
-        const size_t endIndexObject2 = permute.getCollection2().size() - 1U;
+        const auto beginIndexObject1 = 1;
+        const auto endIndexObject1 =
+            static_cast<int>(permute.getCollection1().size()) - 1;
+        const auto beginIndexObject2 = 1;
+        const auto endIndexObject2 =
+            static_cast<int>(permute.getCollection2().size()) - 1;
 
-        for(size_t i = beginIndexObject1; i < endIndexObject1; ++i) {
-            for(size_t j = beginIndexObject2; j < endIndexObject2; ++j) {
+        for(auto i = beginIndexObject1; i < endIndexObject1; ++i) {
+            for(auto j = beginIndexObject2; j < endIndexObject2; ++j) {
                 PermuteObjectElement combination(permute.getCollection1()[i],
                                                  permute.getCollection2()[j]);
                 orderedCombinations.push_back(combination);
@@ -250,13 +252,15 @@ SCENARIO("Test the permutation iterators for partial iteration",
         const PermuteObject permute(collection1, collection2);
 
         vector<PermuteObjectElement> orderedCombinations;
-        const size_t beginIndexObject1 = 1U;
-        const size_t endIndexObject1 = collection1.size() - 1U;
-        const size_t beginIndexObject2 = 1U;
-        const size_t endIndexObject2 = collection2.size() - 1U;
+        const auto beginIndexObject1 = 1;
+        const auto endIndexObject1 =
+            static_cast<int>(permute.getCollection1().size()) - 1;
+        const auto beginIndexObject2 = 1;
+        const auto endIndexObject2 =
+            static_cast<int>(permute.getCollection2().size()) - 1;
 
-        for(size_t i = beginIndexObject1; i < endIndexObject1; ++i) {
-            for(size_t j = beginIndexObject2; j < endIndexObject2; ++j) {
+        for(auto i = beginIndexObject1; i < endIndexObject1; ++i) {
+            for(auto j = beginIndexObject2; j < endIndexObject2; ++j) {
                 PermuteObjectElement combination(collection1[i],
                                                  collection2[j]);
                 orderedCombinations.push_back(combination);

@@ -9,6 +9,7 @@
 #include <gsl/gsl>
 
 #include "log/assertions.h"
+#include "logger.h"
 
 using std::string;
 using std::string_view;
@@ -29,12 +30,16 @@ Envp::Envp(const EnvironmentCollection& env) noexcept {
         string envVarString(envVar.first);
         envVarString.append(DELIMITER).append(envVar.second);
 
-        auto* newVar = // NOLINT(cppcoreguidelines-owning-memory)
-            new char[envVarString.size() + 1U];
-        strncpy(newVar, envVarString.c_str(), envVarString.size() + 1U);
-        newVar // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-            [envVarString.size()] = '\0';
-        m_envp.emplace_back(newVar);
+        try {
+            auto* newVar = // NOLINT(cppcoreguidelines-owning-memory)
+                new char[envVarString.size() + 1U];
+            strncpy(newVar, envVarString.c_str(), envVarString.size() + 1U);
+            newVar // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                [envVarString.size()] = '\0';
+            m_envp.emplace_back(newVar);
+        } catch(const std::bad_alloc& e) {
+            LOG(error) << e.what();
+        }
     }
     m_envp.emplace_back(nullptr);
 }
