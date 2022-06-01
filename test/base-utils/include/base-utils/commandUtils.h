@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-#include <gsl/string_span>
+#include <gsl/gsl>
 
 #include "tmpFile.h"
 
@@ -14,10 +14,10 @@ namespace test {
 namespace baseUtils {
 using ConfigFile = TmpFile;
 
-const gsl::czstring<> EXEC_HELPER_BINARY = "exec-helper";
-const gsl::czstring<> COMMAND_KEY = "commands";
-const gsl::czstring<> COMMAND_LINE_COMMAND_KEY = "command-line-command";
-const gsl::czstring<> COMMAND_LINE_COMMAND_LINE_KEY = "command-line";
+const gsl::czstring EXEC_HELPER_BINARY = "exec-helper";
+const gsl::czstring COMMAND_KEY = "commands";
+const gsl::czstring COMMAND_LINE_COMMAND_KEY = "command-line-command";
+const gsl::czstring COMMAND_LINE_COMMAND_LINE_KEY = "command-line";
 
 using ReturnCode = int32_t;
 static const ReturnCode SUCCESS = EXIT_SUCCESS;

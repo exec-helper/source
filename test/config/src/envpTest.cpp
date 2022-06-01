@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 
-#include <gsl/string_span>
+#include <gsl/gsl>
 
 #include "config/envp.h"
 #include "unittest/catch.h"

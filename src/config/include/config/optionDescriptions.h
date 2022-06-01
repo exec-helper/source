@@ -7,9 +7,7 @@
 #include <vector>
 
 #include <boost/program_options.hpp>
-#include <gsl/pointers>
-#include <gsl/span>
-#include <gsl/string_span>
+#include <gsl/gsl>
 
 #include "log/assertions.h"
 
@@ -20,7 +18,7 @@
 namespace execHelper::config {
 using ArgumentOption = std::string;
 using ArgumentOptions = std::vector<ArgumentOption>;
-using Args = gsl::span<const gsl::czstring<>>;
+using Args = gsl::span<const gsl::czstring>;
 
 namespace detail {
 /**
@@ -133,12 +131,10 @@ class OptionInterface {
      * \param[out] variablesMap The variables map to write to
      * \param[in] optionsMap    The options map to take the value(s) from
      * \throws boost::bad_any_cast  If the given option value can not be parsed to the given option type
-     * \returns void
      */
-    virtual auto
+    virtual void
     toMap(gsl::not_null<config::VariablesMap*> variablesMap,
-          const boost::program_options::variables_map& optionsMap) const
-        -> void = 0;
+          const boost::program_options::variables_map& optionsMap) const = 0;
 
     /**
      * Return the associated type value of this options in order to be able to
@@ -324,10 +320,8 @@ class OptionDescriptions {
      * assumed to belong to this specific option.
      *
      * \param[in] option  The option to use
-     * \returns true    if the positional argument was successfully set
-     *          false   otherwise
      */
-    auto setPositionalArgument(const OptionInterface& option) noexcept -> void;
+    void setPositionalArgument(const OptionInterface& option) noexcept;
 
     /**
      * Returns a map containing the parsed option descriptions for the given

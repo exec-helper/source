@@ -31,7 +31,7 @@ namespace execHelper {
 namespace test {
 namespace baseUtils {
 namespace execution {
-int execute(const CommandLine& commandLine, const Path& workingDir) noexcept {
+auto execute(const CommandLine& commandLine, const Path& workingDir) noexcept -> int {
     filesystem::path binary = commandLine.front();
     if(!filesystem::exists(binary)) {
         binary = search_path(binary);

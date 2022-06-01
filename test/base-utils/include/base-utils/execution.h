@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-#include <gsl/string_span>
+#include <gsl/gsl>
 
 #include "path.h"
 
@@ -15,8 +15,8 @@ namespace baseUtils {
 namespace execution {
 using CommandLine = std::vector<std::string>;
 
-int execute(const CommandLine& commandLine,
-            const Path& workingDir = std::filesystem::current_path()) noexcept;
+auto execute(const CommandLine& commandLine,
+            const Path& workingDir = std::filesystem::current_path()) noexcept -> int;
 } // namespace execution
 } // namespace baseUtils
 } // namespace test

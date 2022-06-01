@@ -26,7 +26,7 @@ if not yaml_cpp_dep.found()
   yaml_cpp_dep = yaml_cpp_proj.dependency('yaml_cpp')
 endif
 
-gsl_dep = dependency('gsl', required: get_option('use-system-gsl'), method: 'cmake', cmake_module_path: 'cmake/modules')  # pkg-config can falsely trigger on GNU Scientific Library
+gsl_dep = dependency('gsl', required: get_option('use-system-gsl'))  # pkg-config can falsely trigger on GNU Scientific Library
 if not gsl_dep.found()
   gsl_proj = subproject('microsoft-gsl')
   gsl_dep = gsl_proj.get_variable('microsoft_gsl_dep')

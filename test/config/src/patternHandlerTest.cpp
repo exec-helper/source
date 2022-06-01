@@ -1,7 +1,7 @@
 #include <iostream>
 #include <vector>
 
-#include <gsl/string_span>
+#include <gsl/gsl>
 
 #include "config/patternsHandler.h"
 #include "unittest/catch.h"
@@ -16,9 +16,9 @@ using execHelper::config::Patterns;
 using execHelper::config::PatternsHandler;
 
 namespace {
-const czstring<> DEFAULT_VALUES_KEY = "default-values";
-const czstring<> SHORT_OPTION_KEY = "short-option";
-const czstring<> LONG_OPTION_KEY = "long-option";
+const czstring DEFAULT_VALUES_KEY = "default-values";
+const czstring SHORT_OPTION_KEY = "short-option";
+const czstring LONG_OPTION_KEY = "long-option";
 
 inline void checkContainsPatterns(const PatternsHandler& handler,
                                   const Patterns& expectedPatterns) {

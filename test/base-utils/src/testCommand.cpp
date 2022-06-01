@@ -1,9 +1,12 @@
 #include "testCommand.h"
 
+#include <numeric>
 #include <iostream>
+#include <memory>
 
 #include "plugins.h"
 
+using std::accumulate;
 using std::cerr;
 using std::endl;
 using std::shared_ptr;

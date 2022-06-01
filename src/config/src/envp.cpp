@@ -1,5 +1,6 @@
 #include "envp.h"
 
+#include <cstddef>
 #include <cstring>
 #include <iostream>
 #include <string>
@@ -58,7 +59,7 @@ void Envp::clear() noexcept {
 }
 
 auto operator<<(std::ostream& os, const Envp& envp) noexcept -> std::ostream& {
-    const span<const czstring<>> envs(envp.getEnvp(), envp.size());
+    const span<const czstring> envs(envp.getEnvp(), envp.size());
     bool firstIteration = true;
     for(const auto& env : envs) {
         if(!firstIteration) {

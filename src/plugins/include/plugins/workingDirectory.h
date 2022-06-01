@@ -3,8 +3,6 @@
 
 #include <string>
 
-#include <gsl/string_span>
-
 #include "config/commandLineOptions.h"
 #include "config/variablesMap.h"
 #include "core/task.h"
@@ -15,7 +13,8 @@ class FleetingOptionsInterface;
 
 namespace execHelper::plugins {
 using WorkingDir = std::string;
-const gsl::czstring<> WORKING_DIR_KEY = "working-dir";
+using namespace std::literals;
+constexpr auto WORKING_DIR_KEY = "working-dir"sv;
 
 /**
  * \brief Extends the functionality to add the working directory configuration variables of the process to execute, using the _working-dir_ key in the configuration

@@ -2,9 +2,10 @@
 
 #include <algorithm>
 #include <memory>
+#include <numeric>
 #include <utility>
 
-#include <gsl/gsl_assert>
+#include <gsl/assert>
 #include <stdexcept>
 
 #include "config/patternsHandler.h"
@@ -108,7 +109,7 @@ inline void index(VariablesMap* variables, const SettingsNode& settings,
     }
 
     // Get current depth to the level of the given key
-    const SettingsNode& currentDepth = std::accumulate(
+    const SettingsNode& currentDepth = accumulate(
         key.begin(), key.end(), static_cast<const SettingsNode&>(settings),
         [](const auto& node, const auto& subkey) { return node[subkey]; });
 

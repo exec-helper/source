@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 
-#include <gsl/string_span>
+#include <gsl/gsl>
 
 #include "config/environment.h"
 #include "config/path.h"
@@ -45,8 +45,8 @@ using execHelper::plugins::COMMAND_LINE_KEY;
 using execHelper::test::FleetingOptionsStub;
 
 namespace {
-const czstring<> PLUGIN_NAME("command-line-command");
-const czstring<> WORKING_DIR_KEY("working-dir");
+const czstring PLUGIN_NAME("command-line-command");
+const czstring WORKING_DIR_KEY("working-dir");
 } // namespace
 
 namespace execHelper::plugins::test {
@@ -67,7 +67,7 @@ SCENARIO(
         Task expectedTask;
         std::vector<TaskCollection> commandLines;
 
-        REQUIRE(variables.add(COMMAND_LINE_KEY, command1));
+        REQUIRE(variables.add(string(COMMAND_LINE_KEY), command1));
         commandLines.push_back(command1);
 
         COMBINATIONS("Set multiple command lines") {
@@ -78,9 +78,9 @@ SCENARIO(
 
             variables.clear(COMMAND_LINE_KEY);
             REQUIRE(variables.add(
-                SettingsKeys({COMMAND_LINE_KEY, "multiple-commandA"}),
+                SettingsKeys({string(COMMAND_LINE_KEY), "multiple-commandA"}),
                 multipleCommand1));
-            REQUIRE(variables.add({COMMAND_LINE_KEY, "multiple-commandB"},
+            REQUIRE(variables.add({string(COMMAND_LINE_KEY), "multiple-commandB"},
                                   multipleCommand2));
 
             commandLines.clear();
@@ -92,8 +92,8 @@ SCENARIO(
             EnvironmentValue ENV1("VAR1", "environmentValue{" +
                                               pattern1.getKey() + "}");
             EnvironmentValue ENV2("VAR2", "environmentValue2");
-            REQUIRE(variables.add({ENVIRONMENT_KEY, ENV1.first}, ENV1.second));
-            REQUIRE(variables.add({ENVIRONMENT_KEY, ENV2.first}, ENV2.second));
+            REQUIRE(variables.add({string(ENVIRONMENT_KEY), ENV1.first}, ENV1.second));
+            REQUIRE(variables.add({string(ENVIRONMENT_KEY), ENV2.first}, ENV2.second));
             expectedTask.appendToEnvironment(move(ENV1));
             expectedTask.appendToEnvironment(move(ENV2));
         }
@@ -103,7 +103,7 @@ SCENARIO(
                                       "{" + pattern2.getKey() + "}/{" +
                                           pattern3.getKey() + "}"));
             expectedTask.setWorkingDirectory(
-                variables.get<Path>(WORKING_DIR_KEY).value());
+                variables.get<Path>(string(WORKING_DIR_KEY)).value());
         }
 
         Tasks expectedTasks;
@@ -145,7 +145,7 @@ SCENARIO("Testing erroneous configuration conditions for the "
         VariablesMap variables(PLUGIN_NAME);
 
         COMBINATIONS("Add command line key without value") {
-            REQUIRE(variables.add(COMMAND_LINE_KEY));
+            REQUIRE(variables.add(string(COMMAND_LINE_KEY)));
         }
 
         THEN_WHEN("We add no parameter and apply") {

@@ -10,7 +10,6 @@
 #include <vector>
 
 #include <gsl/gsl>
-#include <gsl/string_span>
 
 #include "base-utils/yaml.h"
 #include "config/path.h"

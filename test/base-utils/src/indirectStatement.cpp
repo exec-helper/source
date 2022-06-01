@@ -1,7 +1,9 @@
 #include "indirectStatement.h"
 
+#include <numeric>
 #include <iostream>
 
+using std::accumulate;
 using std::cerr;
 using std::endl;
 using std::shared_ptr;

@@ -4,6 +4,7 @@
 #include <memory>
 #include <optional>
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include "cast.h"
@@ -142,6 +143,14 @@ class SettingsNode {
         return get<T>(SettingsKeys({key}));
     }
 
+    /*! @copydoc get(const SettingsKeys&) const
+     */
+    template <typename T>
+    [[nodiscard]] inline auto get(const std::string_view& key) const noexcept
+        -> std::optional<T> {
+        return get<T>(std::string(key));
+    }
+
     /**
      * Get the direct values associated with the given key path or the default
      * value it does not exist
@@ -267,6 +276,12 @@ class SettingsNode {
      * not exist, it is considered to be removed successfully False otherwise
      */
     auto clear(const SettingsKey& key) noexcept -> bool;
+
+    /*! @copydoc clear(const SettingsKey&)
+     */
+    inline auto clear(const std::string_view& key) noexcept -> bool {
+        return clear(SettingsKey(key));
+    }
 
     /**
      * Remove the child at the end of the given hierarchy key path

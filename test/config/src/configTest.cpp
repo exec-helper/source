@@ -1,7 +1,7 @@
 #include <algorithm>
 #include <string>
 
-#include <gsl/string_span>
+#include <gsl/gsl>
 
 #include "config/config.h"
 #include "config/pattern.h"

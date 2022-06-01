@@ -13,7 +13,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/process.hpp>
 #include <boost/process/start_dir.hpp>
-#include <gsl/span>
+#include <gsl/gsl>
 
 #include "config/envp.h"
 #include "log/assertions.h"
@@ -169,7 +169,7 @@ inline auto PosixShell::wordExpand(const Task& task) noexcept
         size_t returnCode =
             wordexp(taskItem.c_str(), &p, WRDE_SHOWERR | WRDE_UNDEF);
         if(returnCode == 0) {
-            span<zstring<>> w(p.we_wordv, p.we_wordc);
+            span<zstring> w(p.we_wordv, p.we_wordc);
             std::copy(w.begin(), w.end(), std::back_inserter(result));
         } else {
             switch(returnCode) {

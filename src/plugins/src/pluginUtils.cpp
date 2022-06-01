@@ -110,11 +110,11 @@ auto replacePatternCombinations(
 auto getEnvironment(const VariablesMap& variables) noexcept
     -> EnvironmentCollection {
     EnvironmentCollection result;
-    SettingsKeys key({ENVIRONMENT_KEY});
+    SettingsKeys key({string(ENVIRONMENT_KEY)});
     auto environmentOpt = variables.get<vector<string>>(key);
     for(auto variableName : environmentOpt.value_or(vector<string>())) {
         auto variableValueOpt =
-            variables.get<string>({ENVIRONMENT_KEY, variableName});
+            variables.get<string>({string(ENVIRONMENT_KEY), variableName});
         if(!variableValueOpt) {
             LOG(warning) << "Environment variable '" << variableName
                          << "' does not have an associated value. Ignoring it.";

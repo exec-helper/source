@@ -2,20 +2,19 @@
 #define COMMAND_LINE_INCLUDE
 
 #include <string>
+#include <string_view>
 #include <vector>
-
-#include <gsl/string_span>
 
 #include "config/fleetingOptionsInterface.h"
 #include "config/variablesMap.h"
 #include "core/task.h"
 
-namespace execHelper {
-namespace plugins {
+namespace execHelper::plugins {
 using CommandLineArg = std::string;
 using CommandLineArgs = std::vector<CommandLineArg>;
 
-static const gsl::czstring<> COMMAND_LINE_KEY = "command-line";
+using namespace std::literals;
+constexpr auto COMMAND_LINE_KEY = "command-line"sv;
 
 /**
  * \brief Extends the functionality to include the _command-line_ config parameter and processes this parameter
@@ -43,7 +42,6 @@ struct CommandLine {
     }
 };
 
-} // namespace plugins
-} // namespace execHelper
+} // namespace execHelper::plugins
 
 #endif /* COMMAND_LINE_INCLUDE */

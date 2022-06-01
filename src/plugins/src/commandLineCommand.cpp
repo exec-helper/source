@@ -14,6 +14,8 @@
 #include "pluginUtils.h"
 #include "workingDirectory.h"
 
+using namespace std::string_literals;
+
 using std::move;
 using std::string;
 
@@ -40,7 +42,7 @@ commandLineCommand(Task task, const VariablesMap& variables,
         LOG(error) << "Could not find the '" << COMMAND_LINE_KEY
                    << "' setting in the 'command-line-command' settings";
         throw std::runtime_error(
-            string("Command-line-command plugin: Could not find the '")
+            "Command-line-command plugin: Could not find the '"s
                 .append(COMMAND_LINE_KEY)
                 .append("' setting in the 'command-line-command' settings"));
     }
@@ -48,15 +50,15 @@ commandLineCommand(Task task, const VariablesMap& variables,
     Tasks tasks;
     if(variables
            .get<SettingsValues>(
-               SettingsKeys({COMMAND_LINE_KEY, commandLine->front()}),
+               SettingsKeys({string(COMMAND_LINE_KEY), commandLine->front()}),
                SettingsValues())
            .empty()) {
         task.append(move(*commandLine));
         tasks.emplace_back(move(task));
     } else {
-        SettingsKeys keys({COMMAND_LINE_KEY});
+        SettingsKeys keys({string(COMMAND_LINE_KEY)});
         for(const auto& commandKey :
-            variables.get<SettingsValues>(COMMAND_LINE_KEY, SettingsValues())) {
+            variables.get<SettingsValues>(string(COMMAND_LINE_KEY), SettingsValues())) {
             SettingsKeys tmpKey = keys;
             tmpKey.emplace_back(commandKey);
             Task newTask = task;

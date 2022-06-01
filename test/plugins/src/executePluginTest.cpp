@@ -2,7 +2,7 @@
 #include <stdexcept>
 #include <vector>
 
-#include <gsl/string_span>
+#include <gsl/gsl>
 
 #include "config/pattern.h"
 #include "config/patternsHandler.h"
@@ -42,8 +42,8 @@ using execHelper::core::Task;
 using execHelper::test::FleetingOptionsStub;
 
 namespace {
-const czstring<> PLUGIN_NAME = "execute-plugin";
-const czstring<> MEMORY_KEY = "memory";
+const czstring PLUGIN_NAME = "execute-plugin";
+const czstring MEMORY_KEY = "memory";
 
 class Expected {
   public:
