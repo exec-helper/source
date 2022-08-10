@@ -18,7 +18,6 @@ src = [
 deps = [
   log,
   yaml_cpp_dep,
-  gsl_dep,
   boost_program_options_dep
 ]
 

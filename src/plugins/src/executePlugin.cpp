@@ -5,7 +5,6 @@
 #include <numeric>
 #include <utility>
 
-#include <gsl/assert>
 #include <stdexcept>
 
 #include "config/patternsHandler.h"
@@ -81,8 +80,8 @@ auto getNextStep(const Command& currentCommand, const SettingsNode& settings,
             LOG(trace) << "Resolving subsequent commands...";
             Tasks tasks;
             for(const auto& command : commandsToExecute) {
-                auto newTasks = detail::executeCommands(
-                    currentCommand, command, task, context);
+                auto newTasks = detail::executeCommands(currentCommand, command,
+                                                        task, context);
                 tasks.insert(tasks.end(), newTasks.begin(), newTasks.end());
             }
             return tasks;

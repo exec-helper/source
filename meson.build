@@ -2,7 +2,7 @@ project('exec-helper', 'cpp',
   version: '0.7.0',
   default_options: [
     'warning_level=3',
-    'cpp_std=c++17',
+    'cpp_std=c++20',
     'cpp_rtti=true',
     'default_library=static'
   ]
@@ -28,12 +28,6 @@ yaml_cpp_dep = dependency('yaml-cpp', required : get_option('use-system-yaml-cpp
 if not yaml_cpp_dep.found()
   yaml_cpp_proj = cmake.subproject('yaml-cpp', cmake_options: ['-DYAML_CPP_BUILD_CONTRIB=OFF', '-DYAML_CPP_BUILD_TOOLS=OFF', '-DBUILD_SHARED_LIBS=OFF', '-DMSVC_SHARED_RT=ON', '-DMSVC_STHREADED_RT=OFF', '-DAPPLE_UNIVERSAL_BIN=OFF', '-DYAML_CPP_BUILD_TESTS=OFF', '-DCMAKE_POSITION_INDEPENDENT_CODE=ON', cmake_build_type])
   yaml_cpp_dep = yaml_cpp_proj.dependency('yaml_cpp')
-endif
-
-gsl_dep = dependency('Microsoft.GSL', required: get_option('use-system-gsl'), modules: ['Microsoft.GSL::GSL'])  # pkg-config can falsely trigger on GNU Scientific Library
-if not gsl_dep.found()
-  gsl_proj = subproject('microsoft-gsl')
-  gsl_dep = gsl_proj.get_variable('microsoft_gsl_dep')
 endif
 
 lua_dep = dependency('lua5.3', required: false)

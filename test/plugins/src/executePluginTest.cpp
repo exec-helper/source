@@ -2,8 +2,6 @@
 #include <stdexcept>
 #include <vector>
 
-#include <gsl/gsl>
-
 #include "config/pattern.h"
 #include "config/patternsHandler.h"
 #include "config/settingsNode.h"
@@ -25,8 +23,6 @@ using std::runtime_error;
 using std::string;
 using std::vector;
 
-using gsl::czstring;
-
 using execHelper::config::Command;
 using execHelper::config::COMMAND_KEY;
 using execHelper::config::CommandCollection;
@@ -42,8 +38,9 @@ using execHelper::core::Task;
 using execHelper::test::FleetingOptionsStub;
 
 namespace {
-const czstring PLUGIN_NAME = "execute-plugin";
-const czstring MEMORY_KEY = "memory";
+using namespace std::literals;
+const auto PLUGIN_NAME = "execute-plugin"s;
+const auto MEMORY_KEY = "memory"s;
 
 class Expected {
   public:

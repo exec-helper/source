@@ -291,7 +291,6 @@ meson:
             plugins-prefix: "{EH_ROOT_DIR}/build/{TRIPLET}{COMPILER}/{MODE}/install/share/exec-helper/plugins"
             license-prefix: "{EH_ROOT_DIR}/build/{TRIPLET}{COMPILER}/{MODE}/install/share/exec-helper"
             use-system-yaml-cpp: disabled
-            use-system-gsl: disabled
             use-system-lua: disabled
             use-system-catch2: disabled
             use-system-rapidcheck: disabled
@@ -570,7 +569,6 @@ lcov:
         - "*/subprojects/*"
         - "boost/*"
         - "c++/*"
-        - "gsl/*"
         - "rapidcheck/*"
         - "yaml-cpp/*"
     gen-html: yes

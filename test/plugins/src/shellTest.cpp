@@ -76,47 +76,46 @@ SCENARIO("Testing the configuration settings of the shell plugins",
     const Plugins plugins;
     const ExecutionContext context(options, settings, patterns, plugins);
 
-    propertyTest(
-        "", [&context](Shell shell, const Task& task,
-                       const optional<filesystem::path>& workingDir,
-                       const optional<vector<string>>& commandLine,
-                       const optional<EnvironmentCollection>& environment,
-                       const string& command) {
-            auto expectedTask = task;
+    propertyTest("", [&context](
+                         Shell shell, const Task& task,
+                         const optional<filesystem::path>& workingDir,
+                         const optional<vector<string>>& commandLine,
+                         const optional<EnvironmentCollection>& environment,
+                         const string& command) {
+        auto expectedTask = task;
 
-            auto shellName = string(shellToString(shell));
-            expectedTask.append(shellName);
+        auto shellName = string(shellToString(shell));
+        expectedTask.append(shellName);
 
-            VariablesMap config("shell-test");
+        VariablesMap config("shell-test");
 
-            addToConfig("command", command, &config);
-            addToTask(command, &expectedTask,
-                      [](const auto& cmd) -> TaskCollection {
-                          return {"-c", cmd};
-                      });
-
-            if(commandLine) {
-                handleCommandLine(*commandLine, config, expectedTask);
-            }
-
-            if(environment) {
-                handleEnvironment(*environment, config, expectedTask);
-            }
-
-            if(workingDir) {
-                handleWorkingDirectory(*workingDir, config, expectedTask);
-            }
-
-            THEN_WHEN("We apply the plugin") {
-                auto actualTasks = luaPlugin(task, config, context,
-                                             std::string(PLUGINS_INSTALL_PATH) +
-                                                 "/" + shellName + ".lua");
-
-                THEN_CHECK("It generated the expected tasks") {
-                    REQUIRE(actualTasks == Tasks({expectedTask}));
-                }
-            }
+        addToConfig("command", command, config);
+        addToTask(command, expectedTask, [](const auto& cmd) -> TaskCollection {
+            return {"-c", cmd};
         });
+
+        if(commandLine) {
+            handleCommandLine(*commandLine, config, expectedTask);
+        }
+
+        if(environment) {
+            handleEnvironment(*environment, config, expectedTask);
+        }
+
+        if(workingDir) {
+            handleWorkingDirectory(*workingDir, config, expectedTask);
+        }
+
+        THEN_WHEN("We apply the plugin") {
+            auto actualTasks = luaPlugin(task, config, context,
+                                         std::string(PLUGINS_INSTALL_PATH) +
+                                             "/" + shellName + ".lua");
+
+            THEN_CHECK("It generated the expected tasks") {
+                REQUIRE(actualTasks == Tasks({expectedTask}));
+            }
+        }
+    });
 }
 
 SCENARIO("Pass no command to the shell plugin", "[shell][error]") {

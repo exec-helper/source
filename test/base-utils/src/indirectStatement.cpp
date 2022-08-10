@@ -8,8 +8,6 @@ using std::cerr;
 using std::endl;
 using std::shared_ptr;
 
-using gsl::not_null;
-
 namespace execHelper {
 namespace test {
 namespace baseUtils {
@@ -41,12 +39,12 @@ void IndirectStatement::resetExecutions() noexcept {
 
 StatementKey IndirectStatement::getKey() const noexcept { return m_key; }
 
-void IndirectStatement::write(not_null<YamlWriter*> yaml,
+void IndirectStatement::write(YamlWriter& yaml,
                               const std::string& /*command*/) const noexcept {
     try {
-        if(!(*yaml)[m_key]) {
+        if(!yaml[m_key]) {
             for(const auto& statement : m_statements) {
-                (*yaml)[m_key].push_back(statement->getKey());
+                yaml[m_key].push_back(statement->getKey());
                 statement->write(yaml, m_key);
             }
         }

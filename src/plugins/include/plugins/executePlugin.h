@@ -7,8 +7,6 @@
 #include <string>
 #include <vector>
 
-#include <gsl/gsl>
-
 #include "config/commandLineOptions.h"
 #include "config/pattern.h"
 

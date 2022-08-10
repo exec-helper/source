@@ -10,7 +10,6 @@
 #include <boost/asio.hpp>
 #include <boost/serialization/map.hpp>
 #include <boost/serialization/vector.hpp>
-#include <gsl/gsl>
 
 #include "base-utils/commandUtils.h"
 #include "base-utils/execution.h"
@@ -82,7 +81,7 @@ class ExecutionContentServer {
 
     void clear() noexcept;
 
-    static void registerIoService(gsl::not_null<IoService*> ioService) noexcept;
+    static void registerIoService(IoService* ioService) noexcept;
 
   private:
     /**

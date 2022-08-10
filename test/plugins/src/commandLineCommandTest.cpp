@@ -3,8 +3,6 @@
 #include <string>
 #include <vector>
 
-#include <gsl/gsl>
-
 #include "config/environment.h"
 #include "config/path.h"
 #include "config/pattern.h"
@@ -24,8 +22,6 @@ using std::runtime_error;
 using std::string;
 using std::vector;
 
-using gsl::czstring;
-
 using execHelper::config::EnvArgs;
 using execHelper::config::ENVIRONMENT_KEY;
 using execHelper::config::EnvironmentValue;
@@ -40,13 +36,13 @@ using execHelper::config::VariablesMap;
 using execHelper::core::Task;
 using execHelper::core::TaskCollection;
 using execHelper::core::Tasks;
-using execHelper::plugins::COMMAND_LINE_KEY;
 
 using execHelper::test::FleetingOptionsStub;
 
 namespace {
-const czstring PLUGIN_NAME("command-line-command");
-const czstring WORKING_DIR_KEY("working-dir");
+using namespace std::literals;
+const auto PLUGIN_NAME = "command-line-command"s;
+const auto WORKING_DIR_KEY = "working-dir"s;
 } // namespace
 
 namespace execHelper::plugins::test {

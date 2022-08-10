@@ -20,7 +20,7 @@ class IndirectStatement : public Statement {
     unsigned int getNumberOfExecutions() const noexcept override;
     void resetExecutions() noexcept override;
     StatementKey getKey() const noexcept override;
-    void write(gsl::not_null<YamlWriter*> yaml,
+    void write(YamlWriter& yaml,
                const std::string& command) const noexcept override;
 
   private:

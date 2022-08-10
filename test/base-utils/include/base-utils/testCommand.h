@@ -5,8 +5,6 @@
 #include <string>
 #include <vector>
 
-#include <gsl/gsl>
-
 #include "statement.h"
 #include "yaml.h"
 
@@ -35,7 +33,7 @@ class TestCommand {
     void add(std::shared_ptr<Statement> statement) noexcept;
     void resetExecutions() noexcept;
 
-    void write(gsl::not_null<YamlWriter*> yaml) const noexcept;
+    void write(YamlWriter& yaml) const noexcept;
 
   private:
     std::string m_command;

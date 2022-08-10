@@ -11,8 +11,6 @@ using std::cerr;
 using std::endl;
 using std::shared_ptr;
 
-using gsl::not_null;
-
 namespace execHelper {
 namespace test {
 namespace baseUtils {
@@ -61,11 +59,11 @@ void TestCommand::resetExecutions() noexcept {
     }
 }
 
-void TestCommand::write(not_null<YamlWriter*> yaml) const noexcept {
+void TestCommand::write(YamlWriter& yaml) const noexcept {
     try {
-        (*yaml)["commands"][m_command] = "Execute the command";
+        yaml["commands"][m_command] = "Execute the command";
         for(const auto& statement : m_statements) {
-            (*yaml)[m_command].push_back(statement->getKey());
+            yaml[m_command].push_back(statement->getKey());
             statement->write(yaml, m_command);
         }
     } catch(const YAML::InvalidNode&) {

@@ -5,8 +5,6 @@
 #include <string>
 #include <vector>
 
-#include <gsl/gsl>
-
 #include "path.h"
 
 namespace execHelper {

@@ -9,8 +9,6 @@
 #include <string>
 #include <vector>
 
-#include <gsl/gsl>
-
 #include "base-utils/yaml.h"
 #include "config/path.h"
 #include "config/pattern.h"
@@ -64,7 +62,7 @@ template <typename T> void appendVectors(T& appendTo, const T& appendFrom) {
 baseUtils::YamlWriter toYaml(const config::SettingsNode& settings,
                              const config::Patterns& patterns) noexcept;
 void writeSettingsFile(
-    gsl::not_null<baseUtils::ConfigFileWriter*> configFileWriter,
+    baseUtils::ConfigFileWriter& configFileWriter,
     const config::SettingsNode& settings,
     const config::Patterns& patterns) noexcept;
 std::string convertToConfig(const Patterns& patterns) noexcept;

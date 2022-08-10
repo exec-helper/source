@@ -76,8 +76,7 @@ SCENARIO("Test that the right return code is returned", "[shell][posixshell]") {
 
                      PosixShell shell;
 
-                     ExecutionContent::registerIoService(
-                         gsl::not_null<IoService*>(&ioService));
+                     ExecutionContent::registerIoService(&ioService);
                      ExecutionContent executionEngine(expectedReturnCode);
 
                      ioService.run();
@@ -103,8 +102,7 @@ SCENARIO("Test that the command is executed the expected number of times",
 
         PosixShell shell;
 
-        ExecutionContent::registerIoService(
-            gsl::not_null<IoService*>(&ioService));
+        ExecutionContent::registerIoService(&ioService);
         ExecutionContent executionEngine(0);
 
         ioService.run();
@@ -157,8 +155,7 @@ SCENARIO("Test the shell for shell expansion", "[shell][posixshell]") {
 
             PosixShell shell;
 
-            ExecutionContent::registerIoService(
-                gsl::not_null<IoService*>(&ioService));
+            ExecutionContent::registerIoService(&ioService);
             ExecutionContent executionEngine(0);
 
             ioService.run();
@@ -194,8 +191,7 @@ SCENARIO("Test the shell for word expansion", "[shell][posixshell]") {
             EnvironmentCollection env = {{"EXPANSION", shellExpansion}};
             PosixShell shell;
 
-            ExecutionContent::registerIoService(
-                gsl::not_null<IoService*>(&ioService));
+            ExecutionContent::registerIoService(&ioService);
             ExecutionContent executionEngine(0);
 
             ioService.run();
@@ -226,8 +222,7 @@ SCENARIO("Test the shell for binaries prefixed with an absolute path",
 
         PosixShell shell;
 
-        ExecutionContent::registerIoService(
-            gsl::not_null<IoService*>(&ioService));
+        ExecutionContent::registerIoService(&ioService);
         ExecutionContent executionEngine(0);
 
         ioService.run();
@@ -266,8 +261,7 @@ SCENARIO("Test the shell for binaries prefixed with a relative path",
 
         PosixShell shell;
 
-        ExecutionContent::registerIoService(
-            gsl::not_null<IoService*>(&ioService));
+        ExecutionContent::registerIoService(&ioService);
         ExecutionContent executionEngine(0);
 
         ioService.run();
@@ -303,8 +297,7 @@ SCENARIO("Test the shell for binaries found in the task environment path",
 
         PosixShell shell;
 
-        ExecutionContent::registerIoService(
-            gsl::not_null<IoService*>(&ioService));
+        ExecutionContent::registerIoService(&ioService);
         ExecutionContent executionEngine(0);
 
         ioService.run();
@@ -346,8 +339,7 @@ SCENARIO("Test the shell for binaries found in the working directory but not "
 
         PosixShell shell;
 
-        ExecutionContent::registerIoService(
-            gsl::not_null<IoService*>(&ioService));
+        ExecutionContent::registerIoService(&ioService);
         ExecutionContent executionEngine(0);
 
         ioService.run();
@@ -388,8 +380,7 @@ SCENARIO("The shell should properly set the PWD environment variable",
 
             PosixShell shell;
 
-            ExecutionContent::registerIoService(
-                gsl::not_null<IoService*>(&ioService));
+            ExecutionContent::registerIoService(&ioService);
             ExecutionContent executionEngine(0);
 
             ioService.run();

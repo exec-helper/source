@@ -5,8 +5,6 @@
 #include <memory>
 #include <sstream>
 
-#include <gsl/gsl>
-
 #include "config/pattern.h"
 #include "config/settingsNode.h"
 #include "plugins/pluginUtils.h"
@@ -26,8 +24,6 @@ using std::static_pointer_cast;
 using std::string;
 using std::stringstream;
 using std::vector;
-
-using gsl::not_null;
 
 using execHelper::config::EnvironmentCollection;
 using execHelper::config::EnvironmentValue;
@@ -239,11 +235,11 @@ YamlWriter toYaml(const SettingsNode& settings,
     return yaml;
 }
 
-void writeSettingsFile(not_null<ConfigFileWriter*> configFileWriter,
+void writeSettingsFile(ConfigFileWriter& configFileWriter,
                        const SettingsNode& settings,
                        const Patterns& patterns) noexcept {
     YamlWriter yaml = toYaml(settings, patterns);
-    configFileWriter->write(yaml);
+    configFileWriter.write(yaml);
 }
 
 PatternCombinations createPatternCombination(

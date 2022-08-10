@@ -27,7 +27,6 @@ using boost::asio::socket_base;
 using boost::asio::local::stream_protocol;
 using boost::system::error_code;
 using boost::system::system_error;
-using gsl::not_null;
 
 using execHelper::test::baseUtils::ExecutionContentData;
 using execHelper::test::baseUtils::ExecutionContentDataReply;
@@ -247,7 +246,7 @@ void ExecutionContentServer::swap(ExecutionContentServer& other) noexcept {
 }
 
 void ExecutionContentServer::registerIoService(
-    gsl::not_null<IoService*> ioService) noexcept {
+    IoService* ioService) noexcept {
     m_ioService = ioService;
 }
 

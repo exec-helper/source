@@ -5,25 +5,21 @@
 #include <string>
 #include <vector>
 
-#include <gsl/gsl>
-
 #include "tmpFile.h"
 
-namespace execHelper {
-namespace test {
-namespace baseUtils {
+namespace execHelper::test::baseUtils {
 using ConfigFile = TmpFile;
 
-const gsl::czstring EXEC_HELPER_BINARY = "exec-helper";
-const gsl::czstring COMMAND_KEY = "commands";
-const gsl::czstring COMMAND_LINE_COMMAND_KEY = "command-line-command";
-const gsl::czstring COMMAND_LINE_COMMAND_LINE_KEY = "command-line";
+using namespace std::literals;
+
+constexpr auto EXEC_HELPER_BINARY = "exec-helper"sv;
+constexpr auto COMMAND_KEY = "commands"sv;
+constexpr auto COMMAND_LINE_COMMAND_KEY = "command-line-command"sv;
+constexpr auto COMMAND_LINE_COMMAND_LINE_KEY = "command-line"sv;
 
 using ReturnCode = int32_t;
 static const ReturnCode SUCCESS = EXIT_SUCCESS;
 static const ReturnCode RUNTIME_ERROR = std::numeric_limits<ReturnCode>::max();
-} // namespace baseUtils
-} // namespace test
-} // namespace execHelper
+} // namespace execHelper::test::baseUtils
 
 #endif /* COMMAND_UTILS_INCLUDE */

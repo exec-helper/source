@@ -6,15 +6,10 @@
 #include <functional>
 #include <memory>
 
-#include <gsl/pointers>
-
 #include "shell.h"
 
 namespace execHelper::core {
 class Task;
-} // namespace execHelper::core
-
-namespace execHelper::core {
 /**
  * \brief Implements a straight forward executor that immediately executes the
  * given task. This executor blocks during executes.
@@ -31,13 +26,12 @@ class ImmediateExecutor : public ExecutorInterface {
      * \param[in] callback  The function to call with the result when a command
      * finishes
      */
-    ImmediateExecutor(const gsl::not_null<std::shared_ptr<Shell>>& shell,
-                      Callback callback) noexcept;
+    ImmediateExecutor(Shell& shell, Callback callback) noexcept;
 
     void execute(const Task& task) noexcept override;
 
   private:
-    const gsl::not_null<std::shared_ptr<Shell>> m_shell;
+    const Shell& m_shell;
     Callback m_callback;
 };
 } // namespace execHelper::core

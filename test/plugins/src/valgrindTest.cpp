@@ -6,8 +6,6 @@
 #include <string_view>
 #include <vector>
 
-#include <gsl/pointers>
-
 #include "config/patternsHandler.h"
 #include "config/settingsNode.h"
 #include "core/task.h"
@@ -35,8 +33,6 @@ using std::runtime_error;
 using std::string;
 using std::string_view;
 using std::vector;
-
-using gsl::not_null;
 
 using execHelper::config::EnvironmentCollection;
 using execHelper::config::Pattern;
@@ -107,11 +103,11 @@ constexpr auto toString(Tool tool) -> string_view {
 }
 
 inline void addToConfig(const execHelper::config::SettingsKeys& key,
-                        const Tool tool, not_null<VariablesMap*> config) {
+                        const Tool tool, VariablesMap& config) {
     execHelper::test::addToConfig(key, toString(tool), config);
 }
 
-inline void addToTask(const Tool tool, not_null<execHelper::core::Task*> task,
+inline void addToTask(const Tool tool, execHelper::core::Task& task,
                       execHelper::test::AddToTaskFunction func) {
     execHelper::test::addToTask(toString(tool), task, move(func));
 }
@@ -153,10 +149,10 @@ SCENARIO("Testing the configuration settings of the valgrind plugin",
                                        plugins);
 
         auto runCommand = string("{").append(pattern.getKey()).append("}");
-        addToConfig("run-command", runCommand, &config);
+        addToConfig("run-command", runCommand, config);
 
-        addToConfig("tool", tool, &config);
-        addToTask(tool, &expectedTask, [](const auto& tool) -> TaskCollection {
+        addToConfig("tool", tool, config);
+        addToTask(tool, expectedTask, [](const auto& tool) -> TaskCollection {
             return {std::string("--tool=").append(tool)};
         });
 

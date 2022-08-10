@@ -7,7 +7,6 @@ src = [
 
 deps = [
   boost_log_dep,
-  gsl_dep
 ]
 
 log_lib = library('exec-helper-log', src,

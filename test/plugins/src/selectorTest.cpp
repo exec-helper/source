@@ -72,7 +72,7 @@ SCENARIO("Testing the configuration settings of the selector plugin",
 
         auto target = string("{").append(pattern.getKey()).append("}");
 
-        addToConfig("targets", target, &config);
+        addToConfig("targets", target, config);
 
         if(workingDir) {
             handleWorkingDirectory(*workingDir, config, task);

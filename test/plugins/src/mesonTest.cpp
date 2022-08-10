@@ -4,8 +4,6 @@
 #include <string>
 #include <vector>
 
-#include <gsl/pointers>
-
 #include "config/environment.h"
 #include "config/patternsHandler.h"
 #include "config/settingsNode.h"
@@ -27,8 +25,6 @@
 #include "handlers.h"
 
 using namespace std;
-
-using gsl::not_null;
 
 using execHelper::config::EnvironmentCollection;
 using execHelper::config::Jobs_t;
@@ -74,15 +70,15 @@ inline auto modeToString(Mode mode) {
 }
 
 inline void addToConfig(const execHelper::config::SettingsKey& key, Mode mode,
-                        not_null<VariablesMap*> config) {
+                        VariablesMap& config) {
     auto command = modeToString(mode);
-    if(!config->add(key, string(command))) {
+    if(!config.add(key, string(command))) {
         throw runtime_error("Failed to add key " + key +
                             " with mode value to config");
     }
 }
 
-inline void addToTask(Mode mode, gsl::not_null<execHelper::core::Task*> task) {
+inline void addToTask(Mode mode, execHelper::core::Task& task) {
     auto command = modeToString(mode);
     execHelper::test::addToTask(
         command, task,
@@ -109,16 +105,15 @@ inline auto buildTypeToString(BuildType buildType) {
 }
 
 inline void addToConfig(const execHelper::config::SettingsKey& key,
-                        BuildType buildType, not_null<VariablesMap*> config) {
+                        BuildType buildType, VariablesMap& config) {
     auto command = buildTypeToString(buildType);
-    if(!config->add(key, string(command))) {
+    if(!config.add(key, string(command))) {
         throw runtime_error("Failed to add key " + key +
                             " with build type value to config");
     }
 }
 
-inline void addToTask(BuildType buildType,
-                      gsl::not_null<execHelper::core::Task*> task) {
+inline void addToTask(BuildType buildType, execHelper::core::Task& task) {
     auto command = buildTypeToString(buildType);
     execHelper::test::addToTask(command, task,
                                 [](const string& value) -> TaskCollection {
@@ -165,51 +160,51 @@ SCENARIO("Testing the configuration settings of the meson plugin",
 
             expectedTask.append("meson");
 
-            addToConfig("mode", mode, &config);
-            addToTask(mode, &expectedTask);
+            addToConfig("mode", mode, config);
+            addToTask(mode, expectedTask);
 
-            addToConfig("build-type", buildType, &config);
-            addToConfig("cross-file", crossFile, &config);
-            addToConfig("prefix", prefix, &config);
-            addToConfig("options", setupOptions, &config);
+            addToConfig("build-type", buildType, config);
+            addToConfig("cross-file", crossFile, config);
+            addToConfig("prefix", prefix, config);
+            addToConfig("options", setupOptions, config);
             if(mode == Mode::Setup) {
-                addToTask(buildType, &expectedTask);
-                addToTask(crossFile, &expectedTask,
+                addToTask(buildType, expectedTask);
+                addToTask(crossFile, expectedTask,
                           [](const auto& path) -> TaskCollection {
                               return {"--cross-file", path};
                           });
-                addToTask(prefix, &expectedTask,
+                addToTask(prefix, expectedTask,
                           [](const auto& path) -> TaskCollection {
                               return {"--prefix", path};
                           });
-                addToTask(setupOptions, &expectedTask,
+                addToTask(setupOptions, expectedTask,
                           [](const auto& option) -> TaskCollection {
                               return {"-D", option};
                           });
             }
 
-            addToConfig("jobs", jobs, &config);
+            addToConfig("jobs", jobs, config);
             if(mode == Mode::Compile) {
                 addToTask(
-                    jobs, &expectedTask,
+                    jobs, expectedTask,
                     [](const auto& job) -> TaskCollection {
                         return {"--jobs", job};
                     },
                     context.options().getJobs());
             }
 
-            addToConfig("suites", suites, &config);
+            addToConfig("suites", suites, config);
             if(mode == Mode::Test) {
-                addToTask(suites, &expectedTask,
+                addToTask(suites, expectedTask,
                           [](const auto& suite) -> TaskCollection {
                               return {"--suite", suite};
                           });
             }
 
-            addToConfig("build-dir", buildDir, &config);
+            addToConfig("build-dir", buildDir, config);
             if(mode != Mode::Setup) {
                 addToTask(
-                    buildDir, &expectedTask,
+                    buildDir, expectedTask,
                     [](const auto& path) -> TaskCollection {
                         return {"-C", path};
                     },
@@ -220,22 +215,22 @@ SCENARIO("Testing the configuration settings of the meson plugin",
                 handleCommandLine(*commandLine, config, expectedTask);
             }
 
-            addToConfig("targets", targets, &config);
+            addToConfig("targets", targets, config);
             if(mode == Mode::Test) {
-                addToTask(targets, &expectedTask,
+                addToTask(targets, expectedTask,
                           [](const auto& target) -> TaskCollection {
                               return {target};
                           });
             }
 
-            addToConfig("source-dir", sourceDir, &config);
+            addToConfig("source-dir", sourceDir, config);
             if(mode == Mode::Setup) {
                 addToTask(
-                    buildDir, &expectedTask,
+                    buildDir, expectedTask,
                     [](const auto& path) -> TaskCollection { return {path}; },
                     filesystem::path("."));
                 addToTask(
-                    sourceDir, &expectedTask,
+                    sourceDir, expectedTask,
                     [](const auto& path) -> TaskCollection { return {path}; },
                     filesystem::path("."));
             }
@@ -274,7 +269,7 @@ SCENARIO("Pass an invalid mode to the meson plugin", "[meson][error]") {
         RC_PRE(mode != "install");
 
         VariablesMap config("meson-test");
-        addToConfig("mode", mode, &config);
+        addToConfig("mode", mode, config);
 
         THEN_WHEN("We call the meson plugin with this configuration") {
             THEN_CHECK("It throws a runtime error") {

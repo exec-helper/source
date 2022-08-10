@@ -11,7 +11,6 @@ option('api-documentation', type : 'boolean', value : 'false', description: 'Bui
 option('changelog', type : 'boolean', value : 'false', description: 'build the changelog')
 
 option('use-system-yaml-cpp', type: 'feature', value: 'auto', description: 'Use the system yaml-cpp')
-option('use-system-gsl', type: 'feature', value: 'auto', description: 'Use the system microsft gsl')
 option('use-system-lua', type: 'feature', value: 'auto', description: 'Use the system lua')
 
 option('test', type : 'boolean', value : 'true', description: 'Enable tests')

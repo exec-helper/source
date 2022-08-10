@@ -7,18 +7,18 @@ namespace execHelper {
 namespace test {
 namespace baseUtils {
 struct CommandPluginSettings {
-    static inline std::string getKey() { return COMMAND_KEY; }
+    static inline auto getKey() { return COMMAND_KEY; }
 
-    static inline std::string getStatementKey() {
+    static inline auto getStatementKey() {
         assert(false); // The command plugin does not have a command line key
         return COMMAND_KEY;
     }
 };
 
 struct CommandLineCommandSettings {
-    static inline std::string getKey() { return COMMAND_LINE_COMMAND_KEY; }
+    static inline auto getKey() { return COMMAND_LINE_COMMAND_KEY; }
 
-    static inline std::string getStatementKey() {
+    static inline auto getStatementKey() {
         return COMMAND_LINE_COMMAND_LINE_KEY;
     }
 };

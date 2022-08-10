@@ -64,13 +64,13 @@ auto zeroCounterTask(Task task, const optional<path>& workingDir,
                      const optional<path>& directory) noexcept {
     task.append(string(binary));
     addToTask(
-        baseDirectory, &task,
+        baseDirectory, task,
         [](const auto& dir) -> TaskCollection {
             return {"--base-directory", dir};
         },
         defaultBaseDir());
     addToTask(
-        directory, &task,
+        directory, task,
         [](const auto& dir) -> TaskCollection {
             return {"--directory", dir};
         },
@@ -95,20 +95,20 @@ auto captureTask(Task task, const optional<path>& workingDir,
                  const optional<path>& infoFile) noexcept {
     task.append(string(binary));
     addToTask(
-        baseDirectory, &task,
+        baseDirectory, task,
         [](const auto& dir) -> TaskCollection {
             return {"--base-directory", dir};
         },
         defaultBaseDir());
     addToTask(
-        directory, &task,
+        directory, task,
         [](const auto& dir) -> TaskCollection {
             return {"--directory", dir};
         },
         defaultDir());
     task.append("--capture");
     addToTask(
-        infoFile, &task,
+        infoFile, task,
         [](const auto& file) -> TaskCollection {
             return {"--output", file};
         },
@@ -131,14 +131,14 @@ auto excludeTask(Task task, const optional<path>& workingDir,
                  const vector<string>& excludes) noexcept {
     task.append({string(binary), "--remove"});
     addToTask(
-        infoFile, &task,
+        infoFile, task,
         [](const auto& file) -> TaskCollection { return {file}; },
         defaultInfoFile());
-    addToTask(excludes, &task, [](const auto& exclude) -> TaskCollection {
+    addToTask(excludes, task, [](const auto& exclude) -> TaskCollection {
         return {"'" + exclude + "'"};
     });
     addToTask(
-        infoFile, &task,
+        infoFile, task,
         [](const auto& file) -> TaskCollection {
             return {"--output-file", file};
         },
@@ -162,20 +162,20 @@ auto genHtmlTask(Task task, const optional<path>& workingDir,
                  const optional<vector<string>>& genHtmlCommandLine) noexcept {
     task.append("genhtml");
     addToTask(
-        genHtmlOutput, &task,
+        genHtmlOutput, task,
         [](const auto& output) -> TaskCollection {
             return {"--output-directory", output};
         },
         defaultGenHtmlOutput());
     addToTask(
-        genHtmlTitle, &task,
+        genHtmlTitle, task,
         [](const auto& title) -> TaskCollection {
             return {"--title", title};
         },
         "Hello"s);
     task.append(genHtmlCommandLine.value_or(vector<string>()));
     addToTask(
-        infoFile, &task,
+        infoFile, task,
         [](const auto& file) -> TaskCollection { return {file}; },
         defaultInfoFile());
 
@@ -215,14 +215,14 @@ SCENARIO("Testing the configuration settings of the lcov plugin", "[lcov]") {
 
         const auto plugins = mapToMemories(pattern.getValues());
 
-        addToConfig("base-directory", baseDirectory, &config);
-        addToConfig("directory", directory, &config);
-        addToConfig("info-file", infoFile, &config);
-        addToConfig("command-line", commandLine, &config);
-        addToConfig("working-dir", workingDir, &config);
+        addToConfig("base-directory", baseDirectory, config);
+        addToConfig("directory", directory, config);
+        addToConfig("info-file", infoFile, config);
+        addToConfig("command-line", commandLine, config);
+        addToConfig("working-dir", workingDir, config);
 
         if(environment) {
-            addToConfig("environment", vector<string>(), &config);
+            addToConfig("environment", vector<string>(), config);
             std::for_each(
                 environment->begin(), environment->end(),
                 [&config](const auto& env) {
@@ -230,7 +230,7 @@ SCENARIO("Testing the configuration settings of the lcov plugin", "[lcov]") {
                 });
         }
 
-        addToConfig("zero-counters", zeroCounters, &config);
+        addToConfig("zero-counters", zeroCounters, config);
         if(zeroCounters.value_or(false)) {
             auto zero = zeroCounterTask(task, workingDir, commandLine,
                                         environment, baseDirectory, directory);
@@ -238,7 +238,7 @@ SCENARIO("Testing the configuration settings of the lcov plugin", "[lcov]") {
         }
 
         auto runCommand = string("{").append(pattern.getKey()).append("}");
-        addToConfig("run-command", runCommand, &config);
+        addToConfig("run-command", runCommand, config);
 
         Task runTask = task;
         if(workingDir) {
@@ -255,17 +255,17 @@ SCENARIO("Testing the configuration settings of the lcov plugin", "[lcov]") {
                                    baseDirectory, directory, infoFile);
         expectedTasks.emplace_back(capture);
 
-        addToConfig("excludes", excludes, &config);
+        addToConfig("excludes", excludes, config);
         if(excludes && !excludes->empty()) {
             auto exclude = excludeTask(task, workingDir, commandLine,
                                        environment, infoFile, *excludes);
             expectedTasks.emplace_back(exclude);
         }
 
-        addToConfig("gen-html", genHtml, &config);
-        addToConfig("gen-html-output", genHtmlOutput, &config);
-        addToConfig("gen-html-title", genHtmlTitle, &config);
-        addToConfig("gen-html-command-line", genHtmlCommandLine, &config);
+        addToConfig("gen-html", genHtml, config);
+        addToConfig("gen-html-output", genHtmlOutput, config);
+        addToConfig("gen-html-title", genHtmlTitle, config);
+        addToConfig("gen-html-command-line", genHtmlCommandLine, config);
 
         if(genHtml.value_or(false)) {
             auto genHtml =

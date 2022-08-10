@@ -2,14 +2,12 @@
 
 using std::move;
 
-using gsl::not_null;
-
 namespace execHelper {
 namespace test {
 namespace baseUtils {
 ConfigBuilder::ConfigBuilder() {
     ExecutionContent::registerIoService(
-        gsl::not_null<IoService*>(&m_ioService));
+        &m_ioService);
 }
 
 Commands::const_iterator ConfigBuilder::begin() const noexcept {
@@ -28,7 +26,7 @@ void ConfigBuilder::add(TestCommand&& command) noexcept {
     m_commands.emplace_back(move(command));
 }
 
-void ConfigBuilder::write(not_null<YamlWriter*> yaml) noexcept {
+void ConfigBuilder::write(YamlWriter& yaml) noexcept {
     for(auto& command : m_commands) {
         command.write(yaml);
     }

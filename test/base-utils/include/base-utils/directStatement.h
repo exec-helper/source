@@ -18,10 +18,10 @@ template <typename Plugin> class DirectStatement : public Statement {
 
     StatementKey getKey() const noexcept override { return Plugin::getKey(); }
 
-    void write(gsl::not_null<YamlWriter*> yaml,
+    void write(YamlWriter& yaml,
                const std::string& command) const noexcept override {
         try {
-            (*yaml)[getKey()][command][getStatementKey()] = getStatement();
+            yaml[getKey()][command][getStatementKey()] = getStatement();
         } catch(const YAML::InvalidNode&) {
             std::cerr << "Somehow the used YAML node is invalid" << std::endl;
             assert(false);

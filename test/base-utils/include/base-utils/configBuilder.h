@@ -32,7 +32,7 @@ class ConfigBuilder {
 
     void add(const TestCommand& command) noexcept;
     void add(TestCommand&& command) noexcept;
-    void write(gsl::not_null<YamlWriter*> yaml) noexcept;
+    void write(YamlWriter& yaml) noexcept;
 
     ConfigBuilderRAII startIteration() noexcept;
 

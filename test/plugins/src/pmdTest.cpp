@@ -5,8 +5,6 @@
 #include <string>
 #include <vector>
 
-#include <gsl/pointers>
-
 #include "config/environment.h"
 #include "config/patternsHandler.h"
 #include "config/settingsNode.h"
@@ -33,8 +31,6 @@ using std::runtime_error;
 using std::string;
 using std::vector;
 
-using gsl::not_null;
-
 using execHelper::config::EnvironmentCollection;
 using execHelper::config::PatternsHandler;
 using execHelper::config::SettingsNode;
@@ -56,7 +52,7 @@ enum class Tool { Cpd };
 constexpr auto getAllTools() { return array<Tool, 1>({Tool::Cpd}); }
 
 inline void addToConfig(const execHelper::config::SettingsKeys& key,
-                        const Tool tool, not_null<VariablesMap*> config) {
+                        const Tool tool, VariablesMap& config) {
     string command;
     switch(tool) {
     case Tool::Cpd:
@@ -65,14 +61,14 @@ inline void addToConfig(const execHelper::config::SettingsKeys& key,
     default:
         throw runtime_error("Invalid mode");
     }
-    if(!config->add(key, command)) {
+    if(!config.add(key, command)) {
         throw runtime_error("Failed to add key " + key.back() +
                             " with mode value to config");
     }
 }
 
 inline void addToTask(const filesystem::path& exe, const Tool tool,
-                      not_null<execHelper::core::Task*> task) {
+                      execHelper::core::Task& task) {
     string command;
     switch(tool) {
     case Tool::Cpd:
@@ -118,12 +114,12 @@ SCENARIO("Testing the configuration settings of the pmd plugin", "[pmd]") {
 
         VariablesMap config("pmd-test");
 
-        addToConfig("exec", exe, &config);
-        addToConfig("tool", tool, &config);
-        addToTask(exe.value_or("pmd"), tool.value_or(Tool::Cpd), &expectedTask);
+        addToConfig("exec", exe, config);
+        addToConfig("tool", tool, config);
+        addToTask(exe.value_or("pmd"), tool.value_or(Tool::Cpd), expectedTask);
 
-        addToConfig("language", language, &config);
-        addToTask(language, &expectedTask,
+        addToConfig("language", language, config);
+        addToTask(language, expectedTask,
                   [](const auto& language) -> TaskCollection {
                       return {"--language", language};
                   });
@@ -132,16 +128,16 @@ SCENARIO("Testing the configuration settings of the pmd plugin", "[pmd]") {
                         "-verbose", config, expectedTask);
 
         if(tool.value_or(Tool::Cpd) == Tool::Cpd) {
-            addToConfig("minimum-tokens", minimumTokens, &config);
+            addToConfig("minimum-tokens", minimumTokens, config);
             addToTask(
-                minimumTokens, &expectedTask,
+                minimumTokens, expectedTask,
                 [](const auto& minimumTokens) -> TaskCollection {
                     return {"--minimum-tokens", minimumTokens};
                 },
                 defaultMinimumTokens);
 
-            addToConfig("files", files, &config);
-            addToTask(files, &expectedTask,
+            addToConfig("files", files, config);
+            addToTask(files, expectedTask,
                       [](const auto& file) -> TaskCollection {
                           return {"--files", file};
                       });

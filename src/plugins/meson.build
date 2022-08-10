@@ -13,7 +13,6 @@ deps = [
   config,
   core,
   luawrapper,
-  gsl_dep
 ]
 
 plugins_lib = library('exec-helper-plugins', src,

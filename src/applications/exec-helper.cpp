@@ -337,7 +337,7 @@ inline VariablesMap handleConfiguration(const Args& args,
                                         OptionDescriptions& options) {
     options.setPositionalArgument(commandOption);
     VariablesMap optionsMap = FleetingOptions::getDefault();
-    if(!options.getOptionsMap(&optionsMap, args, false)) {
+    if(!options.getOptionsMap(optionsMap, args, false)) {
         throw std::invalid_argument(
             "Could not properly parse the command line options");
     }
@@ -352,7 +352,7 @@ int execHelperMain(int argc, char** argv, char** envp) {
     auto firstPassOptions = getDefaultOptions();
 
     VariablesMap firstPassOptionsMap = FleetingOptions::getDefault();
-    if(!firstPassOptions.getOptionsMap(&firstPassOptionsMap, args, true)) {
+    if(!firstPassOptions.getOptionsMap(firstPassOptionsMap, args, true)) {
         user_feedback_error(
             "Could not properly parse the command line options");
         printHelp(args[0], firstPassOptions, SettingsNode("Options"));
@@ -475,7 +475,7 @@ int execHelperMain(int argc, char** argv, char** envp) {
         }
     }
 
-    auto shell = make_shared<PosixShell>();
+    PosixShell shell;
     std::unique_ptr<ExecutorInterface> executor;
     auto lastReturnCode = EXIT_SUCCESS;
     if(fleetingOptions.getDryRun()) {

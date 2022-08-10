@@ -3,13 +3,9 @@
 
 #include <map>
 
-#include <gsl/gsl>
-
 #include "executionContent.h"
 
-namespace execHelper {
-namespace test {
-namespace baseUtils {
+namespace execHelper::test::baseUtils {
 class ExecutionHandler {
   public:
     void add(const std::string& key, ExecutionContent&& content) noexcept;
@@ -25,7 +21,7 @@ class ExecutionHandler {
     class ExecutionHandlerIterationRAII {
       public:
         explicit ExecutionHandlerIterationRAII(
-            gsl::not_null<ExecutionContentCollection*> outputs);
+            ExecutionContentCollection& outputs);
         ~ExecutionHandlerIterationRAII();
 
         ExecutionHandlerIterationRAII(
@@ -42,7 +38,7 @@ class ExecutionHandler {
         const ExecutionContent& at(const std::string& key) const noexcept;
 
       private:
-        gsl::not_null<ExecutionContentCollection*> m_outputs;
+        ExecutionContentCollection& m_outputs;
     };
 
     ExecutionContentCollection m_outputs;
@@ -50,8 +46,6 @@ class ExecutionHandler {
   public:
     ExecutionHandlerIterationRAII startIteration() noexcept;
 };
-} // namespace baseUtils
-} // namespace test
-} // namespace execHelper
+} // namespace execHelper::test::baseUtils
 
 #endif /* EXECUTION_HANDLER_INCLUDE */

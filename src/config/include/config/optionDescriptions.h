@@ -3,11 +3,12 @@
 
 #include <memory>
 #include <optional>
+#include <span>
+#include <string_view>
 #include <type_traits>
 #include <vector>
 
 #include <boost/program_options.hpp>
-#include <gsl/gsl>
 
 #include "log/assertions.h"
 
@@ -18,7 +19,7 @@
 namespace execHelper::config {
 using ArgumentOption = std::string;
 using ArgumentOptions = std::vector<ArgumentOption>;
-using Args = gsl::span<const gsl::czstring>;
+using Args = std::span<const char* const>;
 
 namespace detail {
 /**
@@ -133,7 +134,7 @@ class OptionInterface {
      * \throws boost::bad_any_cast  If the given option value can not be parsed to the given option type
      */
     virtual void
-    toMap(gsl::not_null<config::VariablesMap*> variablesMap,
+    toMap(config::VariablesMap& variablesMap,
           const boost::program_options::variables_map& optionsMap) const = 0;
 
     /**
@@ -247,12 +248,12 @@ template <typename T> class Option : public OptionInterface {
         return m_explanation;
     }
 
-    auto toMap(gsl::not_null<config::VariablesMap*> variablesMap,
+    auto toMap(config::VariablesMap& variablesMap,
                const boost::program_options::variables_map& optionsMap) const
         -> void override {
         auto value = optionsMap[m_identifyingOption].template as<T>();
         auto settings = detail::toSetting(value);
-        if(!variablesMap->replace(m_identifyingOption, settings)) {
+        if(!variablesMap.replace(m_identifyingOption, settings)) {
             throw(std::invalid_argument(
                 std::string("Could not set ").append(m_identifyingOption)));
         }
@@ -334,8 +335,7 @@ class OptionDescriptions {
      * map was successfully constructed False   otherwise
      */
     [[nodiscard]] auto
-    getOptionsMap(gsl::not_null<config::VariablesMap*> variablesMap,
-                  const Args& args,
+    getOptionsMap(config::VariablesMap& variablesMap, const Args& args,
                   bool allowUnregistered = false) const noexcept -> bool;
 
     /**
@@ -356,7 +356,7 @@ class OptionDescriptions {
      * \param[in] optionsMap        The options mapping
      * \throws std::invalid_argument    If an option value can not be mapped to the corresponding setting
      */
-    void toMap(gsl::not_null<config::VariablesMap*> variablesMap,
+    void toMap(config::VariablesMap& variablesMap,
                const boost::program_options::variables_map& optionsMap) const;
 
     boost::program_options::options_description m_optionDescription;

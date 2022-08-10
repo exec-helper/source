@@ -3,12 +3,8 @@
 #include <string>
 #include <vector>
 
-#include <gsl/gsl>
-
 #include "config/envp.h"
 #include "unittest/catch.h"
-
-using gsl::czstring;
 
 using std::string;
 using std::stringstream;

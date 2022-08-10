@@ -4,7 +4,6 @@
 #include "logger.h"
 #include <stdexcept>
 
-using gsl::not_null;
 using std::invalid_argument;
 using std::string;
 
@@ -30,7 +29,7 @@ auto OptionDescriptions::setPositionalArgument(
     m_positional = option.getId();
 }
 
-auto OptionDescriptions::getOptionsMap(not_null<VariablesMap*> variablesMap,
+auto OptionDescriptions::getOptionsMap(VariablesMap& variablesMap,
                                        const Args& args,
                                        bool allowUnregistered) const noexcept
     -> bool {
@@ -70,7 +69,7 @@ auto OptionDescriptions::getOptionsMap(not_null<VariablesMap*> variablesMap,
     return true;
 }
 
-void OptionDescriptions::toMap(not_null<VariablesMap*> variablesMap,
+void OptionDescriptions::toMap(VariablesMap& variablesMap,
                                const variables_map& optionsMap) const {
     for(const auto& option : optionsMap) {
         if(m_options.count(option.first) > 0U) {

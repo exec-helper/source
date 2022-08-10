@@ -12,9 +12,7 @@ using std::move;
 
 namespace execHelper::core {
 
-ImmediateExecutor::ImmediateExecutor(
-    const gsl::not_null<std::shared_ptr<Shell>>& shell,
-    Callback callback) noexcept
+ImmediateExecutor::ImmediateExecutor(Shell& shell, Callback callback) noexcept
     : m_shell(shell), m_callback(move(callback)) {
     ;
 }
@@ -22,8 +20,8 @@ ImmediateExecutor::ImmediateExecutor(
 void ImmediateExecutor::execute(const Task& task) noexcept {
     user_feedback_info("Executing '" << task.toString() << "'");
     try {
-        auto returnCode = m_shell->execute(task);
-        if(!m_shell->isExecutedSuccessfully(returnCode)) {
+        auto returnCode = m_shell.execute(task);
+        if(!m_shell.isExecutedSuccessfully(returnCode)) {
             m_callback(returnCode);
         }
     } catch(const PathNotFoundError& e) {

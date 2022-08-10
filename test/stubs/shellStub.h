@@ -20,7 +20,7 @@ class ShellStub final : public Shell {
         ;
     }
 
-    ShellReturnCode execute(const Task& task) noexcept override {
+    ShellReturnCode execute(const Task& task) const noexcept override {
         m_executedTasks.push_back(task);
         return m_returnCode;
     }
@@ -35,7 +35,7 @@ class ShellStub final : public Shell {
     }
 
   private:
-    TaskQueue m_executedTasks;
+    mutable TaskQueue m_executedTasks;
     ShellReturnCode m_returnCode;
 };
 } // namespace test

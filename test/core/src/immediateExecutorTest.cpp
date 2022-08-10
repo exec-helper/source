@@ -25,10 +25,9 @@ SCENARIO("Test the execution of the immediateExecutor",
         task3.append("task3");
 
         ShellStub::TaskQueue actualTasks = {task1, task2, task3};
-        auto shell = make_shared<ShellStub>();
+        ShellStub shell;
         ImmediateExecutor executor(
-            static_pointer_cast<Shell>(shell),
-            []([[maybe_unused]] Shell::ShellReturnCode returnCode) {});
+            shell, []([[maybe_unused]] Shell::ShellReturnCode returnCode) {});
 
         WHEN("We schedule each task and run the executor") {
             executor.execute(task1);
@@ -36,7 +35,7 @@ SCENARIO("Test the execution of the immediateExecutor",
             executor.execute(task3);
 
             THEN("We should get the same tasks again") {
-                ShellStub::TaskQueue executedTasks = shell->getExecutedTasks();
+                ShellStub::TaskQueue executedTasks = shell.getExecutedTasks();
                 REQUIRE(executedTasks == actualTasks);
             }
         }
@@ -55,8 +54,8 @@ SCENARIO("Test the failing of the execution",
             [&realReturnCode](Shell::ShellReturnCode returnCode) {
                 realReturnCode = returnCode;
             };
-        auto shell = make_shared<ShellStub>(actualReturnCode);
-        ImmediateExecutor executor(static_pointer_cast<Shell>(shell), callback);
+        ShellStub shell(actualReturnCode);
+        ImmediateExecutor executor(shell, callback);
 
         WHEN("We schedule the task for execution") {
             executor.execute(task1);

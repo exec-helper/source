@@ -5,8 +5,6 @@
 using std::move;
 using std::string;
 
-using gsl::not_null;
-
 namespace execHelper {
 namespace test {
 namespace baseUtils {
@@ -22,19 +20,18 @@ const ExecutionContent& ExecutionHandler::at(const string& key) const noexcept {
 
 ExecutionHandler::ExecutionHandlerIterationRAII
 ExecutionHandler::startIteration() noexcept {
-    return ExecutionHandlerIterationRAII(
-        gsl::not_null<ExecutionContentCollection*>(&m_outputs));
+    return ExecutionHandlerIterationRAII(m_outputs);
 }
 
 ExecutionHandler::ExecutionHandlerIterationRAII::ExecutionHandlerIterationRAII(
-    not_null<ExecutionContentCollection*> outputs)
+    ExecutionContentCollection& outputs)
     : m_outputs(outputs) {
     ;
 }
 
 ExecutionHandler::ExecutionHandlerIterationRAII::
     ~ExecutionHandlerIterationRAII() {
-    for(auto& output : *m_outputs) {
+    for(auto& output : m_outputs) {
         output.second.clear();
     }
 }

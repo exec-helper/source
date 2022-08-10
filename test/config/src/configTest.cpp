@@ -1,8 +1,6 @@
 #include <algorithm>
 #include <string>
 
-#include <gsl/gsl>
-
 #include "config/config.h"
 #include "config/pattern.h"
 
@@ -10,7 +8,6 @@
 #include "unittest/catch.h"
 #include "utils/utils.h"
 
-using gsl::czstring;
 using std::find;
 using std::string;
 using std::to_string;
@@ -99,8 +96,7 @@ SCENARIO("Parse properly written settings files", "[config][config-config]") {
         }
 
         ConfigFileWriter configFile;
-        writeSettingsFile(gsl::not_null<ConfigFileWriter*>(&configFile),
-                          settings, patterns);
+        writeSettingsFile(configFile, settings, patterns);
         auto parsedSettingsFile = parseSettingsFile(configFile.getPath());
 
         THEN_CHECK("It must succeed") {

@@ -3,20 +3,16 @@
 #include <cstddef>
 #include <cstring>
 #include <iostream>
+#include <span>
 #include <string>
 #include <string_view>
-
-#include <gsl/gsl>
 
 #include "log/assertions.h"
 #include "logger.h"
 
+using std::span;
 using std::string;
 using std::string_view;
-
-using gsl::czstring;
-using gsl::owner;
-using gsl::span;
 
 using namespace std::literals;
 
@@ -64,7 +60,7 @@ void Envp::clear() noexcept {
 }
 
 auto operator<<(std::ostream& os, const Envp& envp) noexcept -> std::ostream& {
-    const span<const czstring> envs(envp.getEnvp(), envp.size());
+    const span<const char* const> envs(envp.getEnvp(), envp.size());
     bool firstIteration = true;
     for(const auto& env : envs) {
         if(!firstIteration) {

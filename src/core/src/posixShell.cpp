@@ -1,6 +1,7 @@
 #include "posixShell.h"
 #include "log/log.h"
 
+#include <span>
 #include <vector>
 
 #ifdef _WIN32
@@ -13,7 +14,6 @@
 #include <boost/filesystem.hpp>
 #include <boost/process.hpp>
 #include <boost/process/start_dir.hpp>
-#include <gsl/gsl>
 
 #include "config/envp.h"
 #include "log/assertions.h"
@@ -25,10 +25,8 @@
 using boost::replace_all;
 #endif
 
+using std::span;
 using std::string;
-
-using gsl::span;
-using gsl::zstring;
 
 using execHelper::config::Envp;
 
@@ -64,7 +62,8 @@ inline auto getPath(const process::environment& env,
 } // namespace
 
 namespace execHelper::core {
-auto PosixShell::execute(const Task& task) -> PosixShell::ShellReturnCode {
+auto PosixShell::execute(const Task& task) const
+    -> PosixShell::ShellReturnCode {
     if(task.getTask().empty()) {
         return POSIX_SUCCESS;
     }
@@ -169,7 +168,7 @@ inline auto PosixShell::wordExpand(const Task& task) noexcept
         size_t returnCode =
             wordexp(taskItem.c_str(), &p, WRDE_SHOWERR | WRDE_UNDEF);
         if(returnCode == 0) {
-            span<zstring> w(p.we_wordv, p.we_wordc);
+            std::span<char*> w(p.we_wordv, p.we_wordc);
             std::copy(w.begin(), w.end(), std::back_inserter(result));
         } else {
             switch(returnCode) {

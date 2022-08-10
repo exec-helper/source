@@ -25,7 +25,7 @@ class Shell {
      * \returns A shell return code
      * \throws PathNotFoundError    The binary to execute was not found
      */
-    virtual auto execute(const Task& task) -> ShellReturnCode = 0;
+    virtual auto execute(const Task& task) const -> ShellReturnCode = 0;
 
     /**
      * Checks whether the given shell return code can be associated with a

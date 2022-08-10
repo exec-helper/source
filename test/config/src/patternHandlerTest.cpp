@@ -1,24 +1,22 @@
 #include <iostream>
 #include <vector>
 
-#include <gsl/gsl>
-
 #include "config/patternsHandler.h"
 #include "unittest/catch.h"
 
 using std::string;
 using std::vector;
 
-using gsl::czstring;
-
 using execHelper::config::Pattern;
 using execHelper::config::Patterns;
 using execHelper::config::PatternsHandler;
 
 namespace {
-const czstring DEFAULT_VALUES_KEY = "default-values";
-const czstring SHORT_OPTION_KEY = "short-option";
-const czstring LONG_OPTION_KEY = "long-option";
+using namespace std::literals;
+
+const auto DEFAULT_VALUES_KEY = "default-values"s;
+const auto SHORT_OPTION_KEY = "short-option"s;
+const auto LONG_OPTION_KEY = "long-option"s;
 
 inline void checkContainsPatterns(const PatternsHandler& handler,
                                   const Patterns& expectedPatterns) {

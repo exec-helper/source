@@ -60,7 +60,8 @@ auto makePatternPermutator(const Patterns& patterns) noexcept
 }
 
 auto replacePatternsInEnvironment(
-    const EnvironmentCollection& env, // NOLINT(bugprone-easily-swappable-parameters)
+    const EnvironmentCollection&
+        env, // NOLINT(bugprone-easily-swappable-parameters)
     const PatternCombinations& patternCombinations) noexcept
     -> EnvironmentCollection {
     EnvironmentCollection replaced;

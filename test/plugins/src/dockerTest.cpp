@@ -34,8 +34,6 @@ using std::runtime_error;
 using std::string;
 using std::vector;
 
-using gsl::not_null;
-
 using execHelper::config::EnvironmentCollection;
 using execHelper::config::Pattern;
 using execHelper::config::Patterns;
@@ -60,7 +58,7 @@ enum class Mode { Run, Exec };
 constexpr auto getAllModes() { return array<Mode, 2>({Mode::Run, Mode::Exec}); }
 
 inline void addToConfig(const execHelper::config::SettingsKeys& key,
-                        const Mode mode, not_null<VariablesMap*> config) {
+                        const Mode mode, VariablesMap& config) {
     string command;
     switch(mode) {
     case Mode::Run:
@@ -72,14 +70,13 @@ inline void addToConfig(const execHelper::config::SettingsKeys& key,
     default:
         throw runtime_error("Invalid mode");
     }
-    if(!config->add(key, command)) {
+    if(!config.add(key, command)) {
         throw runtime_error("Failed to add key " + key.back() +
                             " with mode value to config");
     }
 }
 
-inline void addToTask(const Mode mode,
-                      gsl::not_null<execHelper::core::Task*> task) {
+inline void addToTask(const Mode mode, execHelper::core::Task& task) {
     string command;
     switch(mode) {
     case Mode::Run:
@@ -142,44 +139,44 @@ SCENARIO("Testing the configuration settings of the docker plugin",
 
             expectedTask.append("docker");
 
-            addToConfig("mode", mode, &config);
-            addToTask(mode, &expectedTask);
+            addToConfig("mode", mode, config);
+            addToTask(mode, expectedTask);
 
-            addToConfig("interactive", interactive, &config);
+            addToConfig("interactive", interactive, config);
             addToTask(
-                interactive, &expectedTask,
+                interactive, expectedTask,
                 [](const string& value) -> TaskCollection {
                     return {"--interactive=" + value};
                 },
                 false);
 
-            addToConfig("tty", tty, &config);
+            addToConfig("tty", tty, config);
             addToTask(
-                tty, &expectedTask,
+                tty, expectedTask,
                 [](const string& value) -> TaskCollection {
                     return {"--tty=" + value};
                 },
                 false);
 
-            addToConfig("privileged", privileged, &config);
+            addToConfig("privileged", privileged, config);
             addToTask(
-                privileged, &expectedTask,
+                privileged, expectedTask,
                 [](const string& value) {
                     return value == "true" ? TaskCollection{"--privileged"}
                                            : TaskCollection();
                 },
                 false);
 
-            addToConfig("user", user, &config);
-            addToTask(user, &expectedTask,
+            addToConfig("user", user, config);
+            addToTask(user, expectedTask,
                       [](const string& value) -> TaskCollection {
                           return {
                               "--user=\"" + value + "\"",
                           };
                       });
 
-            addToConfig("env", env, &config);
-            addToTask(env, &expectedTask,
+            addToConfig("env", env, config);
+            addToTask(env, expectedTask,
                       [](const string& value) -> TaskCollection {
                           return {
                               "\"--env=" + value + "\"",
@@ -190,13 +187,13 @@ SCENARIO("Testing the configuration settings of the docker plugin",
                 handleCommandLine(*commandLine, config, expectedTask);
             }
 
-            addToConfig("image", image, &config);
-            addToConfig("container", container, &config);
+            addToConfig("image", image, config);
+            addToConfig("container", container, config);
 
             switch(mode) {
             case Mode::Run:
-                addToConfig("volumes", volumes, &config);
-                addToTask(volumes, &expectedTask,
+                addToConfig("volumes", volumes, config);
+                addToTask(volumes, expectedTask,
                           [](const string& value) -> TaskCollection {
                               return {
                                   "\"--volume=" + value + "\"",
@@ -215,7 +212,7 @@ SCENARIO("Testing the configuration settings of the docker plugin",
             }
 
             auto target = string("{").append(pattern.getKey()).append("}");
-            addToConfig("targets", target, &config);
+            addToConfig("targets", target, config);
 
             if(environment) {
                 handleEnvironment(*environment, config, expectedTask);
@@ -258,13 +255,13 @@ SCENARIO("Not passing an image or container to the docker plugin",
                 env, // Lua does not necessarily preserve the order of these, so we currently limit ourselves to one value
             const optional<vector<string>>& volumes) {
             VariablesMap config("docker-test");
-            addToConfig("run", mode, &config);
-            addToConfig("interactive", interactive, &config);
-            addToConfig("tty", tty, &config);
-            addToConfig("privileged", privileged, &config);
-            addToConfig("user", user, &config);
-            addToConfig("env", env, &config);
-            addToConfig("volumes", volumes, &config);
+            addToConfig("run", mode, config);
+            addToConfig("interactive", interactive, config);
+            addToConfig("tty", tty, config);
+            addToConfig("privileged", privileged, config);
+            addToConfig("user", user, config);
+            addToConfig("env", env, config);
+            addToConfig("volumes", volumes, config);
 
             THEN_WHEN("We call the docker plugin with this configuration") {
                 THEN_CHECK("It throws a runtime error") {

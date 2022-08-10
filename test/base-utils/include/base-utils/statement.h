@@ -3,8 +3,6 @@
 
 #include <string>
 
-#include <gsl/gsl>
-
 #include "executionContent.h"
 #include "yaml.h"
 
@@ -19,7 +17,7 @@ class Statement {
     virtual ~Statement() = default;
 
     virtual StatementKey getKey() const noexcept = 0;
-    virtual void write(gsl::not_null<YamlWriter*> yaml,
+    virtual void write(YamlWriter& yaml,
                        const std::string& command) const noexcept = 0;
 
     virtual inline unsigned int getNumberOfExecutions() const noexcept {
