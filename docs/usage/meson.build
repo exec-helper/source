@@ -61,7 +61,7 @@ if get_option('usage-documentation-man')
   gzip = find_program('gzip')
 
   man = custom_target('Building man documentation',
-    command: [sphinx, '-q', '-b', 'man', meson.source_root(), meson.current_build_dir(), '&&', 'cd', meson.current_build_dir(), '&&', gzip, '--keep', '--force', '--best'] + man1_intermediate + man5_intermediate,
+    command: [sphinx, '-q', '-b', 'man', meson.source_root(), meson.current_build_dir(), '&&', 'cd', meson.current_build_dir(), '&&', gzip, '-k', '-f', '--best'] + man1_intermediate + man5_intermediate,
     input: man1_sources + man5_sources,
     output: man1_output + man5_output,
     build_by_default: true,
