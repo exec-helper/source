@@ -1,3 +1,5 @@
+#!/bin/bash
+
 _eh_complete() {
   COMPREPLY=()
   local word="${COMP_WORDS[COMP_CWORD]}"
