@@ -46,22 +46,22 @@ auto Pattern::getLongOption() const noexcept -> const LongOption& {
     return m_longOption;
 }
 
-auto operator<<(ostream& os, const Pattern& pattern) noexcept -> ostream& {
-    os << "{" << pattern.getKey() << ": ";
+auto operator<<(ostream& out, const Pattern& pattern) noexcept -> ostream& {
+    out << "{" << pattern.getKey() << ": ";
     auto shortOption = pattern.getShortOption();
     if(shortOption) {
-        os << "short option: " << shortOption.value() << ", ";
+        out << "short option: " << shortOption.value() << ", ";
     }
     auto longOption = pattern.getLongOption();
     if(longOption) {
-        os << "long option: " << longOption.value() << ", ";
+        out << "long option: " << longOption.value() << ", ";
     }
-    os << "values: {";
+    out << "values: {";
     for(const auto& value : pattern.getValues()) {
-        os << value << ";";
+        out << value << ";";
     }
-    os << "}";
-    os << "}";
-    return os;
+    out << "}";
+    out << "}";
+    return out;
 }
 } // namespace execHelper::config

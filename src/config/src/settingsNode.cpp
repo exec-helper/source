@@ -19,21 +19,21 @@ using execHelper::config::SettingsKeys;
 using execHelper::config::SettingsValues;
 
 namespace {
-auto stream(ostream& os, // NOLINT(misc-no-recursion)
+auto stream(ostream& out, // NOLINT(misc-no-recursion)
             const execHelper::config::SettingsNode& settings,
             const string& prepend) noexcept -> ostream& {
-    os << prepend << "- " << settings.key();
+    out << prepend << "- " << settings.key();
     auto values =
         settings.get<SettingsValues>(SettingsKeys(), SettingsValues());
     if(!values.empty()) {
-        os << ":";
+        out << ":";
     }
-    os << std::endl;
+    out << std::endl;
     const string newPrepend = string(prepend).append("  ");
     for(const auto& value : values) {
-        stream(os, settings[value], newPrepend);
+        stream(out, settings[value], newPrepend);
     }
-    return os;
+    return out;
 }
 } // namespace
 
@@ -180,8 +180,9 @@ auto SettingsNode::add(const std::initializer_list<SettingsKey>& key,
     return add(SettingsKeys(key), SettingsValues({newValue}));
 }
 
-auto SettingsNode::add(const SettingsKeys& key,
-                       const SettingsValues& newValue) noexcept -> bool {
+auto SettingsNode::add(
+    const SettingsKeys& key, // NOLINT(bugprone-easily-swappable-parameters)
+    const SettingsValues& newValue) noexcept -> bool {
     SettingsNode* settings = this;
     for(const auto& parentKey : key) {
         if(!settings->contains(parentKey)) {
@@ -325,8 +326,8 @@ void SettingsNode::deepCopy( // NOLINT(misc-no-recursion)
               std::back_inserter(*m_values));
 }
 
-auto operator<<(ostream& os, const SettingsNode& settings) noexcept
+auto operator<<(ostream& out, const SettingsNode& settings) noexcept
     -> ostream& {
-    return stream(os, settings, "");
+    return stream(out, settings, "");
 }
 } // namespace execHelper::config

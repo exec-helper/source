@@ -32,7 +32,7 @@ if host_machine.system() == 'windows'
     )
 else
     # Create a symlink
-  custom_target('eh', 
+  custom_target('eh',
     input: exec_helper,
     output: 'eh',
     command: ['ln', '--symbolic', '--force', '@PLAINNAME@', '@OUTPUT@'],

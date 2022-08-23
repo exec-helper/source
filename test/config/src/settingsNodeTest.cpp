@@ -13,7 +13,6 @@
 #include "utils/utils.h"
 
 using std::move;
-using std::nullopt;
 using std::ostream;
 using std::string;
 using std::stringstream;

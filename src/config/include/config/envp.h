@@ -55,7 +55,7 @@ class Envp {
     Envp_t m_envp;
 };
 
-auto operator<<(std::ostream& os, const Envp& envp) noexcept -> std::ostream&;
+auto operator<<(std::ostream& out, const Envp& envp) noexcept -> std::ostream&;
 } // namespace execHelper::config
 
 #endif /* ENVP_INCLUDES */

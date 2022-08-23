@@ -25,21 +25,19 @@ namespace {
  * Since valgrind reports boost::filesystem::unique_path to leak, we implement
  * our own version
  */
-inline Path unique_path(const Path& model) {
-    string resultPathName = model.filename().string();
+inline auto unique_path(string model) -> Path {
     auto nbOfReplacements =
-        count(resultPathName.begin(), resultPathName.end(), '%');
+        count(model.begin(), model.end(), '%');
     auto replacements = generateRandomChar(nbOfReplacements);
     size_t pos = 0U;
     auto index = 0U;
 
-    while((pos = resultPathName.find('%', pos)) != std::string::npos) {
-        assert(index < replacements.size());
-        resultPathName.replace(pos, 1U, string(1U, replacements[index]));
+    while((pos = model.find('%', pos)) != std::string::npos && index < replacements.size()) {
+        model[pos] = replacements[index];
         ++pos;
         ++index;
     }
-    return resultPathName;
+    return model;
 }
 } // namespace
 

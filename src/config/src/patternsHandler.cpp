@@ -42,13 +42,13 @@ void PatternsHandler::addPattern(const Pattern& pattern) noexcept {
 }
 
 auto PatternsHandler::contains(const PatternKey& key) const noexcept -> bool {
-    return m_patterns.count(key) > 0U;
+    return m_patterns.contains(key);
 }
 
 auto PatternsHandler::getPattern(const PatternKey& key) const noexcept
     -> const Pattern& {
     const PatternCollection& constPatterns = m_patterns;
-    ensures(constPatterns.count(key) > 0U);
+    ensures(constPatterns.contains(key));
     return constPatterns.at(key);
 }
 

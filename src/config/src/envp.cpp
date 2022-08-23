@@ -59,17 +59,17 @@ void Envp::clear() noexcept {
     m_envp.clear();
 }
 
-auto operator<<(std::ostream& os, const Envp& envp) noexcept -> std::ostream& {
+auto operator<<(std::ostream& out, const Envp& envp) noexcept -> std::ostream& {
     const span<const char* const> envs(envp.getEnvp(), envp.size());
     bool firstIteration = true;
     for(const auto& env : envs) {
         if(!firstIteration) {
-            os << ", "sv;
+            out << ", "sv;
         } else {
             firstIteration = false;
         }
-        os << env;
+        out << env;
     }
-    return os;
+    return out;
 }
 } // namespace execHelper::config

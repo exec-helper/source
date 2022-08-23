@@ -28,13 +28,14 @@ namespace {
 inline auto implodeVector(const vector<string>& toImplode,
                           const string& delimiter) -> string {
     string result;
-    return accumulate(toImplode.begin(), toImplode.end(), string(),
-                      [&delimiter](const std::string& a, const std::string& b) {
-                          if(a.empty()) {
-                              return string(b);
-                          }
-                          return string(a).append(delimiter).append(b);
-                      });
+    return accumulate(
+        toImplode.begin(), toImplode.end(), string(),
+        [&delimiter](const std::string& lhs, const std::string& rhs) {
+            if(lhs.empty()) {
+                return string(rhs);
+            }
+            return string(lhs).append(delimiter).append(rhs);
+        });
 }
 
 inline auto implodeVector(const vector<string>& toImplode) -> string {
@@ -112,7 +113,7 @@ auto Task::setEnvironment(EnvironmentCollection&& env) noexcept -> bool {
 }
 
 auto Task::appendToEnvironment(EnvironmentValue&& newValue) noexcept -> bool {
-    if(m_env.count(newValue.first) > 0U) {
+    if(m_env.contains(newValue.first)) {
         m_env.erase(newValue.first);
     }
     m_env.emplace(newValue);
@@ -149,26 +150,26 @@ auto Task::operator!=(const Task& other) const noexcept -> bool {
     return !(*this == other);
 }
 
-auto operator<<(ostream& os, const Task& task) noexcept -> ostream& {
+auto operator<<(ostream& stream, const Task& task) noexcept -> ostream& {
     TaskCollection subtasks = task.getTask();
     EnvironmentCollection environment = task.getEnvironment();
-    os << string("Task {");
+    stream << string("Task {");
 
-    os << string("Environment(") << environment.size() << "): {";
+    stream << string("Environment(") << environment.size() << "): {";
     for(const auto& envVar : environment) {
-        os << string(" ") << envVar.first << ": " << envVar.second << ";";
+        stream << string(" ") << envVar.first << ": " << envVar.second << ";";
     }
-    os << string("} ");
+    stream << string("} ");
 
-    os << string("Command(") << subtasks.size() << "): {";
+    stream << string("Command(") << subtasks.size() << "): {";
     for(const auto& subTask : subtasks) {
-        os << string(" ") << subTask;
+        stream << string(" ") << subTask;
     }
-    os << string("} ");
-    os << string("Working-dir: {") << task.getWorkingDirectory().string()
-       << "}";
-    os << string("}");
-    os << endl;
-    return os;
+    stream << string("} ");
+    stream << string("Working-dir: {") << task.getWorkingDirectory().string()
+           << "}";
+    stream << string("}");
+    stream << endl;
+    return stream;
 }
 } // namespace execHelper::core

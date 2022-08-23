@@ -60,8 +60,8 @@ auto makePatternPermutator(const Patterns& patterns) noexcept
 }
 
 auto replacePatternsInEnvironment(
-    const EnvironmentCollection&
-        env, // NOLINT(bugprone-easily-swappable-parameters)
+    const EnvironmentCollection& // NOLINT(bugprone-easily-swappable-parameters)
+        env,
     const PatternCombinations& patternCombinations) noexcept
     -> EnvironmentCollection {
     EnvironmentCollection replaced;
@@ -196,7 +196,7 @@ auto discoverPlugins(const Paths& searchPaths) noexcept -> Plugins {
                 return luaPlugin(move(task), variables, context, path);
             };
 
-            if(plugins.count(newId) == 0) {
+            if(!plugins.contains(newId)) {
                 plugins.try_emplace(newId, plugin);
             } else {
                 plugins[newId] = plugin;
@@ -221,7 +221,7 @@ auto discoverPluginSummaries(const Paths& searchPaths) noexcept
                                    auto newId = path.stem().string();
                                    auto summary = luaPluginSummary(path);
 
-                                   if(plugins.count(newId) == 0) {
+                                   if(!plugins.contains(newId)) {
                                        plugins.try_emplace(newId, summary);
                                    } else {
                                        plugins[newId] = summary;

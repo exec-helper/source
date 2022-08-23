@@ -10,7 +10,8 @@ class ExecutionHandler {
   public:
     void add(const std::string& key, ExecutionContent&& content) noexcept;
 
-    const ExecutionContent& at(const std::string& key) const noexcept;
+    [[nodiscard]]
+    auto at(const std::string& key) const noexcept -> const ExecutionContent&;
 
   private:
     using ExecutionContentCollection = std::map<std::string, ExecutionContent>;
@@ -29,13 +30,14 @@ class ExecutionHandler {
         ExecutionHandlerIterationRAII(ExecutionHandlerIterationRAII&& other) =
             default;
 
-        ExecutionHandlerIterationRAII&
-        operator=(const ExecutionHandlerIterationRAII& other) = default;
-        ExecutionHandlerIterationRAII&
+        auto
+        operator=(const ExecutionHandlerIterationRAII& other) = delete;
+        auto
         operator=(ExecutionHandlerIterationRAII&& other) noexcept =
-            default; // NOLINT(misc-noexcept-move-constructor)
+            delete;
 
-        const ExecutionContent& at(const std::string& key) const noexcept;
+        [[nodiscard]]
+        auto at(const std::string& key) const noexcept -> const ExecutionContent&;
 
       private:
         ExecutionContentCollection& m_outputs;

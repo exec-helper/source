@@ -6,14 +6,48 @@ Installing from package
 =======================
 Arch Linux based distributions
 ------------------------------
-Arch linux users can use the `exec-helper (AUR) package <https://aur.archlinux.org/packages/exec-helper>`_ or checkout the `exec-helper-package <https://github.com/bverhagen/exec-helper-package>`_ project for building the package from source.
+Arch linux users can:
 
-Debian based distributions
---------------------------
-Add the `PPA on Launchpad <https://launchpad.net/~bverhagen/+archive/ubuntu/exec-helper>`_ to your sources or checkout the `exec-helper-package <https://github.com/bverhagen/exec-helper-package>`_ project for building the package from source.
+*. Use the pre-built Arch Linux pre-built binary package:
+  Add to `/etc/pacman.conf`::
+
+      [home_bverhagen_exec-helper_Arch]
+      SigLevel = Optional TrustAll
+      Server = https://download.opensuse.org/repositories/home:/bverhagen:/exec-helper/Arch/x86_64/
+
+
+  Then::
+
+    curl -L -O https://download.opensuse.org/repositories/home:/bverhagen:/exec-helper/Arch/x86_64/home_bverhagen_exec-helper_Arch.key
+    sudo pacman-key --add home_bverhagen_exec-helper_Arch.key
+    sudo pacman-key --lsign-key C6DA27F1EB5EE305
+
+*. Use the `exec-helper (AUR) package <https://aur.archlinux.org/packages/exec-helper>`_
+*. Check out the `exec-helper-package <https://github.com/bverhagen/exec-helper-package>`_ project for building the package from source. See the `Building from source`_ section.
+
+Ubuntu
+------
+
+*note:* The support of non-LTS versions is rather limited. You are welcome to contribute if one is missing!
+
+Ubuntu users (Bionic and later) can:
+
+*. Add the `PPA on Launchpad <https://launchpad.net/~bverhagen/+archive/ubuntu/exec-helper>`_ to your sources
+*. Check out the `exec-helper-package <https://github.com/bverhagen/exec-helper-package>`_ project for building the package from source. See the `Building from source`_ section.
+
+openSUSE
+--------
+
+*note:* Tumbleweed an Leap 15.4 and later are supported.
+
+openSUSE users can:
+
+*. Check out the binaries from the `home:bverhagen:exec-helper <https://build.opensuse.org/project/show/home:bverhagen:exec-helper>`_ project on OBS
+*. Check out the `exec-helper-package <https://github.com/bverhagen/exec-helper-package>`_ project for building the package from source. See the `Building from source`_ section.
 
 Other distributions
 -------------------
+
 Checkout the `Building from source`_ section.
 
 Building from source
@@ -36,7 +70,6 @@ Build dependencies
 * `boost-program-options <https://github.com/boostorg/program_options>`_ (1.64 or newer) development files
 * `boost-log <https://github.com/boostorg/log>`_ (1.64 or newer) development files
 * `yaml-cpp <https://github.com/jbeder/yaml-cpp>`_ (0.5.3 or newer) development files (optional, will be downloaded and compiled in statically if missing)
-* `Microsoft gsl <https://github.com/Microsoft/GSL>`_ development files (optional, will be downloaded and compiled in statically if missing)
 * `lua <https://www.lua.org/>`_ (5.3 or newer) development files (optional, will be downloaded and compiled in statically if missing)
 * `readline <https://tiswww.case.edu/php/chet/readline/rltop.html>`_ development files (\*NIX systems): required if not using the system Lua.
 
@@ -69,10 +102,6 @@ It has the following project-specific configuration options:
 .. describe:: USE_SYSTEM_LUAJIT
 
     Use the `luaJIT <https://luajit.org/>`_ library installed on the system. If switched off, the library will be automatically installed locally during the build. Default: *auto*
-
-.. describe:: USE_SYSTEM_GSL
-
-    Use the `Microsoft gsl <https://github.com/Microsoft/GSL>`_ library installed on the system. If switched off, the library will be automaically installed locally during the build. Default: *auto*
 
 .. describe:: POSITION_INDEPENDENT_CODE
 

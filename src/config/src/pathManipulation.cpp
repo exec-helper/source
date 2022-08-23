@@ -26,7 +26,7 @@ auto getAllParentDirectories(Path path) noexcept -> Paths {
 auto getHomeDirectory(const EnvironmentCollection& env) noexcept
     -> std::optional<Path> {
     const string HOME_DIR_KEY("HOME");
-    if(env.count(HOME_DIR_KEY) == 0) {
+    if(!env.contains(HOME_DIR_KEY)) {
         return std::nullopt;
     }
     return Path(env.at(HOME_DIR_KEY));

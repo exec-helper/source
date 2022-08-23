@@ -20,7 +20,7 @@ UNITY_BUILD?=off## Switch unity building to<off> or on. Note: Unity builds may f
 all: build
 
 init:	## Initialize native build
-	meson setup --buildtype release --unity ${UNITY_BUILD} --prefix ${PREFIX} -D "usage-documentation=true" -D "api-documentation=false" -D "plugins-prefix=${ACTUAL_PLUGINS_INSTALL_PREFIX}" -D "license-prefix=${LICENSE_PREFIX}" -D "test=false" -D "use-system-yaml-cpp=disabled" -D "use-system-gsl=disabled" -D "use-system-lua=auto" -D "use-system-catch2=disabled" -D "use-system-rapidcheck=disabled" -D "use-static-boost=true" -D "version=$(shell git describe --long --dirty)-MANUAL" -D "copyright=Copyright (c) $(shell date +'%Y') Bart Verhagen"  $(BUILD_DIR) .
+	meson setup --buildtype release --unity ${UNITY_BUILD} --prefix ${PREFIX} -D "usage-documentation=true" -D "api-documentation=false" -D "plugins-prefix=${ACTUAL_PLUGINS_INSTALL_PREFIX}" -D "license-prefix=${LICENSE_PREFIX}" -D "test=false" -D "use-system-yaml-cpp=disabled" -D "use-system-lua=auto" -D "use-system-catch2=disabled" -D "use-system-rapidcheck=disabled" -D "use-static-boost=true" -D "version=$(shell git describe --long --dirty)-MANUAL" -D "copyright=Copyright (c) $(shell date +'%Y') Bart Verhagen"  $(BUILD_DIR) .
 
 build: init ## Build the exec-helper binary
 	meson compile -C $(BUILD_DIR) --jobs $(JOBS)

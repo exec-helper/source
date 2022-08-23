@@ -178,10 +178,11 @@ using Tasks = std::vector<Task>;
 /**
  * Adds the details of the Task object to the given stream
  *
- * \param[in] os    The stream to add the details to
+ * \param[in] stream    The stream to add the details to
  * \param[in] task  The task to add the details from
  * \returns The given stream expanded with the details of the given task
  */
-std::ostream& operator<<(std::ostream& os, const Task& task) noexcept;
+auto operator<<(std::ostream& stream, const Task& task) noexcept
+    -> std::ostream&;
 } // namespace execHelper::core
 #endif /* __TASK_H__ */

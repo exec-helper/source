@@ -79,7 +79,7 @@ struct Modifier {
     explicit Modifier(ColorCode cCode) noexcept : code(cCode) {}
 };
 
-std::ostream& operator<<(std::ostream& os, const Modifier& mod);
+auto operator<<(std::ostream& out, const Modifier& mod) -> std::ostream&;
 
 static Modifier def(FG_DEFAULT);
 static Modifier blue(FG_BLUE);

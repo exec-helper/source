@@ -9,8 +9,10 @@
 using std::string;
 
 namespace execHelper::core {
-auto replacePatterns(const string& subject, const string& pattern,
-                     const string& replacement) noexcept -> string {
+auto replacePatterns(
+    const string& subject, // NOLINT(bugprone-easily-swappable-parameters)
+    const string& pattern, // NOLINT(bugprone-easily-swappable-parameters)
+    const string& replacement) noexcept -> string {
     const auto needle = std::string("{").append(pattern).append("}");
     return boost::algorithm::replace_all_copy(subject, needle, replacement);
 }

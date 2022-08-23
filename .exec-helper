@@ -294,7 +294,7 @@ meson:
             use-system-lua: disabled
             use-system-catch2: disabled
             use-system-rapidcheck: disabled
-            use-static-boost: true
+            use-static-boost: false
             terminate-on-assert: true
             changelog: false
             b_pie: true
@@ -587,6 +587,7 @@ clang-tidy:
     checks:
       - -altera-unroll-loops
       - -altera-id-dependent-backward-branch
+      - -altera-struct-pack-align
       - -readability-function-cognitive-complexity
     build-dir: 'build/{TRIPLET}{COMPILER}/{MODE}/build'
     sources:

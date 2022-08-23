@@ -46,7 +46,7 @@ const std::vector<LogLevel>& getLogLevels();
  */
 std::string_view toString(LogLevel level) noexcept;
 
-std::ostream& operator<<(std::ostream& os, LogLevel level) noexcept;
+auto operator<<(std::ostream& out, LogLevel level) noexcept -> std::ostream&;
 
 /**
  * \brief   Thrown if an unknown log level is used

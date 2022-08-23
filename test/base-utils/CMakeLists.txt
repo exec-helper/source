@@ -16,7 +16,6 @@ set(SRCS
 
 set(DEPENDENCIES
         filesystem
-        gsl
         boost-system
         boost-filesystem
         boost-serialization

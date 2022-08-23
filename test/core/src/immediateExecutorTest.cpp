@@ -6,12 +6,7 @@
 
 #include "shellStub.h"
 
-using std::make_shared;
-using std::static_pointer_cast;
 using std::string;
-
-using execHelper::core::ImmediateExecutor;
-using execHelper::core::Shell;
 
 namespace execHelper::core::test {
 SCENARIO("Test the execution of the immediateExecutor",
@@ -35,7 +30,8 @@ SCENARIO("Test the execution of the immediateExecutor",
             executor.execute(task3);
 
             THEN("We should get the same tasks again") {
-                ShellStub::TaskQueue executedTasks = shell.getExecutedTasks();
+                const ShellStub::TaskQueue& executedTasks =
+                    shell.getExecutedTasks();
                 REQUIRE(executedTasks == actualTasks);
             }
         }

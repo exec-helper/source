@@ -31,12 +31,12 @@ void LogInit::setSeverity(const Channel& channel, LogLevel severity) {
 } // namespace log
 
 namespace color {
-auto operator<<(std::ostream& os, const Modifier& mod) -> std::ostream& {
-    return os << "\033[" << mod.code << "m";
+auto operator<<(std::ostream& out, const Modifier& mod) -> std::ostream& {
+    return out << "\033[" << mod.code << "m";
 }
 
-auto operator<<(std::wostream& os, const Modifier& mod) -> std::wostream& {
-    return os << "\033[" << mod.code << "m";
+auto operator<<(std::wostream& out, const Modifier& mod) -> std::wostream& {
+    return out << "\033[" << mod.code << "m";
 }
 } // namespace color
 } // namespace execHelper

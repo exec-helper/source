@@ -109,10 +109,16 @@ SCENARIO("Test that the command is executed the expected number of times",
 
         THEN_WHEN("We execute the command of the execution engine the expected "
                   "number of times") {
+            Shell::ShellReturnCode returnCode = 0U;
+
             for(uint8_t i = 0; i < nbOfRepeats; ++i) {
                 Task task;
                 task.append(executionEngine.getConfigCommand());
-                shell.execute(task);
+                returnCode += shell.execute(task);
+            }
+
+            THEN_CHECK("The task is executed successfully") {
+                REQUIRE(returnCode == 0U);
             }
 
             THEN_CHECK("We should find the expected number of executions") {
@@ -165,7 +171,11 @@ SCENARIO("Test the shell for shell expansion", "[shell][posixshell]") {
                 task.append(executionEngine.getConfigCommand());
                 task.append("\"$(echo " + std::to_string(randomExpansion) +
                             ")\"");
-                shell.execute(task);
+                auto returnCode = shell.execute(task);
+
+                THEN_CHECK("The task is executed succesfully") {
+                    REQUIRE(returnCode == 0U);
+                }
 
                 THEN_CHECK("The execution engine should have received the "
                            "expanded value") {
@@ -201,7 +211,11 @@ SCENARIO("Test the shell for word expansion", "[shell][posixshell]") {
                 task.setEnvironment(env);
                 task.append(executionEngine.getConfigCommand());
                 task.append("\"${EXPANSION}\"");
-                shell.execute(task);
+                auto returnCode = shell.execute(task);
+
+                THEN_CHECK("The task is executed successfully") {
+                    REQUIRE(returnCode == 0);
+                }
 
                 THEN_CHECK("The execution engine should have received the "
                            "expanded value") {
@@ -281,7 +295,11 @@ SCENARIO("Test the shell for binaries prefixed with a relative path",
 
             Task task;
             task.append(command);
-            shell.execute(task);
+            auto returnCode = shell.execute(task);
+
+            THEN_CHECK("The call executed successfully") {
+                REQUIRE(shell.isExecutedSuccessfully(returnCode));
+            }
 
             THEN_CHECK("The command should be properly executed") {
                 REQUIRE(executionEngine.getNumberOfExecutions() == 1U);
@@ -322,7 +340,11 @@ SCENARIO("Test the shell for binaries found in the task environment path",
             task.append(command);
             task.setEnvironment(env);
             task.setWorkingDirectory(newPath.parent_path().native());
-            shell.execute(task);
+            auto returnCode = shell.execute(task);
+
+            THEN_CHECK("The call executed successfully") {
+                REQUIRE(shell.isExecutedSuccessfully(returnCode));
+            }
 
             THEN_CHECK("The command should be properly executed") {
                 REQUIRE(executionEngine.getNumberOfExecutions() == 1U);
@@ -362,7 +384,11 @@ SCENARIO("Test the shell for binaries found in the working directory but not "
             task.append(command);
             task.setEnvironment(env);
             task.setWorkingDirectory(workingDir);
-            shell.execute(task);
+            auto returnCode = shell.execute(task);
+
+            THEN_CHECK("The call executed successfully") {
+                REQUIRE(shell.isExecutedSuccessfully(returnCode));
+            }
 
             THEN_CHECK("The command should be properly executed") {
                 REQUIRE(executionEngine.getNumberOfExecutions() == 1U);
@@ -392,13 +418,17 @@ SCENARIO("The shell should properly set the PWD environment variable",
                 task.setEnvironment({{"PWD", move(initialValue)}});
                 task.setWorkingDirectory(workingDir);
                 task.append(executionEngine.getConfigCommand());
-                shell.execute(task);
+                auto returnCode = shell.execute(task);
+
+                THEN_CHECK("The call executed successfully") {
+                    REQUIRE(shell.isExecutedSuccessfully(returnCode));
+                }
 
                 THEN_CHECK(
                     "That the PWD variable is set to the working directory") {
                     REQUIRE(executionEngine.getReceivedData().size() == 1);
                     auto env = executionEngine.getReceivedData().back().env;
-                    REQUIRE(env.count("PWD") > 0);
+                    REQUIRE(env.contains("PWD"));
                     REQUIRE(env["PWD"] == workingDir.string());
                 }
             }

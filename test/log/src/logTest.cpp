@@ -2,6 +2,7 @@
 #include <sstream>
 #include <string>
 #include <string_view>
+#include <utility>
 
 #include <boost/core/null_deleter.hpp>
 #include <boost/lexical_cast.hpp>
@@ -22,6 +23,7 @@ using std::exception;
 using std::map;
 using std::move;
 using std::ostream;
+using std::pair;
 using std::string;
 using std::string_view;
 using std::stringbuf;
@@ -122,7 +124,7 @@ class LogMessage {
     string m_message;
 };
 
-auto toMessage(const string& message) -> LogMessage {
+auto toMessage(const string& message) -> pair<LogMessage, string> {
     sregex regex = sregex::compile(
         R"((?P<date>\S*)\s(?P<time>\S*)\s<(?P<severity>\S*)>\s\[(?P<channel>\S*)\]\s(?P<file>.*):(?P<lineNumber>\d*)\s(?P<message>.*)\s$)");
     smatch parsedResult;
@@ -138,16 +140,15 @@ auto toMessage(const string& message) -> LogMessage {
         string channel = parsedResult["channel"];
         string logLevelString = parsedResult["severity"];
         LogLevel logLevel = toLogLevel(logLevelString);
+        user_feedback(channel);
 
-        return {parsedResult["date"],
-                parsedResult["time"],
-                channel,
-                logLevel,
-                parsedResult["file"],
-                boost::lexical_cast<unsigned int>(lineNumberString),
-                parsedResult["message"]};
+        return {LogMessage{parsedResult["date"], parsedResult["time"], channel,
+                           logLevel, parsedResult["file"],
+                           boost::lexical_cast<unsigned int>(lineNumberString),
+                           parsedResult["message"]},
+                channel};
     }
-    return {"", "", "", none, "", 0U, ""};
+    return {LogMessage{"", "", "", none, "", 0U, ""}, ""};
 }
 
 auto getRelativeLogLevel(LogLevel currentLogLevel, int relativeLevel) noexcept
@@ -261,8 +262,8 @@ SCENARIO("Write a log message with the severity enabled", "[log]") {
                 // clang-format on
 
                 THEN_CHECK("We should find the message in the stream") {
-                    LogMessage result = toMessage(logBuffer.str());
-                    REQUIRE(result.getChannel() == LOG_CHANNEL);
+                    const auto [result, channel] = toMessage(logBuffer.str());
+                    REQUIRE(channel == LOG_CHANNEL);
                     REQUIRE(result.getLevel() == severity);
                     REQUIRE(result.getFile() == __FILE__);
                     REQUIRE(result.getLineNumber() == line);

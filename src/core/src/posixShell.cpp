@@ -25,6 +25,7 @@
 using boost::replace_all;
 #endif
 
+using std::exception;
 using std::span;
 using std::string;
 
@@ -48,15 +49,36 @@ const execHelper::core::PosixShell::ShellReturnCode POSIX_SUCCESS = 0U;
 inline auto getPath(const process::environment& env,
                     const filesystem::path& workingDir) noexcept
     -> std::vector<filesystem::path> {
-    std::vector<filesystem::path> path({filesystem::absolute(workingDir)});
-    if(env.count("PATH") == 0) {
-        auto parent_path = this_process::path();
-        path.insert(path.end(), parent_path.begin(), parent_path.end());
-        return path;
+    std::vector<filesystem::path> path;
+
+    try {
+        path.emplace_back(filesystem::absolute(workingDir));
+    } catch(const exception& e) {
+        LOG(error) << "Error retrieving absolute path to the current working "
+                      "directory: "
+                   << e.what();
+        return {};
     }
-    std::vector<std::string> stringPaths = env.at("PATH").to_vector();
-    path.reserve(stringPaths.size() + stringPaths.size());
-    std::copy(stringPaths.begin(), stringPaths.end(), std::back_inserter(path));
+
+    try {
+        std::vector<std::string> stringPaths = env.at("PATH").to_vector();
+        path.reserve(path.size() + stringPaths.size());
+        std::move(stringPaths.begin(), stringPaths.end(),
+                  std::back_inserter(path));
+        LOG(debug) << "Added current path to the PATH environment variable";
+    } catch(const exception&) {
+        LOG(debug) << "PATH environment variable does not exist. Adding the "
+                      "path of this executable to the PATH!";
+        try {
+            auto parent_path = this_process::path();
+            path.insert(path.end(), parent_path.begin(), parent_path.end());
+            return path;
+        } catch(const exception& e) {
+            LOG(error) << "Failed to retrieve the path to the current binary: "
+                       << e.what();
+            return {};
+        }
+    }
     return path;
 }
 } // namespace
@@ -164,12 +186,14 @@ inline auto PosixShell::wordExpand(const Task& task) noexcept
 
     TaskCollection result;
     for(const auto& taskItem : task.getTask()) {
-        wordexp_t p{};
+        wordexp_t expanded{};
         size_t returnCode =
-            wordexp(taskItem.c_str(), &p, WRDE_SHOWERR | WRDE_UNDEF);
+            wordexp(taskItem.c_str(), // NOLINT(concurrency-mt-unsafe
+                    &expanded,        // NOLINT(concurrency-mt-unsafe)
+                    WRDE_SHOWERR | WRDE_UNDEF);
         if(returnCode == 0) {
-            std::span<char*> w(p.we_wordv, p.we_wordc);
-            std::copy(w.begin(), w.end(), std::back_inserter(result));
+            std::span<char*> word(expanded.we_wordv, expanded.we_wordc);
+            std::copy(word.begin(), word.end(), std::back_inserter(result));
         } else {
             switch(returnCode) {
             case WRDE_BADVAL:
@@ -190,7 +214,7 @@ inline auto PosixShell::wordExpand(const Task& task) noexcept
             }
             result.push_back(taskItem);
         }
-        wordfree(&p);
+        wordfree(&expanded);
     }
     environ = cached_environ;
     return result;

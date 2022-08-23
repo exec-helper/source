@@ -31,7 +31,7 @@ auto Yaml::getValueCollection(const initializer_list<string>& keys)
         return m_yaml.get<vector<string>>(keys);
     } catch(YAML::Exception& e) {
         LOG(error) << "Yaml parser threw an exception: " << e.what();
-        return vector<string>();
+        return {};
     }
 }
 

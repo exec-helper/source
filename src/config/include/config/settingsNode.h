@@ -350,11 +350,11 @@ class SettingsNode {
 /**
  * Streaming operator for settings nodes
  *
- * \param[in] os    The stream to stream to
+ * \param[in] out    The stream to stream to
  * \param[in] settings  The settings to add to the stream
- * \returns os
+ * \returns out
  */
-auto operator<<(std::ostream& os, const SettingsNode& settings) noexcept
+auto operator<<(std::ostream& out, const SettingsNode& settings) noexcept
     -> std::ostream&;
 } // namespace config
 } // namespace execHelper

@@ -1,7 +1,8 @@
-#include "config/configFileSearcher.h"
-#include "unittest/catch.h"
 #include <filesystem>
 #include <fstream>
+
+#include "config/configFileSearcher.h"
+#include "unittest/catch.h"
 
 using std::ofstream;
 using std::string;
@@ -22,7 +23,7 @@ SCENARIO("Test the config file searcher", "[config][config-file-searcher]") {
             for(const auto& searchPath : searchPaths) {
                 Path fileToDelete(searchPath);
                 fileToDelete /= settingsFile;
-                remove(fileToDelete.c_str());
+                REQUIRE(remove(fileToDelete.c_str()));
             }
 
             for(const auto& searchPath : searchPaths) {

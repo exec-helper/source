@@ -73,6 +73,7 @@ variables:
     script:
         - *install_exec_helper
         - export PATH=$(pwd)/build/gcc/limited/install/bin:$(pwd)/build/gcc/limited/install/test/integration:$PATH
+        - export DEBUGINFOD_URLS="https://debuginfod.archlinux.org/"
         - exec-helper analyze --analyze valgrind --run-target $RUN_TARGET --compiler gcc --mode limited --module $MODULES
 
 .clang_tidy: &clang_tidy
@@ -88,8 +89,8 @@ variables:
           artifacts: true
     script:
         - *install_exec_helper
-        - exec-helper setup init-build -c gcc -m release
-        - exec-helper analyze --analyze clang-tidy --module $MODULES --source-type $SOURCE_TYPE
+        - exec-helper setup init-build -c clang -m release
+        - exec-helper analyze --analyze clang-tidy --module $MODULES --source-type $SOURCE_TYPE --compiler clang --mode release
 
 .cppcheck: &cppcheck
     stage: analyze
@@ -134,6 +135,7 @@ variables:
         MODULES: $ALL_MODULES
         SOURCE_TYPE: $ALL_SOURCE_TYPES
     script:
+        - *safe_git_dir
         - *install_exec_helper
         - exec-helper analyze -a format
 
@@ -404,12 +406,6 @@ clang-tidy:plugins:
         MODULES: core commander plugins
         SOURCE_TYPE: $ALL_SOURCE_TYPES
 
-clang-tidy-integration:
-    <<: *clang_tidy
-    variables:
-        SOURCE_TYPE: test
-        MODULES: integration
-
 clang-static-analyzer:
     stage: analyze
     image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-analyze
@@ -502,6 +498,7 @@ examples:
         - sudo pacman -Sy --noconfirm --needed fish zsh bash
     script:
         - *install_exec_helper
+        - export DEBUGINFOD_URLS="https://debuginfod.archlinux.org/"
         - export ROOT_DIR=$(pwd)
         - cd ${ROOT_DIR}/src/config/examples
         - exec-helper --settings-file exec-helper-config.example build clean rebuild

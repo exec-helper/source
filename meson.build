@@ -18,15 +18,9 @@ endif
 
 cmake = import('cmake')
 
-if get_option('optimization').to_int() > 0
-    cmake_build_type = '-DCMAKE_BUILD_TYPE=Release'
-else
-    cmake_build_type = '-DCMAKE_BUILD_TYPE=Debug'
-endif
-
 yaml_cpp_dep = dependency('yaml-cpp', required : get_option('use-system-yaml-cpp'))
 if not yaml_cpp_dep.found()
-  yaml_cpp_proj = cmake.subproject('yaml-cpp', cmake_options: ['-DYAML_CPP_BUILD_CONTRIB=OFF', '-DYAML_CPP_BUILD_TOOLS=OFF', '-DBUILD_SHARED_LIBS=OFF', '-DMSVC_SHARED_RT=ON', '-DMSVC_STHREADED_RT=OFF', '-DAPPLE_UNIVERSAL_BIN=OFF', '-DYAML_CPP_BUILD_TESTS=OFF', '-DCMAKE_POSITION_INDEPENDENT_CODE=ON', cmake_build_type])
+  yaml_cpp_proj = cmake.subproject('yaml-cpp', cmake_options: ['-DYAML_CPP_BUILD_CONTRIB=OFF', '-DYAML_CPP_BUILD_TOOLS=OFF', '-DBUILD_SHARED_LIBS=OFF', '-DMSVC_SHARED_RT=ON', '-DMSVC_STHREADED_RT=OFF', '-DAPPLE_UNIVERSAL_BIN=OFF', '-DYAML_CPP_BUILD_TESTS=OFF', '-DCMAKE_POSITION_INDEPENDENT_CODE=ON'])
   yaml_cpp_dep = yaml_cpp_proj.dependency('yaml_cpp')
 endif
 

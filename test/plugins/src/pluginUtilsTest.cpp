@@ -98,6 +98,8 @@ SCENARIO("Test replacing patterns in the environment", "[plugin-utils]") {
         "Replace a pattern in the environment",
         [](const NonEmptyPatternCombinations& nonEmptyPatternCombinations,
            const EnvironmentCollection& startEnvironment) {
+            using namespace std::literals;
+
             // Replace '{' and '}' with '%'
             PatternCombinations patternCombinations;
             std::transform(
@@ -106,12 +108,12 @@ SCENARIO("Test replacing patterns in the environment", "[plugin-utils]") {
                 std::inserter(patternCombinations, patternCombinations.end()),
                 [](const auto& combination) {
                     auto key = boost::algorithm::replace_all_copy(
-                        *(combination.first), "{", "%");
-                    boost::algorithm::replace_all(key, "}", "%");
+                        *(combination.first), "{"s, "%"s);
+                    boost::algorithm::replace_all(key, "}"s, "%"s);
 
                     auto value = boost::algorithm::replace_all_copy(
-                        combination.second, "{", "%");
-                    boost::algorithm::replace_all(value, "}", "%");
+                        combination.second, "{"s, "%"s);
+                    boost::algorithm::replace_all(value, "}"s, "%"s);
                     return make_pair(key, value);
                 });
 
@@ -121,13 +123,13 @@ SCENARIO("Test replacing patterns in the environment", "[plugin-utils]") {
                 startEnvironment.begin(), startEnvironment.end(),
                 std::inserter(replacedEnvironment, replacedEnvironment.end()),
                 [](const auto& env) {
-                    auto key =
-                        boost::algorithm::replace_all_copy(env.first, "{", "%");
-                    boost::algorithm::replace_all(key, "}", "%");
+                    auto key = boost::algorithm::replace_all_copy(env.first,
+                                                                  "{"s, "%"s);
+                    boost::algorithm::replace_all(key, "}"s, "%"s);
 
                     auto value = boost::algorithm::replace_all_copy(env.second,
-                                                                    "{", "%");
-                    boost::algorithm::replace_all(value, "}", "%");
+                                                                    "{"s, "%"s);
+                    boost::algorithm::replace_all(value, "}"s, "%"s);
                     return make_pair(key, value);
                 });
 

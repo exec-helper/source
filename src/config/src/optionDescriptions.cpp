@@ -72,7 +72,7 @@ auto OptionDescriptions::getOptionsMap(VariablesMap& variablesMap,
 void OptionDescriptions::toMap(VariablesMap& variablesMap,
                                const variables_map& optionsMap) const {
     for(const auto& option : optionsMap) {
-        if(m_options.count(option.first) > 0U) {
+        if(m_options.contains(option.first)) {
             try {
                 m_options.at(option.first)->toMap(variablesMap, optionsMap);
             } catch(const boost::bad_any_cast& e) {

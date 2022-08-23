@@ -194,18 +194,19 @@ SCENARIO("Test the permutation iterators for partial iteration",
          "[permutationiterator]") {
     GIVEN("Some non-const collections to partially iterate over using "
           "permutations of its content and the ordered combinations") {
+        const PermuteObject::Collection2 collection2{1, 2, 3, 4, 5, 6, 7, 8};
         const PermuteObject::Collection1 collection1{"object1", "object2",
                                                      "object3", "object4"};
-        const PermuteObject::Collection2 collection2{1, 2, 3, 4, 5, 6, 7, 8};
         const PermuteObject permute(collection1, collection2);
 
         vector<PermuteObjectElement> orderedCombinations;
-        const auto beginIndexObject1 = 1;
-        const auto endIndexObject1 =
-            static_cast<int>(permute.getCollection1().size()) - 1;
         const auto beginIndexObject2 = 1;
         const auto endIndexObject2 =
             static_cast<int>(permute.getCollection2().size()) - 1;
+
+        const auto beginIndexObject1 = 1;
+        const auto endIndexObject1 =
+            static_cast<int>(permute.getCollection1().size()) - 1;
 
         for(auto i = beginIndexObject1; i < endIndexObject1; ++i) {
             for(auto j = beginIndexObject2; j < endIndexObject2; ++j) {
@@ -246,8 +247,8 @@ SCENARIO("Test the permutation iterators for partial iteration",
     }
     GIVEN("Some const collections to partially iterate over using permutations "
           "of its content and the ordered combinations") {
-        const PermuteObject::Collection1 collection1{"object1", "object2",
-                                                     "object3", "object4"};
+        const PermuteObject::Collection1 collection1{"object5", "object6",
+                                                     "object7", "object8"};
         const PermuteObject::Collection2 collection2{1, 2, 3, 4, 5, 6, 7, 8};
         const PermuteObject permute(collection1, collection2);
 

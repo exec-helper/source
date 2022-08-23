@@ -99,11 +99,11 @@ using Patterns = std::vector<Pattern>;
 /**
  * Streaming operator for pattern objects
  *
- * \param os    The stream to stream to
+ * \param out    The stream to stream to
  * \param pattern  The pattern to stream
- * \returns os
+ * \returns out
  */
-auto operator<<(std::ostream& os, const Pattern& pattern) noexcept
+auto operator<<(std::ostream& out, const Pattern& pattern) noexcept
     -> std::ostream&;
 } // namespace execHelper::config
 

@@ -39,9 +39,9 @@ auto getLogLevels() -> const vector<LogLevel>& {
     return LOG_LEVELS;
 }
 
-auto operator<<(std::ostream& os, LogLevel level) noexcept -> std::ostream& {
-    os << toString(level);
-    return os;
+auto operator<<(std::ostream& out, LogLevel level) noexcept -> std::ostream& {
+    out << toString(level);
+    return out;
 }
 
 auto toString(LogLevel level) noexcept -> string_view {

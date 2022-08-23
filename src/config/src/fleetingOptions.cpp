@@ -23,7 +23,7 @@ inline auto toPaths(const std::vector<std::string>& toConvert) noexcept
     -> execHelper::config::Paths {
     execHelper::config::Paths paths;
     transform(toConvert.begin(), toConvert.end(), back_inserter(paths),
-              [](const auto& to) { return execHelper::config::Path{to}; });
+              [](const auto& path) { return execHelper::config::Path{path}; });
     return paths;
 }
 } // namespace
