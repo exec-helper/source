@@ -24,11 +24,17 @@ if not yaml_cpp_dep.found()
   yaml_cpp_dep = yaml_cpp_proj.dependency('yaml_cpp')
 endif
 
-lua_dep = dependency('lua5.3', required: false)
-if not lua_dep.found()
-  lua_dep = dependency('lua-5.3', required: get_option('use-system-lua'))
-endif
-if not lua_dep.found()
+if not get_option('use-system-lua').disabled()
+  lua_dep = dependency('lua5.3', required: false)
+  if not lua_dep.found()
+    lua_dep = dependency('lua-5.3', required: get_option('use-system-lua'))
+  endif
+
+  if not lua_dep.found()
+    lua_proj = subproject('lua', default_options: ['default_library=static', 'werror=false'])
+    lua_dep = lua_proj.get_variable('lua_dep')
+  endif
+else
   lua_proj = subproject('lua', default_options: ['default_library=static', 'werror=false'])
   lua_dep = lua_proj.get_variable('lua_dep')
 endif
