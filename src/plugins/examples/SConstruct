@@ -1,6 +1,0 @@
-env = Environment()
-Export('env')
-
-SConscript('src/SConscript', variant_dir='build', duplicate=0)
-
-Default(None)

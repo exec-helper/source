@@ -1,7 +1,0 @@
-Import('env')
-
-hello = env.Program('hello.cpp')
-env.Alias('hello', hello)
-
-world = env.Program('world.cpp')
-env.Alias('world', world)

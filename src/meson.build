@@ -1,6 +1,0 @@
-subdir('log')
-subdir('config')
-subdir('core')
-subdir('plugins')
-subdir('commander')
-subdir('applications')

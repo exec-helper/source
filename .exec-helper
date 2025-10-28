@@ -82,6 +82,8 @@ patterns:
         long-option: filter
 
 commands:
+    hello: Command to print hello to the console
+    world: Print hello world! to the console
     setup: Setup the repository for building
     init: Initialize the build infrastructure
     init-build: Initialize the build infrastructure and switches off everything that has nothing to do with building the exec-helper binaries themselves
@@ -108,6 +110,13 @@ commands:
     create-toolchain-file: Create the associated toolchain file
     format: Format and check the format of the sources
     language-server: Start and connect to the c++ language server
+
+hello:
+    - command-line-command
+
+world:
+    - hello
+    - command-line-command
 
 setup:
     - command-line-command
@@ -420,6 +429,18 @@ clang-static-analyzer:
     clean-command: clean
 
 command-line-command:
+    hello:
+      command-line: [ echo, "Hello"]
+
+    world:
+      patterns:
+      - MODE
+      - COMPILER
+      environment:
+        EH: "exec-helper!"
+      command-line:
+        - pattern: [ echo, "{{ MODE }}-{{ COMPILER }}: ${EDITOR}"]
+
     setup:
         patterns:
             - COMPILER
@@ -520,7 +541,7 @@ command-line-command:
         command-line: [ clang-format, -i, '$(find "{SOURCE_TYPE}/{MODULE}" -name "*.cpp" -o -name "*.h")']
 
     py-format:
-        command-line: [ black, --line-length, 100, test/integration/src/*.py]
+        command-line: [ black, --line-length, '100', test/integration/src/*.py]
 
     check-changes:
         command-line: [ git, diff-index, --quiet, HEAD, --]
