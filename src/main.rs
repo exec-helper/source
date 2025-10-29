@@ -55,7 +55,7 @@ type Patterns = HashMap<String, Pattern>;
 
 #[derive(Debug, Deserialize)]
 struct Config {
-    //commands: HashMap<String, String>,
+    commands: HashMap<String, String>,
     patterns: Option<Patterns>,
 
     #[serde(flatten)]
@@ -334,7 +334,10 @@ fn find_and_read_config() -> Result<(PathBuf, Config)> {
     read_config(temp_fixed_cli.configuration_file).context("Failed to read configuration file!")
 }
 
-fn handle_cli_arguments(patterns: &Option<Patterns>) -> Result<(ArgMatches, Cli)> {
+fn handle_cli_arguments(
+    commands: &HashMap<String, String>,
+    patterns: &Option<Patterns>,
+) -> Result<(ArgMatches, Cli)> {
     let mut cli = clap::Command::new("exec-helper");
 
     cli = Cli::augment_args(cli);
@@ -358,6 +361,17 @@ fn handle_cli_arguments(patterns: &Option<Patterns>) -> Result<(ArgMatches, Cli)
         }
     }
 
+    let commands_help = commands
+        .iter()
+        .map(|(command, description)| format!(" {:<25} {}", command, description))
+        .fold("Commands:\n".to_string(), |mut acc, line| {
+            acc.push_str(&line);
+            acc.push('\n');
+            acc
+        });
+
+    cli = cli.after_help(commands_help);
+
     let matches = cli.get_matches();
 
     let fixed_cli = Cli::from_arg_matches(&matches).context("Invalid command line arguments!")?;
@@ -371,7 +385,7 @@ async fn main() -> Result<()> {
 
     let (root_dir, config) = find_and_read_config()?;
 
-    let (dynamic_cli, fixed_cli) = handle_cli_arguments(&config.patterns)?;
+    let (dynamic_cli, fixed_cli) = handle_cli_arguments(&config.commands, &config.patterns)?;
 
     if let Some(force_color) = fixed_cli.force_color {
         console::set_colors_enabled(force_color);
@@ -404,7 +418,6 @@ async fn main() -> Result<()> {
         None => HashMap::<String, Vec<String>>::new(),
     };
 
-    // TODO: replace default values with values defined on the CLI
     pattern_values.insert(
         "EH_ROOT_DIR".to_string(),
         vec![
