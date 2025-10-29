@@ -1,5 +1,5 @@
 use anyhow::{Context, Result, anyhow, bail};
-use clap::Parser;
+use clap::{Arg, ArgMatches, Args, FromArgMatches};
 use console::{Term, style};
 use indicatif::{ProgressBar, ProgressStyle};
 use itertools::Itertools;
@@ -48,14 +48,15 @@ enum CommandLine {
 #[serde(rename_all = "kebab-case")]
 struct Pattern {
     default_values: Vec<String>,
-    //short_option: Option<char>,
-    //long_option: Option<String>,
+    short_option: Option<char>,
+    long_option: Option<String>,
 }
+type Patterns = HashMap<String, Pattern>;
 
 #[derive(Debug, Deserialize)]
 struct Config {
     //commands: HashMap<String, String>,
-    patterns: Option<HashMap<String, Pattern>>,
+    patterns: Option<Patterns>,
 
     #[serde(flatten)]
     root_keys: HashMap<String, RootCommand>,
@@ -73,13 +74,16 @@ struct CommandLineCommand {
     commands: Option<HashMap<String, CommandLineCommand>>,
 }
 
-#[derive(Parser, Debug)]
+#[derive(Args, Debug)]
 #[command(version, about, long_about = None)]
-struct Args {
+struct Cli {
     commands: Vec<String>,
 
-    #[arg(short, long)]
+    #[arg(short = 's', long)]
     configuration_file: Option<PathBuf>,
+
+    #[arg(short = 'n', long, default_value_t = false)]
+    dry_run: bool,
 
     #[arg(short, long, default_value_t = Level::WARN)]
     log_level: Level,
@@ -261,20 +265,22 @@ fn build_execution_command(
 
 fn build_env(env_options: &Option<Environment>) -> Result<HashMap<String, String>> {
     // Start with a copy of the current environment.
-    let mut env_map: HashMap<String, String> =
-        //env::vars_os().map(|(k, v)| (k.into_string(), v.into_string())).collect();
-        env::vars_os()
-            .filter_map(|(k_os, v_os)| {
-                match (k_os.clone().into_string(), v_os.clone().into_string()) {
-                    (Ok(k), Ok(v)) => Some((k, v)),
-                    // Silently drop malformed entries; you could log here if you wish.
-                    _ => {
-                        user_warn!("Failed to convert '{:?}' or '{:?}' to a valid UTF-8 string. Ignoring it!", k_os, v_os);
-                        None
-                    },
+    let mut env_map: HashMap<String, String> = env::vars_os()
+        .filter_map(|(k_os, v_os)| {
+            match (k_os.clone().into_string(), v_os.clone().into_string()) {
+                (Ok(k), Ok(v)) => Some((k, v)),
+                // Silently drop malformed entries; you could log here if you wish.
+                _ => {
+                    user_warn!(
+                        "Failed to convert '{:?}' or '{:?}' to a valid UTF-8 string. Ignoring it!",
+                        k_os,
+                        v_os
+                    );
+                    None
                 }
-            })
-            .collect();
+            }
+        })
+        .collect();
 
     if let Some(extra_vars) = env_options {
         for (k, v) in extra_vars {
@@ -312,17 +318,67 @@ fn read_config(configuration_file: Option<PathBuf>) -> Result<(PathBuf, Config)>
     Ok((config_file_path, config))
 }
 
+fn find_and_read_config() -> Result<(PathBuf, Config)> {
+    let temp_cli = Cli::augment_args(
+        clap::Command::new("exec-helper")
+            .ignore_errors(true)
+            .disable_help_flag(true)
+            .disable_help_subcommand(true),
+    );
+
+    let matches = temp_cli.get_matches();
+
+    let temp_fixed_cli =
+        Cli::from_arg_matches(&matches).context("Invalid command line arguments!")?;
+
+    read_config(temp_fixed_cli.configuration_file).context("Failed to read configuration file!")
+}
+
+fn handle_cli_arguments(patterns: &Option<Patterns>) -> Result<(ArgMatches, Cli)> {
+    let mut cli = clap::Command::new("exec-helper");
+
+    cli = Cli::augment_args(cli);
+
+    if let Some(actual_patterns) = patterns {
+        for (key, pattern) in actual_patterns {
+            let mut pattern_argument = Arg::new(clap::Id::from(key))
+                .help(format!("Values for pattern '{}'", key))
+                .default_values(pattern.default_values.clone())
+                .num_args(1..);
+
+            if let Some(short_option) = pattern.short_option {
+                pattern_argument = pattern_argument.short(short_option);
+            }
+
+            if let Some(long_option) = &pattern.long_option {
+                pattern_argument = pattern_argument.long(long_option);
+            }
+
+            cli = cli.arg(pattern_argument);
+        }
+    }
+
+    let matches = cli.get_matches();
+
+    let fixed_cli = Cli::from_arg_matches(&matches).context("Invalid command line arguments!")?;
+
+    Ok((matches, fixed_cli))
+}
+
 #[tokio::main]
 async fn main() -> Result<()> {
     let term = Term::stdout();
-    let args = Args::parse();
 
-    if let Some(force_color) = args.force_color {
+    let (root_dir, config) = find_and_read_config()?;
+
+    let (dynamic_cli, fixed_cli) = handle_cli_arguments(&config.patterns)?;
+
+    if let Some(force_color) = fixed_cli.force_color {
         console::set_colors_enabled(force_color);
     }
 
     let subscriber = FmtSubscriber::builder()
-        .with_max_level(args.log_level)
+        .with_max_level(fixed_cli.log_level)
         .finish();
 
     tracing::subscriber::set_global_default(subscriber)
@@ -330,17 +386,22 @@ async fn main() -> Result<()> {
 
     info!("Starting exec-helper...");
 
-    trace!("{:?}", args);
-
-    let (root_dir, config) =
-        read_config(args.configuration_file).context("Failed to read configuration file!")?;
-
     let mut pattern_values: PatternValues = match config.patterns {
         Some(ref patterns) => patterns
             .iter()
-            .map(|(key, pattern)| (key.clone(), pattern.default_values.clone()))
+            .map(|(key, pattern)| {
+                let values = match dynamic_cli.try_get_many::<String>(key) {
+                    Ok(values) => match values {
+                        Some(values) => values.cloned().collect::<Vec<_>>(),
+                        None => pattern.default_values.clone(),
+                    },
+                    Err(_) => pattern.default_values.clone(),
+                };
+
+                (key.clone(), values.clone())
+            })
             .collect(),
-        None => HashMap::new(),
+        None => HashMap::<String, Vec<String>>::new(),
     };
 
     // TODO: replace default values with values defined on the CLI
@@ -348,6 +409,10 @@ async fn main() -> Result<()> {
         "EH_ROOT_DIR".to_string(),
         vec![
             root_dir
+                .parent()
+                .ok_or(anyhow!(
+                    "Config file somehow does not have a parent directory!"
+                ))?
                 .to_str()
                 .ok_or(anyhow!("Failed to convert root dir to valid UTF-8!"))?
                 .to_string(),
@@ -355,7 +420,7 @@ async fn main() -> Result<()> {
     );
     trace!("Pattern values = {:?}", pattern_values);
 
-    let clis = args
+    let clis = fixed_cli
         .commands
         .iter()
         .map(|command| {
@@ -436,7 +501,11 @@ async fn main() -> Result<()> {
 
             user_info!("..  Execute '{substituted_command}'...");
 
-            let pb = match args.non_interactive {
+            if fixed_cli.dry_run {
+                continue;
+            }
+
+            let pb = match fixed_cli.non_interactive {
                 true => Arc::new(ProgressBar::hidden()),
                 false => Arc::new(ProgressBar::new_spinner()),
             };
@@ -506,7 +575,7 @@ async fn main() -> Result<()> {
             if status.success() {
                 info!("Process exited with exit code 0 (success!)");
 
-                if !args.keep_output {
+                if !fixed_cli.keep_output {
                     term.clear_last_lines(number_of_output_lines.load(Ordering::Relaxed))
                         .context("Failed to erase last lines")?;
                 }
@@ -519,7 +588,7 @@ async fn main() -> Result<()> {
                     last_error_status = status;
                 }
 
-                if !args.keep_going {
+                if !fixed_cli.keep_going {
                     bail!("Process exited with non-zero exit code: {}", status);
                 }
             }

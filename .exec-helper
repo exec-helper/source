@@ -436,10 +436,11 @@ command-line-command:
       patterns:
       - MODE
       - COMPILER
+      - EH_ROOT_DIR
       environment:
         EH: "exec-helper!"
       command-line:
-        - pattern: [ echo, "{{ MODE }}-{{ COMPILER }}: ${EDITOR}"]
+        - pattern: [ echo, "{{ MODE }}-{{ COMPILER }}: ${EDITOR}@{{ EH_ROOT_DIR }}"]
 
     setup:
         patterns:

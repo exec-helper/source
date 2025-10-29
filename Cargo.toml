@@ -5,7 +5,7 @@ edition = "2024"
 
 [dependencies]
 anyhow = "1.0.100"
-clap = { version = "4.5.50", features = ["derive"] }
+clap = { version = "4.5.50", features = ["derive", "string"] }
 console = { version = "0.16.1", features = ["windows-console-colors"] }
 indicatif = { version = "0.18.1", features = ["tokio"] }
 itertools = "0.14.0"

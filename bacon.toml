@@ -5,6 +5,10 @@
 # You may check the current default at
 #   https://github.com/Canop/bacon/blob/main/defaults/default-bacon.toml
 
+watch = [
+  ".exec-helper"
+]
+
 default_job = "check"
 env.CARGO_TERM_COLOR = "always"
 
@@ -74,6 +78,16 @@ command = [
 need_stdout = true
 allow_warnings = true
 background = true
+
+[jobs.help]
+command = [
+    "cargo", "run", "--", "--help",
+    # put launch parameters for your program behind a `--` separator
+]
+need_stdout = true
+allow_warnings = true
+background = true
+
 
 # Run your long-running application (eg server) and have the result displayed in bacon.
 # For programs that never stop (eg a server), `background` is set to false
