@@ -159,7 +159,7 @@ fn run_command_line_command(
     command: &String,
     plugin_config: Value,
 ) -> Result<Vec<ExecutionCommand>> {
-    trace!("Processing subconfig as a command-line-command plugin...");
+    trace!("Resolved '{}' -> command-line-command plugin", command);
     let config: CommandLineCommand = match from_value(plugin_config) {
         Ok(config) => config,
         Err(e) => bail!(
@@ -220,10 +220,7 @@ fn build_subcommand(
     subcommands
         .iter()
         .map(|subcommand| {
-            trace!(
-                "Redirecting to subcommand '{}' for command '{}'",
-                subcommand, command
-            );
+            trace!("Redirecting '{}' -> '{}'", command, subcommand);
             build_execution_command(command, subcommand, config)
         })
         .try_fold(Vec::new(), |mut acc, cur| {
@@ -239,7 +236,7 @@ fn build_plugin(
     plugin: &String,
     plugin_config: &Value,
 ) -> Result<Vec<ExecutionCommand>> {
-    trace!("Using plugin '{}' for command '{}'", plugin, command);
+    trace!("Using '{}' -> '{}'", command, plugin);
     match plugin.as_str() {
         "command-line-command" => run_command_line_command(command, plugin_config.clone()),
         &_ => Err(anyhow!("Invalid plugin: '{}'!", plugin)),
@@ -437,6 +434,7 @@ async fn main() -> Result<()> {
         .commands
         .iter()
         .map(|command| {
+            trace!("Resolving command '{}'...", command);
             build_execution_command(command, command, &config).with_context(|| {
                 format!(
                     "Failed to generate execution instructions for command '{}'",
@@ -489,7 +487,7 @@ async fn main() -> Result<()> {
                             "Going to substitute '{}' patterns with '{}'",
                             pattern_key, pattern_value
                         );
-                        let needle = format!("{{{{ {} }}}}", pattern_key);
+                        let needle = format!("{{{}}}", pattern_key);
                         substituted = substituted.replace(&needle, pattern_value);
                     }
                     match substitute(&substituted, &environment) {
