@@ -38,10 +38,27 @@ enum RootCommand {
 
 #[derive(Clone, Debug, Deserialize)]
 #[serde(untagged)]
-enum CommandLine {
-    SingleCommand(Vec<String>),
+// Make sure serde handles primitive YAML or JSON types, even though we will just treat them as strings later
+enum CommandLineArgument {
+    String(String),
+    Integer(i64),
+}
 
-    MultipleCommands(Vec<HashMap<String, Vec<String>>>),
+impl std::fmt::Display for CommandLineArgument {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            CommandLineArgument::String(s) => write!(f, "{s}"),
+            CommandLineArgument::Integer(i) => write!(f, "{i}"),
+        }
+    }
+}
+
+#[derive(Clone, Debug, Deserialize)]
+#[serde(untagged)]
+enum CommandLine {
+    SingleCommand(Vec<CommandLineArgument>),
+
+    MultipleCommands(Vec<HashMap<String, Vec<CommandLineArgument>>>),
 }
 
 #[derive(Debug, Deserialize)]
@@ -160,6 +177,7 @@ fn run_command_line_command(
     plugin_config: Value,
 ) -> Result<Vec<ExecutionCommand>> {
     trace!("Resolved '{}' -> command-line-command plugin", command);
+    trace!("Plugin config = {:?}", plugin_config);
     let config: CommandLineCommand = match from_value(plugin_config) {
         Ok(config) => config,
         Err(e) => bail!(
@@ -167,6 +185,7 @@ fn run_command_line_command(
             e.path()
         ),
     };
+    trace!("Selected config = {:?}", config);
 
     let command_config = match config.commands {
         Some(ref commands) => match commands.get(command) {
@@ -175,6 +194,7 @@ fn run_command_line_command(
         },
         None => config.clone(),
     };
+    //let command_config = config.commands.get(command).unwrap().clone();
 
     let command_line = match command_config.command_line {
         Some(command) => command,
@@ -192,7 +212,7 @@ fn run_command_line_command(
 
     match command_line {
         CommandLine::SingleCommand(command) => Ok(vec![ExecutionCommand {
-            command,
+            command: command.into_iter().map(|arg| arg.to_string()).collect(),
             environment,
             patterns,
         }]),
@@ -202,7 +222,7 @@ fn run_command_line_command(
                 command
                     .into_values()
                     .map(|command| ExecutionCommand {
-                        command,
+                        command: command.into_iter().map(|arg| arg.to_string()).collect(),
                         environment: environment.clone(),
                         patterns: patterns.clone(),
                     })
