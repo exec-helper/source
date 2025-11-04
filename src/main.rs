@@ -13,7 +13,7 @@ use std::fmt::Arguments;
 use std::fs::File;
 use std::io::Write;
 use std::iter::zip;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::ExitStatus;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicUsize, Ordering};
@@ -85,7 +85,7 @@ struct CommandLineCommand {
     patterns: Option<PatternReferences>,
     environment: Option<Environment>,
     command_line: Option<CommandLine>,
-    _working_dir: Option<String>,
+    working_dir: Option<String>,
 
     #[serde(flatten)]
     commands: Option<HashMap<String, CommandLineCommand>>,
@@ -122,6 +122,7 @@ struct ExecutionCommand {
     patterns: Option<PatternReferences>,
     environment: Option<Environment>,
     command: Vec<String>,
+    working_directory: String,
 }
 
 pub fn user_info_fmt(args: Arguments) {
@@ -172,6 +173,14 @@ macro_rules! user_error {
     };
 }
 
+pub fn resolve_working_directory(working_directory: &String, root_dir: &Path) -> PathBuf {
+    let path = PathBuf::from(working_directory);
+    match path.is_absolute() {
+        true => path,
+        false => root_dir.join(path),
+    }
+}
+
 fn run_command_line_command(
     command: &String,
     plugin_config: Value,
@@ -209,12 +218,17 @@ fn run_command_line_command(
 
     let environment = command_config.environment.or(config.environment);
     let patterns = command_config.patterns.or(config.patterns);
+    let working_directory = command_config
+        .working_dir
+        .or(config.working_dir)
+        .unwrap_or(".".to_string());
 
     match command_line {
         CommandLine::SingleCommand(command) => Ok(vec![ExecutionCommand {
             command: command.into_iter().map(|arg| arg.to_string()).collect(),
             environment,
             patterns,
+            working_directory,
         }]),
         CommandLine::MultipleCommands(commands) => Ok(commands
             .into_iter()
@@ -225,6 +239,7 @@ fn run_command_line_command(
                         command: command.into_iter().map(|arg| arg.to_string()).collect(),
                         environment: environment.clone(),
                         patterns: patterns.clone(),
+                        working_directory: working_directory.clone(),
                     })
                     .collect::<Vec<ExecutionCommand>>()
             })
@@ -400,7 +415,7 @@ fn handle_cli_arguments(
 async fn main() -> Result<()> {
     let term = Term::stdout();
 
-    let (root_dir, config) = find_and_read_config()?;
+    let (config_file, config) = find_and_read_config()?;
 
     let (dynamic_cli, fixed_cli) = handle_cli_arguments(&config.commands, &config.patterns)?;
 
@@ -416,6 +431,9 @@ async fn main() -> Result<()> {
         .context("Setting default subscriber failed")?;
 
     info!("Starting exec-helper...");
+    let root_dir = config_file.parent().ok_or(anyhow!(
+        "Config file somehow does not have a parent directory!"
+    ))?;
 
     let mut pattern_values: PatternValues = match config.patterns {
         Some(ref patterns) => patterns
@@ -439,10 +457,6 @@ async fn main() -> Result<()> {
         "EH_ROOT_DIR".to_string(),
         vec![
             root_dir
-                .parent()
-                .ok_or(anyhow!(
-                    "Config file somehow does not have a parent directory!"
-                ))?
                 .to_str()
                 .ok_or(anyhow!("Failed to convert root dir to valid UTF-8!"))?
                 .to_string(),
@@ -553,6 +567,10 @@ async fn main() -> Result<()> {
             let mut cmd = Command::new(&commands[0]);
             cmd.args(&commands[1..]);
             cmd.envs(environment);
+
+            let working_directory = resolve_working_directory(&cli.working_directory, root_dir);
+            trace!("Executing this in dir {}", working_directory.display());
+            cmd.current_dir(working_directory);
 
             let mut process = Process::new(cmd).spawn_single_subscriber().unwrap();
 

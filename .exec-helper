@@ -87,8 +87,10 @@ command-line-command:
       - TARGET
       environment:
         EH: "exec-helper!"
+      working-dir: /tmp
       command-line:
         - pattern: [ echo, "{TARGET}: ${EDITOR}@{EH_ROOT_DIR}"]
+        - pwd: [ pwd]
 
     build:
       patterns:
