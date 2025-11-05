@@ -102,7 +102,7 @@ struct Cli {
     #[arg(short = 'n', long, default_value_t = false)]
     dry_run: bool,
 
-    #[arg(short, long, default_value_t = Level::WARN)]
+    #[arg(long, visible_alias = "debug", default_value_t = Level::WARN)]
     log_level: Level,
 
     #[arg(long, default_value_t = false)]
@@ -116,6 +116,9 @@ struct Cli {
 
     #[arg(long)]
     force_color: Option<bool>,
+
+    #[arg(long, default_value_t = false)]
+    list_plugins: bool,
 }
 
 struct ExecutionCommand {
@@ -186,7 +189,6 @@ fn run_command_line_command(
     plugin_config: Value,
 ) -> Result<Vec<ExecutionCommand>> {
     trace!("Resolved '{}' -> command-line-command plugin", command);
-    trace!("Plugin config = {:?}", plugin_config);
     let config: CommandLineCommand = match from_value(plugin_config) {
         Ok(config) => config,
         Err(e) => bail!(
@@ -203,7 +205,6 @@ fn run_command_line_command(
         },
         None => config.clone(),
     };
-    //let command_config = config.commands.get(command).unwrap().clone();
 
     let command_line = match command_config.command_line {
         Some(command) => command,
@@ -463,6 +464,19 @@ async fn main() -> Result<()> {
         ],
     );
     trace!("Pattern values = {:?}", pattern_values);
+
+    let mut plugins = HashMap::new();
+    plugins.insert(
+        "command-line-command".to_string(),
+        "Command-line-command (internal)".to_string(),
+    );
+
+    if fixed_cli.list_plugins {
+        for (name, description) in plugins {
+            user_info!("{:.<25} {}", name, description);
+        }
+        return Ok(());
+    }
 
     let clis = fixed_cli
         .commands
