@@ -1,6 +1,6 @@
 use anyhow::{Context, Result, anyhow, bail};
 use clap::{Arg, ArgMatches, Args, FromArgMatches};
-use console::{Term, style};
+use console::Term;
 use indicatif::{ProgressBar, ProgressStyle};
 use itertools::Itertools;
 use lets_find_up::{FindUpKind, FindUpOptions, find_up_with};
@@ -9,8 +9,8 @@ use serde_json::{Value, from_value};
 use serde_saphyr::from_reader;
 use std::collections::HashMap;
 use std::env;
-use std::fmt::Arguments;
-use std::fs::File;
+use std::ffi::OsStr;
+use std::fs::{File, read_dir};
 use std::io::Write;
 use std::iter::zip;
 use std::path::{Path, PathBuf};
@@ -23,10 +23,14 @@ use tokio_process_tools::{LineParsingOptions, Next, Process};
 use tracing::{Level, info, trace};
 use tracing_subscriber::FmtSubscriber;
 
-type Environment = HashMap<String, String>;
-type PatternReference = String;
-type PatternReferences = Vec<PatternReference>;
+mod common;
+mod lua;
+
+use crate::common::{CommandLineArgument, Environment, ExecutionCommand, PatternReferences};
+use crate::lua::run_lua_plugin;
+
 type PatternValues = HashMap<String, Vec<String>>;
+type Plugins = HashMap<String, Plugin>;
 
 #[derive(Debug, Deserialize)]
 #[serde(untagged)]
@@ -34,31 +38,6 @@ enum RootCommand {
     Command(Vec<String>),
 
     Plugin(Value),
-}
-
-#[derive(Clone, Debug, Deserialize)]
-#[serde(untagged)]
-// Make sure serde handles primitive YAML or JSON types, even though we will just treat them as strings later
-enum CommandLineArgument {
-    String(String),
-    Integer(i64),
-}
-
-impl std::fmt::Display for CommandLineArgument {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            CommandLineArgument::String(s) => write!(f, "{s}"),
-            CommandLineArgument::Integer(i) => write!(f, "{i}"),
-        }
-    }
-}
-
-#[derive(Clone, Debug, Deserialize)]
-#[serde(untagged)]
-enum CommandLine {
-    SingleCommand(Vec<CommandLineArgument>),
-
-    MultipleCommands(Vec<HashMap<String, Vec<CommandLineArgument>>>),
 }
 
 #[derive(Debug, Deserialize)]
@@ -121,59 +100,12 @@ struct Cli {
     list_plugins: bool,
 }
 
-struct ExecutionCommand {
-    patterns: Option<PatternReferences>,
-    environment: Option<Environment>,
-    command: Vec<String>,
-    working_directory: String,
-}
+type PluginGenerateCommandFn = Box<dyn Fn(&String, Value) -> Result<Vec<ExecutionCommand>>>;
 
-pub fn user_info_fmt(args: Arguments) {
-    let line = style(args).cyan().bold();
-    println!("{line}");
-}
-
-#[macro_export]
-macro_rules! user_info {
-    ($($arg:tt)*) => {
-        $crate::user_info_fmt(format_args!($($arg)*))
-    };
-}
-
-pub fn user_success_fmt(args: Arguments) {
-    let line = style(args).green().bold();
-    println!("{line}");
-}
-
-#[macro_export]
-macro_rules! user_success {
-    ($($arg:tt)*) => {
-        $crate::user_success_fmt(format_args!($($arg)*))
-    };
-}
-
-pub fn user_warn_fmt(args: Arguments) {
-    let line = style(args).yellow().bold();
-    eprintln!("{line}");
-}
-
-#[macro_export]
-macro_rules! user_warn {
-    ($($arg:tt)*) => {
-        $crate::user_warn_fmt(format_args!($($arg)*))
-    };
-}
-
-pub fn user_error_fmt(args: Arguments) {
-    let line = style(args).red().bold();
-    eprintln!("{line}");
-}
-
-#[macro_export]
-macro_rules! user_error {
-    ($($arg:tt)*) => {
-        $crate::user_error_fmt(format_args!($($arg)*))
-    };
+struct Plugin {
+    name: String,
+    description: String,
+    generate_command: PluginGenerateCommandFn,
 }
 
 pub fn resolve_working_directory(working_directory: &String, root_dir: &Path) -> PathBuf {
@@ -182,6 +114,14 @@ pub fn resolve_working_directory(working_directory: &String, root_dir: &Path) ->
         true => path,
         false => root_dir.join(path),
     }
+}
+
+#[derive(Clone, Debug, Deserialize)]
+#[serde(untagged)]
+pub enum CommandLine {
+    SingleCommand(Vec<CommandLineArgument>),
+
+    MultipleCommands(Vec<HashMap<String, Vec<CommandLineArgument>>>),
 }
 
 fn run_command_line_command(
@@ -252,12 +192,13 @@ fn build_subcommand(
     command: &String,
     subcommands: &[String],
     config: &Config,
+    plugins: &Plugins,
 ) -> Result<Vec<ExecutionCommand>> {
     subcommands
         .iter()
         .map(|subcommand| {
             trace!("Redirecting '{}' -> '{}'", command, subcommand);
-            build_execution_command(command, subcommand, config)
+            build_execution_command(command, subcommand, config, plugins)
         })
         .try_fold(Vec::new(), |mut acc, cur| {
             cur.map(|inner| {
@@ -269,25 +210,35 @@ fn build_subcommand(
 
 fn build_plugin(
     command: &String,
-    plugin: &String,
+    plugin_name: &String,
     plugin_config: &Value,
+    plugins: &Plugins,
 ) -> Result<Vec<ExecutionCommand>> {
-    trace!("Using '{}' -> '{}'", command, plugin);
-    match plugin.as_str() {
-        "command-line-command" => run_command_line_command(command, plugin_config.clone()),
-        &_ => Err(anyhow!("Invalid plugin: '{}'!", plugin)),
-    }
+    trace!("Using '{}' -> '{}'", command, plugin_name);
+
+    let plugin = plugins
+        .get(plugin_name)
+        .with_context(|| format!("Could not find plugin '{}'!", plugin_name))?;
+
+    let generate_command = &plugin.generate_command;
+
+    generate_command(command, plugin_config.clone())
 }
 
 fn build_execution_command(
     parent: &String,
     command: &String,
     config: &Config,
+    plugins: &Plugins,
 ) -> Result<Vec<ExecutionCommand>> {
     match config.root_keys.get(command) {
         Some(subconfig) => match subconfig {
-            RootCommand::Command(subcommands) => build_subcommand(command, subcommands, config),
-            RootCommand::Plugin(plugin_config) => build_plugin(parent, command, plugin_config),
+            RootCommand::Command(subcommands) => {
+                build_subcommand(command, subcommands, config, plugins)
+            }
+            RootCommand::Plugin(plugin_config) => {
+                build_plugin(parent, command, plugin_config, plugins)
+            }
         },
         None => Err(anyhow!(
             "'{}' not found in the exec-helper configuration!",
@@ -365,6 +316,58 @@ fn find_and_read_config() -> Result<(PathBuf, Config)> {
         Cli::from_arg_matches(&matches).context("Invalid command line arguments!")?;
 
     read_config(temp_fixed_cli.configuration_file).context("Failed to read configuration file!")
+}
+
+fn builtin_plugins() -> Result<Plugins> {
+    let mut plugins = HashMap::new();
+    plugins.insert(
+        "command-line-command".to_string(),
+        Plugin {
+            name: "command-line-command".to_string(),
+            description: "Command-line-command (internal)".to_string(),
+            generate_command: Box::new(|command: &String, config: Value| {
+                run_command_line_command(command, config)
+            }),
+        },
+    );
+
+    Ok(plugins)
+}
+
+fn find_plugins(search_paths: &[PathBuf]) -> Result<Plugins> {
+    let default_plugins = builtin_plugins().context("Failed to load built-in plugins!")?;
+
+    let plugins = search_paths
+        .iter()
+        .flat_map(|dir: &PathBuf| {
+            read_dir(dir)
+                .into_iter()
+                .flatten()
+                .filter_map(Result::ok)
+                .map(|entry| entry.path())
+                .filter(|p| p.is_file())
+                .filter(|p| p.extension() == Some(OsStr::new("lua")))
+        })
+        .filter_map(|path| {
+            let plugin_path = path.clone();
+            let plugin_name = path.file_stem()?.to_str()?;
+            let plugin = Plugin {
+                name: plugin_name.to_string(),
+                description: format!("Lua plugin at '{}'", path.display()),
+                generate_command: Box::new(move |command: &String, config: Value| {
+                    run_lua_plugin(command, config, plugin_path.clone())
+                }),
+            };
+            Some(plugin)
+        })
+        .fold(default_plugins, |mut acc, plugin| {
+            acc.insert(plugin.name.clone(), plugin);
+            acc
+        });
+
+    trace!("Plugins = {:?}", plugins.keys());
+
+    Ok(plugins)
 }
 
 fn handle_cli_arguments(
@@ -465,15 +468,13 @@ async fn main() -> Result<()> {
     );
     trace!("Pattern values = {:?}", pattern_values);
 
-    let mut plugins = HashMap::new();
-    plugins.insert(
-        "command-line-command".to_string(),
-        "Command-line-command (internal)".to_string(),
-    );
+    let plugin_default_search_path: PathBuf = PathBuf::from(env!("PLUGIN_DEFAULT_SEARCH_PATH"));
+
+    let plugins = find_plugins(&[plugin_default_search_path]).context("Failed to find plugins!")?;
 
     if fixed_cli.list_plugins {
-        for (name, description) in plugins {
-            user_info!("{:.<25} {}", name, description);
+        for (name, plugin) in plugins {
+            user_info!("{:.<25} {}", name, plugin.description);
         }
         return Ok(());
     }
@@ -483,7 +484,7 @@ async fn main() -> Result<()> {
         .iter()
         .map(|command| {
             trace!("Resolving command '{}'...", command);
-            build_execution_command(command, command, &config).with_context(|| {
+            build_execution_command(command, command, &config, &plugins).with_context(|| {
                 format!(
                     "Failed to generate execution instructions for command '{}'",
                     command
@@ -574,6 +575,7 @@ async fn main() -> Result<()> {
                     .unwrap(),
             );
             pb.set_message(format!("Running '{}'...", &substituted_command));
+            pb.enable_steady_tick(std::time::Duration::from_millis(500));
             pb.tick();
 
             let number_of_output_lines = Arc::new(AtomicUsize::new(1));
@@ -586,7 +588,9 @@ async fn main() -> Result<()> {
             trace!("Executing this in dir {}", working_directory.display());
             cmd.current_dir(working_directory);
 
-            let mut process = Process::new(cmd).spawn_single_subscriber().unwrap();
+            let mut process = Process::new(cmd)
+                .spawn_single_subscriber()
+                .context("Failed to spawn process!")?;
 
             let stdout_poke = pb.clone();
             let stdout_nb_of_output_lines = number_of_output_lines.clone();

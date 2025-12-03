@@ -29,7 +29,8 @@ commands:
     format: Format and check the format of the sources
 
 hello:
-- command-line-command
+#- command-line-command
+- bash
 
 world:
 - hello
@@ -105,7 +106,7 @@ command-line-command:
     run:
       patterns:
       - TARGET
-      command-line: [ cargo, run, "--target={TARGET}", --, --force-color=true, --log-level=trace, --target, blaat, --keep-output, hello, world]
+      command-line: [ cargo, run, "--target={TARGET}", --, --force-color=true, --log-level=info, --target, blaat, --keep-output, hello, world]
 
     rs-format:
       command-line: [ cargo, fmt]
@@ -115,3 +116,7 @@ command-line-command:
 
     check-changes:
         command-line: [ git, diff-index, --quiet, HEAD, --]
+
+bash:
+    hello:
+      command: 'echo "Hello"'
