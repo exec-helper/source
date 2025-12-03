@@ -14,3 +14,6 @@ __pycache__
 
 # Clangd-specific
 .cache
+
+# Rust
+target
