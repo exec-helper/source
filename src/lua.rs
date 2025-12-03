@@ -11,6 +11,7 @@ use mlua::prelude::*;
 
 use crate::common::{
     CommandLineArgument, Environment, ExecutionCommand, PatternReferences, deserialize_arguments,
+    deserialize_verbose,
 };
 use crate::user_error;
 
@@ -21,6 +22,9 @@ struct LuaCommand {
     environment: Option<Environment>,
     working_dir: Option<String>,
     command_line: Option<Vec<CommandLineArgument>>,
+
+    #[serde(default, deserialize_with = "deserialize_verbose")]
+    verbose: Option<bool>,
 
     #[serde(flatten)]
     commands: Option<HashMap<String, LuaCommand>>,
@@ -185,7 +189,7 @@ pub fn run_lua_plugin(
 
     let execution_command = ExecutionCommand {
         command: Vec::new(),
-        environment,
+        environment: environment.clone(),
         patterns,
         working_directory,
     };
@@ -231,6 +235,22 @@ pub fn run_lua_plugin(
                 ))),
             },
             None => Ok(Vec::new()),
+        })?,
+    )?;
+
+    lua.globals().set(
+        "get_environment",
+        lua.create_function(move |_, ()| Ok(environment.clone()))?,
+    )?;
+
+    let verbose = command_config.verbose.or(config.verbose).unwrap_or(false);
+    lua.globals().set(
+        "get_verbose",
+        lua.create_function(move |lua, command: LuaValue| -> mlua::Result<LuaValue> {
+            match verbose {
+                true => Ok(command),
+                false => Ok(mlua::Value::Table(lua.create_table()?)),
+            }
         })?,
     )?;
 
