@@ -1,8 +1,8 @@
 patterns:
     MODE:
         default-values:
-            - debug
-            - release
+            - dev
+            #- release
         short-option: m
         long-option: mode
     TARGET:
@@ -20,7 +20,6 @@ commands:
     hello: Command to print hello to the console
     world: Print hello world! to the console
     build: Build the project for the given TARGET
-    release: Build release version for the given TARGET
     run: Run the project exdcutable for the given TARGET
     analyze: Analyze the source code
     setup: Setup the repository for building
@@ -37,13 +36,10 @@ world:
 - command-line-command
 
 build:
-- command-line-command
-
-release:
-- command-line-command
+- cargo
 
 run:
-- command-line-command
+- cargo
 
 create-installer:
 - command-line-command
@@ -57,10 +53,10 @@ analyze:
 - format
 
 clippy:
-- command-line-command
+- cargo
 
 rs-format:
-- command-line-command
+- cargo
 
 py-format:
 - command-line-command
@@ -93,30 +89,33 @@ command-line-command:
         - pattern: [ echo, "{TARGET}: ${EDITOR}@{EH_ROOT_DIR}"]
         - pwd: [ pwd]
 
-    build:
-      patterns:
-      - TARGET
-      command-line: [ cargo, build, "--target={TARGET}"]
-
-    release:
-      patterns:
-      - TARGET
-      command-line: [ cargo, build, --release, "--target={TARGET}"]
-
-    run:
-      patterns:
-      - TARGET
-      command-line: [ cargo, run, "--target={TARGET}", --, --force-color=true, --log-level=info, --target, blaat, --keep-output, hello, world]
-
-    rs-format:
-      command-line: [ cargo, fmt]
-
-    clippy:
-      command-line: [ cargo, clippy, --all-targets]
-
     check-changes:
         command-line: [ git, diff-index, --quiet, HEAD, --]
 
 bash:
     hello:
       command: 'echo "Hello"'
+
+cargo:
+  patterns:
+  - TARGET
+  - MODE
+  target: "{TARGET}"
+  profile: "{MODE}"
+
+  build:
+    command: build
+    command-line: ["--color", "always"]
+
+  run:
+    command: run
+    program-args: [ --force-color=true, --log-level=info, --target, blaat, --keep-output, hello, world]
+
+  rs-format:
+    patterns: []
+    command: fmt
+
+  clippy:
+    patterns: []
+    command: clippy
+    all-targets: yes
