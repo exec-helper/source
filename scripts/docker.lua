@@ -54,7 +54,7 @@ end
 
 local targets = list(config['targets'])
 if targets then
-    register_tasks(run_target(task, targets))
+    run_target(task, targets).register()
 else
-    register_task(task)
+    task:register()
 end

@@ -31,4 +31,4 @@ if command == 'run' then
     task:add_args(args)
   end
 end
-register_task(task)
+task:register(task)

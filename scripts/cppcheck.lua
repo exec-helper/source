@@ -6,4 +6,4 @@ task:add_args(get_commandline())
 
 task:add_args(list(config['src-dir']) or {'.'})
 
-register_task(task)
+task:register()

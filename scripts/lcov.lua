@@ -7,7 +7,7 @@ if zero_counters == 'yes' then
     local zero_task = task:copy()
     zero_task:add_args({'lcov', '--base-directory', base_directory, '--directory', directory, '--zerocounters'})
     zero_task:add_args(get_commandline())
-    register_task(zero_task)
+    zero_task:register()
 end
 
 local targets = list(config['run-command'])
@@ -17,12 +17,12 @@ if targets == nil then
 end
 
 local run_task = task:copy()
-register_tasks(run_target(run_task, targets))
+run_target(run_task, targets):register()
 
 local capture_task = task:copy()
 capture_task:add_args({'lcov', '--base-directory', base_directory, '--directory', directory, '--capture', '--output', info_file})
 capture_task:add_args(get_commandline())
-register_task(capture_task)
+capture_task:register()
 
 local excludes = list(config['excludes'])
 if excludes then
@@ -33,7 +33,7 @@ if excludes then
     end
     exclude_task:add_args({'--output-file', info_file})
     exclude_task:add_args(get_commandline())
-    register_task(exclude_task)
+    exclude_task:register()
 end
 
 local gen_html = one(config['gen-html'])
@@ -46,5 +46,5 @@ if gen_html == 'yes' then
     gen_html_task:add_args({"genhtml", '--output-directory', output, '--title', title})
     gen_html_task:add_args(command_line)
     gen_html_task:add_args({info_file})
-    register_task(gen_html_task)
+    gen_html_task:register()
 end

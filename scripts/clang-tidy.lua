@@ -19,4 +19,4 @@ end
 task:add_args(get_commandline())
 task:add_args(list(config['sources']) or {"*.cpp"})
 
-register_task(task)
+task:register()

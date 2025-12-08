@@ -75,4 +75,4 @@ if mode == 'setup' then
     task:add_args({build_dir, one(config['source-dir']) or '.'})
 end
 
-register_task(task)
+task:register()

@@ -5,4 +5,4 @@ task:add_args(get_verbose('--debug'))
 task:add_args({'--jobs', one(config['jobs']) or jobs})
 task:add_args(get_commandline())
 
-register_task(task)
+task:register()

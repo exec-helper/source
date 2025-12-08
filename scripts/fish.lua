@@ -6,4 +6,4 @@ end
 task:add_args({'fish', '-c', cmd})
 task:add_args(get_commandline())
 
-register_task(task)
+task:register()

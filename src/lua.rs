@@ -54,26 +54,67 @@ impl UserData for LuaConfig {
     }
 }
 
-impl UserData for ExecutionCommand {
-    fn add_methods<M: UserDataMethods<Self>>(methods: &mut M) {
-        methods.add_method_mut("add_args", |_, this, args: mlua::Value| {
-            let mut arguments: Vec<String> = match args {
-                mlua::Value::Table(values) => values
-                    .sequence_values::<String>()
-                    .map(|value| value.unwrap())
-                    .collect(),
-                _ => {
-                    return Err(mlua::Error::FromLuaConversionError {
-                        from: args.type_name(),
-                        to: "Vec<String>".to_string(),
-                        message: Some("expected an array of strings".into()),
-                    });
-                }
-            };
+#[derive(Clone)]
+struct LuaTask {
+    patterns: Option<PatternReferences>,
+    environment: Option<Environment>,
+    working_directory: String,
+    registered: Arc<Mutex<Vec<ExecutionCommand>>>,
+    command: ExecutionCommand,
+}
 
-            this.command.append(&mut arguments);
-            Ok(())
-        });
+impl UserData for LuaTask {
+    fn add_methods<M: UserDataMethods<Self>>(methods: &mut M) {
+        methods.add_method(
+            "new",
+            |_, this, _: Option<mlua::Value>| -> mlua::Result<LuaTask> {
+                let mut new = this.clone();
+                new.command.patterns = this.patterns.clone();
+                new.command.environment = this.environment.clone();
+                new.command.working_directory = this.working_directory.clone();
+                new.command.command = Vec::new();
+                Ok(new)
+            },
+        );
+
+        methods.add_method_mut(
+            "copy",
+            |_, this, _: Option<mlua::Value>| -> mlua::Result<LuaTask> {
+                let copy = this.clone();
+                Ok(copy)
+            },
+        );
+
+        methods.add_method_mut(
+            "add_args",
+            |_, this, args: mlua::Value| -> mlua::Result<()> {
+                let mut arguments: Vec<String> = match args {
+                    mlua::Value::Table(values) => values
+                        .sequence_values::<String>()
+                        .map(|value| value.unwrap())
+                        .collect(),
+                    _ => {
+                        return Err(mlua::Error::FromLuaConversionError {
+                            from: args.type_name(),
+                            to: "Vec<String>".to_string(),
+                            message: Some("expected an array of strings".into()),
+                        });
+                    }
+                };
+
+                this.command.command.append(&mut arguments);
+                Ok(())
+            },
+        );
+
+        methods.add_method(
+            "register",
+            |_, this, _: Option<mlua::Value>| -> mlua::Result<()> {
+                let mut registered = this.registered.lock().unwrap();
+                registered.push(this.command.clone());
+                Ok(())
+            },
+        );
     }
 }
 
@@ -187,11 +228,18 @@ pub fn run_lua_plugin(
         .or(config.working_dir)
         .unwrap_or(".".to_string());
 
-    let execution_command = ExecutionCommand {
-        command: Vec::new(),
+    let registered = Arc::new(Mutex::new(Vec::new()));
+    let execution_command = LuaTask {
         environment: environment.clone(),
-        patterns,
-        working_directory,
+        patterns: patterns.clone(),
+        working_directory: working_directory.clone(),
+        command: ExecutionCommand {
+            environment: environment.clone(),
+            patterns,
+            working_directory,
+            command: Vec::new(),
+        },
+        registered: registered.clone(),
     };
 
     lua.globals().set(
@@ -257,19 +305,8 @@ pub fn run_lua_plugin(
     lua.globals()
         .set("task", lua.create_userdata(execution_command)?)?;
 
-    let commands: Arc<Mutex<Vec<ExecutionCommand>>> = Arc::new(Mutex::new(vec![]));
-    let cmds = commands.clone();
-    lua.globals().set(
-        "register_task",
-        lua.create_function(move |_, task: ExecutionCommand| {
-            let mut guard = cmds.lock().unwrap();
-            guard.push(task);
-            Ok(())
-        })?,
-    )?;
-
     lua.load(plugin_path).exec()?;
-    let mut guard = commands.lock().unwrap();
+    let mut guard = registered.lock().unwrap();
 
     Ok(std::mem::take(&mut *guard))
 }
