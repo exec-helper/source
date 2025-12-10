@@ -27,6 +27,12 @@ commands:
     changelog: Build the changelog
     format: Format and check the format of the sources
 
+watch:
+- src
+- scripts
+- Cargo.toml
+- .exec-helper
+
 hello:
 #- command-line-command
 - bash
@@ -109,7 +115,7 @@ cargo:
 
   run:
     command: run
-    program-args: [ --force-color=true, --log-level=info, --target, blaat, --keep-output, hello, world]
+    program-args: [ --force-color=true, --log-level=warn, --target, blaat, --keep-output, hello, world]
 
   rs-format:
     patterns: []

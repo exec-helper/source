@@ -4,6 +4,7 @@ use console::Term;
 use indicatif::{ProgressBar, ProgressStyle};
 use itertools::Itertools;
 use lets_find_up::{FindUpKind, FindUpOptions, find_up_with};
+use notify::Watcher;
 use serde::Deserialize;
 use serde_json::{Value, from_value};
 use serde_saphyr::from_reader;
@@ -53,6 +54,7 @@ type Patterns = HashMap<String, Pattern>;
 struct Config {
     commands: HashMap<String, String>,
     patterns: Option<Patterns>,
+    watch: Vec<String>,
 
     #[serde(flatten)]
     root_keys: HashMap<String, RootCommand>,
@@ -98,6 +100,9 @@ struct Cli {
 
     #[arg(long, default_value_t = false)]
     list_plugins: bool,
+
+    #[arg(short, long, default_value_t = false)]
+    watch: bool,
 }
 
 type PluginGenerateCommandFn = Box<dyn Fn(&String, Value) -> Result<Vec<ExecutionCommand>>>;
@@ -415,92 +420,16 @@ fn handle_cli_arguments(
     Ok((matches, fixed_cli))
 }
 
-#[tokio::main]
-async fn main() -> Result<()> {
-    let term = Term::stdout();
-
-    let (config_file, config) = find_and_read_config()?;
-
-    let (dynamic_cli, fixed_cli) = handle_cli_arguments(&config.commands, &config.patterns)?;
-
-    if let Some(force_color) = fixed_cli.force_color {
-        console::set_colors_enabled(force_color);
-    }
-
-    let subscriber = FmtSubscriber::builder()
-        .with_max_level(fixed_cli.log_level)
-        .finish();
-
-    tracing::subscriber::set_global_default(subscriber)
-        .context("Setting default subscriber failed")?;
-
-    info!("Starting exec-helper...");
-    let root_dir = config_file.parent().ok_or(anyhow!(
-        "Config file somehow does not have a parent directory!"
-    ))?;
-
-    let mut pattern_values: PatternValues = match config.patterns {
-        Some(ref patterns) => patterns
-            .iter()
-            .map(|(key, pattern)| {
-                let values = match dynamic_cli.try_get_many::<String>(key) {
-                    Ok(values) => match values {
-                        Some(values) => values.cloned().collect::<Vec<_>>(),
-                        None => pattern.default_values.clone(),
-                    },
-                    Err(_) => pattern.default_values.clone(),
-                };
-
-                (key.clone(), values.clone())
-            })
-            .collect(),
-        None => HashMap::<String, Vec<String>>::new(),
-    };
-
-    pattern_values.insert(
-        "EH_ROOT_DIR".to_string(),
-        vec![
-            root_dir
-                .to_str()
-                .ok_or(anyhow!("Failed to convert root dir to valid UTF-8!"))?
-                .to_string(),
-        ],
-    );
-    trace!("Pattern values = {:?}", pattern_values);
-
-    let plugin_default_search_path: PathBuf = PathBuf::from(env!("PLUGIN_DEFAULT_SEARCH_PATH"));
-
-    let plugins = find_plugins(&[plugin_default_search_path]).context("Failed to find plugins!")?;
-
-    if fixed_cli.list_plugins {
-        for (name, plugin) in plugins {
-            user_info!("{:.<25} {}", name, plugin.description);
-        }
-        return Ok(());
-    }
-
-    let clis = fixed_cli
-        .commands
-        .iter()
-        .map(|command| {
-            trace!("Resolving command '{}'...", command);
-            build_execution_command(command, command, &config, &plugins).with_context(|| {
-                format!(
-                    "Failed to generate execution instructions for command '{}'",
-                    command
-                )
-            })
-        })
-        .try_fold(Vec::new(), |mut acc, cur| {
-            cur.map(|inner| {
-                acc.extend(inner);
-                acc
-            })
-        })?;
-
+async fn run_cli(
+    clis: &Vec<ExecutionCommand>,
+    pattern_values: &PatternValues,
+    fixed_cli: &Cli,
+    term: &Term,
+    root_dir: &Path,
+) -> Result<ExitStatus> {
     let no_patterns: Vec<String> = vec!["NO_PATTERNS_DEFINED".to_string()];
-
     let mut last_error_status = ExitStatus::default();
+
     for cli in clis {
         let pattern_iterator_result = match cli.patterns {
             Some(ref patterns) => patterns
@@ -661,10 +590,128 @@ async fn main() -> Result<()> {
             }
         }
     }
-    if last_error_status.success() {
+    Ok(last_error_status)
+}
+
+#[tokio::main]
+async fn main() -> Result<()> {
+    let term = Term::stdout();
+
+    let (config_file, config) = find_and_read_config()?;
+
+    let (dynamic_cli, fixed_cli) = handle_cli_arguments(&config.commands, &config.patterns)?;
+
+    if let Some(force_color) = fixed_cli.force_color {
+        console::set_colors_enabled(force_color);
+    }
+
+    let subscriber = FmtSubscriber::builder()
+        .with_max_level(fixed_cli.log_level)
+        .finish();
+
+    tracing::subscriber::set_global_default(subscriber)
+        .context("Setting default subscriber failed")?;
+
+    info!("Starting exec-helper...");
+    let root_dir = config_file.parent().ok_or(anyhow!(
+        "Config file somehow does not have a parent directory!"
+    ))?;
+
+    let mut pattern_values: PatternValues = match config.patterns {
+        Some(ref patterns) => patterns
+            .iter()
+            .map(|(key, pattern)| {
+                let values = match dynamic_cli.try_get_many::<String>(key) {
+                    Ok(values) => match values {
+                        Some(values) => values.cloned().collect::<Vec<_>>(),
+                        None => pattern.default_values.clone(),
+                    },
+                    Err(_) => pattern.default_values.clone(),
+                };
+
+                (key.clone(), values.clone())
+            })
+            .collect(),
+        None => HashMap::<String, Vec<String>>::new(),
+    };
+
+    pattern_values.insert(
+        "EH_ROOT_DIR".to_string(),
+        vec![
+            root_dir
+                .to_str()
+                .ok_or(anyhow!("Failed to convert root dir to valid UTF-8!"))?
+                .to_string(),
+        ],
+    );
+    trace!("Pattern values = {:?}", pattern_values);
+
+    let plugin_default_search_path: PathBuf = PathBuf::from(env!("PLUGIN_DEFAULT_SEARCH_PATH"));
+
+    let plugins = find_plugins(&[plugin_default_search_path]).context("Failed to find plugins!")?;
+
+    if fixed_cli.list_plugins {
+        for (name, plugin) in plugins {
+            user_info!("{:.<25} {}", name, plugin.description);
+        }
+        return Ok(());
+    }
+
+    let clis = fixed_cli
+        .commands
+        .iter()
+        .map(|command| {
+            trace!("Resolving command '{}'...", command);
+            build_execution_command(command, command, &config, &plugins).with_context(|| {
+                format!(
+                    "Failed to generate execution instructions for command '{}'",
+                    command
+                )
+            })
+        })
+        .try_fold(Vec::new(), |mut acc, cur| {
+            cur.map(|inner| {
+                acc.extend(inner);
+                acc
+            })
+        })?;
+
+    let error_status = run_cli(&clis, &pattern_values, &fixed_cli, &term, root_dir).await?;
+    if error_status.success() {
         user_success!("All commands were executed successfully!");
     } else {
         user_error!("There were errors while executing commands!");
+    }
+
+    if fixed_cli.watch {
+        let (tx, mut rx) = tokio::sync::mpsc::channel::<notify::Event>(10);
+        let mut watcher =
+            notify::recommended_watcher(move |response: notify::Result<notify::Event>| {
+                if let Ok(event) = response
+                    && let notify::EventKind::Access(access) = event.kind
+                    && let notify::event::AccessKind::Close(close) = access
+                    && close == notify::event::AccessMode::Write
+                {
+                    tx.blocking_send(event).unwrap();
+                }
+            })
+            .context("Failed to watch the configured files")?;
+
+        for path in config.watch {
+            info!("Watching {path} for changes...");
+            watcher.watch(Path::new(&path), notify::RecursiveMode::Recursive)?;
+        }
+
+        while rx.recv().await.is_some() {
+            user_info!("Change detected! Rerunning commands...");
+
+            let error_status = run_cli(&clis, &pattern_values, &fixed_cli, &term, root_dir).await?;
+            if error_status.success() {
+                user_success!("All commands were executed successfully!");
+            } else {
+                user_error!("There were errors while executing commands!");
+            }
+        }
     }
 
     Ok(())
