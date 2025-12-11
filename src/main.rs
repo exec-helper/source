@@ -15,7 +15,7 @@ use std::fs::{File, read_dir};
 use std::io::Write;
 use std::iter::zip;
 use std::path::{Path, PathBuf};
-use std::process::ExitStatus;
+use std::process::ExitCode;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use subst::substitute;
@@ -54,7 +54,7 @@ type Patterns = HashMap<String, Pattern>;
 struct Config {
     commands: HashMap<String, String>,
     patterns: Option<Patterns>,
-    watch: Vec<String>,
+    watch: Option<Vec<String>>,
 
     #[serde(flatten)]
     root_keys: HashMap<String, RootCommand>,
@@ -426,9 +426,9 @@ async fn run_cli(
     fixed_cli: &Cli,
     term: &Term,
     root_dir: &Path,
-) -> Result<ExitStatus> {
+) -> Result<ExitCode> {
     let no_patterns: Vec<String> = vec!["NO_PATTERNS_DEFINED".to_string()];
-    let mut last_error_status = ExitStatus::default();
+    let mut last_error_status = ExitCode::from(0);
 
     for cli in clis {
         let pattern_iterator_result = match cli.patterns {
@@ -579,13 +579,15 @@ async fn run_cli(
                 user_success!("OK  Execute '{substituted_command}'");
             } else {
                 user_error!("ERR Execute '{substituted_command}'!");
+                user_error!("Process exited with {status}!");
 
-                if last_error_status.success() {
-                    last_error_status = status;
-                }
+                last_error_status = match status.code() {
+                    Some(code) => ExitCode::from(code as u8),
+                    None => ExitCode::from(1),
+                };
 
                 if !fixed_cli.keep_going {
-                    bail!("Process exited with non-zero exit code: {}", status);
+                    return Ok(last_error_status);
                 }
             }
         }
@@ -676,12 +678,7 @@ async fn main() -> Result<()> {
             })
         })?;
 
-    let error_status = run_cli(&clis, &pattern_values, &fixed_cli, &term, root_dir).await?;
-    if error_status.success() {
-        user_success!("All commands were executed successfully!");
-    } else {
-        user_error!("There were errors while executing commands!");
-    }
+    let mut return_code = run_cli(&clis, &pattern_values, &fixed_cli, &term, root_dir).await;
 
     if fixed_cli.watch {
         let (tx, mut rx) = tokio::sync::mpsc::channel::<notify::Event>(10);
@@ -697,22 +694,33 @@ async fn main() -> Result<()> {
             })
             .context("Failed to watch the configured files")?;
 
-        for path in config.watch {
-            info!("Watching {path} for changes...");
-            watcher.watch(Path::new(&path), notify::RecursiveMode::Recursive)?;
-        }
+        match config.watch {
+            Some(watch) => {
+                for path in watch {
+                    info!("Watching {path} for changes...");
+                    watcher.watch(Path::new(&path), notify::RecursiveMode::Recursive)?;
+                }
+            }
+            None => bail!(
+                "You did not configure any files to watch in the configuration file! List the files you want to watch as a list of directories and/or files"
+            ),
+        };
 
         while rx.recv().await.is_some() {
             user_info!("Change detected! Rerunning commands...");
 
-            let error_status = run_cli(&clis, &pattern_values, &fixed_cli, &term, root_dir).await?;
-            if error_status.success() {
-                user_success!("All commands were executed successfully!");
-            } else {
-                user_error!("There were errors while executing commands!");
-            }
+            return_code = run_cli(&clis, &pattern_values, &fixed_cli, &term, root_dir).await;
         }
     }
 
-    Ok(())
+    match return_code {
+        Ok(code) => match code {
+            ExitCode::SUCCESS => {
+                user_success!("All commands were executed successfully!");
+                Ok(())
+            }
+            _ => Err(anyhow!("There were errors while executing commands!")),
+        },
+        Err(_) => Err(anyhow!("There were errors while executing commands!")),
+    }
 }

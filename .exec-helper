@@ -81,9 +81,6 @@ install-docs:
 - cmake
 
 command-line-command:
-    hello:
-      command-line: [ echo, "Hello"]
-
     world:
       patterns:
       - EH_ROOT_DIR
