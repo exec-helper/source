@@ -488,7 +488,7 @@ async fn run_cli(
                 .collect::<Vec<_>>()
                 .join(" ");
 
-            user_info!("..  Execute '{substituted_command}'...");
+            user_info!("[EXEC] {substituted_command}");
 
             if fixed_cli.dry_run {
                 continue;
@@ -500,11 +500,10 @@ async fn run_cli(
             };
             pb.set_style(
                 ProgressStyle::default_spinner()
-                    .template("[{elapsed}] {spinner} {msg:.cyan}")
+                    .template("[running] {spinner} {msg:.cyan}")
                     .unwrap(),
             );
-            pb.set_message(format!("Running '{}'...", &substituted_command));
-            pb.enable_steady_tick(std::time::Duration::from_millis(500));
+            pb.set_message(substituted_command.clone());
             pb.tick();
 
             let number_of_output_lines = Arc::new(AtomicUsize::new(1));
@@ -576,9 +575,9 @@ async fn run_cli(
                         .context("Failed to erase last lines")?;
                 }
 
-                user_success!("OK  Execute '{substituted_command}'");
+                user_success!("[ OK ]  {substituted_command}");
             } else {
-                user_error!("ERR Execute '{substituted_command}'!");
+                user_error!("[ERR ] {substituted_command}!");
                 user_error!("Process exited with {status}!");
 
                 last_error_status = match status.code() {
