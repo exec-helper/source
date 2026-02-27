@@ -28,11 +28,16 @@ if command == 'build' or command == 'run' or command == 'test' or command == 'cl
   end
 end
 
+task:add_args({'--'})
+
+if command == 'clippy' and one(config['fail-on-warnings']) then
+  task:add_args({'--deny', 'warnings'})
+end
+
 task:add_args(get_commandline())
 if command == 'run' then
   local args = config['program-args']
   if args then
-    task:add_args({'--'})
     task:add_args(args)
   end
 end
