@@ -105,10 +105,10 @@ cargo:
   - MODE
   target: "{TARGET}"
   profile: "{MODE}"
+  color: always
 
   build:
     command: build
-    command-line: ["--color", "always"]
 
   run:
     command: run
@@ -122,3 +122,4 @@ cargo:
     patterns: []
     command: clippy
     all-targets: yes
+    fail-on-warnings: true
