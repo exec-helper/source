@@ -27,7 +27,16 @@ struct LuaCommand {
     verbose: Option<bool>,
 
     #[serde(flatten)]
-    commands: Option<HashMap<String, LuaCommand>>,
+    extra: Option<HashMap<String, JsonValue>>,
+}
+
+impl LuaCommand {
+    fn get_subcommand(&self, name: &str) -> Option<LuaCommand> {
+        self.extra
+            .as_ref()?
+            .get(name)
+            .and_then(|v| from_value(v.clone()).ok())
+    }
 }
 
 struct LuaConfig {
@@ -211,15 +220,14 @@ pub fn run_lua_plugin(
         Ok(config) => config,
         Err(e) => bail!("Failed to parse lua plugin at '{}'", e.path()),
     };
-    trace!("Selected config = {:?}", config);
+    trace!("Root config = {:?}", config);
 
-    let command_config = match config.commands {
-        Some(ref commands) => match commands.get(command) {
-            Some(config) => config.clone(),
-            None => config.clone(),
-        },
+    let command_config = match config.get_subcommand(command) {
+        Some(command_config) => command_config,
         None => config.clone(),
     };
+
+    trace!("Command config = {:?}", command_config);
 
     let environment = command_config.environment.or(config.environment);
     let patterns = command_config.patterns.or(config.patterns);
