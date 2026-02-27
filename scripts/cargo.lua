@@ -7,28 +7,33 @@ task:add_args({'cargo', command})
 
 if command == 'build' or command == 'run' then
   local profile = one(config['profile'])
-  if type(profile) ~= 'nil' then
+  if profile then
     task:add_args({'--profile', profile})
   end
 
   local target = one(config['target'])
-  if type(target) ~= 'nil' then
+  if target) then
     task:add_args({'--target', target})
   end
 end
 
-if command == 'build' or command == 'run' or command == 'clippy' then
+if command == 'build' or command == 'run' or command == 'test' or command == 'clippy' then
   if one(config['all-targets']) then
     task:add_args({'--all-targets'})
+  end
+
+  local color = one(config['color'])
+  if color then
+    task:add_args({'--color', color})
   end
 end
 
 task:add_args(get_commandline())
 if command == 'run' then
   local args = config['program-args']
-  if type(args) ~= 'nil' then
+  if args then
     task:add_args({'--'})
     task:add_args(args)
   end
 end
-task:register(task)
+task:register()
