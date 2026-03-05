@@ -20,7 +20,8 @@ commands:
     hello: Command to print hello to the console
     world: Print hello world! to the console
     build: Build the project for the given TARGET
-    run: Run the project exdcutable for the given TARGET
+    run: Run the project executable for the given TARGET
+    release: Create a release build
     analyze: Analyze the source code
     setup: Setup the repository for building
     docs: Build + install the documentation
@@ -49,6 +50,16 @@ run:
 
 create-installer:
 - command-line-command
+
+release:
+- clean-release
+- build-release
+
+build-release:
+- cargo
+
+clean-release:
+- cargo
 
 format:
 - rs-format
@@ -117,6 +128,16 @@ cargo:
       PLUGIN_DEFAULT_SEARCH_PATH: './scripts'   # TODO: replace {EH_ROOT_DIR} in environment variables
     command: run
     program-args: [ --force-color=true, --log-level=warn, --keep-output, hello, world]
+
+  build-release:
+    environment:
+      PLUGIN_DEFAULT_SEARCH_PATH: '/usr/share/exec-helper/plugins'
+    command: build
+    profile: release
+
+  clean-release:
+    command: clean
+    profile: release
 
   rs-format:
     patterns: []
