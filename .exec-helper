@@ -103,6 +103,7 @@ cargo:
   patterns:
   - TARGET
   - MODE
+  - EH_ROOT_DIR
   target: "{TARGET}"
   profile: "{MODE}"
   color: always
@@ -111,8 +112,11 @@ cargo:
     command: build
 
   run:
+    profile: '{MODE}'
+    environment:
+      PLUGIN_DEFAULT_SEARCH_PATH: './scripts'   # TODO: replace {EH_ROOT_DIR} in environment variables
     command: run
-    program-args: [ --force-color=true, --log-level=warn, --target, blaat, --keep-output, hello, world]
+    program-args: [ --force-color=true, --log-level=warn, --keep-output, hello, world]
 
   rs-format:
     patterns: []

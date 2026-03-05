@@ -516,6 +516,16 @@ async fn run_cli(
             trace!("Executing this in dir {}", working_directory.display());
             cmd.current_dir(working_directory);
 
+            // Put the child in its own process group so we can signal the
+            // entire tree (including grandchildren) on Ctrl+C.
+            #[cfg(unix)]
+            unsafe {
+                cmd.pre_exec(|| {
+                    nix::unistd::setpgid(nix::unistd::Pid::from_raw(0), nix::unistd::Pid::from_raw(0))
+                        .map_err(std::io::Error::other)
+                });
+            }
+
             let mut process = Process::new(cmd)
                 .spawn_single_subscriber()
                 .context("Failed to spawn process!")?;
@@ -554,14 +564,54 @@ async fn run_cli(
                 LineParsingOptions::default(),
             );
 
-            let status = process
-                .wait_for_completion_or_terminate(
+            let status = tokio::select! {
+                biased;
+                _ = tokio::signal::ctrl_c() => {
+                    std::io::stderr().flush().ok();
+                    pb.finish_and_clear();
+                    user_error!("Interrupted! Terminating child process...");
+
+                    // Save PID before terminate() consumes it.
+                    let child_pid = process.id();
+
+                    // Send SIGINT to the entire process group first, so
+                    // grandchildren (e.g. the binary spawned by `cargo run`)
+                    // also receive the signal.
+                    #[cfg(unix)]
+                    if let Some(pid) = child_pid {
+                        use nix::sys::signal::{Signal, killpg};
+                        use nix::unistd::Pid;
+                        let _ = killpg(Pid::from_raw(pid as i32), Signal::SIGINT);
+                    }
+
+                    // Let the library handle the escalation (SIGINT→SIGTERM→SIGKILL)
+                    // and lifecycle management for the direct child.
+                    match process.terminate(
+                        std::time::Duration::from_secs(5),
+                        std::time::Duration::from_secs(5),
+                    ).await {
+                        Ok(_) => {},
+                        Err(e) => user_error!("Failed to gracefully terminate child process: {e}"),
+                    }
+
+                    // SIGKILL any remaining grandchildren in the process group.
+                    #[cfg(unix)]
+                    if let Some(pid) = child_pid {
+                        use nix::sys::signal::{Signal, killpg};
+                        use nix::unistd::Pid;
+                        let _ = killpg(Pid::from_raw(pid as i32), Signal::SIGKILL);
+                    }
+
+                    return Ok(ExitCode::from(130));
+                }
+                status = process.wait_for_completion_or_terminate(
                     std::time::Duration::from_secs(3600),
                     std::time::Duration::from_secs(5),
                     std::time::Duration::from_secs(5),
-                )
-                .await
-                .context("Process is terminated abnormaly")?;
+                ) => {
+                    status.context("Process is terminated abnormaly")?
+                }
+            };
 
             std::io::stderr().flush().ok();
             pb.finish_and_clear();

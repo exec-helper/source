@@ -236,6 +236,7 @@ dependencies = [
  "itertools",
  "lets_find_up",
  "mlua",
+ "nix",
  "notify",
  "serde",
  "serde-saphyr",
