@@ -121,6 +121,51 @@ pub fn resolve_working_directory(working_directory: &String, root_dir: &Path) ->
     }
 }
 
+#[cfg(unix)]
+fn signal_process_group(pid: u32, signal: nix::sys::signal::Signal) {
+    use nix::sys::signal::killpg;
+    use nix::unistd::Pid;
+    let _ = killpg(Pid::from_raw(pid as i32), signal);
+}
+
+async fn terminate_child_process(
+    process: &mut tokio_process_tools::ProcessHandle<impl tokio_process_tools::OutputStream>,
+) {
+    let child_pid = process.id();
+
+    // Send SIGINT to the entire process group first, so grandchildren
+    // (e.g. the binary spawned by `cargo run`) also receive the signal.
+    #[cfg(unix)]
+    if let Some(pid) = child_pid {
+        signal_process_group(pid, nix::sys::signal::Signal::SIGINT);
+    }
+
+    // Let the library handle the escalation (SIGINT→SIGTERM→SIGKILL)
+    // and lifecycle management for the direct child.
+    match process
+        .terminate(
+            std::time::Duration::from_secs(5),
+            std::time::Duration::from_secs(5),
+        )
+        .await
+    {
+        Ok(_) => {}
+        Err(e) => user_error!("Failed to gracefully terminate child process: {e}"),
+    }
+
+    // SIGKILL any remaining grandchildren in the process group.
+    #[cfg(unix)]
+    if let Some(pid) = child_pid {
+        signal_process_group(pid, nix::sys::signal::Signal::SIGKILL);
+    }
+}
+
+enum RunOutcome {
+    Completed(ExitCode),
+    Interrupted,
+    Restarting,
+}
+
 #[derive(Clone, Debug, Deserialize)]
 #[serde(untagged)]
 pub enum CommandLine {
@@ -426,7 +471,8 @@ async fn run_cli(
     fixed_cli: &Cli,
     term: &Term,
     root_dir: &Path,
-) -> Result<ExitCode> {
+    mut restart_rx: Option<&mut tokio::sync::mpsc::Receiver<notify::Event>>,
+) -> Result<RunOutcome> {
     let no_patterns: Vec<String> = vec!["NO_PATTERNS_DEFINED".to_string()];
     let mut last_error_status = ExitCode::from(0);
 
@@ -521,8 +567,11 @@ async fn run_cli(
             #[cfg(unix)]
             unsafe {
                 cmd.pre_exec(|| {
-                    nix::unistd::setpgid(nix::unistd::Pid::from_raw(0), nix::unistd::Pid::from_raw(0))
-                        .map_err(std::io::Error::other)
+                    nix::unistd::setpgid(
+                        nix::unistd::Pid::from_raw(0),
+                        nix::unistd::Pid::from_raw(0),
+                    )
+                    .map_err(std::io::Error::other)
                 });
             }
 
@@ -569,40 +618,21 @@ async fn run_cli(
                 _ = tokio::signal::ctrl_c() => {
                     std::io::stderr().flush().ok();
                     pb.finish_and_clear();
-                    user_error!("Interrupted! Terminating child process...");
-
-                    // Save PID before terminate() consumes it.
-                    let child_pid = process.id();
-
-                    // Send SIGINT to the entire process group first, so
-                    // grandchildren (e.g. the binary spawned by `cargo run`)
-                    // also receive the signal.
-                    #[cfg(unix)]
-                    if let Some(pid) = child_pid {
-                        use nix::sys::signal::{Signal, killpg};
-                        use nix::unistd::Pid;
-                        let _ = killpg(Pid::from_raw(pid as i32), Signal::SIGINT);
+                    user_error!("[ INT] Interrupted! Terminating child process...");
+                    terminate_child_process(&mut process).await;
+                    return Ok(RunOutcome::Interrupted);
+                }
+                _ = async {
+                    if let Some(ref mut rx) = restart_rx {
+                        let _ = rx.recv().await;
+                    } else {
+                        std::future::pending::<()>().await;
                     }
-
-                    // Let the library handle the escalation (SIGINT→SIGTERM→SIGKILL)
-                    // and lifecycle management for the direct child.
-                    match process.terminate(
-                        std::time::Duration::from_secs(5),
-                        std::time::Duration::from_secs(5),
-                    ).await {
-                        Ok(_) => {},
-                        Err(e) => user_error!("Failed to gracefully terminate child process: {e}"),
-                    }
-
-                    // SIGKILL any remaining grandchildren in the process group.
-                    #[cfg(unix)]
-                    if let Some(pid) = child_pid {
-                        use nix::sys::signal::{Signal, killpg};
-                        use nix::unistd::Pid;
-                        let _ = killpg(Pid::from_raw(pid as i32), Signal::SIGKILL);
-                    }
-
-                    return Ok(ExitCode::from(130));
+                } => {
+                    std::io::stderr().flush().ok();
+                    pb.finish_and_clear();
+                    terminate_child_process(&mut process).await;
+                    return Ok(RunOutcome::Restarting);
                 }
                 status = process.wait_for_completion_or_terminate(
                     std::time::Duration::from_secs(3600),
@@ -636,12 +666,12 @@ async fn run_cli(
                 };
 
                 if !fixed_cli.keep_going {
-                    return Ok(last_error_status);
+                    return Ok(RunOutcome::Completed(last_error_status));
                 }
             }
         }
     }
-    Ok(last_error_status)
+    Ok(RunOutcome::Completed(last_error_status))
 }
 
 #[tokio::main]
@@ -727,9 +757,7 @@ async fn main() -> Result<()> {
             })
         })?;
 
-    let mut return_code = run_cli(&clis, &pattern_values, &fixed_cli, &term, root_dir).await;
-
-    if fixed_cli.watch {
+    let return_code = if fixed_cli.watch {
         let (tx, mut rx) = tokio::sync::mpsc::channel::<notify::Event>(10);
         let mut watcher =
             notify::recommended_watcher(move |response: notify::Result<notify::Event>| {
@@ -755,21 +783,48 @@ async fn main() -> Result<()> {
             ),
         };
 
-        while rx.recv().await.is_some() {
-            user_info!("Change detected! Rerunning commands...");
-
-            return_code = run_cli(&clis, &pattern_values, &fixed_cli, &term, root_dir).await;
+        loop {
+            match run_cli(
+                &clis,
+                &pattern_values,
+                &fixed_cli,
+                &term,
+                root_dir,
+                Some(&mut rx),
+            )
+            .await
+            {
+                Ok(RunOutcome::Restarting) => {
+                    while rx.try_recv().is_ok() {}
+                    user_info!("[ DET] Change detected! Rerunning commands...");
+                }
+                result @ Ok(RunOutcome::Interrupted) => break result,
+                other => {
+                    // Completed (success or error): wait for next file change
+                    match rx.recv().await {
+                        Some(_) => {
+                            while rx.try_recv().is_ok() {}
+                            user_info!("[ DET] Change detected! Rerunning commands...");
+                        }
+                        None => break other,
+                    }
+                }
+            }
         }
-    }
+    } else {
+        run_cli(&clis, &pattern_values, &fixed_cli, &term, root_dir, None).await
+    };
 
     match return_code {
-        Ok(code) => match code {
-            ExitCode::SUCCESS => {
-                user_success!("All commands were executed successfully!");
-                Ok(())
-            }
-            _ => Err(anyhow!("There were errors while executing commands!")),
-        },
+        Ok(RunOutcome::Completed(ExitCode::SUCCESS)) => {
+            user_success!("All commands were executed successfully!");
+            Ok(())
+        }
+        Ok(RunOutcome::Interrupted) => Err(anyhow!("Interrupted!")),
+        Ok(RunOutcome::Completed(_)) => Err(anyhow!("There were errors while executing commands!")),
+        Ok(RunOutcome::Restarting) => Err(anyhow!(
+            "Internal error: unexpected restart outside of watch loop!"
+        )),
         Err(_) => Err(anyhow!("There were errors while executing commands!")),
     }
 }
