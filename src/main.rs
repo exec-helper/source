@@ -796,17 +796,25 @@ async fn main() -> Result<()> {
             {
                 Ok(RunOutcome::Restarting) => {
                     while rx.try_recv().is_ok() {}
-                    user_info!("[ DET] Change detected! Rerunning commands...");
+                    user_info!("[INFO] Change detected! Rerunning commands...");
                 }
                 result @ Ok(RunOutcome::Interrupted) => break result,
                 other => {
-                    // Completed (success or error): wait for next file change
-                    match rx.recv().await {
-                        Some(_) => {
-                            while rx.try_recv().is_ok() {}
-                            user_info!("[ DET] Change detected! Rerunning commands...");
+                    // Completed (success or error): wait for next file change or Ctrl+C
+                    tokio::select! {
+                        biased;
+                        _ = tokio::signal::ctrl_c() => {
+                            break Ok(RunOutcome::Interrupted);
                         }
-                        None => break other,
+                        event = rx.recv() => {
+                            match event {
+                                Some(_) => {
+                                    while rx.try_recv().is_ok() {}
+                                    user_info!("[INFO] Change detected! Rerunning commands...");
+                                }
+                                None => break other,
+                            }
+                        }
                     }
                 }
             }
