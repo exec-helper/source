@@ -5,7 +5,7 @@ end
 
 task:add_args({'cargo', command})
 
-if command == 'build' or command == 'run' then
+if command == 'build' or command == 'run' or command == 'clean' then
   local profile = one(config['profile'])
   if profile then
     task:add_args({'--profile', profile})
